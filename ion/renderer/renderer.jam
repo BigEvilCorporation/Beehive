@@ -1,0 +1,35 @@
+SubDir ion renderer ;
+
+SRC =
+	Camera.cpp
+	Camera.h
+	Light.cpp
+	Light.h
+	Material.cpp
+	Material.h
+	Mesh.cpp
+	Mesh.h
+	Primitive.cpp
+	Primitive.h
+	Renderer.cpp
+	Renderer.h
+	Scene.cpp
+	Scene.h
+	SceneNode.cpp
+	SceneNode.h
+	TexCoord.cpp
+	TexCoord.h
+	Texture.cpp
+	Texture.h
+	Vertex.h
+	Viewport.cpp
+	Viewport.h
+	;
+
+ApplyWin32SDK renderer ;
+ApplyOgreSDK renderer ;
+ApplyDirectXSDK renderer ;
+
+AutoSourceGroup renderer : $(SRC) ;
+
+C.Library renderer : $(SRC) ;

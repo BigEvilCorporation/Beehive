@@ -1,0 +1,18 @@
+SubDir ion input ;
+
+SRC =
+	Gamepad.cpp
+ 	Gamepad.h
+	input.jam
+	Keyboard.cpp
+	Keyboard.h
+	Mouse.cpp
+	Mouse.h
+	;
+
+ApplyWin32SDK input ;
+ApplyXInputSDK input ;
+
+AutoSourceGroup input : $(SRC) ;
+
+C.Library input : $(SRC) ;

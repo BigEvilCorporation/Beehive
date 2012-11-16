@@ -1,0 +1,31 @@
+rule CompilerPlatformInfo
+{
+	local vsplatform = $(VSPLATFORMMAP.$(PLATFORM)) ;
+	local vsnative = $(VSNATIVEPLATFORM.$(PLATFORM)) ;
+	local text = "if not MapPlatformToVSPlatform then MapPlatformToVSPlatform = {} end
+MapPlatformToVSPlatform[ [[$(PLATFORM)]] ] = [[$(vsplatform)]]
+" ;
+	if $(vsnative) {
+		text += "if not VSNativePlatforms then VSNativePlatforms = {} end
+VSNativePlatforms[ [[$(PLATFORM)]] ] = true
+" ;
+	}
+
+	return $(text) ;
+}
+
+rule CompilerConfigInfo
+{
+	local vsconfig = $(VSCONFIGMAP.$(CONFIG)) ;
+	return "if not MapConfigToVSConfig then MapConfigToVSConfig = {} end
+MapConfigToVSConfig[ [[$(CONFIG)]] ] = [[$(vsconfig)]]
+" ;
+}
+
+
+
+rule Project.MakefileTool TARGET : TOOL : KEY : VALUE {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
+	Contents += "Projects['$(TARGET)'].MakefileTool[ [[$(TOOL)]] ][ [[$(KEY)]] ] = [[$(VALUE:E="")]]$(NEWLINE)" ;
+}

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ionSceneExporter", "ionSceneExporter.vcxproj", "{F2FF61A7-EC36-4126-B5DD-6431B6D5B885}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ion", "..\..\ion.vcxproj", "{E1E81CDB-D064-40EA-A4F9-7FD3C36CBE86}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Hybrid|Win32 = Hybrid|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F2FF61A7-EC36-4126-B5DD-6431B6D5B885}.Debug|Win32.ActiveCfg = Release|Win32
+		{F2FF61A7-EC36-4126-B5DD-6431B6D5B885}.Debug|Win32.Build.0 = Release|Win32
+		{F2FF61A7-EC36-4126-B5DD-6431B6D5B885}.Hybrid|Win32.ActiveCfg = Hybrid|Win32
+		{F2FF61A7-EC36-4126-B5DD-6431B6D5B885}.Hybrid|Win32.Build.0 = Hybrid|Win32
+		{F2FF61A7-EC36-4126-B5DD-6431B6D5B885}.Release|Win32.ActiveCfg = Release|Win32
+		{F2FF61A7-EC36-4126-B5DD-6431B6D5B885}.Release|Win32.Build.0 = Release|Win32
+		{E1E81CDB-D064-40EA-A4F9-7FD3C36CBE86}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E1E81CDB-D064-40EA-A4F9-7FD3C36CBE86}.Debug|Win32.Build.0 = Debug|Win32
+		{E1E81CDB-D064-40EA-A4F9-7FD3C36CBE86}.Hybrid|Win32.ActiveCfg = Release|Win32
+		{E1E81CDB-D064-40EA-A4F9-7FD3C36CBE86}.Hybrid|Win32.Build.0 = Release|Win32
+		{E1E81CDB-D064-40EA-A4F9-7FD3C36CBE86}.Release|Win32.ActiveCfg = Release|Win32
+		{E1E81CDB-D064-40EA-A4F9-7FD3C36CBE86}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
