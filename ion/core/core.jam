@@ -1,0 +1,42 @@
+SubDir ion core ;
+
+SRC =
+	Application.cpp
+	Application.h
+	BinaryFile.cpp
+	BinaryFile.h
+	Colour.cpp
+	Colour.h
+	Debug.cpp
+	Debug.h
+	File.cpp
+	File.h
+	FileDevice.cpp
+	FileDevice.h
+	FileSystem.cpp
+	FileSystem.h
+	Hash.cpp
+	Hash.h
+	MemoryManager.cpp
+	MemoryManager.h
+	Thread.cpp
+	Thread.h
+	Time.cpp
+	Time.h
+	Types.h
+	version.h
+	Maths/Maths.cpp
+	Maths/Maths.h
+	Maths/Matrix.cpp
+	Maths/Matrix.h
+	Maths/Quaternion.cpp
+	Maths/Quaternion.h
+	Maths/Vector.cpp
+	Maths/Vector.h
+	;
+
+ApplyWin32SDK core ;
+
+AutoSourceGroup core : $(SRC) ;
+
+C.Library core : $(SRC) ;

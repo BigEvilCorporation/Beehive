@@ -1,0 +1,142 @@
+VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
+
+vs_versions.10.0 = vs2010 ;
+vs_versions.9.0 = vs2008 ;
+vs_versions.8.0 = vs2005 ;
+vs_versions.7.1 = vs2003 ;
+vs_versions.7.0 = vs2002 ;
+vs_versions.6.0 = vc6 ;
+
+rule FindVisualStudioHelper VERSION {
+	local compiler ;
+
+	switch $(VERSION) {
+		case 10.0 :
+			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+			MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+			VS100COMNTOOLS = $(VS100COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS100COMNTOOLS) {
+				MSVCNT = $(VS100COMNTOOLS) ;
+			}
+			if $(MSVCNT) {
+				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+				compiler = vs2010 ;
+			}
+
+		case 9.0 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+			MSVCNT ?= [ W32_GETREG $(key) ] ;
+			VS90COMNTOOLS = $(VS90COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS90COMNTOOLS) {
+				MSVCNT = $(VS90COMNTOOLS) ;
+			}
+			if $(MSVCNT) {
+				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+				compiler = vs2008 ;
+			}
+
+		case 8.0 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+			MSVCNT ?= [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS80COMNTOOLS) {
+				MSVCNT = $(VS80COMNTOOLS) ;
+			}
+			if $(MSVCNT) {
+				MSVCNT = @(..\\..\\VC:R=$(MSVCNT)) ;
+				MSVCNT_BIN_PATH = @($(MSVCNT)/../Common7/IDE:R=) ;
+				compiler = vs2005 ;
+			}
+
+		case 7.1 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+			MSVCNT ?= [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS71COMNTOOLS) {
+				MSVCNT = $(VS71COMNTOOLS) ;
+			}
+			if $(MSVCNT) {
+				MSVCNT = @(..\\..\\vc7:R=$(MSVCNT)) ;
+				MSVCNT_BIN_PATH = $(MSVCNT)/../Common7/IDE ;
+				compiler = vs2003 ;
+			}
+
+		case 7.0 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
+				VisualStudio $(VERSION) InstallDir ;
+			MSVCNT ?= [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS70COMNTOOLS) {
+				MSVCNT = $(VS70COMNTOOLS) ;
+			}
+			if $(MSVCNT) {
+				MSVCNT = $(MSVCNT)\\..\\..\\vc7 ;
+				MSVCNT = @(..\\..\\vc7:R=$(MSVCNT)) ;
+				compiler = vs2002 ;
+			}
+
+		case 6.0 :
+		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft DevStudio $(VERSION) Products "Microsoft Visual C++" ProductDir ;
+		    MSVCNT ?= [ W32_GETREG $(key) ] ;
+			MSVCNT_BIN_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
+			compiler = vc6 ;
+	}
+
+	return $(compiler) ;
+}
+
+
+rule FindVisualStudio VERSION {
+	local msvcnt ;
+	msvcnt = $(MSVCNT) ;
+	if ! $(msvcnt) {
+		compiler = [ FindVisualStudioHelper $(VERSION) ] ;
+	}
+
+	return $(compiler) ;
+}
+
+
+rule C.AutoDetect {
+	# Do we need to attempt to detect the compiler?
+	if ! $(COMPILER.$(PLATFORM)) {
+		if ! $(MSVCNT) {
+			MSVCNT_BIN_PATH = ;
+			for ver in $(VISUAL_STUDIO_FORCE_VERSION) 10.0 9.0 8.0 7.1 7.0 6.0 {
+				COMPILER.$(PLATFORM) = [ FindVisualStudio $(ver) ] ;
+				if $(COMPILER.$(PLATFORM)) {
+					break ;
+				}
+			}
+			if ! $(COMPILER.$(PLATFORM)) {
+				return ;
+			}
+		}
+	}
+
+	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010 {
+		MSVCNT = ;
+		switch $(COMPILER.$(PLATFORM))
+		{
+			case vc6 :
+				COMPILER.$(PLATFORM) = [ FindVisualStudio 6.0 ] ;
+			case vs2003 :
+				COMPILER.$(PLATFORM) = [ FindVisualStudio 7.1 ] ;
+				COMPILER.$(PLATFORM) ?= [ FindVisualStudio 7.0 ] ;
+			case vs2005 :
+				COMPILER.$(PLATFORM) = [ FindVisualStudio 8.0 ] ;
+			case vs2008 :
+				COMPILER.$(PLATFORM) = [ FindVisualStudio 9.0 ] ;
+			case vs2010 :
+				COMPILER.$(PLATFORM) = [ FindVisualStudio 10.0 ] ;
+		}
+
+		IncludeModule c-compilers/c-vc ;
+		if $(PLATFORM) != *  &&  $(CONFIG) != * {
+			IncludeModule c-compilers/$(PLATFORM)-vc ;
+			IncludeModule c-compilers/$(PLATFORM)-vc-$(CONFIG) ;
+		}
+
+		return $(COMPILER.$(PLATFORM)) ;
+	}
+}

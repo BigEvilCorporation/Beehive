@@ -1,0 +1,42 @@
+SubDir ion gui ;
+
+SRC =
+	Button.cpp
+	Button.h
+	CheckBox.h
+	EventListener.cpp
+	EventListener.h
+	GUISystem.cpp
+	GUISystem.h
+	ListBox.cpp
+	ListBox.h
+	ProgressBar.h
+	Root.h
+	Scheme.cpp
+	Scheme.h
+	Slider.cpp
+	Slider.h
+	StaticText.cpp
+	StaticText.h
+	TextBox.cpp
+	TextBox.h
+	Widget.cpp
+	Widget.h
+	Window.cpp
+	Window.h
+	CommonDlg/ColourPicker.cpp
+	CommonDlg/ColourPicker.h
+	CommonDlg/FileBrowser.cpp
+	CommonDlg/FileBrowser.h
+	CommonDlg/MessageBox.cpp
+	CommonDlg/MessageBox.h
+	;
+
+ApplyWin32SDK gui ;
+ApplyDirectXSDK gui ;
+ApplyOgreSDK gui ;
+ApplyCEGUISDK gui ;
+
+AutoSourceGroup gui : $(SRC) ;
+
+C.Library gui : $(SRC) ;

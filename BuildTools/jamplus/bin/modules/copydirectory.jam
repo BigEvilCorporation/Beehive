@@ -1,0 +1,56 @@
+IncludeModule copyfile ;
+
+if ! $(TARGETINFO_LOCATE)
+{
+
+rule _CopyDirectoryRecursiveHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : RECURSIVE
+{
+	local files = @($(SOURCE_PATH)/$(SEARCH_STRING:E=*):W) ;
+	local file ;
+	for file in $(files) {
+		CopyFile $(PARENT) : $(file:BSR=$(DESTINATION_PATH)) : $(file) ;
+	}
+
+	local dirs = @($(SOURCE_PATH)/*/:W) ;
+	local dir ;
+	for dir in $(dirs) {
+		local parent = $(dir:P) ;
+		_CopyDirectoryRecursiveHelper $(PARENT) : $(parent:BR=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
+	}
+}
+
+rule _CopyDirectoryGlobHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING
+{
+	SOURCE_PATH = @($(SOURCE_PATH)/:D)/ ;
+	local files = @($(SOURCE_PATH)$(SEARCH_STRING:E=*):W) ;
+	local source ;
+	for source in $(files) {
+		local adjustedSourcePathForRegularExpression = [ SubstLiteralize $(SOURCE_PATH) ] ;
+		local destination = [ Subst $(source) : ^$(adjustedSourcePathForRegularExpression) : : 1 ] ;
+		destination = $(destination:R=$(DESTINATION_PATH)) ;
+		CopyFile $(PARENT) : $(destination) : $(source) ;
+	}
+}
+
+rule CopyDirectory PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : RECURSIVE
+{
+	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
+	SOURCE_PATH = $(SOURCE_PATH:R=$(SUBDIR:E="")) ;
+	DESTINATION_PATH = $(DESTINATION_PATH:R=$(SUBDIR:E="")) ;
+
+	if $(RECURSIVE) = 1 {
+		_CopyDirectoryRecursiveHelper $(PARENT) : $(DESTINATION_PATH) : $(SOURCE_PATH) : $(SEARCH_STRING) : $(RECURSIVE) ;
+	} else {
+		_CopyDirectoryGlobHelper $(PARENT) : $(DESTINATION_PATH) : $(SOURCE_PATH) : $(SEARCH_STRING) ;
+	}
+}
+
+}
+else
+{
+
+rule CopyDirectory
+{
+}
+
+}

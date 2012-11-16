@@ -1,0 +1,242 @@
+C.AR			?= ar ru ;
+C.CC			?= gcc ;
+C.C++			?= g++ ;
+C.LINK			?= g++ ;
+C.RANLIB		?= ranlib ;
+
+SUFMODULE	= .dylib ;
+SUFLINKLIBS = $(SUFLIB) $(SUFMODULE) ;
+
+actions C.Link
+{
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS:T)
+}
+
+if $(DONTUSEMERIGHTNOW)
+{
+	local isysroot ;
+	local developerRoot = /Developer/SDKs ;
+	SUBPLATFORM ?= 10.5 ;
+	switch $(SUBPLATFORM) {
+		case 10.4u :
+			isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+			flags += -mmacosx-version-min=10.4 ;
+		case 10.5 :
+			isysroot = $(developerRoot)/MacOSX10.5.sdk ;
+			flags += -mmacosx-version-min=10.5 ;
+		case 10.6 :
+			isysroot = $(developerRoot)/MacOSX10.6.sdk ;
+			flags += -mmacosx-version-min=10.6 ;
+		case * :		Exit "* MacOSX_SDK: Unsupported subplatform $(SUBPLATFORM) for SDK platform $(PLATFORM)." ;
+	}
+	developerRoot = $(isysroot) ;
+
+	C.Flags CC	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.Flags C++	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.Flags M	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.Flags MM	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.LinkFlags * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	MACOSX_SDK_DEVELOPER_ROOT on * = $(developerRoot) ;
+}
+    
+
+rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : MACOSX_VERSION_MIN {
+	if ! ( $(PLATFORM) in macosx32 macosx64 macosxppc ) { return ; }
+
+	if $(SDK_PLATFORM) in macosx32 macosx64 macosxppc {
+		SDK_PLATFORM = macosx ;
+	}
+
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local developerRoot ;
+	local isysroot ;
+	local flags ;
+	local defaultversionmin ;
+	switch $(SDK_PLATFORM) {
+		case macosx :
+			developerRoot = /Developer/SDKs ;
+			SDK_VERSION ?= 10.5 ;
+			switch $(SDK_VERSION) {
+				case 10.4 :
+					C.CC	= gcc-4.0 ;
+					C.C++	= g++-4.0 ;
+					C.LINK	= g++-4.0 ;
+					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+					defaultversionmin = 10.4 ;
+					XCODE_SDKROOT = macosx10.4 ;
+
+				case 10.4u :
+					C.CC	= gcc-4.0 ;
+					C.C++	= g++-4.0 ;
+					C.LINK	= g++-4.0 ;
+					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+					defaultversionmin = 10.4 ;
+					XCODE_SDKROOT = macosx10.4 ;
+
+				case 10.5 :
+					C.CC	= gcc ;
+					C.C++	= g++ ;
+					C.LINK	= g++ ;
+					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
+					defaultversionmin = 10.5 ;
+					XCODE_SDKROOT = macosx10.5 ;
+
+				case 10.6 :
+					C.CC	= gcc ;
+					C.C++	= g++ ;
+					C.LINK	= g++ ;
+					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
+					defaultversionmin = 10.6 ;
+					XCODE_SDKROOT = macosx10.6 ;
+
+				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+			}
+			MACOSX_VERSION_MIN ?= $(defaultversionmin) ;
+			flags += -mmacosx-version-min=$(MACOSX_VERSION_MIN) ;
+			developerRoot = $(isysroot) ;
+	}
+
+	C.Flags CC	: $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.Flags C++	: $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.Flags M	: $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.Flags MM	: $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.LinkFlags $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(TARGET)]] ].XCODE_SDKROOT[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(XCODE_SDKROOT)]]
+
+" ;
+	}
+}
+
+
+rule C._ApplicationFromObjects_LinkFlags
+{
+	if bundle in $(OPTIONS) {
+		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
+		MakeLocate $(_linkTargets) : $(outputPath)/$(outputName).app/Contents/MacOS ;
+	}
+}
+
+
+rule C._ApplicationFromObjects_PostBuild
+{
+	if bundle in $(OPTIONS) {
+		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
+		local bundlePath = $(outputPath)/$(outputName).app ;
+		BUNDLE_PATH on $(TARGET) = $(bundlePath) ;
+
+		local pkginfo = @(PkgInfo:G=$(grist)) ;
+		MakeLocate $(pkginfo) : $(bundlePath)/Contents ;
+		local contents = APPL???? ;
+		CONTENTS on $(pkginfo) = $(contents) ;
+		WriteFile $(pkginfo) ;
+		UseCommandLine $(pkginfo) : $(contents) ;
+		Depends $(TARGET) : $(pkginfo) ;
+		Clean clean:$(TARGET) : $(pkginfo) ;
+		
+		local infoplistcontents ;
+		on $(TARGET) infoplistcontents = $(INFO_PLIST) ;
+		if $(infoplistcontents) {
+			infoplistcontents += "</dict>
+</plist>
+" ;
+			infoplistcontents = $(infoplistcontents:J="") ;
+
+			local infoplist = @(Info.plist:G=$(grist)) ;
+			MakeLocate $(infoplist) : $(bundlePath)/Contents ;
+			CONTENTS on $(infoplist) = $(infoplistcontents) ;
+			WriteFile $(infoplist) ;
+			
+			UseCommandLine $(infoplist) : $(infoplistcontents) ;
+			Depends $(TARGET) : $(infoplist) ;
+			Clean clean:$(TARGET) : $(infoplist) ;
+		}
+		
+	}
+}
+
+
+rule C._SharedLibraryFromObjects_LinkFlags
+{
+	if module in $(OPTIONS) {
+		linkFlags += -bundle -undefined dynamic_lookup -fPIC ;
+	} else {
+		local installName =
+			[ C._retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
+		if ! $(installName)
+		{
+			installName = $(_t:TD) ;
+		}
+		else
+		{
+			installName = $(installName[1]) ;
+		}
+		installName = $(_t:BSR=$(installName)) ;
+		on $(TARGET) linkFlags += -dynamiclib -fPIC -install_name $(installName) ;
+	}
+}
+
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C._BundleInfoString KEY {
+	INFO_PLIST on $(TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<string>$(VALUE)</string>$(NEWLINE)" ;
+}
+
+rule C.BundleInfo TARGET : TYPE : VALUE {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	INFO_PLIST on $(TARGET) ?= "<?xml version="1.0" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>LSRequiresCarbon</key>
+	<true/>
+" ;
+	switch $(TYPE:L) {
+		case info :				C._BundleInfoString CFBundleGetInfoString ;
+		case iconfile :			C._BundleInfoString CFBundleIconFile ;
+		case longversion :		C._BundleInfoString CFBundleLongVersionString ;
+		case bundlename :		C._BundleInfoString CFBundleName ;
+		case shortversion :		C._BundleInfoString CFShortVersionString ;
+		case bundleversion :	C._BundleInfoString CFBundleVersion ;
+		case copyright :		C._BundleInfoString NSHumanReadableCopyright ;
+	}
+}
+
+
+rule C.FrameworkDirectories TARGET : FRAMEWORKDIRS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	C.Flags CC	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.Flags C++	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.Flags M	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.Flags MM	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.LinkFlags $(TARGET) : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
+
+rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
+
+} else {
+
+rule C.BundleInfo TARGET : TYPE : VALUE {
+}
+
+rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM {
+}
+
+}

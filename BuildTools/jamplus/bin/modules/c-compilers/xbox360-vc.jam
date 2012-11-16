@@ -1,0 +1,108 @@
+MSVCBIN			?= "$(XEDK)/bin/win32/" ;
+MSVCNT_BIN_PATH ?= $(MSVCBIN) ;
+C.AR			= "$(MSVCBIN)lib" ;
+C.CC			= "$(MSVCBIN)cl" ;
+C.C++			= "$(MSVCBIN)cl" ;
+C.LINK			= "$(MSVCBIN)link" ;
+C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
+C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
+
+rule ImageXexHelper
+{
+	local _configFile ;
+	on $(TARGET) _configFile = $(CONFIG_FILE) ;
+	
+	local xex = $(_t:S=.xex) ;
+	MakeLocate $(xex) : $(outputPath) ;
+	Depends $(TARGET) : $(xex) : $(_t) ;
+	Clean clean:$(TARGET) : $(xex) $(xex:S=.pe) $(xex:S=.xdb) ;
+	if $(_configFile)
+	{
+		Depends $(xex) : $(_configFile) ;
+		ImageXexWithConfig $(xex) : $(_t) $(_configFile) ;
+	}
+	else
+	{
+		ImageXex $(xex) : $(_t) ;
+	}
+}
+
+actions ImageXex
+{
+	"$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2)"
+}
+
+actions ImageXexWithConfig
+{
+	CD /D $(2[2]:PC\\)
+	"$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2[1])" /CONFIG:"$(2[2]:\\)"
+}
+
+rule C.Xbox360ImageXexToolSettings TARGET : CONFIG_FILE
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	CONFIG_FILE = [ C.TargetGrist $(TARGET) : $(CONFIG_FILE) ] ;
+	SearchSource $(CONFIG_FILE) ;
+	CONFIG_FILE on $(TARGET) = $(CONFIG_FILE) ;      
+}
+
+rule DeployXexHelper
+{
+	local deployLocation ;
+	on $(TARGET) deployLocation = $(DEPLOY_LOCATION) ;
+	if $(deployLocation)
+	{
+		local xex = $(_t:S=.xex) ;
+		local deployXex = $(xex:G=$(TARGET)|deploy) ;
+		MakeLocate $(deployXex) : $(LOCATE_TARGET)/deploy ;
+		Depends $(deployXex) : $(xex) ;
+		CopyXex $(deployXex) : $(xex) ;
+		Clean clean:$(TARGET) : $(deployXex) ;
+		
+		DEPLOY_LOCATION on $(deployXex) = $(deployLocation) ;
+		DeployXex $(deployXex) ;
+		Depends $(TARGET) : $(deployXex) ;
+	}
+}
+
+actions CopyXex
+{
+	copy $(2:C\\) $(1:C\\)
+}
+
+actions DeployXex
+{
+	"$(XEDK)/bin/win32/xbecopy" $(1:C\\) "$(DEPLOY_LOCATION)\$(1:BS)" /nologo
+	EXIT /B 0
+}
+
+rule C._ApplicationFromObjects_PostBuild
+{
+	ImageXexHelper ;
+	DeployXexHelper ;
+}
+
+rule C._ApplicationTargetInfo
+{
+	DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG) on $(TARGET) = $(_t:S=.xex:R=$(outputPath):G=) ;
+}
+
+rule C.DeployXex TARGET : DEPLOY_LOCATION
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	DEPLOY_LOCATION on $(TARGET) = $(DEPLOY_LOCATION) ;
+}
+
+rule C.Xbox360DeployToolSettings TARGET : REMOTE_ROOT : DEPLOYMENT_TYPE : DEPLOYMENT_FILES
+{
+	if $(TARGETINFO_LOCATE)
+	{
+		Project.MakefileTool $(TARGET) : VCX360DeploymentTool : RemoteRoot : $(REMOTE_ROOT) ;
+		Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentFiles : $(DEPLOYMENT_FILES:E="") ;
+		Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentType : $(DEPLOYMENT_TYPE:E=0) ;
+	}
+}
+
+VSPLATFORMMAP.xbox360 = "Xbox 360" ;
+VSNATIVEPLATFORM.xbox360 = 1 ;
+

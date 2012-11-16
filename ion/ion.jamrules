@@ -1,0 +1,168 @@
+
+#################################################
+## Apply ion::engine libraries
+#################################################
+rule ApplyIonLib TARGET : LIBNAME
+{
+	SubInclude ion $(LIBNAME) : $(LIBNAME) ;
+	C.IncludeDirectories $(TARGET) : $(ion) ;
+	C.LinkLibraries $(TARGET) : $(LIBNAME) ;
+}
+
+rule ApplyIonCore TARGET
+{
+	ApplyIonLib $(TARGET) : core ;
+
+	ApplyWin32SDK $(TARGET) ;
+}
+
+rule ApplyIonEditor TARGET
+{
+	ApplyIonLib $(TARGET) : editor ;
+}
+
+rule ApplyIonGui TARGET
+{
+	ApplyIonLib $(TARGET) : gui ;
+
+	ApplyWin32SDK $(TARGET) ;
+	ApplyDirectXSDK $(TARGET) ;
+	ApplyOgreSDK $(TARGET) ;
+	ApplyCEGUISDK $(TARGET) ;
+}
+
+rule ApplyIonInput TARGET
+{
+	ApplyIonLib $(TARGET) : input ;
+
+	ApplyWin32SDK $(TARGET) ;
+	ApplyXInputSDK $(TARGET) ;
+}
+
+rule ApplyIonRenderer TARGET
+{
+	ApplyIonLib $(TARGET) : renderer ;
+
+	ApplyWin32SDK $(TARGET) ;
+	ApplyOgreSDK $(TARGET) ;
+	ApplyDirectXSDK $(TARGET) ;
+}
+
+#################################################
+## Apply external SDKs
+#################################################
+rule ApplyWin32SDK TARGET
+{
+	C.Defines $(TARGET) : WIN32_LEAN_AND_MEAN VC_EXTRALEAN ;
+
+	WIN32_LIBS =
+		kernel32.lib
+		user32.lib
+		gdi32.lib
+		comdlg32.lib
+		advapi32.lib
+		shell32.lib
+		uuid.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(WIN32_LIBS) ;
+}
+
+rule ApplyXInputSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(DXSDK_DIR:J=" ")/Include ;
+	C.LinkDirectories $(TARGET) : $(DXSDK_DIR:J=" ")/Lib/x86 ;
+	C.Defines $(TARGET) : DIRECTINPUT_VERSION=0x0800 ;
+	
+	XINPUT_LIBS =
+		xinput.lib
+		dinput8.lib
+		DxErr.lib
+		dxguid.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(XINPUT_LIBS) ;
+}
+
+rule ApplyDirectXSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(DXSDK_DIR:J=" ")/Include ;
+	C.LinkDirectories $(TARGET) : $(DXSDK_DIR:J=" ")/Lib/x86 ;
+
+	DIRECTX_LIBS =
+		d3dx9d.lib
+		d3d9.lib
+		DxErr.lib
+		dxguid.lib
+		winmm.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(DIRECTX_LIBS) ;
+}
+
+rule ApplyOgreSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Include ;
+	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Lib ;
+	C.Defines $(TARGET) : OGRE_STATIC_LIB ;
+
+	#Required for Ogre itself, since it doesn't prepend directories to its #includes
+	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Include/OGRE ;
+
+	OGRE_LIBS_DEBUG = 
+		OgreMainStatic_d.lib
+		RenderSystem_Direct3D9Static_d.lib
+		;
+
+	OGRE_LIBS_RELEASE = 
+		OgreMainStatic.lib
+		RenderSystem_Direct3D9Static.lib
+		;
+	
+	OGRE_DEPENDENCIES_DEBUG =
+		cg.lib
+		freetype_d.lib
+		FreeImage_d.lib
+		zlib_d.lib
+		zziplib_d.lib
+		;
+			
+	OGRE_DEPENDENCIES_RELEASE =
+		cg.lib
+		freetype.lib
+		FreeImage.lib
+		zlib.lib
+		zziplib.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(OGRE_DEPENDENCIES_DEBUG) $(OGRE_LIBS_DEBUG) : debug ;
+	C.LinkPrebuiltLibraries $(TARGET) : $(OGRE_DEPENDENCIES_RELEASE) $(OGRE_LIBS_RELEASE) : release ;
+}
+
+rule ApplyCEGUISDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/CEGUI/Include ;
+	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/CEGUI/Lib ;
+	C.Defines $(TARGET) : CEGUI_STATIC CEGUI_VERSION=8 ;
+
+	CEGUI_LIBS_DEBUG = 
+		CEGUIBase_Static_d.lib
+		CEGUICommonDialogs_Static_d.lib
+		CEGUIFalagardWRBase_Static_d.lib
+		CEGUIFreeImageImageCodec_Static_d.lib
+		CEGUIOgreRenderer_Static_d.lib
+		CEGUITinyXMLParser_Static_d.lib
+		;
+
+	CEGUI_LIBS_RELEASE = 
+		CEGUIBase_Static.lib
+		CEGUICommonDialogs_Static.lib
+		CEGUIFalagardWRBase_Static.lib
+		CEGUIFreeImageImageCodec_Static.lib
+		CEGUIOgreRenderer_Static.lib
+		CEGUITinyXMLParser_Static.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(CEGUI_LIBS_DEBUG) : debug ;
+	C.LinkPrebuiltLibraries $(TARGET) : $(CEGUI_LIBS_RELEASE) : release ;
+}
