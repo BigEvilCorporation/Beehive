@@ -15,6 +15,8 @@
 #include "renderer/Light.h"
 #include "renderer/Material.h"
 #include "renderer/Texture.h"
+#include "renderer/PostEffect.h"
+#include "renderer/PostEffectBloom.h"
 
 class RenderTest : public ion::framework::Application
 {
@@ -36,6 +38,8 @@ public:
 	ion::input::Keyboard* mKeyboard;
 	ion::input::Mouse* mMouse;
 	ion::input::Gamepad* mGamepad;
+
+	ion::renderer::PostEffectBloom* mPostEffectBloom;
 
 	ion::renderer::Primitive* mCube;
 	ion::renderer::SceneNode* mCubeNode;

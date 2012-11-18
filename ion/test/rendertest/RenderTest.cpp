@@ -82,6 +82,10 @@ bool RenderTest::Initialise()
 	//Set default shadow cast distance (must be done before adding lights)
 	mScene->SetShadowFarDistance(100.0f);
 
+	//Add post effects
+	mPostEffectBloom = new ion::renderer::PostEffectBloom;
+	mPostEffectBloom->AssignToViewport(*mViewport);
+
 	//Set default camera position and direction
 	mCamera->SetPosition(ion::Vector3(0.0f, 0.0f, 10.0f));
 	mCamera->LookAt(ion::Vector3(0.0f, 0.0f, 0.0f));
@@ -97,6 +101,7 @@ bool RenderTest::Initialise()
 	mMaterial->SetAmbientColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	mMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	mMaterial->SetSpecularColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	mMaterial->SetEmissiveColour(ion::Colour(1.0f, 0.0f, 0.0f, 1.0f));
 	mMaterial->SetLightingEnabled(true);
 	mMaterial->SetReceiveShadows(true);
 
@@ -148,7 +153,6 @@ bool RenderTest::Initialise()
 	mPointLightNode[0]->Attach(*mPointLight[0]);
 	mPointLightNode[0]->SetPosition(ion::Vector3(-1.0f, 1.0f, -1.0f));
 
-	/*
 	mPointLight[1] = new ion::renderer::Light(ion::renderer::Light::Point, *mScene);
 	mPointLight[1]->SetDiffuse(ion::ColourRGB(0.8f, 0.0f, 0.0f));
 	mPointLight[1]->SetSpecular(ion::ColourRGB(1.0f, 0.0f, 0.0f));
@@ -175,7 +179,6 @@ bool RenderTest::Initialise()
 	mPointLightNode[3] = new ion::renderer::SceneNode(*mScene);
 	mPointLightNode[3]->Attach(*mPointLight[3]);
 	mPointLightNode[3]->SetPosition(ion::Vector3(-1.0f, 1.0f, -1.0f));
-	*/
 
 	mPointLightDebugSphereMaterial = new ion::renderer::Material();
 	mPointLightDebugSphereMaterial->SetAmbientColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
@@ -188,7 +191,6 @@ bool RenderTest::Initialise()
 	mPointLightDebugSphere[0]->AddSphere(mPointLightDebugSphereMaterial, 0.1f, 6, 6);
 	mPointLightNode[0]->Attach(*mPointLightDebugSphere[0]);
 
-	/*
 	mPointLightDebugSphere[1] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
 	mPointLightDebugSphere[1]->AddSphere(mPointLightDebugSphereMaterial, 0.1f, 6, 6);
 	mPointLightNode[1]->Attach(*mPointLightDebugSphere[1]);
@@ -200,7 +202,6 @@ bool RenderTest::Initialise()
 	mPointLightDebugSphere[3] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
 	mPointLightDebugSphere[3]->AddSphere(mPointLightDebugSphereMaterial, 0.1f, 6, 6);
 	mPointLightNode[3]->Attach(*mPointLightDebugSphere[3]);
-	*/
 
 	/*
 	mPointLight2->SetPosition(ion::Vector3(-100.0f, 0.0f, -100.0f));
@@ -313,9 +314,9 @@ bool RenderTest::Update(float deltaTime)
 	mLightSin += 0.5f * deltaTime;
 	mLightCos += 0.5f * deltaTime;
 	mPointLightNode[0]->SetPosition(ion::Vector3(sin(mLightSin) * 2.0f, 1.5f, cos(mLightCos) * 2.0f));
-	//mPointLightNode[1]->SetPosition(ion::Vector3(sin(mLightSin + 0.3f) * 2.0f, cos(mLightCos + 0.3f) * 2.0f, cos(mLightCos + 0.3f) * 2.0f));
-	//mPointLightNode[2]->SetPosition(ion::Vector3(sin(mLightSin + 0.6f) * 3.0f, cos(mLightCos + 0.6f) * 2.0f, 1.0f));
-	//mPointLightNode[3]->SetPosition(ion::Vector3(cos(mLightCos + 0.9f) * 4.0f, 2.0f, sin(mLightSin + 0.9f) * 2.0f));
+	mPointLightNode[1]->SetPosition(ion::Vector3(sin(mLightSin + 0.3f) * 2.0f, cos(mLightCos + 0.3f) * 2.0f, cos(mLightCos + 0.3f) * 2.0f));
+	mPointLightNode[2]->SetPosition(ion::Vector3(sin(mLightSin + 0.6f) * 3.0f, cos(mLightCos + 0.6f) * 2.0f, 1.0f));
+	mPointLightNode[3]->SetPosition(ion::Vector3(cos(mLightCos + 0.9f) * 4.0f, 2.0f, sin(mLightSin + 0.9f) * 2.0f));
 
 	//Update renderer
 	mRenderer->Update(deltaTime);
