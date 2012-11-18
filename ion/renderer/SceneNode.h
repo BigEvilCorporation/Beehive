@@ -25,6 +25,7 @@ namespace ion
 		class Primitive;
 		class Camera;
 		class Mesh;
+		class Light;
 
 		class SceneNode
 		{
@@ -34,10 +35,12 @@ namespace ion
 
 			void SetPosition(const Vector3& position);
 			void SetTransform(const Matrix4& matrix);
+			void SetLookAt(const Vector3& position);
 
 			void Attach(Primitive& primitive);
 			void Attach(Camera& camera);
 			void Attach(Mesh& mesh);
+			void Attach(Light& light);
 
 			#if !defined ION_PLUGIN
 			Ogre::SceneNode* GetOgreSceneNode();

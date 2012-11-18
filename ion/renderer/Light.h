@@ -49,6 +49,10 @@ namespace ion
 			bool Read(io::BinaryFile::Chunk& binaryChunk);
 			u64 Write(io::BinaryFile::Chunk& binaryChunk);
 
+			#if !defined ION_PLUGIN
+			Ogre::Light* GetOgreLightIFace();
+			#endif
+
 		private:
 			#if !defined ION_PLUGIN
 			Ogre::Light* mOgreLight;

@@ -104,14 +104,16 @@ rule ApplyOgreSDK TARGET
 {
 	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Include ;
 	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Lib ;
-	C.Defines $(TARGET) : OGRE_STATIC_LIB ;
+	# C.Defines $(TARGET) : OGRE_STATIC_LIB ;
 
 	#Required for Ogre itself, since it doesn't prepend directories to its #includes
 	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Include/OGRE ;
 
 	OGRE_LIBS_DEBUG = 
-		OgreMainStatic_d.lib
-		RenderSystem_Direct3D9Static_d.lib
+		OgreMain_d.lib
+		RenderSystem_Direct3D9_d.lib
+		# OgreMainStatic_d.lib
+		# RenderSystem_Direct3D9Static_d.lib
 		;
 
 	OGRE_LIBS_RELEASE = 
@@ -143,15 +145,22 @@ rule ApplyCEGUISDK TARGET
 {
 	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/CEGUI/Include ;
 	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/CEGUI/Lib ;
-	C.Defines $(TARGET) : CEGUI_STATIC CEGUI_VERSION=8 ;
+	C.Defines $(TARGET) : CEGUI_VERSION=7 ;
+	# C.Defines $(TARGET) : CEGUI_STATIC CEGUI_VERSION=7 ;
 
 	CEGUI_LIBS_DEBUG = 
-		CEGUIBase_Static_d.lib
-		CEGUICommonDialogs_Static_d.lib
-		CEGUIFalagardWRBase_Static_d.lib
-		CEGUIFreeImageImageCodec_Static_d.lib
-		CEGUIOgreRenderer_Static_d.lib
-		CEGUITinyXMLParser_Static_d.lib
+		CEGUIBase_d.lib
+		CEGUIOgreRenderer_d.lib
+		CEGUIFalagardWRBase_d.lib
+		CEGUIFreeImageImageCodec_d.lib
+		CEGUIOgreRenderer_d.lib
+		CEGUITinyXMLParser_d.lib
+		# CEGUIBase_Static_d.lib
+		# CEGUICommonDialogs_Static_d.lib
+		# CEGUIFalagardWRBase_Static_d.lib
+		# CEGUIFreeImageImageCodec_Static_d.lib
+		# CEGUIOgreRenderer_Static_d.lib
+		# CEGUITinyXMLParser_Static_d.lib
 		;
 
 	CEGUI_LIBS_RELEASE = 

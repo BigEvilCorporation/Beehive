@@ -17,9 +17,9 @@ namespace ion
 			: mCEListItem(text, id, (void*)this, false, false)
 		{
 			//TODO: Find out why this isn't fetched from the skin
-			mCEListItem.setTextColours(CEGUI::Colour(0.0f, 0.0f, 0.0f, 1.0f));
-			mCEListItem.setSelectionColours(CEGUI::Colour(0.0f, 0.0f, 1.0f, 1.0f));
-			mCEListItem.setSelectionBrushImage("WindowsLook/Background");
+			mCEListItem.setTextColours(CEGUI::colour(0.0f, 0.0f, 0.0f, 1.0f));
+			mCEListItem.setSelectionColours(CEGUI::colour(0.0f, 0.0f, 1.0f, 1.0f));
+			// mCEListItem.setSelectionBrushImage("WindowsLook/Background");
 		}
 
 		std::string ListBox::Item::GetText() const

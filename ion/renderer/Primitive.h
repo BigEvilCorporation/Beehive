@@ -42,9 +42,13 @@ namespace ion
 			void AddTextureCoord(const TexCoord& coord);
 			void AddIndex(unsigned int index);
 
-			//Add built-in primitives (Begin() with triangle pattern only)
-			void AddQuad(float width, float height, QuadAxis axis, const Vector3& offset);
-			void AddBox(const Vector3& halfExtents, const Vector3& offset);
+			//Add built-in primitives (no need to call Begin()/End())
+			void AddQuad(Material* material, float width, float height, QuadAxis axis, const Vector3& offset);
+			void AddBox(Material* material, const Vector3& halfExtents, const Vector3& offset);
+			void AddSphere(Material* material, float radius, int rings, int segments);
+
+			//Shadows
+			void SetCastShadows(bool shadows);
 
 			Ogre::ManualObject* GetOgreManualObj();
 

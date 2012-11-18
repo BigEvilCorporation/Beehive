@@ -31,9 +31,10 @@ namespace ion
 			Scene();
 			~Scene();
 
+			//Lighting and shadows
 			void SetAmbientLight(const ColourRGB& colour);
-
 			void AddLight(Light& light);
+			void SetShadowFarDistance(float distance);
 
 			bool Load(std::string filename);
 			u64 Save(std::string filename);

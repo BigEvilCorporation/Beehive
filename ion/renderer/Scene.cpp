@@ -40,6 +40,9 @@ namespace ion
 			Ogre::Entity* sceneMeshEntity = mOgreSceneMgrIFace->createEntity(mSceneMesh->GetOgreMesh()->getName());
 			mOgreSceneMgrIFace->getRootSceneNode()->attachObject(sceneMeshEntity);
 			mOgreSceneMgrIFace->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
+
+			Ogre::ShadowCameraSetupPtr shadowCameraSetup(new Ogre::DefaultShadowCameraSetup);
+			mOgreSceneMgrIFace->setShadowCameraSetup(shadowCameraSetup);
 			#endif
 		}
 
@@ -87,6 +90,13 @@ namespace ion
 		void Scene::AddLight(Light& light)
 		{
 			mLights.push_back(&light);
+		}
+
+		void Scene::SetShadowFarDistance(float distance)
+		{
+			#if !defined ION_PLUGIN
+			mOgreSceneMgrIFace->setShadowFarDistance(distance);
+			#endif
 		}
 
 		bool Scene::Load(std::string filename)
