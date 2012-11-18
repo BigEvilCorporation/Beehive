@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -84,7 +84,9 @@ namespace Ogre {
 		friend class EntityFactory;
 		friend class SubEntity;
 	public:
+		
 		typedef set<Entity*>::type EntitySet;
+		typedef map<unsigned short, bool>::type SchemeHardwareAnimMap;
 
 	protected:
 
@@ -155,6 +157,17 @@ namespace Ogre {
 		*/
 		void bindMissingHardwarePoseBuffers(const VertexData* srcData, 
 			VertexData* destData);
+			
+		/** When performing software pose animation, initialise software copy
+			of vertex data
+		*/
+		void initialisePoseVertexData(const VertexData* srcData, VertexData* destData, 
+			bool animateNormals);
+
+		/** When animating normals for pose animation, finalise normals by filling in
+			with the reference mesh normal where applied normal weights < 1
+		*/
+		void finalisePoseNormals(const VertexData* srcData, VertexData* destData);
 
 		/// Cached bone matrices, including any world transform
         Matrix4 *mBoneWorldMatrices;
@@ -179,13 +192,24 @@ namespace Ogre {
 		*/
 		EntitySet* mSharedSkeletonEntities;
 
-		/// Private method to cache bone matrices from skeleton
-		void cacheBoneMatrices(void);
+		/** 
+		* Private method to cache bone matrices from skeleton
+		*
+		* @return True if the bone matrices cache has been updated. False if note
+		*/
+		bool cacheBoneMatrices(void);
 
 		/// Flag determines whether or not to display skeleton
 		bool mDisplaySkeleton;
-		/// Flag indicating whether hardware animation is supported by this entities materials
-		bool mHardwareAnimation;
+		/** 
+		* Flag indicating whether hardware animation is supported by this entities materials
+		* data is saved per scehme number
+		*/
+		SchemeHardwareAnimMap mSchemeHardwareAnim;
+
+		/// Current state of the hardware animation as represented by the entities parameters
+		bool mCurrentHWAnimationState;
+
 		/// Number of hardware poses supported by materials
 		ushort mHardwarePoseCount;
 		/// Flag indicating whether we have a vertex program in use on any of our subentities
@@ -196,6 +220,8 @@ namespace Ogre {
         int mSoftwareAnimationNormalsRequests;
 		/// Flag indicating whether to skip automatic updating of the Skeleton's AnimationState
 		bool mSkipAnimStateUpdates;
+		/// Flag indicating whether to update the main entity skeleton even when an LOD is displayed
+		bool mAlwaysUpdateMainSkeleton;
 
 
 		/// The LOD number of the mesh to use, calculated by _notifyCurrentCamera
@@ -232,7 +258,7 @@ namespace Ogre {
 		/// Has this entity been initialised yet?
 		bool mInitialised;
 
-		/// Last parent xform
+		/// Last parent transform
 		Matrix4 mLastParentXform;
 
 		/// Mesh state count, used to detect differences
@@ -250,14 +276,22 @@ namespace Ogre {
 		/// internal implementation of detaching all 'child' objects of this entity
 		void detachAllObjectsImpl(void);
 
-		/// Trigger reevaluation of the kind of vertex processing in use
+		/// ensures reevaluation of the vertex processing usage
 		void reevaluateVertexProcessing(void);
 
+		/** calculates the kind of vertex processing in use
+		@remarks
+		This function's return value is calculated according to the current 
+		active scheme. This is due to the fact that RTSS schemes may be different
+		in their handling of hardware animation.
+		*/
+		bool calcVertexProcessing(void);
+	
 		/// Apply vertex animation
 		void applyVertexAnimation(bool hardwareAnimation, bool stencilShadows);
 		/// Initialise the hardware animation elements for given vertex data
-		void initHardwareAnimationElements(VertexData* vdata,
-			ushort numberOfElements);
+		ushort initHardwareAnimationElements(VertexData* vdata,
+			ushort numberOfElements, bool animateNormals);
 		/// Are software vertex animation temp buffers bound?
 		bool tempVertexAnimBuffersBound(void) const;
         /// Are software skeleton animation temp buffers bound?
@@ -280,13 +314,13 @@ namespace Ogre {
 		{
 		protected:
 			Entity* mParent;
-			// Shared link to position buffer
+			/// Shared link to position buffer
 			HardwareVertexBufferSharedPtr mPositionBuffer;
-			// Shared link to w-coord buffer (optional)
+			/// Shared link to w-coord buffer (optional)
 			HardwareVertexBufferSharedPtr mWBuffer;
-			// Link to current vertex data used to bind (maybe changes)
+			/// Link to current vertex data used to bind (maybe changes)
 			const VertexData* mCurrentVertexData;
-			// Original position buffer source binding
+			/// Original position buffer source binding
 			unsigned short mOriginalPosBufferBinding;
 			/// Link to SubEntity, only present if SubEntity has it's own geometry
 			SubEntity* mSubEntity;
@@ -297,6 +331,9 @@ namespace Ogre {
 				HardwareIndexBufferSharedPtr* indexBuffer, const VertexData* vertexData,
 				bool createSeparateLightCap, SubEntity* subent, bool isLightCap = false);
 			~EntityShadowRenderable();
+			
+			/// Create the separate light cap if it doesn't already exists
+			void _createSeparateLightCap();
 			/// Overridden from ShadowRenderable
 			void getWorldTransforms(Matrix4* xform) const;
 			HardwareVertexBufferSharedPtr getPositionBuffer(void) { return mPositionBuffer; }
@@ -305,7 +342,8 @@ namespace Ogre {
 			void rebindPositionBuffer(const VertexData* vertexData, bool force);
 			/// Overridden from ShadowRenderable
 			bool isVisible(void) const;
-
+			/// Overridden from ShadowRenderable
+			virtual void rebindIndexBuffer(const HardwareIndexBufferSharedPtr& indexBuffer);
 		};
 	public:
 		/** Default destructor.
@@ -392,8 +430,10 @@ namespace Ogre {
 		initialised from the Mesh object.
 		*/
 		AnimationState* getAnimationState(const String& name) const;
+        /** Returns whether the AnimationState with the given name exists. */
+        bool hasAnimationState(const String& name) const;
 		/** For entities based on animated meshes, gets the AnimationState objects for all animations.
-		@returns
+		@return
 		In case the entity is animated, this functions returns the pointer to a AnimationStateSet
 		containing all animations of the entries. If the entity is not animated, it returns 0.
 		@remarks
@@ -502,7 +542,7 @@ namespace Ogre {
 		@param pMovable Pointer to the object to attach
 		@param offsetOrientation An adjustment to the orientation of the attached object, relative to the bone.
 		@param offsetPosition An adjustment to the position of the attached object, relative to the bone.
-		@returns The TagPoint to which the object has been attached
+		@return The TagPoint to which the object has been attached
 		*/
 		TagPoint* attachObjectToBone(const String &boneName,
 			MovableObject *pMovable,
@@ -565,8 +605,12 @@ namespace Ogre {
 		vertex programs must support 'includes_morph_animation true' if using
         morph animation, 'includes_pose_animation true' if using pose animation
         and 'includes_skeletal_animation true' if using skeletal animation.
+
+		Also note the the function returns value according to the current active
+		scheme. This is due to the fact that RTSS schemes may be different in their
+		handling of hardware animation.
 		*/
-		bool isHardwareAnimationEnabled(void) const { return mHardwareAnimation; }
+		bool isHardwareAnimationEnabled(void);
 
 		/** Overridden from MovableObject */
 		void _notifyAttached(Node* parent, bool isTagPoint = false);
@@ -721,7 +765,7 @@ namespace Ogre {
 			BIND_HARDWARE_MORPH
 		};
 		/// Choose which vertex data to bind to the renderer
-		VertexDataBindChoice chooseVertexDataForBinding(bool hasVertexAnim) const;
+		VertexDataBindChoice chooseVertexDataForBinding(bool hasVertexAnim);
 
 		/** Are buffers already marked as vertex animated? */
 		bool _getBuffersMarkedForAnimation(void) const { return mVertexAnimationAppliedThisFrame; }
@@ -744,7 +788,7 @@ namespace Ogre {
 			This method builds the internal structures of the Entity based on it
 			resources (Mesh, Skeleton). This may or may not succeed if the 
 			resources it references have been earmarked for background loading,
-			so you should check isInitialised afterwards to see if it was sucessful.
+			so you should check isInitialised afterwards to see if it was successful.
 		@param forceReinitialise If true, this forces the Entity to tear down it's
 			internal structures and try to rebuild them. Useful if you changed the
 			content of a Mesh or Skeleton at runtime.
@@ -780,6 +824,23 @@ namespace Ogre {
 		}
 
 
+		/** The skeleton of the main entity will be updated even if the an LOD entity is being displayed.
+		useful if you have entities attached to the main entity. Otherwise position of attached
+		entities will not be updated.
+		*/
+		void setAlwaysUpdateMainSkeleton(bool update) {
+			mAlwaysUpdateMainSkeleton = update;
+		}
+
+		/** The skeleton of the main entity will be updated even if the an LOD entity is being displayed.
+		useful if you have entities attached to the main entity. Otherwise position of attached
+		entities will not be updated.
+		*/
+		bool getAlwaysUpdateMainSkeleton() const {
+			return mAlwaysUpdateMainSkeleton;
+		}
+
+		
 	};
 
 	/** Factory object for creating Entity instances */

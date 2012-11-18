@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ namespace Ogre {
 	/** High level interface of Direct3D9 Device.
 	Provide useful methods for device handling.
 	*/
-	class _OgreD3D9Export D3D9Device
+	class _OgreD3D9Export D3D9Device : public ResourceAlloc
 	{
 
 	// Interface.
@@ -59,6 +59,7 @@ namespace Ogre {
 		D3DDEVTYPE				getDeviceType			() const;
 		bool					isMultihead				() const;					
 		bool					isAutoDepthStencil		() const;
+		bool					isFullScreen			() const;
 		
 		const D3DCAPS9&			getD3D9DeviceCaps		() const;
 		D3DFORMAT				getBackBufferFormat		() const;
@@ -88,8 +89,8 @@ namespace Ogre {
 		~D3D9Device	();
 
 	protected:			
-		D3D9DeviceManager*				mpDeviceManager;			// The manager of this device instance.
-		IDirect3DDevice9*				mpDevice;					// Will hold the device interface.				
+		D3D9DeviceManager*				mDeviceManager;			// The manager of this device instance.
+		IDirect3DDevice9*				mDevice;					// Will hold the device interface.				
 		UINT							mAdapterNumber;				// The adapter that this device belongs to.	
 		HMONITOR						mMonitor;					// The monitor that this device belongs to.
 		D3DDEVTYPE						mDeviceType;				// Device type.	
@@ -115,14 +116,14 @@ namespace Ogre {
 			D3DPRESENT_PARAMETERS	presentParameters;				// Present parameters of the render window.
 			bool					acquired;						// True if resources acquired.			
 		};		
-		typedef map<D3D9RenderWindow*, RenderWindowResources*>::type RenderWindowToResorucesMap;
-		typedef RenderWindowToResorucesMap::iterator				 RenderWindowToResorucesIterator;
+		typedef map<D3D9RenderWindow*, RenderWindowResources*>::type RenderWindowToResourcesMap;
+		typedef RenderWindowToResourcesMap::iterator				 RenderWindowToResourcesIterator;
 
-		RenderWindowToResorucesMap mMapRenderWindowToResoruces;		// Map between render window to resources.
+		RenderWindowToResourcesMap mMapRenderWindowToResources;		// Map between render window to resources.
 
 
 	protected:
-		RenderWindowToResorucesIterator getRenderWindowIterator (D3D9RenderWindow* renderWindow);
+		RenderWindowToResourcesIterator getRenderWindowIterator (D3D9RenderWindow* renderWindow);
 
 		bool					acquire							(D3D9RenderWindow* renderWindow);
 		bool					reset							();
@@ -132,7 +133,7 @@ namespace Ogre {
 		void					createD3D9Device				();
 		void					releaseD3D9Device				();
 		void					releaseRenderWindowResources	(RenderWindowResources* renderWindowResources);
-		void					acquireRenderWindowResources	(RenderWindowToResorucesIterator it);		
+		void					acquireRenderWindowResources	(RenderWindowToResourcesIterator it);		
 		void					setupDeviceStates				();
 		void					notifyDeviceLost				();
 

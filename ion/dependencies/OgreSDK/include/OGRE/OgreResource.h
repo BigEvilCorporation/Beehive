@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -161,7 +161,7 @@ namespace Ogre {
 		/// State count, the number of times this resource has changed state
 		size_t mStateCount;
 
-		typedef list<Listener*>::type ListenerList;
+		typedef set<Listener*>::type ListenerList;
 		ListenerList mListenerList;
 		OGRE_MUTEX(mListenerListMutex)
 
@@ -396,7 +396,7 @@ namespace Ogre {
 		virtual void removeListener(Listener* lis);
 
 		/// Gets the group which this resource is a member of
-		virtual const String& getGroup(void) { return mGroup; }
+		virtual const String& getGroup(void) const { return mGroup; }
 
 		/** Change the resource group ownership of a Resource.
 		@remarks

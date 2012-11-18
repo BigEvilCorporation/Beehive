@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +73,9 @@ namespace Ogre {
         /// 3D volume texture, used in combination with 3D texture coordinates
         TEX_TYPE_3D = 3,
         /// 3D cube map, used in combination with 3D texture coordinates
-        TEX_TYPE_CUBE_MAP = 4
+        TEX_TYPE_CUBE_MAP = 4,
+        /// 2D texture array
+        TEX_TYPE_2D_ARRAY = 5
     };
 
 	/** Enum identifying special mipmap numbers
@@ -218,18 +220,18 @@ namespace Ogre {
         virtual void setWidth(size_t w) { mWidth = mSrcWidth = w; }
 
         /** Set the depth of the texture (only applicable for 3D textures);
-            ; can only do this before load();
+            can only do this before load();
         */
         virtual void setDepth(size_t d)  { mDepth = mSrcDepth = d; }
 
-        /** Returns the TextureUsage indentifier for this Texture
+        /** Returns the TextureUsage identifier for this Texture
         */
         virtual int getUsage() const
         {
             return mUsage;
         }
 
-        /** Sets the TextureUsage indentifier for this Texture; only useful before load()
+        /** Sets the TextureUsage identifier for this Texture; only useful before load()
 			
 			@param u is a combination of TU_STATIC, TU_DYNAMIC, TU_WRITE_ONLY 
 				TU_AUTOMIPMAP and TU_RENDERTARGET (see TextureUsage enum). You are
@@ -300,7 +302,7 @@ namespace Ogre {
         }
 
         /** Returns the pixel format of the original input texture (may differ due to
-            hardware requirements and pixel format convertion).
+            hardware requirements and pixel format conversion).
         */
         virtual PixelFormat getSrcFormat(void) const
         {
@@ -360,7 +362,7 @@ namespace Ogre {
                             +X (0), -X (1), +Y (2), -Y (3), +Z (4), -Z (5)
 			@param mipmap	Mipmap level. This goes from 0 for the first, largest
 							mipmap level to getNumMipmaps()-1 for the smallest.
-			@returns	A shared pointer to a hardware pixel buffer
+			@return	A shared pointer to a hardware pixel buffer
 			@remarks	The buffer is invalidated when the resource is unloaded or destroyed.
 						Do not use it after the lifetime of the containing texture.
 		*/

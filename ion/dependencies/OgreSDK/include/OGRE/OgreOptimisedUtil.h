@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -116,6 +116,7 @@ namespace Ogre {
         @param srcPos1 Pointer to buffer for the start positions
         @param srcPos2 Pointer to buffer for the end positions
         @param dstPos Pointer to buffer for the destination positions
+		@param pos1VSize, pos2VSize, dstVSize Vertex sizes in bytes of each of the 3 buffers referenced
         @param numVertices Number of vertices to morph, which agree with
             the number in start, end and destination buffer. Bear in mind
             three floating-point values per vertex
@@ -124,7 +125,9 @@ namespace Ogre {
             Real t,
             const float *srcPos1, const float *srcPos2,
             float *dstPos,
-            size_t numVertices) = 0;
+			size_t pos1VSize, size_t pos2VSize, size_t dstVSize, 
+            size_t numVertices,
+			bool morphNormals) = 0;
 
         /** Concatenate an affine matrix to an array of affine matrices.
         @note

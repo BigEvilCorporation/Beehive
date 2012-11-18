@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,10 @@ namespace Ogre {
         /// Constructor
         PatchMesh(ResourceManager* creator, const String& name, ResourceHandle handle,
             const String& group);
-
+        /// Update the mesh with new control points positions.
+		void update(void* controlPointBuffer, size_t width, size_t height, 
+                    size_t uMaxSubdivisionLevel, size_t vMaxSubdivisionLevel, 
+                    PatchSurface::VisibleSide visibleSide);
         /// Define the patch, as defined in MeshManager::createBezierPatch
         void define(void* controlPointBuffer, 
             VertexDeclaration *declaration, size_t width, size_t height,

@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -131,7 +131,7 @@ namespace Ogre {
         /// Name of the material to use
         String mMaterialName;
         /// Pointer to the material to use
-        MaterialPtr mpMaterial;
+        MaterialPtr mMaterial;
 
         /// True if no billboards in this set have been resized - greater efficiency.
         bool mAllDefaultSize;
@@ -201,7 +201,7 @@ namespace Ogre {
         Vector3 mCamPos;
 
         /// The vertex index data for all billboards in this set (1 set only)
-        //unsigned short* mpIndexes;
+        //unsigned short* mIndexes;
         IndexData* mIndexData;
 
         /// Flag indicating whether each billboard should be culled separately (default: false)
@@ -342,7 +342,7 @@ namespace Ogre {
                 position The position of the new billboard realtive to the certer of the set
             @param
                 colour Optional base colour of the billboard.
-            @returns
+            @return
                 On success, a pointer to a newly created Billboard is
                 returned.
             @par
@@ -367,7 +367,7 @@ namespace Ogre {
                 z The position of the new billboard relative to the center of the set
             @param
                 colour Optional base colour of the billboard.
-            @returns
+            @return
                 On success, a pointer to a newly created Billboard is
                 returned.
             @par
@@ -430,7 +430,7 @@ namespace Ogre {
         virtual void setPoolSize(size_t size);
 
         /** Returns the current size of the billboard pool.
-            @returns
+            @return
                 The current size of the billboard pool.
             @see
                 BillboardSet::setAutoextend
@@ -447,7 +447,7 @@ namespace Ogre {
                 This method requires linear time since the billboard list is a linked list.
             @param
                 index The index of the billboard that is requested.
-            @returns
+            @return
                 On success, a valid pointer to the requested billboard is
                 returned.
             @par
@@ -481,7 +481,7 @@ namespace Ogre {
         virtual void setBillboardOrigin(BillboardOrigin origin);
 
         /** Gets the point which acts as the origin point for all billboards in this set.
-            @returns
+            @return
                 A member of the BillboardOrigin enum specifying the origin for all the billboards in this set.
         */
         virtual BillboardOrigin getBillboardOrigin(void) const;
@@ -498,7 +498,7 @@ namespace Ogre {
         virtual void setBillboardRotationType(BillboardRotationType rotationType);
 
         /** Sets billboard rotation type.
-            @returns
+            @return
                 A member of the BillboardRotationType enum specifying the rotation type for all the billboards in this set.
         */
         virtual BillboardRotationType getBillboardRotationType(void) const;
@@ -531,7 +531,7 @@ namespace Ogre {
         virtual void setMaterialName( const String& name, const String& groupName = ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME );
 
         /** Sets the name of the material to be used for this billboard set.
-            @returns The name of the material that is used for this set.
+            @return The name of the material that is used for this set.
         */
         virtual const String& getMaterialName(void) const;
 
@@ -639,7 +639,7 @@ namespace Ogre {
             smoke, anything which is symmetrical about a central point) but does not look good for
             billboards which have an orientation (e.g. an elongated raindrop). In this case, the
             oriented billboards are more suitable (BBT_ORIENTED_COMMON or BBT_ORIENTED_SELF) since
-            they retain an independant Y axis and only the X axis is generated, perpendicular to both
+            they retain an independent Y axis and only the X axis is generated, perpendicular to both
             the local Y and the camera Z.
         @par
             In some case you might want the billboard has fixed Z axis and doesn't need to face to

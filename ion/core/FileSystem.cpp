@@ -44,6 +44,9 @@ namespace ion
 			//Get root path for working directory
 			std::string workingRoot = workingDirectory.substr(0, 3);
 
+			//Suppress "Drive not ready" error dialogue when getting attributes for floppy drives
+			SetErrorMode(SEM_FAILCRITICALERRORS);
+
 			//Enumerate volumes
 			bool volumeFound = true;
 			HANDLE volumeHndl = INVALID_HANDLE_VALUE;
@@ -120,6 +123,9 @@ namespace ion
 
 			//Finished volume search
 			FindVolumeClose(volumeHndl);
+
+			//Restore default error mode
+			SetErrorMode(0);
 		}
 
 		FileDevice* FileSystem::FindFileDevice(io::FileDevice::DeviceType, io::FileDevice::AccessType accessType)

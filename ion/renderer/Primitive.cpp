@@ -36,8 +36,6 @@ namespace ion
 					//Render before overlay renderstage
 					mManualPrimitive->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY - 1);
 				}
-
-				mManualPrimitive->setCastShadows(true);
 			}
 			#endif
 		}
@@ -134,10 +132,12 @@ namespace ion
 			#endif
 		}
 
-		void Primitive::AddQuad(float width, float height, Primitive::QuadAxis axis, const Vector3& offset)
+		void Primitive::AddQuad(Material* material, float width, float height, Primitive::QuadAxis axis, const Vector3& offset)
 		{
 			float halfWidth = width * 0.5f;
 			float halfHeight = height * 0.5f;
+
+			Begin(material, Triangle);
 
 			if(axis == xy)
 			{
@@ -154,10 +154,14 @@ namespace ion
 				AddVertex(Vertex(offset.x + -halfWidth, offset.y, offset.z + -halfHeight)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
 				AddVertex(Vertex(offset.x + -halfWidth, offset.y, offset.z +  halfHeight)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
 				AddVertex(Vertex(offset.x +  halfWidth, offset.y, offset.z +  halfHeight)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));
-
-				AddVertex(Vertex(offset.x + -halfWidth, offset.y, offset.z + -halfHeight)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
-				AddVertex(Vertex(offset.x +  halfWidth, offset.y, offset.z +  halfHeight)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));
 				AddVertex(Vertex(offset.x +  halfWidth, offset.y, offset.z + -halfHeight)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
+
+				AddIndex(0);
+				AddIndex(1);
+				AddIndex(2);
+				AddIndex(2);
+				AddIndex(3);
+				AddIndex(0);
 			}
 			else if(axis == yz)
 			{
@@ -169,10 +173,14 @@ namespace ion
 				AddVertex(Vertex(offset.x, offset.y +  halfHeight, offset.z +  halfWidth));
 				AddVertex(Vertex(offset.x, offset.y + -halfHeight, offset.z +  halfWidth));
 			}
+
+			End();
 		}
 
-		void Primitive::AddBox(const Vector3& halfExtents, const Vector3& offset)
+		void Primitive::AddBox(Material* material, const Vector3& halfExtents, const Vector3& offset)
 		{
+			Begin(material, Triangle);
+
 			//Add indices
 
 			//Top
@@ -221,13 +229,64 @@ namespace ion
 			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, -1.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
 
 			//Back
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));;
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));;
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));;
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
 																																				  
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));;
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));;
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));;
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 0.0f, 1.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
+
+			for(int i = 0; i < 24; i++)
+			{
+				AddIndex(i);
+			}
+			
+
+			End();
+		}
+
+		void Primitive::AddSphere(Material* material, float radius, int rings, int segments)
+		{
+			Begin(material, Triangle);
+
+			float deltaRingAngle = (maths::PI / rings);
+			float deltaSegAngle = (2.0f * maths::PI / segments);
+			int vertexIndex = 0;
+					 
+			for(int ring = 0; ring <= rings; ring++)
+			{
+				float r0 = radius * sinf (ring * deltaRingAngle);
+				float y0 = radius * cosf (ring * deltaRingAngle);
+
+				for(int seg = 0; seg <= segments; seg++)
+				{
+					float x0 = r0 * sinf(seg * deltaSegAngle);
+					float z0 = r0 * cosf(seg * deltaSegAngle);
+
+					AddVertex(Vertex(x0, y0, z0));
+					AddNormal(Vector3(x0, y0, z0).Normalise());
+					AddTextureCoord(TexCoord((float)seg / (float)segments, (float)ring / (float)rings));
+
+					if (ring != rings)
+					{
+						AddIndex(vertexIndex + segments + 1);
+						AddIndex(vertexIndex);               
+						AddIndex(vertexIndex + segments);
+						AddIndex(vertexIndex + segments + 1);
+						AddIndex(vertexIndex + 1);
+						AddIndex(vertexIndex);
+						vertexIndex++;
+					}
+				}
+			}
+
+			End();
+		}
+
+		void Primitive::SetCastShadows(bool shadows)
+		{
+			mManualPrimitive->setCastShadows(shadows);
 		}
 
 		#if !defined ION_PLUGIN

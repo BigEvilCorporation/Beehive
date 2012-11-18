@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,7 @@ namespace Ogre
 		static DWORD get(LayerBlendSource lbs, bool perStageConstants);
 		/// return a D3D9 equivalent for a Ogre SceneBlendFactor value
 		static D3DBLEND get(SceneBlendFactor sbf);
-		/// return a D3D9 equivlalent for a Ogre SceneBlendOperation value
+		/// return a D3D9 equivalent for a Ogre SceneBlendOperation value
 		static D3DBLENDOP get(SceneBlendOperation sbo);
 		/// return a D3D9 equivalent for a Ogre CompareFunction value
 		static DWORD get(CompareFunction cf);

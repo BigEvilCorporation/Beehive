@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -264,6 +264,12 @@ namespace Ogre
 		*/
 		virtual void quad(uint32 i1, uint32 i2, uint32 i3, uint32 i4);
 
+		/// Get the number of vertices in the section currently being defined (returns 0 if no section is in progress).
+		virtual size_t getCurrentVertexCount() const;
+
+		/// Get the number of indices in the section currently being defined (returns 0 if no section is in progress).
+		virtual size_t getCurrentIndexCount() const;
+		
 		/** Finish defining the object and compile the final renderable version. 
 		@note
 			Will return a pointer to the finished section or NULL if the section was discarded (i.e. has zero vertices/indices).
@@ -456,6 +462,10 @@ namespace Ogre
 			void getWorldTransforms(Matrix4* xform) const;
 			HardwareVertexBufferSharedPtr getPositionBuffer(void) { return mPositionBuffer; }
 			HardwareVertexBufferSharedPtr getWBuffer(void) { return mWBuffer; }
+			/// Overridden from ShadowRenderable
+			virtual void rebindIndexBuffer(const HardwareIndexBufferSharedPtr& indexBuffer);
+
+			
 
 		};
 

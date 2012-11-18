@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ namespace Ogre {
 		RCP_CREATE_ON_ALL_DEVICES
 	};
 	
-	class _OgreD3D9Export D3D9ResourceManager
+	class _OgreD3D9Export D3D9ResourceManager : public ResourceAlloc
 	{
 
 	// Interface.
@@ -81,14 +81,24 @@ namespace Ogre {
 
 		void						setCreationPolicy	(D3D9ResourceCreationPolicy creationPolicy);
 		D3D9ResourceCreationPolicy	getCreationPolicy	() const;
-		
+
+		/** 
+			Set/Get automatic hardware buffers management.
+			This has affect only when multiple devices involved during the runtime.
+			When enabled, an explicit system memory backup is created for buffers with no read caps - so in case of device swaps
+			the content of the buffers can be restored from this copy.
+			The default is false in order to reduce system memory consumption.
+		*/
+		void						setAutoHardwareBufferManagement(bool autoManagement) { mAutoHardwareBufferManagement = autoManagement; }
+		bool						getAutoHardwareBufferManagement() const { return mAutoHardwareBufferManagement; }
+
 	// Friends.
 	protected:
 		friend class D3D9Resource;
 	
 	// Types.
 	protected:
-		typedef vector<D3D9Resource*>::type		ResourceContainer;
+		typedef set<D3D9Resource*>::type		ResourceContainer;
 		typedef ResourceContainer::iterator		ResourceContainerIterator;
 
 	// Protected methods.
@@ -107,6 +117,7 @@ namespace Ogre {
 		ResourceContainer			mResources;
 		D3D9ResourceCreationPolicy	mResourceCreationPolicy;
 		long						mDeviceAccessLockCount;		
+		bool						mAutoHardwareBufferManagement;
 	};
 }
 

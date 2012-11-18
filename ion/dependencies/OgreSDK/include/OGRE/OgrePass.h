@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -174,6 +174,8 @@ namespace Ogre {
         // Should it only be run for a certain light type?
         bool mRunOnlyForOneLightType;
         Light::LightTypes mOnlyLightType;
+		// With a specific light mask?
+		uint32 mLightMask;
 
         /// Shading options
         ShadeOptions mShadeOptions;
@@ -200,6 +202,8 @@ namespace Ogre {
 		GpuProgramUsage *mVertexProgramUsage;
         // Vertex program details
         GpuProgramUsage *mShadowCasterVertexProgramUsage;
+        // Fragment program details
+        GpuProgramUsage *mShadowCasterFragmentProgramUsage;
         // Vertex program details
         GpuProgramUsage *mShadowReceiverVertexProgramUsage;
 		// Fragment program details
@@ -269,6 +273,8 @@ namespace Ogre {
         bool hasGeometryProgram(void) const { return mGeometryProgramUsage != NULL; }
         /// Returns true if this pass uses a shadow caster vertex program
         bool hasShadowCasterVertexProgram(void) const { return mShadowCasterVertexProgramUsage != NULL; }
+        /// Returns true if this pass uses a shadow caster fragment program
+        bool hasShadowCasterFragmentProgram(void) const { return mShadowCasterFragmentProgramUsage != NULL; }
         /// Returns true if this pass uses a shadow receiver vertex program
         bool hasShadowReceiverVertexProgram(void) const { return mShadowReceiverVertexProgramUsage != NULL; }
         /// Returns true if this pass uses a shadow receiver fragment program
@@ -384,6 +390,15 @@ namespace Ogre {
         void setSelfIllumination(Real red, Real green, Real blue);
 
         /** Sets the amount of self-illumination an object has.
+        @see
+            setSelfIllumination
+        */
+        void setEmissive(Real red, Real green, Real blue)
+        {
+            setSelfIllumination(red, green, blue);
+        }
+
+        /** Sets the amount of self-illumination an object has.
         @remarks
         If an object is self-illuminating, it does not need external sources to light it, ambient or
         otherwise. It's like the object has it's own personal ambient light. This property is rarely useful since
@@ -393,6 +408,15 @@ namespace Ogre {
         or if this is a programmable pass.
         */
         void setSelfIllumination(const ColourValue& selfIllum);
+
+        /** Sets the amount of self-illumination an object has.
+        @see
+            setSelfIllumination
+        */
+        void setEmissive(const ColourValue& emissive)
+        {
+            setSelfIllumination(emissive);
+        }
 
         /** Sets which material properties follow the vertex colour
          */
@@ -492,6 +516,15 @@ namespace Ogre {
         */
         const ColourValue& getSelfIllumination(void) const;
 
+        /** Gets the self illumination colour of the pass.
+        @see
+                getSelfIllumination
+        */
+        const ColourValue& getEmissive(void) const
+        {
+            return getSelfIllumination();
+        }
+
         /** Gets the 'shininess' property of the pass (affects specular highlights).
         */
         Real getShininess(void) const;
@@ -572,7 +605,7 @@ namespace Ogre {
 
         /** Sets the kind of blending this pass has with the existing contents of the scene.
         @remarks
-        Wheras the texture blending operations seen in the TextureUnitState class are concerned with
+        Whereas the texture blending operations seen in the TextureUnitState class are concerned with
         blending between texture layers, this blending is about combining the output of the Pass
         as a whole with the existing contents of the rendering target. This blending therefore allows
         object transparency and other special effects. If all passes in a technique have a scene
@@ -634,7 +667,7 @@ namespace Ogre {
 
         /** Allows very fine control of blending this Pass with the existing contents of the scene.
         @remarks
-        Wheras the texture blending operations seen in the TextureUnitState class are concerned with
+        Whereas the texture blending operations seen in the TextureUnitState class are concerned with
         blending between texture layers, this blending is about combining the output of the material
         as a whole with the existing contents of the rendering target. This blending therefore allows
         object transparency and other special effects.
@@ -862,6 +895,11 @@ namespace Ogre {
 		void setStartLight(unsigned short startLight);
 		/** Gets the light index that this pass will start at in the light list. */
 		unsigned short getStartLight(void) const;
+
+		/** Sets the light mask which can be matched to specific light flags to be handled by this pass */
+		void setLightMask(uint32 mask);
+		/** Gets the light mask controlling which lights are used for this pass */
+		uint32 getLightMask() const;
 
         /** Sets the type of light shading required
         @note
@@ -1228,6 +1266,51 @@ namespace Ogre {
             only available after _load(). */
         const GpuProgramPtr& getShadowCasterVertexProgram(void) const;
 
+        /** Sets the details of the fragment program to use when rendering as a
+        shadow caster.
+        @remarks
+        Texture-based shadows require that the caster is rendered to a texture
+        in a solid colour (the shadow colour in the case of modulative texture
+        shadows). Whilst Ogre can arrange this for the fixed function
+        pipeline, passes which use vertex programs might need the vertex
+        programs still to run in order to preserve any deformation etc
+        that it does. However, lighting calculations must be a lot simpler,
+        with only the ambient colour being used (which the engine will ensure
+        is bound to the shadow colour).
+        @par
+        Therefore, it is up to implementors of vertex programs to provide an
+        alternative vertex program which can be used to render the object
+        to a shadow texture. Do all the same vertex transforms, but set the
+        colour of the vertex to the ambient colour, as bound using the
+        standard auto parameter binding mechanism.
+        @note
+        Some vertex programs will work without doing this, because Ogre ensures
+        that all lights except for ambient are set black. However, the chances
+        are that your vertex program is doing a lot of unnecessary work in this
+        case, since the other lights are having no effect, and it is good practice
+        to supply an alternative.
+        @note
+        This is only applicable to programmable passes.
+        @par
+        The default behaviour is for Ogre to switch to fixed-function
+        rendering if an explicit fragment program alternative is not set.
+        */
+        void setShadowCasterFragmentProgram(const String& name);
+        /** Sets the fragment program parameters for rendering as a shadow caster.
+        @remarks
+        Only applicable to programmable passes, and this particular call is
+        designed for low-level programs; use the named parameter methods
+        for setting high-level program parameters.
+        */
+        void setShadowCasterFragmentProgramParameters(GpuProgramParametersSharedPtr params);
+        /** Gets the name of the fragment program used by this pass when rendering shadow casters. */
+        const String& getShadowCasterFragmentProgramName(void) const;
+        /** Gets the fragment program parameters used by this pass when rendering shadow casters. */
+        GpuProgramParametersSharedPtr getShadowCasterFragmentProgramParameters(void) const;
+        /** Gets the fragment program used by this pass when rendering shadow casters,
+            only available after _load(). */
+        const GpuProgramPtr& getShadowCasterFragmentProgram(void) const;
+
         /** Sets the details of the vertex program to use when rendering as a
             shadow receiver.
         @remarks
@@ -1372,7 +1455,7 @@ namespace Ogre {
 			split, it's up to the author to ensure that there is a fallback Technique
 			for less capable cards.
 		@param numUnits The target number of texture units
-		@returns A new Pass which contains the remaining units, and a scene_blend
+		@return A new Pass which contains the remaining units, and a scene_blend
 				setting appropriate to approximate the multitexture. This Pass will be
 				attached to the parent Technique of this Pass.
 		*/
@@ -1494,7 +1577,7 @@ namespace Ogre {
             Only applicable for programmable passes.
         @param count number of iterations to perform fast multi pass operations.
             A value greater than 1 will cause the pass to be executed count number of
-            times without changing the render state.  This is very usefull for passes
+            times without changing the render state.  This is very useful for passes
             that use programmable shaders that have to iterate more than once but don't
             need a render state change.  Using multi pass can dramatically speed up rendering
             for materials that do things like fur, blur.

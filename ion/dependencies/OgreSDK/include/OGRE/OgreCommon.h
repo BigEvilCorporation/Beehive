@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -298,6 +298,33 @@ namespace Ogre {
         FBT_DEPTH   = 0x2,
         FBT_STENCIL = 0x4
     };
+
+	/** Flags for the Instance Manager when calculating ideal number of instances per batch */
+	enum InstanceManagerFlags
+	{
+		/** Forces an amount of instances per batch low enough so that vertices * numInst < 65535
+			since usually improves performance. In HW instanced techniques, this flag is ignored
+		*/
+		IM_USE16BIT		= 0x0001,
+
+		/** The num. of instances is adjusted so that as few pixels as possible are wasted
+			in the vertex texture */
+		IM_VTFBESTFIT	= 0x0002,
+
+		/** Use a limited number of skeleton animations shared among all instances. 
+		Update only that limited amount of animations in the vertex texture.*/
+		IM_VTFBONEMATRIXLOOKUP = 0x0004,
+
+		IM_USEBONEDUALQUATERNIONS = 0x0008,
+
+		/** Use one weight per vertex when recommended (i.e. VTF). */
+		IM_USEONEWEIGHT = 0x0010,
+
+		/** All techniques are forced to one weight per vertex. */
+		IM_FORCEONEWEIGHT = 0x0020,
+
+		IM_USEALL		= IM_USE16BIT|IM_VTFBESTFIT|IM_USEONEWEIGHT
+	};
     
 	
 	/** A hashed vector.
@@ -800,7 +827,7 @@ namespace Ogre {
 		virtual ~Pool() {}
 
 		/** Get the next item from the pool.
-		@returns pair indicating whether there was a free item, and the item if so
+		@return pair indicating whether there was a free item, and the item if so
 		*/
 		virtual std::pair<bool, T> removeItem()
 		{

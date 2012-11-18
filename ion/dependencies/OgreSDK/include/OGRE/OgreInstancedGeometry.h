@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -72,7 +72,7 @@ namespace Ogre {
 			Therefore you won't gain as much benefit from the batching if you 
 			use many different materials; try to keep the number down.
 	@par
-		The bounding box information is computed whith object position only. 
+		The bounding box information is computed with object position only. 
 		It doesn't take account of the object orientation. 
 	@par
 		The LOD settings of both the Mesh and the Materials used in 
@@ -90,7 +90,7 @@ namespace Ogre {
 		There are 2 ways you can add geometry to this class; you can add
 		Entity objects directly with predetermined positions, scales and 
 		orientations, or you can add an entire SceneNode and it's subtree, 
-		including all the objects attached to it. Once you've added everthing
+		including all the objects attached to it. Once you've added everything
 		you need to, you have to call build() the fix the geometry in place. 
 	@par
 		You should not construct instances of this class directly; instead, call 
@@ -216,10 +216,17 @@ namespace Ogre {
 					}
 				}
 			}
+
+			void _initGeometryBucket(const VertexData* vData, const IndexData* iData);
+			void _initGeometryBucket(GeometryBucket* bucket);
+
 		public:
 			GeometryBucket(MaterialBucket* parent, const String& formatString, 
 				const VertexData* vData, const IndexData* iData);
+			GeometryBucket(const String& name, MaterialBucket* parent, const String& formatString, 
+				const VertexData* vData, const IndexData* iData);
 			GeometryBucket(MaterialBucket* parent,const String& formatString,GeometryBucket*bucket);
+			GeometryBucket(const String& name, MaterialBucket* parent,const String& formatString,GeometryBucket*bucket);
 			virtual ~GeometryBucket();
 			MaterialBucket* getParent(void) { return mParent; }
 			Real getBoundingRadius(void) const;
@@ -237,14 +244,14 @@ namespace Ogre {
 			bool getCastsShadows(void) const;
 			String getFormatString(void) const;
 			/** Try to assign geometry to this bucket.
-			@returns false if there is no room left in this bucket
+			@return false if there is no room left in this bucket
 			*/
 			bool assign(QueuedGeometry* qsm);
 			/// Build
 			void build();
 			/// Dump contents for diagnostics
 			void dump(std::ofstream& of) const;
-			/// retun the BoundingBox information. Usefull when cloning the batch instance.
+			/// Return the BoundingBox information. Useful when cloning the batch instance.
 			AxisAlignedBox & getAABB(void){return mAABB;}
 			/// @copydoc MovableObject::visitRenderables
 			void visitRenderables(Renderable::Visitor* visitor, bool debugRenderables);

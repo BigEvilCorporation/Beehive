@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -307,7 +307,8 @@ namespace Ogre {
             under control should they be affected by complex parameters which alter their emission rates
             etc. If a particle system reaches it's particle quota, none of the emitters will be able to 
             emit any more particles. As existing particles die, the spare capacity will be allocated
-            equally across all emitters to be as consistent to the origina particle system style as possible.
+            equally across all emitters to be as consistent to the original particle system style as possible.
+            The quota can be increased but not decreased after the system has been created.
         @param quota The maximum number of particles this system is allowed to have.
         */
         void setParticleQuota(size_t quota);
@@ -355,7 +356,7 @@ namespace Ogre {
         virtual void setMaterialName( const String& name, const String& groupName = ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME );
 
         /** Sets the name of the material to be used for this billboard set.
-            @returns The name of the material that is used for this set.
+            @return The name of the material that is used for this set.
         */
         virtual const String& getMaterialName(void) const;
 
@@ -547,6 +548,8 @@ namespace Ogre {
 
 		/** @copydoc MovableObject::setRenderQueueGroup */
 		void setRenderQueueGroup(uint8 queueID);
+		/** @copydoc MovableObject::setRenderQueueGroupAndPriority */
+		void setRenderQueueGroupAndPriority(uint8 queueID, ushort priority);
 
 		/** Set whether or not particles are sorted according to the camera.
 		@remarks
@@ -670,7 +673,7 @@ namespace Ogre {
         /// Have we set the material etc on the renderer?
         bool mIsRendererConfigured;
         /// Pointer to the material to use
-        MaterialPtr mpMaterial;
+        MaterialPtr mMaterial;
         /// Default width of each particle
         Real mDefaultWidth;
         /// Default height of each particle

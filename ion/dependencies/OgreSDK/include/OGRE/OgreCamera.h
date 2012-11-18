@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -175,6 +175,11 @@ namespace Ogre {
 		bool mUseRenderingDistance;
         /// Camera to use for LOD calculation
         const Camera* mLodCamera;
+		
+		/// Whether or not the minimum display size of objects should take effect for this camera
+		bool mUseMinPixelSize;
+		/// @see Camera::getPixelDisplayRatio
+		Real mPixelDisplayRatio;
 
 		typedef vector<Listener*>::type ListenerList;
 		ListenerList mListeners;
@@ -402,6 +407,9 @@ namespace Ogre {
             rotation inherited from a node attachment. */
         Vector3 getRealRight(void) const;
 
+        /** Overridden from Frustum/Renderable */
+        void getWorldTransforms(Matrix4* mat) const;
+
         /** Overridden from MovableObject */
         const String& getMovableType(void) const;
 
@@ -424,7 +432,7 @@ namespace Ogre {
         @param offset If supplied, the camera targets this point in local space of the target node
             instead of the origin of the target node. Good for fine tuning the look at point.
         */
-        void setAutoTracking(bool enabled, SceneNode* target = 0, 
+        void setAutoTracking(bool enabled, SceneNode* const target = 0, 
             const Vector3& offset = Vector3::ZERO);
 
 
@@ -640,6 +648,30 @@ namespace Ogre {
 		const Vector3& getPositionForViewUpdate(void) const;
 		/** Get the derived orientation of this frustum. */
 		const Quaternion& getOrientationForViewUpdate(void) const;
+
+		/** @brief 
+				Sets whether to use min display size calculations 
+			When active objects who's size on the screen is less then a given number will not
+			be rendered.
+		*/
+		void setUseMinPixelSize(bool enable) { mUseMinPixelSize = enable; }
+		/** Returns whether to use min display size calculations 
+			@see Camera::setUseMinDisplaySize
+		*/
+		bool getUseMinPixelSize() const { return mUseMinPixelSize; }
+
+		/** Returns an estimated ratio between a pixel and the display area it represents.
+			For orthographic cameras this function returns the amount of meters covered by
+			a single pixel along the vertical axis. For perspective cameras the value
+			returned is the amount of meters covered by a single pixel per meter distance 
+			from the camera.
+		@note
+			This parameter is calculated just before the camera is rendered
+		@note
+			This parameter is used in min display size calculations.
+		*/
+		Real getPixelDisplayRatio() const { return mPixelDisplayRatio; }
+		
      };
 	 /** @} */
 	 /** @} */

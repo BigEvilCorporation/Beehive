@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -80,10 +80,22 @@ namespace Ogre {
 	protected:		
 		/** See HardwareBuffer. */
 		void* lockImpl(size_t offset, size_t length, LockOptions options);		
+		
 		/** See HardwareBuffer. */
 		void unlockImpl(void);			
+		
+		/** Update the given buffer content.*/
+		void updateBufferContent(BufferResources* bufferResources);
+
 		// updates buffer resources from system memory buffer.
 		bool updateBufferResources(const char* systemMemoryBuffer, BufferResources* bufferResources);		
+
+		/** Internal buffer lock method. */
+		char* _lockBuffer(BufferResources* bufferResources, size_t offset, size_t length);
+
+		/** Internal buffer unlock method. */
+		void _unlockBuffer(BufferResources* bufferResources);
+
 
 	protected:
 		typedef map<IDirect3DDevice9*, BufferResources*>::type	DeviceToBufferResourcesMap;
@@ -91,9 +103,10 @@ namespace Ogre {
 
 		DeviceToBufferResourcesMap	mMapDeviceToBufferResources;	// Map between device to buffer resources.
 		D3DVERTEXBUFFER_DESC		mBufferDesc;					// Buffer description.		
-		char*						mSystemMemoryBuffer;			// Consistent system memory buffer for multiple devices support.
+		BufferResources*			mSourceBuffer;					// Source buffer resources when working with multiple devices.
+		char*						mSourceLockedBytes;				// Source buffer locked bytes.
+		char*						mSystemMemoryBuffer;			// Consistent system memory buffer for multiple devices support in case of write only buffers.
     };
-
 }
 #endif
 

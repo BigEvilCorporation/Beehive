@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -130,29 +130,43 @@ namespace Ogre
 			memcpy(m,rkMatrix.m,9*sizeof(Real));
 			return *this;
 		}
+
+        /** Tests 2 matrices for equality.
+         */
         bool operator== (const Matrix3& rkMatrix) const;
+
+        /** Tests 2 matrices for inequality.
+         */
         inline bool operator!= (const Matrix3& rkMatrix) const
 		{
 			return !operator==(rkMatrix);
 		}
 
         // arithmetic operations
+        /** Matrix addition.
+         */
         Matrix3 operator+ (const Matrix3& rkMatrix) const;
+
+        /** Matrix subtraction.
+         */
         Matrix3 operator- (const Matrix3& rkMatrix) const;
+
+        /** Matrix concatenation using '*'.
+         */
         Matrix3 operator* (const Matrix3& rkMatrix) const;
         Matrix3 operator- () const;
 
-        // matrix * vector [3x3 * 3x1 = 3x1]
+        /// Matrix * vector [3x3 * 3x1 = 3x1]
         Vector3 operator* (const Vector3& rkVector) const;
 
-        // vector * matrix [1x3 * 3x3 = 1x3]
+        /// Vector * matrix [1x3 * 3x3 = 1x3]
         _OgreExport friend Vector3 operator* (const Vector3& rkVector,
             const Matrix3& rkMatrix);
 
-        // matrix * scalar
+        /// Matrix * scalar
         Matrix3 operator* (Real fScalar) const;
 
-        // scalar * matrix
+        /// Scalar * matrix
         _OgreExport friend Matrix3 operator* (Real fScalar, const Matrix3& rkMatrix);
 
         // utilities
@@ -167,23 +181,23 @@ namespace Ogre
         void SingularValueComposition (const Matrix3& rkL,
             const Vector3& rkS, const Matrix3& rkR);
 
-        // Gram-Schmidt orthonormalization (applied to columns of rotation matrix)
+        /// Gram-Schmidt orthonormalization (applied to columns of rotation matrix)
         void Orthonormalize ();
 
-        // orthogonal Q, diagonal D, upper triangular U stored as (u01,u02,u12)
+        /// Orthogonal Q, diagonal D, upper triangular U stored as (u01,u02,u12)
         void QDUDecomposition (Matrix3& rkQ, Vector3& rkD,
             Vector3& rkU) const;
 
         Real SpectralNorm () const;
 
         // matrix must be orthonormal
-        void ToAxisAngle (Vector3& rkAxis, Radian& rfAngle) const;
-		inline void ToAxisAngle (Vector3& rkAxis, Degree& rfAngle) const {
+        void ToAngleAxis (Vector3& rkAxis, Radian& rfAngle) const;
+		inline void ToAngleAxis (Vector3& rkAxis, Degree& rfAngle) const {
 			Radian r;
-			ToAxisAngle ( rkAxis, r );
+			ToAngleAxis ( rkAxis, r );
 			rfAngle = r;
 		}
-        void FromAxisAngle (const Vector3& rkAxis, const Radian& fRadians);
+        void FromAngleAxis (const Vector3& rkAxis, const Radian& fRadians);
 
         // The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
         // where yaw is rotation about the Up vector, pitch is rotation about the
@@ -206,7 +220,7 @@ namespace Ogre
         void FromEulerAnglesYZX (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
         void FromEulerAnglesZXY (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
         void FromEulerAnglesZYX (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
-        // eigensolver, matrix must be symmetric
+        /// Eigensolver, matrix must be symmetric
         void EigenSolveSymmetric (Real afEigenvalue[3],
             Vector3 akEigenvector[3]) const;
 
@@ -251,8 +265,8 @@ namespace Ogre
         bool QLAlgorithm (Real afDiag[3], Real afSubDiag[3]);
 
         // support for singular value decomposition
-        static const Real ms_fSvdEpsilon;
-        static const unsigned int ms_iSvdMaxIterations;
+        static const Real msSvdEpsilon;
+        static const unsigned int msSvdMaxIterations;
         static void Bidiagonalize (Matrix3& kA, Matrix3& kL,
             Matrix3& kR);
         static void GolubKahanStep (Matrix3& kA, Matrix3& kL,

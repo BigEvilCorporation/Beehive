@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,6 @@ THE SOFTWARE.
 #include "OgreMaterial.h"
 #include "OgreRenderOperation.h"
 #include "OgreVertexBoneAssignment.h"
-#include "OgreProgressiveMesh.h"
 #include "OgreAnimationTrack.h"
 #include "OgreResourceGroupManager.h"
 
@@ -110,7 +109,8 @@ namespace Ogre {
         typedef vector<unsigned short>::type IndexMap;
         IndexMap blendIndexToBoneIndexMap;
 
-        ProgressiveMesh::LODFaceList mLodFaceList;
+		typedef vector<IndexData*>::type LODFaceList;
+		LODFaceList mLodFaceList;
 
         /** A list of extreme points on the submesh (optional).
             @remarks
@@ -238,6 +238,10 @@ namespace Ogre {
 		/** Get the type of any vertex animation used by dedicated geometry.
 		*/
 		VertexAnimationType getVertexAnimationType(void) const;
+		
+		/// Returns whether animation on dedicated vertex data includes normals
+		bool getVertexAnimationIncludesNormals() const { return mVertexAnimationIncludesNormals; }
+
 
         /** Generate the submesh extremes (@see extremityPoints).
         @param count
@@ -268,6 +272,9 @@ namespace Ogre {
 
 		/// Type of vertex animation for dedicated vertex data (populated by Mesh)
 		mutable VertexAnimationType mVertexAnimationType;
+
+		/// Whether normals are included in vertex animation keyframes
+		mutable bool mVertexAnimationIncludesNormals;
 
 		/// Is Build Edges Enabled
 		bool mBuildEdgesEnabled;

@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ namespace Ogre {
     @par
         This same approach is used for ParticleAffectors (which modify existing particles per frame).
         This means that OGRE is particularly flexible when it comes to creating particle system effects,
-        with literally infinite combinations of emitter and affector types, and paramters within those
+        with literally infinite combinations of emitter and affector types, and parameters within those
         types.
     */
     class _OgreExport ParticleEmitter : public StringInterface, public Particle
@@ -78,6 +78,7 @@ namespace Ogre {
         static EmitterCommands::CmdColourRangeStart msColourRangeStartCmd;
         static EmitterCommands::CmdColourRangeEnd msColourRangeEndCmd;
         static EmitterCommands::CmdDirection msDirectionCmd;
+        static EmitterCommands::CmdUp msUpCmd;
         static EmitterCommands::CmdEmissionRate msEmissionRateCmd;
         static EmitterCommands::CmdMaxTTL msMaxTTLCmd;
         static EmitterCommands::CmdMaxVelocity msMaxVelocityCmd;
@@ -106,7 +107,7 @@ namespace Ogre {
         String mType;
         /// Base direction of the emitter, may not be used by some emitters
         Vector3 mDirection;
-        // Notional up vector, just used to speed up generation of variant directions
+        // Notional up vector, used to speed up generation of variant directions, and also to orient some emitters.
         Vector3 mUp;
         /// Angle around direction which particles may be emitted, internally radians but angleunits for interface
         Radian mAngle;
@@ -151,7 +152,7 @@ namespace Ogre {
         String mEmittedEmitter;
 
 		// If 'true', this emitter is emitted by another emitter.
-		// NB. That doesn´t imply that the emitter itself emits other emitters (that could or could not be the case)
+		// NB. That doesn't imply that the emitter itself emits other emitters (that could or could not be the case)
 		bool mEmitted;
 
 		// NB Method below here are to help out people implementing emitters by providing the
@@ -208,6 +209,8 @@ namespace Ogre {
             emit in all directions will ignore this parameter). They may not emit exactly along this
             vector for every particle, many will introduce a random scatter around this vector using 
             the angle property.
+        @note 
+			This resets the up vector.
         @param direction
             The base direction for particles emitted.
         */
@@ -215,6 +218,19 @@ namespace Ogre {
 
         /** Returns the base direction of the emitter. */
         virtual const Vector3& getDirection(void) const;
+
+        /** Sets the notional up vector of the emitter
+        @remarks
+			Many emitters emit particles from within a region, and for some that region is not
+			circularly symmetric about the emitter direction. The up vector allows such emitters
+			to be orientated about the direction vector.
+        @param up
+            The base direction for particles emitted. It must be perpendicular to the direction vector.
+        */
+        virtual void setUp(const Vector3& up);
+
+        /** Returns the up vector of the emitter. */
+        virtual const Vector3& getUp(void) const;
 
         /** Sets the maximum angle away from the emitter direction which particle will be emitted.
         @remarks

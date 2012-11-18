@@ -46,6 +46,13 @@ namespace ion
 				TransparentColour
 			};
 
+			enum LightingMode
+			{
+				Flat,
+				Gouraud,
+				Phong
+			};
+
 			//Blend mode
 			void SetBlendMode(BlendMode blendMode);
 			BlendMode GetBlendMode() const;
@@ -73,6 +80,15 @@ namespace ion
 			const Texture* GetOpacityMap() const;
 
 			int GetNumDiffuseMaps() const;
+
+			//Lighting and shadows
+			void SetLightingEnabled(bool lighting);
+			void SetLightingMode(LightingMode mode);
+			void SetReceiveShadows(bool shadows);
+
+			bool GetLightingEnabled() const;
+			LightingMode GetLightingMode() const;
+			bool GetReceiveShadows() const;
 
 			#if !defined ION_PLUGIN
 			const std::string& GetOgreMaterialName() { return mOgreMaterialName; }
@@ -114,6 +130,10 @@ namespace ion
 			Texture* mNormalMap;
 			Texture* mSpecularMap;
 			Texture* mOpacityMap;
+
+			bool mLightingEnabled;
+			bool mReceiveShadows;
+			LightingMode mLightingMode;
 
 			BlendMode mBlendMode;
 

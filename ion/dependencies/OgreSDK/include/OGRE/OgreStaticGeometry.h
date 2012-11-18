@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -95,7 +95,7 @@ namespace Ogre {
 		There are 2 ways you can add geometry to this class; you can add
 		Entity objects directly with predetermined positions, scales and 
 		orientations, or you can add an entire SceneNode and it's subtree, 
-		including all the objects attached to it. Once you've added everthing
+		including all the objects attached to it. Once you've added everything
 		you need to, you have to call build() the fix the geometry in place. 
 	@note
 		This class is not a replacement for world geometry (@see 
@@ -241,7 +241,7 @@ namespace Ogre {
 			bool getCastsShadows(void) const;
 			
 			/** Try to assign geometry to this bucket.
-			@returns false if there is no room left in this bucket
+			@return false if there is no room left in this bucket
 			*/
 			bool assign(QueuedGeometry* qsm);
 			/// Build
@@ -329,6 +329,8 @@ namespace Ogre {
 				void getWorldTransforms(Matrix4* xform) const;
 				HardwareVertexBufferSharedPtr getPositionBuffer(void) { return mPositionBuffer; }
 				HardwareVertexBufferSharedPtr getWBuffer(void) { return mWBuffer; }
+				/// Overridden from ShadowRenderable
+				virtual void rebindIndexBuffer(const HardwareIndexBufferSharedPtr& indexBuffer);
 
 			};
 			/// Pointer to parent region

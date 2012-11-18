@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ namespace Ogre {
 	*  @{
 	*/
 	/** Manages Overlay objects, parsing them from .overlay files and
-        storing a lookup library of them. Alo manages the creation of 
+        storing a lookup library of them. Also manages the creation of 
 		OverlayContainers and OverlayElements, used for non-interactive 2D 
 		elements such as HUDs.
     */
@@ -111,7 +111,7 @@ namespace Ogre {
         /** Create a new Overlay. */
         Overlay* create(const String& name);
         /** Retrieve an Overlay by name 
-        @returns A pointer to the Overlay, or 0 if not found
+        @return A pointer to the Overlay, or 0 if not found
         */
         Overlay* getByName(const String& name);
         /** Destroys an existing overlay by name */

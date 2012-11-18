@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,7 @@ namespace Ogre {
             archive, for file naming
         */
         void findFiles(const String& pattern, bool recursive, bool dirs,
-            StringVector* simpleList, FileInfoList* detailList);
+            StringVector* simpleList, FileInfoList* detailList) const;
 
 		OGRE_AUTO_MUTEX
     public:
@@ -94,7 +94,7 @@ namespace Ogre {
 
         /// @copydoc Archive::findFileInfo
         FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-            bool dirs = false);
+            bool dirs = false) const;
 
         /// @copydoc Archive::exists
         bool exists(const String& filename);
@@ -107,16 +107,16 @@ namespace Ogre {
 		/// resource locations. The default is true (ignore hidden files).
 		static void setIgnoreHidden(bool ignore)
 		{
-			ms_IgnoreHidden = ignore;
+			msIgnoreHidden = ignore;
 		}
 
 		/// Get whether hidden files are ignored during filesystem enumeration.
 		static bool getIgnoreHidden()
 		{
-			return ms_IgnoreHidden;
+			return msIgnoreHidden;
 		}
 
-		static bool ms_IgnoreHidden;
+		static bool msIgnoreHidden;
     };
 
     /** Specialisation of ArchiveFactory for FileSystem files. */

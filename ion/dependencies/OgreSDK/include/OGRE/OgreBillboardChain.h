@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -87,10 +87,11 @@ namespace Ogre {
 
 			Element();
 
-			Element(Vector3 position,
+			Element(const Vector3 &position,
 				Real width,
 				Real texCoord,
-				ColourValue colour);
+				const ColourValue &colour,
+				const Quaternion &orientation);
 
 			Vector3 position;
 			Real width;
@@ -98,6 +99,8 @@ namespace Ogre {
 			Real texCoord;
 			ColourValue colour;
 
+			//Only used when mFaceCamera == false
+			Quaternion orientation;
 		};
 		typedef vector<Element>::type ElementList;
 
@@ -231,6 +234,24 @@ namespace Ogre {
 		/** Remove all elements from all chains (but leave the chains themselves intact). */
 		virtual void clearAllChains(void);
 
+		/** Sets whether the billboard should always be facing the camera or a custom direction
+			set by each point element.
+		@remarks
+			Billboards facing the camera are useful for smoke trails, light beams, etc by
+			simulating a cylinder. However, because of this property, wide trails can cause
+			several artefacts unless the head is properly covered.
+			Therefore, non-camera-facing billboards are much more convenient for leaving big
+			trails of movement from thin objects, for example a sword swing as seen in many
+			fighting games.
+		@param faceCamera True to be always facing the camera (Default value: True)
+		@param normalVector Only used when faceCamera == false. Must be a non-zero vector.
+		This vector is the "point of reference" for each point orientation. For example,
+		if normalVector is Vector3::UNIT_Z, and the point's orientation is an identity
+		matrix, the segment corresponding to that point will be facing towards UNIT_Z
+		This vector is internally normalized.
+		*/
+		void setFaceCamera( bool faceCamera, const Vector3 &normalVector=Vector3::UNIT_X );
+
 		/// Get the material name in use
 		virtual const String& getMaterialName(void) const { return mMaterialName; }
 		/// Set the material name to use for rendering
@@ -238,7 +259,6 @@ namespace Ogre {
 
 
 		// Overridden members follow
-		void _notifyCurrentCamera(Camera* cam);
 		Real getSquaredViewDepth(const Camera* cam) const;
 		Real getBoundingRadius(void) const;
 		const AxisAlignedBox& getBoundingBox(void) const;
@@ -246,6 +266,7 @@ namespace Ogre {
 		const String& getMovableType(void) const;
 		void _updateRenderQueue(RenderQueue *);
 		void getRenderOperation(RenderOperation &);
+		virtual bool preRender(SceneManager* sm, RenderSystem* rsys);
 		void getWorldTransforms(Matrix4 *) const;
 		const LightList& getLights(void) const;
 		/// @copydoc MovableObject::visitRenderables
@@ -278,6 +299,8 @@ namespace Ogre {
 		mutable bool mBoundsDirty;
 		/// Is the index buffer dirty?
 		bool mIndexContentDirty;
+        /// Is the vertex buffer dirty?
+        bool mVertexContentDirty;
 		/// AABB
 		mutable AxisAlignedBox mAABB;
 		/// Bounding radius
@@ -289,6 +312,14 @@ namespace Ogre {
 		TexCoordDirection mTexCoordDir;
 		/// Other texture coord range
 		Real mOtherTexCoordRange[2];
+        /// Camera last used to build the vertex buffer
+        Camera *mVertexCameraUsed;
+		/// When true, the billboards always face the camera
+		bool mFaceCamera;
+		/// Used when mFaceCamera == false; determines the billboard's "normal". i.e.
+		/// when the orientation is identity, the billboard is perpendicular to this
+		/// vector
+		Vector3 mNormalBase;
 
 
 		/// The list holding the chain elements

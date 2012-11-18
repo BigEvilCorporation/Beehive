@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -50,9 +50,17 @@ namespace Ogre
 	*/
 	class _OgreD3D9Export D3D9RenderSystem : public RenderSystem
 	{
+	public:
+		enum MultiheadUseType
+		{
+			mutAuto,
+			mutYes,
+			mutNo
+		};
+		
 	private:
 		/// Direct3D
-		IDirect3D9*	 mpD3D;		
+		IDirect3D9*	 mD3D;		
 		// Stored options
 		ConfigOptionMap mOptions;
 		size_t mFSAASamples;
@@ -138,6 +146,7 @@ namespace Ogre
         void convertVertexShaderCaps(RenderSystemCapabilities* rsc) const;
         void convertPixelShaderCaps(RenderSystemCapabilities* rsc) const;
 		bool checkVertexTextureFormats(D3D9RenderWindow* renderWindow) const;
+		void detachRenderTargetImpl(const String& name);
 		
         HashMap<IDirect3DDevice9*, unsigned short> mCurrentLights;
         /// Saved last view matrix
@@ -154,30 +163,7 @@ namespace Ogre
 		typedef HashMap<unsigned int, D3DFORMAT> DepthStencilHash;
 		DepthStencilHash mDepthStencilHash;
 
-		/** Mapping of depthstencil format -> depthstencil buffer
-			Keep one depthstencil buffer around for every format that is used, it must be large
-			enough to hold the largest rendering target.
-			This is used as cache by _getDepthStencilFor.
-		*/
-		struct ZBufferIdentifier
-		{
-			IDirect3DDevice9* device;
-			D3DFORMAT format;
-			D3DMULTISAMPLE_TYPE multisampleType;
-		};
-		struct ZBufferRef
-		{
-			IDirect3DSurface9 *surface;
-			size_t width, height;
-		};
-		struct ZBufferIdentifierComparator
-		{
-			bool operator()(const ZBufferIdentifier& z0, const ZBufferIdentifier& z1) const;
-		};
-		
-		typedef deque<ZBufferRef>::type ZBufferRefQueue;
-		typedef map<ZBufferIdentifier, ZBufferRefQueue, ZBufferIdentifierComparator>::type ZBufferHash;
-		ZBufferHash mZBufferHash;		
+		MultiheadUseType mMultiheadUse;
 
 	protected:
 		void setClipPlanesImpl(const PlaneList& clipPlanes);		
@@ -201,6 +187,37 @@ namespace Ogre
 		bool _createRenderWindows(const RenderWindowDescriptionList& renderWindowDescriptions, 
 			RenderWindowList& createdWindows);
 
+		/// @copydoc RenderSystem::_createDepthBufferFor
+		DepthBuffer* _createDepthBufferFor( RenderTarget *renderTarget );
+
+		/**
+		 * This function is meant to add Depth Buffers to the pool that aren't released when the DepthBuffer
+		 * is deleted. This is specially useful to put the Depth Buffer created along with the window's
+		 * back buffer into the pool. All depth buffers introduced with this method go to POOL_DEFAULT
+		 */
+		DepthBuffer* _addManualDepthBuffer( IDirect3DDevice9* depthSurfaceDevice, IDirect3DSurface9 *surf );
+
+		/**
+		 * This function does NOT override RenderSystem::_cleanupDepthBuffers(bool) functionality.
+		 * On multi monitor setups, when a device becomes "inactive" (it has no RenderWindows; like
+		 * when the window was moved from one monitor to another); the Device will be destroyed,
+		 * meaning all it's depth buffers (auto & manual) should be removed from the pool,
+		 * but only selectively removing those created by that D3D9Device.
+		 * @param:
+		 *		Creator device to compare against. Shouldn't be null
+		 */
+		using RenderSystem::_cleanupDepthBuffers;
+		void _cleanupDepthBuffers( IDirect3DDevice9 *creator );
+
+		/**
+		 * This function does NOT override RenderSystem::_cleanupDepthBuffers(bool) functionality.
+		 * Manually created surfaces may be released arbitrarely without being pulled out from the pool
+		 * (specially RenderWindows) this function takes care of that.
+		 * @param:
+		 *		Depthbuffer surrface to compare against. Shouldn't be null
+		 */
+		void _cleanupDepthBuffers( IDirect3DSurface9 *manualSurface );
+
 		/**
          * Set current render target to target, enabling its GL context if needed
          */
@@ -208,6 +225,9 @@ namespace Ogre
 		
 		/// @copydoc RenderSystem::createMultiRenderTarget
 		virtual MultiRenderTarget * createMultiRenderTarget(const String & name);
+
+		/// @copydoc RenderSystem::detachRenderTarget
+		virtual RenderTarget * detachRenderTarget(const String &name);
 
 		String getErrorDescription( long errorNumber ) const;
 		const String& getName() const;
@@ -279,7 +299,9 @@ namespace Ogre
         void _setTextureUnitFiltering(size_t unit, FilterType ftype, FilterOptions filter);
 		void _setTextureLayerAnisotropy(size_t unit, unsigned int maxAnisotropy);
 		void setVertexDeclaration(VertexDeclaration* decl);
+		void setVertexDeclaration(VertexDeclaration* decl, bool useGlobalInstancingVertexBufferIsAvailable);
 		void setVertexBufferBinding(VertexBufferBinding* binding);
+		void setVertexBufferBinding(VertexBufferBinding* binding, size_t numberOfInstances, bool useGlobalInstancingVertexBufferIsAvailable, bool indexesUsed);
         void _render(const RenderOperation& op);
         /** See
           RenderSystem
@@ -318,26 +340,11 @@ namespace Ogre
 		static UINT	getResourceCreationDeviceCount();
 		static IDirect3DDevice9* getResourceCreationDevice(UINT index);
 		static IDirect3DDevice9* getActiveD3D9Device();
-		
-		/**
-			Get the matching Z-Buffer identifier for a certain render target
-		*/
-		ZBufferIdentifier getZBufferIdentifier(RenderTarget* rt);
 
 		/** Check which depthStencil formats can be used with a certain pixel format,
 			and return the best suited.
 		*/
 		D3DFORMAT _getDepthStencilFormatFor(D3DFORMAT fmt);
-
-		/** Get a depth stencil surface that is compatible with an internal pixel format and
-			multisample type.
-			@returns A directx surface, or 0 if there is no compatible depthstencil possible.
-		*/
-		IDirect3DSurface9* _getDepthStencilFor(D3DFORMAT fmt, D3DMULTISAMPLE_TYPE multisample, DWORD multisample_quality, size_t width, size_t height);
-
-		/** Clear all cached depth stencil surfaces
-		*/
-		void _cleanupDepthStencils(IDirect3DDevice9* d3d9Device);
 
         /** Check whether or not filtering is supported for the precise texture format requested
         with the given usage options.
@@ -350,16 +357,30 @@ namespace Ogre
 
 		/// @copydoc RenderSystem::getDisplayMonitorCount
 		unsigned int getDisplayMonitorCount() const;
+
+		/// @copydoc RenderSystem::beginProfileEvent
+        virtual void beginProfileEvent( const String &eventName );
+
+		/// @copydoc RenderSystem::endProfileEvent
+        virtual void endProfileEvent( void );
+
+		/// @copydoc RenderSystem::markProfileEvent
+        virtual void markProfileEvent( const String &eventName );
 		
+		/// fires a device releated event
+		void fireDeviceEvent( D3D9Device* device, const String & name );
+
+		/// Returns how multihead should be activated
+		MultiheadUseType getMultiheadUse() const { return mMultiheadUse; }
 	protected:	
+		///returns the sampler id for a given unit texture number
+		DWORD getSamplerId(size_t unit);
+
 		/// Notify when a device has been lost.
 		void notifyOnDeviceLost(D3D9Device* device);
 
 		/// Notify when a device has been reset.
 		void notifyOnDeviceReset(D3D9Device* device);
-		
-		typedef map<RenderTarget*, ZBufferRef>::type TargetDepthStencilMap;
-		TargetDepthStencilMap mCheckedOutTextures;
 
 	private:
 		friend class D3D9Device;

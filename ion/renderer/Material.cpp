@@ -47,10 +47,16 @@ namespace ion
 			std::stringstream name;
 			name << "Material_" << sMaterialIndex++;
 			mOgreMaterialName = name.str();
-			mOgreMaterial = Ogre::MaterialManager::getSingleton().create(mOgreMaterialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+			mOgreMaterial = Ogre::MaterialManager::getSingleton().create(mOgreMaterialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+			mOgreMaterial->load();
 			mOgreTechnique = mOgreMaterial->getTechnique(0);
 			mOgrePass = mOgreTechnique->getPass(0);
 			#endif
+
+			//Set default lighting and shadows
+			SetLightingEnabled(true);
+			SetLightingMode(Phong);
+			SetReceiveShadows(true);
 		}
 
 		Material::~Material()
@@ -272,7 +278,7 @@ namespace ion
 		void Material::SetAmbientColour(const Colour& ambient)
 		{
 			#if !defined ION_PLUGIN
-			mOgreMaterial->getTechnique(0)->getPass(0)->setAmbient(ambient.r, ambient.g, ambient.b);
+			mOgrePass->setAmbient(ambient.r, ambient.g, ambient.b);
 			#endif
 
 			mAmbientColour = ambient;
@@ -281,7 +287,7 @@ namespace ion
 		void Material::SetDiffuseColour(const Colour& diffuse)
 		{
 			#if !defined ION_PLUGIN
-			mOgreMaterial->getTechnique(0)->getPass(0)->setDiffuse(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+			mOgrePass->setDiffuse(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
 			#endif
 
 			mDiffuseColour = diffuse;
@@ -290,8 +296,8 @@ namespace ion
 		void Material::SetSpecularColour(const Colour& specular)
 		{
 			#if !defined ION_PLUGIN
-			mOgreMaterial->getTechnique(0)->getPass(0)->setSpecular(specular.r, specular.g, specular.b, 1.0f);
-			mOgreMaterial->getTechnique(0)->getPass(0)->setShininess(specular.a);
+			mOgrePass->setSpecular(specular.r, specular.g, specular.b, 1.0f);
+			mOgrePass->setShininess(specular.a);
 			#endif
 
 			mSpecularColour = specular;
@@ -300,7 +306,7 @@ namespace ion
 		void Material::SetEmissiveColour(const Colour& emissive)
 		{
 			#if !defined ION_PLUGIN
-			mOgreMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(emissive.r, emissive.g, emissive.b);
+			mOgrePass->setSelfIllumination(emissive.r, emissive.g, emissive.b);
 			#endif
 
 			mEmissiveColour = emissive;
@@ -332,6 +338,8 @@ namespace ion
 
 			#if !defined ION_PLUGIN
 			Ogre::TextureUnitState* textureState = mOgrePass->createTextureUnitState(diffuse->GetOgreTextureName());
+			textureState->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
+			textureState->setTextureAnisotropy(8);
 			#endif
 		}
 
@@ -378,6 +386,63 @@ namespace ion
 		int Material::GetNumDiffuseMaps() const
 		{
 			return mDiffuseMaps.size();
+		}
+
+		void Material::SetLightingEnabled(bool lighting)
+		{
+			#if !defined ION_PLUGIN
+			mOgreMaterial->setLightingEnabled(lighting);
+			#endif
+
+			mLightingEnabled = lighting;
+		}
+
+		bool Material::GetLightingEnabled() const
+		{
+			return mLightingEnabled;
+		}
+
+		void Material::SetLightingMode(LightingMode mode)
+		{
+			#if !defined ION_PLUGIN
+			Ogre::ShadeOptions ogreShadeMode = Ogre::SO_FLAT ;
+
+			switch(mode)
+			{
+			case Flat:
+				ogreShadeMode = Ogre::SO_FLAT;
+				break;
+			case Gouraud:
+				ogreShadeMode = Ogre::SO_GOURAUD;
+				break;
+			case Phong:
+				ogreShadeMode = Ogre::SO_PHONG;
+				break;
+			};
+
+			mOgreMaterial->setShadingMode(ogreShadeMode);
+			#endif
+
+			mLightingMode = mode;
+		}
+
+		Material::LightingMode Material::GetLightingMode() const
+		{
+			return mLightingMode;
+		}
+
+		void Material::SetReceiveShadows(bool shadows)
+		{
+			#if !defined ION_PLUGIN
+			mOgreMaterial->setReceiveShadows(shadows);
+			#endif
+
+			mReceiveShadows = shadows;
+		}
+
+		bool Material::GetReceiveShadows() const
+		{
+			return mReceiveShadows;
 		}
 	}
 }

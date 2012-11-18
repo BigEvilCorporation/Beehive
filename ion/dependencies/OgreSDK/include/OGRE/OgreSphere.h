@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -95,6 +95,43 @@ namespace Ogre {
 		bool intersects(const Vector3& v) const
 		{
             return ((v - mCenter).squaredLength() <= Math::Sqr(mRadius));
+		}
+		/** Merges another Sphere into the current sphere */
+		void merge(const Sphere& oth)
+		{
+			Vector3 diff =  oth.getCenter() - mCenter;
+			Real lengthSq = diff.squaredLength();
+			Real radiusDiff = oth.getRadius() - mRadius;
+			
+			// Early-out
+			if (Math::Sqr(radiusDiff) >= lengthSq) 
+			{
+				// One fully contains the other
+				if (radiusDiff <= 0.0f) 
+					return; // no change
+				else 
+				{
+					mCenter = oth.getCenter();
+					mRadius = oth.getRadius();
+					return;
+				}
+			}
+			
+			Real length = Math::Sqrt(lengthSq);
+			
+			Vector3 newCenter;
+			Real newRadius;
+			if ((length + oth.getRadius()) > mRadius) 
+			{
+				Real t = (length + radiusDiff) / (2.0f * length);
+				newCenter = mCenter + diff * t;
+			} 
+			// otherwise, we keep our existing center
+			
+			newRadius = 0.5f * (length + mRadius + oth.getRadius());
+			
+			mCenter = newCenter;
+			mRadius = newRadius;
 		}
         
 

@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -61,23 +61,24 @@ namespace Ogre {
 		GCT_SAMPLERCUBE = 8,
 		GCT_SAMPLER1DSHADOW = 9,
 		GCT_SAMPLER2DSHADOW = 10,
-		GCT_MATRIX_2X2 = 11,
-		GCT_MATRIX_2X3 = 12,
-		GCT_MATRIX_2X4 = 13,
-		GCT_MATRIX_3X2 = 14,
-		GCT_MATRIX_3X3 = 15,
-		GCT_MATRIX_3X4 = 16,
-		GCT_MATRIX_4X2 = 17,
-		GCT_MATRIX_4X3 = 18,
-		GCT_MATRIX_4X4 = 19,
-		GCT_INT1 = 20,
-		GCT_INT2 = 21,
-		GCT_INT3 = 22,
-		GCT_INT4 = 23,
+		GCT_SAMPLER2DARRAY = 11,
+		GCT_MATRIX_2X2 = 12,
+		GCT_MATRIX_2X3 = 13,
+		GCT_MATRIX_2X4 = 14,
+		GCT_MATRIX_3X2 = 15,
+		GCT_MATRIX_3X3 = 16,
+		GCT_MATRIX_3X4 = 17,
+		GCT_MATRIX_4X2 = 18,
+		GCT_MATRIX_4X3 = 19,
+		GCT_MATRIX_4X4 = 20,
+		GCT_INT1 = 21,
+		GCT_INT2 = 22,
+		GCT_INT3 = 23,
+		GCT_INT4 = 24,
 		GCT_UNKNOWN = 99
 	};
 
-	/** The variability of a GPU parameter, as derived from auto-params targetting it.
+	/** The variability of a GPU parameter, as derived from auto-params targeting it.
 	These values must be powers of two since they are used in masks.
 	*/
 	enum GpuParamVariability
@@ -132,6 +133,7 @@ namespace Ogre {
 			case GCT_INT4:
 			case GCT_SAMPLER1D:
 			case GCT_SAMPLER2D:
+            case GCT_SAMPLER2DARRAY:
 			case GCT_SAMPLER3D:
 			case GCT_SAMPLERCUBE:
 			case GCT_SAMPLER1DSHADOW:
@@ -154,6 +156,7 @@ namespace Ogre {
 			{
 			case GCT_SAMPLER1D:
 			case GCT_SAMPLER2D:
+            case GCT_SAMPLER2DARRAY:
 			case GCT_SAMPLER3D:
 			case GCT_SAMPLERCUBE:
 			case GCT_SAMPLER1DSHADOW:
@@ -179,6 +182,7 @@ namespace Ogre {
 				case GCT_INT1:
 				case GCT_SAMPLER1D:
 				case GCT_SAMPLER2D:
+                case GCT_SAMPLER2DARRAY:
 				case GCT_SAMPLER3D:
 				case GCT_SAMPLERCUBE:
 				case GCT_SAMPLER1DSHADOW:
@@ -214,6 +218,7 @@ namespace Ogre {
 				case GCT_INT1:
 				case GCT_SAMPLER1D:
 				case GCT_SAMPLER2D:
+                case GCT_SAMPLER2DARRAY:
 				case GCT_SAMPLER3D:
 				case GCT_SAMPLERCUBE:
 				case GCT_SAMPLER1DSHADOW:
@@ -253,6 +258,7 @@ namespace Ogre {
 		GpuConstantDefinition()
 			: constType(GCT_UNKNOWN)
 			, physicalIndex((std::numeric_limits<size_t>::max)())
+            , logicalIndex(0)
 			, elementSize(0)
 			, arraySize(1)
 			, variability(GPV_GLOBAL) {}
@@ -324,6 +330,8 @@ namespace Ogre {
 		GpuNamedConstantsSerializer();
 		virtual ~GpuNamedConstantsSerializer();
 		void exportNamedConstants(const GpuNamedConstants* pConsts, const String& filename,
+			Endian endianMode = ENDIAN_NATIVE);
+		void exportNamedConstants(const GpuNamedConstants* pConsts, DataStreamPtr stream,
 			Endian endianMode = ENDIAN_NATIVE);
 		void importNamedConstants(DataStreamPtr& stream, GpuNamedConstants* pDest);
 	};
@@ -600,12 +608,15 @@ namespace Ogre {
 			/// The current world matrix, inverted & transposed
 			ACT_INVERSE_TRANSPOSE_WORLD_MATRIX,
 
-
 			/// The current array of world matrices, as a 3x4 matrix, used for blending
 			ACT_WORLD_MATRIX_ARRAY_3x4,
 			/// The current array of world matrices, used for blending
 			ACT_WORLD_MATRIX_ARRAY,
-
+			/// The current array of world matrices transformed to an array of dual quaternions, represented as a 2x4 matrix
+			ACT_WORLD_DUALQUATERNION_ARRAY_2x4,
+			/// The scale and shear components of the current array of world matrices
+			ACT_WORLD_SCALE_SHEAR_MATRIX_ARRAY_3x4,
+			
 			/// The current view matrix
 			ACT_VIEW_MATRIX,
 			/// The current view matrix, inverted
@@ -1384,13 +1395,13 @@ namespace Ogre {
 		/** Retrieves the logical index relating to a physical index in the float
 		buffer, for programs which support that (low-level programs and 
 		high-level programs which use logical parameter indexes).
-		@returns std::numeric_limits<size_t>::max() if not found
+		@return std::numeric_limits<size_t>::max() if not found
 		*/
 		size_t getFloatLogicalIndexForPhysicalIndex(size_t physicalIndex);
 		/** Retrieves the logical index relating to a physical index in the int
 		buffer, for programs which support that (low-level programs and 
 		high-level programs which use logical parameter indexes).
-		@returns std::numeric_limits<size_t>::max() if not found
+		@return std::numeric_limits<size_t>::max() if not found
 		*/
 		size_t getIntLogicalIndexForPhysicalIndex(size_t physicalIndex);
 

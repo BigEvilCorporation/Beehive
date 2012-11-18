@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -110,20 +110,20 @@ namespace Ogre {
 		{
 		public:
 			/** Attribute storage ctor. */
-			Attributes() : mpUserObjectsMap(NULL) {}
+			Attributes() : mUserObjectsMap(NULL) {}
 
 			/** Attribute storage dtor. */
 			~Attributes()
 			{
-				if (mpUserObjectsMap != NULL)
+				if (mUserObjectsMap != NULL)
 				{
-					OGRE_DELETE mpUserObjectsMap;
-					mpUserObjectsMap = NULL;
+					OGRE_DELETE mUserObjectsMap;
+					mUserObjectsMap = NULL;
 				}				
 			}
 
 			Any					mKeylessAny;		// Will hold key less associated user object for fast access. 	
-			UserObjectsMap*		mpUserObjectsMap;	// Will hold a map between user keys to user objects.
+			UserObjectsMap*		mUserObjectsMap;	// Will hold a map between user keys to user objects.
 		};
 
 	// Attributes.

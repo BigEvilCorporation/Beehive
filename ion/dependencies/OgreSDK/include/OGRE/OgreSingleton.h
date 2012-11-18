@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -72,25 +72,25 @@ namespace Ogre {
     
 	protected:
 
-        static T* ms_Singleton;
+        static T* msSingleton;
 
     public:
         Singleton( void )
         {
-            assert( !ms_Singleton );
+            assert( !msSingleton );
 #if defined( _MSC_VER ) && _MSC_VER < 1200	 
             int offset = (int)(T*)1 - (int)(Singleton <T>*)(T*)1;
-            ms_Singleton = (T*)((int)this + offset);
+            msSingleton = (T*)((int)this + offset);
 #else
-	    ms_Singleton = static_cast< T* >( this );
+	    msSingleton = static_cast< T* >( this );
 #endif
         }
         ~Singleton( void )
-            {  assert( ms_Singleton );  ms_Singleton = 0;  }
+            {  assert( msSingleton );  msSingleton = 0;  }
         static T& getSingleton( void )
-		{	assert( ms_Singleton );  return ( *ms_Singleton ); }
+		{	assert( msSingleton );  return ( *msSingleton ); }
         static T* getSingletonPtr( void )
-		{ return ms_Singleton; }
+		{ return msSingleton; }
     };
 	/** @} */
 	/** @} */

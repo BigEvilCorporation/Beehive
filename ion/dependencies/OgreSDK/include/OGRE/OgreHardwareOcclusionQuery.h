@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -71,18 +71,18 @@ public:
 
 	/**
 	  * Starts the hardware occlusion query
-	  * @Remarks	Simple usage: Create one or more OcclusionQuery object one per outstanding query or one per tested object 
-	  *				OcclusionQuery* m_pOcclusionQuery;
-	  *				createOcclusionQuery( &m_pOcclusionQuery );
+	  * @remarks	Simple usage: Create one or more OcclusionQuery object one per outstanding query or one per tested object 
+	  *				OcclusionQuery* mOcclusionQuery;
+	  *				createOcclusionQuery( &mOcclusionQuery );
 	  *				In the rendering loop:
 	  *				Draw all occluders
-	  *				m_pOcclusionQuery->startOcclusionQuery();
+	  *				mOcclusionQuery->startOcclusionQuery();
 	  *				Draw the polygons to be tested
-	  *				m_pOcclusionQuery->endOcclusionQuery();
+	  *				mOcclusionQuery->endOcclusionQuery();
 	  *
 	  *				Results must be pulled using:
-	  *				UINT	m_uintNumberOfPixelsVisable;
-	  *				pullOcclusionQuery( &m_dwNumberOfPixelsVisable );
+	  *				UINT	mNumberOfPixelsVisable;
+	  *				pullOcclusionQuery( &mNumberOfPixelsVisable );
 	  *			
 	  */
 	virtual void beginOcclusionQuery() = 0;

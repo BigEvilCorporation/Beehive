@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ THE SOFTWARE.
 
 // Precompiler options
 #include "OgrePrerequisites.h"
+#include "OgreException.h"
 
 namespace Ogre {
 
@@ -144,7 +145,7 @@ namespace Ogre {
 			size_t mLockSize;
 			bool mSystemMemory;
             bool mUseShadowBuffer;
-            HardwareBuffer* mpShadowBuffer;
+            HardwareBuffer* mShadowBuffer;
             bool mShadowUpdated;
             bool mSuppressHardwareUpdate;
     		
@@ -157,7 +158,7 @@ namespace Ogre {
 		    /// Constructor, to be called by HardwareBufferManager only
             HardwareBuffer(Usage usage, bool systemMemory, bool useShadowBuffer) 
 				: mUsage(usage), mIsLocked(false), mSystemMemory(systemMemory), 
-                mUseShadowBuffer(useShadowBuffer), mpShadowBuffer(NULL), mShadowUpdated(false), 
+                mUseShadowBuffer(useShadowBuffer), mShadowBuffer(NULL), mShadowUpdated(false), 
                 mSuppressHardwareUpdate(false) 
             {
                 // If use shadow buffer, upgrade to WRITE_ONLY on hardware side
@@ -175,13 +176,20 @@ namespace Ogre {
 		    @param offset The byte offset from the start of the buffer to lock
 		    @param length The size of the area to lock, in bytes
 		    @param options Locking options
-		    @returns Pointer to the locked memory
+		    @return Pointer to the locked memory
 		    */
 		    virtual void* lock(size_t offset, size_t length, LockOptions options)
             {
                 assert(!isLocked() && "Cannot lock this buffer, it is already locked!");
-                void* ret;
-				if (mUseShadowBuffer)
+
+				void* ret = NULL;
+				if ((length + offset) > mSizeInBytes)
+				{
+					OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
+						"Lock request out of bounds.",
+						"HardwareBuffer::lock");
+				}
+				else if (mUseShadowBuffer)
                 {
 					if (options != HBL_READ_ONLY)
 					{
@@ -190,7 +198,7 @@ namespace Ogre {
                         mShadowUpdated = true;
                     }
 
-                    ret = mpShadowBuffer->lock(offset, length, options);
+                    ret = mShadowBuffer->lock(offset, length, options);
                 }
                 else
                 {
@@ -205,7 +213,7 @@ namespace Ogre {
 
             /** Lock the entire buffer for (potentially) reading / writing.
 		    @param options Locking options
-		    @returns Pointer to the locked memory
+		    @return Pointer to the locked memory
             */
             void* lock(LockOptions options)
             {
@@ -228,9 +236,9 @@ namespace Ogre {
                 assert(isLocked() && "Cannot unlock this buffer, it is not locked!");
 
 				// If we used the shadow buffer this time...
-                if (mUseShadowBuffer && mpShadowBuffer->isLocked())
+                if (mUseShadowBuffer && mShadowBuffer->isLocked())
                 {
-                    mpShadowBuffer->unlock();
+                    mShadowBuffer->unlock();
                     // Potentially update the 'real' buffer from the shadow buffer
                     _updateFromShadow();
                 }
@@ -297,7 +305,7 @@ namespace Ogre {
                 if (mUseShadowBuffer && mShadowUpdated && !mSuppressHardwareUpdate)
                 {
                     // Do this manually to avoid locking problems
-                    const void *srcData = mpShadowBuffer->lockImpl(
+                    const void *srcData = mShadowBuffer->lockImpl(
     					mLockStart, mLockSize, HBL_READ_ONLY);
 					// Lock with discard if the whole buffer was locked, otherwise normal
 					LockOptions lockOpt;
@@ -311,7 +319,7 @@ namespace Ogre {
 					// Copy shadow to real
                     memcpy(destData, srcData, mLockSize);
                     this->unlockImpl();
-                    mpShadowBuffer->unlockImpl();
+                    mShadowBuffer->unlockImpl();
                     mShadowUpdated = false;
                 }
             }
@@ -326,7 +334,7 @@ namespace Ogre {
 			bool hasShadowBuffer(void) const { return mUseShadowBuffer; }
             /// Returns whether or not this buffer is currently locked.
             bool isLocked(void) const { 
-                return mIsLocked || (mUseShadowBuffer && mpShadowBuffer->isLocked()); 
+                return mIsLocked || (mUseShadowBuffer && mShadowBuffer->isLocked()); 
             }
             /// Pass true to suppress hardware upload of shadow buffer changes
             void suppressHardwareUpdate(bool suppress) {

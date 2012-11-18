@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -208,9 +208,16 @@ namespace Ogre {
         */
         void setTextureName( const String& name, TextureType ttype = TEX_TYPE_2D);
 
+        /** Sets this texture layer to use a single texture, given the
+        pointer to the texture to use on this layer.
+        @note
+        Applies to both fixed-function and programmable pipeline.
+        */
+        void setTexture( const TexturePtr& texPtr);
+
 		/** Sets this texture layer to use a combination of 6 texture maps, each one relating to a face of a cube.
         @remarks
-        Cubic textures are made up of 6 separate texture images. Each one of these is an orthoganal view of the
+        Cubic textures are made up of 6 separate texture images. Each one of these is an orthogonal view of the
         world with a FOV of 90 degrees and an aspect ratio of 1:1. You can generate these from 3D Studio by
         rendering a scene to a reflection map of a transparent cube and saving the output files.
         @par
@@ -258,7 +265,53 @@ namespace Ogre {
 
         /** Sets this texture layer to use a combination of 6 texture maps, each one relating to a face of a cube.
         @remarks
-        Cubic textures are made up of 6 separate texture images. Each one of these is an orthoganal view of the
+        Cubic textures are made up of 6 separate texture images. Each one of these is an orthogonal view of the
+        world with a FOV of 90 degrees and an aspect ratio of 1:1. You can generate these from 3D Studio by
+        rendering a scene to a reflection map of a transparent cube and saving the output files.
+        @par
+        Cubic maps can be used either for skyboxes (complete wrap-around skies, like space) or as environment
+        maps to simulate reflections. The system deals with these 2 scenarios in different ways:
+        <ol>
+        <li>
+        <p>
+        For cubic environment maps, the 6 textures are combined into a single 'cubic' texture map which
+        is then addressed using 3D texture coordinates. This is required because you don't know what
+        face of the box you're going to need to address when you render an object, and typically you
+        need to reflect more than one face on the one object, so all 6 textures are needed to be
+        'active' at once. Cubic environment maps are enabled by calling this method with the forUVW
+        parameter set to true, and then calling setEnvironmentMap(true).
+        </p>
+        <p>
+        Note that not all cards support cubic environment mapping.
+        </p>
+        </li>
+        <li>
+        <p>
+        For skyboxes, the 6 textures are kept separate and used independently for each face of the skybox.
+        This is done because not all cards support 3D cubic maps and skyboxes do not need to use 3D
+        texture coordinates so it is simpler to render each face of the box with 2D coordinates, changing
+        texture between faces.
+        </p>
+        <p>
+        Skyboxes are created by calling SceneManager::setSkyBox.
+        </p>
+        </li>
+        </ul>
+        @note
+        Applies to both fixed-function and programmable pipeline.
+        @param
+        names The 6 names of the textures which make up the 6 sides of the box. The textures must all 
+		be the same size and be powers of 2 in width & height.
+		Must be an Ogre::String array with a length of 6 unless forUVW is set to true.
+        @param
+        forUVW Set to true if you want a single 3D texture addressable with 3D texture coordinates rather than
+        6 separate textures. Useful for cubic environment mapping.
+        */
+        void setCubicTextureName( const String* const names, bool forUVW = false );
+
+        /** Sets this texture layer to use a combination of 6 texture maps, each one relating to a face of a cube.
+        @remarks
+        Cubic textures are made up of 6 separate texture images. Each one of these is an orthogonal view of the
         world with a FOV of 90 degrees and an aspect ratio of 1:1. You can generate these from 3D Studio by
         rendering a scene to a reflection map of a transparent cube and saving the output files.
         @par
@@ -293,18 +346,16 @@ namespace Ogre {
         @note
         Applies to both fixed-function and programmable pipeline.
         @param
-        name The basic name of the texture e.g. brickwall.jpg, stonefloor.png. There must be 6 versions
-        of this texture with the suffixes _fr, _bk, _up, _dn, _lf, and _rt (before the extension) which
-        make up the 6 sides of the box. The textures must all be the same size and be powers of 2 in width & height.
-        If you can't make your texture names conform to this, use the alternative method of the same name which takes
-        an array of texture names instead.
+        pTextures The 6 pointers to the textures which make up the 6 sides of the box. The textures must all 
+		be the same size and be powers of 2 in width & height.
+		Must be an Ogre::TexturePtr array with a length of 6 unless forUVW is set to true.
         @param
         forUVW Set to true if you want a single 3D texture addressable with 3D texture coordinates rather than
         6 separate textures. Useful for cubic environment mapping.
         */
-        void setCubicTextureName( const String* const names, bool forUVW = false );
+        void setCubicTexture( const TexturePtr* const texPtrs, bool forUVW = false );
 
-        /** Sets the names of the texture images for an animated texture.
+		/** Sets the names of the texture images for an animated texture.
         @remarks
         Animated textures are just a series of images making up the frames of the animation. All the images
         must be the same size, and their names must have a frame number appended before the extension, e.g.
@@ -313,7 +364,7 @@ namespace Ogre {
         @par
         You can change the active frame on a texture layer by calling the setCurrentFrame method.
         @note
-        If you can't make your texture images conform to the naming standard layed out here, you
+        If you can't make your texture images conform to the naming standard laid out here, you
         can call the alternative setAnimatedTextureName method which takes an array of names instead.
         @note
         Applies to both fixed-function and programmable pipeline.
@@ -561,7 +612,7 @@ namespace Ogre {
         Has no effect in the programmable pipeline.
         */
         void setTextureUScroll(Real value);
-        // get texture uscroll value
+        // Get texture uscroll value
         Real getTextureUScroll(void) const;
 
         /** As setTextureScroll, but sets only V value.
@@ -569,7 +620,7 @@ namespace Ogre {
         Has no effect in the programmable pipeline.
         */
         void setTextureVScroll(Real value);
-        // get texture vscroll value
+        // Get texture vscroll value
         Real getTextureVScroll(void) const;
 
         /** As setTextureScale, but sets only U value.
@@ -577,7 +628,7 @@ namespace Ogre {
         Has no effect in the programmable pipeline.
         */
         void setTextureUScale(Real value);
-        // get texture uscale value
+        /// Get texture uscale value
         Real getTextureUScale(void) const;
 
         /** As setTextureScale, but sets only V value.
@@ -585,7 +636,7 @@ namespace Ogre {
         Has no effect in the programmable pipeline.
         */
         void setTextureVScale(Real value);
-        // get texture vscale value
+        /// Get texture vscale value
         Real getTextureVScale(void) const;
 
         /** Sets the scaling factor applied to texture coordinates.
@@ -613,7 +664,7 @@ namespace Ogre {
         angle The angle of rotation (anticlockwise).
         */
         void setTextureRotate(const Radian& angle);
-        // get texture rotation effects angle value
+        /// Get texture rotation effects angle value
         const Radian& getTextureRotate(void) const;
 
         /** Gets the texture addressing mode for a given coordinate, 
@@ -803,7 +854,7 @@ namespace Ogre {
         This works in exactly the same way as setColourOperation, except
         that the effect is applied to the level of alpha (i.e. transparency)
         of the texture rather than its colour. When the alpha of a texel (a pixel
-        on a texture) is 1.0, it is opaque, wheras it is fully transparent if the
+        on a texture) is 1.0, it is opaque, whereas it is fully transparent if the
         alpha is 0.0. Please refer to the setColourOperation method for more info.
         @param
         op The operation to be used, e.g. modulate (multiply), add, subtract
@@ -857,7 +908,7 @@ namespace Ogre {
         This effect works best if the object has lots of gradually changing normals. The texture also
         has to be designed for this effect - see the example spheremap.png included with the sample
         application for a 2D environment map; a cubic map can be generated by rendering 6 views of a
-        scene to each of the cube faces with orthoganal views.
+        scene to each of the cube faces with orthogonal views.
         @note
         Enabling this disables any other texture coordinate generation effects.
         However it can be combined with texture coordinate modification functions, which then operate on the
@@ -967,9 +1018,9 @@ namespace Ogre {
 		*/
 		void retryTextureLoad() { mTextureLoadFailed = false; }
 
-        // get texture effects in a multimap paired array
+        /// Get texture effects in a multimap paired array
         const EffectMap& getEffects(void) const;
-        // get the animated-texture animation duration
+        /// Get the animated-texture animation duration
         Real getAnimationDuration(void) const;
 
         /** Set the texture filtering for this unit, using the simplified interface.
@@ -996,7 +1047,7 @@ namespace Ogre {
             Can be FO_NONE (turns off mipmapping), FO_POINT or FO_LINEAR (trilinear filtering)
         */
         void setTextureFiltering(FilterOptions minFilter, FilterOptions magFilter, FilterOptions mipFilter);
-        // get the texture filtering for the given type
+        /// Get the texture filtering for the given type
         FilterOptions getTextureFiltering(FilterType ftpye) const;
 
         /** Sets the anisotropy level to be used for this texture level.
@@ -1005,7 +1056,7 @@ namespace Ogre {
         This option applies in both the fixed function and the programmable pipeline.
         */
         void setTextureAnisotropy(unsigned int maxAniso);
-        // get this layer texture anisotropy level
+        /// Get this layer texture anisotropy level
         unsigned int getTextureAnisotropy() const;
 
 		/** Sets the bias value applied to the mipmap calculation.
@@ -1056,25 +1107,25 @@ namespace Ogre {
         /// Returns whether this unit has texture coordinate generation that depends on the camera
         bool hasViewRelativeTextureCoordinateGeneration(void) const;
 
-        // Is this loaded?
+        /// Is this loaded?
         bool isLoaded(void) const;
         /** Tells the class that it needs recompilation. */
         void _notifyNeedsRecompile(void);
 
         /** Set the name of the Texture Unit State
         @remarks
-            The name of the Texture Unit State is optional.  Its usefull in material scripts where a material could inherit
+            The name of the Texture Unit State is optional.  Its useful in material scripts where a material could inherit
             from another material and only want to modify a particalar Texture Unit State.
         */
         void setName(const String& name);
-        /// get the name of the Texture Unit State
+        /// Get the name of the Texture Unit State
         const String& getName(void) const { return mName; }
 
         /** Set the alias name used for texture frame names
         @param name can be any sequence of characters and does not have to be unique           
         */
         void setTextureNameAlias(const String& name);
-        /** gets the Texture Name Alias of the Texture Unit.
+        /** Gets the Texture Name Alias of the Texture Unit.
         */
         const String& getTextureNameAlias(void) const { return mTextureNameAlias;}
 
@@ -1086,9 +1137,9 @@ namespace Ogre {
             If matching texture aliases are found then true is returned.
 
         @param
-            aliasList is a map container of texture alias, texture name pairs
+            aliasList Is a map container of texture alias, texture name pairs
         @param
-            apply set true to apply the texture aliases else just test to see if texture alias matches are found.
+            apply Set true to apply the texture aliases else just test to see if texture alias matches are found.
         @return
             True if matching texture aliases were found in the Texture Unit State.
         */
@@ -1149,7 +1200,7 @@ protected:
         FilterOptions mMagFilter;
         /// Texture filtering - mipmapping
         FilterOptions mMipFilter;
-        ///Texture anisotropy
+        /// Texture anisotropy
         unsigned int mMaxAniso;
 		/// Mipmap bias (always float, not Real)
 		float mMipmapBias;
@@ -1172,7 +1223,7 @@ protected:
         String mName;               // optional name for the TUS
         String mTextureNameAlias;       // optional alias for texture frames
         EffectMap mEffects;
-		///The data that references the compositor
+		/// The data that references the compositor
 		String mCompositorRefName;
 		String mCompositorRefTexName;
         //-----------------------------------------------------------------------------

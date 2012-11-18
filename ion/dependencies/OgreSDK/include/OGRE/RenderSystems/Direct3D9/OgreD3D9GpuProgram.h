@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -102,8 +102,10 @@ namespace Ogre {
         virtual GpuProgramParametersSharedPtr createParameters(void);
 	protected:    
 		bool mColumnMajorMatrices;
-		ID3DXBuffer* mpExternalMicrocode;
+		ID3DXBuffer* mExternalMicrocode;
 
+		void getMicrocodeFromCache( IDirect3DDevice9* d3d9Device );
+		void compileMicrocode( IDirect3DDevice9* d3d9Device );
     };
 
     /** Direct3D implementation of low-level vertex programs. */

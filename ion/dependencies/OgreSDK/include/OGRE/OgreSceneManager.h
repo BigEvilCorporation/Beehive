@@ -4,7 +4,7 @@ This source file is a part of OGRE
 
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -53,6 +53,7 @@ Torus Knot Software Ltd.
 #include "OgreCamera.h"
 #include "OgreInstancedGeometry.h"
 #include "OgreLodListener.h"
+#include "OgreInstanceManager.h"
 #include "OgreRenderSystem.h"
 namespace Ogre {
 	/** \addtogroup Core
@@ -221,6 +222,24 @@ namespace Ogre {
 			Listener() {}
 			virtual ~Listener() {}
 
+			/** Called prior to updating the scene graph in this SceneManager.
+			@remarks
+				This is called before updating the scene graph for a camera.
+			@param source The SceneManager instance raising this event.
+			@param camera The camera being updated.
+			*/
+			virtual void preUpdateSceneGraph(SceneManager* source, Camera* camera)
+                        { (void)source; (void)camera; }
+
+			/** Called after updating the scene graph in this SceneManager.
+			@remarks
+				This is called after updating the scene graph for a camera.
+			@param source The SceneManager instance raising this event.
+			@param camera The camera being updated.
+			*/
+			virtual void postUpdateSceneGraph(SceneManager* source, Camera* camera)
+                        { (void)source; (void)camera; }
+
 			/** Called prior to searching for visible objects in this SceneManager.
 			@remarks
 				Note that the render queue at this stage will be full of the last
@@ -319,7 +338,7 @@ namespace Ogre {
 				within the range of the frustum will be in the list.
 			@param lightList The list of lights within range of the frustum which you
 				may sort.
-			@returns true if you sorted the list, false otherwise.
+			@return true if you sorted the list, false otherwise.
 			*/
 			virtual bool sortLightsAffectingFrustum(LightList& lightList)
                         { (void)lightList; return false; }
@@ -390,6 +409,9 @@ namespace Ogre {
 		StaticGeometryList mStaticGeometryList;
 		typedef map<String, InstancedGeometry* >::type InstancedGeometryList;
 		InstancedGeometryList mInstancedGeometryList;
+
+		typedef map<String, InstanceManager*>::type InstanceManagerMap;
+		InstanceManagerMap	mInstanceManagerMap;
 
         typedef map<String, SceneNode*>::type SceneNodeList;
 
@@ -549,7 +571,7 @@ namespace Ogre {
             ensure that objects are rendered solid black.
             This method will usually return the standard solid black pass for
             all fixed function passes, but will merge in a vertex program
-            and fudge the AutpoParamDataSource to set black lighting for
+            and fudge the AutoParamDataSource to set black lighting for
             passes with vertex programs. 
         */
         virtual const Pass* deriveShadowCasterPass(const Pass* pass);
@@ -649,6 +671,10 @@ namespace Ogre {
         virtual void fireShadowTexturesPreCaster(Light* light, Camera* camera, size_t iteration);
 		/// Internal method for firing the pre receiver texture shadows event
         virtual void fireShadowTexturesPreReceiver(Light* light, Frustum* f);
+		/// Internal method for firing pre update scene graph event
+		virtual void firePreUpdateSceneGraph(Camera* camera);
+		/// Internal method for firing post update scene graph event
+		virtual void firePostUpdateSceneGraph(Camera* camera);
 		/// Internal method for firing find visible objects event
 		virtual void firePreFindVisibleObjects(Viewport* v);
 		/// Internal method for firing find visible objects event
@@ -765,6 +791,13 @@ namespace Ogre {
         virtual void ensureShadowTexturesCreated();
         /// Internal method for destroying shadow textures (texture-based shadows)
         virtual void destroyShadowTextures(void);
+
+		typedef vector<InstanceManager*>::type		InstanceManagerVec;
+		InstanceManagerVec mDirtyInstanceManagers;
+		InstanceManagerVec mDirtyInstanceMgrsTmp;
+
+		/** Updates all instance managaers with dirty instance batches. @see _addDirtyInstanceManager */
+		void updateDirtyInstanceManagers(void);
         
 	public:
 		/// Method for preparing shadow textures ready for use in a regular render
@@ -824,9 +857,11 @@ namespace Ogre {
 		Pass* mShadowTextureCustomCasterPass;
 		Pass* mShadowTextureCustomReceiverPass;
 		String mShadowTextureCustomCasterVertexProgram;
+		String mShadowTextureCustomCasterFragmentProgram;
 		String mShadowTextureCustomReceiverVertexProgram;
 		String mShadowTextureCustomReceiverFragmentProgram;
 		GpuProgramParametersSharedPtr mShadowTextureCustomCasterVPParams;
+		GpuProgramParametersSharedPtr mShadowTextureCustomCasterFPParams;
 		GpuProgramParametersSharedPtr mShadowTextureCustomReceiverVPParams;
 		GpuProgramParametersSharedPtr mShadowTextureCustomReceiverFPParams;
 
@@ -1302,12 +1337,27 @@ namespace Ogre {
         */
         virtual Entity* createEntity(const String& entityName, const String& meshName, const String& groupName = ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME );
 
+        /** Create an Entity (instance of a discrete mesh).
+            @param
+                entityName The name to be given to the entity (must be unique).
+            @param
+                pMesh The pointer to the Mesh it is to be based on.
+        */
+        virtual Entity* createEntity(const String& entityName, const MeshPtr& pMesh );
+
         /** Create an Entity (instance of a discrete mesh) with an autogenerated name.
             @param
                 meshName The name of the Mesh it is to be based on (e.g. 'knot.oof'). The
                 mesh will be loaded if it is not already.
         */
         virtual Entity* createEntity(const String& meshName);
+
+        /** Create an Entity (instance of a discrete mesh) with an autogenerated name.
+            @param
+                pMesh The pointer to the Mesh it is to be based on.
+        */
+        virtual Entity* createEntity(const MeshPtr& pMesh);
+
         /** Prefab shapes available without loading a model.
             @note
                 Minimal implementation at present.
@@ -1855,7 +1905,7 @@ namespace Ogre {
 				bow If zero, the plane will be completely flat (like previous
 				versions.  If above zero, the plane will be curved, allowing
 				the sky to appear below camera level.  Curved sky planes are 
-				simular to skydomes, but are more compatable with fog.
+				simular to skydomes, but are more compatible with fog.
             @param xsegments, ysegments
                 Determines the number of segments the plane will have to it. This
                 is most important when you are bowing the plane, but may also be useful
@@ -1905,7 +1955,7 @@ namespace Ogre {
 				bow If zero, the plane will be completely flat (like previous
 				versions.  If above zero, the plane will be curved, allowing
 				the sky to appear below camera level.  Curved sky planes are 
-				simular to skydomes, but are more compatable with fog.
+				simular to skydomes, but are more compatible with fog.
             @param xsegments, ysegments
                 Determines the number of segments the plane will have to it. This
                 is most important when you are bowing the plane, but may also be useful
@@ -2042,7 +2092,7 @@ namespace Ogre {
                 backdrop with an overlayed curved cloud layer.
             @par
                 Sky domes work well with 2D repeating textures like clouds. You
-                can change the apparant 'curvature' of the sky depending on how
+                can change the apparent 'curvature' of the sky depending on how
                 your scene is viewed - lower curvatures are better for 'open'
                 scenes like landscapes, whilst higher curvatures are better for
                 say FPS levels where you don't see a lot of the sky at once and
@@ -2104,7 +2154,7 @@ namespace Ogre {
                 backdrop with an overlayed curved cloud layer.
             @par
                 Sky domes work well with 2D repeating textures like clouds. You
-                can change the apparant 'curvature' of the sky depending on how
+                can change the apparent 'curvature' of the sky depending on how
                 your scene is viewed - lower curvatures are better for 'open'
                 scenes like landscapes, whilst higher curvatures are better for
                 say FPS levels where you don't see a lot of the sky at once and
@@ -2474,7 +2524,7 @@ namespace Ogre {
 			current 'special case' render queue list and mode.
 		@see SceneManager::addSpecialCaseRenderQueue
 		@param qid The identifier of the queue which should be tested
-		@returns true if the queue will be rendered, false otherwise
+		@return true if the queue will be rendered, false otherwise
 		*/
 		virtual bool isRenderQueueToBeProcessed(uint8 qid);
 
@@ -2637,7 +2687,7 @@ namespace Ogre {
             simple decal approach. The 2 stencil approaches differ in the amount of multipass work 
             that is required - the modulative approach simply 'darkens' areas in shadow after the 
             main render, which is the least expensive, whilst the additive approach has to perform 
-            a render per light and adds the cumulative effect, whcih is more expensive but more 
+            a render per light and adds the cumulative effect, which is more expensive but more 
             accurate. The texture based shadows both work in roughly the same way, the only difference is
             that the shadowmap approach is slightly more accurate, but requires a more recent
             graphics card.
@@ -2755,9 +2805,11 @@ namespace Ogre {
 			number of shadow textures setting
 		@param width, height The dimensions of the texture
 		@param format The pixel format of the texture
+        @param fsaa The level of multisampling to use. Ignored if the device does not support it.
+		@param depthBufferPoolId The pool # it should query the depth buffers from
 		*/
 		virtual void setShadowTextureConfig(size_t shadowIndex, unsigned short width, 
-			unsigned short height, PixelFormat format);
+			unsigned short height, PixelFormat format, unsigned short fsaa = 0, uint16 depthBufferPoolId=1);
 		/** Set the detailed configuration for a shadow texture.
 		@param shadowIndex The index of the texture to configure, must be < the
 			number of shadow textures setting
@@ -2781,6 +2833,14 @@ namespace Ogre {
 			complex form.
         */
         virtual void setShadowTexturePixelFormat(PixelFormat fmt);
+        /** Set the level of multisample AA of the textures used for texture-based shadows.
+        @remarks
+            By default, the level of multisample AA is zero.
+        @note This is the simple form, see setShadowTextureConfig for the more 
+            complex form.
+        */
+        virtual void setShadowTextureFSAA(unsigned short fsaa);
+
         /** Set the number of textures allocated for texture-based shadows.
         @remarks
             The default number of textures assigned to deal with texture based
@@ -2816,7 +2876,7 @@ namespace Ogre {
 			complex form.
         */
         virtual void setShadowTextureSettings(unsigned short size, unsigned short count, 
-			PixelFormat fmt = PF_X8R8G8B8);
+			PixelFormat fmt = PF_X8R8G8B8, unsigned short fsaa = 0, uint16 depthBufferPoolId=1);
 
 		/** Get a reference to the shadow texture currently in use at the given index.
 		@note
@@ -3053,7 +3113,7 @@ namespace Ogre {
 			efficient form at the expense of being able to move it. Please 
 			read the StaticGeometry class documentation for full information.
 		@param name The name to give the new object
-		@returns The new StaticGeometry instance
+		@return The new StaticGeometry instance
 		*/
 		virtual StaticGeometry* createStaticGeometry(const String& name);
 		/** Retrieve a previously created StaticGeometry instance. 
@@ -3076,7 +3136,7 @@ namespace Ogre {
 			efficient form, and still be able to move it. Please 
 			read the InstancedGeometry class documentation for full information.
 		@param name The name to give the new object
-		@returns The new InstancedGeometry instance
+		@return The new InstancedGeometry instance
 		*/
 		virtual InstancedGeometry* createInstancedGeometry(const String& name);
 		/** Retrieve a previously created InstancedGeometry instance. */
@@ -3088,6 +3148,92 @@ namespace Ogre {
 		/** Remove & destroy all InstancedGeometry instances. */
 		virtual void destroyAllInstancedGeometry(void);
 
+		/** Creates an InstanceManager interface to create & manipulate instanced entities
+			You need to call this function at least once before start calling createInstancedEntity
+			to build up an instance based on the given mesh.
+		@remarks
+			Instancing is a way of batching up geometry into a much more 
+			efficient form, but with some limitations, and still be able to move & animate it.
+			Please @see InstanceManager class documentation for full information.
+		@param customName Custom name for referencing. Must be unique
+		@param meshName The mesh name the instances will be based upon
+		@param groupName The resource name where the mesh lives
+		@param Technique to use, which may be shader based, or hardware based.
+		@param numInstancesPerBatch Suggested number of instances per batch. The actual number
+		may end up being lower if the technique doesn't support having so many. It can't be zero
+		@param flags @see InstanceManagerFlags
+		@param InstanceManager only supports using one submesh from the base mesh. This parameter
+		says which submesh to pick (must be <= Mesh::getNumSubMeshes())
+		@return The new InstanceManager instance
+		*/
+		virtual InstanceManager* createInstanceManager( const String &customName, const String &meshName,
+														const String &groupName,
+														InstanceManager::InstancingTechnique technique,
+														size_t numInstancesPerBatch, uint16 flags=0,
+														unsigned short subMeshIdx=0 );
+
+		/** Retrieves an existing InstanceManager by it's name.
+		@note Throws an exception if the named InstanceManager does not exist
+		*/
+		virtual InstanceManager* getInstanceManager( const String &managerName ) const;
+
+    /** Returns whether an InstanceManager with the given name exists. */
+    virtual bool hasInstanceManager( const String &managerName ) const;
+
+		/** Destroys an InstanceManager <b>if</b> it was created with createInstanceManager()
+		@remarks
+			Be sure you don't have any InstancedEntity referenced somewhere which was created with
+			this manager, since it will become a dangling pointer.
+		@param customName Name of the manager to remove
+		*/
+		virtual void destroyInstanceManager( const String &name );
+		virtual void destroyInstanceManager( InstanceManager *instanceManager );
+
+		virtual void destroyAllInstanceManagers(void);
+
+		/** @see InstanceManager::getMaxOrBestNumInstancesPerBatch
+		@remarks
+			If you've already created an InstanceManager, you can call it's
+			getMaxOrBestNumInstancesPerBatch() function directly.
+			Another (not recommended) way to know if the technique is unsupported is by creating
+			an InstanceManager and use createInstancedEntity, which will return null pointer.
+			The input parameter "numInstancesPerBatch" is a suggested value when using IM_VTFBESTFIT
+			flag (in that case it should be non-zero)
+		@return
+			The ideal (or maximum, depending on flags) number of instances per batch for
+			the given technique. Zero if technique is unsupported or errors were spotted
+		*/
+		virtual size_t getNumInstancesPerBatch( const String &meshName, const String &groupName,
+												const String &materialName,
+												InstanceManager::InstancingTechnique technique,
+												size_t numInstancesPerBatch, uint16 flags=0,
+												unsigned short subMeshIdx=0 );
+
+		/** Creates an InstancedEntity based on an existing InstanceManager (@see createInstanceManager)
+		@remarks
+			* Return value may be null if the InstanceManger technique isn't supported
+			* Try to keep the number of entities with different materials <b>to a minimum</b>
+			* For more information @see InstancedManager @see InstancedBatch, @see InstancedEntity
+			* Alternatively you can call InstancedManager::createInstanceEntity using the returned
+			pointer from createInstanceManager
+		@param materialName Material name 
+		@param managerName Name of the instance manager
+		@return An InstancedEntity ready to be attached to a SceneNode
+		*/
+		virtual InstancedEntity* createInstancedEntity( const String &materialName,
+														const String &managerName );
+
+		/** Removes an InstancedEntity, @see SceneManager::createInstancedEntity &
+			@see InstanceBatch::removeInstancedEntity
+		@param instancedEntity Instance to remove
+		*/
+		virtual void destroyInstancedEntity( InstancedEntity *instancedEntity );
+
+		/** Called by an InstanceManager when it has at least one InstanceBatch that needs their bounds
+			to be updated for proper culling
+			@param dirtyManager The manager with dirty batches to update
+		*/
+		void _addDirtyInstanceManager( InstanceManager *dirtyManager );
 
 		/** Create a movable object of the type specified.
 		@remarks
@@ -3277,7 +3423,7 @@ namespace Ogre {
 				true.
 			@param shadowDerivation If false, disables the derivation of shadow
 				passes from original passes
-            @returns
+            @return
                 A Pass object that was used instead of the one passed in, can
                 happen when rendering shadow passes
         */

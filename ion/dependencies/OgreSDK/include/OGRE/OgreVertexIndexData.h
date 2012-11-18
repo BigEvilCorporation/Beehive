@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -92,7 +92,7 @@ namespace Ogre {
 		/// Struct used to hold hardware morph / pose vertex data information
 		struct HardwareAnimationData
 		{
-			const VertexElement* targetVertexElement;
+			unsigned short targetBufferIndex;
 			Real parametric;
 		};
 		typedef vector<HardwareAnimationData>::type HardwareAnimationDataList;
@@ -228,8 +228,10 @@ namespace Ogre {
 			expected to bind these new buffers when appropriate. For morph animation
 			the original position buffer will be the 'from' keyframe data, whilst
 			for pose animation it will be the original vertex data.
+			If normals are animated, then twice the number of 3D texture coordinates are required
+		 @return The number of sets that were supported
 		*/
-		void allocateHardwareAnimationElements(ushort count);
+		ushort allocateHardwareAnimationElements(ushort count, bool animateNormals);
 
 
 

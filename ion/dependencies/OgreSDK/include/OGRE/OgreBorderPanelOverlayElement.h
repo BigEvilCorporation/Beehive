@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -271,7 +271,7 @@ namespace Ogre {
         ushort mPixelBottomBorderSize;
 
         String mBorderMaterialName;
-        MaterialPtr mpBorderMaterial;
+        MaterialPtr mBorderMaterial;
 
         // Render operation for the border area
         RenderOperation mRenderOp2;
@@ -328,7 +328,7 @@ namespace Ogre {
             mUseIdentityProjection = true;
             mUseIdentityView = true;
         }
-        const MaterialPtr& getMaterial(void) const { return mParent->mpBorderMaterial; }
+        const MaterialPtr& getMaterial(void) const { return mParent->mBorderMaterial; }
         void getRenderOperation(RenderOperation& op) { op = mParent->mRenderOp2; }
         void getWorldTransforms(Matrix4* xform) const { mParent->getWorldTransforms(xform); }
         unsigned short getNumWorldTransforms(void) const { return 1; }

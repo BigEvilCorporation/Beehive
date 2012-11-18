@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -261,7 +261,7 @@ namespace Ogre
 			if it fails.
 		@param forceSynchronous Forces the request to be processed immediately
 			even if threading is enabled.
-		@returns The ID of the request that has been added
+		@return The ID of the request that has been added
 		*/
 		virtual RequestID addRequest(uint16 channel, uint16 requestType, const Any& rData, uint8 retryCount = 0, 
 			bool forceSynchronous = false) = 0;
@@ -472,7 +472,7 @@ namespace Ogre
 		class _OgreExport RequestHandlerHolder : public UtilityAlloc
 		{
 		protected:
-			OGRE_RW_MUTEX(mRWMutex);
+			OGRE_RW_MUTEX(mRWMutex)
 			RequestHandler* mHandler;
 		public:
 			RequestHandlerHolder(RequestHandler* handler)
@@ -529,7 +529,7 @@ namespace Ogre
 		OGRE_MUTEX(mRequestMutex)
 		OGRE_MUTEX(mProcessMutex)
 		OGRE_MUTEX(mResponseMutex)
-		OGRE_RW_MUTEX(mRequestHandlerMutex);
+		OGRE_RW_MUTEX(mRequestHandlerMutex)
 
 
 		void processRequestResponse(Request* r, bool synchronous);

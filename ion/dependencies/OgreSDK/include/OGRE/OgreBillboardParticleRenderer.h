@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -113,7 +113,7 @@ namespace Ogre {
             the camera's local axes. This is fine for 'point' style billboards (e.g. flares,
             smoke, anything which is symmetrical about a central point) but does not look good for
             billboards which have an orientation (e.g. an elongated raindrop). In this case, the
-            oriented billboards are more suitable (BBT_ORIENTED_COMMON or BBT_ORIENTED_SELF) since they retain an independant Y axis
+            oriented billboards are more suitable (BBT_ORIENTED_COMMON or BBT_ORIENTED_SELF) since they retain an independent Y axis
             and only the X axis is generated, perpendicular to both the local Y and the camera Z.
         @param bbt The type of billboard to render
         */
@@ -141,7 +141,7 @@ namespace Ogre {
         void setBillboardOrigin(BillboardOrigin origin) { mBillboardSet->setBillboardOrigin(origin); }
 
         /** Gets the point which acts as the origin point for all billboards in this set.
-        @returns
+        @return
         A member of the BillboardOrigin enum specifying the origin for all the billboards in this set.
         */
         BillboardOrigin getBillboardOrigin(void) const { return mBillboardSet->getBillboardOrigin(); }
@@ -158,7 +158,7 @@ namespace Ogre {
         void setBillboardRotationType(BillboardRotationType rotationType);
 
         /** Sets billboard rotation type.
-            @returns
+            @return
                 A member of the BillboardRotationType enum specifying the rotation type for all the billboards in this set.
         */
         BillboardRotationType getBillboardRotationType(void) const;
@@ -221,6 +221,8 @@ namespace Ogre {
         void _notifyDefaultDimensions(Real width, Real height);
 		/// @copydoc ParticleSystemRenderer::setRenderQueueGroup
 		void setRenderQueueGroup(uint8 queueID);
+		/// @copydoc MovableObject::setRenderQueueGroupAndPriority
+		void setRenderQueueGroupAndPriority(uint8 queueID, ushort priority);
 		/// @copydoc ParticleSystemRenderer::setKeepParticlesInLocalSpace
 		void setKeepParticlesInLocalSpace(bool keepLocal);
         /// @copydoc ParticleSystemRenderer::_getSortMode

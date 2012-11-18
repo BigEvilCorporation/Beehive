@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -277,6 +277,18 @@ namespace Ogre {
 		*/
 		void setSpotlightFalloff(Real val);
 
+		/** Set the near clip plane distance to be used by spotlights that use light
+		 clipping, allowing you to render spots as if they start from further
+		 down their frustum. 
+		 @param near The near distance
+		 */
+		void setSpotlightNearClipDistance(Real nearClip) { mSpotNearClip = nearClip; }
+		
+		/** Get the near clip plane distance to be used by spotlights that use light
+		 clipping.
+		 */
+		Real getSpotlightNearClipDistance() const { return mSpotNearClip; }
+		
 		/** Set a scaling factor to indicate the relative power of a light.
 		@remarks
 			This factor is only useful in High Dynamic Range (HDR) rendering.
@@ -525,6 +537,7 @@ namespace Ogre {
         Radian mSpotOuter;
         Radian mSpotInner;
         Real mSpotFalloff;
+		Real mSpotNearClip;
         Real mRange;
         Real mAttenuationConst;
         Real mAttenuationLinear;

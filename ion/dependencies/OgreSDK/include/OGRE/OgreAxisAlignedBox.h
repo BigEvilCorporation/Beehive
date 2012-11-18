@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ namespace Ogre {
 		Vector3 mMinimum;
 		Vector3 mMaximum;
 		Extent mExtent;
-		mutable Vector3* mpCorners;
+		mutable Vector3* mCorners;
 
 	public:
 		/*
@@ -88,21 +88,21 @@ namespace Ogre {
 			NEAR_LEFT_TOP = 5,
 			NEAR_RIGHT_TOP = 4
 		} CornerEnum;
-		inline AxisAlignedBox() : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mpCorners(0)
+		inline AxisAlignedBox() : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mCorners(0)
 		{
 			// Default to a null box 
 			setMinimum( -0.5, -0.5, -0.5 );
 			setMaximum( 0.5, 0.5, 0.5 );
 			mExtent = EXTENT_NULL;
 		}
-		inline AxisAlignedBox(Extent e) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mpCorners(0)
+		inline AxisAlignedBox(Extent e) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mCorners(0)
 		{
 			setMinimum( -0.5, -0.5, -0.5 );
 			setMaximum( 0.5, 0.5, 0.5 );
 			mExtent = e;
 		}
 
-		inline AxisAlignedBox(const AxisAlignedBox & rkBox) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mpCorners(0)
+		inline AxisAlignedBox(const AxisAlignedBox & rkBox) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mCorners(0)
 
 		{
 			if (rkBox.isNull())
@@ -113,21 +113,21 @@ namespace Ogre {
 				setExtents( rkBox.mMinimum, rkBox.mMaximum );
 		}
 
-		inline AxisAlignedBox( const Vector3& min, const Vector3& max ) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mpCorners(0)
+		inline AxisAlignedBox( const Vector3& min, const Vector3& max ) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mCorners(0)
 		{
 			setExtents( min, max );
 		}
 
 		inline AxisAlignedBox(
 			Real mx, Real my, Real mz,
-			Real Mx, Real My, Real Mz ) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mpCorners(0)
+			Real Mx, Real My, Real Mz ) : mMinimum(Vector3::ZERO), mMaximum(Vector3::UNIT_SCALE), mCorners(0)
 		{
 			setExtents( mx, my, mz, Mx, My, Mz );
 		}
 
 		AxisAlignedBox& operator=(const AxisAlignedBox& rhs)
 		{
-			// Specifically override to avoid copying mpCorners
+			// Specifically override to avoid copying mCorners
 			if (rhs.isNull())
 				setNull();
 			else if (rhs.isInfinite())
@@ -140,8 +140,8 @@ namespace Ogre {
 
 		~AxisAlignedBox()
 		{
-			if (mpCorners)
-				OGRE_FREE(mpCorners, MEMCATEGORY_SCENE_CONTROL);
+			if (mCorners)
+				OGRE_FREE(mCorners, MEMCATEGORY_SCENE_CONTROL);
 		}
 
 
@@ -309,20 +309,20 @@ namespace Ogre {
 			// Maximum Z face, starting with Max(all), then anticlockwise
 			//   around face (looking onto the face)
 			// Only for optimization/compatibility.
-			if (!mpCorners)
-				mpCorners = OGRE_ALLOC_T(Vector3, 8, MEMCATEGORY_SCENE_CONTROL);
+			if (!mCorners)
+				mCorners = OGRE_ALLOC_T(Vector3, 8, MEMCATEGORY_SCENE_CONTROL);
 
-			mpCorners[0] = mMinimum;
-			mpCorners[1].x = mMinimum.x; mpCorners[1].y = mMaximum.y; mpCorners[1].z = mMinimum.z;
-			mpCorners[2].x = mMaximum.x; mpCorners[2].y = mMaximum.y; mpCorners[2].z = mMinimum.z;
-			mpCorners[3].x = mMaximum.x; mpCorners[3].y = mMinimum.y; mpCorners[3].z = mMinimum.z;            
+			mCorners[0] = mMinimum;
+			mCorners[1].x = mMinimum.x; mCorners[1].y = mMaximum.y; mCorners[1].z = mMinimum.z;
+			mCorners[2].x = mMaximum.x; mCorners[2].y = mMaximum.y; mCorners[2].z = mMinimum.z;
+			mCorners[3].x = mMaximum.x; mCorners[3].y = mMinimum.y; mCorners[3].z = mMinimum.z;            
 
-			mpCorners[4] = mMaximum;
-			mpCorners[5].x = mMinimum.x; mpCorners[5].y = mMaximum.y; mpCorners[5].z = mMaximum.z;
-			mpCorners[6].x = mMinimum.x; mpCorners[6].y = mMinimum.y; mpCorners[6].z = mMaximum.z;
-			mpCorners[7].x = mMaximum.x; mpCorners[7].y = mMinimum.y; mpCorners[7].z = mMaximum.z;
+			mCorners[4] = mMaximum;
+			mCorners[5].x = mMinimum.x; mCorners[5].y = mMaximum.y; mCorners[5].z = mMaximum.z;
+			mCorners[6].x = mMinimum.x; mCorners[6].y = mMinimum.y; mCorners[6].z = mMaximum.z;
+			mCorners[7].x = mMaximum.x; mCorners[7].y = mMinimum.y; mCorners[7].z = mMaximum.z;
 
-			return mpCorners;
+			return mCorners;
 		}
 
 		/** gets the position of one of the corners
@@ -759,6 +759,34 @@ namespace Ogre {
                    mMinimum.y <= v.y && v.y <= mMaximum.y &&
                    mMinimum.z <= v.z && v.z <= mMaximum.z;
         }
+		
+		/** Returns the minimum distance between a given point and any part of the box. */
+		Real distance(const Vector3& v) const
+		{
+			
+			if (this->contains(v))
+				return 0;
+			else
+			{
+				Real maxDist = std::numeric_limits<Real>::min();
+
+				if (v.x < mMinimum.x)
+					maxDist = std::max(maxDist, mMinimum.x - v.x);
+				if (v.y < mMinimum.y)
+					maxDist = std::max(maxDist, mMinimum.y - v.y);
+				if (v.z < mMinimum.z)
+					maxDist = std::max(maxDist, mMinimum.z - v.z);
+				
+				if (v.x > mMaximum.x)
+					maxDist = std::max(maxDist, v.x - mMaximum.x);
+				if (v.y > mMaximum.y)
+					maxDist = std::max(maxDist, v.y - mMaximum.y);
+				if (v.z > mMaximum.z)
+					maxDist = std::max(maxDist, v.z - mMaximum.z);
+				
+				return maxDist;
+			}
+		}
 
         /** Tests whether another box contained by this box.
         */

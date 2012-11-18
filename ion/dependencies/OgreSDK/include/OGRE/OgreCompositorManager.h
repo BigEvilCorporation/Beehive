@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -94,7 +94,7 @@ namespace Ogre {
 			@param vp			Viewport to modify
 			@param compositor	The name of the compositor to apply
 			@param addPosition	At which position to add, defaults to the end (-1).
-			@returns pointer to instance, or 0 if it failed.
+			@return pointer to instance, or 0 if it failed.
 		*/
 		CompositorInstance *addCompositor(Viewport *vp, const String &compositor, int addPosition=-1);
 
@@ -142,6 +142,10 @@ namespace Ogre {
 			techniques.
 		*/
 		void registerCompositorLogic(const String& name, CompositorLogic* logic);
+
+		/** Removes a listener for compositor logic registered with registerCompositorLogic
+		*/
+		void unregisterCompositorLogic(const String& name);
 		
 		/** Get a compositor logic by its name
 		*/
@@ -154,13 +158,6 @@ namespace Ogre {
 		/** Get a custom composition pass by its name 
 		*/
 		CustomCompositionPass* getCustomCompositionPass(const String& name);
-
-		/**
-		Relocates a compositor chain from one viewport to another
-		@param sourceVP The viewport to take the chain from
-		@param destVP The viewport to connect the chain to
-		*/
-		void _relocateChain(Viewport* sourceVP, Viewport* destVP);
 
 		/** Override standard Singleton retrieval.
 		@remarks

@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2005 The OGRE Team
+ Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -71,6 +71,14 @@ namespace Ogre {
 		typedef MapIterator<VertexOffsetMap> VertexOffsetIterator;
 		/// An iterator over the vertex offsets
 		typedef ConstMapIterator<VertexOffsetMap> ConstVertexOffsetIterator;
+		/// A collection of normals based on the vertex index
+		typedef map<size_t, Vector3>::type NormalsMap;
+		/// An iterator over the vertex offsets
+		typedef MapIterator<NormalsMap> NormalsIterator;
+		/// An iterator over the vertex offsets
+		typedef ConstMapIterator<NormalsMap> ConstNormalsIterator;
+		/// Return whether the pose vertices include normals
+		bool getIncludesNormals() const { return !mNormalsMap.empty(); }
 
 		/** Adds an offset to a vertex for this pose. 
 		@param index The vertex index
@@ -78,11 +86,17 @@ namespace Ogre {
 		*/
 		void addVertex(size_t index, const Vector3& offset);
 
+		/** Adds an offset to a vertex and a new normal for this pose. 
+		@param index The vertex index
+		@param offset The position offset for this pose
+		*/
+		void addVertex(size_t index, const Vector3& offset, const Vector3& normal);
+
 		/** Remove a vertex offset. */
 		void removeVertex(size_t index);
 
-		/** Clear all vertex offsets. */
-		void clearVertexOffsets(void);
+		/** Clear all vertices. */
+		void clearVertices(void);
 
 		/** Gets an iterator over all the vertex offsets. */
 		ConstVertexOffsetIterator getVertexOffsetIterator(void) const;
@@ -91,8 +105,15 @@ namespace Ogre {
 		/** Gets a const reference to the vertex offsets. */
 		const VertexOffsetMap& getVertexOffsets(void) const { return mVertexOffsetMap; }
 
+		/** Gets an iterator over all the vertex offsets. */
+		ConstNormalsIterator getNormalsIterator(void) const;
+		/** Gets an iterator over all the vertex offsets. */
+		NormalsIterator getNormalsIterator(void);
+		/** Gets a const reference to the vertex offsets. */
+		const NormalsMap& getNormals(void) const { return mNormalsMap; }
+
 		/** Get a hardware vertex buffer version of the vertex offsets. */
-		const HardwareVertexBufferSharedPtr& _getHardwareVertexBuffer(size_t numVertices) const;
+		const HardwareVertexBufferSharedPtr& _getHardwareVertexBuffer(const VertexData* origData) const;
 
 		/** Clone this pose and create another one configured exactly the same
 			way (only really useful for cloning holders of this class).
@@ -105,6 +126,8 @@ namespace Ogre {
 		String mName;
 		/// Primary storage, sparse vertex use
 		VertexOffsetMap mVertexOffsetMap;
+		/// Primary storage, sparse vertex use
+		NormalsMap mNormalsMap;
 		/// Derived hardware buffer, covers all vertices
 		mutable HardwareVertexBufferSharedPtr mBuffer;
 	};

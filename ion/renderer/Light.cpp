@@ -114,7 +114,7 @@ namespace ion
 		void Light::SetAttenuation(float maxDistance)
 		{
 			#if !defined ION_PLUGIN
-			mOgreLight->setAttenuation(maxDistance, 1.0f, 4.5 / maxDistance, 75.0f / (maxDistance * maxDistance));
+			mOgreLight->setAttenuation(maxDistance, 1.0f, 4.5f / maxDistance, 75.0f / (maxDistance * maxDistance));
 			#endif
 
 			mParams.mMaxDistance = maxDistance;
@@ -204,5 +204,12 @@ namespace ion
 
 			return binaryChunk.GetChunkSize();
 		}
+
+		#if !defined ION_PLUGIN
+		Ogre::Light* Light::GetOgreLightIFace()
+		{
+			return mOgreLight;
+		}
+		#endif
 	}
 }

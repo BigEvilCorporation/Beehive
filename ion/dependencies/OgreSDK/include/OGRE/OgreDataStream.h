@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,118 @@ THE SOFTWARE.
 #include <istream>
 
 namespace Ogre {
+	
+	/** Template version of cache based on static array.
+	 'cacheSize' defines size of cache in bytes. */
+	template <size_t cacheSize>
+	class StaticCache
+	{
+	protected:
+		/// Static buffer
+		char mBuffer[cacheSize];
+		
+		/// Number of bytes valid in cache (written from the beginning of static buffer)
+		size_t mValidBytes;
+		/// Current read position
+		size_t mPos;
+		
+	public:
+		/// Constructor
+		StaticCache()
+		{
+			mValidBytes = 0;
+			mPos = 0;
+		}
+		
+		/** Cache data pointed by 'buf'. If 'count' is greater than cache size, we cache only last bytes.
+		 Returns number of bytes written to cache. */
+		size_t cacheData(const void* buf, size_t count)
+		{
+			assert(avail() == 0 && "It is assumed that you cache data only after you have read everything.");
+			
+			if (count < cacheSize)
+			{
+				// number of bytes written is less than total size of cache
+				if (count + mValidBytes <= cacheSize)
+				{
+					// just append
+					memcpy(mBuffer + mValidBytes, buf, count);
+					mValidBytes += count;
+				}
+				else
+				{
+					size_t begOff = count - (cacheSize - mValidBytes);
+					// override old cache content in the beginning
+					memmove(mBuffer, mBuffer + begOff, mValidBytes - begOff);
+					// append new data
+					memcpy(mBuffer + cacheSize - count, buf, count);
+					mValidBytes = cacheSize;
+				}
+				mPos = mValidBytes;
+				return count;
+			}
+			else
+			{
+				// discard all
+				memcpy(mBuffer, (const char*)buf + count - cacheSize, cacheSize);
+				mValidBytes = mPos = cacheSize;
+				return cacheSize;
+			}
+		}
+		/** Read data from cache to 'buf' (maximum 'count' bytes). Returns number of bytes read from cache. */
+		size_t read(void* buf, size_t count)
+		{
+			size_t rb = avail();
+			rb = (rb < count) ? rb : count;
+			memcpy(buf, mBuffer + mPos, rb);
+			mPos += rb;
+			return rb;
+		}
+		
+		/** Step back in cached stream by 'count' bytes. Returns 'true' if cache contains resulting position. */
+		bool rewind(size_t count)
+		{
+			if (mPos < count)
+			{
+				clear();
+				return false;
+			}
+			else
+			{
+				mPos -= count;
+				return true;
+			}
+		}
+		/** Step forward in cached stream by 'count' bytes. Returns 'true' if cache contains resulting position. */
+		bool ff(size_t count)
+		{
+			if (avail() < count)
+			{
+				clear();
+				return false;
+			}
+			else
+			{
+				mPos += count;
+				return true;
+			}
+		}
+		
+		/** Returns number of bytes available for reading in cache after rewinding. */
+		size_t avail() const
+		{
+			return mValidBytes - mPos;
+		}
+		
+		/** Clear the cache */
+		void clear()
+		{
+			mValidBytes = 0;
+			mPos = 0;
+		}
+	};
+	
+	
 	/** \addtogroup Core
 	*  @{
 	*/
@@ -98,14 +210,14 @@ namespace Ogre {
 			stopping at the end of the file.
 		@param buf Reference to a buffer pointer
 		@param count Number of bytes to read
-		@returns The number of bytes read
+		@return The number of bytes read
 		*/
 		virtual size_t read(void* buf, size_t count) = 0;
 		/** Write the requisite number of bytes from the stream (only applicable to 
 			streams that are not read-only)
 		@param buf Pointer to a buffer containing the bytes to write
 		@param count Number of bytes to write
-		@returns The number of bytes written
+		@return The number of bytes written
 		*/
 		virtual size_t write(const void* buf, size_t count)
 		{
@@ -127,7 +239,7 @@ namespace Ogre {
 		@param buf Reference to a buffer pointer
 		@param maxCount The maximum length of data to be read, excluding the terminating character
 		@param delim The delimiter to stop at
-		@returns The number of bytes read, excluding the terminating character
+		@return The number of bytes read, excluding the terminating character
 		*/
 		virtual size_t readLine(char* buf, size_t maxCount, const String& delim = "\n");
 		
@@ -159,7 +271,7 @@ namespace Ogre {
             If you used this function, you <b>must</b> open the stream in <b>binary mode</b>,
             otherwise, it'll produce unexpected results.
 		@param delim The delimiter(s) to stop at
-		@returns The number of bytes skipped
+		@return The number of bytes skipped
 		*/
 		virtual size_t skipLine(const String& delim = "\n");
 
@@ -377,11 +489,11 @@ namespace Ogre {
 	{
 	protected:
 		/// Reference to source stream (read)
-		std::istream* mpInStream;
+		std::istream* mInStream;
 		/// Reference to source file stream (read-only)
-		std::ifstream* mpFStreamRO;
+		std::ifstream* mFStreamRO;
 		/// Reference to source file stream (read-write)
-		std::fstream* mpFStream;
+		std::fstream* mFStream;
         bool mFreeOnClose;	
 
 		void determineAccess();

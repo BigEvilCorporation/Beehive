@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ THE SOFTWARE.
 #include "OgreTextureUnitState.h"
 #include "OgreCommon.h"
 
+#include "OgreMaterialManager.h"
 #include "OgreRenderOperation.h"
 #include "OgreRenderSystemCapabilities.h"
 #include "OgreRenderTarget.h"
@@ -55,6 +56,8 @@ namespace Ogre
 	*  @{
 	*/
 
+	typedef vector<DepthBuffer*>::type DepthBufferVec;
+	typedef map< uint16, DepthBufferVec >::type DepthBufferMap;
 	typedef map< String, RenderTarget * >::type RenderTargetMap;
 	typedef multimap<uchar, RenderTarget * >::type RenderTargetPriorityMap;
 
@@ -150,7 +153,7 @@ namespace Ogre
 		This routine is called automatically by the default
 		configuration dialogue produced by Root::showConfigDialog
 		or may be used by the caller for custom settings dialogs
-		@returns
+		@return
 		A 'map' of options, i.e. a list of options which is also
 		indexed by option name.
 		*/
@@ -204,7 +207,7 @@ namespace Ogre
 		If an application has more specific window requirements,
 		however (e.g. a level design app), it should specify false
 		for this parameter and do it manually.
-		@returns
+		@return
 		A pointer to the automatically created window, if requested, otherwise null.
 		*/
 		virtual RenderWindow* _initialise(bool autoCreateWindow, const String& windowTitle = "OGRE Render Window");
@@ -212,6 +215,15 @@ namespace Ogre
 
 		/** Query the real capabilities of the GPU and driver in the RenderSystem*/
 		virtual RenderSystemCapabilities* createRenderSystemCapabilities() const = 0;
+ 
+		/** Get a pointer to the current capabilities being used by the RenderSystem.
+		@remarks
+		The capabilities may be modified using this pointer, this will only have an effect
+		before the RenderSystem has been initialised. It's intended use is to allow a
+		listener of the RenderSystemCapabilitiesCreated event to customise the capabilities
+		on the fly before the RenderSystem is initialised.
+		*/
+		RenderSystemCapabilities* getMutableCapabilities(){ return mCurrentCapabilities; }
 
 		/** Force the render system to use the special capabilities. Can only be called
 		*    before the render system has been fully initializer (before createWindow is called) 
@@ -330,7 +342,10 @@ namespace Ogre
 		<tr>
 			<td>externalWindowHandle</td>
 			<td>Win32: HWND as integer<br/>
-			    GLX: poslong:posint:poslong (display*:screen:windowHandle) or poslong:posint:poslong:poslong (display*:screen:windowHandle:XVisualInfo*)</td>
+			    GLX: poslong:posint:poslong (display*:screen:windowHandle) or poslong:posint:poslong:poslong (display*:screen:windowHandle:XVisualInfo*)<br/>
+                OS X: WindowRef for Carbon or NSWindow for Cocoa address as an integer
+                iOS: UIWindow address as an integer
+            </td>
 			<td>0 (none)</td>
 			<td>External window handle, for embedding the OGRE render in an existing window</td>
 			<td>&nbsp;</td>
@@ -367,6 +382,7 @@ namespace Ogre
 			<td>String: "cocoa" or "carbon"</td>
 			<td>"carbon"</td>
 			<td>Specifies the type of rendering window on the Mac Platform.</td>
+            <td>Mac OS X Specific</td>
 			<td>&nbsp;</td>
 		 </tr>
 		 <tr>
@@ -381,6 +397,7 @@ namespace Ogre
 				In short, by setting this flag to "true" the Ogre::Root::createRenderWindow interprets the "externalWindowHandle" as a NSView*
 				instead of an OgreView*. See OgreOSXCocoaView.h/mm.
 			</td>
+            <td>Mac OS X Specific</td>
 			<td>&nbsp;</td>
 		 </tr>
          <tr>
@@ -392,8 +409,25 @@ namespace Ogre
                  native resolution is 960 x 640.  Windows are always 320 x 480, if you would like to limit the display
                  to 720 x 480, specify 1.5 as the scaling factor.
              </td>
+             <td>iOS Specific</td>
              <td>&nbsp;</td>
 		 </tr>
+         <tr>
+             <td>externalViewHandle</td>
+             <td>UIView pointer as an integer</td>
+             <td>0</td>
+             <td>External view handle, for rendering OGRE render in an existing view</td>
+             <td>iOS Specific</td>
+             <td>&nbsp;</td>
+         </tr>
+         <tr>
+             <td>externalViewControllerHandle</td>
+             <td>UIViewController pointer as an integer</td>
+             <td>0</td>
+             <td>External view controller handle, for embedding OGRE in an existing view controller</td>
+             <td>iOS Specific</td>
+             <td>&nbsp;</td>
+         </tr>
          <tr>
 			<td>FSAA</td>
 			<td>Positive integer (usually 0, 2, 4, 8, 16)</td>
@@ -462,6 +496,14 @@ namespace Ogre
 			colour space on rendering to the window.</td>
 			<td>&nbsp;</td>
 		</tr>
+		<tr>
+			<td>enableDoubleClick</td>
+			<td>true, false</td>
+			<td>false</td>
+			<td>Enable the window to keep track and transmit double click messages.</td>
+			<td>Win32 Specific</td>
+		</tr>
+		
 		*/
 		virtual RenderWindow* _createRenderWindow(const String &name, unsigned int width, unsigned int height, 
 			bool fullScreen, const NameValuePairList *miscParams = 0) = 0;
@@ -478,7 +520,7 @@ namespace Ogre
 		See _createRenderWindow for details about each member.		
 		@param
 		createdWindows This array will hold the created render windows.
-		@returns
+		@return
 		true on success.		
 		*/
 		virtual bool _createRenderWindows(const RenderWindowDescriptionList& renderWindowDescriptions, 
@@ -541,6 +583,42 @@ namespace Ogre
 		/** Returns true if the system is synchronising frames with the monitor vertical blank.
 		*/
 		bool getWaitForVerticalBlank(void) const;
+
+		/** Returns the global instance vertex buffer.
+		*/
+        HardwareVertexBufferSharedPtr getGlobalInstanceVertexBuffer() const;
+		/** Sets the global instance vertex buffer.
+		*/
+        void setGlobalInstanceVertexBuffer(const HardwareVertexBufferSharedPtr val);
+		/** Gets vertex declaration for the global vertex buffer for the global instancing
+		*/
+        VertexDeclaration* getGlobalInstanceVertexBufferVertexDeclaration() const;
+		/** Sets vertex declaration for the global vertex buffer for the global instancing
+		*/
+        void setGlobalInstanceVertexBufferVertexDeclaration( VertexDeclaration* val);
+		/** Gets the global number of instances.
+		*/
+        size_t getGlobalNumberOfInstances() const;
+		/** Sets the global number of instances.
+		*/
+        void setGlobalNumberOfInstances(const size_t val);
+
+#ifdef RTSHADER_SYSTEM_BUILD_CORE_SHADERS
+		/** Sets if fixed pipeline rendering is enabled on the system.
+		*/
+		void setFixedPipelineEnabled(bool enabled);
+
+		/** Returns true if fixed pipeline rendering is enabled on the system.
+		*/
+		bool getFixedPipelineEnabled(void) const;
+#endif
+
+		/** Retrieves an existing DepthBuffer or creates a new one suited for the given RenderTarget
+			and sets it.
+			@remarks
+				RenderTarget's pool ID is respected. @see RenderTarget::setDepthBufferPool()
+		*/
+		virtual void setDepthBufferFor( RenderTarget *renderTarget );
 
 		// ------------------------------------------------------------------------
 		//                     Internal Rendering Access
@@ -782,6 +860,25 @@ namespace Ogre
 			relative to a different origin.
 		*/
 		virtual void _setTextureProjectionRelativeTo(bool enabled, const Vector3& pos);
+
+		/** Creates a DepthBuffer that can be attached to the specified RenderTarget
+			@remarks
+				It doesn't attach anything, it just returns a pointer to a new DepthBuffer
+				Caller is responsible for putting this buffer into the right pool, for
+				attaching, and deleting it. Here's where API-specific magic happens.
+				Don't call this directly unless you know what you're doing.
+		*/
+		virtual DepthBuffer* _createDepthBufferFor( RenderTarget *renderTarget ) = 0;
+
+		/** Removes all depth buffers. Should be called on device lost and shutdown
+			@remarks
+				Advanced users can call this directly with bCleanManualBuffers=false to
+				remove all depth buffers created for RTTs; when they think the pool has
+				grown too big or they've used lots of depth buffers they don't need anymore,
+				freeing GPU RAM.
+		*/
+		void _cleanupDepthBuffers( bool bCleanManualBuffers=true );
+
 		/**
 		* Signifies the beginning of a frame, i.e. the start of rendering on a single viewport. Will occur
 		* several times per complete frame if multiple viewports exist.
@@ -1100,6 +1197,17 @@ namespace Ogre
 		*/
 		virtual const DriverVersion& getDriverVersion(void) const { return mDriverVersion; }
 
+        /** Returns the default material scheme used by the render system.
+            Systems that use the RTSS to emulate a fixed function pipeline 
+            (e.g. OpenGL ES 2, DX11) need to override this function to return
+            the default material scheme of the RTSS ShaderGenerator.
+         
+            This is currently only used to set the default material scheme for
+            viewports.  It is a necessary step on these render systems for
+            render textures to be rendered into properly.
+		*/
+		virtual const String& _getDefaultViewportMaterialScheme(void) const;
+
 		/** Binds a given GpuProgram (but not the parameters). 
 		@remarks Only one GpuProgram of each type can be bound at once, binding another
 		one will simply replace the existing one.
@@ -1345,8 +1453,27 @@ namespace Ogre
 		@see Root::getDisplayMonitorCount
 		*/
 		virtual unsigned int getDisplayMonitorCount() const = 0;
+
+        /**
+        * This marks the beginning of an event for GPU profiling.
+        */
+        virtual void beginProfileEvent( const String &eventName ) = 0;
+
+        /**
+        * Ends the currently active GPU profiling event.
+        */
+        virtual void endProfileEvent( void ) = 0;
+
+        /**
+        * Marks an instantaneous event for graphics profilers.  
+        * This is equivalent to calling @see beginProfileEvent and @see endProfileEvent back to back.
+        */
+        virtual void markProfileEvent( const String &event ) = 0;
+
 	protected:
 
+		/** DepthBuffers to be attached to render targets */
+		DepthBufferMap mDepthBufferPool;
 
 		/** The render targets. */
 		RenderTargetMap mRenderTargets;
@@ -1354,6 +1481,7 @@ namespace Ogre
 		RenderTargetPriorityMap mPrioritisedRenderTargets;
 		/** The Active render target. */
 		RenderTarget * mActiveRenderTarget;
+
 		/** The Active GPU programs and gpu program parameters*/
 		GpuProgramParametersSharedPtr mActiveVertexGpuProgramParameters;
 		GpuProgramParametersSharedPtr mActiveGeometryGpuProgramParameters;
@@ -1395,9 +1523,21 @@ namespace Ogre
 		float mDerivedDepthBiasMultiplier;
 		float mDerivedDepthBiasSlopeScale;
 
+        /// a global vertex buffer for global instancing
+        HardwareVertexBufferSharedPtr mGlobalInstanceVertexBuffer;
+        /// a vertex declaration for the global vertex buffer for the global instancing
+        VertexDeclaration* mGlobalInstanceVertexBufferVertexDeclaration;
+        /// the number of global instances (this number will be multiply by the render op instance number) 
+        size_t mGlobalNumberOfInstances;
+
+#ifdef RTSHADER_SYSTEM_BUILD_CORE_SHADERS
+		/// is fixed pipeline enabled
+		bool mEnableFixedPipeline;
+#endif
+
 		/** updates pass iteration rendering state including bound gpu program parameter
 		pass iteration auto constant entry
-		@returns True if more iterations are required
+		@return True if more iterations are required
 		*/
 		bool updatePassIterationRenderState(void);
 

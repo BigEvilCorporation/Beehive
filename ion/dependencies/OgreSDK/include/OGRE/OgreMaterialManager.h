@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,7 @@ namespace Ogre {
 			@param rend Pointer to the Renderable that is requesting this technique
 				to be used, so this may influence your choice of Technique. May be
 				null if the technique isn't being requested in that context.
-			@returns A pointer to the technique to be used, or NULL if you wish to
+			@return A pointer to the technique to be used, or NULL if you wish to
 				use the default technique for this material
 			*/
 			virtual Technique* handleSchemeNotFound(unsigned short schemeIndex, 
@@ -178,7 +178,7 @@ namespace Ogre {
         */
         virtual void setDefaultTextureFiltering(FilterOptions minFilter, FilterOptions magFilter, FilterOptions mipFilter);
 
-		/// get the default texture filtering
+		/// Get the default texture filtering
         virtual FilterOptions getDefaultTextureFiltering(FilterType ftype) const;
 
         /** Sets the default anisotropy level to be used for loaded textures, for when textures are
@@ -188,7 +188,7 @@ namespace Ogre {
                 The default value is 1 (no anisotropy).
         */
 		void setDefaultAnisotropy(unsigned int maxAniso);
-		/// get the default maxAnisotropy
+		/// Get the default maxAnisotropy
 		unsigned int getDefaultAnisotropy() const;
 
         /** Returns a pointer to the default Material settings.

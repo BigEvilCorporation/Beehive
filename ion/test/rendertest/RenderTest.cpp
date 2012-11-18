@@ -30,94 +30,14 @@ RenderTest::RenderTest()
 	mCameraSpeed = 10.0f;
 	mMouseSensitivity = 0.005f;
 
-	mFrameCount = 0;
+	mLightSin = 0.0f;
+	mLightCos = 0.0f;
 
-	mFileBrowser = NULL;
+	mFrameCount = 0;
 }
 
 RenderTest::~RenderTest()
 {
-}
-
-void RenderTest::OnEvent(const ion::gui::Event& event, const ion::gui::Event::Params& params)
-{
-	if(event == ion::gui::Button::sOnPressedEvent)
-	{
-		//Button pressed UI event, params will be a standard Widget event
-		//TODO: Button should typedef this even if it's unchanged for clarity
-		const ion::gui::Widget::EventParams& widgetParams = (const ion::gui::Widget::EventParams&)params;
-
-		if(widgetParams.mWidget == mUIButton)
-		{
-			mUIStaticText->SetText("Button pressed");
-
-			if(!mFileBrowser)
-			{
-				//Create file browser
-				mFileBrowser = new ion::gui::FileBrowser(*mUIScheme, "File Browser", *mFileSystem->GetDefaultFileDevice(), "\\", NULL);
-
-				//Subscribe to events
-				ion::gui::FileBrowser::sBrowserClosedEvent.Subscribe(*this);
-
-				//Add to root UI node
-				mUIWindow->AddChild(*mFileBrowser);
-			}
-
-			//Show
-			mFileBrowser->Show();
-
-			mUISystem->SetActiveRoot(mUIRoot);
-		}
-	}
-	else if(event == ion::gui::FileBrowser::sBrowserClosedEvent)
-	{
-		//File browser params
-		ion::gui::FileBrowser::Params& fileBrowserParams = (ion::gui::FileBrowser::Params&)params;
-
-		if(fileBrowserParams.mWidget == mFileBrowser)
-		{
-			if(fileBrowserParams.mResult == ion::gui::FileBrowser::Ok)
-			{
-				//Get filename
-				mUIStaticText->SetText(fileBrowserParams.mFullPath);
-			}
-			else
-			{
-				mUIStaticText->SetText("File browser cancelled");
-			}
-		}
-	}
-	else if(event == ion::gui::ListBox::sOnItemSelectedEvent)
-	{
-		//Listbox selection UI event, params will be a ListBox event
-		const ion::gui::ListBox::Params& listBoxParams = (const ion::gui::ListBox::Params&)params;
-
-		if(listBoxParams.mWidget == mUIListBox)
-		{
-			std::stringstream text;
-			text << "Selected items: ";
-
-			//Iterate through all selected items
-			for(std::list<ion::gui::ListBox::Item*>::const_iterator it = listBoxParams.mItems.begin(), end = listBoxParams.mItems.end(); it != end; it++)
-			{
-				text << (*it)->GetId() << ", ";
-			}
-
-			mUIStaticText->SetText(text.str());
-		}
-	}
-	else if(event == ion::gui::Slider::sOnValueChangedEvent)
-	{
-		//Slider value change event, params will be a slider event
-		const ion::gui::Slider::Params& sliderParams = (const ion::gui::Slider::Params&)params;
-
-		if(sliderParams.mWidget == mUISlider)
-		{
-			std::stringstream text;
-			text << "Slider value: " << sliderParams.mValue;
-			mUIStaticText->SetText(text.str());
-		}
-	}
 }
 
 bool RenderTest::Initialise()
@@ -129,7 +49,7 @@ bool RenderTest::Initialise()
 	mFileSystem = new ion::io::FileSystem();
 
 	//Create renderer, scene, camera and viewport
-	mRenderer = new ion::renderer::Renderer(windowTitle.str().c_str(), 640, 480, false);
+	mRenderer = new ion::renderer::Renderer(windowTitle.str().c_str(), 1024, 768, false);
 	mScene = new ion::renderer::Scene();
 	mCamera = new ion::renderer::Camera(*mScene);
 	mViewport = new ion::renderer::Viewport(*mRenderer, *mCamera);
@@ -143,48 +63,6 @@ bool RenderTest::Initialise()
 	mKeyboard->SetCooperativeWindow(mRenderer->GetWindowHandle(), ion::input::Keyboard::Exclusive);
 	mMouse->SetCooperativeWindow(mRenderer->GetWindowHandle(), ion::input::Mouse::Exclusive);
 
-	//Create UI system
-	mUISystem = new ion::gui::GUISystem(*mRenderer);
-
-	//Load UI scheme
-	mUIScheme = new ion::gui::Scheme("WindowsLook");
-
-	//Load font
-	mUISystem->LoadFont("DejaVuSans-10");
-
-	//Create root widget
-	mUIRoot = new ion::gui::Root();
-
-	//Create window
-	mUIWindow = new ion::gui::Window("Window", *mUIScheme);
-	mUIWindow->SetPosition(ion::Vector2(0.1f, 0.1f));
-	mUIWindow->SetSize(ion::Vector2(0.8f, 0.8f));
-
-	//Create button
-	mUIButton = new ion::gui::Button("Button", *mUIScheme);
-	mUIButton->SetPosition(ion::Vector2(0.1f, 0.1f));
-	mUIButton->SetSize(ion::Vector2(0.1f, 0.06f));
-
-	//Create static text
-	mUIStaticText = new ion::gui::StaticText("Static text", *mUIScheme);
-	mUIStaticText->SetPosition(ion::Vector2(0.1f, 0.2f));
-	mUIStaticText->SetSize(ion::Vector2(0.4f, 0.06f));
-
-	//Create editable text
-	mUITextBox = new ion::gui::TextBox(*mUIScheme);
-	mUITextBox->SetPosition(ion::Vector2(0.10f, 0.3f));
-	mUITextBox->SetSize(ion::Vector2(0.3f, 0.06f));
-
-	//Create slider
-	mUISlider = new ion::gui::Slider(*mUIScheme, 10.0f, 5.0f, 1.0f);
-	mUISlider->SetPosition(ion::Vector2(0.1f, 0.4f));
-	mUISlider->SetSize(ion::Vector2(0.6f, 0.1f));
-
-	//Create list box
-	mUIListBox = new ion::gui::ListBox(*mUIScheme);
-	mUIListBox->SetPosition(ion::Vector2(0.1f, 0.5f));
-	mUIListBox->SetSize(ion::Vector2(0.6f, 0.3f));
-
 	//Get default file device
 	ion::io::FileDevice* defaultFileDevice = mFileSystem->GetDefaultFileDevice();
 
@@ -195,77 +73,14 @@ bool RenderTest::Initialise()
 	std::vector<ion::io::FileDevice::DirectoryItem> directoryItems;
 	defaultFileDevice->ReadDirectory(currentDirectory, directoryItems);
 
-	//Add listbox items
-	for(unsigned int i = 0; i < directoryItems.size(); i++)
-	{
-		//Generate name
-		std::stringstream name;
-
-		if(directoryItems[i].mFileType == ion::io::FileDevice::Directory)
-		{
-			name << "<" << directoryItems[i].mFilename << ">";
-		}
-		else
-		{
-			name << directoryItems[i].mFilename;
-		}
-
-		//Create new item
-		ion::gui::ListBox::Item* item = new ion::gui::ListBox::Item(name.str(), i);
-
-		//Push to local list for destruction later
-		mListBoxItems.push_back(item);
-
-		//Add to listbox
-		mUIListBox->AddItem(*item);
-	}
-
-	//Create static text for FPS counter
-	mUIFPSText = new ion::gui::StaticText("FPS", *mUIScheme);
-	mUIFPSText->SetPosition(ion::Vector2(0.55f, 0.1f));
-	mUIFPSText->SetSize(ion::Vector2(0.15f, 0.06f));
-
-	//Add widgets to window
-	mUIWindow->AddChild(*mUIButton);
-	mUIWindow->AddChild(*mUIStaticText);
-	mUIWindow->AddChild(*mUITextBox);
-	mUIWindow->AddChild(*mUISlider);
-	mUIWindow->AddChild(*mUIListBox);
-	mUIWindow->AddChild(*mUIFPSText);
-
-	/*
-	//Create file browser
-	mFileBrowser = new ion::gui::FileBrowser(*mUIScheme, "File Browser", *mFileSystem->GetDefaultFileDevice(), currentDirectory, NULL);
-
-	//Subscribe to events
-	ion::gui::FileBrowser::sBrowserClosedEvent.Subscribe(*this);
-
-	//Add to root UI node
-	mUIRoot->AddChild(*mFileBrowser);
-
-	//Show
-	mFileBrowser->Show();
-	*/
-
-	//Add window to root node
-	mUIRoot->AddChild(*mUIWindow);
-
-	//Set root (and its tree of elements) as the currently active (i.e. visible, receiving input) set
-	//mUISystem->SetActiveRoot(mUIRoot);
-
-	//Subscribe to UI events
-	ion::gui::Button::sOnPressedEvent.Subscribe(*this);
-	ion::gui::ListBox::sOnItemSelectedEvent.Subscribe(*this);
-	ion::gui::Slider::sOnValueChangedEvent.Subscribe(*this);
-
-	//Hide the OS's mouse cursor, since the UI system has its own
-	mMouse->ShowCursor(false);
-
 	//mScene->Load("scenes\\testscene.ion.scene");
 
 	//Set default ambient light and window background colour
 	mScene->SetAmbientLight(ion::ColourRGB(0.1f, 0.1f, 0.1f));
 	mViewport->SetBackgroundColour(ion::Colour(0.2f, 0.2f, 0.2f));
+
+	//Set default shadow cast distance (must be done before adding lights)
+	mScene->SetShadowFarDistance(100.0f);
 
 	//Set default camera position and direction
 	mCamera->SetPosition(ion::Vector3(0.0f, 0.0f, 10.0f));
@@ -273,29 +88,38 @@ bool RenderTest::Initialise()
 
 	//Create material
 	mMaterial = new ion::renderer::Material();
-	mMaterial->SetAmbientColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	mMaterial->SetDiffuseColour(ion::Colour(0.8f, 0.0f, 0.0f, 1.0f));
-	mMaterial->SetSpecularColour(ion::Colour(1.0f, 0.0f, 0.0f, 1.0f));
 
 	//Load texture
 	mTexture = new ion::renderer::Texture();
-	mTexture->Load("textures\\placeholder256.png");
+	mTexture->Load("textures\\placeholderWhite512.png");
 	mMaterial->AddDiffuseMap(mTexture);
 
-	mCube = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-	mCube->Begin(mMaterial, ion::renderer::Primitive::Triangle);
-	mCube->AddBox(ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
-	mCube->End();
-	mCubeNode = new ion::renderer::SceneNode(*mScene);
-	mCubeNode->Attach(*mCube);
+	mMaterial->SetAmbientColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	mMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	mMaterial->SetSpecularColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	mMaterial->SetLightingEnabled(true);
+	mMaterial->SetReceiveShadows(true);
 
 	mQuad = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-	mQuad->Begin(NULL, ion::renderer::Primitive::Triangle);
-	mQuad->AddQuad(10.0f, 5.0f, ion::renderer::Primitive::xz, ion::Vector3());
-	mQuad->End();
+	mQuad->AddQuad(mMaterial, 10.0f, 5.0f, ion::renderer::Primitive::xz, ion::Vector3());
+	mQuad->SetCastShadows(false);
 	mQuadNode = new ion::renderer::SceneNode(*mScene);
 	mQuadNode->Attach(*mQuad);
-	mQuadNode->SetPosition(ion::Vector3(0.0f, -0.5f, 0.0f));
+	mQuadNode->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
+
+	mCube = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mCube->AddBox(mMaterial, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
+	mCube->SetCastShadows(true);
+	mCubeNode = new ion::renderer::SceneNode(*mScene);
+	mCubeNode->Attach(*mCube);
+	mCubeNode->SetPosition(ion::Vector3(-2.0f, 0.5f, 0.0f));
+
+	mSphere = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mSphere->AddSphere(mMaterial, 1.0f, 32, 32);
+	mSphere->SetCastShadows(true);
+	mSphereNode = new ion::renderer::SceneNode(*mScene);
+	mSphereNode->Attach(*mSphere);
+	mSphereNode->SetPosition(ion::Vector3(2.0f, 0.5f, 0.0f));
 
 	//mCamera->SetPosition(ion::Vector3(0.0f, 0.0f, 5.0f));
 	//mCamera->LookAt(ion::Vector3(0.0f, 0.0f, 0.0f));
@@ -308,32 +132,95 @@ bool RenderTest::Initialise()
 	//mMeshNode = new ion::renderer::SceneNode(*mScene);
 	//mMeshNode->Attach(*mMesh);
 
-	mPointLight = new ion::renderer::Light(ion::renderer::Light::Point, *mScene);
 	//mPointLight2 = new ion::renderer::Light(ion::renderer::Light::Point, *mScene);
-	//mSpotLight = new ion::renderer::Light(ion::renderer::Light::Spot, *mScene);
 
 	//mDirectionalLights[0] = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
 	//mDirectionalLights[1] = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
 	//mDirectionalLights[2] = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
 	//mDirectionalLights[3] = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
 
-	mPointLight->SetPosition(ion::Vector3(2.0f, 2.0f, 2.0f));
-	mPointLight->SetDiffuse(ion::ColourRGB(0.8f, 0.8f, 0.8f));
-	mPointLight->SetSpecular(ion::ColourRGB(1.0f, 1.0f, 1.0f));
-	mPointLight->SetAttenuation(100.0f);
+	mPointLight[0] = new ion::renderer::Light(ion::renderer::Light::Point, *mScene);
+	mPointLight[0]->SetDiffuse(ion::ColourRGB(0.8f, 0.8f, 0.8f));
+	mPointLight[0]->SetSpecular(ion::ColourRGB(1.0f, 1.0f, 1.0f));
+	mPointLight[0]->SetAttenuation(50.0f);
+
+	mPointLightNode[0] = new ion::renderer::SceneNode(*mScene);
+	mPointLightNode[0]->Attach(*mPointLight[0]);
+	mPointLightNode[0]->SetPosition(ion::Vector3(-1.0f, 1.0f, -1.0f));
+
+	/*
+	mPointLight[1] = new ion::renderer::Light(ion::renderer::Light::Point, *mScene);
+	mPointLight[1]->SetDiffuse(ion::ColourRGB(0.8f, 0.0f, 0.0f));
+	mPointLight[1]->SetSpecular(ion::ColourRGB(1.0f, 0.0f, 0.0f));
+	mPointLight[1]->SetAttenuation(50.0f);
+
+	mPointLight[2] = new ion::renderer::Light(ion::renderer::Light::Point, *mScene);
+	mPointLight[2]->SetDiffuse(ion::ColourRGB(0.0f, 0.8f, 0.0f));
+	mPointLight[2]->SetSpecular(ion::ColourRGB(0.0f, 1.0f, 0.0f));
+	mPointLight[2]->SetAttenuation(50.0f);
+
+	mPointLight[3] = new ion::renderer::Light(ion::renderer::Light::Point, *mScene);
+	mPointLight[3]->SetDiffuse(ion::ColourRGB(0.0f, 0.0f, 0.8f));
+	mPointLight[3]->SetSpecular(ion::ColourRGB(0.0f, 0.0f, 1.0f));
+	mPointLight[3]->SetAttenuation(50.0f);
+
+	mPointLightNode[1] = new ion::renderer::SceneNode(*mScene);
+	mPointLightNode[1]->Attach(*mPointLight[1]);
+	mPointLightNode[1]->SetPosition(ion::Vector3(-1.0f, 1.0f, -1.0f));
+
+	mPointLightNode[2] = new ion::renderer::SceneNode(*mScene);
+	mPointLightNode[2]->Attach(*mPointLight[2]);
+	mPointLightNode[2]->SetPosition(ion::Vector3(-1.0f, 1.0f, -1.0f));
+
+	mPointLightNode[3] = new ion::renderer::SceneNode(*mScene);
+	mPointLightNode[3]->Attach(*mPointLight[3]);
+	mPointLightNode[3]->SetPosition(ion::Vector3(-1.0f, 1.0f, -1.0f));
+	*/
+
+	mPointLightDebugSphereMaterial = new ion::renderer::Material();
+	mPointLightDebugSphereMaterial->SetAmbientColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	mPointLightDebugSphereMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	mPointLightDebugSphereMaterial->SetSpecularColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	mPointLightDebugSphereMaterial->SetLightingEnabled(false);
+	mPointLightDebugSphereMaterial->SetReceiveShadows(false);
+
+	mPointLightDebugSphere[0] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mPointLightDebugSphere[0]->AddSphere(mPointLightDebugSphereMaterial, 0.1f, 6, 6);
+	mPointLightNode[0]->Attach(*mPointLightDebugSphere[0]);
+
+	/*
+	mPointLightDebugSphere[1] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mPointLightDebugSphere[1]->AddSphere(mPointLightDebugSphereMaterial, 0.1f, 6, 6);
+	mPointLightNode[1]->Attach(*mPointLightDebugSphere[1]);
+
+	mPointLightDebugSphere[2] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mPointLightDebugSphere[2]->AddSphere(mPointLightDebugSphereMaterial, 0.1f, 6, 6);
+	mPointLightNode[2]->Attach(*mPointLightDebugSphere[2]);
+
+	mPointLightDebugSphere[3] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mPointLightDebugSphere[3]->AddSphere(mPointLightDebugSphereMaterial, 0.1f, 6, 6);
+	mPointLightNode[3]->Attach(*mPointLightDebugSphere[3]);
+	*/
 
 	/*
 	mPointLight2->SetPosition(ion::Vector3(-100.0f, 0.0f, -100.0f));
 	mPointLight2->SetDiffuse(ion::ColourRGB(0.0f, 0.7f, 0.0f));
 	mPointLight2->SetSpecular(ion::ColourRGB(0.0f, 0.8f, 0.0f));
 	mPointLight2->SetAttenuation(50.0f, 10.0f, 0.5f);
+	*/
 
-	mSpotLight->SetPosition(ion::Vector3(-100.0f, 0.0f, 100.0f));
-	mSpotLight->SetDirection(ion::Vector3(1.0f, 0.0f, 0.0f));
-	mSpotLight->SetDiffuse(ion::ColourRGB(0.0f, 0.0f, 0.7f));
+	/*
+	mSpotLight = new ion::renderer::Light(ion::renderer::Light::Spot, *mScene);
+	mSpotLight->SetDiffuse(ion::ColourRGB(0.7f, 0.0f, 0.0f));
 	mSpotLight->SetSpecular(ion::ColourRGB(0.0f, 0.0f, 0.8f));
-	mSpotLight->SetAttenuation(50.0f, 10.0f, 0.5f);
+	mSpotLight->SetAttenuation(10.0f);
+	mSpotLight->SetSpotRange(10.0f, 45.0f);
 	mSpotLight->CastShadows(true);
+
+	mSpotLightNode = new ion::renderer::SceneNode(*mScene);
+	mSpotLightNode->Attach(*mSpotLight);
+	mSpotLightNode->SetPosition(ion::Vector3(1.0f, 2.0f, 1.0f));
+	mSpotLightNode->SetLookAt(ion::Vector3(0.0f, 0.0f, 0.0f));
 	*/
 
 	//mDirectionalLights[0]->SetPosition(ion::Vector3(5.0f, 0.0f, 5.0f));
@@ -397,7 +284,6 @@ bool RenderTest::Update(float deltaTime)
 	mKeyboard->Update();
 	mMouse->Update();
 	mGamepad->Update();
-	mUISystem->Update(mKeyboard, mMouse, mGamepad);
 
 	//Get state of escape key and gamepad back/select button, for exit
 	bool exit = mKeyboard->KeyDown(DIK_ESCAPE);
@@ -424,14 +310,20 @@ bool RenderTest::Update(float deltaTime)
 	mCamera->Pitch(-mouseDeltaY * mMouseSensitivity);
 	mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
 
+	mLightSin += 0.5f * deltaTime;
+	mLightCos += 0.5f * deltaTime;
+	mPointLightNode[0]->SetPosition(ion::Vector3(sin(mLightSin) * 2.0f, 1.5f, cos(mLightCos) * 2.0f));
+	//mPointLightNode[1]->SetPosition(ion::Vector3(sin(mLightSin + 0.3f) * 2.0f, cos(mLightCos + 0.3f) * 2.0f, cos(mLightCos + 0.3f) * 2.0f));
+	//mPointLightNode[2]->SetPosition(ion::Vector3(sin(mLightSin + 0.6f) * 3.0f, cos(mLightCos + 0.6f) * 2.0f, 1.0f));
+	//mPointLightNode[3]->SetPosition(ion::Vector3(cos(mLightCos + 0.9f) * 4.0f, 2.0f, sin(mLightSin + 0.9f) * 2.0f));
+
 	//Update renderer
 	mRenderer->Update(deltaTime);
 
-	//Measure the time of 100 frames and average it for FPS count
-	mFrameCount++;
-	if(mFrameCount % 100 == 0)
+	//Update FPS display
+	if(mFrameCount++ % 100 == 0)
 	{
-		//Get 1000-frame end time and diff
+		//Get 100-frame end time and diff
 		u64 endTicks = ion::time::GetSystemTicks();
 		u64 diffTicks = endTicks - mStartTicks;
 
@@ -444,8 +336,7 @@ bool RenderTest::Update(float deltaTime)
 		text.setf(std::ios::fixed, std::ios::floatfield);
 		text.precision(2);
 		text << "FPS: " << framesPerSecond;
-
-		mUIFPSText->SetText(text.str());
+		mRenderer->SetWindowTitle(text.str().c_str());
 
 		//Reset timer
 		mStartTicks = ion::time::GetSystemTicks();

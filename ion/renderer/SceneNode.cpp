@@ -63,6 +63,16 @@ namespace ion
 			#endif
 		}
 
+		void SceneNode::SetLookAt(const Vector3& position)
+		{
+			#if !defined ION_PLUGIN
+			if(mOgreSceneNode)
+			{
+				mOgreSceneNode->lookAt(Ogre::Vector3(position.x, position.y, position.z), Ogre::Node::TS_WORLD);
+			}
+			#endif	
+		}
+
 		void SceneNode::Attach(Primitive& primitive)
 		{
 			#if !defined ION_PLUGIN
@@ -93,6 +103,16 @@ namespace ion
 				entity->setCastShadows(true);
 				mOgreSceneNode->attachObject(entity);
 				mOgreSceneNode->setVisible(true);
+			}
+			#endif
+		}
+
+		void SceneNode::Attach(Light& light)
+		{
+			#if !defined ION_PLUGIN
+			if(mOgreSceneNode)
+			{
+				mOgreSceneNode->attachObject(light.GetOgreLightIFace());
 			}
 			#endif
 		}

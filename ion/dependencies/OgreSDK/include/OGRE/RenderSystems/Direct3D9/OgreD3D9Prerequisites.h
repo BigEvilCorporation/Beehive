@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ THE SOFTWARE.
 #ifndef __D3D9PREREQUISITES_H__
 #define __D3D9PREREQUISITES_H__
 
-#include "../../OgrePrerequisites.h"
+#include "OgrePrerequisites.h"
 #ifdef __MINGW32__
 #  include "WIN32/OgreMinGWSupport.h" // extra defines for MinGW to deal with DX SDK
 #endif
@@ -65,7 +65,10 @@ THE SOFTWARE.
 #	define D3D_DEBUG_INFO
 #endif
 
+#if !defined WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+
 #if !defined(NOMINMAX) && defined(_MSC_VER)
 #	define NOMINMAX // required to stop windows.h messing up std::min
 #endif
@@ -77,6 +80,7 @@ THE SOFTWARE.
 namespace Ogre
 {
 	// Predefine classes
+	class D3D9DepthBuffer;
 	class D3D9RenderSystem;
 	class D3D9RenderWindow;
 	class D3D9Texture;

@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,20 @@ THE SOFTWARE.
 #define __Ogre_Iterator_Range_H__
 
 
-//#define OGRE_USE_BOOST 1 - picked up by CMake
 #if OGRE_USE_BOOST
-#include <boost/range.hpp>
+#   if OGRE_COMPILER == OGRE_COMPILER_CLANG || OGRE_COMPILER == OGRE_COMPILER_GCC
+#       pragma GCC diagnostic push
+#       pragma GCC diagnostic ignored "-Wshadow"
+#       pragma GCC diagnostic ignored "-Wpadded"
+#       pragma GCC diagnostic ignored "-Wweak-vtables"
+#       pragma GCC diagnostic ignored "-Wall"
+#   endif
+
+#   include <boost/range.hpp>
+
+#   if OGRE_COMPILER == OGRE_COMPILER_CLANG || OGRE_COMPILER == OGRE_COMPILER_GCC
+#       pragma GCC diagnostic pop
+#   endif
 #endif
 
 namespace Ogre {

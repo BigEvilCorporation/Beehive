@@ -4,7 +4,7 @@ This source file is part of OGRE
 (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -107,13 +107,14 @@ namespace Ogre
 		size_t mTotalAllocations;
 		typedef std::vector<size_t> AllocationsByPool;
 		AllocationsByPool mAllocationsByPool;
+		bool mRecordEnable;
 
 		void reportLeaks();
 
 		// protected ctor
 		MemoryTracker()
 			: mLeakFileName("OgreLeaks.log"), mDumpToStdOut(true),
-			mTotalAllocations(0)
+			mTotalAllocations(0), mRecordEnable(true)
 		{
 		}
 	public:
@@ -139,6 +140,8 @@ namespace Ogre
 			return mDumpToStdOut;
 		}
 
+		
+
 		/// Get the total amount of memory allocated currently.
 		size_t getTotalMemoryAllocated() const;
 		/// Get the amount of memory allocated in a given pool
@@ -158,6 +161,18 @@ namespace Ogre
 						  const char* file = 0, size_t ln = 0, const char* func = 0);
 		/** Record the deallocation of memory. */
 		void _recordDealloc(void* ptr);
+
+		/// Sets whether the record alloc/dealloc enabled.
+		void setRecordEnable(bool recordEnable)
+		{
+			mRecordEnable = recordEnable;
+		}
+
+		/// Gets whether the record alloc/dealloc enabled.
+		bool getRecordEnable() const
+		{
+			return mRecordEnable;
+		}
 
 		~MemoryTracker()
 		{

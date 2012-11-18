@@ -4,7 +4,7 @@ This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2009 Torus Knot Software Ltd
+Copyright (c) 2000-2012 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,9 +35,9 @@ THE SOFTWARE.
 #include "OgreAxisAlignedBox.h"
 #include "OgreVertexBoneAssignment.h"
 #include "OgreIteratorWrappers.h"
-#include "OgreProgressiveMesh.h"
 #include "OgreHardwareVertexBuffer.h"
 #include "OgreSkeleton.h"
+#include "OgreAnimation.h"
 #include "OgreAnimationTrack.h"
 #include "OgrePose.h"
 #include "OgreDataStream.h"
@@ -88,7 +88,7 @@ namespace Ogre {
     struct MeshLodUsage;
     class LodStrategy;
 
-    class _OgreExport Mesh: public Resource
+    class _OgreExport Mesh: public Resource, public AnimationContainer
     {
         friend class SubMesh;
         friend class MeshSerializerImpl;
@@ -176,11 +176,14 @@ namespace Ogre {
 		AnimationList mAnimationsList;
 		/// The vertex animation type associated with the shared vertex data
 		mutable VertexAnimationType mSharedVertexDataAnimationType;
+		/// Whether vertex animation includes normals
+		mutable bool mSharedVertexDataAnimationIncludesNormals;
 		/// Do we need to scan animations for animation types?
 		mutable bool mAnimationTypesDirty;
 
 		/// List of available poses for shared and dedicated geometryPoseList
 		PoseList mPoseList;
+		mutable bool mPosesIncludeNormals;
 
 
         /** Loads the mesh from disk.  This call only performs IO, it
@@ -360,9 +363,9 @@ namespace Ogre {
 		/** Returns whether or not this mesh has some kind of vertex animation. 
 		*/
 		bool hasVertexAnimation(void) const;
-
+		
 		/** Gets a pointer to any linked Skeleton. 
-        @returns Weak reference to the skeleton - copy this if you want to hold a strong pointer.
+        @return Weak reference to the skeleton - copy this if you want to hold a strong pointer.
         */
         const SkeletonPtr& getSkeleton(void) const;
 
@@ -417,34 +420,6 @@ namespace Ogre {
 		*/
 		const VertexBoneAssignmentList& getBoneAssignments() const { return mBoneAssignments; }
 
-
-		/** Automatically generates lower level of detail versions of this mesh for use
-			when a simpler version of the model is acceptable for rendering.
-		@remarks
-			There are 2 ways that you can create level-of-detail (LOD) versions of a mesh;
-			the first is to call this method, which does fairly extensive calculations to
-			work out how to simplify the mesh whilst having the minimum affect on the model.
-			The alternative is to actually create simpler versions of the mesh yourself in 
-			a modelling tool, and having exported them, tell the 'master' mesh to use these
-			alternative meshes for lower detail versions; this is done by calling the 
-			createManualLodLevel method.
-		@par
-			As well as creating the lower detail versions of the mesh, this method will
-			also associate them with depth values. As soon as an object is at least as far
-			away from the camera as the depth value associated with it's LOD, it will drop 
-			to that level of detail. 
-		@par
-			I recommend calling this method before mesh export, not at runtime.
-		@param lodValues A list of lod values indicating the values at which new lods should be
-		generated. These are 'user values', before being potentially 
-		transformed by the strategy, so for the distance strategy this is an
-		unsquared distance for example.
-		@param reductionMethod The way to determine the number of vertices collapsed per LOD
-		@param reductionValue Meaning depends on reductionMethod, typically either the proportion
-			of remaining vertices to collapse or a fixed number of vertices.
-		*/
-		void generateLodLevels(const LodValueList& lodValues, 
-			ProgressiveMesh::VertexReductionQuota reductionMethod, Real reductionValue);
 
 		/** Returns the number of levels of detail that this mesh supports. 
 		@remarks
@@ -569,7 +544,7 @@ namespace Ogre {
         @param vertexCount The number of vertices.
         @param assignments The bone assignment list to rationalise. This list will be modified and
             entries will be removed where the limits are exceeded.
-        @returns The maximum number of bone assignments per vertex found, clamped to [1-4]
+        @return The maximum number of bone assignments per vertex found, clamped to [1-4]
         */
         unsigned short _rationaliseBoneAssignments(size_t vertexCount, VertexBoneAssignmentList& assignments);
 
@@ -754,12 +729,14 @@ namespace Ogre {
 			for the duration)
         @param weight Parametric weight to scale the offsets by
 		@param vertexOffsetMap Potentially sparse map of vertex index -> offset
+		@param normalsMap Potentially sparse map of vertex index -> normal
 		@param targetVertexData VertexData destination; assumed to have a separate position
 			buffer already bound, and the number of vertices must agree with the
 			number in start and end
 		*/
 		static void softwareVertexPoseBlend(Real weight, 
 			const map<size_t, Vector3>::type& vertexOffsetMap,
+			const map<size_t, Vector3>::type& normalsMap,
 			VertexData* targetVertexData);
         /** Gets a reference to the optional name assignments of the SubMeshes. */
         const SubMeshNameMap& getSubMeshNameMap(void) const { return mSubMeshNameMap; }
@@ -785,6 +762,9 @@ namespace Ogre {
 		*/
 		virtual VertexAnimationType getSharedVertexDataAnimationType(void) const;
 
+		/// Returns whether animation on shared vertex data includes normals
+		bool getSharedVertexDataAnimationIncludesNormals() const { return mSharedVertexDataAnimationIncludesNormals; }
+
 		/** Creates a new Animation object for vertex animating this mesh. 
         @param name The name of this animation
         @param length The length of the animation in seconds
@@ -803,7 +783,7 @@ namespace Ogre {
 		virtual Animation* _getAnimationImpl(const String& name) const;
 
 		/** Returns whether this mesh contains the named vertex animation. */
-		virtual bool hasAnimation(const String& name);
+		virtual bool hasAnimation(const String& name) const;
 
         /** Removes vertex Animation from this mesh. */
         virtual void removeAnimation(const String& name);
@@ -848,7 +828,7 @@ namespace Ogre {
   	    @param target The target geometry index; 0 is the shared Mesh geometry, 1+ is the
 			dedicated SubMesh geometry belonging to submesh index + 1.
 		@param name Name to give the pose, which is optional
-		@returns A new Pose ready for population
+		@return A new Pose ready for population
 		*/
 		Pose* createPose(ushort target, const String& name = StringUtil::BLANK);
 		/** Get the number of poses.*/
