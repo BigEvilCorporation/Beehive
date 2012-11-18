@@ -9,6 +9,10 @@ SRC =
 	Material.h
 	Mesh.cpp
 	Mesh.h
+	PostEffect.cpp
+	PostEffect.h
+	PostEffectBloom.cpp
+	PostEffectBloom.h
 	Primitive.cpp
 	Primitive.h
 	Renderer.cpp

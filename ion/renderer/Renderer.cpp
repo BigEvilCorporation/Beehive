@@ -44,6 +44,12 @@ namespace ion
 
 			//Get window handle
 			mOgreWindow->getCustomAttribute("WINDOW", &mWindowHandle);
+
+			//Set Ogre resource manager locations
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation("materials\\ogre", "FileSystem");
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation("shaders\\ogre", "FileSystem");
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation("textures\\ogre", "FileSystem");
+			Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 		}
 
 		Renderer::~Renderer()
