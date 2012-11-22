@@ -2,7 +2,7 @@
 // File:		Hash.h
 // Date:		15th December 2011
 // Authors:		Matt Phillips
-// Description:	Various hashign algorithms
+// Description:	Various hashing algorithms
 ///////////////////////////////////////////////////
 
 #pragma once

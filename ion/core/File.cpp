@@ -83,7 +83,7 @@ namespace ion
 			
 				mStream.seekg(position, Dir);
 
-				return (u64)mStream.tellg();
+				return (unsigned int)mStream.tellg();
 			}
 		
 			return 0;
@@ -107,7 +107,7 @@ namespace ion
 			{
 				mStream.write((const char*)Data, Size);
 				mCurrentPosition = (int)mStream.tellp();
-				return mCurrentPosition;
+				return (unsigned int)mCurrentPosition;
 			}
 
 			return 0;
@@ -122,7 +122,7 @@ namespace ion
 		{
 			//If filesize has been cached
 			if(mSize)
-				return mSize;
+				return (unsigned int)mSize;
 
 			if(!mOpen)
 				return 0;
@@ -135,7 +135,7 @@ namespace ion
 		
 			mStream.seekg(CurrPos, std::ios::beg);
 
-			return mSize;
+			return (unsigned int)mSize;
 		}
 
 		unsigned int File::GetPosition()

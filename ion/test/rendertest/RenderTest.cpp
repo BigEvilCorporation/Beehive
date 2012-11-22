@@ -112,6 +112,13 @@ bool RenderTest::Initialise()
 	mQuadNode->Attach(*mQuad);
 	mQuadNode->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
 
+	ion::renderer::Primitive* quad = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	quad->AddQuad(mMaterial, 15.0f, 10.0f, ion::renderer::Primitive::xz, ion::Vector3());
+	quad->SetCastShadows(false);
+	ion::renderer::SceneNode* sceneNode = new ion::renderer::SceneNode(*mScene);
+	sceneNode->Attach(*quad);
+	sceneNode->SetPosition(ion::Vector3(-1.0f, -1.0f, -1.0f));
+
 	mCube = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
 	mCube->AddBox(mMaterial, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
 	mCube->SetCastShadows(true);
