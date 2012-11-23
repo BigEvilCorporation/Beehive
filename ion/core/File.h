@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Types.h"
+#include "Stream.h"
 
 #include <fstream>
 #include <string>
@@ -19,9 +20,9 @@ namespace ion
 	namespace io
 	{
 		bool FileExists(std::string filename);
-		int GetFileSize(std::string filename);
+		u64 GetFileSize(std::string filename);
 
-		class File
+		class File : public serialise::Stream
 		{
 		public:
 			enum OpenMode { OpenRead, OpenWrite, OpenAppend };
@@ -34,14 +35,14 @@ namespace ion
 			virtual bool Open(std::string filename, OpenMode openMode = OpenRead);
 			virtual void Close();
 
-			unsigned int Seek(u64 position, SeekMode origin = Current);
-			unsigned int Read(void* data, u64 size);
-			unsigned int Write(const void* data, u64 Size);
+			u64 Seek(u64 position, SeekMode origin = Current);
+			u64 Read(void* data, u64 size);
+			u64 Write(const void* data, u64 Size);
 
 			void Flush();
 
-			unsigned int GetSize();
-			unsigned int GetPosition();
+			u64 GetSize();
+			u64 GetPosition();
 
 			bool IsOpen() const;
 
