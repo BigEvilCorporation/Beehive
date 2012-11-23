@@ -3,6 +3,8 @@ SubDir ion core ;
 SRC =
 	Application.cpp
 	Application.h
+	Archive.cpp
+	Archive.h
 	BinaryFile.cpp
 	BinaryFile.h
 	Colour.cpp
@@ -19,6 +21,10 @@ SRC =
 	Hash.h
 	MemoryManager.cpp
 	MemoryManager.h
+	Serialise.cpp
+	Serialise.h
+	Stream.cpp
+	Stream.h
 	Thread.cpp
 	Thread.h
 	Time.cpp
