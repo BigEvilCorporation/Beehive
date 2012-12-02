@@ -84,11 +84,10 @@ namespace ion
 			return (int)mChildren.size();
 		}
 
-		bool BinaryFile::Chunk::AddChild(Chunk& chunk)
+		void BinaryFile::Chunk::AddChild(Chunk& chunk)
 		{
 			mChildren.push_back(chunk);
 			mHeader.TotalSize = GetChunkSize();
-			return true;
 		}
 
 		void BinaryFile::Chunk::SetData(void* Data, u64 Size, u64 NumItems)
@@ -108,12 +107,7 @@ namespace ion
 			mChunkStartPos = InFile->GetPosition();
 
 			//Read header
-			if(InFile->Read(&mHeader, sizeof(ChunkHeader)) == sizeof(ChunkHeader))
-			{
-				return true;
-			}
-
-			return false;
+			return (InFile->Read(&mHeader, sizeof(ChunkHeader)) == sizeof(ChunkHeader));
 		}
 
 		u64 BinaryFile::Chunk::GetChunkStartPos()

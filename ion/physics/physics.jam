@@ -1,0 +1,14 @@
+SubDir ion physics ;
+
+SRC =
+	Body.cpp
+	Body.h
+	World.cpp
+	World.h
+	;
+
+ApplyBulletSDK physics ;
+
+AutoSourceGroup physics : $(SRC) ;
+
+C.Library physics : $(SRC) ;

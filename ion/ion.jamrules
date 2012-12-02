@@ -48,6 +48,13 @@ rule ApplyIonRenderer TARGET
 	ApplyDirectXSDK $(TARGET) ;
 }
 
+rule ApplyIonPhysics TARGET
+{
+	ApplyIonLib $(TARGET) : physics ;
+
+	ApplyBulletSDK $(TARGET) ;
+}
+
 #################################################
 ## Apply external SDKs
 #################################################
@@ -162,4 +169,25 @@ rule ApplyCEGUISDK TARGET
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(CEGUI_LIBS_DEBUG) : debug ;
 	C.LinkPrebuiltLibraries $(TARGET) : $(CEGUI_LIBS_RELEASE) : release ;
+}
+
+rule ApplyBulletSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/Bullet/include ;
+	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/Bullet/lib ;
+
+	BULLET_LIBS_DEBUG = 
+		BulletCollision_debug.lib
+		BulletDynamics_debug.lib
+		LinearMath_debug.lib
+		;
+
+	BULLET_LIBS_RELEASE = 
+		BulletCollision.lib
+		BulletDynamics.lib
+		LinearMath.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_DEBUG) : debug ;
+	C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_RELEASE) : release ;
 }
