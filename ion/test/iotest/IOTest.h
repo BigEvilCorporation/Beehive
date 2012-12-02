@@ -18,6 +18,9 @@ public:
 	bool Update(float deltaTime);
 	void Render();
 
+	void TestBasicSerialisation();
+	void TestVersionedSerialisation();
+
 	ion::io::FileSystem* mFileSystem;
 
 	ion::input::Keyboard* mKeyboard;
