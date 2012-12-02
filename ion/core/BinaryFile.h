@@ -59,7 +59,7 @@ namespace ion
 				int GetNumChildren();
 
 				//Add a child chunk
-				bool AddChild(Chunk& chunk);
+				void AddChild(Chunk& chunk);
 
 				//Iterate through chunks
 				Chunk Begin();

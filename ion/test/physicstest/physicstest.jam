@@ -1,0 +1,16 @@
+SubDir ion test physicstest ;
+
+ApplyIonCore physicstest ;
+ApplyIonInput physicstest ;
+ApplyIonRenderer physicstest ;
+ApplyIonPhysics physicstest ;
+
+SRC = 
+	main.cpp
+	PhysicsTest.cpp
+	PhysicsTest.h
+	;
+	
+AutoSourceGroup physicstest : $(SRC) ;
+C.RuntimeType physicstest : dynamic ;
+C.Application physicstest : $(SRC) ;
