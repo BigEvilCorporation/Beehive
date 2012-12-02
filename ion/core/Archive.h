@@ -21,40 +21,41 @@ namespace ion
 		public:
 			enum Direction { In, Out };
 
-			Archive(Stream& stream, Direction direction);
-
-			//Raw serialisation of basic types (endian flipped if < 4 bytes)
-			template <typename T> void Serialise(T& object);
+			Archive(Stream& stream, Direction direction, u32 version);
 
 			//Serialise a Serialisable-derived type
 			void Serialise(Serialisable& object);
 
-			//Raw serialisation of an array
-			template <typename T> void Serialise(std::vector<T>& objects);
+			//Raw serialisation
+			void Serialise(void* data, u64 size);
+
+			//Raw serialisation of basic types (with endian flipping)
+			void Serialise(u8& data);
+			void Serialise(s8& data);
+			void Serialise(u16& data);
+			void Serialise(s16& data);
+			void Serialise(u32& data);
+			void Serialise(s32& data);
+			void Serialise(u64& data);
+			void Serialise(s64& data);
+			void Serialise(float& data);
 
 			//Serialise a string
 			void Serialise(std::string& string);
 
+			//Serialise an array
+			template <typename T> void Serialise(std::vector<T>& objects);
+
 			Direction GetDirection() const;
+			u32 GetVersion() const;
 
 		private:
 			Stream& mStream;
 			Direction mDirection;
+			u32 mVersion;
 		};
 
 		//Template functions belong in header
-		template <typename T> void Archive::Serialise(T& object)
-		{
-			if(GetDirection() == In)
-			{
-				mStream.Read(&object, sizeof(T));
-			}
-			else
-			{
-				mStream.Write(&object, sizeof(T));
-			}
-		}
-
 		template <typename T> void Archive::Serialise(std::vector<T>& objects)
 		{
 			if(GetDirection() == In)
