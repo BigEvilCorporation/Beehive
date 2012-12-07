@@ -241,7 +241,6 @@ namespace ion
 			{
 				AddIndex(i);
 			}
-			
 
 			End();
 		}
@@ -268,7 +267,7 @@ namespace ion
 					AddNormal(Vector3(x0, y0, z0).Normalise());
 					AddTextureCoord(TexCoord((float)seg / (float)segments, (float)ring / (float)rings));
 
-					if (ring != rings)
+					if(ring != rings)
 					{
 						AddIndex(vertexIndex + segments + 1);
 						AddIndex(vertexIndex);               

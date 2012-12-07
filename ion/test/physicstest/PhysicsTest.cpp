@@ -3,9 +3,6 @@
 #include "core/Debug.h"
 #include "core/Time.h"
 
-#include "btBulletCollisionCommon.h"
-#include "btBulletDynamicsCommon.h"
-
 #include <sstream>
 
 PhysicsTest::PhysicsTest()
@@ -28,9 +25,6 @@ PhysicsTest::PhysicsTest()
 PhysicsTest::~PhysicsTest()
 {
 }
-
-btDiscreteDynamicsWorld* dynamicsWorld = NULL;
-btRigidBody* fallRigidBody = NULL;
 
 bool PhysicsTest::Initialise()
 {
@@ -58,7 +52,7 @@ bool PhysicsTest::Initialise()
 
 	//Create directional light
 	mDirectionalLight = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
-	mDirectionalLight->SetDirection(ion::Vector3(-1.0f, -1.0f, -1.0f));
+	mDirectionalLight->SetDirection(ion::Vector3(1.0f, -1.0f, 1.0f));
 
 	//Set default camera position and direction
 	mCamera->SetPosition(ion::Vector3(0.0f, 2.0f, 10.0f));
@@ -72,38 +66,24 @@ bool PhysicsTest::Initialise()
 
 	//Create cube
 	mCube = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-	//mCube->AddBox(NULL, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
-	mCube->AddSphere(NULL, 1.0f, 16, 16);
+	mCube->AddBox(NULL, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
 	mCubeNode = new ion::renderer::SceneNode(*mScene);
 	mCubeNode->Attach(*mCube);
-	mCubeNode->SetPosition(ion::Vector3(-2.0f, 0.5f, 0.0f));
 
-	btBroadphaseInterface* broadphase = new btDbvtBroadphase();
-	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
-	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
-    btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
-	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0,-10,0));
+	mPhysicsWorld = new ion::physics::World;
+	mPhysicsWorld->SetGravity(ion::Vector3(0.0f, -9.8f, 0.0f));
 
-	btCollisionShape* fallShape = new btSphereShape(1);
-	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),1);
-	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0)));
-	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
-	groundRigidBodyCI.m_restitution = 1.0f;
-	groundRigidBodyCI.m_friction = 1.0f;
-    btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-	dynamicsWorld->addRigidBody(groundRigidBody);
+	mPhysicsFloor = new ion::physics::Body(ion::physics::Body::InfinitePlane, ion::Vector3(0.0f, 1.0f, 0.0f));
+	mPhysicsWorld->AddBody(*mPhysicsFloor);
 
-	btDefaultMotionState* fallMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,10,0)));
-	btScalar mass = 10;
-    btVector3 fallInertia(0,0,0);
-    fallShape->calculateLocalInertia(mass,fallInertia);
-	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass,fallMotionState,fallShape,fallInertia);
-	fallRigidBodyCI.m_restitution = 0.5f;
-	fallRigidBodyCI.m_friction = 1.0f;
-    fallRigidBody = new btRigidBody(fallRigidBodyCI);
-    dynamicsWorld->addRigidBody(fallRigidBody);
+	mPhysicsBox = new ion::physics::Body(ion::physics::Body::Box, ion::Vector3(0.5f, 0.5f, 0.5f));
 
+	ion::Matrix4 boxTransform;
+	boxTransform.SetTranslation(ion::Vector3(0.0f, 10.0f, 0.0f));
+	mPhysicsBox->SetTransform(boxTransform);
+
+	mPhysicsWorld->AddBody(*mPhysicsBox);
+	
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
 	
@@ -166,11 +146,10 @@ bool PhysicsTest::Update(float deltaTime)
 	mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
 
 	//Update physics world using 10 substeps
-	dynamicsWorld->stepSimulation(deltaTime, 10);
+	mPhysicsWorld->Step(deltaTime, 10);
 
-	btTransform trans;
-    fallRigidBody->getMotionState()->getWorldTransform(trans);
-	//mCubeNode->SetPosition(ion::Vector3(trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z()));
+	//Update graphics from physics simulation
+	mCubeNode->SetTransform(mPhysicsBox->GetTransform());
 
 	//Update renderer
 	mRenderer->Update(deltaTime);
