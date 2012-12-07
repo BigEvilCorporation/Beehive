@@ -11,6 +11,8 @@
 #include "renderer/Viewport.h"
 #include "renderer/Primitive.h"
 #include "renderer/Light.h"
+#include "physics/World.h"
+#include "physics/Body.h"
 
 class PhysicsTest : public ion::framework::Application
 {
@@ -37,6 +39,10 @@ public:
 	ion::renderer::Primitive* mCube;
 	ion::renderer::SceneNode* mQuadNode;
 	ion::renderer::SceneNode* mCubeNode;
+
+	ion::physics::World* mPhysicsWorld;
+	ion::physics::Body* mPhysicsFloor;
+	ion::physics::Body* mPhysicsBox;
 
 	float mCameraPitch;
 	float mCameraYaw;
