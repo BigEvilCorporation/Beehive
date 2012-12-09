@@ -1,4 +1,4 @@
-SubDir ion renderer ;
+SubDir bigevilcorp ion renderer ;
 
 SRC =
 	Camera.cpp

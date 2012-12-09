@@ -197,14 +197,6 @@ bool PhysicsTest::Update(float deltaTime)
 	mCamera->Pitch(-mouseDeltaY * mMouseSensitivity);
 	mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
 
-	//Fire projectile after box stack has had time to settle
-	if(mApplicationTime > 3.0f && !mProjectileTriggered)
-	{
-		mPhysicsWorld->AddBody(*mPhysicsProjectile);
-		mPhysicsProjectile->SetLinearVelocity(ion::Vector3(0.0f, 0.0f, -20.0f));
-		mProjectileTriggered = true;
-	}
-
 	//Move character
 	const float characterMoveSpeed = 0.15f;
 	const float characterJumpForce(10.0f);
@@ -222,6 +214,14 @@ bool PhysicsTest::Update(float deltaTime)
 		mPhysicsCharacter->Jump(characterJumpForce);
 	
 	mPhysicsCharacter->SetMoveVector(characterMoveVector);
+
+	//Fire projectile after box stack has had time to settle
+	if(mApplicationTime > 3.0f && !mProjectileTriggered)
+	{
+		mPhysicsWorld->AddBody(*mPhysicsProjectile);
+		mPhysicsProjectile->SetLinearVelocity(ion::Vector3(0.0f, 0.0f, -20.0f));
+		mProjectileTriggered = true;
+	}
 
 	//Update physics world using 10 substeps
 	mPhysicsWorld->Step(deltaTime, 10);

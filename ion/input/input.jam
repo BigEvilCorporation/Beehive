@@ -1,4 +1,4 @@
-SubDir ion input ;
+SubDir bigevilcorp ion input ;
 
 SRC =
 	Gamepad.cpp

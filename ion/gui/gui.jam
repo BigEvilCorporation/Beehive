@@ -1,4 +1,4 @@
-SubDir ion gui ;
+SubDir bigevilcorp ion gui ;
 
 SRC =
 	Button.cpp
