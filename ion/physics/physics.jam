@@ -3,6 +3,8 @@ SubDir ion physics ;
 SRC =
 	Body.cpp
 	Body.h
+	Character.cpp
+	Character.h
 	World.cpp
 	World.h
 	;

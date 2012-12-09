@@ -297,7 +297,6 @@ namespace ion
 		else
 		{
 			int next[3] = { 1, 2, 0 };
-			Vector3 vec;
 
 			int i = 0;
 			if (Matrix.Get(1, 1) > Matrix.Get(0, 0)) i = 1;
@@ -308,15 +307,11 @@ namespace ion
 
 			float root = sqrt(Matrix.Get(i, i) - Matrix.Get(j, j) - Matrix.Get(k, k) + 1);
 
-			vec.x = 0.5f * root;
+			x = 0.5f * root;
 			root = 0.5f / root;
-			vec.y = (Matrix.Get(j, i) + Matrix.Get(i, j)) * root;
-			vec.z = (Matrix.Get(k, i) + Matrix.Get(i, k)) * root;
-			w      = (Matrix.Get(k, j) - Matrix.Get(j, k)) * root;
-
-			x = vec.x;
-			y = vec.y;
-			z = vec.z;
+			y = (Matrix.Get(j, i) + Matrix.Get(i, j)) * root;
+			z = (Matrix.Get(k, i) + Matrix.Get(i, k)) * root;
+			w = (Matrix.Get(k, j) - Matrix.Get(j, k)) * root;
 		}
 	}
 

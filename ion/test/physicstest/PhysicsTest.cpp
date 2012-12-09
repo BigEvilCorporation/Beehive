@@ -19,6 +19,9 @@ PhysicsTest::PhysicsTest()
 	mCameraSpeed = 10.0f;
 	mMouseSensitivity = 0.005f;
 
+	mApplicationTime = 0.0f;
+	mProjectileTriggered = false;
+
 	mFrameCount = 0;
 }
 
@@ -64,25 +67,74 @@ bool PhysicsTest::Initialise()
 	mQuadNode = new ion::renderer::SceneNode(*mScene);
 	mQuadNode->Attach(*mQuad);
 
-	//Create cube
-	mCube = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-	mCube->AddBox(NULL, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
-	mCubeNode = new ion::renderer::SceneNode(*mScene);
-	mCubeNode->Attach(*mCube);
-
+	//Create physics world
 	mPhysicsWorld = new ion::physics::World;
 	mPhysicsWorld->SetGravity(ion::Vector3(0.0f, -9.8f, 0.0f));
 
+	//Create physics floor
 	mPhysicsFloor = new ion::physics::Body(ion::physics::Body::InfinitePlane, ion::Vector3(0.0f, 1.0f, 0.0f));
 	mPhysicsWorld->AddBody(*mPhysicsFloor);
 
-	mPhysicsBox = new ion::physics::Body(ion::physics::Body::Box, ion::Vector3(0.5f, 0.5f, 0.5f));
+	//Ensure it's immovable
+	mPhysicsFloor->SetMass(0.0f);
 
+	//Create box stack
+	for(int x = 0; x < sBoxStackWidth; x++)
+	{
+		for(int y = 0; y < sBoxStackHeight; y++)
+		{
+			//Create graphical box and scene node
+			mCubes[x][y] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+			mCubes[x][y]->AddBox(NULL, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
+			mCubeNodes[x][y] = new ion::renderer::SceneNode(*mScene);
+			mCubeNodes[x][y]->Attach(*mCubes[x][y]);
+
+			//Create physics box
+			mPhysicsBoxes[x][y] = new ion::physics::Body(ion::physics::Body::Box, ion::Vector3(0.5f, 0.5f, 0.5f));
+			mPhysicsWorld->AddBody(*mPhysicsBoxes[x][y]);
+
+			//Set initial transform
+			ion::Matrix4 boxTransform;
+			boxTransform.SetTranslation(ion::Vector3((float)x - (sBoxStackWidth / 2), (float)y + 0.5f, 0.0f));
+			mPhysicsBoxes[x][y]->SetTransform(boxTransform);
+		}
+	}
+
+	//Create projectile box
+	mProjectile = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mProjectile->AddBox(NULL, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
+	mProjectileNode = new ion::renderer::SceneNode(*mScene);
+	mProjectileNode->Attach(*mProjectile);
+
+	//Create projectile physics box
+	mPhysicsProjectile = new ion::physics::Body(ion::physics::Body::Box, ion::Vector3(0.5f, 0.5f, 0.5f));
+
+	//Set initial transform
 	ion::Matrix4 boxTransform;
-	boxTransform.SetTranslation(ion::Vector3(0.0f, 10.0f, 0.0f));
-	mPhysicsBox->SetTransform(boxTransform);
+	boxTransform.SetTranslation(ion::Vector3(0.25f, 5.0f, 10.0f));
+	mPhysicsProjectile->SetTransform(boxTransform);
 
-	mPhysicsWorld->AddBody(*mPhysicsBox);
+	//Set mass
+	mPhysicsProjectile->SetMass(5.0f);
+
+	//Create character box
+	const ion::Vector2 characterDimensions(0.5f, 1.0f);
+	mCharacter = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mCharacter->AddBox(NULL, ion::Vector3(characterDimensions.x, characterDimensions.y, characterDimensions.x), ion::Vector3());
+	mCharacterNode = new ion::renderer::SceneNode(*mScene);
+	mCharacterNode->Attach(*mCharacter);
+
+	//Create physics character
+	mPhysicsCharacter = new ion::physics::Character(characterDimensions);
+	mPhysicsWorld->AddCharacter(*mPhysicsCharacter);
+
+	//Set initial transform
+	ion::Matrix4 characterTransform;
+	characterTransform.SetTranslation(ion::Vector3(0.0f, characterDimensions.y / 2.0f, 5.0f));
+	mPhysicsCharacter->SetTransform(characterTransform);
+
+	//Set max jump height
+	mPhysicsCharacter->SetMaxJumpHeight(characterDimensions.y);
 	
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
@@ -116,14 +168,14 @@ void PhysicsTest::Shutdown()
 
 bool PhysicsTest::Update(float deltaTime)
 {
+	mApplicationTime += deltaTime;
+
 	mKeyboard->Update();
 	mMouse->Update();
 	mGamepad->Update();
 
 	//Get state of escape key and gamepad back/select button, for exit
-	bool exit = mKeyboard->KeyDown(DIK_ESCAPE);
-	if(!exit)
-		exit = mGamepad->ButtonDown(ion::input::Gamepad::SELECT);
+	bool exit = mKeyboard->KeyDown(DIK_ESCAPE) || mGamepad->ButtonDown(ion::input::Gamepad::SELECT);
 
 	//Create camera move vector from WASD state
 	ion::Vector3 cameraMoveVector;
@@ -145,11 +197,47 @@ bool PhysicsTest::Update(float deltaTime)
 	mCamera->Pitch(-mouseDeltaY * mMouseSensitivity);
 	mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
 
+	//Fire projectile after box stack has had time to settle
+	if(mApplicationTime > 3.0f && !mProjectileTriggered)
+	{
+		mPhysicsWorld->AddBody(*mPhysicsProjectile);
+		mPhysicsProjectile->SetLinearVelocity(ion::Vector3(0.0f, 0.0f, -20.0f));
+		mProjectileTriggered = true;
+	}
+
+	//Move character
+	const float characterMoveSpeed = 0.15f;
+	const float characterJumpForce(10.0f);
+	ion::Vector3 characterMoveVector;
+	
+	if(mKeyboard->KeyDown(DIK_UP))
+		characterMoveVector.z -= characterMoveSpeed;
+	if(mKeyboard->KeyDown(DIK_DOWN))
+		characterMoveVector.z += characterMoveSpeed;
+	if(mKeyboard->KeyDown(DIK_LEFT))
+		characterMoveVector.x -= characterMoveSpeed;
+	if(mKeyboard->KeyDown(DIK_RIGHT))
+		characterMoveVector.x += characterMoveSpeed;
+	if(mKeyboard->KeyPressedThisFrame(DIK_SPACE))
+		mPhysicsCharacter->Jump(characterJumpForce);
+	
+	mPhysicsCharacter->SetMoveVector(characterMoveVector);
+
 	//Update physics world using 10 substeps
 	mPhysicsWorld->Step(deltaTime, 10);
 
-	//Update graphics from physics simulation
-	mCubeNode->SetTransform(mPhysicsBox->GetTransform());
+	//Update box stack graphics from physics simulation
+	for(int x = 0; x < sBoxStackWidth; x++)
+	{
+		for(int y = 0; y < sBoxStackHeight; y++)
+		{
+			mCubeNodes[x][y]->SetTransform(mPhysicsBoxes[x][y]->GetTransform());
+		}
+	}
+
+	//Update projectile graphics from physics simulation
+	mProjectileNode->SetTransform(mPhysicsProjectile->GetTransform());
+	mCharacterNode->SetTransform(mPhysicsCharacter->GetTransform());
 
 	//Update renderer
 	mRenderer->Update(deltaTime);
@@ -161,7 +249,7 @@ bool PhysicsTest::Update(float deltaTime)
 		u64 endTicks = ion::time::GetSystemTicks();
 		u64 diffTicks = endTicks - mStartTicks;
 
-		//Calc frame time and frames per secod
+		//Calc frame time and frames per second
 		float frameTime = (float)ion::time::TicksToSeconds(diffTicks) / 100.0f;
 		float framesPerSecond = 1.0f / frameTime;
 
