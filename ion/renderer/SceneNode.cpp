@@ -55,10 +55,13 @@ namespace ion
 			#if !defined ION_PLUGIN
 			if(mOgreSceneNode)
 			{
-				Quaternion quat;
-				quat.FromMatrix(matrix);
+				Ogre::Matrix3 ogreMtx3(
+					matrix.Get(0,0), matrix.Get(0,1), matrix.Get(0,2), 
+					matrix.Get(1,0), matrix.Get(1,1), matrix.Get(1,2), 
+					matrix.Get(2,0), matrix.Get(2,1), matrix.Get(2,2) );
+
 				SetPosition(matrix.GetTranslation());
-				mOgreSceneNode->setOrientation(Ogre::Quaternion(quat.w, quat.x, quat.y, quat.z));
+				mOgreSceneNode->setOrientation(Ogre::Quaternion(ogreMtx3));
 			}
 			#endif
 		}

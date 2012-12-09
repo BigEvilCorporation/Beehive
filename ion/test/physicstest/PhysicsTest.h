@@ -13,6 +13,7 @@
 #include "renderer/Light.h"
 #include "physics/World.h"
 #include "physics/Body.h"
+#include "physics/Character.h"
 
 class PhysicsTest : public ion::framework::Application
 {
@@ -35,19 +36,32 @@ public:
 
 	ion::renderer::Light* mDirectionalLight;
 
+	static const int sBoxStackWidth = 5;
+	static const int sBoxStackHeight = 5;
+
 	ion::renderer::Primitive* mQuad;
-	ion::renderer::Primitive* mCube;
+	ion::renderer::Primitive* mCubes[sBoxStackWidth][sBoxStackHeight];
+	ion::renderer::Primitive* mProjectile;
+	ion::renderer::Primitive* mCharacter;
 	ion::renderer::SceneNode* mQuadNode;
-	ion::renderer::SceneNode* mCubeNode;
+	ion::renderer::SceneNode* mCubeNodes[sBoxStackWidth][sBoxStackHeight];
+	ion::renderer::SceneNode* mProjectileNode;
+	ion::renderer::SceneNode* mCharacterNode;
 
 	ion::physics::World* mPhysicsWorld;
 	ion::physics::Body* mPhysicsFloor;
-	ion::physics::Body* mPhysicsBox;
+	ion::physics::Body* mPhysicsBoxes[sBoxStackWidth][sBoxStackHeight];
+	ion::physics::Body* mPhysicsProjectile;
+	ion::physics::Character* mPhysicsCharacter;
+
+	bool mProjectileTriggered;
 
 	float mCameraPitch;
 	float mCameraYaw;
 	float mCameraSpeed;
 	float mMouseSensitivity;
+
+	float mApplicationTime;
 
 	u64 mStartTicks;
 	u32 mFrameCount;

@@ -15,7 +15,7 @@ namespace ion
 		{
 			//Defaults
 			mMass = 1.0f;
-			float initialFriction = 0.8f;
+			float initialFriction = 1.0f;
 			float initialRestitution = 0.2f;
 
 			//Create Bullet shape
@@ -35,7 +35,7 @@ namespace ion
 			};
 			
 			//Create Bullet motion state
-			mBulletMotionState = new btDefaultMotionState(btTransform(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f), btVector3(0.0f, 0.0f, 0.0f)));
+			mBulletMotionState = new BulletMotionState();
 
 			//Calculate initial inertia
 			btVector3 initialInertia(0,0,0);
@@ -52,17 +52,23 @@ namespace ion
 
 		void Body::SetTransform(const ion::Matrix4& transform)
 		{
-			mMatrix = transform;
-			btTransform bulletTransform;
-			bulletTransform.setFromOpenGLMatrix(transform.GetAsFloatArray());
-			mBulletMotionState->setWorldTransform(bulletTransform);
+			btTransform worldTrans;
+			worldTrans.setFromOpenGLMatrix(transform.GetAsFloatArray());
+			mBulletMotionState->mMatrix = transform;
+			mBulletBody->setWorldTransform(worldTrans);
 		}
 
 		void Body::SetMass(float mass)
 		{
 			btVector3 inertia(0,0,0);
-			mBulletShape->calculateLocalInertia(mass, inertia);
+
+			if(mass > 0.0f)
+			{
+				mBulletShape->calculateLocalInertia(mass, inertia);
+			}
+
 			mBulletBody->setMassProps(mass, inertia);
+			mMass = mass;
 		}
 
 		void Body::SetFriction(float friction)
@@ -75,14 +81,39 @@ namespace ion
 			mBulletBody->setRestitution(restitution);
 		}
 
+		void Body::SetLinearVelocity(const ion::Vector3& velocity)
+		{
+			mBulletBody->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+		}
+
+		void Body::SetAngularVelocity(const ion::Vector3& velocity)
+		{
+			mBulletBody->setAngularVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+		}
+
+		void Body::ApplyLinearForce(const ion::Vector3& force, const ion::Vector3& relativePosition)
+		{
+			mBulletBody->applyForce(btVector3(force.x, force.y, force.z), btVector3(relativePosition.x, relativePosition.y, relativePosition.z));
+		}
+
+		void Body::ApplyAngularForce(const ion::Vector3& force)
+		{
+			mBulletBody->applyTorque(btVector3(force.x, force.y, force.z));
+		}
+
+		void Body::ApplyLinearImpulse(const ion::Vector3& impulse, const ion::Vector3& relativePosition)
+		{
+			mBulletBody->applyImpulse(btVector3(impulse.x, impulse.y, impulse.z), btVector3(relativePosition.x, relativePosition.y, relativePosition.z));
+		}
+
+		void Body::ApplyAngularImpulse(const ion::Vector3& impulse)
+		{
+			mBulletBody->applyTorqueImpulse(btVector3(impulse.x, impulse.y, impulse.z));
+		}
+
 		const ion::Matrix4& Body::GetTransform()
 		{
-			btTransform transform;
-			mBulletMotionState->getWorldTransform(transform);
-			float mtx44[16] = { 0.0f };
-			transform.getOpenGLMatrix(mtx44);
-			mMatrix = Matrix4(mtx44);
-			return mMatrix;
+			return mBulletMotionState->mMatrix;
 		}
 
 		float Body::GetMass() const

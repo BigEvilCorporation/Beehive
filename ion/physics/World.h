@@ -20,6 +20,7 @@ namespace ion
 	{
 		//Forward declaration
 		class Body;
+		class Character;
 
 		class World
 		{
@@ -30,6 +31,9 @@ namespace ion
 
 			void AddBody(Body& body);
 			void RemoveBody(Body& body);
+
+			void AddCharacter(Character& character);
+			void RemoveCharacter(Character& character);
 
 			void Step(float deltaTime, int numSubSteps);
 
