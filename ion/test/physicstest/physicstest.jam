@@ -1,4 +1,4 @@
-SubDir ion test physicstest ;
+SubDir bigevilcorp ion test physicstest ;
 
 ApplyIonCore physicstest ;
 ApplyIonInput physicstest ;

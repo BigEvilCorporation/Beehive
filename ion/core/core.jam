@@ -1,4 +1,4 @@
-SubDir ion core ;
+SubDir bigevilcorp ion core ;
 
 SRC =
 	Application.cpp

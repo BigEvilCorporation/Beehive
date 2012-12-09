@@ -1,4 +1,4 @@
-SubDir ion physics ;
+SubDir bigevilcorp ion physics ;
 
 SRC =
 	Body.cpp

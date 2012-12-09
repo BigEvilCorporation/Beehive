@@ -1,0 +1,16 @@
+SubDir bigevilcorp watershed ;
+
+ApplyIonCore watershed ;
+ApplyIonInput watershed ;
+ApplyIonRenderer watershed ;
+ApplyIonPhysics watershed ;
+
+SRC = 
+	main.cpp
+	Watershed.cpp
+	Watershed.h
+	;
+	
+AutoSourceGroup watershed : $(SRC) ;
+C.RuntimeType watershed : dynamic ;
+C.Application watershed : $(SRC) ;

@@ -1,4 +1,4 @@
-SubDir ion editor ;
+SubDir bigevilcorp ion editor ;
 
 SRC =
 	MaterialEditor.h

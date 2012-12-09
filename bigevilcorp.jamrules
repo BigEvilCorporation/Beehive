@@ -4,8 +4,8 @@
 #################################################
 rule ApplyIonLib TARGET : LIBNAME
 {
-	SubInclude ion $(LIBNAME) : $(LIBNAME) ;
-	C.IncludeDirectories $(TARGET) : $(ion) ;
+	SubInclude bigevilcorp ion $(LIBNAME) : $(LIBNAME) ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion ;
 	C.LinkLibraries $(TARGET) : $(LIBNAME) ;
 }
 
@@ -109,11 +109,11 @@ rule ApplyDirectXSDK TARGET
 
 rule ApplyOgreSDK TARGET
 {
-	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Include ;
-	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Lib ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Include ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Lib ;
 
 	#Required for Ogre itself, since it doesn't prepend directories to its #includes
-	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/OgreSDK/Include/OGRE ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Include/OGRE ;
 
 	OGRE_LIBS_DEBUG = 
 		OgreMain_d.lib
@@ -147,8 +147,8 @@ rule ApplyOgreSDK TARGET
 
 rule ApplyCEGUISDK TARGET
 {
-	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/CEGUI/Include ;
-	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/CEGUI/Lib ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/CEGUI/Include ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/CEGUI/Lib ;
 	C.Defines $(TARGET) : CEGUI_VERSION=7 ;
 
 	CEGUI_LIBS_DEBUG = 
@@ -173,8 +173,8 @@ rule ApplyCEGUISDK TARGET
 
 rule ApplyBulletSDK TARGET
 {
-	C.IncludeDirectories $(TARGET) : $(ion)/Dependencies/Bullet/include ;
-	C.LinkDirectories $(TARGET) : $(ion)/Dependencies/Bullet/lib ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/Bullet/include ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/Bullet/lib ;
 
 	BULLET_LIBS_DEBUG = 
 		BulletCollision_debug.lib
