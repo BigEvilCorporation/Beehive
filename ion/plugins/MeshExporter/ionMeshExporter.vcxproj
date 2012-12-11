@@ -83,6 +83,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\renderer\Mesh.cpp" />
+    <ClCompile Include="..\..\renderer\TexCoord.cpp" />
     <ClCompile Include="MeshExporter.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -91,11 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ionMeshExport.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\ion.vcxproj">
-      <Project>{e1e81cdb-d064-40ea-a4f9-7fd3c36cbe86}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

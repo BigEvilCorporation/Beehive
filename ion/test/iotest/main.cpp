@@ -19,7 +19,7 @@ int main(char** args, int numargs)
 			}
 
 			u64 endTicks = ion::time::GetSystemTicks();
-			deltaTime = (float)ion::time::TicksToSeconds(endTicks) - (float)ion::time::TicksToSeconds(startTicks);
+			deltaTime = (float)ion::time::TicksToSeconds(endTicks - startTicks);
 		}
 
 		app.Shutdown();

@@ -184,22 +184,22 @@ namespace ion
 			//Add indices
 
 			//Top
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
 
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
 
 			//Bottom																															   
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 1.0f));
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
 																																				   
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
-			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
-			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, 1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
+			AddVertex(Vertex(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(1.0f, 0.0f));
+			AddVertex(Vertex(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z - halfExtents.z)); AddNormal(Vector3(0.0f, -1.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 0.0f));
 
 			//Left
 			AddVertex(Vertex(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z)); AddNormal(Vector3(-1.0f, 0.0f, 0.0f)); AddTextureCoord(TexCoord(0.0f, 1.0f));
