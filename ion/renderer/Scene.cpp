@@ -39,10 +39,13 @@ namespace ion
 
 			Ogre::Entity* sceneMeshEntity = mOgreSceneMgrIFace->createEntity(mSceneMesh->GetOgreMesh()->getName());
 			mOgreSceneMgrIFace->getRootSceneNode()->attachObject(sceneMeshEntity);
-			mOgreSceneMgrIFace->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
 
-			Ogre::ShadowCameraSetupPtr shadowCameraSetup(new Ogre::DefaultShadowCameraSetup);
-			mOgreSceneMgrIFace->setShadowCameraSetup(shadowCameraSetup);
+			//Default shadow setup
+			mOgreSceneMgrIFace->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_ADDITIVE);
+			SetShadowFarDistance(10.0f);
+			SetShadowTextureResolution(2048);
+			SetShadowTextureCount(2);
+			SetShadowColour(ColourRGB(0.7f, 0.7f, 0.7f));
 			#endif
 		}
 
@@ -97,6 +100,21 @@ namespace ion
 			#if !defined ION_PLUGIN
 			mOgreSceneMgrIFace->setShadowFarDistance(distance);
 			#endif
+		}
+
+		void Scene::SetShadowColour(const ColourRGB& colour)
+		{
+			mOgreSceneMgrIFace->setShadowColour(Ogre::ColourValue(colour.r, colour.g, colour.b));
+		}
+
+		void Scene::SetShadowTextureResolution(int resolution)
+		{
+			mOgreSceneMgrIFace->setShadowTextureSize(resolution);
+		}
+
+		void Scene::SetShadowTextureCount(int count)
+		{
+			mOgreSceneMgrIFace->setShadowTextureCount(count);
 		}
 
 		bool Scene::Load(std::string filename)

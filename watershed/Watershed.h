@@ -11,6 +11,7 @@
 #include "renderer/Viewport.h"
 #include "renderer/Primitive.h"
 #include "renderer/Light.h"
+#include "renderer/Material.h"
 #include "physics/World.h"
 #include "physics/Body.h"
 #include "physics/Character.h"
@@ -53,6 +54,7 @@ public:
 
 	//Character
 	ion::renderer::Primitive* mCharacter;
+	ion::renderer::Material* mCharacterMaterial;
 	ion::renderer::SceneNode* mCharacterNode;
 	ion::physics::Character* mCharacterBody;
 	float mCharacterAcceleration;

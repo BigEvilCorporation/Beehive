@@ -22,9 +22,16 @@ namespace ion
 
 		double TicksToSeconds(u64 ticks)
 		{
-			LARGE_INTEGER freq;
-			QueryPerformanceFrequency(&freq);
-			return (double)ticks / (double)freq.QuadPart;
+			static double timerFrequency = 0.0;
+
+			if(timerFrequency == 0)
+			{
+				LARGE_INTEGER freq = {0};
+				QueryPerformanceFrequency(&freq);
+				timerFrequency = (double)freq.QuadPart;
+			}
+
+			return (double)ticks / timerFrequency;
 		}
 	}
 }

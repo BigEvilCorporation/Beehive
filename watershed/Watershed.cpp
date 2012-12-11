@@ -58,11 +58,13 @@ bool Watershed::Initialise()
 	mMouse->SetCooperativeWindow(mRenderer->GetWindowHandle(), ion::input::Mouse::Exclusive);
 
 	//Set default ambient light and window background colour
-	mScene->SetAmbientLight(ion::ColourRGB(0.8f, 0.8f, 0.8f));
+	mScene->SetAmbientLight(ion::ColourRGB(0.5f, 0.5f, 0.5f));
 	mViewport->SetBackgroundColour(ion::Colour(0.2f, 0.2f, 0.2f));
 
 	//Create directional light
 	mDirectionalLight = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
+	mDirectionalLight->SetDiffuse(ion::ColourRGB(0.8f, 0.8f, 0.8f));
+	mDirectionalLight->SetSpecular(ion::ColourRGB(0.9f, 0.9f, 0.9f));
 	mDirectionalLight->SetDirection(ion::Vector3(1.0f, -1.0f, 1.0f));
 
 	//Set default camera position and direction
@@ -86,10 +88,17 @@ bool Watershed::Initialise()
 	//Ensure it's immovable
 	mFloorBody->SetMass(0.0f);
 
+	//Create character material
+	mCharacterMaterial = new ion::renderer::Material();
+	mCharacterMaterial->SetAmbientColour(ion::Colour(1.0f, 0.3f, 0.3f));
+	mCharacterMaterial->SetDiffuseColour(ion::Colour(1.0f, 0.3f, 0.3f));
+	mCharacterMaterial->SetSpecularColour(ion::Colour(1.0f, 0.6f, 0.6f));
+	mCharacterMaterial->SetReceiveShadows(false);
+
 	//Create character box
 	const ion::Vector2 characterDimensions(0.5f, 1.0f);
 	mCharacter = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-	mCharacter->AddBox(NULL, ion::Vector3(characterDimensions.x, characterDimensions.y, characterDimensions.x), ion::Vector3());
+	mCharacter->AddBox(mCharacterMaterial, ion::Vector3(characterDimensions.x, characterDimensions.y, characterDimensions.x), ion::Vector3());
 	mCharacterNode = new ion::renderer::SceneNode(*mScene);
 	mCharacterNode->Attach(*mCharacter);
 
@@ -249,7 +258,7 @@ bool Watershed::Update(float deltaTime)
 		const ion::Matrix4 characterMtx = mCharacterBody->GetTransform();
 		mCameraThirdPerson->SetTargetFocusPosition(characterMtx.GetTranslation());
 
-		//Set camera head target position as character plus offset
+		//Set camera head target position as character position plus offset
 		mCameraThirdPerson->SetTargetHeadPosition(characterMtx.GetTranslation() + mThirdPersonCameraHeadOffset);
 
 		//Update camera
@@ -281,7 +290,9 @@ bool Watershed::Update(float deltaTime)
 		text.setf(std::ios::fixed, std::ios::floatfield);
 		text.precision(2);
 		text << "FPS: " << framesPerSecond;
-		mRenderer->SetWindowTitle(text.str().c_str());
+
+		//TODO: Slow! Draw to screen instead
+		//mRenderer->SetWindowTitle(text.str().c_str());
 
 		//Reset timer
 		mStartTicks = ion::time::GetSystemTicks();
