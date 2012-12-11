@@ -55,6 +55,11 @@ rule ApplyIonPhysics TARGET
 	ApplyBulletSDK $(TARGET) ;
 }
 
+rule ApplyIonGameKit TARGET
+{
+	ApplyIonLib $(TARGET) : gamekit ;
+}
+
 #################################################
 ## Apply external SDKs
 #################################################

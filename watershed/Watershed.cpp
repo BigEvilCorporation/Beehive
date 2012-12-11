@@ -5,8 +5,8 @@
 
 #include <sstream>
 
-PhysicsTest::PhysicsTest()
-	: ion::framework::Application("PhysicsTest")
+Watershed::Watershed()
+	: ion::framework::Application("Watershed")
 {
 	mRenderer = NULL;
 
@@ -14,22 +14,26 @@ PhysicsTest::PhysicsTest()
 	mMouse = NULL;
 	mGamepad = NULL;
 
-	mCameraPitch = 0.0f;
-	mCameraYaw = 0.0f;
-	mCameraSpeed = 10.0f;
 	mMouseSensitivity = 0.005f;
 
-	mApplicationTime = 0.0f;
-	mProjectileTriggered = false;
+	mCameraType = ThirdPerson;
+	mThirdPersonCameraHeadOffset.y = 2.5f;
+	mThirdPersonCameraHeadOffset.z = 15.0f;
+	mFirstPersonCameraMoveSpeed = 10.0f;
+
+	mCharacterAcceleration = 0.4f;
+	mCharacterDeceleration = 0.8f;
+	mCharacterCurrSpeed = 0.0f;
+	mCharacterTopSpeed = 0.15f;
 
 	mFrameCount = 0;
 }
 
-PhysicsTest::~PhysicsTest()
+Watershed::~Watershed()
 {
 }
 
-bool PhysicsTest::Initialise()
+bool Watershed::Initialise()
 {
 	std::stringstream windowTitle;
 	windowTitle << "ion::engine - build " << ion::sVersion.Major << "." << ion::sVersion.Minor << "." << ion::sVersion.Build;
@@ -39,6 +43,10 @@ bool PhysicsTest::Initialise()
 	mScene = new ion::renderer::Scene();
 	mCamera = new ion::renderer::Camera(*mScene);
 	mViewport = new ion::renderer::Viewport(*mRenderer, *mCamera);
+
+	//Create camera controllers
+	mCameraThirdPerson = new ion::gamekit::CameraThirdPerson();
+	mCameraThirdPerson->SetMoveSpeed(5.0f);
 
 	//Create input handlers
 	mKeyboard = new ion::input::Keyboard();
@@ -62,60 +70,21 @@ bool PhysicsTest::Initialise()
 	mCamera->LookAt(ion::Vector3(0.0f, 0.0f, 0.0f));
 
 	//Create floor quad
-	mQuad = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-	mQuad->AddQuad(NULL, 15.0f, 10.0f, ion::renderer::Primitive::xz, ion::Vector3());
-	mQuadNode = new ion::renderer::SceneNode(*mScene);
-	mQuadNode->Attach(*mQuad);
+	mFloorQuad = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+	mFloorQuad->AddQuad(NULL, 15.0f, 10.0f, ion::renderer::Primitive::xz, ion::Vector3());
+	mFloorNode = new ion::renderer::SceneNode(*mScene);
+	mFloorNode->Attach(*mFloorQuad);
 
 	//Create physics world
 	mPhysicsWorld = new ion::physics::World;
 	mPhysicsWorld->SetGravity(ion::Vector3(0.0f, -9.8f, 0.0f));
 
 	//Create physics floor
-	mPhysicsFloor = new ion::physics::Body(ion::physics::Body::InfinitePlane, ion::Vector3(0.0f, 1.0f, 0.0f));
-	mPhysicsWorld->AddBody(*mPhysicsFloor);
+	mFloorBody = new ion::physics::Body(ion::physics::Body::InfinitePlane, ion::Vector3(0.0f, 1.0f, 0.0f));
+	mPhysicsWorld->AddBody(*mFloorBody);
 
 	//Ensure it's immovable
-	mPhysicsFloor->SetMass(0.0f);
-
-	//Create box stack
-	for(int x = 0; x < sBoxStackWidth; x++)
-	{
-		for(int y = 0; y < sBoxStackHeight; y++)
-		{
-			//Create graphical box and scene node
-			mCubes[x][y] = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-			mCubes[x][y]->AddBox(NULL, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
-			mCubeNodes[x][y] = new ion::renderer::SceneNode(*mScene);
-			mCubeNodes[x][y]->Attach(*mCubes[x][y]);
-
-			//Create physics box
-			mPhysicsBoxes[x][y] = new ion::physics::Body(ion::physics::Body::Box, ion::Vector3(0.5f, 0.5f, 0.5f));
-			mPhysicsWorld->AddBody(*mPhysicsBoxes[x][y]);
-
-			//Set initial transform
-			ion::Matrix4 boxTransform;
-			boxTransform.SetTranslation(ion::Vector3((float)x - (sBoxStackWidth / 2), (float)y + 0.5f, 0.0f));
-			mPhysicsBoxes[x][y]->SetTransform(boxTransform);
-		}
-	}
-
-	//Create projectile box
-	mProjectile = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
-	mProjectile->AddBox(NULL, ion::Vector3(0.5f, 0.5f, 0.5f), ion::Vector3());
-	mProjectileNode = new ion::renderer::SceneNode(*mScene);
-	mProjectileNode->Attach(*mProjectile);
-
-	//Create projectile physics box
-	mPhysicsProjectile = new ion::physics::Body(ion::physics::Body::Box, ion::Vector3(0.5f, 0.5f, 0.5f));
-
-	//Set initial transform
-	ion::Matrix4 boxTransform;
-	boxTransform.SetTranslation(ion::Vector3(0.25f, 5.0f, 10.0f));
-	mPhysicsProjectile->SetTransform(boxTransform);
-
-	//Set mass
-	mPhysicsProjectile->SetMass(5.0f);
+	mFloorBody->SetMass(0.0f);
 
 	//Create character box
 	const ion::Vector2 characterDimensions(0.5f, 1.0f);
@@ -125,16 +94,16 @@ bool PhysicsTest::Initialise()
 	mCharacterNode->Attach(*mCharacter);
 
 	//Create physics character
-	mPhysicsCharacter = new ion::physics::Character(characterDimensions);
-	mPhysicsWorld->AddCharacter(*mPhysicsCharacter);
+	mCharacterBody = new ion::physics::Character(characterDimensions);
+	mPhysicsWorld->AddCharacter(*mCharacterBody);
 
 	//Set initial transform
 	ion::Matrix4 characterTransform;
-	characterTransform.SetTranslation(ion::Vector3(0.0f, characterDimensions.y / 2.0f, 5.0f));
-	mPhysicsCharacter->SetTransform(characterTransform);
+	characterTransform.SetTranslation(ion::Vector3(0.0f, characterDimensions.y / 2.0f, 0.0f));
+	mCharacterBody->SetTransform(characterTransform);
 
 	//Set max jump height
-	mPhysicsCharacter->SetMaxJumpHeight(characterDimensions.y);
+	mCharacterBody->SetMaxJumpHeight(characterDimensions.y);
 	
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
@@ -142,7 +111,7 @@ bool PhysicsTest::Initialise()
 	return true;
 }
 
-void PhysicsTest::Shutdown()
+void Watershed::Shutdown()
 {
 	if(mKeyboard)
 		delete mKeyboard;
@@ -166,10 +135,8 @@ void PhysicsTest::Shutdown()
 		delete mRenderer;
 }
 
-bool PhysicsTest::Update(float deltaTime)
+bool Watershed::Update(float deltaTime)
 {
-	mApplicationTime += deltaTime;
-
 	mKeyboard->Update();
 	mMouse->Update();
 	mGamepad->Update();
@@ -177,67 +144,123 @@ bool PhysicsTest::Update(float deltaTime)
 	//Get state of escape key and gamepad back/select button, for exit
 	bool exit = mKeyboard->KeyDown(DIK_ESCAPE) || mGamepad->ButtonDown(ion::input::Gamepad::SELECT);
 
-	//Create camera move vector from WASD state
-	ion::Vector3 cameraMoveVector;
-	if(mKeyboard->KeyDown(DIK_W))
-		cameraMoveVector.z -= mCameraSpeed * deltaTime;
-	if(mKeyboard->KeyDown(DIK_S))
-		cameraMoveVector.z += mCameraSpeed * deltaTime;
-	if(mKeyboard->KeyDown(DIK_A))
-		cameraMoveVector.x -= mCameraSpeed * deltaTime;
-	if(mKeyboard->KeyDown(DIK_D))
-		cameraMoveVector.x += mCameraSpeed * deltaTime;
-
-	//Get mouse deltas
-	float mouseDeltaX = (float)mMouse->GetDeltaX();
-	float mouseDeltaY = (float)mMouse->GetDeltaY();
-
-	//Move, pitch and yaw camera
-	mCamera->Move(cameraMoveVector);
-	mCamera->Pitch(-mouseDeltaY * mMouseSensitivity);
-	mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
-
-	//Move character
-	const float characterMoveSpeed = 0.15f;
-	const float characterJumpForce(10.0f);
-	ion::Vector3 characterMoveVector;
-	
-	if(mKeyboard->KeyDown(DIK_UP))
-		characterMoveVector.z -= characterMoveSpeed;
-	if(mKeyboard->KeyDown(DIK_DOWN))
-		characterMoveVector.z += characterMoveSpeed;
-	if(mKeyboard->KeyDown(DIK_LEFT))
-		characterMoveVector.x -= characterMoveSpeed;
-	if(mKeyboard->KeyDown(DIK_RIGHT))
-		characterMoveVector.x += characterMoveSpeed;
-	if(mKeyboard->KeyPressedThisFrame(DIK_SPACE))
-		mPhysicsCharacter->Jump(characterJumpForce);
-	
-	mPhysicsCharacter->SetMoveVector(characterMoveVector);
-
-	//Fire projectile after box stack has had time to settle
-	if(mApplicationTime > 3.0f && !mProjectileTriggered)
+	//Toggle camera type with TAB key
+	if(mKeyboard->KeyPressedThisFrame(DIK_TAB))
 	{
-		mPhysicsWorld->AddBody(*mPhysicsProjectile);
-		mPhysicsProjectile->SetLinearVelocity(ion::Vector3(0.0f, 0.0f, -20.0f));
-		mProjectileTriggered = true;
+		mCameraType = (CameraType)(((int)mCameraType + 1) % MaxCameraTypes);
+	}
+
+	//First person (cutscene/debug) camera, no character control
+	if(mCameraType == FirstPerson)
+	{
+		//Un-register third person camera controller
+		mCameraThirdPerson->SetCurrentCamera(mCamera);
+
+		//Create camera move vector from WASD state
+		ion::Vector3 cameraMoveVector;
+		if(mKeyboard->KeyDown(DIK_W))
+			cameraMoveVector.z -= mFirstPersonCameraMoveSpeed * deltaTime;
+		if(mKeyboard->KeyDown(DIK_S))
+			cameraMoveVector.z += mFirstPersonCameraMoveSpeed * deltaTime;
+		if(mKeyboard->KeyDown(DIK_A))
+			cameraMoveVector.x -= mFirstPersonCameraMoveSpeed * deltaTime;
+		if(mKeyboard->KeyDown(DIK_D))
+			cameraMoveVector.x += mFirstPersonCameraMoveSpeed * deltaTime;
+
+		//Get mouse deltas
+		float mouseDeltaX = (float)mMouse->GetDeltaX();
+		float mouseDeltaY = (float)mMouse->GetDeltaY();
+
+		//Move, pitch and yaw camera
+		mCamera->Move(cameraMoveVector);
+		mCamera->Pitch(-mouseDeltaY * mMouseSensitivity);
+		mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
+
+		//Reset character speed
+		mCharacterBody->SetMoveVector(ion::Vector3(0.0f, 0.0f, 0.0f));
+	}
+	else if(mCameraType == ThirdPerson)
+	{
+		//Set third person camera
+		mCameraThirdPerson->SetCurrentCamera(mCamera);
+
+		//Move character
+		const float characterJumpForce(10.0f);
+
+		if(mKeyboard->KeyDown(DIK_A))
+		{
+			if(mCharacterCurrSpeed > 0.0f)
+			{
+				//Decelerate
+				mCharacterCurrSpeed -= mCharacterDeceleration * deltaTime;
+			}
+			else
+			{
+				//Accelerate
+				mCharacterCurrSpeed -= mCharacterAcceleration * deltaTime;
+			}
+		}
+		else if(mKeyboard->KeyDown(DIK_D))
+		{
+			if(mCharacterCurrSpeed < 0.0f)
+			{
+				//Decelerate
+				mCharacterCurrSpeed += mCharacterDeceleration * deltaTime;
+			}
+			else
+			{
+				//Accelerate
+				mCharacterCurrSpeed += mCharacterAcceleration * deltaTime;
+			}
+		}
+		else
+		{
+			//Character not being controlled, decelerate towards zero
+			float decelerationStep = mCharacterDeceleration * deltaTime;
+
+			if(mCharacterCurrSpeed > 0.0f && mCharacterCurrSpeed > decelerationStep)
+			{
+				mCharacterCurrSpeed -= decelerationStep;
+			}
+			else if(mCharacterCurrSpeed < 0.0f && mCharacterCurrSpeed < decelerationStep)
+			{
+				mCharacterCurrSpeed += decelerationStep;
+			}
+			else
+			{
+				mCharacterCurrSpeed = 0.0f;
+			}
+		}
+
+		if(mKeyboard->KeyPressedThisFrame(DIK_SPACE))
+		{
+			//Jump
+			mCharacterBody->Jump(characterJumpForce);
+		}
+
+		//Clamp to top speed
+		mCharacterCurrSpeed = ion::maths::Clamp(mCharacterCurrSpeed, -mCharacterTopSpeed, mCharacterTopSpeed);
+		
+		//Set movement vector
+		ion::Vector3 characterMoveVector(mCharacterCurrSpeed, 0.0f, 0.0f);
+		mCharacterBody->SetMoveVector(characterMoveVector);
+
+		//Set camera focus target position as character position
+		const ion::Matrix4 characterMtx = mCharacterBody->GetTransform();
+		mCameraThirdPerson->SetTargetFocusPosition(characterMtx.GetTranslation());
+
+		//Set camera head target position as character plus offset
+		mCameraThirdPerson->SetTargetHeadPosition(characterMtx.GetTranslation() + mThirdPersonCameraHeadOffset);
+
+		//Update camera
+		mCameraThirdPerson->Update(deltaTime);
 	}
 
 	//Update physics world using 10 substeps
 	mPhysicsWorld->Step(deltaTime, 10);
 
-	//Update box stack graphics from physics simulation
-	for(int x = 0; x < sBoxStackWidth; x++)
-	{
-		for(int y = 0; y < sBoxStackHeight; y++)
-		{
-			mCubeNodes[x][y]->SetTransform(mPhysicsBoxes[x][y]->GetTransform());
-		}
-	}
-
-	//Update projectile graphics from physics simulation
-	mProjectileNode->SetTransform(mPhysicsProjectile->GetTransform());
-	mCharacterNode->SetTransform(mPhysicsCharacter->GetTransform());
+	//Update character graphics from physics simulation
+	mCharacterNode->SetTransform(mCharacterBody->GetTransform());
 
 	//Update renderer
 	mRenderer->Update(deltaTime);
@@ -267,6 +290,6 @@ bool PhysicsTest::Update(float deltaTime)
 	return !exit;
 }
 
-void PhysicsTest::Render()
+void Watershed::Render()
 {
 }

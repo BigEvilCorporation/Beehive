@@ -3,7 +3,7 @@
 
 int main(char** args, int numargs)
 {
-	PhysicsTest app;
+	Watershed app;
 	
 	if(app.Initialise())
 	{

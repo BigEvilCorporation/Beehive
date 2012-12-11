@@ -187,7 +187,7 @@ namespace ion
 		return sqrt(dx*dx + dy*dy + dz*dz);
 	}
 
-	Vector3 Vector3::Lerp(const Vector3& Vector, float Weight)
+	Vector3 Vector3::Lerp(const Vector3& Vector, float Weight) const
 	{
 		Vector3 Result;
 

@@ -62,6 +62,6 @@ namespace ion
 		float GetDistance(const Vector3 &v) const;
 
 		//Interpolation with another vector, with a given weight
-		Vector3 Lerp(const Vector3 &Vector, float Weight);
+		Vector3 Lerp(const Vector3 &Vector, float Weight) const;
 	};
 }

@@ -14,12 +14,13 @@
 #include "physics/World.h"
 #include "physics/Body.h"
 #include "physics/Character.h"
+#include "gamekit/CameraThirdPerson.h"
 
-class PhysicsTest : public ion::framework::Application
+class Watershed : public ion::framework::Application
 {
 public:
-	PhysicsTest();
-	~PhysicsTest();
+	Watershed();
+	~Watershed();
 
 	bool Initialise();
 	void Shutdown();
@@ -36,32 +37,30 @@ public:
 
 	ion::renderer::Light* mDirectionalLight;
 
-	static const int sBoxStackWidth = 5;
-	static const int sBoxStackHeight = 5;
-
-	ion::renderer::Primitive* mQuad;
-	ion::renderer::Primitive* mCubes[sBoxStackWidth][sBoxStackHeight];
-	ion::renderer::Primitive* mProjectile;
-	ion::renderer::Primitive* mCharacter;
-	ion::renderer::SceneNode* mQuadNode;
-	ion::renderer::SceneNode* mCubeNodes[sBoxStackWidth][sBoxStackHeight];
-	ion::renderer::SceneNode* mProjectileNode;
-	ion::renderer::SceneNode* mCharacterNode;
-
 	ion::physics::World* mPhysicsWorld;
-	ion::physics::Body* mPhysicsFloor;
-	ion::physics::Body* mPhysicsBoxes[sBoxStackWidth][sBoxStackHeight];
-	ion::physics::Body* mPhysicsProjectile;
-	ion::physics::Character* mPhysicsCharacter;
 
-	bool mProjectileTriggered;
+	//Cameras
+	enum CameraType { FirstPerson = 0, ThirdPerson, MaxCameraTypes };
+	CameraType mCameraType;
+	ion::gamekit::CameraThirdPerson* mCameraThirdPerson;
+	ion::Vector3 mThirdPersonCameraHeadOffset;
+	float mFirstPersonCameraMoveSpeed;
 
-	float mCameraPitch;
-	float mCameraYaw;
-	float mCameraSpeed;
+	//Floor
+	ion::renderer::Primitive* mFloorQuad;
+	ion::renderer::SceneNode* mFloorNode;
+	ion::physics::Body* mFloorBody;
+
+	//Character
+	ion::renderer::Primitive* mCharacter;
+	ion::renderer::SceneNode* mCharacterNode;
+	ion::physics::Character* mCharacterBody;
+	float mCharacterAcceleration;
+	float mCharacterDeceleration;
+	float mCharacterCurrSpeed;
+	float mCharacterTopSpeed;
+
 	float mMouseSensitivity;
-
-	float mApplicationTime;
 
 	u64 mStartTicks;
 	u32 mFrameCount;

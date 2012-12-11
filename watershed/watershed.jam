@@ -4,6 +4,7 @@ ApplyIonCore watershed ;
 ApplyIonInput watershed ;
 ApplyIonRenderer watershed ;
 ApplyIonPhysics watershed ;
+ApplyIonGameKit watershed ;
 
 SRC = 
 	main.cpp
