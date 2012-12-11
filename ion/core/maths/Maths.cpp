@@ -29,6 +29,18 @@ namespace ion
 			return Round(pow((double)2, (double)ceil(logbase2)));
 		}
 
+		float Clamp(float value, float min, float max)
+		{
+			float clamped = value;
+
+			if(value < min)
+				clamped = min;
+			else if(value > max)
+				clamped = max;
+
+			return clamped;
+		}
+
 		float DegreesToRadians(float Degrees)
 		{
 			return Degrees * DEGREES_TO_RADIANS;

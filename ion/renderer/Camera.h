@@ -35,12 +35,15 @@ namespace ion
 			void Yaw(float yaw);
 			void Roll(float roll);
 
+			const Vector3& GetPosition();
+
 			void SetDrawMode(DrawMode drawMode);
 
 			Ogre::Camera* GetOgreCameraIFace();
 
 		private:
 			Ogre::Camera* mOgreCameraIFace;
+			Vector3 mPosition;
 		};
 	}
 }

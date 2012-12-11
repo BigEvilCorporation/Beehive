@@ -34,6 +34,20 @@ namespace ion
 				mOgreCameraIFace->setPosition(position.x, position.y, position.z);
 			}
 			#endif
+
+			mPosition = position;
+		}
+
+		const Vector3& Camera::GetPosition()
+		{
+			#if !defined ION_PLUGIN
+			const Ogre::Vector3& ogrePos = mOgreCameraIFace->getPosition();
+			mPosition.x = ogrePos.x;
+			mPosition.y = ogrePos.y;
+			mPosition.z = ogrePos.z;
+			#endif
+
+			return mPosition;
 		}
 
 		void Camera::LookAt(const Vector3& lookat)

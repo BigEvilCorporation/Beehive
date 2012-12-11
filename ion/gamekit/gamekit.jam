@@ -1,0 +1,16 @@
+SubDir bigevilcorp ion gamekit ;
+
+SRC =
+	CameraController.cpp
+ 	CameraController.h
+ 	CameraThirdPerson.cpp
+ 	CameraThirdPerson.h
+	;
+
+ApplyIonCore gamekit ;
+ApplyIonRenderer gamekit ;
+ApplyIonPhysics gamekit ;
+
+AutoSourceGroup gamekit : $(SRC) ;
+
+C.Library gamekit : $(SRC) ;

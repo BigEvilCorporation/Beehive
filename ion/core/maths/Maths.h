@@ -33,6 +33,8 @@ namespace ion
 		float RoundToNearest(float Value, int Nearest);
 		int NextPowerOfTwo(int x);
 
+		float Clamp(float value, float min, float max);
+
 		int RandInt();
 		float RandFloat();
 
