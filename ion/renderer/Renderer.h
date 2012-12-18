@@ -20,7 +20,7 @@ namespace ion
 		class Renderer
 		{
 		public:
-			Renderer(const char* windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+			Renderer(const char* windowTitle, int windowWidth, int windowHeight, bool fullscreen, int fsaaLevel);
 			~Renderer();
 
 			void AddViewport(Viewport& viewport);

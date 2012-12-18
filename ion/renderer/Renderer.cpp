@@ -16,7 +16,7 @@ namespace ion
 {
 	namespace renderer
 	{
-		Renderer::Renderer(const char* windowTitle, int windowWidth, int windowHeight, bool fullscreen)
+		Renderer::Renderer(const char* windowTitle, int windowWidth, int windowHeight, bool fullscreen, int fsaaLevel)
 		{
 			//Create Ogre root system
 			mOgreRoot = new Ogre::Root("", "engine\\config.cfg", "engine\\renderer.log");
@@ -30,8 +30,13 @@ namespace ion
 			//Initialise Ogre root
 			mOgreRoot->initialise(false);
 
+			Ogre::NameValuePairList windowCreationParams;
+			char fsaaLevelText[8] = {0};
+			sprintf_s(fsaaLevelText, 8, "%i", fsaaLevel);
+			windowCreationParams["FSAA"] = fsaaLevelText;
+
 			//Create render window
-			mOgreWindow = mOgreRoot->createRenderWindow(windowTitle, windowWidth, windowHeight, fullscreen);
+			mOgreWindow = mOgreRoot->createRenderWindow(windowTitle, windowWidth, windowHeight, fullscreen, &windowCreationParams);
 
 			//Set active
 			mOgreWindow->setActive(true);
