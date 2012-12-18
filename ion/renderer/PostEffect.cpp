@@ -12,10 +12,13 @@ namespace ion
 {
 	namespace renderer
 	{
+		u32 PostEffectPass::sCurrPassId = 0;
+
 		PostEffect::PostEffect(const char* name)
 		{
 			mName = name;
 			mOgreCompositor = Ogre::CompositorManager::getSingleton().create(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+			mOgreCompositorListener = NULL;
 		}
 
 		void PostEffect::AssignToViewport(Viewport& viewport)
@@ -23,6 +26,11 @@ namespace ion
 			Ogre::CompositorInstance* compositorInstance = Ogre::CompositorManager::getSingleton().addCompositor(viewport.GetOgreViewportInterface(), mName.c_str());
 			ion::debug::Assert(compositorInstance != NULL, "PostEffect::AssignToViewport() - Could not create compositor instance, did its materials load successfully?");
             compositorInstance->setEnabled(true);
+
+			if(mOgreCompositorListener)
+			{
+				compositorInstance->addListener(mOgreCompositorListener);
+			}
 		}
 
 		PostEffectTechnique::PostEffectTechnique(PostEffect& postEffect)
@@ -37,6 +45,7 @@ namespace ion
 			case Input:
 				mOgreTargetPass = technique.mOgreTechnique->createTargetPass();
 				mOgreTargetPass->setInputMode(Ogre::CompositionTargetPass::IM_PREVIOUS);
+				mOgrePassId = 0;
 				break;
 
 			case Composition:
@@ -44,6 +53,8 @@ namespace ion
 				mOgreTargetPass->setInputMode(Ogre::CompositionTargetPass::IM_NONE);
 				mOgrePass = mOgreTargetPass->createPass();
 				mOgrePass->setType(Ogre::CompositionPass::PT_RENDERQUAD);
+				mOgrePassId = sCurrPassId++;
+				mOgrePass->setIdentifier(mOgrePassId);
 				break;
 
 			case Output:
@@ -51,6 +62,8 @@ namespace ion
                 mOgreTargetPass->setInputMode(Ogre::CompositionTargetPass::IM_PREVIOUS);
                 mOgrePass = mOgreTargetPass->createPass();
 				mOgrePass->setType(Ogre::CompositionPass::PT_RENDERQUAD);
+				mOgrePassId = sCurrPassId++;
+				mOgrePass->setIdentifier(mOgrePassId);
 				break;
 			};
 		}
@@ -68,6 +81,11 @@ namespace ion
 		void PostEffectPass::SetMaterial(const char* material)
 		{
 			mOgrePass->setMaterialName(material);
+		}
+
+		u32 PostEffectPass::GetPassId() const
+		{
+			return mOgrePassId;
 		}
 
 		PostEffectRenderTarget::PostEffectRenderTarget(PostEffectTechnique& technique, const char* name, int width, int height, PixelFormat pixelFormat)
