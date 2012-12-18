@@ -1,3 +1,6 @@
+#include "core/Version.h"
+#include "core/Debug.h"
+#include "core/Time.h"
 #include "core/Application.h"
 #include "core/maths/Vector.h"
 #include "core/maths/Matrix.h"
@@ -12,6 +15,8 @@
 #include "renderer/Primitive.h"
 #include "renderer/Light.h"
 #include "renderer/Material.h"
+#include "renderer/PostEffect.h"
+#include "renderer/PostEffectBloom.h"
 #include "physics/World.h"
 #include "physics/Body.h"
 #include "physics/Character.h"
@@ -32,6 +37,7 @@ public:
 	ion::renderer::Scene* mScene;
 	ion::renderer::Camera* mCamera;
 	ion::renderer::Viewport* mViewport;
+	ion::renderer::PostEffectBloom* mPostEffectBloom;
 	ion::input::Keyboard* mKeyboard;
 	ion::input::Mouse* mMouse;
 	ion::input::Gamepad* mGamepad;

@@ -1,7 +1,4 @@
 #include "Watershed.h"
-#include "core/Version.h"
-#include "core/Debug.h"
-#include "core/Time.h"
 
 #include <sstream>
 
@@ -56,6 +53,12 @@ bool Watershed::Initialise()
 	//Set input cooperative level with renderer window
 	mKeyboard->SetCooperativeWindow(mRenderer->GetWindowHandle(), ion::input::Keyboard::Exclusive);
 	mMouse->SetCooperativeWindow(mRenderer->GetWindowHandle(), ion::input::Mouse::Exclusive);
+
+	//Add post effects
+	mPostEffectBloom = new ion::renderer::PostEffectBloom;
+	mPostEffectBloom->AssignToViewport(*mViewport);
+	mPostEffectBloom->SetBlurWidth(0.01f);
+	mPostEffectBloom->SetBlendAlpha(0.15f);
 
 	//Set default ambient light and window background colour
 	mScene->SetAmbientLight(ion::ColourRGB(0.5f, 0.5f, 0.5f));

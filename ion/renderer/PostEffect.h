@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Viewport.h"
+#include "../core/Types.h"
 
 #if !defined ION_PLUGIN
 #include <Ogre/OgreCompositorManager.h>
@@ -36,6 +37,7 @@ namespace ion
 		protected:
 			std::string mName;
 			Ogre::CompositorPtr mOgreCompositor;
+			Ogre::CompositorInstance::Listener* mOgreCompositorListener;
 
 			friend class PostEffectTechnique;
 		};
@@ -65,10 +67,15 @@ namespace ion
 			//TODO: Accept an ion::Material ptr
 			void SetMaterial(const char* material);
 
+			u32 GetPassId() const;
+
 		protected:
 			PassType mPassType;
 			Ogre::CompositionPass* mOgrePass;
 			Ogre::CompositionTargetPass* mOgreTargetPass;
+			u32 mOgrePassId;
+
+			static u32 sCurrPassId;
 		};
 
 		class PostEffectRenderTarget
