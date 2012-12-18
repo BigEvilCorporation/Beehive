@@ -36,7 +36,7 @@ bool Watershed::Initialise()
 	windowTitle << "ion::engine - build " << ion::sVersion.Major << "." << ion::sVersion.Minor << "." << ion::sVersion.Build;
 
 	//Create renderer, scene, camera and viewport
-	mRenderer = new ion::renderer::Renderer(windowTitle.str().c_str(), 1024, 768, false);
+	mRenderer = new ion::renderer::Renderer(windowTitle.str().c_str(), 1024, 768, false, 8);
 	mScene = new ion::renderer::Scene();
 	mCamera = new ion::renderer::Camera(*mScene);
 	mViewport = new ion::renderer::Viewport(*mRenderer, *mCamera);
