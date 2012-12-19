@@ -60,6 +60,10 @@ bool Watershed::Initialise()
 	mPostEffectBloom->SetBlurWidth(0.01f);
 	mPostEffectBloom->SetBlendAlpha(0.15f);
 
+	mPostEffectMotionBlur = new ion::renderer::PostEffectMotionBlur;
+	mPostEffectMotionBlur->AssignToViewport(*mViewport);
+	mPostEffectMotionBlur->SetBlurWeight(0.2f);
+
 	//Set default ambient light and window background colour
 	mScene->SetAmbientLight(ion::ColourRGB(0.5f, 0.5f, 0.5f));
 	mViewport->SetBackgroundColour(ion::Colour(0.2f, 0.2f, 0.2f));

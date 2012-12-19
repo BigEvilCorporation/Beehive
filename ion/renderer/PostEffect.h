@@ -59,9 +59,9 @@ namespace ion
 		public:
 			enum PassType { Input, Composition, Output };
 
-			PostEffectPass(PostEffectTechnique& technique, PassType passType);
+			PostEffectPass(PostEffectTechnique& technique, PassType passType, bool initialOnly = false);
 
-			void SetInput(PostEffectRenderTarget& input);
+			void SetInput(PostEffectRenderTarget& input, int index = 0);
 			void SetOutput(PostEffectRenderTarget& output);
 
 			//TODO: Accept an ion::Material ptr

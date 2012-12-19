@@ -27,6 +27,9 @@ namespace ion
 			//Set renderer
 			mOgreRoot->setRenderSystem(renderer);
 
+			//Load NVIDIA Cg plugin
+			mOgreRoot->loadPlugin("Plugin_CgProgramManager_d");
+
 			//Initialise Ogre root
 			mOgreRoot->initialise(false);
 

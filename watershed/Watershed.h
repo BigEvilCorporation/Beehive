@@ -17,6 +17,7 @@
 #include "renderer/Material.h"
 #include "renderer/PostEffect.h"
 #include "renderer/PostEffectBloom.h"
+#include "renderer/PostEffectMotionBlur.h"
 #include "physics/World.h"
 #include "physics/Body.h"
 #include "physics/Character.h"
@@ -38,6 +39,7 @@ public:
 	ion::renderer::Camera* mCamera;
 	ion::renderer::Viewport* mViewport;
 	ion::renderer::PostEffectBloom* mPostEffectBloom;
+	ion::renderer::PostEffectMotionBlur* mPostEffectMotionBlur;
 	ion::input::Keyboard* mKeyboard;
 	ion::input::Mouse* mMouse;
 	ion::input::Gamepad* mGamepad;

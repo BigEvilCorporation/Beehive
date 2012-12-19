@@ -123,11 +123,13 @@ rule ApplyOgreSDK TARGET
 	OGRE_LIBS_DEBUG = 
 		OgreMain_d.lib
 		RenderSystem_Direct3D9_d.lib
+		Plugin_CgProgramManager_d.lib
 		;
 
 	OGRE_LIBS_RELEASE = 
 		OgreMain.lib
 		RenderSystem_Direct3D9.lib
+		Plugin_CgProgramManager.lib
 		;
 	
 	OGRE_DEPENDENCIES_DEBUG =

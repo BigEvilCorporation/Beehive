@@ -56,14 +56,14 @@ namespace ion
 		PostEffectBloom::PostEffectBloom()
 			: PostEffect("Bloom")
 		{
-			PostEffectTechnique* mTechnique = new PostEffectTechnique(*this);
-			PostEffectRenderTarget* mRenderTarget0 = new PostEffectRenderTarget(*mTechnique, "bloomRT0", 1024, 1024, PostEffectRenderTarget::A8R8G8B8);
-			PostEffectRenderTarget* mRenderTarget1 = new PostEffectRenderTarget(*mTechnique, "bloomRT1", 1024, 1024, PostEffectRenderTarget::A8R8G8B8);
+			mTechnique = new PostEffectTechnique(*this);
+			mRenderTarget0 = new PostEffectRenderTarget(*mTechnique, "bloomRT0", 1024, 1024, PostEffectRenderTarget::A8R8G8B8);
+			mRenderTarget1 = new PostEffectRenderTarget(*mTechnique, "bloomRT1", 1024, 1024, PostEffectRenderTarget::A8R8G8B8);
 
-			PostEffectPass* mPassInput = new PostEffectPass(*mTechnique, PostEffectPass::Input);
-			PostEffectPass* mPassComposition1 = new PostEffectPass(*mTechnique, PostEffectPass::Composition);
-			PostEffectPass* mPassComposition2 = new PostEffectPass(*mTechnique, PostEffectPass::Composition);
-			PostEffectPass* mPassOutput = new PostEffectPass(*mTechnique, PostEffectPass::Output);
+			mPassInput = new PostEffectPass(*mTechnique, PostEffectPass::Input);
+			mPassComposition1 = new PostEffectPass(*mTechnique, PostEffectPass::Composition);
+			mPassComposition2 = new PostEffectPass(*mTechnique, PostEffectPass::Composition);
+			mPassOutput = new PostEffectPass(*mTechnique, PostEffectPass::Output);
 
 			mPostEffectListener = new PostEffectBloomListener(mPassComposition1->GetPassId(), mPassComposition2->GetPassId(), mPassOutput->GetPassId());
 			mOgreCompositorListener = mPostEffectListener;
