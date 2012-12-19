@@ -38,13 +38,14 @@ namespace ion
 			mOgreTechnique = postEffect.mOgreCompositor->createTechnique();
 		}
 
-		PostEffectPass::PostEffectPass(PostEffectTechnique& technique, PassType passType)
+		PostEffectPass::PostEffectPass(PostEffectTechnique& technique, PassType passType, bool initialOnly)
 		{
 			switch(passType)
 			{
 			case Input:
 				mOgreTargetPass = technique.mOgreTechnique->createTargetPass();
 				mOgreTargetPass->setInputMode(Ogre::CompositionTargetPass::IM_PREVIOUS);
+				mOgreTargetPass->setOnlyInitial(initialOnly);
 				mOgrePassId = 0;
 				break;
 
@@ -68,9 +69,9 @@ namespace ion
 			};
 		}
 
-		void PostEffectPass::SetInput(PostEffectRenderTarget& input)
+		void PostEffectPass::SetInput(PostEffectRenderTarget& input, int index)
 		{
-			mOgrePass->setInput(0, input.GetName());
+			mOgrePass->setInput(index, input.GetName());
 		}
 
 		void PostEffectPass::SetOutput(PostEffectRenderTarget& output)

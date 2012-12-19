@@ -40,6 +40,13 @@ namespace ion
 			void SetBlendAlpha(float blendAlpha);
 
 		private:
+			PostEffectTechnique* mTechnique;
+			PostEffectRenderTarget* mRenderTarget0;
+			PostEffectRenderTarget* mRenderTarget1;
+			PostEffectPass* mPassInput;
+			PostEffectPass* mPassComposition1;
+			PostEffectPass* mPassComposition2;
+			PostEffectPass* mPassOutput;
 			PostEffectBloomListener* mPostEffectListener;
 		};
 	}

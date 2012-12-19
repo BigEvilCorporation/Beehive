@@ -13,6 +13,8 @@ SRC =
 	PostEffect.h
 	PostEffectBloom.cpp
 	PostEffectBloom.h
+	PostEffectMotionBlur.cpp
+	PostEffectMotionBlur.h
 	Primitive.cpp
 	Primitive.h
 	Renderer.cpp
