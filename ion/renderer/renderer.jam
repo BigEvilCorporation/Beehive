@@ -23,6 +23,8 @@ SRC =
 	Scene.h
 	SceneNode.cpp
 	SceneNode.h
+	Skeleton.cpp
+	Skeleton.h
 	TexCoord.cpp
 	TexCoord.h
 	Texture.cpp
