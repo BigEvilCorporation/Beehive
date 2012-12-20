@@ -13,6 +13,8 @@
 #include "renderer/Camera.h"
 #include "renderer/Viewport.h"
 #include "renderer/Primitive.h"
+#include "renderer/Mesh.h"
+#include "renderer/Skeleton.h"
 #include "renderer/Light.h"
 #include "renderer/Material.h"
 #include "renderer/PostEffect.h"
@@ -22,6 +24,8 @@
 #include "physics/Body.h"
 #include "physics/Character.h"
 #include "gamekit/CameraThirdPerson.h"
+
+#include <vector>
 
 class Watershed : public ion::framework::Application
 {
@@ -69,6 +73,13 @@ public:
 	float mCharacterDeceleration;
 	float mCharacterCurrSpeed;
 	float mCharacterTopSpeed;
+
+	ion::renderer::Mesh* mTestMesh;
+	ion::renderer::Mesh::SubMesh* mTestSubMesh;
+	ion::renderer::Skeleton* mTestSkeleton;
+	std::vector<ion::renderer::Bone*> mTestBones;
+	ion::renderer::MeshInstance* mTestMeshInstance;
+	ion::renderer::SceneNode* mTestMeshNode;
 
 	float mMouseSensitivity;
 

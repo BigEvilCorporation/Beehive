@@ -13,6 +13,7 @@
 #include "../core/BinaryFile.h"
 #include "Vertex.h"
 #include "TexCoord.h"
+#include "Skeleton.h"
 
 #include <string>
 #include <list>
@@ -22,12 +23,16 @@
 #if !defined ION_PLUGIN
 #include <Ogre/OgreMesh.h>
 #include <Ogre/OgreSubMesh.h>
+#include <Ogre/OgreEntity.h>
 #endif
 
 namespace ion
 {
 	namespace renderer
 	{
+		//Forward declaration
+		class Scene;
+
 		struct Face
 		{
 			u16 mIndices[3];
@@ -62,6 +67,8 @@ namespace ion
 				void AddVertex(Vertex& vertex);
 				void AddNormal(Vector3& normal);
 				void AddFace(Face& face);
+
+				void MapBone(Bone& bone, u32 vertexIdx, float weight);
 
 				void Finalise();
 
@@ -107,6 +114,8 @@ namespace ion
 
 			SubMesh* CreateSubMesh();
 			void Finalise();
+
+			void SetSkeleton(Skeleton& skeleton);
 
 			bool Load(std::string filename);
 			u64 Save(std::string filename);
@@ -154,6 +163,25 @@ namespace ion
 			#if !defined ION_PLUGIN
 			Ogre::MeshPtr mOgreMesh;
 			#endif
+		};
+
+		class MeshInstance
+		{
+		public:
+			MeshInstance(Mesh& mesh, Scene& scene);
+
+			//TODO: Materials
+			//void SetMaterial(Material& material);
+			void SetCastShadows(bool castShadows);
+			void SetDrawDebugSkeleton(bool drawSkeleton);
+
+			//TODO: Copy skeleton locally
+			void SetBoneTransform(Bone& bone, const Matrix4& transform);
+
+			Ogre::Entity* GetOgreEntity() const { return mOgreEntity; }
+
+		protected:
+			Ogre::Entity* mOgreEntity;
 		};
 	}
 }

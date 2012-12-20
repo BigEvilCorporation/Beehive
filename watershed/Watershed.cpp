@@ -120,7 +120,102 @@ bool Watershed::Initialise()
 
 	//Set max jump height
 	mCharacterBody->SetMaxJumpHeight(characterDimensions.y);
+
+	mTestMesh = new ion::renderer::Mesh();
+	mTestSubMesh = mTestMesh->CreateSubMesh();
+
+	ion::Vector3 halfExtents(1.0f, 0.5f, 1.0f);
+	ion::Vector3 offset(0.0f, 0.0f, 0.0f);
+
+	mTestSubMesh->CreateVertexBuffer(8);
+	mTestSubMesh->CreateIndexBuffer(12 * 3);
+
+	mTestSubMesh->AddVertex(ion::renderer::Vertex( halfExtents.x, -halfExtents.y, -halfExtents.z));
+	mTestSubMesh->AddVertex(ion::renderer::Vertex( halfExtents.x, -halfExtents.y,  halfExtents.z));
+	mTestSubMesh->AddVertex(ion::renderer::Vertex( halfExtents.x,  halfExtents.y, -halfExtents.z));
+	mTestSubMesh->AddVertex(ion::renderer::Vertex( halfExtents.x,  halfExtents.y,  halfExtents.z));
+
+	mTestSubMesh->AddVertex(ion::renderer::Vertex(-halfExtents.x, -halfExtents.y, -halfExtents.z));
+	mTestSubMesh->AddVertex(ion::renderer::Vertex(-halfExtents.x, -halfExtents.y,  halfExtents.z));
+	mTestSubMesh->AddVertex(ion::renderer::Vertex(-halfExtents.x,  halfExtents.y, -halfExtents.z));
+	mTestSubMesh->AddVertex(ion::renderer::Vertex(-halfExtents.x,  halfExtents.y,  halfExtents.z));
+
+	ion::renderer::Face faces[12] = {{0}};
+
+	faces[0].mIndices[0] = 2; faces[0].mIndices[1] = 1; faces[0].mIndices[2] = 0;
+	faces[1].mIndices[0] = 3; faces[1].mIndices[1] = 1; faces[1].mIndices[2] = 2;
+
+	faces[2].mIndices[0] = 7; faces[2].mIndices[1] = 4; faces[2].mIndices[2] = 5;
+	faces[3].mIndices[0] = 6; faces[3].mIndices[1] = 4; faces[3].mIndices[2] = 7;
+
+	faces[4].mIndices[0] = 6; faces[4].mIndices[1] = 0; faces[4].mIndices[2] = 4;
+	faces[5].mIndices[0] = 2; faces[5].mIndices[1] = 0; faces[5].mIndices[2] = 6;
+
+	faces[6].mIndices[0] = 3; faces[6].mIndices[1] = 5; faces[6].mIndices[2] = 1;
+	faces[7].mIndices[0] = 7; faces[7].mIndices[1] = 5; faces[7].mIndices[2] = 3;
+
+	faces[8].mIndices[0] = 7; faces[8].mIndices[1] = 2; faces[8].mIndices[2] = 6;
+	faces[9].mIndices[0] = 3; faces[9].mIndices[1] = 2; faces[9].mIndices[2] = 7;
+
+	faces[10].mIndices[0] = 5; faces[10].mIndices[1] = 4; faces[10].mIndices[2] = 1;
+	faces[11].mIndices[0] = 1; faces[11].mIndices[1] = 4; faces[11].mIndices[2] = 0;
 	
+	for(int i = 0; i < 12; i++)
+	{
+		mTestSubMesh->AddFace(faces[i]);
+	}
+
+	mTestSkeleton = new ion::renderer::Skeleton();
+
+	ion::renderer::Bone* bone0 = mTestSkeleton->CreateBone("bone0");
+	ion::renderer::Bone* bone1 = mTestSkeleton->CreateBone("bone1");
+
+	mTestBones.push_back(bone0);
+	mTestBones.push_back(bone1);
+
+	bone0->SetLocalTranslation(ion::Vector3(0.0f,  halfExtents.y, 0.0f));
+	bone1->SetLocalTranslation(ion::Vector3(0.0f, -halfExtents.y, 0.0f));
+
+	mTestSkeleton->FixBindingPose();
+
+	mTestMesh->SetSkeleton(*mTestSkeleton);
+
+	mTestSubMesh->MapBone(*bone0, 0, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 1, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 2, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 3, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 4, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 5, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 6, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 7, 1.0f);
+
+	mTestSubMesh->MapBone(*bone1, 8, 1.0f);
+	mTestSubMesh->MapBone(*bone1, 9, 1.0f);
+	mTestSubMesh->MapBone(*bone1, 10, 1.0f);
+	mTestSubMesh->MapBone(*bone1, 11, 1.0f);
+	mTestSubMesh->MapBone(*bone1, 12, 1.0f);
+	mTestSubMesh->MapBone(*bone1, 13, 1.0f);
+	mTestSubMesh->MapBone(*bone1, 14, 1.0f);
+	mTestSubMesh->MapBone(*bone1, 15, 1.0f);
+
+	mTestSubMesh->Finalise();
+	mTestMesh->Finalise();
+
+	mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene);
+	mTestMeshInstance->SetCastShadows(false);
+	mTestMeshInstance->SetDrawDebugSkeleton(true);
+
+	mTestMeshNode = new ion::renderer::SceneNode(*mScene);
+	mTestMeshNode->Attach(*mTestMeshInstance);
+	mTestMeshNode->SetPosition(ion::Vector3(0.0f, 5.0f, 0.0f));
+
+	ion::Matrix4 boneTransform;
+	boneTransform.SetTranslation(ion::Vector3(0.5f, 0.0f, 0.0f));
+	mTestMeshInstance->SetBoneTransform(*bone1, boneTransform);
+
+	//bone1->Translate(ion::Vector3(0.5f, 0.0f, 0.0f));
+	//bone1->Rotate(ion::Quaternion(0.0f, 1.0f, 0.0f, ion::maths::DegreesToRadians(45.0f)));
+
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
 	

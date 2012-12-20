@@ -24,7 +24,7 @@ namespace ion
 		class Scene;
 		class Primitive;
 		class Camera;
-		class Mesh;
+		class MeshInstance;
 		class Light;
 
 		class SceneNode
@@ -39,7 +39,7 @@ namespace ion
 
 			void Attach(Primitive& primitive);
 			void Attach(Camera& camera);
-			void Attach(Mesh& mesh);
+			void Attach(MeshInstance& meshInstance);
 			void Attach(Light& light);
 
 			#if !defined ION_PLUGIN

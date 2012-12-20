@@ -33,6 +33,7 @@ namespace ion
 			//Initialise Ogre root
 			mOgreRoot->initialise(false);
 
+			//Create FSAA params
 			Ogre::NameValuePairList windowCreationParams;
 			char fsaaLevelText[8] = {0};
 			sprintf_s(fsaaLevelText, 8, "%i", fsaaLevel);

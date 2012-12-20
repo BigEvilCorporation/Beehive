@@ -96,15 +96,12 @@ namespace ion
 			#endif
 		}
 
-		void SceneNode::Attach(Mesh& mesh)
+		void SceneNode::Attach(MeshInstance& meshInstance)
 		{
 			#if !defined ION_PLUGIN
 			if(mOgreSceneNode)
 			{
-				Ogre::Entity* entity = mOgreScene->createEntity(mesh.GetOgreMesh()->getName());
-				entity->setMaterialName("BaseWhite");
-				entity->setCastShadows(true);
-				mOgreSceneNode->attachObject(entity);
+				mOgreSceneNode->attachObject(meshInstance.GetOgreEntity());
 				mOgreSceneNode->setVisible(true);
 			}
 			#endif
