@@ -20,10 +20,11 @@
 #include <vector>
 #include <map>
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreMesh.h>
 #include <Ogre/OgreSubMesh.h>
 #include <Ogre/OgreEntity.h>
+#include <Ogre/OgreSubEntity.h>
 #endif
 
 namespace ion
@@ -44,13 +45,6 @@ namespace ion
 		class Mesh
 		{
 		public:
-			enum Buffers
-			{
-				VertexBuffer = 0,
-				NormalBuffer,
-				TexCoordBuffer
-			};
-
 			Mesh();
 			~Mesh();
 
@@ -58,11 +52,6 @@ namespace ion
 			{
 			public:
 				~SubMesh();
-
-				void CreateVertexBuffer(int numVertices);
-				void CreateNormalBuffer(int numNormals);
-				void CreateIndexBuffer(int numIndices);
-				void CreateTexCoordBuffer(int numTexCoords);
 
 				void AddVertex(Vertex& vertex);
 				void AddNormal(Vector3& normal);
@@ -100,13 +89,14 @@ namespace ion
 				std::vector<Vector3> mNormals;
 				std::vector<Face> mFaces;
 
-				#if !defined ION_PLUGIN
+				#if defined ION_OGRE
 				Ogre::SubMesh* mOgreSubMesh;
 				Ogre::VertexData* mOgreVertexData;
 				Ogre::HardwareVertexBufferSharedPtr mOgreVertexBuffer;
 				Ogre::HardwareVertexBufferSharedPtr mOgreNormalBuffer;
 				Ogre::HardwareVertexBufferSharedPtr mOgreTexCoordBuffer;
 				Ogre::HardwareIndexBufferSharedPtr mOgreIndexBuffer;
+				int mHardwareBufferIndex;
 				#endif
 
 				friend class Mesh;
@@ -120,7 +110,7 @@ namespace ion
 			bool Load(std::string filename);
 			u64 Save(std::string filename);
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::MeshPtr& GetOgreMesh();
 			#endif
 
@@ -160,7 +150,7 @@ namespace ion
 				Vector3 max;
 			} mBounds;
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::MeshPtr mOgreMesh;
 			#endif
 		};
@@ -176,12 +166,17 @@ namespace ion
 			void SetDrawDebugSkeleton(bool drawSkeleton);
 
 			//TODO: Copy skeleton locally
+			void MapBone(Mesh::SubMesh& subMesh, Bone& bone, u32 vertexIdx, float weight);
 			void SetBoneTransform(Bone& bone, const Matrix4& transform);
 
+			#if defined ION_OGRE
 			Ogre::Entity* GetOgreEntity() const { return mOgreEntity; }
+			#endif
 
 		protected:
+			#if defined ION_OGRE
 			Ogre::Entity* mOgreEntity;
+			#endif
 		};
 	}
 }

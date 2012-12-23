@@ -11,7 +11,7 @@
 #include "../core/Colour.h"
 #include "Light.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreSceneManager.h>
 #endif
 
@@ -42,10 +42,10 @@ namespace ion
 			bool Load(std::string filename);
 			u64 Save(std::string filename);
 
-			#if defined ION_PLUGIN
 			Mesh* GetSceneMesh();
 			std::list<Light*>& GetLights();
-			#else
+
+			#if defined ION_OGRE
 			Ogre::SceneManager* GetOgreSceneMgrIFace();
 			#endif
 
@@ -86,7 +86,7 @@ namespace ion
 			ColourRGB mAmbientLight;
 			std::list<Light*> mLights;
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::SceneManager* mOgreSceneMgrIFace;
 			#endif
 		};

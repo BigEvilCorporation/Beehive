@@ -7,7 +7,7 @@
 
 #include "Texture.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreResourceGroupManager.h>
 #include <Ogre/OgreImage.h>
 #include <Ogre/OgreDataStream.h>
@@ -61,7 +61,7 @@ namespace ion
 			return result;
 		}
 
-		#if !defined ION_PLUGIN
+		#if defined ION_OGRE
 		const std::string& Texture::GetOgreTextureName() const
 		{
 			return mOgreTextureName;

@@ -122,13 +122,16 @@ bool Watershed::Initialise()
 	mCharacterBody->SetMaxJumpHeight(characterDimensions.y);
 
 	mTestMesh = new ion::renderer::Mesh();
+	mTestMesh->Load("meshes/maya_test4.ion.mesh");
+	mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene);
+	mTestMeshNode = new ion::renderer::SceneNode(*mScene);
+	mTestMeshNode->Attach(*mTestMeshInstance);
+
+	/*
 	mTestSubMesh = mTestMesh->CreateSubMesh();
 
 	ion::Vector3 halfExtents(1.0f, 0.5f, 1.0f);
 	ion::Vector3 offset(0.0f, 0.0f, 0.0f);
-
-	mTestSubMesh->CreateVertexBuffer(8);
-	mTestSubMesh->CreateIndexBuffer(12 * 3);
 
 	mTestSubMesh->AddVertex(ion::renderer::Vertex( halfExtents.x, -halfExtents.y, -halfExtents.z));
 	mTestSubMesh->AddVertex(ion::renderer::Vertex( halfExtents.x, -halfExtents.y,  halfExtents.z));
@@ -165,6 +168,8 @@ bool Watershed::Initialise()
 		mTestSubMesh->AddFace(faces[i]);
 	}
 
+	mTestMesh->CalculateBounds();
+
 	mTestSkeleton = new ion::renderer::Skeleton();
 
 	ion::renderer::Bone* bone0 = mTestSkeleton->CreateBone("bone0");
@@ -176,45 +181,47 @@ bool Watershed::Initialise()
 	bone0->SetLocalTranslation(ion::Vector3(0.0f,  halfExtents.y, 0.0f));
 	bone1->SetLocalTranslation(ion::Vector3(0.0f, -halfExtents.y, 0.0f));
 
-	mTestSkeleton->FixBindingPose();
-
-	mTestMesh->SetSkeleton(*mTestSkeleton);
-
 	mTestSubMesh->MapBone(*bone0, 0, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 1, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 2, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 3, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 4, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 5, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 6, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 7, 1.0f);
-
-	mTestSubMesh->MapBone(*bone1, 8, 1.0f);
-	mTestSubMesh->MapBone(*bone1, 9, 1.0f);
-	mTestSubMesh->MapBone(*bone1, 10, 1.0f);
-	mTestSubMesh->MapBone(*bone1, 11, 1.0f);
-	mTestSubMesh->MapBone(*bone1, 12, 1.0f);
-	mTestSubMesh->MapBone(*bone1, 13, 1.0f);
-	mTestSubMesh->MapBone(*bone1, 14, 1.0f);
-	mTestSubMesh->MapBone(*bone1, 15, 1.0f);
 
 	mTestSubMesh->Finalise();
 	mTestMesh->Finalise();
 
+	mTestMesh->SetSkeleton(*mTestSkeleton);
+	mTestSkeleton->FixBindingPose();
+
 	mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene);
 	mTestMeshInstance->SetCastShadows(false);
 	mTestMeshInstance->SetDrawDebugSkeleton(true);
+
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 0, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 1, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 2, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 3, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 4, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 5, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 6, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 7, 1.0f);
+
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 8, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 9, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 10, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 11, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 12, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 13, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 14, 1.0f);
+	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 15, 1.0f);
 
 	mTestMeshNode = new ion::renderer::SceneNode(*mScene);
 	mTestMeshNode->Attach(*mTestMeshInstance);
 	mTestMeshNode->SetPosition(ion::Vector3(0.0f, 5.0f, 0.0f));
 
 	ion::Matrix4 boneTransform;
-	boneTransform.SetTranslation(ion::Vector3(0.5f, 0.0f, 0.0f));
+	boneTransform.SetTranslation(ion::Vector3(1.0f, 0.0f, 0.5f));
 	mTestMeshInstance->SetBoneTransform(*bone1, boneTransform);
 
 	//bone1->Translate(ion::Vector3(0.5f, 0.0f, 0.0f));
 	//bone1->Rotate(ion::Quaternion(0.0f, 1.0f, 0.0f, ion::maths::DegreesToRadians(45.0f)));
+	*/
 
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();

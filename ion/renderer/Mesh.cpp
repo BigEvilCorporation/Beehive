@@ -11,7 +11,7 @@
 #include "Scene.h"
 #include "../core/Debug.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreMesh.h>
 #include <Ogre/OgreMeshManager.h>
 #include <Ogre/OgreHardwareBufferManager.h>
@@ -36,67 +36,25 @@ namespace ion
 
 		Mesh::SubMesh::SubMesh(Mesh* mesh)
 		{
-			#if !defined ION_PLUGIN
-			mOgreSubMesh = mesh->GetOgreMesh()->createSubMesh();
-
-			mOgreVertexData = new Ogre::VertexData;
+			#if defined ION_OGRE
+			static int numSubMeshes = 0;
+			std::stringstream subMeshName;
+			subMeshName << "OgreSubMesh_" << numSubMeshes++;
+			mName = subMeshName.str();
+			mOgreSubMesh = mesh->GetOgreMesh()->createSubMesh(subMeshName.str());
 
 			//Setup vertex declaration
-			mOgreVertexData->vertexDeclaration->addElement(VertexBuffer, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-
+			mOgreVertexData = new Ogre::VertexData;
 			mOgreSubMesh->useSharedVertices = false;
 			mOgreSubMesh->vertexData = mOgreVertexData;
 			mOgreSubMesh->setMaterialName("BaseWhite");
+
+			mHardwareBufferIndex = 0;
 			#endif
 		}
 
 		Mesh::SubMesh::~SubMesh()
 		{
-		}
-
-		void Mesh::SubMesh::CreateVertexBuffer(int numVertices)
-		{
-			#if !defined ION_PLUGIN
-			mOgreVertexData->vertexCount = numVertices;
-			mOgreVertexBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(sizeof(Vertex),
-																								numVertices,
-																								Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-			#endif
-		}
-
-		void Mesh::SubMesh::CreateNormalBuffer(int numNormals)
-		{
-			#if !defined ION_PLUGIN
-			//Add normals to vertex declaration
-			mOgreVertexData->vertexDeclaration->addElement(NormalBuffer, 0, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-			
-			//Create normal buffer
-			mOgreNormalBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(sizeof(Vector3),
-																								numNormals,
-																								Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-			#endif
-		}
-
-		void Mesh::SubMesh::CreateIndexBuffer(int numIndices)
-		{
-			#if !defined ION_PLUGIN
-			mOgreIndexBuffer = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT,
-																							numIndices,
-																							Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-			#endif
-		}
-
-		void Mesh::SubMesh::CreateTexCoordBuffer(int numTexCoords)
-		{
-			#if !defined ION_PLUGIN
-			//Add text coords to vertex declaration
-			mOgreVertexData->vertexDeclaration->addElement(TexCoordBuffer, 0, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-
-			//Create tex coord buffer
-			mOgreTexCoordBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(sizeof(TexCoord),
-																								numTexCoords,
-																								Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-			#endif
 		}
 
 		void Mesh::SubMesh::AddVertex(Vertex& vertex)
@@ -116,7 +74,7 @@ namespace ion
 
 		void Mesh::SubMesh::MapBone(Bone& bone, u32 vertexIdx, float weight)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::VertexBoneAssignment boneAssignment;
 			boneAssignment.boneIndex = bone.GetOgreBone()->getHandle();
 			boneAssignment.vertexIndex = vertexIdx;
@@ -127,62 +85,81 @@ namespace ion
 
 		void Mesh::SubMesh::Finalise()
 		{
-			#if !defined ION_PLUGIN
-			if(mOgreVertexBuffer->getNumVertices() == 0 || mOgreVertexBuffer->getNumVertices() != mVertices.size())
+			#if defined ION_OGRE
+			//Get hardware buffer manager
+			Ogre::HardwareBufferManager& bufferManager = Ogre::HardwareBufferManager::getSingleton();
+
+			if(mVertices.size() > 0)
 			{
-				ion::debug::Error("Mesh::SubMesh::Finalise() - Cannot finalise submesh, incorrect number of vertices");
+				//Add vertices to vertex declaration
+				mOgreVertexData->vertexDeclaration->addElement(mHardwareBufferIndex, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+
+				//Create vertex buffer
+				mOgreVertexBuffer = bufferManager.createVertexBuffer(sizeof(Vertex), mVertices.size(), Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+
+				//Write vertices
+				mOgreVertexBuffer->writeData(0, sizeof(Vertex) * mVertices.size(), &mVertices[0], true);
+
+				//Bind vertex buffer
+				mOgreVertexData->vertexCount = mVertices.size();
+				mOgreSubMesh->vertexData->vertexBufferBinding->setBinding(mHardwareBufferIndex, mOgreVertexBuffer);
+
+				mHardwareBufferIndex++;
 			}
 
-			if(mOgreIndexBuffer->getNumIndexes() == 0 || mOgreIndexBuffer->getNumIndexes() != mFaces.size() * 3)
+			if(mFaces.size() > 0)
 			{
-				ion::debug::Error("Mesh::SubMesh::Finalise() - Cannot finalise submesh, incorrect number of indices");
+				//Create index buffer
+				mOgreIndexBuffer = bufferManager.createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, mFaces.size() * 3, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+
+				//Write indices
+				for(unsigned int i = 0; i < mFaces.size(); i++)
+				{
+					mOgreIndexBuffer->writeData(i * sizeof(Index) * 3, sizeof(Index) * 3, &mFaces[i].mIndices, true);
+				}
+
+				//Bind index buffer
+				mOgreSubMesh->indexData->indexBuffer = mOgreIndexBuffer;
+				mOgreSubMesh->indexData->indexCount = mOgreIndexBuffer->getNumIndexes();
+				mOgreSubMesh->indexData->indexStart = 0;
 			}
 
-			if(!mOgreNormalBuffer.isNull() && mOgreNormalBuffer->getNumVertices() != mNormals.size())
+			if(mNormals.size() > 0)
 			{
-				ion::debug::Error("Mesh::SubMesh::Finalise() - Cannot finalise submesh, incorrect number of normals");
-			}
+				//Add normals to vertex declaration
+				mOgreVertexData->vertexDeclaration->addElement(mHardwareBufferIndex, 0, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+				
+				//Create normal buffer
+				mOgreNormalBuffer = bufferManager.createVertexBuffer(sizeof(Vector3), mNormals.size(), Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
-			if(!mOgreTexCoordBuffer.isNull() && mOgreTexCoordBuffer->getNumVertices() != mFaces.size() * 3)
-			{
-				ion::debug::Error("Mesh::SubMesh::Finalise() - Cannot finalise submesh, incorrect number of texture coordinates");
-			}
-
-			//Copy mesh data to Ogre hardware buffers
-			mOgreVertexBuffer->writeData(0, sizeof(Vertex) * mVertices.size(), &mVertices[0], true);
-
-			if(!mOgreNormalBuffer.isNull())
-			{
+				//Write normals
 				mOgreNormalBuffer->writeData(0, sizeof(Vector3) * mNormals.size(), &mNormals[0], true);
+
+				//Bind normal buffer
+				mOgreSubMesh->vertexData->vertexBufferBinding->setBinding(mHardwareBufferIndex, mOgreNormalBuffer);
+
+				mHardwareBufferIndex++;
 			}
 
-			for(unsigned int i = 0; i < mFaces.size(); i++)
+			if(mFaces.size() > 0)
 			{
-				mOgreIndexBuffer->writeData(i * sizeof(Index) * 3, sizeof(Index) * 3, &mFaces[i].mIndices, true);
+				//Add text coords to vertex declaration
+				mOgreVertexData->vertexDeclaration->addElement(mHardwareBufferIndex, 0, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
 
-				if(!mOgreTexCoordBuffer.isNull())
+				//Create tex coord buffer
+				mOgreTexCoordBuffer = bufferManager.createVertexBuffer(sizeof(TexCoord), mFaces.size() * 3, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+
+				//Write tex coords
+				for(unsigned int i = 0; i < mFaces.size(); i++)
 				{
 					mOgreTexCoordBuffer->writeData(i * sizeof(TexCoord) * 3, sizeof(TexCoord) * 3, &mFaces[i].mTexCoords, true);
 				}
-			}
 
-			//Bind vertex, normal and texcoord buffers
-			mOgreSubMesh->vertexData->vertexBufferBinding->setBinding(VertexBuffer, mOgreVertexBuffer);
+				//Bind tex coord buffer
+				mOgreSubMesh->vertexData->vertexBufferBinding->setBinding(mHardwareBufferIndex, mOgreTexCoordBuffer);
 
-			if(!mOgreNormalBuffer.isNull())
-			{
-				mOgreSubMesh->vertexData->vertexBufferBinding->setBinding(NormalBuffer, mOgreNormalBuffer);
-			}
-
-			if(!mOgreTexCoordBuffer.isNull())
-			{
-				mOgreSubMesh->vertexData->vertexBufferBinding->setBinding(TexCoordBuffer, mOgreTexCoordBuffer);
-			}
-
-			//Set index buffer
-			mOgreSubMesh->indexData->indexBuffer = mOgreIndexBuffer;
-			mOgreSubMesh->indexData->indexCount = mOgreIndexBuffer->getNumIndexes();
-			mOgreSubMesh->indexData->indexStart = 0;
+				mHardwareBufferIndex++;
+			}		
 			#endif
 		}
 
@@ -246,8 +223,6 @@ namespace ion
 					//Read in vertices
 					u64 numVerts = dataChunk.GetNumItems();
 
-					CreateVertexBuffer((int)numVerts);
-
 					for(int i = 0; i < numVerts; i++)
 					{
 						Vertex vertex;
@@ -260,8 +235,6 @@ namespace ion
 					//Read in normals
 					u64 numNorms = dataChunk.GetNumItems();
 
-					CreateNormalBuffer((int)numNorms);
-
 					for(int i = 0; i < numNorms; i++)
 					{
 						Vector3 normal;
@@ -273,9 +246,6 @@ namespace ion
 				{
 					//Read in faces
 					u64 numFaces = dataChunk.GetNumItems();
-
-					CreateIndexBuffer((int)numFaces * 3);
-					CreateTexCoordBuffer((int)numFaces * 3);
 
 					for(int i = 0; i < numFaces; i++)
 					{
@@ -346,7 +316,7 @@ namespace ion
 
 		Mesh::Mesh()
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			std::stringstream meshName;
 			meshName << "mesh_" << sMeshIndex++;
 			mOgreMesh = Ogre::MeshManager::getSingleton().createManual(meshName.str(), "General");
@@ -381,7 +351,7 @@ namespace ion
 
 		void Mesh::Finalise()
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreMesh->_setBounds(Ogre::AxisAlignedBox(mBounds.min.x, mBounds.min.y, mBounds.min.z, mBounds.max.x, mBounds.max.y, mBounds.max.z));
 			mOgreMesh->load();
 			#endif
@@ -389,7 +359,7 @@ namespace ion
 
 		void Mesh::SetSkeleton(Skeleton& skeleton)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreMesh->_notifySkeleton(Ogre::SkeletonPtr(skeleton.GetOgreSkeleton()));
 			#endif
 		}
@@ -418,7 +388,7 @@ namespace ion
 			}
 		}
 
-		#if !defined ION_PLUGIN
+		#if defined ION_OGRE
 		Ogre::MeshPtr& Mesh::GetOgreMesh()
 		{
 			return mOgreMesh;
@@ -557,26 +527,65 @@ namespace ion
 
 		MeshInstance::MeshInstance(Mesh& mesh, Scene& scene)
 		{
+			#if defined ION_OGRE
 			mOgreEntity = scene.GetOgreSceneMgrIFace()->createEntity(mesh.GetOgreMesh()->getName());
 
 			//Default material
 			mOgreEntity->setMaterialName("BaseWhite");
+
+			//Set all skeleton bones as manually controlled
+			Ogre::Skeleton* ogreSkeleton = mOgreEntity->getSkeleton();
+			if(ogreSkeleton)
+			{
+				for(Ogre::Skeleton::BoneIterator::iterator it = ogreSkeleton->getBoneIterator().begin(), end = ogreSkeleton->getBoneIterator().end(); it != end; ++it)
+				{
+					(*it)->setManuallyControlled(true);
+				}
+
+				//Set binding pose
+				ogreSkeleton->setBindingPose();
+
+				//Reset
+				ogreSkeleton->reset();
+			}
+			#endif
 
 			//TODO: Create copy of ion skeleton
 		}
 
 		void MeshInstance::SetCastShadows(bool castShadows)
 		{
+			#if defined ION_OGRE
 			mOgreEntity->setCastShadows(castShadows);
+			#endif
 		}
 
 		void MeshInstance::SetDrawDebugSkeleton(bool drawSkeleton)
 		{
+			#if defined ION_OGRE
 			mOgreEntity->setDisplaySkeleton(drawSkeleton);
+			#endif
+		}
+
+		void MeshInstance::MapBone(Mesh::SubMesh& subMesh, Bone& bone, u32 vertexIdx, float weight)
+		{
+			#if defined ION_OGRE
+			Ogre::SubMesh* ogreSubMesh = mOgreEntity->getMesh()->getSubMesh(subMesh.GetName());
+			if(ogreSubMesh)
+			{
+				Ogre::VertexBoneAssignment boneAssignment;
+				boneAssignment.boneIndex = bone.GetOgreBone()->getHandle();
+				boneAssignment.vertexIndex = vertexIdx;
+				boneAssignment.weight = weight;
+				//subEntity->addBoneAssignment(boneAssignment);
+				ogreSubMesh->addBoneAssignment(boneAssignment);
+			}
+			#endif
 		}
 
 		void MeshInstance::SetBoneTransform(Bone& bone, const Matrix4& transform)
 		{
+			#if defined ION_OGRE
 			Ogre::Bone* boneInstance = mOgreEntity->getSkeleton()->getBone(bone.GetOgreBone()->getHandle());
 			if(boneInstance)
 			{
@@ -586,6 +595,7 @@ namespace ion
 				boneInstance->setPosition(position.x, position.y, position.z);
 				boneInstance->setOrientation(rotation.w, rotation.x, rotation.y, rotation.z);
 			}
+			#endif
 		}
 	}
 }

@@ -11,7 +11,7 @@
 #include "../core/BinaryFile.h"
 #include "../core/Debug.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreRoot.h>
 #include <Ogre/OgreSceneNode.h>
 #include <Ogre/OgreEntity.h>
@@ -34,7 +34,7 @@ namespace ion
 		{
 			mSceneMesh = new Mesh();
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreSceneMgrIFace = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC, "Scene");
 
 			Ogre::Entity* sceneMeshEntity = mOgreSceneMgrIFace->createEntity(mSceneMesh->GetOgreMesh()->getName());
@@ -71,7 +71,7 @@ namespace ion
 		}
 		#endif
 
-		#if !defined ION_PLUGIN
+		#if defined ION_OGRE
 		Ogre::SceneManager* Scene::GetOgreSceneMgrIFace()
 		{
 			return mOgreSceneMgrIFace;
@@ -80,7 +80,7 @@ namespace ion
 
 		void Scene::SetAmbientLight(const ColourRGB& colour)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneMgrIFace)
 			{
 				mOgreSceneMgrIFace->setAmbientLight(Ogre::ColourValue(colour.r, colour.g, colour.b));
@@ -97,7 +97,7 @@ namespace ion
 
 		void Scene::SetShadowFarDistance(float distance)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreSceneMgrIFace->setShadowFarDistance(distance);
 			#endif
 		}

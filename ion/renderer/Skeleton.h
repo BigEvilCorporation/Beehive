@@ -11,9 +11,11 @@
 #include "../core/maths/Vector.h"
 #include "../core/maths/Quaternion.h"
 
+#if defined ION_OGRE
 #include <OgreBone.h>
 #include <OgreSkeleton.h>
 #include <OgreSkeletonManager.h>
+#endif
 
 #include <list>
 
@@ -24,7 +26,11 @@ namespace ion
 		class Bone
 		{
 		public:
+			Bone(const char* name);
+
+			#if defined ION_OGRE
 			Bone(const char* name, Ogre::Bone* ogreBone);
+			#endif
 
 			//Set local transform
 			void SetLocalTransform(const Matrix4& transform);
@@ -43,13 +49,17 @@ namespace ion
 
 			const Matrix4& GetLocalTransform();
 
+			#if defined ION_OGRE
 			Ogre::Bone* GetOgreBone() const { return mOgreBone; }
+			#endif
 
 		protected:
-			void UpdateOgreMtx();
-
 			Matrix4 mLocalMatrix;
+
+			#if defined ION_OGRE
+			void UpdateOgreMtx();
 			Ogre::Bone* mOgreBone;
+			#endif
 		};
 
 		class Skeleton
@@ -66,13 +76,18 @@ namespace ion
 			//Reset to binding pose
 			void SetBindingPose();
 
+			#if defined ION_OGRE
 			Ogre::Skeleton* GetOgreSkeleton() const { return mOgreSkeleton.get(); }
+			#endif
 
 		protected:
 			static int sSkeletonIndex;
 			Bone* mRootBone;
 			std::list<Bone*> mBones;
+
+			#if defined ION_OGRE
 			Ogre::SkeletonPtr mOgreSkeleton;
+			#endif
 		};
 	}
 }

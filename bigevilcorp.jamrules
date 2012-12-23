@@ -119,6 +119,8 @@ rule ApplyOgreSDK TARGET
 
 	#Required for Ogre itself, since it doesn't prepend directories to its #includes
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Include/OGRE ;
+	
+	C.Defines $(TARGET) : ION_OGRE ;
 
 	OGRE_LIBS_DEBUG = 
 		OgreMain_d.lib

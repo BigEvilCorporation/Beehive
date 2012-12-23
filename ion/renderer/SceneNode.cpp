@@ -11,7 +11,7 @@
 #include "Primitive.h"
 #include "Mesh.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreEntity.h>
 #endif
 
@@ -21,7 +21,7 @@ namespace ion
 	{
 		SceneNode::SceneNode(Scene& scene)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreSceneNode = scene.GetOgreSceneMgrIFace()->getRootSceneNode()->createChildSceneNode();
 			mOgreSceneNode->setPosition(0.0f, 0.0f, 0.0f);
 			mOgreScene = scene.GetOgreSceneMgrIFace();
@@ -33,7 +33,7 @@ namespace ion
 			//Ogre::SceneNode destroyed with scene manager
 		}
 
-		#if !defined ION_PLUGIN
+		#if defined ION_OGRE
 		Ogre::SceneNode* SceneNode::GetOgreSceneNode()
 		{
 			return mOgreSceneNode;
@@ -42,7 +42,7 @@ namespace ion
 
 		void SceneNode::SetPosition(const Vector3& position)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneNode)
 			{
 				mOgreSceneNode->setPosition(position.x, position.y, position.z);
@@ -52,7 +52,7 @@ namespace ion
 
 		void SceneNode::SetTransform(const Matrix4& matrix)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneNode)
 			{
 				Ogre::Matrix3 ogreMtx3(
@@ -68,7 +68,7 @@ namespace ion
 
 		void SceneNode::SetLookAt(const Vector3& position)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneNode)
 			{
 				mOgreSceneNode->lookAt(Ogre::Vector3(position.x, position.y, position.z), Ogre::Node::TS_WORLD);
@@ -78,7 +78,7 @@ namespace ion
 
 		void SceneNode::Attach(Primitive& primitive)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneNode)
 			{
 				mOgreSceneNode->attachObject(primitive.GetOgreManualObj());
@@ -88,7 +88,7 @@ namespace ion
 
 		void SceneNode::Attach(Camera& camera)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneNode)
 			{
 				mOgreSceneNode->attachObject(camera.GetOgreCameraIFace());
@@ -98,7 +98,7 @@ namespace ion
 
 		void SceneNode::Attach(MeshInstance& meshInstance)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneNode)
 			{
 				mOgreSceneNode->attachObject(meshInstance.GetOgreEntity());
@@ -109,7 +109,7 @@ namespace ion
 
 		void SceneNode::Attach(Light& light)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreSceneNode)
 			{
 				mOgreSceneNode->attachObject(light.GetOgreLightIFace());
