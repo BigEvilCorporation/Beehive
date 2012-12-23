@@ -18,7 +18,7 @@ namespace ion
 	{
 		Light::Light(Type type, Scene& scene)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight = scene.GetOgreSceneMgrIFace()->createLight();
 			mOgreLight->setCastShadows(true);
 			#endif
@@ -31,7 +31,7 @@ namespace ion
 
 		Light::Light(Scene& scene)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight = scene.GetOgreSceneMgrIFace()->createLight();
 			#endif
 
@@ -47,7 +47,7 @@ namespace ion
 
 		void Light::SetType(Type type)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			switch(type)
 			{
 			case Point:
@@ -67,7 +67,7 @@ namespace ion
 
 		void Light::SetPosition(const Vector3& position)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight->setPosition(Ogre::Vector3(position.x, position.y, position.z));
 			#endif
 
@@ -76,7 +76,7 @@ namespace ion
 
 		void Light::SetDirection(const Vector3& direction)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight->setDirection(direction.x, direction.y, direction.z);
 			#endif
 
@@ -95,7 +95,7 @@ namespace ion
 
 		void Light::SetDiffuse(ColourRGB& diffuse)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight->setDiffuseColour(Ogre::ColourValue(diffuse.r, diffuse.g, diffuse.b));
 			#endif
 
@@ -104,7 +104,7 @@ namespace ion
 
 		void Light::SetSpecular(ColourRGB& specular)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight->setSpecularColour(Ogre::ColourValue(specular.r, specular.g, specular.b));
 			#endif
 
@@ -113,7 +113,7 @@ namespace ion
 
 		void Light::SetAttenuation(float maxDistance)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight->setAttenuation(maxDistance, 1.0f, 4.5f / maxDistance, 75.0f / (maxDistance * maxDistance));
 			#endif
 
@@ -124,7 +124,7 @@ namespace ion
 
 		void Light::SetSpotRange(float minAngle, float maxAngle)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight->setSpotlightRange(Ogre::Degree(minAngle), Ogre::Degree(maxAngle));
 			#endif
 
@@ -134,7 +134,7 @@ namespace ion
 
 		void Light::CastShadows(bool enabled)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreLight->setCastShadows(enabled);
 			#endif
 
@@ -205,7 +205,7 @@ namespace ion
 			return binaryChunk.GetChunkSize();
 		}
 
-		#if !defined ION_PLUGIN
+		#if defined ION_OGRE
 		Ogre::Light* Light::GetOgreLightIFace()
 		{
 			return mOgreLight;

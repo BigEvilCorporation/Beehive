@@ -14,7 +14,7 @@ namespace ion
 	{
 		Camera::Camera(Scene& scene)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreCameraIFace = scene.GetOgreSceneMgrIFace()->createCamera("Camera");
 			mOgreCameraIFace->setNearClipDistance(0.1f);
 			mOgreCameraIFace->setFarClipDistance(1000.0f);
@@ -28,7 +28,7 @@ namespace ion
 			
 		void Camera::SetPosition(const Vector3& position)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreCameraIFace)
 			{
 				mOgreCameraIFace->setPosition(position.x, position.y, position.z);
@@ -40,7 +40,7 @@ namespace ion
 
 		const Vector3& Camera::GetPosition()
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			const Ogre::Vector3& ogrePos = mOgreCameraIFace->getPosition();
 			mPosition.x = ogrePos.x;
 			mPosition.y = ogrePos.y;
@@ -52,7 +52,7 @@ namespace ion
 
 		void Camera::LookAt(const Vector3& lookat)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreCameraIFace)
 			{
 				mOgreCameraIFace->lookAt(lookat.x, lookat.y, lookat.z);
@@ -62,7 +62,7 @@ namespace ion
 
 		void Camera::Move(const Vector3& moveVector)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreCameraIFace)
 			{
 				mOgreCameraIFace->moveRelative(Ogre::Vector3(moveVector.x, moveVector.y, moveVector.z));
@@ -72,7 +72,7 @@ namespace ion
 
 		void Camera::Pitch(float pitch)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreCameraIFace)
 			{
 				mOgreCameraIFace->pitch(Ogre::Radian(pitch));
@@ -82,7 +82,7 @@ namespace ion
 
 		void Camera::Yaw(float yaw)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreCameraIFace)
 			{
 				mOgreCameraIFace->yaw(Ogre::Radian(yaw));
@@ -92,7 +92,7 @@ namespace ion
 
 		void Camera::Roll(float roll)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreCameraIFace)
 			{
 				mOgreCameraIFace->roll(Ogre::Radian(roll));
@@ -102,7 +102,7 @@ namespace ion
 
 		void Camera::SetDrawMode(DrawMode drawMode)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mOgreCameraIFace)
 			{
 				Ogre::PolygonMode polyMode = Ogre::PM_SOLID;

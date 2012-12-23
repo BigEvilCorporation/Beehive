@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreMaterial.h>
 #include <Ogre/OgreMaterialManager.h>
 #include <Ogre/OgreTechnique.h>
@@ -90,7 +90,7 @@ namespace ion
 			LightingMode GetLightingMode() const;
 			bool GetReceiveShadows() const;
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			const std::string& GetOgreMaterialName() { return mOgreMaterialName; }
 			#endif
 
@@ -137,7 +137,7 @@ namespace ion
 
 			BlendMode mBlendMode;
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::MaterialPtr mOgreMaterial;
 			Ogre::Technique* mOgreTechnique;
 			Ogre::Pass* mOgrePass;

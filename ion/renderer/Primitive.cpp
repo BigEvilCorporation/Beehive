@@ -17,7 +17,7 @@ namespace ion
 	{
 		Primitive::Primitive(Scene& scene, Projection projection)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mManualPrimitive = scene.GetOgreSceneMgrIFace()->createManualObject();
 
 			if(mManualPrimitive)
@@ -47,7 +47,7 @@ namespace ion
 
 		void Primitive::Begin(Material* material, Primitive::Pattern pattern)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mManualPrimitive)
 			{
 				Ogre::RenderOperation::OperationType renderOp;
@@ -84,7 +84,7 @@ namespace ion
 
 		void Primitive::End()
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mManualPrimitive)
 			{
 				mManualPrimitive->end();
@@ -94,7 +94,7 @@ namespace ion
 
 		void Primitive::AddVertex(const Vertex& vertex)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mManualPrimitive)
 			{
 				mManualPrimitive->position(vertex.x, vertex.y, vertex.z);
@@ -104,7 +104,7 @@ namespace ion
 
 		void Primitive::AddNormal(const Vector3& normal)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mManualPrimitive)
 			{
 				mManualPrimitive->normal(normal.x, normal.y, normal.z);
@@ -114,7 +114,7 @@ namespace ion
 
 		void Primitive::AddTextureCoord(const TexCoord& coord)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mManualPrimitive)
 			{
 				mManualPrimitive->textureCoord(coord.x, coord.y);
@@ -124,7 +124,7 @@ namespace ion
 
 		void Primitive::AddIndex(unsigned int index)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			if(mManualPrimitive)
 			{
 				mManualPrimitive->index(index);
@@ -288,7 +288,7 @@ namespace ion
 			mManualPrimitive->setCastShadows(shadows);
 		}
 
-		#if !defined ION_PLUGIN
+		#if defined ION_OGRE
 		Ogre::ManualObject* Primitive::GetOgreManualObj()
 		{
 			return mManualPrimitive;

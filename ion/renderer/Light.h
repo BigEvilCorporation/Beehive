@@ -11,7 +11,7 @@
 #include "../core/Colour.h"
 #include "../core/BinaryFile.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreLight.h>
 #endif
 
@@ -49,12 +49,12 @@ namespace ion
 			bool Read(io::BinaryFile::Chunk& binaryChunk);
 			u64 Write(io::BinaryFile::Chunk& binaryChunk);
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::Light* GetOgreLightIFace();
 			#endif
 
 		private:
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::Light* mOgreLight;
 			#endif
 

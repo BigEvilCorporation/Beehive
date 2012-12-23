@@ -43,7 +43,7 @@ namespace ion
 
 		Material::Material()
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			std::stringstream name;
 			name << "Material_" << sMaterialIndex++;
 			mOgreMaterialName = name.str();
@@ -238,7 +238,7 @@ namespace ion
 		void Material::SetBlendMode(BlendMode blendMode)
 		{
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::SceneBlendType ogreBlendType = Ogre::SBT_REPLACE;
 
 			switch(blendMode)
@@ -277,7 +277,7 @@ namespace ion
 
 		void Material::SetAmbientColour(const Colour& ambient)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgrePass->setAmbient(ambient.r, ambient.g, ambient.b);
 			#endif
 
@@ -286,7 +286,7 @@ namespace ion
 
 		void Material::SetDiffuseColour(const Colour& diffuse)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgrePass->setDiffuse(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
 			#endif
 
@@ -295,7 +295,7 @@ namespace ion
 
 		void Material::SetSpecularColour(const Colour& specular)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgrePass->setSpecular(specular.r, specular.g, specular.b, 1.0f);
 			mOgrePass->setShininess(specular.a);
 			#endif
@@ -305,7 +305,7 @@ namespace ion
 
 		void Material::SetEmissiveColour(const Colour& emissive)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgrePass->setSelfIllumination(emissive.r, emissive.g, emissive.b);
 			#endif
 
@@ -336,7 +336,7 @@ namespace ion
 		{
 			mDiffuseMaps.push_back(diffuse);
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::TextureUnitState* textureState = mOgrePass->createTextureUnitState(diffuse->GetOgreTextureName());
 			textureState->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
 			textureState->setTextureAnisotropy(8);
@@ -347,7 +347,7 @@ namespace ion
 		{
 			mNormalMap = normal;
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			//Ogre::TextureUnitState* textureState = mOgrePass->createTextureUnitState(diffuse->GetOgreTextureName());
 			//textureState->setContentType(Ogre::TextureUnitState::Conte
 			#endif
@@ -390,7 +390,7 @@ namespace ion
 
 		void Material::SetLightingEnabled(bool lighting)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreMaterial->setLightingEnabled(lighting);
 			#endif
 
@@ -404,7 +404,7 @@ namespace ion
 
 		void Material::SetLightingMode(LightingMode mode)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::ShadeOptions ogreShadeMode = Ogre::SO_FLAT ;
 
 			switch(mode)
@@ -433,7 +433,7 @@ namespace ion
 
 		void Material::SetReceiveShadows(bool shadows)
 		{
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			mOgreMaterial->setReceiveShadows(shadows);
 			#endif
 

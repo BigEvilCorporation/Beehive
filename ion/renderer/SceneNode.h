@@ -11,7 +11,7 @@
 #include "../core/maths/Matrix.h"
 #include "../core/maths/Quaternion.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreSceneNode.h>
 #include <Ogre/OgreSceneManager.h>
 #endif
@@ -42,12 +42,12 @@ namespace ion
 			void Attach(MeshInstance& meshInstance);
 			void Attach(Light& light);
 
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::SceneNode* GetOgreSceneNode();
 			#endif
 
 		private:
-			#if !defined ION_PLUGIN
+			#if defined ION_OGRE
 			Ogre::SceneNode* mOgreSceneNode;
 			Ogre::SceneManager* mOgreScene;
 			#endif

@@ -10,7 +10,7 @@
 #include "Viewport.h"
 #include "../core/Types.h"
 
-#if !defined ION_PLUGIN
+#if defined ION_OGRE
 #include <Ogre/OgreCompositorManager.h>
 #include <Ogre/OgreCompositor.h>
 #include <Ogre/OgreCompositorInstance.h>
