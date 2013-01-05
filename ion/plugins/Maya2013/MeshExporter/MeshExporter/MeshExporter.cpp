@@ -188,7 +188,8 @@ namespace ion
 
 						//Add normals
 						MFloatVectorArray normals;
-						fnMesh.getNormals(normals);
+						//fnMesh.getNormals(normals);
+						fnMesh.getVertexNormals(false, normals);
 						for(int i = 0; i < normals.length(); i++)
 						{
 							MFloatVector normal = normals[i];
