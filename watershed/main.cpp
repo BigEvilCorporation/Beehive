@@ -3,7 +3,7 @@
 
 int main(char** args, int numargs)
 {
-	Watershed app;
+	ws::Watershed app;
 	
 	if(app.Initialise())
 	{

@@ -8,6 +8,12 @@ ApplyIonGameKit watershed ;
 
 SRC = 
 	main.cpp
+	ColourWheel.cpp
+	ColourWheel.h
+	Creature.cpp
+	Creature.h
+	Fireflies.cpp
+	Fireflies.h
 	Watershed.cpp
 	Watershed.h
 	;
