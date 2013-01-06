@@ -42,6 +42,8 @@ namespace ion
 			void Attach(MeshInstance& meshInstance);
 			void Attach(Light& light);
 
+			void Detach(Primitive& primitive);
+
 			#if defined ION_OGRE
 			Ogre::SceneNode* GetOgreSceneNode();
 			#endif
