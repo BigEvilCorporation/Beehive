@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////
+// File:		Watershed.cpp
+// Date:		4th January 2013
+// Authors:		Matt Phillips
+// Description:	Watershed - Main game class
+///////////////////////////////////////////////////
+
 #include "Watershed.h"
 
 #include <sstream>
@@ -32,11 +39,14 @@ namespace ws
 		std::stringstream windowTitle;
 		windowTitle << "ion::engine - build " << ion::sVersion.Major << "." << ion::sVersion.Minor << "." << ion::sVersion.Build;
 
-		//Create renderer, scene, camera and viewport
+		//Create renderer, scenes, cameras and viewports
 		mRenderer = new ion::renderer::Renderer(windowTitle.str().c_str(), 1024, 768, false, 8);
-		mScene = new ion::renderer::Scene();
-		mCamera = new ion::renderer::Camera(*mScene);
-		mViewport = new ion::renderer::Viewport(*mRenderer, *mCamera);
+		mScene2d = new ion::renderer::Scene();
+		mScene3d = new ion::renderer::Scene();
+		mCamera2d = new ion::renderer::Camera(*mScene2d);
+		mCamera3d = new ion::renderer::Camera(*mScene3d);
+		mViewport2d = new ion::renderer::Viewport(*mRenderer, *mCamera2d, 1);
+		mViewport3d = new ion::renderer::Viewport(*mRenderer, *mCamera3d, 0);
 
 		//Create camera controllers
 		mCameraThirdPerson = new ion::gamekit::CameraThirdPerson();
@@ -53,32 +63,39 @@ namespace ws
 
 		//Add post effects
 		mPostEffectBloom = new ion::renderer::PostEffectBloom;
-		mPostEffectBloom->AssignToViewport(*mViewport);
+		mPostEffectBloom->AssignToViewport(*mViewport3d);
 		mPostEffectBloom->SetBlurWidth(0.01f);
 		mPostEffectBloom->SetBlendAlpha(0.15f);
 
 		mPostEffectMotionBlur = new ion::renderer::PostEffectMotionBlur;
-		mPostEffectMotionBlur->AssignToViewport(*mViewport);
+		mPostEffectMotionBlur->AssignToViewport(*mViewport3d);
 		mPostEffectMotionBlur->SetBlurWeight(0.2f);
 
 		//Set default ambient light and window background colour
-		mScene->SetAmbientLight(ion::ColourRGB(0.5f, 0.5f, 0.5f));
-		mViewport->SetBackgroundColour(ion::Colour(0.2f, 0.2f, 0.2f));
+		mScene2d->SetAmbientLight(ion::ColourRGB(1.0f, 1.0f, 1.0f));
+		mScene3d->SetAmbientLight(ion::ColourRGB(0.5f, 0.5f, 0.5f));
+		mViewport2d->SetBackgroundColour(ion::Colour(0.0f, 0.0f, 0.0f));
+		mViewport3d->SetBackgroundColour(ion::Colour(0.2f, 0.2f, 0.2f));
 
 		//Create directional light
-		mDirectionalLight = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
+		mDirectionalLight = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene3d);
 		mDirectionalLight->SetDiffuse(ion::ColourRGB(0.8f, 0.8f, 0.8f));
 		mDirectionalLight->SetSpecular(ion::ColourRGB(0.9f, 0.9f, 0.9f));
 		mDirectionalLight->SetDirection(ion::Vector3(1.0f, -1.0f, 1.0f));
 
-		//Set default camera position and direction
-		mCamera->SetPosition(ion::Vector3(0.0f, 2.0f, 10.0f));
-		mCamera->LookAt(ion::Vector3(0.0f, 0.0f, 0.0f));
+		//Set default camera projections, positions and directions
+		mCamera2d->SetProjection(ion::renderer::Camera::Orthographic);
+		mCamera2d->SetOrthoDimensions(1.0f, 1.0f);
+		mCamera2d->SetAspectRatio(1.0f);
+		mCamera3d->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
+		mCamera3d->SetProjection(ion::renderer::Camera::Perspective);
+		mCamera3d->SetPosition(ion::Vector3(0.0f, 2.0f, 10.0f));
+		mCamera3d->LookAt(ion::Vector3(0.0f, 0.0f, 0.0f));
 
 		//Create floor quad
-		mFloorQuad = new ion::renderer::Primitive(*mScene, ion::renderer::Primitive::Proj3D);
+		mFloorQuad = new ion::renderer::Primitive(*mScene3d, ion::renderer::Primitive::Proj3D);
 		mFloorQuad->AddQuad(NULL, 15.0f, 10.0f, ion::renderer::Primitive::xz, ion::Vector3());
-		mFloorNode = new ion::renderer::SceneNode(*mScene);
+		mFloorNode = new ion::renderer::SceneNode(*mScene3d);
 		mFloorNode->Attach(*mFloorQuad);
 
 		//Create physics world
@@ -93,13 +110,38 @@ namespace ws
 		mFloorBody->SetMass(0.0f);
 
 		//Create character
-		mPlayer = new ws::Creature(*mPhysicsWorld, *mScene);
+		mPlayer = new ws::Creature(*mPhysicsWorld, *mScene3d);
+
+		ion::renderer::Material* quad2dMat = new ion::renderer::Material();
+		quad2dMat->AssignVertexColour(ion::renderer::Material::Ambient);
+		quad2dMat->SetDepthTest(false);
+		quad2dMat->SetDepthWrite(false);
+		quad2dMat->SetCullMode(ion::renderer::Material::None);
+
+		ion::renderer::Primitive* quad2d = new ion::renderer::Primitive(*mScene2d, ion::renderer::Primitive::Proj2D);
+		ion::Vector2 size(0.8f, 0.8f);
+		quad2d->Begin(quad2dMat, ion::renderer::Primitive::Triangle);
+		quad2d->AddVertex(ion::renderer::Vertex(-size.x, -size.y, 0.0f));
+		quad2d->AddColour(ion::Colour(1.0f, 0.0f, 0.0f, 0.8f));
+		quad2d->AddVertex(ion::renderer::Vertex( size.x, -size.y, 0.0f));
+		quad2d->AddColour(ion::Colour(0.0f, 1.0f, 0.0f, 0.8f));
+		quad2d->AddVertex(ion::renderer::Vertex( size.x,  size.y, 0.0f));
+		quad2d->AddColour(ion::Colour(0.0f, 0.0f, 1.0f, 0.8f));
+		quad2d->AddVertex(ion::renderer::Vertex(-size.x, -size.y, 0.0f));
+		quad2d->AddColour(ion::Colour(1.0f, 1.0f, 0.0f, 0.8f));
+		quad2d->AddVertex(ion::renderer::Vertex( size.x,  size.y, 0.0f));
+		quad2d->AddColour(ion::Colour(1.0f, 0.0f, 0.0f, 0.8f));
+		quad2d->AddVertex(ion::renderer::Vertex(-size.x,  size.y, 0.0f));
+		quad2d->AddColour(ion::Colour(1.0f, 1.0f, 0.0f, 0.8f));
+		quad2d->End();
+		ion::renderer::SceneNode* quad2dNode = new ion::renderer::SceneNode(*mScene2d);
+		quad2dNode->Attach(*quad2d);
 
 		/*
 		mTestMesh = new ion::renderer::Mesh();
 		mTestMesh->Load("meshes/maya_test5.ion.mesh");
-		mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene);
-		mTestMeshNode = new ion::renderer::SceneNode(*mScene);
+		mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene3d);
+		mTestMeshNode = new ion::renderer::SceneNode(*mScene3d);
 		mTestMeshNode->Attach(*mTestMeshInstance);
 		*/
 
@@ -165,7 +207,7 @@ namespace ws
 		mTestMesh->SetSkeleton(*mTestSkeleton);
 		mTestSkeleton->FixBindingPose();
 
-		mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene);
+		mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene3d);
 		mTestMeshInstance->SetCastShadows(false);
 		mTestMeshInstance->SetDrawDebugSkeleton(true);
 
@@ -187,7 +229,7 @@ namespace ws
 		mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 14, 1.0f);
 		mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 15, 1.0f);
 
-		mTestMeshNode = new ion::renderer::SceneNode(*mScene);
+		mTestMeshNode = new ion::renderer::SceneNode(*mScene3d);
 		mTestMeshNode->Attach(*mTestMeshInstance);
 		mTestMeshNode->SetPosition(ion::Vector3(0.0f, 5.0f, 0.0f));
 
@@ -216,14 +258,14 @@ namespace ws
 		if(mGamepad)
 			delete mGamepad;
 
-		if(mViewport)
-			delete mViewport;
+		if(mViewport3d)
+			delete mViewport3d;
 
-		if(mCamera)
-			delete mCamera;
+		if(mCamera3d)
+			delete mCamera3d;
 
-		if(mScene)
-			delete mScene;
+		if(mScene3d)
+			delete mScene3d;
 
 		if(mRenderer)
 			delete mRenderer;
@@ -248,7 +290,7 @@ namespace ws
 		if(mCameraType == FirstPerson)
 		{
 			//Un-register third person camera controller
-			mCameraThirdPerson->SetCurrentCamera(mCamera);
+			mCameraThirdPerson->SetCurrentCamera(mCamera3d);
 
 			//Create camera move vector from WASD state
 			ion::Vector3 cameraMoveVector;
@@ -266,9 +308,9 @@ namespace ws
 			float mouseDeltaY = (float)mMouse->GetDeltaY();
 
 			//Move, pitch and yaw camera
-			mCamera->Move(cameraMoveVector);
-			mCamera->Pitch(-mouseDeltaY * mMouseSensitivity);
-			mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
+			mCamera3d->Move(cameraMoveVector);
+			mCamera3d->Pitch(-mouseDeltaY * mMouseSensitivity);
+			mCamera3d->Yaw(-mouseDeltaX * mMouseSensitivity);
 
 			//Update character movement
 			mPlayer->UpdateMovement(deltaTime, ws::Creature::Idle);
@@ -276,7 +318,7 @@ namespace ws
 		else if(mCameraType == ThirdPerson)
 		{
 			//Set third person camera
-			mCameraThirdPerson->SetCurrentCamera(mCamera);
+			mCameraThirdPerson->SetCurrentCamera(mCamera3d);
 
 			//Get character move state
 			const float characterJumpForce(10.0f);

@@ -8,6 +8,8 @@
 #include "Camera.h"
 #include "Scene.h"
 
+#include <sstream>
+
 namespace ion
 {
 	namespace renderer
@@ -15,7 +17,10 @@ namespace ion
 		Camera::Camera(Scene& scene)
 		{
 			#if defined ION_OGRE
-			mOgreCameraIFace = scene.GetOgreSceneMgrIFace()->createCamera("Camera");
+			static int cameraId = 0;
+			std::stringstream cameraName;
+			cameraName << "Camera_" << cameraId++;
+			mOgreCameraIFace = scene.GetOgreSceneMgrIFace()->createCamera(cameraName.str().c_str());
 			mOgreCameraIFace->setNearClipDistance(0.1f);
 			mOgreCameraIFace->setFarClipDistance(1000.0f);
 			#endif
@@ -118,6 +123,48 @@ namespace ion
 				}
 
 				mOgreCameraIFace->setPolygonMode(polyMode);
+			}
+			#endif
+		}
+
+		void Camera::SetProjection(Projection projection)
+		{
+			#if defined ION_OGRE
+			if(mOgreCameraIFace)
+			{
+				Ogre::ProjectionType ogreProjection = Ogre::PT_PERSPECTIVE;
+
+				switch(projection)
+				{
+				case Perspective:
+					ogreProjection = Ogre::PT_PERSPECTIVE;
+					break;
+				case Orthographic:
+					ogreProjection = Ogre::PT_ORTHOGRAPHIC;
+					break;
+				}
+
+				mOgreCameraIFace->setProjectionType(ogreProjection);
+			}
+			#endif
+		}
+
+		void Camera::SetOrthoDimensions(float width, float height)
+		{
+			#if defined ION_OGRE
+			if(mOgreCameraIFace)
+			{
+				mOgreCameraIFace->setOrthoWindow(width, height);
+			}
+			#endif
+		}
+
+		void Camera::SetAspectRatio(float aspectRatio)
+		{
+			#if defined ION_OGRE
+			if(mOgreCameraIFace)
+			{
+				mOgreCameraIFace->setAspectRatio(aspectRatio);
 			}
 			#endif
 		}

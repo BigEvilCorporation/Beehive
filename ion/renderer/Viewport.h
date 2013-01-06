@@ -23,7 +23,7 @@ namespace ion
 		class Viewport
 		{
 		public:
-			Viewport(Renderer& renderer, Camera& camera);
+			Viewport(Renderer& renderer, Camera& camera, int zOrder = 0);
 			~Viewport();
 
 			void SetBackgroundColour(const Colour& colour);

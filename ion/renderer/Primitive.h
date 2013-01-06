@@ -9,6 +9,7 @@
 
 #include "Vertex.h"
 #include "../core/maths/Vector.h"
+#include "../core/Colour.h"
 
 #include <Ogre/OgreManualObject.h>
 #include <string>
@@ -39,6 +40,7 @@ namespace ion
 			//Add components
 			void AddVertex(const Vertex& vertex);
 			void AddNormal(const Vector3& normal);
+			void AddColour(const Colour& colour);
 			void AddTextureCoord(const TexCoord& coord);
 			void AddIndex(unsigned int index);
 

@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////
+// File:		Watershed.h
+// Date:		4th January 2013
+// Authors:		Matt Phillips
+// Description:	Watershed - Main game class
+///////////////////////////////////////////////////
+
 #include "core/Version.h"
 #include "core/Debug.h"
 #include "core/Time.h"
@@ -42,9 +49,12 @@ namespace ws
 		void Render();
 		
 		ion::renderer::Renderer* mRenderer;
-		ion::renderer::Scene* mScene;
-		ion::renderer::Camera* mCamera;
-		ion::renderer::Viewport* mViewport;
+		ion::renderer::Scene* mScene2d;
+		ion::renderer::Scene* mScene3d;
+		ion::renderer::Camera* mCamera2d;
+		ion::renderer::Camera* mCamera3d;
+		ion::renderer::Viewport* mViewport2d;
+		ion::renderer::Viewport* mViewport3d;
 		ion::renderer::PostEffectBloom* mPostEffectBloom;
 		ion::renderer::PostEffectMotionBlur* mPostEffectMotionBlur;
 		ion::input::Keyboard* mKeyboard;

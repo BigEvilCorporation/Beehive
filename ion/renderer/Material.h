@@ -53,6 +53,21 @@ namespace ion
 				Phong
 			};
 
+			enum CullMode
+			{
+				None,
+				Clockwise,
+				CounterClockwise
+			};
+
+			enum ColourType
+			{
+				Ambient,
+				Diffuse,
+				Specular,
+				Emissive
+			};
+
 			//Blend mode
 			void SetBlendMode(BlendMode blendMode);
 			BlendMode GetBlendMode() const;
@@ -81,6 +96,9 @@ namespace ion
 
 			int GetNumDiffuseMaps() const;
 
+			//Vertex colours
+			void AssignVertexColour(ColourType colourType);
+
 			//Lighting and shadows
 			void SetLightingEnabled(bool lighting);
 			void SetLightingMode(LightingMode mode);
@@ -89,6 +107,11 @@ namespace ion
 			bool GetLightingEnabled() const;
 			LightingMode GetLightingMode() const;
 			bool GetReceiveShadows() const;
+
+			//Depth and culling
+			void SetDepthTest(bool enabled);
+			void SetDepthWrite(bool enabled);
+			void SetCullMode(CullMode cullMode);
 
 			#if defined ION_OGRE
 			const std::string& GetOgreMaterialName() { return mOgreMaterialName; }
