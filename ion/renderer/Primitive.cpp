@@ -70,7 +70,7 @@ namespace ion
 					debug::Error("Primitive::Begin() - Invalid render pattern");
 				}
 
-				std::string materialName = "BaseWhite";
+				std::string materialName = "BaseWhiteNoLighting";
 
 				if(material)
 				{
@@ -108,6 +108,16 @@ namespace ion
 			if(mManualPrimitive)
 			{
 				mManualPrimitive->normal(normal.x, normal.y, normal.z);
+			}
+			#endif
+		}
+
+		void Primitive::AddColour(const Colour& colour)
+		{
+			#if defined ION_OGRE
+			if(mManualPrimitive)
+			{
+				mManualPrimitive->colour(colour.r, colour.g, colour.b, colour.a);
 			}
 			#endif
 		}

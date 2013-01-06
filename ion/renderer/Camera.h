@@ -24,6 +24,7 @@ namespace ion
 		{
 		public:
 			enum DrawMode { Solid, Wireframe };
+			enum Projection { Perspective, Orthographic };
 
 			Camera(Scene& scene);
 			~Camera();
@@ -38,6 +39,9 @@ namespace ion
 			const Vector3& GetPosition();
 
 			void SetDrawMode(DrawMode drawMode);
+			void SetProjection(Projection projection);
+			void SetOrthoDimensions(float width, float height);
+			void SetAspectRatio(float aspectRatio);
 
 			Ogre::Camera* GetOgreCameraIFace();
 

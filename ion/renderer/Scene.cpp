@@ -11,6 +11,8 @@
 #include "../core/BinaryFile.h"
 #include "../core/Debug.h"
 
+#include <sstream>
+
 #if defined ION_OGRE
 #include <Ogre/OgreRoot.h>
 #include <Ogre/OgreSceneNode.h>
@@ -35,7 +37,10 @@ namespace ion
 			mSceneMesh = new Mesh();
 
 			#if defined ION_OGRE
-			mOgreSceneMgrIFace = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC, "Scene");
+			static int sceneId = 0;
+			std::stringstream sceneName;
+			sceneName << "Scene_" << sceneId++;
+			mOgreSceneMgrIFace = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC, sceneName.str().c_str());
 
 			Ogre::Entity* sceneMeshEntity = mOgreSceneMgrIFace->createEntity(mSceneMesh->GetOgreMesh()->getName());
 			mOgreSceneMgrIFace->getRootSceneNode()->attachObject(sceneMeshEntity);

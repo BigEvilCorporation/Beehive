@@ -14,16 +14,22 @@ namespace ion
 {
 	namespace renderer
 	{
-		Viewport::Viewport(Renderer& renderer, Camera& camera)
+		Viewport::Viewport(Renderer& renderer, Camera& camera, int zOrder)
 		{
 			//Create viewport interface
-			mOgreViewportIFace = renderer.GetOgreRenderWindow()->addViewport(camera.GetOgreCameraIFace());
+			mOgreViewportIFace = renderer.GetOgreRenderWindow()->addViewport(camera.GetOgreCameraIFace(), zOrder);
 
 			//Correct camera's aspect ratio
 			camera.GetOgreCameraIFace()->setAspectRatio(float(mOgreViewportIFace->getActualWidth()) / float(mOgreViewportIFace->getActualHeight()));
  
 			//Set viewport's camera
 			mOgreViewportIFace->setCamera(camera.GetOgreCameraIFace());
+
+			//Don't clear every frame
+			mOgreViewportIFace->setClearEveryFrame(false);
+
+			//Enable overlays
+			mOgreViewportIFace->setOverlaysEnabled(true);
 
 			//Render with Renderer::Update
 			mOgreViewportIFace->setAutoUpdated(true);

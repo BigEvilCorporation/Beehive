@@ -332,6 +332,31 @@ namespace ion
 			return mEmissiveColour;
 		}
 
+		void Material::AssignVertexColour(ColourType colourType)
+		{
+			#if defined ION_OGRE
+			int ogreColourType = Ogre::TVC_AMBIENT;
+
+			switch(colourType)
+			{
+			case Ambient:
+				ogreColourType = Ogre::TVC_AMBIENT;
+				break;
+			case Diffuse:
+				ogreColourType = Ogre::TVC_DIFFUSE;
+				break;
+			case Specular:
+				ogreColourType = Ogre::TVC_SPECULAR;
+				break;
+			case Emissive:
+				ogreColourType = Ogre::TVC_EMISSIVE;
+				break;
+			}
+
+			mOgrePass->setVertexColourTracking(ogreColourType);
+			#endif
+		}
+
 		void Material::AddDiffuseMap(Texture* diffuse)
 		{
 			mDiffuseMaps.push_back(diffuse);
@@ -443,6 +468,42 @@ namespace ion
 		bool Material::GetReceiveShadows() const
 		{
 			return mReceiveShadows;
+		}
+
+		void Material::SetDepthTest(bool enabled)
+		{
+			#if defined ION_OGRE
+			mOgrePass->setDepthCheckEnabled(enabled);
+			#endif
+		}
+
+		void Material::SetDepthWrite(bool enabled)
+		{
+			#if defined ION_OGRE
+			mOgrePass->setDepthWriteEnabled(enabled);
+			#endif
+		}
+
+		void Material::SetCullMode(CullMode cullMode)
+		{
+			#if defined ION_OGRE
+			Ogre::CullingMode ogreCullMode = Ogre::CULL_NONE;
+
+			switch(cullMode)
+			{
+				case None:
+					ogreCullMode = Ogre::CULL_NONE;
+					break;
+				case Clockwise:
+					ogreCullMode = Ogre::CULL_CLOCKWISE;
+					break;
+				case CounterClockwise:
+					ogreCullMode = Ogre::CULL_ANTICLOCKWISE;
+					break;
+			}
+
+			mOgrePass->setCullingMode(ogreCullMode);
+			#endif
 		}
 	}
 }
