@@ -86,6 +86,16 @@ namespace ion
 			#endif
 		}
 
+		void SceneNode::Detach(Primitive& primitive)
+		{
+			#if defined ION_OGRE
+			if(mOgreSceneNode)
+			{
+				mOgreSceneNode->detachObject(primitive.GetOgreManualObj());
+			}
+			#endif
+		}
+
 		void SceneNode::Attach(Camera& camera)
 		{
 			#if defined ION_OGRE

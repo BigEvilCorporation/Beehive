@@ -18,6 +18,7 @@ namespace ion
 	public:
 		float x, y;
 
+		Vector2();
 		Vector2(float X, float Y);
 		Vector2(const Vector2& vector);
 		float operator [](int index) const;

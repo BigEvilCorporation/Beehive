@@ -37,6 +37,9 @@ namespace ion
 			void Begin(Material* material, Pattern pattern);
 			void End();
 
+			//Clear primitive
+			void Clear();
+
 			//Add components
 			void AddVertex(const Vertex& vertex);
 			void AddNormal(const Vector3& normal);
@@ -56,6 +59,7 @@ namespace ion
 
 		private:
 			Ogre::ManualObject* mManualPrimitive;
+			Projection mProjection;
 		};
 	}
 }

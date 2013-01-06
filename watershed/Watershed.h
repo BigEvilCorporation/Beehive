@@ -32,6 +32,7 @@
 #include "gamekit/CameraThirdPerson.h"
 
 #include "Creature.h"
+#include "ColourWheel.h"
 
 #include <vector>
 
@@ -79,6 +80,9 @@ namespace ws
 
 		//Character
 		ws::Creature* mPlayer;
+
+		//Colour wheel
+		ws::ColourWheel* mColourWheel;
 
 		ion::renderer::Mesh* mTestMesh;
 		ion::renderer::Mesh::SubMesh* mTestSubMesh;

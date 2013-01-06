@@ -19,7 +19,7 @@ namespace ion
 		class Mouse
 		{
 		public:
-			enum Buttons { LB, MB,	RB };
+			enum Buttons { LB, RB, MB };
 			enum CoopLevel { Background, Foreground, Exclusive };
 
 			Mouse();

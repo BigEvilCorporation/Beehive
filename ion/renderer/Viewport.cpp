@@ -40,6 +40,16 @@ namespace ion
 			//Ogre::Viewport destroyed with the renderer
 		}
 
+		int Viewport::GetWidth() const
+		{
+			return mOgreViewportIFace->getActualWidth();
+		}
+
+		int Viewport::GetHeight() const
+		{
+			return mOgreViewportIFace->getActualHeight();
+		}
+
 		Ogre::Viewport* Viewport::GetOgreViewportInterface()
 		{
 			return mOgreViewportIFace;

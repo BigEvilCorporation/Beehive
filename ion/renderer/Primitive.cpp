@@ -17,6 +17,8 @@ namespace ion
 	{
 		Primitive::Primitive(Scene& scene, Projection projection)
 		{
+			mProjection = projection;
+
 			#if defined ION_OGRE
 			mManualPrimitive = scene.GetOgreSceneMgrIFace()->createManualObject();
 
@@ -88,6 +90,31 @@ namespace ion
 			if(mManualPrimitive)
 			{
 				mManualPrimitive->end();
+			}
+			#endif
+		}
+
+		void Primitive::Clear()
+		{
+			#if defined ION_OGRE
+			if(mManualPrimitive)
+			{
+				mManualPrimitive->clear();
+
+				if(mProjection == Proj2D)
+				{
+					//Use identity view/projection matrices
+					mManualPrimitive->setUseIdentityProjection(true);
+					mManualPrimitive->setUseIdentityView(true);
+
+					//Infinite clip bounds
+					Ogre::AxisAlignedBox bounds;
+					bounds.setInfinite();
+					mManualPrimitive->setBoundingBox(bounds);
+
+					//Render before overlay renderstage
+					mManualPrimitive->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY - 1);
+				}
 			}
 			#endif
 		}

@@ -112,30 +112,11 @@ namespace ws
 		//Create character
 		mPlayer = new ws::Creature(*mPhysicsWorld, *mScene3d);
 
-		ion::renderer::Material* quad2dMat = new ion::renderer::Material();
-		quad2dMat->AssignVertexColour(ion::renderer::Material::Ambient);
-		quad2dMat->SetDepthTest(false);
-		quad2dMat->SetDepthWrite(false);
-		quad2dMat->SetCullMode(ion::renderer::Material::None);
-
-		ion::renderer::Primitive* quad2d = new ion::renderer::Primitive(*mScene2d, ion::renderer::Primitive::Proj2D);
-		ion::Vector2 size(0.8f, 0.8f);
-		quad2d->Begin(quad2dMat, ion::renderer::Primitive::Triangle);
-		quad2d->AddVertex(ion::renderer::Vertex(-size.x, -size.y, 0.0f));
-		quad2d->AddColour(ion::Colour(1.0f, 0.0f, 0.0f, 0.8f));
-		quad2d->AddVertex(ion::renderer::Vertex( size.x, -size.y, 0.0f));
-		quad2d->AddColour(ion::Colour(0.0f, 1.0f, 0.0f, 0.8f));
-		quad2d->AddVertex(ion::renderer::Vertex( size.x,  size.y, 0.0f));
-		quad2d->AddColour(ion::Colour(0.0f, 0.0f, 1.0f, 0.8f));
-		quad2d->AddVertex(ion::renderer::Vertex(-size.x, -size.y, 0.0f));
-		quad2d->AddColour(ion::Colour(1.0f, 1.0f, 0.0f, 0.8f));
-		quad2d->AddVertex(ion::renderer::Vertex( size.x,  size.y, 0.0f));
-		quad2d->AddColour(ion::Colour(1.0f, 0.0f, 0.0f, 0.8f));
-		quad2d->AddVertex(ion::renderer::Vertex(-size.x,  size.y, 0.0f));
-		quad2d->AddColour(ion::Colour(1.0f, 1.0f, 0.0f, 0.8f));
-		quad2d->End();
-		ion::renderer::SceneNode* quad2dNode = new ion::renderer::SceneNode(*mScene2d);
-		quad2dNode->Attach(*quad2d);
+		//Create colour wheel
+		mColourWheel = new ws::ColourWheel(*mScene2d, 0.3f, 0.15f);
+		mColourWheel->AddEntry(ws::ColourWheel::Entry(0, ion::Colour(1.0f, 0.0f, 0.0f)));
+		mColourWheel->AddEntry(ws::ColourWheel::Entry(0, ion::Colour(0.0f, 1.0f, 0.0f)));
+		mColourWheel->AddEntry(ws::ColourWheel::Entry(0, ion::Colour(0.0f, 0.0f, 1.0f)));
 
 		/*
 		mTestMesh = new ion::renderer::Mesh();
@@ -352,6 +333,22 @@ namespace ws
 
 			//Update camera
 			mCameraThirdPerson->Update(deltaTime);
+		}
+
+		//Open/close colour wheel
+		if(mMouse->ButtonDown(ion::input::Mouse::MB))
+		{
+			if(!mColourWheel->IsOpen())
+			{
+				mColourWheel->Open();
+			}
+		}
+		else
+		{
+			if(mColourWheel->IsOpen())
+			{
+				mColourWheel->Close();
+			}
 		}
 
 		//Update physics world using 10 substeps

@@ -26,6 +26,9 @@ namespace ion
 			Viewport(Renderer& renderer, Camera& camera, int zOrder = 0);
 			~Viewport();
 
+			int GetWidth() const;
+			int GetHeight() const;
+
 			void SetBackgroundColour(const Colour& colour);
 
 			Ogre::Viewport* GetOgreViewportInterface();
