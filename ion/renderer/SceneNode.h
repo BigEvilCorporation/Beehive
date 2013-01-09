@@ -34,6 +34,7 @@ namespace ion
 			~SceneNode();
 
 			void SetPosition(const Vector3& position);
+			void SetOrientation(const Quaternion& orientation);
 			void SetTransform(const Matrix4& matrix);
 			void SetLookAt(const Vector3& position);
 

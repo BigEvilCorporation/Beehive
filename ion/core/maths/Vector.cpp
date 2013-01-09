@@ -26,7 +26,18 @@ namespace ion
 			return x;
 		else if(index == 1)
 			return y;
-		else return 0.0f;
+		else
+			return 0.0f;
+	}
+
+	float Vector2::GetLength() const
+	{
+		return sqrt(x*x + y*y);
+	}
+
+	float Vector2::Dot(const Vector2& vector) const
+	{
+		return (x * vector.x + y * vector.y);
 	}
 
 	Vector3::Vector3()
