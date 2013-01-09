@@ -22,6 +22,9 @@ namespace ion
 		Vector2(float X, float Y);
 		Vector2(const Vector2& vector);
 		float operator [](int index) const;
+
+		float GetLength() const;
+		float Dot(const Vector2& vector) const;
 	};
 
 	class Vector3

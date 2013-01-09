@@ -9,7 +9,7 @@
 
 namespace ws
 {	
-	ColourWheel::ColourWheel(ion::renderer::Scene& scene, float outerRadius, float innerRadius)
+	ColourWheel::ColourWheel(ion::renderer::Scene& scene, const ion::Vector2& position, float outerRadius, float innerRadius)
 	{
 		mOuterRadius = outerRadius;
 		mInnerRadius = innerRadius;
@@ -31,6 +31,17 @@ namespace ws
 
 		//Create scene node
 		mSceneNode = new ion::renderer::SceneNode(scene);
+		mSceneNode->SetPosition(ion::Vector3(position.x, position.y, 0.0f));
+
+		//Create selector
+		mSelectorMesh = new ion::renderer::Primitive(scene, ion::renderer::Primitive::Proj2D);
+		mSelectorSceneNode = new ion::renderer::SceneNode(scene);
+		mSelectorSceneNode->SetPosition(ion::Vector3(position.x, position.y, 0.0f));
+
+		mSelectorMesh->Begin(NULL, ion::renderer::Primitive::Line);
+		mSelectorMesh->AddVertex(ion::renderer::Vertex(0.0f, 0.0f, 0.0f));
+		mSelectorMesh->AddVertex(ion::renderer::Vertex(0.0f, outerRadius, 0.0f));
+		mSelectorMesh->End();
 	}
 
 	void ColourWheel::AddEntry(Entry& entry)
@@ -50,6 +61,7 @@ namespace ws
 		if(!IsOpen())
 		{
 			mSceneNode->Attach(*mMesh);
+			mSelectorSceneNode->Attach(*mSelectorMesh);
 			mIsOpen = true;
 		}
 	}
@@ -59,6 +71,7 @@ namespace ws
 		if(IsOpen())
 		{
 			mSceneNode->Detach(*mMesh);
+			mSelectorSceneNode->Detach(*mSelectorMesh);
 			mIsOpen = false;
 		}
 	}
@@ -70,6 +83,8 @@ namespace ws
 
 	void ColourWheel::SetSelectionAngle(float angle)
 	{
+		ion::Quaternion orientation(0.0f, 0.0f, 1.0f, ion::maths::DegreesToRadians(angle));
+		mSelectorSceneNode->SetOrientation(orientation);
 	}
 
 	const ColourWheel::Entry& ColourWheel::GetCurrentSelection()

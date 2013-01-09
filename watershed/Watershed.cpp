@@ -113,7 +113,7 @@ namespace ws
 		mPlayer = new ws::Creature(*mPhysicsWorld, *mScene3d);
 
 		//Create colour wheel
-		mColourWheel = new ws::ColourWheel(*mScene2d, 0.3f, 0.15f);
+		mColourWheel = new ws::ColourWheel(*mScene2d, ion::Vector2(-0.65f, 0.65f), 0.2f, 0.1f);
 		mColourWheel->AddEntry(ws::ColourWheel::Entry(0, ion::Colour(1.0f, 0.0f, 0.0f)));
 		mColourWheel->AddEntry(ws::ColourWheel::Entry(0, ion::Colour(0.0f, 1.0f, 0.0f)));
 		mColourWheel->AddEntry(ws::ColourWheel::Entry(0, ion::Colour(0.0f, 0.0f, 1.0f)));
@@ -341,6 +341,20 @@ namespace ws
 			if(!mColourWheel->IsOpen())
 			{
 				mColourWheel->Open();
+			}
+
+			//Get mouse delta
+			ion::Vector2 mouseDelta((float)mMouse->GetDeltaX(), (float)mMouse->GetDeltaY());
+
+			const float selectionMouseThreshold = 2.0f;
+
+			if(mouseDelta.GetLength() > selectionMouseThreshold)
+			{
+				//Convert to angle
+				float selectionAngle = mouseDelta.Dot(ion::Vector2(0.0f, 1.0f));
+
+				//Set selection angle
+				mColourWheel->SetSelectionAngle(ion::maths::RadiansToDegrees(selectionAngle));
 			}
 		}
 		else

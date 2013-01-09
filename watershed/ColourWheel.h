@@ -34,7 +34,7 @@ namespace ws
 			ion::Colour mColour;
 		};
 
-		ColourWheel(ion::renderer::Scene& scene, float outerRadius, float innerRadius);
+		ColourWheel(ion::renderer::Scene& scene, const ion::Vector2& position, float outerRadius, float innerRadius);
 
 		void AddEntry(Entry& entry);
 		void RemoveEntry(Entry& entry);
@@ -55,6 +55,9 @@ namespace ws
 		ion::renderer::Material* mMaterial;
 		ion::renderer::Primitive* mMesh;
 		ion::renderer::SceneNode* mSceneNode;
+
+		ion::renderer::Primitive* mSelectorMesh;
+		ion::renderer::SceneNode* mSelectorSceneNode;
 
 		std::list<Entry> mEntries;
 

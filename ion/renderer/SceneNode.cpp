@@ -50,6 +50,16 @@ namespace ion
 			#endif		
 		}
 
+		void SceneNode::SetOrientation(const Quaternion& orientation)
+		{
+			#if defined ION_OGRE
+			if(mOgreSceneNode)
+			{
+				mOgreSceneNode->setOrientation(Ogre::Quaternion(orientation.w, orientation.x, orientation.y, orientation.z));
+			}
+			#endif
+		}
+
 		void SceneNode::SetTransform(const Matrix4& matrix)
 		{
 			#if defined ION_OGRE
