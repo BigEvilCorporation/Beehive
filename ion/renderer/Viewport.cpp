@@ -25,8 +25,8 @@ namespace ion
 			//Set viewport's camera
 			mOgreViewportIFace->setCamera(camera.GetOgreCameraIFace());
 
-			//Don't clear every frame
-			mOgreViewportIFace->setClearEveryFrame(false);
+			//Clear every frame
+			mOgreViewportIFace->setClearEveryFrame(true);
 
 			//Enable overlays
 			mOgreViewportIFace->setOverlaysEnabled(true);
