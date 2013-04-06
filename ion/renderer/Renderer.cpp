@@ -85,6 +85,8 @@ namespace ion
 			{
 				//Update window
 				mOgreWindow->update(false);
+
+				mOgreRoot->_fireFrameRenderingQueued();
 				
 				//Render a frame
 				mOgreRoot->renderOneFrame(deltaTime);

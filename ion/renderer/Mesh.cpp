@@ -159,7 +159,9 @@ namespace ion
 				mOgreSubMesh->vertexData->vertexBufferBinding->setBinding(mHardwareBufferIndex, mOgreTexCoordBuffer);
 
 				mHardwareBufferIndex++;
-			}		
+			}
+
+			mOgreSubMesh->_compileBoneAssignments();
 			#endif
 		}
 

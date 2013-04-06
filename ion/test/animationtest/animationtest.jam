@@ -1,0 +1,15 @@
+SubDir bigevilcorp ion test animationtest ;
+
+ApplyIonCore AnimationTest ;
+ApplyIonInput AnimationTest ;
+ApplyIonRenderer AnimationTest ;
+
+SRC = 
+	main.cpp
+	AnimationTest.cpp
+	AnimationTest.h
+	;
+	
+AutoSourceGroup AnimationTest : $(SRC) ;
+C.RuntimeType AnimationTest : dynamic ;
+C.Application AnimationTest : $(SRC) ;
