@@ -261,7 +261,7 @@ namespace ion
 		return Matrix;
 	}
 
-	Matrix4 Matrix4::GetProduct(Matrix4& Mat) const
+	Matrix4 Matrix4::GetProduct(const Matrix4& Mat) const
 	{
 		Matrix4 Result;
 
@@ -288,7 +288,7 @@ namespace ion
 		return Result;
 	}
 
-	Matrix4 Matrix4::GetInterpolated(Matrix4& Mat, float Time) const
+	Matrix4 Matrix4::GetInterpolated(const Matrix4& Mat, float Time) const
 	{
 		Matrix4 Result;
 

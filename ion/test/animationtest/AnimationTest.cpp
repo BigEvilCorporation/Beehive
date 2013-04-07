@@ -175,35 +175,39 @@ bool AnimationTest::Initialise()
 	mTestMeshInstance->SetCastShadows(false);
 	mTestMeshInstance->SetDrawDebugSkeleton(true);
 
-	/*
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 0, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 1, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 2, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 3, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 4, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 5, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 6, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone0, 7, 1.0f);
-
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 8, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 9, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 10, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 11, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 12, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 13, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 14, 1.0f);
-	mTestMeshInstance->MapBone(*mTestSubMesh, *bone1, 15, 1.0f);
-	*/
-
 	//Attach mesh instance to scene node
 	mTestMeshNode = new ion::renderer::SceneNode(*mScene);
 	mTestMeshNode->Attach(*mTestMeshInstance);
 	mTestMeshNode->SetPosition(ion::Vector3(0.0f, 5.0f, 0.0f));
 
+	//Create animation track
+	mTestAnimationTrack = new ion::renderer::AnimationTrackTransform();
+
+	//Add keyframes (move bone 10.0 units X, 5.0 units Y, over 9 seconds)
+	for(int i = 0; i < 10; i++)
+	{
+		ion::Matrix4 matrix;
+		matrix.SetTranslation(ion::Vector3((float)i, (float)i / 2.0f, 0.0f));
+		ion::renderer::Keyframe<ion::Matrix4> keyframe((float)i, matrix);
+		mTestAnimationTrack->AddKeyframe(keyframe);
+	}
+
+	//Create skeletal animation, bind to mesh instance
+	mTestSkeletalAnimation = new ion::renderer::SkeletalAnimation(*mTestMeshInstance);
+
+	//Set animation length
+	mTestSkeletalAnimation->SetLength(9.0f);
+
+	//Map animation track to bones
+	mTestSkeletalAnimation->AddAnimationTrack(*bone1, *mTestAnimationTrack);
+
+	//Set animation running
+	mTestSkeletalAnimation->SetState(ion::renderer::Animation::Playing);
+
 	//Transform bone of mesh instance
-	ion::Matrix4 boneTransform;
-	boneTransform.SetTranslation(ion::Vector3(3.0f, 1.0f, 0.5f));
-	mTestMeshInstance->SetBoneTransform(*bone1, boneTransform);
+	//ion::Matrix4 boneTransform;
+	//boneTransform.SetTranslation(ion::Vector3(3.0f, 1.0f, 0.5f));
+	//mTestMeshInstance->SetBoneTransform(*bone1, boneTransform);
 
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
@@ -263,6 +267,9 @@ bool AnimationTest::Update(float deltaTime)
 	mCamera->Move(cameraMoveVector);
 	mCamera->Pitch(-mouseDeltaY * mMouseSensitivity);
 	mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
+
+	//Update skeletal animation
+	mTestSkeletalAnimation->Update(deltaTime);
 
 	//Update renderer
 	mRenderer->Update(deltaTime);

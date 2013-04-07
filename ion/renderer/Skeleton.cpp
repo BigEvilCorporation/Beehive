@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////
 
 #include "Skeleton.h"
+#include "Mesh.h"
 
 #include <sstream>
 
@@ -160,6 +161,27 @@ namespace ion
 			for(std::list<Bone*>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
 			{
 				(*it)->SetBindingPose();
+			}
+		}
+
+		SkeletalAnimation::SkeletalAnimation(MeshInstance& meshInstance)
+			: mMeshInstance(meshInstance)
+		{
+		}
+
+		void SkeletalAnimation::AddAnimationTrack(Bone& bone, const AnimationTrackTransform& animationTrack)
+		{
+			mTracks.push_back( std::pair<Bone*, const AnimationTrackTransform*>(&bone, &animationTrack));
+		}
+
+		void SkeletalAnimation::ApplyFrame(float frame)
+		{
+			for(unsigned int i = 0; i < mTracks.size(); i++)
+			{
+				Bone* bone = mTracks[i].first;
+				const AnimationTrackTransform* track = mTracks[i].second;
+				const Matrix4 transform = track->GetValue(frame);
+				mMeshInstance.SetBoneTransform(*bone, transform);
 			}
 		}
 	}

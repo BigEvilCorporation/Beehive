@@ -41,8 +41,8 @@ namespace ion
 
 		Matrix4 GetTranspose() const;
 		Matrix4 GetInverse() const;
-		Matrix4 GetProduct(Matrix4& Mat) const;
-		Matrix4 GetInterpolated(Matrix4& Mat, float Time) const;
+		Matrix4 GetProduct(const Matrix4& Mat) const;
+		Matrix4 GetInterpolated(const Matrix4& Mat, float Time) const;
 
 		Vector3 TransformVector(const Vector3& Vector) const;
 		Vector3 RotateVector(const Vector3& Vector) const;

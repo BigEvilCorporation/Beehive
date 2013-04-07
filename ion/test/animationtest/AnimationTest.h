@@ -48,6 +48,8 @@ public:
 	ion::renderer::Mesh* mTestMesh;
 	ion::renderer::Mesh::SubMesh* mTestSubMesh;
 	ion::renderer::Skeleton* mTestSkeleton;
+	ion::renderer::SkeletalAnimation* mTestSkeletalAnimation;
+	ion::renderer::AnimationTrackTransform* mTestAnimationTrack;
 	std::vector<ion::renderer::Bone*> mTestBones;
 	ion::renderer::MeshInstance* mTestMeshInstance;
 	ion::renderer::SceneNode* mTestMeshNode;
