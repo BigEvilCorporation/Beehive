@@ -579,7 +579,6 @@ namespace ion
 				boneAssignment.boneIndex = bone.GetOgreBone()->getHandle();
 				boneAssignment.vertexIndex = vertexIdx;
 				boneAssignment.weight = weight;
-				//subEntity->addBoneAssignment(boneAssignment);
 				ogreSubMesh->addBoneAssignment(boneAssignment);
 			}
 			#endif

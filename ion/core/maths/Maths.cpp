@@ -41,6 +41,33 @@ namespace ion
 			return clamped;
 		}
 
+		float Abs(float value)
+		{
+			return abs(value);
+		}
+
+		float Fmod(float value, float divisor)
+		{
+			return fmod(value, divisor);
+		}
+
+		float Lerp(float valueA, float valueB, float time)
+		{
+			return valueA + ((valueB - valueA) * time);
+		}
+
+		float UnLerp(float valueFrom, float valueTo, float valueCurrent)
+		{
+			float time = 0.0f;
+
+			if(valueTo - valueFrom != 0.0f)
+			{
+				time = (valueFrom - valueCurrent) / (valueFrom - valueTo);
+			}
+
+			return time;
+		}
+
 		float DegreesToRadians(float Degrees)
 		{
 			return Degrees * DEGREES_TO_RADIANS;

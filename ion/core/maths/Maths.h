@@ -34,6 +34,10 @@ namespace ion
 		int NextPowerOfTwo(int x);
 
 		float Clamp(float value, float min, float max);
+		float Abs(float value);
+		float Fmod(float value, float divisor);
+		float Lerp(float valueA, float valueB, float time);
+		float UnLerp(float valueFrom, float valueTo, float valueCurrent);
 
 		int RandInt();
 		float RandFloat();

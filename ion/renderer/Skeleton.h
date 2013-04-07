@@ -11,6 +11,8 @@
 #include "../core/maths/Vector.h"
 #include "../core/maths/Quaternion.h"
 
+#include "Animation.h"
+
 #if defined ION_OGRE
 #include <OgreBone.h>
 #include <OgreSkeleton.h>
@@ -18,11 +20,15 @@
 #endif
 
 #include <list>
+#include <utility>
 
 namespace ion
 {
 	namespace renderer
 	{
+		//Forward declaration
+		class MeshInstance;
+
 		class Bone
 		{
 		public:
@@ -88,6 +94,21 @@ namespace ion
 			#if defined ION_OGRE
 			Ogre::SkeletonPtr mOgreSkeleton;
 			#endif
+		};
+
+		class SkeletalAnimation : public Animation
+		{
+		public:
+			SkeletalAnimation(MeshInstance& meshInstance);
+
+			void AddAnimationTrack(Bone& bone, const AnimationTrackTransform& animationTrack);
+
+		protected:
+			virtual void ApplyFrame(float frame);
+
+		private:
+			MeshInstance& mMeshInstance;
+			std::vector< std::pair<Bone*, const AnimationTrackTransform*> > mTracks;
 		};
 	}
 }
