@@ -11,7 +11,6 @@ IOTest::IOTest()
 : ion::framework::Application("ion::engine I/O Test")
 {
 	mFileSystem = NULL;
-	mKeyboard = NULL;
 }
 
 IOTest::~IOTest()
@@ -26,9 +25,6 @@ bool IOTest::Initialise()
 
 	//Create filesystem
 	mFileSystem = new ion::io::FileSystem();
-
-	//Create keyboard input handler
-	mKeyboard = new ion::input::Keyboard();
 
 	//Get default file device
 	ion::io::FileDevice* defaultFileDevice = mFileSystem->GetDefaultFileDevice();
@@ -62,6 +58,10 @@ void IOTest::TestBasicSerialisation()
 	sourceObject.mTestIntArray.push_back(98765);
 	sourceObject.mTestFloatArray.push_back(3.14195f);
 	sourceObject.mTestFloatArray.push_back(3.0f);
+	sourceObject.mTestIntList.push_back(10203040);
+	sourceObject.mTestIntList.push_back(50607080);
+	sourceObject.mTestIntMap.insert(std::pair<std::string, int>("TestMapEntry1", 11111));
+	sourceObject.mTestIntMap.insert(std::pair<std::string, int>("TestMapEntry2", 22222));
 	sourceObject.mTestSubClass.mTestInt = 43210;
 	sourceObject.mTestSubClass.mTestFloat = 4.0f;
 	sourceObject.mTestSubClass.mTestString = "SubClass test string";
@@ -128,6 +128,10 @@ void IOTest::TestVersionedSerialisation()
 	sourceObject.mTestIntArray.push_back(98765);
 	sourceObject.mTestFloatArray.push_back(3.14195f);
 	sourceObject.mTestFloatArray.push_back(3.0f);
+	sourceObject.mTestIntList.push_back(102030);
+	sourceObject.mTestIntList.push_back(405060);
+	sourceObject.mTestIntMap.insert(std::pair<std::string, int>("TestMapItem1", 111111));
+	sourceObject.mTestIntMap.insert(std::pair<std::string, int>("TestMapItem2", 222222));
 	sourceObject.mTestSubClass.mTestInt = 43210;
 	sourceObject.mTestSubClass.mTestFloat = 4.0f;
 	sourceObject.mTestSubClass.mTestString = "SubClass test string";
@@ -213,9 +217,6 @@ void IOTest::TestVersionedSerialisation()
 
 void IOTest::Shutdown()
 {
-	if(mKeyboard)
-		delete mKeyboard;
-
 	if(mFileSystem)
 		delete mFileSystem;
 }

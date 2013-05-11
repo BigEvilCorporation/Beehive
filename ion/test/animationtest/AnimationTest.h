@@ -59,9 +59,6 @@ public:
 	float mCameraSpeed;
 	float mMouseSensitivity;
 
-	float mLightSin;
-	float mLightCos;
-
 	u64 mStartTicks;
 	u32 mFrameCount;
 };

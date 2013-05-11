@@ -1,6 +1,7 @@
 #include "MeshExporter.h"
 #include "core/File.h"
 #include "renderer/Mesh.h"
+#include "renderer/Skeleton.h"
 
 #include <maya/MObject.h>
 #include <maya/MFnPlugin.h>
@@ -11,6 +12,7 @@
 #include <maya/MItDag.h>
 #include <maya/MFnDagNode.h>
 #include <maya/MFnMesh.h>
+#include <maya/MFnIkJoint.h> 
 #include <maya/MFnSet.h>
 #include <maya/MItMeshPolygon.h>
 #include <maya/MItMeshVertex.h>
@@ -132,68 +134,69 @@ namespace ion
 					//Get DAG function node
 					MFnDagNode dagNode(dagPath);
 
-					//If object has a mesh, isnt an intermediate object, and isn't a transformed shape
-					if(dagPath.hasFn(MFn::kMesh)
-						&& !dagNode.isIntermediateObject()
-						&& !dagPath.hasFn(MFn::kTransform))
+					//If not an intermediate object, and isn't a transformed shape
+					if(!dagNode.isIntermediateObject() && !dagPath.hasFn(MFn::kTransform))
 					{
-						//Create ion submesh
-						ion::renderer::Mesh::SubMesh* ionSubMesh = ionMesh->CreateSubMesh();
-
-						//Get Maya mesh
-						MFnMesh fnMesh(dagPath);
-
-						//Add vertices
-						MFloatPointArray vertices;
-						fnMesh.getPoints(vertices);
-
-						for(int i = 0; i < vertices.length(); i++)
+						//If object has a mesh
+						if(dagPath.hasFn(MFn::kMesh))
 						{
-							MFloatPoint vertex = vertices[i];
-							ionSubMesh->AddVertex(ion::renderer::Vertex(vertex.x, vertex.y, vertex.z));
-						}
+							//Create ion submesh
+							ion::renderer::Mesh::SubMesh* ionSubMesh = ionMesh->CreateSubMesh();
 
-						//Add faces
-						for(MItMeshPolygon polyIterator(dagPath, MObject::kNullObj); !polyIterator.isDone(); polyIterator.next())
-						{
-							int numTriangles = 0;
-							polyIterator.numTriangles(numTriangles);
+							//Get Maya mesh
+							MFnMesh fnMesh(dagPath);
 
-							//Iterate through all triangles in polygon
-							for(int i = 0; i < numTriangles; i++)
+							//Add vertices
+							MFloatPointArray vertices;
+							fnMesh.getPoints(vertices);
+
+							for(int i = 0; i < vertices.length(); i++)
 							{
-								//Get triangle
-								MPointArray points;
-								MIntArray indices;
-								polyIterator.getTriangle(i, points, indices);
-
-								//Create ion face
-								ion::renderer::Face ionFace;
-
-								for(int j = 0; j < 3; j++)
-								{
-									//Set index
-									ionFace.mIndices[j] = indices[j];
-
-									//Set tex coord
-									float2 texCoord;
-									polyIterator.getUV(indices[j], texCoord);
-									ionFace.mTexCoords[j] = ion::renderer::TexCoord(texCoord[0], texCoord[1]);
-								}
-
-								//Add face to submesh
-								ionSubMesh->AddFace(ionFace);
+								MFloatPoint vertex = vertices[i];
+								ionSubMesh->AddVertex(ion::renderer::Vertex(vertex.x, vertex.y, vertex.z));
 							}
-						}
 
-						//Add normals
-						MFloatVectorArray normals;
-						//fnMesh.getNormals(normals);
-						fnMesh.getVertexNormals(false, normals);
-						for(int i = 0; i < normals.length(); i++)
-						{
-							MFloatVector normal = normals[i];
-							ionSubMesh->AddNormal(ion::Vector3(normal.x, normal.y, normal.z));
+							//Add faces
+							for(MItMeshPolygon polyIterator(dagPath, MObject::kNullObj); !polyIterator.isDone(); polyIterator.next())
+							{
+								int numTriangles = 0;
+								polyIterator.numTriangles(numTriangles);
+
+								//Iterate through all triangles in polygon
+								for(int i = 0; i < numTriangles; i++)
+								{
+									//Get triangle
+									MPointArray points;
+									MIntArray indices;
+									polyIterator.getTriangle(i, points, indices);
+
+									//Create ion face
+									ion::renderer::Face ionFace;
+
+									for(int j = 0; j < 3; j++)
+									{
+										//Set index
+										ionFace.mIndices[j] = indices[j];
+
+										//Set tex coord
+										float2 texCoord;
+										polyIterator.getUV(indices[j], texCoord);
+										ionFace.mTexCoords[j] = ion::renderer::TexCoord(texCoord[0], texCoord[1]);
+									}
+
+									//Add face to submesh
+									ionSubMesh->AddFace(ionFace);
+								}
+							}
+
+							//Add normals
+							MFloatVectorArray normals;
+							fnMesh.getVertexNormals(false, normals);
+							for(int i = 0; i < normals.length(); i++)
+							{
+								MFloatVector normal = normals[i];
+								ionSubMesh->AddNormal(ion::Vector3(normal.x, normal.y, normal.z));
+							}
 						}
 					}
 				}

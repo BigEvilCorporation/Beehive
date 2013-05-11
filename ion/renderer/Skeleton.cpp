@@ -14,16 +14,32 @@ namespace ion
 {
 	namespace renderer
 	{
+		//For name generation
 		int Skeleton::sSkeletonIndex = 0;
+
+		//Class serialise version
+		const int Skeleton::sSerialiseVersion = 1;
+
+		Bone::Bone()
+		{
+		}
 
 		Bone::Bone(const char* name)
 		{
+			mName = name;
+		}
+
+		void Bone::Serialise(serialise::Archive& archive)
+		{
+			archive.Serialise(mName);
+			archive.Serialise(mLocalMatrix);
 		}
 
 		#if defined ION_OGRE
 		Bone::Bone(const char* name, Ogre::Bone* ogreBone)
 		{
 			mOgreBone = ogreBone;
+			mName = name;
 		}
 		#endif
 
@@ -95,6 +111,11 @@ namespace ion
 			return mLocalMatrix;
 		}
 
+		const std::string& Bone::GetName() const
+		{
+			return mName;
+		}
+
 		#if defined ION_OGRE
 		void Bone::UpdateOgreMtx()
 		{
@@ -108,36 +129,30 @@ namespace ion
 
 		Skeleton::Skeleton()
 		{
-			#if defined ION_OGRE
-			std::stringstream skeletonName;
-			skeletonName << "skeleton_" << sSkeletonIndex++;
-			mOgreSkeleton = Ogre::SkeletonManager::getSingleton().create(skeletonName.str(), "General", true);
-			mOgreSkeleton->load();
+		}
 
-			//Create root bone
-			Ogre::Bone* ogreRootBone = mOgreSkeleton->createBone("Root");
-			ogreRootBone->setManuallyControlled(true);
-			mRootBone = new Bone("Root", ogreRootBone);
-			mBones.push_back(mRootBone);
-			#else
-			mRootBone = new Bone("Root");
-			mBones.push_back(mRootBone);
-			#endif
+		void Skeleton::Serialise(serialise::Archive& archive)
+		{
+			archive.Serialise(mBones);
 		}
 
 		Bone* Skeleton::CreateBone(const char* name)
 		{
-			#if defined ION_OGRE
-			Ogre::Bone* ogreBone = mRootBone->GetOgreBone()->createChild(mBones.size());
-			ogreBone->setManuallyControlled(true);
-			Bone* bone = new Bone(name, ogreBone);
-			mBones.push_back(bone);
+			mBones.insert(std::pair<std::string, Bone>(name, Bone(name)));
+			return &mBones.rbegin()->second;
+		}
+
+		Bone* Skeleton::FindBone(const char* name) const
+		{
+			Bone* bone = NULL;
+
+			std::map<std::string, Bone>::const_iterator it = mBones.find(name);
+			if(it != mBones.end())
+			{
+				bone = (Bone*)&it->second;
+			}
+
 			return bone;
-			#else
-			Bone* bone = new Bone(name);
-			mBones.push_back(bone);
-			return bone;
-			#endif
 		}
 
 		void Skeleton::FixBindingPose()
@@ -146,9 +161,9 @@ namespace ion
 			mOgreSkeleton->setBindingPose();
 			#endif
 
-			for(std::list<Bone*>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
+			for(std::map<std::string, Bone>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
 			{
-				(*it)->FixBindingPose();
+				it->second.FixBindingPose();
 			}
 		}
 
@@ -158,11 +173,33 @@ namespace ion
 			mOgreSkeleton->reset();
 			#endif
 
-			for(std::list<Bone*>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
+			for(std::map<std::string, Bone>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
 			{
-				(*it)->SetBindingPose();
+				it->second.SetBindingPose();
 			}
 		}
+
+		#if defined ION_OGRE
+		void Skeleton::BuildOgreSkeleton()
+		{
+			//From constructor
+			std::stringstream skeletonName;
+			skeletonName << "skeleton_" << sSkeletonIndex++;
+			mOgreSkeleton = Ogre::SkeletonManager::getSingleton().create(skeletonName.str(), "General", true);
+			mOgreSkeleton->load();
+
+			//Create root bone
+			Ogre::Bone* ogreRootBone = mOgreSkeleton->createBone("Root");
+			ogreRootBone->setManuallyControlled(true);
+			mBones.insert(std::pair<std::string, Bone>("Root", Bone("Root", ogreRootBone)));
+
+			//From CreateBone()
+			Ogre::Bone* ogreBone = mRootBone->GetOgreBone()->createChild(mBones.size());
+			ogreBone->setManuallyControlled(true);
+			mBones.insert(std::pair<std::string, Bone>(name, Bone(name, ogreBone)));
+			return &mBones.rbegin()->second;
+		}
+		#endif
 
 		SkeletalAnimation::SkeletalAnimation(MeshInstance& meshInstance)
 			: mMeshInstance(meshInstance)
@@ -171,7 +208,7 @@ namespace ion
 
 		void SkeletalAnimation::AddAnimationTrack(Bone& bone, const AnimationTrackTransform& animationTrack)
 		{
-			mTracks.push_back( std::pair<Bone*, const AnimationTrackTransform*>(&bone, &animationTrack));
+			mTracks.push_back(std::pair<Bone*, const AnimationTrackTransform*>(&bone, &animationTrack));
 		}
 
 		void SkeletalAnimation::ApplyFrame(float frame)

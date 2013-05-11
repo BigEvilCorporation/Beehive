@@ -54,7 +54,9 @@ namespace ion
 		Matrix4 operator +(const Matrix4& Mat) const;
 		Matrix4 operator -(const Matrix4& Mat) const;
 
+		float* GetAsFloatArray();
 		const float* GetAsFloatArray() const;
+		float operator[] (int index) const;
 
 		float Get(const int col, const int row) const;
 		void Set(const int col, const int row, const float val);

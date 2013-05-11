@@ -10,6 +10,21 @@ TestSerialisable::TestSerialisable()
 
 bool TestSerialisable::operator == (TestSerialisable& rhs)
 {
+	if(mTestIntArray.size() != rhs.mTestIntArray.size())
+	{
+		return false;
+	}
+
+	if(mTestIntList.size() != rhs.mTestIntList.size())
+	{
+		return false;
+	}
+
+	if(mTestIntMap.size() != rhs.mTestIntMap.size())
+	{
+		return false;
+	}
+
 	for(unsigned int i = 0; i < mTestIntArray.size(); i++)
 	{
 		if(mTestIntArray[i] != rhs.mTestIntArray[i])
@@ -21,6 +36,22 @@ bool TestSerialisable::operator == (TestSerialisable& rhs)
 	for(unsigned int i = 0; i < mTestFloatArray.size(); i++)
 	{
 		if(mTestFloatArray[i] != rhs.mTestFloatArray[i])
+		{
+			return false;
+		}
+	}
+
+	for(std::list<int>::iterator it = mTestIntList.begin(), end = mTestIntList.end(), rhsIt = rhs.mTestIntList.begin(), rhsEnd = rhs.mTestIntList.end(); it != end && rhsIt != rhsEnd; ++it, ++rhsIt)
+	{
+		if(*it != *rhsIt)
+		{
+			return false;
+		}
+	}
+
+	for(std::map<std::string, int>::iterator it = mTestIntMap.begin(), end = mTestIntMap.end(), rhsIt = rhs.mTestIntMap.begin(), rhsEnd = rhs.mTestIntMap.end(); it != end && rhsIt != rhsEnd; ++it, ++rhsIt)
+	{
+		if(it->first.compare(rhsIt->first) != 0 || it->second != rhsIt->second)
 		{
 			return false;
 		}
@@ -82,6 +113,8 @@ void TestSerialisable::Serialise(ion::serialise::Archive& archive)
 	
 	archive.Serialise(mTestIntArray);
 	archive.Serialise(mTestFloatArray);
+	archive.Serialise(mTestIntList);
+	archive.Serialise(mTestIntMap);
 
 	archive.Serialise(mTestString1);
 	archive.Serialise(mTestString2);
