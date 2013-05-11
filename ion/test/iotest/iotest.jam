@@ -1,7 +1,6 @@
-SubDir ion test iotest ;
+SubDir bigevilcorp ion test iotest ;
 
 ApplyIonCore iotest ;
-ApplyIonInput iotest ;
 
 SRC = 
 	main.cpp

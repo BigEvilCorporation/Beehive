@@ -30,9 +30,6 @@ AnimationTest::AnimationTest()
 	mCameraSpeed = 10.0f;
 	mMouseSensitivity = 0.005f;
 
-	mLightSin = 0.0f;
-	mLightCos = 0.0f;
-
 	mFrameCount = 0;
 }
 

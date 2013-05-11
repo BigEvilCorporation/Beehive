@@ -299,7 +299,7 @@ namespace ion
 			binaryChunk.AddChild(vertsChunk);
 			binaryChunk.AddChild(normsChunk);
 			binaryChunk.AddChild(facesChunk);
-						
+
 			if(GetMaterialName().size() > 0)
 			{
 				//Create material name chunk

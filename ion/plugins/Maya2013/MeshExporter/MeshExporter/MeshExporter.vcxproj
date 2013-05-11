@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\..\..\core\maths\Quaternion.cpp" />
     <ClCompile Include="..\..\..\..\core\maths\Vector.cpp" />
     <ClCompile Include="..\..\..\..\core\MemoryManager.cpp" />
+    <ClCompile Include="..\..\..\..\renderer\Animation.cpp" />
     <ClCompile Include="..\..\..\..\renderer\Mesh.cpp" />
     <ClCompile Include="..\..\..\..\renderer\Skeleton.cpp" />
     <ClCompile Include="..\..\..\..\renderer\TexCoord.cpp" />

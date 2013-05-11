@@ -5,8 +5,8 @@
 // Description:	Serialisable archive
 ///////////////////////////////////////////////////
 
-#include <Archive.h>
-#include <Stream.h>
+#include "Archive.h"
+#include "Stream.h"
 
 namespace ion
 {
@@ -80,6 +80,31 @@ namespace ion
 		{
 			Serialise((void*)&data, sizeof(float));
 		}
+
+		void Archive::Serialise(Vector3& vector)
+		{
+			Serialise(vector.x);
+			Serialise(vector.y);
+			Serialise(vector.z);
+		}
+
+		void Archive::Serialise(Matrix4& matrix)
+		{
+			float* matrixData = matrix.GetAsFloatArray();
+
+			for(int i = 0; i < 16; i++)
+			{
+				Serialise(matrixData[i]);
+			}
+		}
+
+		void Archive::Serialise(Quaternion& quaternion)
+		{
+			Serialise(quaternion.x);
+			Serialise(quaternion.y);
+			Serialise(quaternion.z);
+			Serialise(quaternion.w);
+		}
 		
 		void Archive::Serialise(std::string& string)
 		{
@@ -103,7 +128,7 @@ namespace ion
 			else
 			{
 				//Serialise out num chars
-				int numChars = string.size();
+				int numChars = (int)string.size();
 				Serialise(numChars);
 
 				//Serialise out chars

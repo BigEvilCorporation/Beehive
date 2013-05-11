@@ -373,9 +373,19 @@ namespace ion
 		return Matrix4(Result);
 	}
 
+	float * Matrix4::GetAsFloatArray()
+	{
+		return mMatrix;
+	}
+
 	const float * Matrix4::GetAsFloatArray() const
 	{
 		return mMatrix;
+	}
+
+	float Matrix4::operator[] (int index) const
+	{
+		return mMatrix[index];
 	}
 
 	float Matrix4::Get(const int col, const int row) const

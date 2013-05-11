@@ -1,6 +1,11 @@
 #include "core/Archive.h"
 #include "core/Serialise.h"
 
+#include <string>
+#include <vector>
+#include <list>
+#include <map>
+
 class TestSerialisable : public ion::serialise::Serialisable
 {
 public:
@@ -35,6 +40,8 @@ public:
 	
 	std::vector<int> mTestIntArray;
 	std::vector<float> mTestFloatArray;
+	std::list<int> mTestIntList;
+	std::map<std::string, int> mTestIntMap;
 
 	std::string mTestString1;
 	std::string mTestString2;

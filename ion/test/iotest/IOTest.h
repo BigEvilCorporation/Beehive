@@ -3,8 +3,6 @@
 #include "core/Archive.h"
 #include "core/Serialise.h"
 
-#include "input/Keyboard.h"
-
 #include "IOTestData.h"
 
 class IOTest : public ion::framework::Application
@@ -22,6 +20,4 @@ public:
 	void TestVersionedSerialisation();
 
 	ion::io::FileSystem* mFileSystem;
-
-	ion::input::Keyboard* mKeyboard;
 };
