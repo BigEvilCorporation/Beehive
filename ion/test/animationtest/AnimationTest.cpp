@@ -133,19 +133,49 @@ bool AnimationTest::Initialise()
 	//Create skeleton
 	mTestSkeleton = new ion::renderer::Skeleton();
 
-	//Create bones
-	ion::renderer::Bone* bone0 = mTestSkeleton->CreateBone("bone0");
-	ion::renderer::Bone* bone1 = mTestSkeleton->CreateBone("bone1");
+	//Create root bone
+	//ion::renderer::Bone* rootBone = mTestSkeleton->CreateBone("root");
 
-	mTestBones.push_back(bone0);
-	mTestBones.push_back(bone1);
+	//Create child bones
+	//ion::renderer::Bone* bone0 = mTestSkeleton->CreateBone("bone0");
+	//ion::renderer::Bone* bone1 = mTestSkeleton->CreateBone("bone1");
+	//bone0->SetParent(rootBone);
+	//bone1->SetParent(rootBone);
+
+	//Finalise bone structure (builds Ogre skeleton)
+	//mTestSkeleton->Finalise();
+
+	//mTestBones.push_back(bone0);
+	//mTestBones.push_back(bone1);
+
+	//Create and open file stream for reading
+	ion::io::File file("..\\skeletons\\test_skeleton.ion.skeleton", ion::io::File::OpenRead);
+			
+	if(file.IsOpen())
+	{
+		//Create archive for serialising out
+		ion::serialise::Archive archiveOut(file, ion::serialise::Archive::In, ion::renderer::Skeleton::sSerialiseVersion);
+
+		//Serialise
+		archiveOut.Serialise(*mTestSkeleton);
+
+		//Finalise
+		mTestSkeleton->Finalise();
+
+		//Close file
+		file.Close();
+	}
+
+	ion::renderer::Bone* bone0 = mTestSkeleton->FindBone("joint1");
+	ion::renderer::Bone* bone1 = mTestSkeleton->FindBone("joint2");
+	ion::renderer::Bone* bone2 = mTestSkeleton->FindBone("joint3");
 
 	//Set bone transforms
-	bone0->SetLocalTranslation(ion::Vector3(0.0f,  halfExtents.y, 0.0f));
-	bone1->SetLocalTranslation(ion::Vector3(0.0f, -halfExtents.y, 0.0f));
+	//bone0->SetLocalTranslation(ion::Vector3(0.0f,  halfExtents.y, 0.0f));
+	//bone1->SetLocalTranslation(ion::Vector3(0.0f, -halfExtents.y, 0.0f));
 
 	//Fix current bone transforms as binding pose
-	mTestSkeleton->FixBindingPose();
+	//mTestSkeleton->FixBindingPose();
 
 	//Assign skeleton to mesh
 	mTestMesh->SetSkeleton(*mTestSkeleton);
@@ -153,8 +183,10 @@ bool AnimationTest::Initialise()
 	//Map bones to vertices
 	mTestSubMesh->MapBone(*bone0, 0, 1.0f);
 	mTestSubMesh->MapBone(*bone0, 1, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 2, 1.0f);
-	mTestSubMesh->MapBone(*bone0, 3, 1.0f);
+	mTestSubMesh->MapBone(*bone0, 2, 0.5f);
+	mTestSubMesh->MapBone(*bone0, 3, 0.5f);
+	mTestSubMesh->MapBone(*bone2, 2, 0.5f);
+	mTestSubMesh->MapBone(*bone2, 3, 0.5f);
 	mTestSubMesh->MapBone(*bone1, 4, 1.0f);
 	mTestSubMesh->MapBone(*bone1, 5, 1.0f);
 	mTestSubMesh->MapBone(*bone1, 6, 1.0f);
@@ -196,10 +228,10 @@ bool AnimationTest::Initialise()
 	mTestSkeletalAnimation->SetLength(9.0f);
 
 	//Map animation track to bones
-	mTestSkeletalAnimation->AddAnimationTrack(*bone1, *mTestAnimationTrack);
+	//mTestSkeletalAnimation->AddAnimationTrack(*bone1, *mTestAnimationTrack);
 
 	//Set animation running
-	mTestSkeletalAnimation->SetState(ion::renderer::Animation::Playing);
+	//mTestSkeletalAnimation->SetState(ion::renderer::Animation::Playing);
 
 	//Transform bone of mesh instance
 	//ion::Matrix4 boneTransform;
@@ -266,7 +298,7 @@ bool AnimationTest::Update(float deltaTime)
 	mCamera->Yaw(-mouseDeltaX * mMouseSensitivity);
 
 	//Update skeletal animation
-	mTestSkeletalAnimation->Update(deltaTime);
+	//mTestSkeletalAnimation->Update(deltaTime);
 
 	//Update renderer
 	mRenderer->Update(deltaTime);
