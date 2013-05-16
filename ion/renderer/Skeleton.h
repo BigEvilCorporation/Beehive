@@ -35,6 +35,8 @@ namespace ion
 
 		class Bone : public serialise::Serialisable
 		{
+			friend class Skeleton;
+
 		public:
 			Bone();
 			Bone(const char* name);
@@ -52,7 +54,10 @@ namespace ion
 			void SetLocalRotation(const Quaternion& rotation);
 
 			//Get local transform
-			const Matrix4& GetLocalTransform();
+			const Matrix4& GetLocalTransform() const;
+
+			//Calculate world transform, traversing up to root
+			Matrix4 CalculateWorldTransform() const;
 
 			//Move/rotate
 			void Translate(const Vector3& positionDelta);
@@ -64,16 +69,27 @@ namespace ion
 			//Reset to binding pose
 			void SetBindingPose();
 
+			//Get/set parent bone
+			void SetParent(Bone* parent);
+			Bone* GetParent() const;
+
 			//Get name
 			const std::string& GetName() const;
 
+			//Get/set parent name (for serialisation)
+			const std::string& GetParentName() const;
+			void SetParentName(const char* name);
+
 			#if defined ION_OGRE
+			void SetOgreBone(Ogre::Bone* ogreBone) { mOgreBone = ogreBone; }
 			Ogre::Bone* GetOgreBone() const { return mOgreBone; }
 			#endif
 
 		protected:
 			Matrix4 mLocalMatrix;
 			std::string mName;
+			std::string mParentName;
+			Bone* mParent;
 
 			#if defined ION_OGRE
 			void UpdateOgreMtx();
@@ -103,6 +119,9 @@ namespace ion
 			//Reset to binding pose
 			void SetBindingPose();
 
+			//Finalise - build tree
+			void Finalise();
+
 			#if defined ION_OGRE
 			Ogre::Skeleton* GetOgreSkeleton() const { return mOgreSkeleton.get(); }
 			#endif
@@ -113,7 +132,7 @@ namespace ion
 			std::map<std::string, Bone> mBones;
 
 			#if defined ION_OGRE
-			void BuildOgreSkeleton();
+			void BuildOgreSkeleton(Bone* rootBone);
 			Ogre::SkeletonPtr mOgreSkeleton;
 			#endif
 		};

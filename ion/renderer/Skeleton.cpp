@@ -7,6 +7,7 @@
 
 #include "Skeleton.h"
 #include "Mesh.h"
+#include "../core/Debug.h"
 
 #include <sstream>
 
@@ -22,17 +23,21 @@ namespace ion
 
 		Bone::Bone()
 		{
+			mParent = NULL;
+
+			#if defined ION_OGRE
+			mOgreBone = NULL;
+			#endif
 		}
 
 		Bone::Bone(const char* name)
 		{
 			mName = name;
-		}
+			mParent = NULL;
 
-		void Bone::Serialise(serialise::Archive& archive)
-		{
-			archive.Serialise(mName);
-			archive.Serialise(mLocalMatrix);
+			#if defined ION_OGRE
+			mOgreBone = NULL;
+			#endif
 		}
 
 		#if defined ION_OGRE
@@ -40,8 +45,16 @@ namespace ion
 		{
 			mOgreBone = ogreBone;
 			mName = name;
+			mParent = NULL;
 		}
 		#endif
+
+		void Bone::Serialise(serialise::Archive& archive)
+		{
+			archive.Serialise(mName);
+			archive.Serialise(mLocalMatrix);
+			archive.Serialise(mParentName);
+		}
 
 		void Bone::SetLocalTransform(const Matrix4& transform)
 		{
@@ -106,9 +119,40 @@ namespace ion
 			#endif
 		}
 
-		const Matrix4& Bone::GetLocalTransform()
+		void Bone::SetParent(Bone* parent)
+		{
+			mParent = parent;
+
+			if(parent)
+			{
+				mParentName = parent->GetName();
+			}
+			else
+			{
+				mParentName.clear();
+			}
+		}
+
+		Bone* Bone::GetParent() const
+		{
+			return mParent;
+		}
+
+		const Matrix4& Bone::GetLocalTransform() const
 		{
 			return mLocalMatrix;
+		}
+
+		Matrix4 Bone::CalculateWorldTransform() const
+		{
+			if(mParent)
+			{
+				return mParent->CalculateWorldTransform() * mLocalMatrix;
+			}
+			else
+			{
+				return mLocalMatrix;
+			}
 		}
 
 		const std::string& Bone::GetName() const
@@ -116,12 +160,23 @@ namespace ion
 			return mName;
 		}
 
+		const std::string& Bone::GetParentName() const
+		{
+			return mParentName;
+		}
+
+		void Bone::SetParentName(const char* name)
+		{
+			mParentName = name;
+		}
+
 		#if defined ION_OGRE
 		void Bone::UpdateOgreMtx()
 		{
-			Vector3 position = mLocalMatrix.GetTranslation();
+			Matrix4 worldMtx = CalculateWorldTransform();
+			Vector3 position = worldMtx.GetTranslation();
 			Quaternion rotation;
-			rotation.FromMatrix(mLocalMatrix);
+			rotation.FromMatrix(worldMtx);
 			mOgreBone->setPosition(position.x, position.y, position.z);
 			mOgreBone->setOrientation(rotation.w, rotation.x, rotation.y, rotation.z);
 		}
@@ -138,8 +193,17 @@ namespace ion
 
 		Bone* Skeleton::CreateBone(const char* name)
 		{
-			mBones.insert(std::pair<std::string, Bone>(name, Bone(name)));
-			return &mBones.rbegin()->second;
+			Bone* bone = NULL;
+
+			//Insert into map
+			std::pair<std::map<std::string, Bone>::iterator, bool> result = mBones.insert(std::pair<std::string, Bone>(name, Bone(name)));
+
+			if(result.second)
+			{
+				bone = &(*result.first).second;
+			}
+
+			return bone;
 		}
 
 		Bone* Skeleton::FindBone(const char* name) const
@@ -179,25 +243,92 @@ namespace ion
 			}
 		}
 
-		#if defined ION_OGRE
-		void Skeleton::BuildOgreSkeleton()
+		void Skeleton::Finalise()
 		{
-			//From constructor
+			Bone* rootBone = NULL;
+
+			//Build tree
+			for(std::map<std::string, Bone>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
+			{
+				const std::string& parentName = it->second.GetParentName();
+
+				if(parentName.size() > 1)
+				{
+					//Find and set parent
+					std::map<std::string, Bone>::iterator parentIt = mBones.find(parentName);
+					ion::debug::Assert(parentIt != mBones.end(), "Parent bone not found");
+					it->second.SetParent(&parentIt->second);
+				}
+				else
+				{
+					//Root bone
+					rootBone = &it->second;
+				}
+			}
+
+			#if defined ION_OGRE
+			BuildOgreSkeleton(rootBone);
+			#endif
+
+			//Fix binding pose
+			FixBindingPose();
+		}
+
+		#if defined ION_OGRE
+		void Skeleton::BuildOgreSkeleton(Bone* rootBone)
+		{
+			//Create Ogre skeleton
 			std::stringstream skeletonName;
 			skeletonName << "skeleton_" << sSkeletonIndex++;
 			mOgreSkeleton = Ogre::SkeletonManager::getSingleton().create(skeletonName.str(), "General", true);
 			mOgreSkeleton->load();
 
-			//Create root bone
+			//Create root Ogre bone
 			Ogre::Bone* ogreRootBone = mOgreSkeleton->createBone("Root");
-			ogreRootBone->setManuallyControlled(true);
-			mBones.insert(std::pair<std::string, Bone>("Root", Bone("Root", ogreRootBone)));
 
-			//From CreateBone()
-			Ogre::Bone* ogreBone = mRootBone->GetOgreBone()->createChild(mBones.size());
-			ogreBone->setManuallyControlled(true);
-			mBones.insert(std::pair<std::string, Bone>(name, Bone(name, ogreBone)));
-			return &mBones.rbegin()->second;
+			//Manually controlled
+			ogreRootBone->setManuallyControlled(true);
+
+			//Set Ogre root bone
+			rootBone->SetOgreBone(ogreRootBone);
+
+			//Update matrix
+			rootBone->UpdateOgreMtx();
+
+			//Loop until all bones have been created. Quick and dirty and very inefficient, but we don't yet have a Tree container
+			int numOgreBonesCreated = mBones.size() - 1;
+			while(numOgreBonesCreated)
+			{
+				for(std::map<std::string, Bone>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
+				{
+					Ogre::Bone* ogreBone = NULL;
+
+					if(it->second.GetParent())
+					{
+						static int ogreBoneId = 1;
+
+						//Get Ogre parent bone
+						Ogre::Bone* ogreParent = it->second.GetParent()->GetOgreBone();
+						
+						if(ogreParent)
+						{
+							//Create child bone
+							ogreBone = ogreParent->createChild(ogreBoneId++);
+
+							//Manually controlled
+							ogreBone->setManuallyControlled(true);
+
+							//Set Ogre bone
+							it->second.SetOgreBone(ogreBone);
+
+							//Update Ogre matrix
+							it->second.UpdateOgreMtx();
+
+							numOgreBonesCreated--;
+						}
+					}
+				}
+			}
 		}
 		#endif
 

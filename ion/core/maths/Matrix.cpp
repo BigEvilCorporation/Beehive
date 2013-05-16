@@ -182,7 +182,7 @@ namespace ion
 
 	void Matrix4::SetIdentity()
 	{
-		float Id[16] =
+		static float Id[16] =
 		{
 			1.0, 0.0, 0.0, 0.0,
 			0.0, 1.0, 0.0, 0.0,
