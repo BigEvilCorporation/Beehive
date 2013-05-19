@@ -52,43 +52,59 @@ namespace ion
 		void Bone::Serialise(serialise::Archive& archive)
 		{
 			archive.Serialise(mName);
-			archive.Serialise(mLocalMatrix);
+			archive.Serialise(mLocalBindPoseMatrix);
+			archive.Serialise(mWorldBindPoseMatrix);
 			archive.Serialise(mParentName);
 		}
 
-		void Bone::SetLocalTransform(const Matrix4& transform)
+		void Bone::SetOffsetTransform(const Matrix4& transform)
 		{
-			mLocalMatrix = transform;
+			mLocalOffsetMatrix = transform;
 
 			#if defined ION_OGRE
 			UpdateOgreMtx();
 			#endif
 		}
 
-		void Bone::SetLocalTranslation(const Vector3& translation)
+		void Bone::SetOffsetTranslation(const Vector3& translation)
 		{
-			mLocalMatrix.SetTranslation(translation);
+			mLocalOffsetMatrix.SetTranslation(translation);
 
 			#if defined ION_OGRE
 			UpdateOgreMtx();
 			#endif
 		}
 
-		void Bone::SetLocalRotation(const Quaternion& rotation)
+		void Bone::SetOffsetRotation(const Quaternion& rotation)
 		{
 			Matrix4 rotMtx = rotation.ToMatrix();
-			mLocalMatrix.SetUp(rotMtx.GetUp());
-			mLocalMatrix.SetRight(rotMtx.GetRight());
-			mLocalMatrix.SetForward(rotMtx.GetForward());
+			mLocalOffsetMatrix.SetUp(rotMtx.GetUp());
+			mLocalOffsetMatrix.SetRight(rotMtx.GetRight());
+			mLocalOffsetMatrix.SetForward(rotMtx.GetForward());
 
 			#if defined ION_OGRE
 			UpdateOgreMtx();
 			#endif
+		}
+
+		const Matrix4& Bone::GetBindPoseLocalTransform() const
+		{
+			return mLocalBindPoseMatrix;
+		}
+
+		const Matrix4& Bone::GetBindPoseWorldTransform() const
+		{
+			return mWorldBindPoseMatrix;
+		}
+
+		const Matrix4 Bone::GetWorldTransform() const
+		{
+			return mWorldBindPoseMatrix * mLocalOffsetMatrix;
 		}
 
 		void Bone::Translate(const Vector3& positionDelta)
 		{
-			mLocalMatrix.SetTranslation(mLocalMatrix.GetTranslation() + positionDelta);
+			mLocalOffsetMatrix.SetTranslation(mLocalOffsetMatrix.GetTranslation() + positionDelta);
 
 			#if defined ION_OGRE
 			UpdateOgreMtx();
@@ -98,7 +114,7 @@ namespace ion
 		void Bone::Rotate(const Quaternion& rotationDelta)
 		{
 			Matrix4 rotMtx = rotationDelta.ToMatrix();
-			mLocalMatrix = mLocalMatrix * rotMtx;
+			mLocalOffsetMatrix = mLocalOffsetMatrix * rotMtx;
 
 			#if defined ION_OGRE
 			UpdateOgreMtx();
@@ -138,22 +154,45 @@ namespace ion
 			return mParent;
 		}
 
-		const Matrix4& Bone::GetLocalTransform() const
+		#if defined ION_PLUGIN
+		void Bone::SetLocalBindPoseTransform(const Matrix4& transform)
 		{
-			return mLocalMatrix;
+			mLocalBindPoseMatrix = transform;
 		}
 
-		Matrix4 Bone::CalculateWorldTransform() const
+		void Bone::SetWorldBindPoseTransform(const Matrix4& transform)
+		{
+			mWorldBindPoseMatrix = transform;
+		}
+
+		Matrix4 Bone::CalculateWorldBindPoseTransform()
 		{
 			if(mParent)
 			{
-				return mParent->CalculateWorldTransform() * mLocalMatrix;
+				mWorldBindPoseMatrix = mParent->CalculateWorldBindPoseTransform() * mLocalBindPoseMatrix;
 			}
 			else
 			{
-				return mLocalMatrix;
+				mWorldBindPoseMatrix = mLocalBindPoseMatrix;
 			}
+
+			return mWorldBindPoseMatrix;
 		}
+
+		Matrix4 Bone::CalculateLocalBindPoseTransform()
+		{
+			if(mParent)
+			{
+				mLocalBindPoseMatrix = mWorldBindPoseMatrix * mParent->GetBindPoseWorldTransform().GetInverse();
+			}
+			else
+			{
+				mLocalBindPoseMatrix = mWorldBindPoseMatrix;
+			}
+
+			return mLocalBindPoseMatrix;
+		}
+		#endif
 
 		const std::string& Bone::GetName() const
 		{
@@ -173,7 +212,7 @@ namespace ion
 		#if defined ION_OGRE
 		void Bone::UpdateOgreMtx()
 		{
-			Matrix4 worldMtx = CalculateWorldTransform();
+			Matrix4 worldMtx = mWorldBindPoseMatrix * mLocalOffsetMatrix;
 			Vector3 position = worldMtx.GetTranslation();
 			Quaternion rotation;
 			rotation.FromMatrix(worldMtx);
@@ -265,6 +304,13 @@ namespace ion
 					rootBone = &it->second;
 				}
 			}
+
+			#if defined ION_PLUGIN
+			for(std::map<std::string, Bone>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
+			{
+				it->second.CalculateLocalBindPoseTransform();
+			}
+			#endif
 
 			#if defined ION_OGRE
 			BuildOgreSkeleton(rootBone);

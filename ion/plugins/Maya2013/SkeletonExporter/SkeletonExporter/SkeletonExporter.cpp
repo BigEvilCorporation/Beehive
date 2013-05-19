@@ -1,3 +1,5 @@
+#define ION_PLUGIN
+
 #include "SkeletonExporter.h"
 #include "core/File.h"
 #include "renderer/Mesh.h"
@@ -116,6 +118,8 @@ namespace ion
 			MSelectionList selectedObjects;
 			MGlobal::getActiveSelectionList(selectedObjects);
 
+			ion::renderer::Bone* ionRootBone = NULL;
+
 			//Iterate through all selected objects
 			for(MItSelectionList objIterator(selectedObjects); !objIterator.isDone(); objIterator.next())
 			{
@@ -136,71 +140,72 @@ namespace ion
 					//Get DAG function node
 					MFnDagNode dagNode(dagPath);
 
-					//If not an intermediate object, and isn't a transformed shape
-					//if(!dagNode.isIntermediateObject() && !dagPath.hasFn(MFn::kTransform))
+					//If object has a skeleton joint
+					if(dagPath.hasFn(MFn::kJoint))
 					{
-						//If object has a skeleton joint
-						if(dagPath.hasFn(MFn::kJoint))
+						//Get joint
+						MFnIkJoint fnJoint(dagPath);
+
+						//Get joint name
+						MString jointName = fnJoint.name();
+
+						//Joints must have names for serialization
+						if(jointName.length() > 1)
 						{
-							//Get joint
-							MFnIkJoint fnJoint(dagPath);
+							//Create ion bone
+							ion::renderer::Bone* ionBone = ionSkeleton->CreateBone(jointName.asChar());
 
-							//Get joint name
-							MString jointName = fnJoint.name();
-
-							//Joints must have names for serialization
-							if(jointName.length() > 1)
+							if(ionBone)
 							{
-								//Create ion bone
-								ion::renderer::Bone* ionBone = ionSkeleton->CreateBone(jointName.asChar());
+								//Get joint's parent
+								MObject parentObj = fnJoint.parent(0);
 
-								if(ionBone)
+								//Check if parent is another joint
+								if(parentObj.hasFn(MFn::kJoint))
 								{
-									//Get joint's parent
-									MObject parentObj = fnJoint.parent(0);
+									//Get joint
+									MFnIkJoint fnParentJoint(parentObj);
 
-									//Check if parent is another joint
-									if(parentObj.hasFn(MFn::kJoint))
+									//Get parent's name
+									MString parentName = fnParentJoint.name();
+
+									if(parentName.length() > 1)
 									{
-										//Get joint
-										MFnIkJoint fnParentJoint(parentObj);
-
-										//Get parent's name
-										MString parentName = fnParentJoint.name();
-
-										if(parentName.length() > 1)
-										{
-											//Set ion bone's parent name
-											ionBone->SetParentName(parentName.asChar());
-										}
+										//Set ion bone's parent name
+										ionBone->SetParentName(parentName.asChar());
 									}
-
-									//Get bind pose plug
-									MPlug bindPose = fnJoint.findPlug("bindPose");
-
-									//Get bind pose world matrix object
-									MObject bindPoseMatrix;
-									bindPose.getValue(bindPoseMatrix);
-
-									//Extract world matrix
-									MFnMatrixData matrixData(bindPoseMatrix);
-									MMatrix worldMatrix = matrixData.matrix();
-
-									//Convert to ion matrix
-									float rawMatrix[4][4];
-									worldMatrix.get(rawMatrix);
-									ion::Matrix4 ionMatrix((float*)rawMatrix);
-
-									//Set bone matrix
-									ionBone->SetLocalTransform(ionMatrix);
 								}
+								else
+								{
+									//Found root bone
+									ionRootBone = ionBone;
+								}
+
+								//Get bind pose plug
+								MPlug bindPose = fnJoint.findPlug("bindPose");
+
+								//Get bind pose world matrix object
+								MObject bindPoseMatrix;
+								bindPose.getValue(bindPoseMatrix);
+
+								//Extract world matrix
+								MFnMatrixData matrixData(bindPoseMatrix);
+								MMatrix worldMatrix = matrixData.matrix();
+
+								//Convert to ion matrix
+								float rawMatrix[4][4];
+								worldMatrix.get(rawMatrix);
+								ion::Matrix4 ionMatrix((float*)rawMatrix);
+
+								//Set world bind pose matrix
+								ionBone->SetWorldBindPoseTransform(ionMatrix);
 							}
 						}
 					}
 				}
 			}
 
-			//Finalise skeleton (builds tree)
+			//Finalise skeleton (builds tree, calculates local bind pose transforms from world)
 			ionSkeleton->Finalise();
 
 			//Get filename

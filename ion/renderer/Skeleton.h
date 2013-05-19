@@ -48,16 +48,17 @@ namespace ion
 			Bone(const char* name, Ogre::Bone* ogreBone);
 			#endif
 
-			//Set local transform
-			void SetLocalTransform(const Matrix4& transform);
-			void SetLocalTranslation(const Vector3& translation);
-			void SetLocalRotation(const Quaternion& rotation);
+			//Set local offset transform
+			void SetOffsetTransform(const Matrix4& transform);
+			void SetOffsetTranslation(const Vector3& translation);
+			void SetOffsetRotation(const Quaternion& rotation);
 
-			//Get local transform
-			const Matrix4& GetLocalTransform() const;
+			//Get world transform
+			const Matrix4 GetWorldTransform() const;
 
-			//Calculate world transform, traversing up to root
-			Matrix4 CalculateWorldTransform() const;
+			//Get bind pose transform
+			const Matrix4& GetBindPoseLocalTransform() const;
+			const Matrix4& GetBindPoseWorldTransform() const;
 
 			//Move/rotate
 			void Translate(const Vector3& positionDelta);
@@ -85,8 +86,26 @@ namespace ion
 			Ogre::Bone* GetOgreBone() const { return mOgreBone; }
 			#endif
 
+#if defined ION_PLUGIN
+			//Set bind pose transforms
+			void SetLocalBindPoseTransform(const Matrix4& transform);
+			void SetWorldBindPoseTransform(const Matrix4& transform);
+
+			//Calculate world transform from object transforms, traversing up to root
+			Matrix4 CalculateWorldBindPoseTransform();
+
+			//Calculate object transform from world transforms, traversing up to root
+			Matrix4 CalculateLocalBindPoseTransform();
+#endif
+
 		protected:
-			Matrix4 mLocalMatrix;
+			//Bind pose
+			Matrix4 mLocalBindPoseMatrix;
+			Matrix4 mWorldBindPoseMatrix;
+
+			//Current offset
+			Matrix4 mLocalOffsetMatrix;
+
 			std::string mName;
 			std::string mParentName;
 			Bone* mParent;
