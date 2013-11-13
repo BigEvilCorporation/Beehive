@@ -15,6 +15,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\core\Archive.cpp" />
     <ClCompile Include="..\..\..\..\core\BinaryFile.cpp" />
     <ClCompile Include="..\..\..\..\core\Debug.cpp" />
     <ClCompile Include="..\..\..\..\core\File.cpp" />
@@ -23,6 +24,8 @@
     <ClCompile Include="..\..\..\..\core\maths\Quaternion.cpp" />
     <ClCompile Include="..\..\..\..\core\maths\Vector.cpp" />
     <ClCompile Include="..\..\..\..\core\MemoryManager.cpp" />
+    <ClCompile Include="..\..\..\..\core\Serialise.cpp" />
+    <ClCompile Include="..\..\..\..\core\Stream.cpp" />
     <ClCompile Include="..\..\..\..\renderer\Animation.cpp" />
     <ClCompile Include="..\..\..\..\renderer\Mesh.cpp" />
     <ClCompile Include="..\..\..\..\renderer\Skeleton.cpp" />

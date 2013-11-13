@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Maths.h"
+#include "../../Core/Archive.h"
 
 namespace ion
 {
@@ -25,6 +26,9 @@ namespace ion
 
 		float GetLength() const;
 		float Dot(const Vector2& vector) const;
+
+		//Serialisation
+		void Serialise(serialise::Archive& archive);
 	};
 
 	class Vector3
@@ -67,5 +71,8 @@ namespace ion
 
 		//Interpolation with another vector, with a given weight
 		Vector3 Lerp(const Vector3 &Vector, float Weight) const;
+
+		//Serialisation
+		void Serialise(serialise::Archive& archive);
 	};
 }

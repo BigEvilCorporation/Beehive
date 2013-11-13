@@ -397,4 +397,12 @@ namespace ion
 	{
 		mMatrix[col * 4 + row] = val;
 	}
+
+	void Matrix4::Serialise(serialise::Archive& archive)
+	{
+		for(int i = 0; i < 16; i++)
+		{
+			archive.Serialise(mMatrix[i]);
+		}
+	}
 }

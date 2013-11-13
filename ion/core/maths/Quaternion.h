@@ -12,6 +12,7 @@
 #include "Maths.h"
 #include "Vector.h"
 #include "Matrix.h"
+#include "../../Core/Archive.h"
 
 namespace ion
 {
@@ -36,12 +37,12 @@ namespace ion
 		Quaternion GetToPowerOf(float n) const;
 		
 		void FromAxis(float Angle, Vector3 Axis);
-		//void FromEuler(Vector3 Euler);
+		void FromEuler(Vector3 Euler);
 		void FromMatrix(const Matrix4& Matrix);
 		void FromLookAt(Vector3 Forward, Vector3 Position, Vector3 Target, float Factor);
 
 		Matrix4 ToMatrix() const;
-		//Vector3 ToEuler() const;
+		Vector3 ToEuler() const;
 
 		void exp();
 		void log();
@@ -50,5 +51,8 @@ namespace ion
 		void operator *= (const Quaternion& Quat);
 		Quaternion operator +(const Quaternion& Quat) const;
 		Vector3 operator* (const Vector3 &Vector) const;
+
+		//Serialisation
+		void Serialise(serialise::Archive& archive);
 	};
 }

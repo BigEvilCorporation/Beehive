@@ -1,18 +1,17 @@
 #include "core/Archive.h"
-#include "core/Serialise.h"
 
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
 
-class TestSerialisable : public ion::serialise::Serialisable
+class TestSerialisable
 {
 public:
 
 	static const u32 sVersion = 2;
 
-	class SubClass : public ion::serialise::Serialisable
+	class SubClass
 	{
 	public:
 		SubClass();
@@ -27,7 +26,7 @@ public:
 		//Additional data for V2
 		int mTestIntV2;
 
-		virtual void Serialise(ion::serialise::Archive& archive);
+		void Serialise(ion::serialise::Archive& archive);
 	};
 
 	TestSerialisable();
@@ -51,5 +50,5 @@ public:
 
 	SubClass mTestSubClass;
 
-	virtual void Serialise(ion::serialise::Archive& archive);
+	void Serialise(ion::serialise::Archive& archive);
 };

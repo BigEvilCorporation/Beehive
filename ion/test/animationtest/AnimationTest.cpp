@@ -88,6 +88,25 @@ bool AnimationTest::Initialise()
 	//Create mesh
 	mTestMesh = new ion::renderer::Mesh();
 
+	//Create and open mesh file stream for reading
+	ion::io::File meshFile("..\\meshes\\box1.ion.mesh", ion::io::File::OpenRead);
+
+	if(meshFile.IsOpen())
+	{
+		//Create archive for serialising in
+		ion::serialise::Archive archiveIn(meshFile, ion::serialise::Archive::In, ion::renderer::Skeleton::sSerialiseVersion);
+
+		//Serialise
+		archiveIn.Serialise(*mTestMesh);
+
+		//Close file
+		meshFile.Close();
+	}
+
+	//Get first submesh
+	mTestSubMesh = &mTestMesh->GetSubMeshes()[0][0];
+
+	/*
 	//Create submesh
 	mTestSubMesh = mTestMesh->CreateSubMesh();
 
@@ -129,7 +148,9 @@ bool AnimationTest::Initialise()
 	{
 		mTestSubMesh->AddFace(faces[i]);
 	}
+	*/
 
+	/*
 	//Create skeleton
 	mTestSkeleton = new ion::renderer::Skeleton();
 
@@ -148,22 +169,19 @@ bool AnimationTest::Initialise()
 	//mTestBones.push_back(bone0);
 	//mTestBones.push_back(bone1);
 
-	//Create and open file stream for reading
-	ion::io::File file("..\\skeletons\\test_skeleton.ion.skeleton", ion::io::File::OpenRead);
-			
-	if(file.IsOpen())
+	//Create and open skeleton file stream for reading
+	ion::io::File skeletonFile("..\\skeletons\\test_skeleton.ion.skeleton", ion::io::File::OpenRead);
+
+	if(skeletonFile.IsOpen())
 	{
-		//Create archive for serialising out
-		ion::serialise::Archive archiveOut(file, ion::serialise::Archive::In, ion::renderer::Skeleton::sSerialiseVersion);
+		//Create archive for serialising in
+		ion::serialise::Archive archiveIn(skeletonFile, ion::serialise::Archive::In, ion::renderer::Skeleton::sSerialiseVersion);
 
 		//Serialise
-		archiveOut.Serialise(*mTestSkeleton);
-
-		//Finalise
-		mTestSkeleton->Finalise();
+		archiveIn.Serialise(*mTestSkeleton);
 
 		//Close file
-		file.Close();
+		skeletonFile.Close();
 	}
 
 	ion::renderer::Bone* bone0 = mTestSkeleton->FindBone("joint1");
@@ -193,11 +211,12 @@ bool AnimationTest::Initialise()
 	mTestSubMesh->MapBone(*bone1, 7, 1.0f);
 
 	//Finalise submesh
-	mTestSubMesh->Finalise();
+	//mTestSubMesh->Finalise();
 
 	//Finalise mesh
-	mTestMesh->CalculateBounds();
-	mTestMesh->Finalise();
+	//mTestMesh->CalculateBounds();
+	//mTestMesh->Finalise();
+	*/
 
 	//Create mesh instance
 	mTestMeshInstance = new ion::renderer::MeshInstance(*mTestMesh, *mScene);
@@ -209,6 +228,7 @@ bool AnimationTest::Initialise()
 	mTestMeshNode->Attach(*mTestMeshInstance);
 	mTestMeshNode->SetPosition(ion::Vector3(0.0f, 5.0f, 0.0f));
 
+	/*
 	//Create animation track
 	mTestAnimationTrack = new ion::renderer::AnimationTrackTransform();
 
@@ -237,6 +257,7 @@ bool AnimationTest::Initialise()
 	//ion::Matrix4 boneTransform;
 	//boneTransform.SetTranslation(ion::Vector3(3.0f, 1.0f, 0.5f));
 	//mTestMeshInstance->SetBoneTransform(*bone1, boneTransform);
+	*/
 
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();

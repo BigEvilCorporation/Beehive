@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Vertex.h"
+#include "TexCoord.h"
 #include "../core/maths/Vector.h"
 #include "../core/Colour.h"
 
@@ -21,7 +22,6 @@ namespace ion
 		//Forward declaration
 		class Scene;
 		class Material;
-		class TexCoord;
 
 		class Primitive
 		{

@@ -19,11 +19,6 @@ namespace ion
 			mVersion = version;
 		}
 
-		void Archive::Serialise(Serialisable& object)
-		{
-			object.Serialise(*this);
-		}
-
 		void Archive::Serialise(void* data, u64 size)
 		{
 			if(GetDirection() == In)
@@ -33,106 +28,6 @@ namespace ion
 			else
 			{
 				mStream.Write(data, size);
-			}
-		}
-
-		void Archive::Serialise(u8& data)
-		{
-			Serialise((void*)&data, sizeof(u8));
-		}
-
-		void Archive::Serialise(s8& data)
-		{
-			Serialise((void*)&data, sizeof(s8));
-		}
-
-		void Archive::Serialise(u16& data)
-		{
-			Serialise((void*)&data, sizeof(u16));
-		}
-
-		void Archive::Serialise(s16& data)
-		{
-			Serialise((void*)&data, sizeof(s16));
-		}
-
-		void Archive::Serialise(u32& data)
-		{
-			Serialise((void*)&data, sizeof(u32));
-		}
-
-		void Archive::Serialise(s32& data)
-		{
-			Serialise((void*)&data, sizeof(s32));
-		}
-
-		void Archive::Serialise(u64& data)
-		{
-			Serialise((void*)&data, sizeof(u64));
-		}
-
-		void Archive::Serialise(s64& data)
-		{
-			Serialise((void*)&data, sizeof(s64));
-		}
-
-		void Archive::Serialise(float& data)
-		{
-			Serialise((void*)&data, sizeof(float));
-		}
-
-		void Archive::Serialise(Vector3& vector)
-		{
-			Serialise(vector.x);
-			Serialise(vector.y);
-			Serialise(vector.z);
-		}
-
-		void Archive::Serialise(Matrix4& matrix)
-		{
-			float* matrixData = matrix.GetAsFloatArray();
-
-			for(int i = 0; i < 16; i++)
-			{
-				Serialise(matrixData[i]);
-			}
-		}
-
-		void Archive::Serialise(Quaternion& quaternion)
-		{
-			Serialise(quaternion.x);
-			Serialise(quaternion.y);
-			Serialise(quaternion.z);
-			Serialise(quaternion.w);
-		}
-		
-		void Archive::Serialise(std::string& string)
-		{
-			if(GetDirection() == In)
-			{
-				//Serialise in num chars
-				int numChars = 0;
-				Serialise(numChars);
-
-				//Reserve string
-				string.reserve(numChars);
-
-				//Serialise chars
-				for(int i = 0; i < numChars; i++)
-				{
-					char character = 0;
-					Serialise(character);
-					string += character;
-				}
-			}
-			else
-			{
-				//Serialise out num chars
-				int numChars = (int)string.size();
-				Serialise(numChars);
-
-				//Serialise out chars
-				mStream.Write(string.data(), numChars);
 			}
 		}
 

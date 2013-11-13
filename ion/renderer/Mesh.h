@@ -10,7 +10,7 @@
 #include "../core/Types.h"
 #include "../core/Colour.h"
 #include "../core/maths/Vector.h"
-#include "../core/BinaryFile.h"
+#include "../core/Archive.h"
 #include "Vertex.h"
 #include "TexCoord.h"
 #include "Skeleton.h"
@@ -38,6 +38,16 @@ namespace ion
 		{
 			u16 mIndices[3];
 			TexCoord mTexCoords[3];
+
+			void Serialise(serialise::Archive& archive)
+			{
+				archive.Serialise(mIndices[0]);
+				archive.Serialise(mIndices[1]);
+				archive.Serialise(mIndices[2]);
+				archive.Serialise(mTexCoords[0]);
+				archive.Serialise(mTexCoords[1]);
+				archive.Serialise(mTexCoords[2]);
+			}
 		};
 
 		typedef u16 Index;
@@ -51,6 +61,7 @@ namespace ion
 			class SubMesh
 			{
 			public:
+				SubMesh();
 				~SubMesh();
 
 				void AddVertex(Vertex& vertex);
@@ -75,11 +86,12 @@ namespace ion
 				void SetMaterialName(std::string name);
 				const std::string& GetMaterialName();
 
-				bool Read(io::BinaryFile::Chunk& binaryChunk);
-				u64 Write(io::BinaryFile::Chunk& binaryChunk);
+				//Serialise
+				void Serialise(serialise::Archive& archive);
 
 			protected:
-				SubMesh(Mesh* mesh);
+				
+				void SetParentMesh(Mesh* mesh);
 
 			private:
 				std::string mName;
@@ -107,31 +119,19 @@ namespace ion
 
 			void SetSkeleton(Skeleton& skeleton);
 
-			bool Load(std::string filename);
-			u64 Save(std::string filename);
-
 			#if defined ION_OGRE
 			Ogre::MeshPtr& GetOgreMesh();
 			#endif
 
-			std::list<std::list<SubMesh*>>& GetSubMeshes();
+			std::vector<std::vector<Mesh::SubMesh>>& GetSubMeshes();
 
 			//Calculate bounds
 			void CalculateBounds();
 
+			//Serialise
+			void Serialise(serialise::Archive& archive);
+
 		private:
-			//Mesh file chunk ids
-			enum ChunkIds
-			{
-				ChunkId_Root				= CHUNK_ID('ROOT'),
-					ChunkId_SubMesh			= CHUNK_ID('SUB_'),
-						ChunkId_LOD			= CHUNK_ID('LOD_'),
-							ChunkId_Vertices= CHUNK_ID('VERT'),
-							ChunkId_Normals	= CHUNK_ID('NORM'),
-							ChunkId_Faces	= CHUNK_ID('FACE'),
-							ChunkId_MatName	= CHUNK_ID('MAT_'),
-					ChunkId_Bounds			= CHUNK_ID('BNDS')
-			};
 
 			static const int sMinFileVersion;
 			static const int sCurrentFileVersion;
@@ -141,7 +141,7 @@ namespace ion
 			static int sMeshIndex;
 			
 			//Submesh/LOD hierarchy
-			std::list<std::list<SubMesh*>> mSubMeshes;
+			std::vector<std::vector<SubMesh>> mSubMeshes;
 
 			//Bounds
 			struct Bounds
