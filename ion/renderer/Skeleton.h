@@ -11,7 +11,6 @@
 #include "../core/maths/Matrix.h"
 #include "../core/maths/Vector.h"
 #include "../core/maths/Quaternion.h"
-#include "../core/Serialise.h"
 #include "../core/Archive.h"
 
 #include "Animation.h"
@@ -33,7 +32,7 @@ namespace ion
 		//Forward declaration
 		class MeshInstance;
 
-		class Bone : public serialise::Serialisable
+		class Bone
 		{
 			friend class Skeleton;
 
@@ -42,7 +41,7 @@ namespace ion
 			Bone(const char* name);
 
 			//Serialise
-			virtual void Serialise(serialise::Archive& archive);
+			void Serialise(serialise::Archive& archive);
 
 			#if defined ION_OGRE
 			Bone(const char* name, Ogre::Bone* ogreBone);
@@ -116,7 +115,7 @@ namespace ion
 			#endif
 		};
 
-		class Skeleton : public serialise::Serialisable
+		class Skeleton
 		{
 		public:
 			static const int sSerialiseVersion;
@@ -124,7 +123,7 @@ namespace ion
 			Skeleton();
 
 			//Serialise
-			virtual void Serialise(serialise::Archive& archive);
+			void Serialise(serialise::Archive& archive);
 
 			//Create new bone
 			Bone* CreateBone(const char* name);

@@ -21,8 +21,6 @@ SRC =
 	Hash.h
 	MemoryManager.cpp
 	MemoryManager.h
-	Serialise.cpp
-	Serialise.h
 	Stream.cpp
 	Stream.h
 	Thread.cpp

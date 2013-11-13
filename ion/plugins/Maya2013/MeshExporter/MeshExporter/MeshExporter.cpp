@@ -202,10 +202,27 @@ namespace ion
 				}
 			}
 
-			//Write to file
+			//Finalise mesh
+			ionMesh->Finalise();
+
+			//Get filename
 			MString fullPath = filename.fullName();
-			const char* filename_cstr = fullPath.asChar();
-			ionMesh->Save(filename_cstr);
+			const char* filenameCstr = fullPath.asChar();
+			
+			//Create and open file stream for writing
+			ion::io::File file(filenameCstr, ion::io::File::OpenWrite);
+			
+			if(file.IsOpen())
+			{
+				//Create archive for serialising out
+				ion::serialise::Archive archiveOut(file, ion::serialise::Archive::Out, ion::renderer::Skeleton::sSerialiseVersion);
+
+				//Serialise
+				archiveOut.Serialise(*ionMesh);
+
+				//Close file
+				file.Close();
+			}
 
 			//Done with mesh
 			delete ionMesh;

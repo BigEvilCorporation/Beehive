@@ -233,7 +233,6 @@ namespace ion
 		return SMatrix;
 	}
 
-	/*
 	void Quaternion::FromEuler(Vector3 Euler)
 	{
 		float cosYaw = cos(Euler.y / 2);
@@ -245,21 +244,21 @@ namespace ion
 		x = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw;
 		y = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw;
 		z = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw;
-		q = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw;
+		w = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw;
 	}
 
 	Vector3 Quaternion::ToEuler() const
 	{
 		Vector3 Euler;
 		float testValue = x * y + z * w;
-		if(testValue > 0.499f) // north pole singularity
+		if(testValue > 0.499f)
 		{
 			Euler.y = 2 * atan2(x,w);
 			Euler.z = maths::PI / 2;
 			Euler.x = 0.0f;
 			return Euler;
 		}
-		if(testValue < -0.499f) // south pole singularity
+		if(testValue < -0.499f)
 		{
 			Euler.y = -2 * atan2(x,w);
 			Euler.z = -maths::PI / 2;
@@ -279,7 +278,6 @@ namespace ion
 
 		return Euler;
 	}
-	*/
 
 	void Quaternion::FromMatrix(const Matrix4& Matrix)
 	{
@@ -388,5 +386,13 @@ namespace ion
 		z *= Length;
 		y *= Length;
 		z *= Length;
+	}
+
+	void Quaternion::Serialise(serialise::Archive& archive)
+	{
+		archive.Serialise(x);
+		archive.Serialise(y);
+		archive.Serialise(z);
+		archive.Serialise(w);
 	}
 }

@@ -130,6 +130,8 @@ namespace ion
 
 		void Bone::SetBindingPose()
 		{
+			mLocalOffsetMatrix.SetIdentity();
+
 			#if defined ION_OGRE
 			mOgreBone->reset();
 			#endif
@@ -212,10 +214,10 @@ namespace ion
 		#if defined ION_OGRE
 		void Bone::UpdateOgreMtx()
 		{
-			Matrix4 worldMtx = mWorldBindPoseMatrix * mLocalOffsetMatrix;
-			Vector3 position = worldMtx.GetTranslation();
+			Matrix4 objectMtx = mLocalBindPoseMatrix * mLocalOffsetMatrix;
+			Vector3 position = objectMtx.GetTranslation();
 			Quaternion rotation;
-			rotation.FromMatrix(worldMtx);
+			rotation.FromMatrix(objectMtx);
 			mOgreBone->setPosition(position.x, position.y, position.z);
 			mOgreBone->setOrientation(rotation.w, rotation.x, rotation.y, rotation.z);
 		}
@@ -228,6 +230,12 @@ namespace ion
 		void Skeleton::Serialise(serialise::Archive& archive)
 		{
 			archive.Serialise(mBones);
+
+			//If serialising in, finalise skeleton
+			if(archive.GetDirection() == serialise::Archive::In)
+			{
+				Finalise();
+			}
 		}
 
 		Bone* Skeleton::CreateBone(const char* name)
@@ -308,7 +316,8 @@ namespace ion
 			#if defined ION_PLUGIN
 			for(std::map<std::string, Bone>::iterator it = mBones.begin(), end = mBones.end(); it != end; ++it)
 			{
-				it->second.CalculateLocalBindPoseTransform();
+				//it->second.CalculateLocalBindPoseTransform();
+				//it->second.CalculateWorldBindPoseTransform();
 			}
 			#endif
 

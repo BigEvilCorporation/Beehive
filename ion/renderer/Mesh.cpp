@@ -34,27 +34,36 @@ namespace ion
 
 		int Mesh::sMeshIndex = 0;
 
-		Mesh::SubMesh::SubMesh(Mesh* mesh)
+		Mesh::SubMesh::SubMesh()
 		{
-			#if defined ION_OGRE
-			static int numSubMeshes = 0;
-			std::stringstream subMeshName;
-			subMeshName << "OgreSubMesh_" << numSubMeshes++;
-			mName = subMeshName.str();
-			mOgreSubMesh = mesh->GetOgreMesh()->createSubMesh(subMeshName.str());
-
-			//Setup vertex declaration
-			mOgreVertexData = new Ogre::VertexData;
-			mOgreSubMesh->useSharedVertices = false;
-			mOgreSubMesh->vertexData = mOgreVertexData;
-			mOgreSubMesh->setMaterialName("BaseWhite");
-
-			mHardwareBufferIndex = 0;
-			#endif
+			mOgreSubMesh = NULL;
+			mOgreVertexData = NULL;
 		}
 
 		Mesh::SubMesh::~SubMesh()
 		{
+		}
+
+		void Mesh::SubMesh::SetParentMesh(Mesh* mesh)
+		{
+			#if defined ION_OGRE
+			if(!mOgreSubMesh)
+			{
+				static int numSubMeshes = 0;
+				std::stringstream subMeshName;
+				subMeshName << "OgreSubMesh_" << numSubMeshes++;
+				mName = subMeshName.str();
+				mOgreSubMesh = mesh->GetOgreMesh()->createSubMesh(subMeshName.str());
+
+				//Setup vertex declaration
+				mOgreVertexData = new Ogre::VertexData;
+				mOgreSubMesh->useSharedVertices = false;
+				mOgreSubMesh->vertexData = mOgreVertexData;
+				mOgreSubMesh->setMaterialName("BaseWhite");
+
+				mHardwareBufferIndex = 0;
+			}
+			#endif
 		}
 
 		void Mesh::SubMesh::AddVertex(Vertex& vertex)
@@ -215,105 +224,15 @@ namespace ion
 			return mMaterialName;
 		}
 
-		bool Mesh::SubMesh::Read(io::BinaryFile::Chunk& binaryChunk)
+		void Mesh::SubMesh::Serialise(serialise::Archive& archive)
 		{
-			//For all mesh data chunks
-			for(io::BinaryFile::Chunk dataChunk = binaryChunk.Begin(), dataEnd = binaryChunk.End(); dataChunk != dataEnd; dataChunk = dataChunk.Next())
-			{
-				if(dataChunk.GetID() == ChunkId_Vertices)
-				{
-					//Read in vertices
-					u64 numVerts = dataChunk.GetNumItems();
+			//Serialise vertices, normals and faces
+			archive.Serialise(mVertices);
+			archive.Serialise(mNormals);
+			archive.Serialise(mFaces);
 
-					for(int i = 0; i < numVerts; i++)
-					{
-						Vertex vertex;
-						dataChunk.ReadData(&vertex, sizeof(Vertex));
-						AddVertex(vertex);
-					}
-				}
-				else if(dataChunk.GetID() == ChunkId_Normals)
-				{
-					//Read in normals
-					u64 numNorms = dataChunk.GetNumItems();
-
-					for(int i = 0; i < numNorms; i++)
-					{
-						Vector3 normal;
-						dataChunk.ReadData(&normal, sizeof(Vector3));
-						AddNormal(normal);
-					}
-				}
-				else if(dataChunk.GetID() == ChunkId_Faces)
-				{
-					//Read in faces
-					u64 numFaces = dataChunk.GetNumItems();
-
-					for(int i = 0; i < numFaces; i++)
-					{
-						Face face;
-						dataChunk.ReadData(&face, sizeof(Face));
-						AddFace(face);
-					}
-				}
-				else if(dataChunk.GetID() == ChunkId_MatName)
-				{
-					//Read in material name
-					char text[128] = {0};
-					u64 stringLength = dataChunk.GetDataSize();
-					dataChunk.ReadData(text, stringLength);
-					SetMaterialName(text);
-				}
-			}
-
-			//Finished reading
-			Finalise();
-
-			return true;
-		}
-
-		u64 Mesh::SubMesh::Write(io::BinaryFile::Chunk& binaryChunk)
-		{
-			//Create vertex chunk
-			io::BinaryFile::Chunk vertsChunk;
-			vertsChunk.SetID(ChunkId_Vertices);
-
-			//Create normals chunk
-			io::BinaryFile::Chunk normsChunk;
-			normsChunk.SetID(ChunkId_Normals);
-
-			//Create faces chunk
-			io::BinaryFile::Chunk facesChunk;
-			facesChunk.SetID(ChunkId_Faces);
-
-			//Set verts ptr
-			vertsChunk.SetData(&GetVertices()[0], GetNumVertices() * sizeof(Vertex), GetNumVertices());
-
-			//Set normals ptr
-			normsChunk.SetData(&GetNormals()[0], GetNumNormals() * sizeof(Vector3), GetNumNormals());
-
-			//Set faces ptr
-			facesChunk.SetData(&GetFaces()[0], GetNumFaces() * sizeof(Face), GetNumFaces());
-
-			//Add verts/norms/faces chunks
-			binaryChunk.AddChild(vertsChunk);
-			binaryChunk.AddChild(normsChunk);
-			binaryChunk.AddChild(facesChunk);
-
-			if(GetMaterialName().size() > 0)
-			{
-				//Create material name chunk
-				io::BinaryFile::Chunk materialChunk;
-				materialChunk.SetID(ChunkId_MatName);
-						
-				//Set material name ptr
-				materialChunk.SetData((void*)&GetMaterialName()[0], GetMaterialName().size(), 1);
-
-				//Add to chunk
-				binaryChunk.AddChild(materialChunk);
-			}
-
-			return binaryChunk.GetChunkSize();
+			//Serialise material name
+			archive.Serialise(mMaterialName);
 		}
 
 		Mesh::Mesh()
@@ -331,28 +250,41 @@ namespace ion
 
 		Mesh::~Mesh()
 		{
-			for(std::list<std::list<SubMesh*>>::iterator subMesh = mSubMeshes.begin(), subMeshEnd = mSubMeshes.end(); subMesh != subMeshEnd; ++subMesh)
-			{
-				for(std::list<SubMesh*>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; ++lod)
-				{
-					delete (*lod);
-				}
-			}
+
 		}
 
 		Mesh::SubMesh* Mesh::CreateSubMesh()
 		{
 			//TODO: LOD support
-			std::list<SubMesh*> subMeshSet;
-			SubMesh* lod = new SubMesh(this);
-			subMeshSet.push_back(lod);
-			mSubMeshes.push_back(subMeshSet);
 
-			return lod;
+			//Resize submesh set vector to insert new element
+			mSubMeshes.resize(mSubMeshes.size() + 1);
+
+			//Get tail submesh set
+			std::vector<SubMesh>& subMeshSet = mSubMeshes[mSubMeshes.size() - 1];
+
+			//Resize submesh set to insert new submesh
+			subMeshSet.resize(1);
+
+			//Get submesh
+			SubMesh* subMesh = &subMeshSet[0];
+
+			subMesh->SetParentMesh(this);
+
+			return subMesh;
 		}
 
 		void Mesh::Finalise()
 		{
+			for(std::vector<std::vector<SubMesh>>::iterator subMesh = mSubMeshes.begin(), subMeshEnd = mSubMeshes.end(); subMesh != subMeshEnd; ++subMesh)
+			{
+				for(std::vector<SubMesh>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
+				{
+					lod->SetParentMesh(this);
+					lod->Finalise();
+				}
+			}
+
 			#if defined ION_OGRE
 			mOgreMesh->_setBounds(Ogre::AxisAlignedBox(mBounds.min.x, mBounds.min.y, mBounds.min.z, mBounds.max.x, mBounds.max.y, mBounds.max.z));
 			mOgreMesh->load();
@@ -371,13 +303,13 @@ namespace ion
 			mBounds.min = Vector3(maths::FLOAT_MAX, maths::FLOAT_MAX, maths::FLOAT_MAX);
 			mBounds.max = Vector3(maths::FLOAT_MIN, maths::FLOAT_MIN, maths::FLOAT_MIN);
 
-			for(std::list<std::list<SubMesh*>>::iterator subMesh = mSubMeshes.begin(), subMeshEnd = mSubMeshes.end(); subMesh != subMeshEnd; ++subMesh)
+			for(std::vector<std::vector<SubMesh>>::iterator subMesh = mSubMeshes.begin(), subMeshEnd = mSubMeshes.end(); subMesh != subMeshEnd; ++subMesh)
 			{
-				for(std::list<SubMesh*>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
+				for(std::vector<SubMesh>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
 				{
-					for(int i = 0; i < (*lod)->GetNumVertices(); i++)
+					for(int i = 0; i < (*lod).GetNumVertices(); i++)
 					{
-						Vertex& vert = (*lod)->GetVertices()[i];
+						Vertex& vert = (*lod).GetVertices()[i];
 
 						if(vert.x < mBounds.min.x) mBounds.min.x = vert.x;
 						if(vert.x > mBounds.max.x) mBounds.max.x = vert.x;
@@ -397,134 +329,31 @@ namespace ion
 		}
 		#endif
 
-		std::list<std::list<Mesh::SubMesh*>>& Mesh::GetSubMeshes()
+		std::vector<std::vector<Mesh::SubMesh>>& Mesh::GetSubMeshes()
 		{
 			return mSubMeshes;
 		}
 
-		bool Mesh::Load(std::string filename)
+		void Mesh::Serialise(serialise::Archive& archive)
 		{
-			//Open file for reading
-			io::BinaryFile file(filename, ion::io::File::OpenRead);
-
-			if(file.IsOpen())
+			//If serialising out, calculate bounds first
+			if(archive.GetDirection() == serialise::Archive::Out)
 			{
-				//Check header
-				if(stricmp(sFileType, file.GetFileType().c_str()) != 0)
-				{
-					ion::debug::Error("Mesh::Load() - Not an ion::mesh file");
-				}
-
-				//Check version
-				if(file.GetFileVersion() < sMinFileVersion)
-				{
-					ion::debug::Error("Mesh::Load() - Unsupported file version");
-				}
-
-				//If no bounds chunk found, we need to manually calculate from vertices
-				bool boundsFound = false;
-
-				//For all root chunks
-				for(io::BinaryFile::Chunk rootChunk = file.GetTrunk().Begin(), rootEnd = file.GetTrunk().End(); rootChunk != rootEnd; rootChunk = rootChunk.Next())
-				{
-					if(rootChunk.GetID() == ChunkId_SubMesh)
-					{
-						//For all LOD chunks
-						for(io::BinaryFile::Chunk lodChunk = rootChunk.Begin(), lodEnd = rootChunk.End(); lodChunk != lodEnd; lodChunk = lodChunk.Next())
-						{
-							//Create submesh
-							SubMesh* subMesh = CreateSubMesh();
-
-							//Read submesh data
-							subMesh->Read(lodChunk);
-						}
-					}
-					else if(rootChunk.GetID() == ChunkId_Bounds)
-					{
-						//Read bounds
-						rootChunk.ReadData(&mBounds, sizeof(Bounds));
-
-						//Bounds chunk found
-						boundsFound = true;
-					}
-				}
-
-				//If bounds not found, calculate manually
-				if(!boundsFound)
-				{
-					CalculateBounds();
-				}
-
-				//Done, finalise
-				Finalise();
-
-				return true;
-			}
-
-			return false;
-		}
-
-		u64 Mesh::Save(std::string filename)
-		{
-			u64 fileSize = 0;
-
-			//Open file for writing
-			io::BinaryFile file(filename, ion::io::File::OpenWrite);
-
-			if(file.IsOpen())
-			{
-				//Setup header
-				file.SetFileType(sFileType);
-				file.SetFileVersion(sCurrentFileVersion);
-
-				//Set trunk node id
-				file.GetTrunk().SetID(ChunkId_Root);
-
-				//For all submeshes
-				for(std::list<std::list<SubMesh*>>::iterator subMesh = mSubMeshes.begin(), subMeshEnd = mSubMeshes.end(); subMesh != subMeshEnd; ++subMesh)
-				{
-					//Create submesh chunk
-					io::BinaryFile::Chunk subMeshChunk;
-					subMeshChunk.SetID(ChunkId_SubMesh);
-
-					//For all LODs
-					for(std::list<SubMesh*>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
-					{
-						//Create LOD chunk
-						io::BinaryFile::Chunk lodChunk;
-						lodChunk.SetID(ChunkId_LOD);
-
-						//Write mesh data
-						(*lod)->Write(lodChunk);
-
-						//Add LOD chunk to submesh chunk
-						subMeshChunk.AddChild(lodChunk);
-					}
-
-					//Add submesh chunk to trunk
-					file.GetTrunk().AddChild(subMeshChunk);
-				}
-
-				//Calculate bounds
 				CalculateBounds();
-
-				//Create bounds chunk
-				io::BinaryFile::Chunk boundsChunk;
-				boundsChunk.SetID(ChunkId_Bounds);
-				boundsChunk.SetData(&mBounds, sizeof(mBounds), 1);
-				file.GetTrunk().AddChild(boundsChunk);
-
-				//Get total filesize
-				fileSize = file.GetTrunk().GetChunkSize() + sizeof(io::BinaryFile::FileHeader);
-
-				//Write file
-				file.Write();
-
-				//Close file
-				file.Close();
 			}
 
-			return fileSize;
+			//Serialise submeshes
+			archive.Serialise(mSubMeshes);
+
+			//Serialise bounds
+			archive.Serialise(mBounds.min);
+			archive.Serialise(mBounds.max);
+
+			//If serialising in, finalise mesh
+			if(archive.GetDirection() == serialise::Archive::In)
+			{
+				Finalise();
+			}
 		}
 
 		MeshInstance::MeshInstance(Mesh& mesh, Scene& scene)

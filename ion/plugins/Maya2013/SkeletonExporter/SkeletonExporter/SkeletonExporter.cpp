@@ -25,6 +25,8 @@
 #include <maya/MIntArray.h>
 #include <maya/MPointArray.h>
 #include <maya/MMatrix.h>
+#include <maya/MQuaternion.h>
+#include <maya/MEulerRotation.h>
 
 MStatus initializePlugin(MObject obj)
 {
@@ -109,6 +111,39 @@ namespace ion
 				return kNotMyFileType;
 		}
 
+		void GetMatrixFromPlug(MFnIkJoint& joint, ion::Matrix4& matrix, const char* plugName)
+		{
+			MPlug plug = joint.findPlug(plugName);
+
+			//Get matrix object
+			MObject matrixObject;
+			plug.getValue(matrixObject);
+
+			//Extract matrix
+			MFnMatrixData matrixData(matrixObject);
+			MMatrix mayaMatrix = matrixData.matrix();
+
+			//Convert to ion matrix
+			float rawMatrix[4][4] = {{0.0f}};
+			mayaMatrix.get(rawMatrix);
+			matrix = ion::Matrix4((float*)rawMatrix);
+		}
+
+		void GetFloat3FromPlug(MFnIkJoint& joint, ion::Vector3& vector, const char* plugName)
+		{
+			MPlug plug = joint.findPlug(plugName);
+
+			//Get component plugs
+			MPlug plugX = plug.child(0);
+			MPlug plugY = plug.child(1);
+			MPlug plugZ = plug.child(2);
+
+			//Get floats
+			plugX.getValue(vector.x);
+			plugY.getValue(vector.y);
+			plugZ.getValue(vector.z);
+		}
+
 		MStatus IonSkeletonExporter::writer(const MFileObject& filename, const MString& optionsString, FileAccessMode mode)
 		{
 			//Create ion skeleton
@@ -117,8 +152,6 @@ namespace ion
 			//Get list of currently selected objects
 			MSelectionList selectedObjects;
 			MGlobal::getActiveSelectionList(selectedObjects);
-
-			ion::renderer::Bone* ionRootBone = NULL;
 
 			//Iterate through all selected objects
 			for(MItSelectionList objIterator(selectedObjects); !objIterator.isDone(); objIterator.next())
@@ -160,11 +193,17 @@ namespace ion
 								//Get joint's parent
 								MObject parentObj = fnJoint.parent(0);
 
+								MMatrix parentInvWorldBindMatrix = MMatrix::identity;
+								//MMatrix mayaOrientMtx = MMatrix::identity;
+
 								//Check if parent is another joint
 								if(parentObj.hasFn(MFn::kJoint))
 								{
 									//Get joint
 									MFnIkJoint fnParentJoint(parentObj);
+
+									//Get inverse world bind matrix
+									parentInvWorldBindMatrix = fnParentJoint.dagPath().inclusiveMatrixInverse();
 
 									//Get parent's name
 									MString parentName = fnParentJoint.name();
@@ -175,30 +214,62 @@ namespace ion
 										ionBone->SetParentName(parentName.asChar());
 									}
 								}
-								else
-								{
-									//Found root bone
-									ionRootBone = ionBone;
-								}
 
-								//Get bind pose plug
-								MPlug bindPose = fnJoint.findPlug("bindPose");
+								//Get world matrix
+								MMatrix worldMatrix = dagPath.inclusiveMatrix();
 
-								//Get bind pose world matrix object
-								MObject bindPoseMatrix;
-								bindPose.getValue(bindPoseMatrix);
+								//Calc local matrix
+								MMatrix localMatrix = worldMatrix * parentInvWorldBindMatrix;
 
-								//Extract world matrix
-								MFnMatrixData matrixData(bindPoseMatrix);
-								MMatrix worldMatrix = matrixData.matrix();
+								//Create ion matrices
+								float rawMtx[4][4] = {{0}};
+								worldMatrix.get(rawMtx);
+								ion::Matrix4 ionWorldMatrix((float*)rawMtx);
 
-								//Convert to ion matrix
-								float rawMatrix[4][4];
-								worldMatrix.get(rawMatrix);
-								ion::Matrix4 ionMatrix((float*)rawMatrix);
+								localMatrix.get(rawMtx);
+								ion::Matrix4 ionLocalMatrix((float*)rawMtx);
 
 								//Set world bind pose matrix
-								ionBone->SetWorldBindPoseTransform(ionMatrix);
+								ionBone->SetWorldBindPoseTransform(ionWorldMatrix);
+
+								//Set local bind pose matrix
+								ionBone->SetLocalBindPoseTransform(ionLocalMatrix);
+
+								/*
+								//Extract components from plugs
+								ion::Vector3 translationVector;
+								ion::Vector3 scaleVector;
+								ion::Vector3 rotationEuler;
+								ion::Vector3 jointOrientEuler;
+
+								GetFloat3FromPlug(fnJoint, translationVector, "translate");
+								GetFloat3FromPlug(fnJoint, scaleVector, "scale");
+								GetFloat3FromPlug(fnJoint, rotationEuler, "rotate");
+								GetFloat3FromPlug(fnJoint, jointOrientEuler, "jointOrient");
+
+								//Convert to matrices
+								ion::Matrix4 translationMatrix;
+								ion::Matrix4 scaleMatrix;
+
+								translationMatrix.SetTranslation(translationVector);
+								scaleMatrix.SetScale(scaleVector);
+
+								MEulerRotation mayaRotEuler(rotationEuler.x, rotationEuler.y, rotationEuler.z, MEulerRotation::kXYZ);
+								MMatrix mayaRotMtx = mayaRotEuler.asMatrix();
+								float rawMtx[4][4] = {{0}};
+								mayaRotMtx.get(rawMtx);
+								ion::Matrix4 rotationMatrix((float*)rawMtx);
+
+								MEulerRotation mayaOrientEuler(jointOrientEuler.x, jointOrientEuler.y, jointOrientEuler.z, MEulerRotation::kXYZ);
+								MMatrix mayaOrientMtx = mayaOrientEuler.asMatrix();
+								mayaOrientMtx.get(rawMtx);
+								ion::Matrix4 jointOrientMatrix((float*)rawMtx);
+
+								//Calculate final local space matrix
+								ion::Matrix4 localMatrix = rotationMatrix * jointOrientMatrix * translationMatrix * scaleMatrix;
+
+								ionBone->SetLocalBindPoseTransform(localMatrix);
+								*/
 							}
 						}
 					}
@@ -210,10 +281,10 @@ namespace ion
 
 			//Get filename
 			MString fullPath = filename.fullName();
-			const char* filename_cstr = fullPath.asChar();
+			const char* filenameCstr = fullPath.asChar();
 			
-			//Create and open file streams for writing
-			ion::io::File file(filename_cstr, ion::io::File::OpenWrite);
+			//Create and open file stream for writing
+			ion::io::File file(filenameCstr, ion::io::File::OpenWrite);
 			
 			if(file.IsOpen())
 			{

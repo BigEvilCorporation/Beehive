@@ -124,6 +124,7 @@ namespace ion
 
 		bool Scene::Load(std::string filename)
 		{
+			/*
 			//Open file for reading
 			io::BinaryFile file(filename, ion::io::File::OpenRead);
 
@@ -191,6 +192,7 @@ namespace ion
 
 				return true;
 			}
+			*/
 
 			return false;
 		}
@@ -199,6 +201,7 @@ namespace ion
 		{
 			u64 fileSize = 0;
 
+			/*
 			//Open file for writing
 			io::BinaryFile file(filename, ion::io::File::OpenWrite);
 
@@ -258,7 +261,6 @@ namespace ion
 					file.GetTrunk().AddChild(lightChunk);
 				}
 
-				/*
 				//Calculate world bounds
 				CalculateBounds();
 
@@ -267,7 +269,6 @@ namespace ion
 				boundsChunk.SetID(ChunkId_Bounds);
 				boundsChunk.SetData(&mBounds, sizeof(mBounds), 1);
 				file.GetTrunk().AddChild(boundsChunk);
-				*/
 
 				//Get total filesize
 				fileSize = file.GetTrunk().GetChunkSize() + sizeof(io::BinaryFile::FileHeader);
@@ -279,6 +280,7 @@ namespace ion
 				file.Close();
 			}
 
+			*/
 			return fileSize;
 		}
 	}

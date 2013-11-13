@@ -40,6 +40,12 @@ namespace ion
 		return (x * vector.x + y * vector.y);
 	}
 
+	void Vector2::Serialise(serialise::Archive& archive)
+	{
+		archive.Serialise(x);
+		archive.Serialise(y);
+	}
+
 	Vector3::Vector3()
 	{ 
 		Zero();
@@ -224,5 +230,12 @@ namespace ion
 		}
 
 		return Result;
+	}
+
+	void Vector3::Serialise(serialise::Archive& archive)
+	{
+		archive.Serialise(x);
+		archive.Serialise(y);
+		archive.Serialise(z);
 	}
 }

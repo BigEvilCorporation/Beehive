@@ -7,18 +7,12 @@
 
 #pragma once
 
+#include "../core/maths/Vector.h"
+
 namespace ion
 {
 	namespace renderer
 	{
-		class TexCoord
-		{
-		public:
-			TexCoord();
-			TexCoord(float X, float Y);
-
-			float x;
-			float y;
-		};
+		typedef Vector2 TexCoord;
 	}
 }

@@ -7,14 +7,10 @@
 
 #pragma once
 
-#include "Serialise.h"
 #include "Stream.h"
 
 //Includes for ion types handled directly by Archive
 #include "Types.h"
-#include "maths/Vector.h"
-#include "maths/Matrix.h"
-#include "maths/Quaternion.h"
 
 //Includes STL types handled directly by Archive
 #include <vector>
@@ -32,30 +28,25 @@ namespace ion
 
 			Archive(Stream& stream, Direction direction, u32 version);
 
-			//Serialise a Serialisable-derived type
-			void Serialise(Serialisable& object);
+			//Default templated serialise
+			template <typename T> void Serialise(T& object);
 
 			//Raw serialisation (no endian flipping)
 			void Serialise(void* data, u64 size);
 
 			//Raw serialisation of basic types (with endian flipping)
-			void Serialise(u8& data);
-			void Serialise(s8& data);
-			void Serialise(u16& data);
-			void Serialise(s16& data);
-			void Serialise(u32& data);
-			void Serialise(s32& data);
-			void Serialise(u64& data);
-			void Serialise(s64& data);
-			void Serialise(float& data);
-
-			//ion types that can't derive from Serialisable, or shouldn't have the Serialise libs as a dependency
-			void Serialise(Vector3& vector);
-			void Serialise(Matrix4& matrix);
-			void Serialise(Quaternion& quaternion);
+			template <> void Serialise<u8>(u8& data);
+			template <> void Serialise<s8>(s8& data);
+			template <> void Serialise<u16>(u16& data);
+			template <> void Serialise<s16>(s16& data);
+			template <> void Serialise<u32>(u32& data);
+			template <> void Serialise<s32>(s32& data);
+			template <> void Serialise<u64>(u64& data);
+			template <> void Serialise<s64>(s64& data);
+			template <> void Serialise<float>(float& data);
 
 			//Serialise STL string
-			void Serialise(std::string& string);
+			template <> void Serialise<std::string>(std::string& string);
 
 			//Serialise STL containers
 			template <typename T> void Serialise(std::vector<T>& objects);
@@ -71,7 +62,86 @@ namespace ion
 			u32 mVersion;
 		};
 
-		//Template functions belong in header
+		template <typename T> void Archive::Serialise(T& object)
+		{
+			object.Serialise(*this);
+		}
+
+		template <> void Archive::Serialise<u8>(u8& data)
+		{
+			Serialise((void*)&data, sizeof(u8));
+		}
+
+		template <> void Archive::Serialise<s8>(s8& data)
+		{
+			Serialise((void*)&data, sizeof(s8));
+		}
+
+		template <> void Archive::Serialise<u16>(u16& data)
+		{
+			Serialise((void*)&data, sizeof(u16));
+		}
+
+		template <> void Archive::Serialise<s16>(s16& data)
+		{
+			Serialise((void*)&data, sizeof(s16));
+		}
+
+		template <> void Archive::Serialise<u32>(u32& data)
+		{
+			Serialise((void*)&data, sizeof(u32));
+		}
+
+		template <> void Archive::Serialise<s32>(s32& data)
+		{
+			Serialise((void*)&data, sizeof(s32));
+		}
+
+		template <> void Archive::Serialise<u64>(u64& data)
+		{
+			Serialise((void*)&data, sizeof(u64));
+		}
+
+		template <> void Archive::Serialise<s64>(s64& data)
+		{
+			Serialise((void*)&data, sizeof(s64));
+		}
+
+		template <> void Archive::Serialise<float>(float& data)
+		{
+			Serialise((void*)&data, sizeof(float));
+		}
+		
+		template <> void Archive::Serialise<std::string>(std::string& string)
+		{
+			if(GetDirection() == In)
+			{
+				//Serialise in num chars
+				int numChars = 0;
+				Serialise(numChars);
+
+				//Reserve string
+				string.reserve(numChars);
+
+				//Serialise chars
+				for(int i = 0; i < numChars; i++)
+				{
+					char character = 0;
+					Serialise(character);
+					string += character;
+				}
+			}
+			else
+			{
+				//Serialise out num chars
+				int numChars = (int)string.size();
+				Serialise(numChars);
+
+				//Serialise out chars
+				mStream.Write(string.data(), numChars);
+			}
+		}
+
 		template <typename T> void Archive::Serialise(std::vector<T>& objects)
 		{
 			if(GetDirection() == In)
@@ -80,12 +150,13 @@ namespace ion
 				int numObjects = 0;
 				Serialise(numObjects);
 
-				//Serialise all objects and add to list
+				//Resize vector to construct elements
+				objects.resize(numObjects);
+
+				//Serialise all objects
 				for(int i = 0; i < numObjects; i++)
 				{
-					T object;
-					Serialise(object);
-					objects.push_back(object);
+					Serialise(objects[i]);
 				}
 			}
 			else

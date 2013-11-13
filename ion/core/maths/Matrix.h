@@ -11,6 +11,7 @@
 
 #include "Maths.h"
 #include "Vector.h"
+#include "../../Core/Archive.h"
 
 namespace ion
 {
@@ -60,6 +61,9 @@ namespace ion
 
 		float Get(const int col, const int row) const;
 		void Set(const int col, const int row, const float val);
+
+		//Serialisation
+		void Serialise(serialise::Archive& archive);
 
 	protected:
 
