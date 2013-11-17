@@ -8,12 +8,6 @@
 #include "core/BinaryFile.h"
 #include "renderer/Mesh.h"
 
-#include <OgreMeshManager.h>
-#include <OgreHardwareBufferManager.h>
-#include <OgreEntity.h>
-#include <OgreMaterial.h>
-#include <OgreMaterialManager.h>
-
 #include <sstream>
 
 RenderTest::RenderTest()
@@ -49,7 +43,7 @@ bool RenderTest::Initialise()
 	mFileSystem = new ion::io::FileSystem();
 
 	//Create renderer, scene, camera and viewport
-	mRenderer = new ion::renderer::Renderer(windowTitle.str().c_str(), 1024, 768, false);
+	mRenderer = new ion::renderer::Renderer(windowTitle.str().c_str(), 1024, 768, false, 1);
 	mScene = new ion::renderer::Scene();
 	mCamera = new ion::renderer::Camera(*mScene);
 	mViewport = new ion::renderer::Viewport(*mRenderer, *mCamera);
@@ -81,10 +75,6 @@ bool RenderTest::Initialise()
 
 	//Set default shadow cast distance (must be done before adding lights)
 	mScene->SetShadowFarDistance(100.0f);
-
-	//Add post effects
-	mPostEffectBloom = new ion::renderer::PostEffectBloom;
-	mPostEffectBloom->AssignToViewport(*mViewport);
 
 	//Set default camera position and direction
 	mCamera->SetPosition(ion::Vector3(0.0f, 0.0f, 10.0f));

@@ -13,6 +13,7 @@ namespace ion
 {
 	namespace renderer
 	{
+		#if defined ION_OGRE
 		class PostEffectBloomListener : public Ogre::CompositorInstance::Listener
 		{
 		public:
@@ -30,6 +31,7 @@ namespace ion
 			u32 mBlurVPassId;
 			u32 mBlendPassId;
 		};
+		#endif
 
 		class PostEffectBloom : public PostEffect
 		{
@@ -47,7 +49,10 @@ namespace ion
 			PostEffectPass* mPassComposition1;
 			PostEffectPass* mPassComposition2;
 			PostEffectPass* mPassOutput;
+
+			#if defined ION_OGRE
 			PostEffectBloomListener* mPostEffectListener;
+			#endif
 		};
 	}
 }

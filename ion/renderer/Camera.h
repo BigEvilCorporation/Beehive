@@ -11,7 +11,9 @@
 #include "../core/maths/Matrix.h"
 #include "../core/maths/Quaternion.h"
 
+#if defined ION_OGRE
 #include <Ogre/OgreCamera.h>
+#endif
 
 namespace ion
 {
@@ -43,10 +45,15 @@ namespace ion
 			void SetOrthoDimensions(float width, float height);
 			void SetAspectRatio(float aspectRatio);
 
+			#if defined ION_OGRE
 			Ogre::Camera* GetOgreCameraIFace();
+			#endif
 
 		private:
+			#if defined ION_OGRE
 			Ogre::Camera* mOgreCameraIFace;
+			#endif
+
 			Vector3 mPosition;
 		};
 	}

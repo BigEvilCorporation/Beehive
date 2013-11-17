@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "../Core/Archive.h"
+
 namespace ion
 {
 	class Colour
@@ -22,6 +24,14 @@ namespace ion
 		Colour(float R, float G, float B, float A);
 
 		//TODO: Convertions - RGBA, hue/sat, etc...
+
+		void Serialise(serialise::Archive& archive)
+		{
+			archive.Serialise(r);
+			archive.Serialise(g);
+			archive.Serialise(b);
+			archive.Serialise(a);
+		}
 	};
 
 	class ColourRGB
@@ -32,5 +42,12 @@ namespace ion
 
 		ColourRGB();
 		ColourRGB(float R, float G, float B);
+
+		void Serialise(serialise::Archive& archive)
+		{
+			archive.Serialise(r);
+			archive.Serialise(g);
+			archive.Serialise(b);
+		}
 	};
 }

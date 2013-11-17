@@ -39,9 +39,6 @@ namespace ion
 			void SetShadowTextureResolution(int resolution);
 			void SetShadowTextureCount(int count);
 
-			bool Load(std::string filename);
-			u64 Save(std::string filename);
-
 			Mesh* GetSceneMesh();
 			std::list<Light*>& GetLights();
 
@@ -49,38 +46,12 @@ namespace ion
 			Ogre::SceneManager* GetOgreSceneMgrIFace();
 			#endif
 
+			//Serialisation
+			void Serialise(serialise::Archive& archive);
+			
+			static const int sSerialiseVersion;
+
 		private:
-			enum ChunkIds
-			{
-				ChunkId_Root				= CHUNK_ID('ROOT'),
-
-					ChunkId_AmbientLight	= CHUNK_ID('ALIT'),
-					ChunkId_WorldBounds		= CHUNK_ID('WBND'),
-					ChunkId_Skybox			= CHUNK_ID('SKYB'),
-
-					ChunkId_SceneMeshData	= CHUNK_ID('MESH'),
-						ChunkId_SubMesh		= CHUNK_ID('SUB_'),
-						ChunkId_Bounds		= CHUNK_ID('BNDS'),	//TODO: Belongs in the SubMesh chunk
-
-					ChunkId_MeshInstance	= CHUNK_ID('MSHI'),
-						//ChunkId_Name
-						//ChunkId_Position
-						//ChunkId_Orientation
-
-					ChunkId_Light			= CHUNK_ID('LIT_'),
-
-					//ChunkId_Entity		= CHUNK_ID('ENTY'),
-					//ChunkId_Script		= CHUNK_ID('SCRP'),
-
-				ChunkId_Name				= CHUNK_ID('NAME'),
-				ChunkId_Position			= CHUNK_ID('POS_'),
-				ChunkId_Direction			= CHUNK_ID('DIR_'),
-				ChunkId_Rotation			= CHUNK_ID('ROT_')
-			};
-
-			static const int sMinFileVersion;
-			static const int sCurrentFileVersion;
-			static const char* sFileType;
 
 			Mesh* mSceneMesh;
 			ColourRGB mAmbientLight;

@@ -19,6 +19,8 @@ public:
 		bool operator == (SubClass& rhs);
 		bool Test(TestSerialisable::SubClass& rhs, u32 version);
 
+		virtual int GetTestInt() { return mTestInt; }
+
 		int mTestInt;
 		float mTestFloat;
 		std::string mTestString;
@@ -27,6 +29,22 @@ public:
 		int mTestIntV2;
 
 		void Serialise(ion::serialise::Archive& archive);
+	};
+
+	class SubClassDerived : public SubClass
+	{
+	public:
+		SubClassDerived();
+
+		bool operator == (SubClassDerived& rhs);
+		bool Test(TestSerialisable::SubClassDerived& rhs, u32 version);
+
+		virtual int GetTestInt() { return mTestInt + 1; }
+
+		void Serialise(ion::serialise::Archive& archive);
+
+		int mTestInt2;
+		int mTestInt3;
 	};
 
 	TestSerialisable();
@@ -49,6 +67,11 @@ public:
 	int mTestIntV2;
 
 	SubClass mTestSubClass;
+
+	SubClass* mTestSubClassPtrBase;
+	SubClass* mTestSubClassPtrDerived1;
+	SubClassDerived* mTestSubClassPtrDerived2;
+	SubClass* mNullPtr;
 
 	void Serialise(ion::serialise::Archive& archive);
 };

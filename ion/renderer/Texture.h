@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <string>
+
 #if defined ION_OGRE
 #include <Ogre/OgreTextureManager.h>
 #endif

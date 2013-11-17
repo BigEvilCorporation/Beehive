@@ -13,6 +13,7 @@ namespace ion
 {
 	namespace renderer
 	{
+		#if defined ION_OGRE
 		class PostEffectMotionBlurListener : public Ogre::CompositorInstance::Listener
 		{
 		public:
@@ -26,6 +27,7 @@ namespace ion
 		private:
 			u32 mBlurPassId;
 		};
+		#endif
 
 		class PostEffectMotionBlur : public PostEffect
 		{
@@ -35,7 +37,9 @@ namespace ion
 			void SetBlurWeight(float weight);
 
 		private:
+			#if defined ION_OGRE
 			PostEffectMotionBlurListener* mPostEffectListener;
+			#endif
 		};
 	}
 }

@@ -36,8 +36,10 @@ namespace ion
 
 		Mesh::SubMesh::SubMesh()
 		{
+			#if defined ION_OGRE
 			mOgreSubMesh = NULL;
 			mOgreVertexData = NULL;
+			#endif
 		}
 
 		Mesh::SubMesh::~SubMesh()

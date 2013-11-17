@@ -65,6 +65,10 @@ void IOTest::TestBasicSerialisation()
 	sourceObject.mTestSubClass.mTestInt = 43210;
 	sourceObject.mTestSubClass.mTestFloat = 4.0f;
 	sourceObject.mTestSubClass.mTestString = "SubClass test string";
+	sourceObject.mTestSubClassPtrBase = new TestSerialisable::SubClass();
+	sourceObject.mTestSubClassPtrDerived1 = new TestSerialisable::SubClassDerived();
+	sourceObject.mTestSubClassPtrDerived2 = new TestSerialisable::SubClassDerived();
+	sourceObject.mNullPtr = NULL;
 
 	const char* filename = "ion_serialise_test.bin";
 
@@ -112,6 +116,11 @@ void IOTest::TestBasicSerialisation()
 	{
 		ion::debug::Error("Source and destination objects mismatch - serialisation test failed");
 	}
+
+	//Clean up
+	delete sourceObject.mTestSubClassPtrBase;
+	delete sourceObject.mTestSubClassPtrDerived1;
+	delete sourceObject.mTestSubClassPtrDerived2;
 }
 
 void IOTest::TestVersionedSerialisation()
@@ -135,6 +144,10 @@ void IOTest::TestVersionedSerialisation()
 	sourceObject.mTestSubClass.mTestInt = 43210;
 	sourceObject.mTestSubClass.mTestFloat = 4.0f;
 	sourceObject.mTestSubClass.mTestString = "SubClass test string";
+	sourceObject.mTestSubClassPtrBase = new TestSerialisable::SubClass();
+	sourceObject.mTestSubClassPtrDerived1 = new TestSerialisable::SubClassDerived();
+	sourceObject.mTestSubClassPtrDerived2 = new TestSerialisable::SubClassDerived();
+	sourceObject.mNullPtr = NULL;
 
 	const char* filenameV1 = "ion_serialise_test_v1.bin";
 	const char* filenameV2 = "ion_serialise_test_v2.bin";
@@ -213,6 +226,11 @@ void IOTest::TestVersionedSerialisation()
 	{
 		ion::debug::Error("Source and destination objects mismatch - serialisation test failed");
 	}
+
+	//Clean up
+	delete sourceObject.mTestSubClassPtrBase;
+	delete sourceObject.mTestSubClassPtrDerived1;
+	delete sourceObject.mTestSubClassPtrDerived2;
 }
 
 void IOTest::Shutdown()
