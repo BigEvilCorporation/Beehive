@@ -16,6 +16,8 @@ namespace ion
 	{
 		Viewport::Viewport(Renderer& renderer, Camera& camera, int zOrder)
 		{
+			#if defined ION_OGRE
+
 			//Create viewport interface
 			mOgreViewportIFace = renderer.GetOgreRenderWindow()->addViewport(camera.GetOgreCameraIFace(), zOrder);
 
@@ -33,6 +35,12 @@ namespace ion
 
 			//Render with Renderer::Update
 			mOgreViewportIFace->setAutoUpdated(true);
+
+			//Get width/height
+			mWidth = mOgreViewportIFace->getActualWidth();
+			mHeight = mOgreViewportIFace->getActualHeight();
+
+			#endif
 		}
 
 		Viewport::~Viewport()
@@ -42,25 +50,31 @@ namespace ion
 
 		int Viewport::GetWidth() const
 		{
-			return mOgreViewportIFace->getActualWidth();
+			return mWidth;
 		}
 
 		int Viewport::GetHeight() const
 		{
-			return mOgreViewportIFace->getActualHeight();
-		}
-
-		Ogre::Viewport* Viewport::GetOgreViewportInterface()
-		{
-			return mOgreViewportIFace;
+			return mHeight;
 		}
 
 		void Viewport::SetBackgroundColour(const Colour& colour)
 		{
+			mBackgroundColour = colour;
+
+			#if defined ION_OGRE
 			if(mOgreViewportIFace)
 			{
 				mOgreViewportIFace->setBackgroundColour(Ogre::ColourValue(colour.r, colour.g, colour.b));
 			}
+			#endif
 		}
+
+		#if defined ION_OGRE
+		Ogre::Viewport* Viewport::GetOgreViewportInterface()
+		{
+			return mOgreViewportIFace;
+		}
+		#endif
 	}
 }

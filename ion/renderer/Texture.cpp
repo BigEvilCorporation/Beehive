@@ -19,11 +19,15 @@ namespace ion
 {
 	namespace renderer
 	{
+		#if defined ION_OGRE
 		int Texture::sTextureIndex = 0;
+		#endif
 
 		bool Texture::Load(std::string filename)
 		{
 			bool result = false;
+
+			#if defined ION_OGRE
 
 			//Open file
 			std::ifstream file(filename.c_str(),  std::ios::binary | std::ios::in);
@@ -57,6 +61,8 @@ namespace ion
 
 				file.close();
 			}
+
+			#endif
 
 			return result;
 		}

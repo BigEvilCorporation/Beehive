@@ -7,8 +7,10 @@
 
 #pragma once
 
+#if defined ION_OGRE
 #include <Ogre/OgreRoot.h>
 #include <Ogre/OgreRenderWindow.h>
+#endif
 
 namespace ion
 {
@@ -29,15 +31,18 @@ namespace ion
 
 			void SetWindowTitle(const char* title);
 
+			#if defined ION_OGRE
 			Ogre::Root* GetOgreRoot();
 			Ogre::RenderWindow* GetOgreRenderWindow();
-
 			HWND GetWindowHandle();
+			#endif
 
 		private:
+			#if defined ION_OGRE
 			Ogre::Root* mOgreRoot;
 			Ogre::RenderWindow* mOgreWindow;
 			HWND mWindowHandle;
+			#endif
 		};
 	}
 }

@@ -307,7 +307,7 @@ namespace ion
 					if(ring != rings)
 					{
 						AddIndex(vertexIndex + segments + 1);
-						AddIndex(vertexIndex);               
+						AddIndex(vertexIndex);
 						AddIndex(vertexIndex + segments);
 						AddIndex(vertexIndex + segments + 1);
 						AddIndex(vertexIndex + 1);
@@ -322,7 +322,9 @@ namespace ion
 
 		void Primitive::SetCastShadows(bool shadows)
 		{
+			#if defined ION_OGRE
 			mManualPrimitive->setCastShadows(shadows);
+			#endif
 		}
 
 		#if defined ION_OGRE

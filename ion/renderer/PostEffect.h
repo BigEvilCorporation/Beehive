@@ -10,6 +10,8 @@
 #include "Viewport.h"
 #include "../core/Types.h"
 
+#include <string>
+
 #if defined ION_OGRE
 #include <Ogre/OgreCompositorManager.h>
 #include <Ogre/OgreCompositor.h>
@@ -36,8 +38,11 @@ namespace ion
 
 		protected:
 			std::string mName;
+
+			#if defined ION_OGRE
 			Ogre::CompositorPtr mOgreCompositor;
 			Ogre::CompositorInstance::Listener* mOgreCompositorListener;
+			#endif
 
 			friend class PostEffectTechnique;
 		};
@@ -48,7 +53,9 @@ namespace ion
 			PostEffectTechnique(PostEffect& postEffect);
 
 		protected:
+			#if defined ION_OGRE
 			Ogre::CompositionTechnique* mOgreTechnique;
+			#endif
 
 			friend class PostEffectPass;
 			friend class PostEffectRenderTarget;
@@ -71,9 +78,12 @@ namespace ion
 
 		protected:
 			PassType mPassType;
+
+			#if defined ION_OGRE
 			Ogre::CompositionPass* mOgrePass;
 			Ogre::CompositionTargetPass* mOgreTargetPass;
 			u32 mOgrePassId;
+			#endif
 
 			static u32 sCurrPassId;
 		};
@@ -88,7 +98,10 @@ namespace ion
 
 		protected:
 			std::string mName;
+
+			#if defined ION_OGRE
 			Ogre::CompositionTechnique::TextureDefinition* mTextureDef;
+			#endif
 		};
 	}
 }

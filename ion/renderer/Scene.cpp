@@ -23,14 +23,8 @@ namespace ion
 {
 	namespace renderer
 	{
-		//Minimum file version supported by Scene::Load()
-		const int Scene::sMinFileVersion = 1;
-
-		//File version output by Scene::Save()
-		const int Scene::sCurrentFileVersion = 1;
-
-		//Scene file header type
-		const char* Scene::sFileType = "ion::scene";
+		//Stream version supported by Scene::Serialise()
+		const int Scene::sSerialiseVersion = 2;
 
 		Scene::Scene()
 		{
@@ -109,22 +103,40 @@ namespace ion
 
 		void Scene::SetShadowColour(const ColourRGB& colour)
 		{
+			#if defined ION_OGRE
 			mOgreSceneMgrIFace->setShadowColour(Ogre::ColourValue(colour.r, colour.g, colour.b));
+			#endif
 		}
 
 		void Scene::SetShadowTextureResolution(int resolution)
 		{
+			#if defined ION_OGRE
 			mOgreSceneMgrIFace->setShadowTextureSize(resolution);
+			#endif
 		}
 
 		void Scene::SetShadowTextureCount(int count)
 		{
+			#if defined ION_OGRE
 			mOgreSceneMgrIFace->setShadowTextureCount(count);
+			#endif
 		}
 
+		void Scene::Serialise(serialise::Archive& archive)
+		{
+			//Serialise scene properties
+			archive.Serialise(mAmbientLight);
+
+			//Serialise scene mesh
+			archive.Serialise(*mSceneMesh);
+
+			//Serialise lights
+			archive.Serialise(mLights);
+		}
+
+		/*
 		bool Scene::Load(std::string filename)
 		{
-			/*
 			//Open file for reading
 			io::BinaryFile file(filename, ion::io::File::OpenRead);
 
@@ -192,7 +204,6 @@ namespace ion
 
 				return true;
 			}
-			*/
 
 			return false;
 		}
@@ -201,7 +212,6 @@ namespace ion
 		{
 			u64 fileSize = 0;
 
-			/*
 			//Open file for writing
 			io::BinaryFile file(filename, ion::io::File::OpenWrite);
 
@@ -279,9 +289,8 @@ namespace ion
 				//Close file
 				file.Close();
 			}
-
-			*/
 			return fileSize;
 		}
+		*/
 	}
 }

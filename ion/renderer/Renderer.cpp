@@ -9,8 +9,11 @@
 #include "../core/Debug.h"
 
 #include <sstream>
+
+#if defined ION_OGRE
 #include <Ogre/OgreWindowEventUtilities.h>
 #include <Ogre/RenderSystems/Direct3D9/OgreD3D9RenderSystem.h>
+#endif
 
 namespace ion
 {
@@ -18,6 +21,8 @@ namespace ion
 	{
 		Renderer::Renderer(const char* windowTitle, int windowWidth, int windowHeight, bool fullscreen, int fsaaLevel)
 		{
+			#if defined ION_OGRE
+
 			//Create Ogre root system
 			mOgreRoot = new Ogre::Root("", "engine\\config.cfg", "engine\\renderer.log");
 
@@ -59,28 +64,37 @@ namespace ion
 			Ogre::ResourceGroupManager::getSingleton().addResourceLocation("shaders\\ogre", "FileSystem");
 			Ogre::ResourceGroupManager::getSingleton().addResourceLocation("textures\\ogre", "FileSystem");
 			Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
+			#endif
 		}
 
 		Renderer::~Renderer()
 		{
+			#if defined ION_OGRE
 			if(mOgreRoot)
 			{
 				delete mOgreRoot;
 			}
+			#endif
 		}
 
 		void Renderer::SetWindowTitle(const char* title)
 		{
+			#if defined ION_OGRE
 			SetWindowText(mWindowHandle, title);
+			#endif
 		}
 
+		#if defined ION_OGRE
 		HWND Renderer::GetWindowHandle()
 		{
 			return mWindowHandle;
 		}
+		#endif
 
 		void Renderer::Update(float deltaTime)
 		{
+			#if defined ION_OGRE
 			if(mOgreRoot)
 			{
 				//Update window
@@ -97,8 +111,10 @@ namespace ion
 				//Pump window messages
 				Ogre::WindowEventUtilities::messagePump();
 			}
+			#endif
 		}
 
+		#if defined ION_OGRE
 		Ogre::Root* Renderer::GetOgreRoot()
 		{
 			return mOgreRoot;
@@ -108,5 +124,6 @@ namespace ion
 		{
 			return mOgreWindow;
 		}
+		#endif
 	}
 }

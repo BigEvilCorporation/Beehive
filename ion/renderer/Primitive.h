@@ -12,8 +12,11 @@
 #include "../core/maths/Vector.h"
 #include "../core/Colour.h"
 
-#include <Ogre/OgreManualObject.h>
 #include <string>
+
+#if defined ION_OGRE
+#include <Ogre/OgreManualObject.h>
+#endif
 
 namespace ion
 {
@@ -55,10 +58,15 @@ namespace ion
 			//Shadows
 			void SetCastShadows(bool shadows);
 
+			#if defined ION_OGRE
 			Ogre::ManualObject* GetOgreManualObj();
+			#endif
 
 		private:
+			#if defined ION_OGRE
 			Ogre::ManualObject* mManualPrimitive;
+			#endif
+
 			Projection mProjection;
 		};
 	}

@@ -45,6 +45,8 @@ public:
 	ion::renderer::Primitive* mQuad;
 	ion::renderer::SceneNode* mQuadNode;
 
+	ion::renderer::Light* mDirectionalLight;
+
 	ion::renderer::Mesh* mTestMesh;
 	ion::renderer::Mesh::SubMesh* mTestSubMesh;
 	ion::renderer::Skeleton* mTestSkeleton;

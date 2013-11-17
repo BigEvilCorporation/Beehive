@@ -169,9 +169,11 @@ namespace ion
 			#endif
 		}
 
+		#if defined ION_OGRE
 		Ogre::Camera* Camera::GetOgreCameraIFace()
 		{
 			return mOgreCameraIFace;
 		}
+		#endif
 	}
 }

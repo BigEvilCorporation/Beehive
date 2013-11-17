@@ -7,7 +7,11 @@
 
 #pragma once
 
+#include "../Core/Colour.h"
+
+#if defined ION_OGRE
 #include <Ogre/OgreViewport.h>
+#endif
 
 namespace ion
 {
@@ -31,10 +35,18 @@ namespace ion
 
 			void SetBackgroundColour(const Colour& colour);
 
+			#if defined ION_OGRE
 			Ogre::Viewport* GetOgreViewportInterface();
+			#endif
 
 		private:
+			int mWidth;
+			int mHeight;
+			Colour mBackgroundColour;
+
+			#if defined ION_OGRE
 			Ogre::Viewport* mOgreViewportIFace;
+			#endif
 		};
 	}
 }

@@ -7,13 +7,16 @@
 
 #include "PostEffectBloom.h"
 
+#if defined ION_OGRE
 #include <Ogre/OgrePass.h>
 #include <Ogre/OgreTechnique.h>
+#endif
 
 namespace ion
 {
 	namespace renderer
 	{
+		#if defined ION_OGRE
 		PostEffectBloomListener::PostEffectBloomListener(u32 blurHPassId, u32 blurVPassId, u32 blendPassId)
 		{
 			mBlurHPassId = blurHPassId;
@@ -52,6 +55,7 @@ namespace ion
 				params->setNamedConstant("blurWidth", mBlurWidth);
 			}
 		}
+		#endif
 
 		PostEffectBloom::PostEffectBloom()
 			: PostEffect("Bloom")
@@ -65,8 +69,10 @@ namespace ion
 			mPassComposition2 = new PostEffectPass(*mTechnique, PostEffectPass::Composition);
 			mPassOutput = new PostEffectPass(*mTechnique, PostEffectPass::Output);
 
+			#if defined ION_OGRE
 			mPostEffectListener = new PostEffectBloomListener(mPassComposition1->GetPassId(), mPassComposition2->GetPassId(), mPassOutput->GetPassId());
 			mOgreCompositorListener = mPostEffectListener;
+			#endif
 
 			mPassComposition1->SetMaterial("Ogre/Compositor/Blur0");
 			mPassComposition2->SetMaterial("Ogre/Compositor/Blur1");
@@ -82,12 +88,16 @@ namespace ion
 
 		void PostEffectBloom::SetBlurWidth(float blurWidth)
 		{
+			#if defined ION_OGRE
 			mPostEffectListener->mBlurWidth = blurWidth;
+			#endif
 		}
 
 		void PostEffectBloom::SetBlendAlpha(float blendAlpha)
 		{
+			#if defined ION_OGRE
 			mPostEffectListener->mBlendAlpha = blendAlpha;
+			#endif
 		}
 	}
 }
