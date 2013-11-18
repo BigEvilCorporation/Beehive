@@ -123,7 +123,8 @@ namespace ion
 			Ogre::MeshPtr& GetOgreMesh();
 			#endif
 
-			std::vector<std::vector<Mesh::SubMesh>>& GetSubMeshes();
+			//Get LOD set
+			std::list<Mesh::SubMesh*>& GetSubMeshes(u32 lodLevel);
 
 			//Calculate bounds
 			void CalculateBounds();
@@ -141,7 +142,7 @@ namespace ion
 			static int sMeshIndex;
 			
 			//Submesh/LOD hierarchy
-			std::vector<std::vector<SubMesh>> mSubMeshes;
+			std::vector<std::list<SubMesh*>> mLodSets;
 
 			//Bounds
 			struct Bounds

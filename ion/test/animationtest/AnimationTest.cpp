@@ -88,13 +88,13 @@ bool AnimationTest::Initialise()
 	//Create directional light
 	mDirectionalLight = new ion::renderer::Light(ion::renderer::Light::Directional, *mScene);
 	mDirectionalLight->SetDirection(ion::Vector3(-1.0f, -1.0f, 0.0f));
-	mDirectionalLight->SetDiffuse(ion::ColourRGB(0.5f, 0.3, 0.3f));
+	mDirectionalLight->SetDiffuse(ion::ColourRGB(0.5f, 0.3f, 0.3f));
 
 	//Create mesh
 	mTestMesh = new ion::renderer::Mesh();
 
 	//Create and open mesh file stream for reading
-	ion::io::File meshFile("..\\meshes\\box1.ion.mesh", ion::io::File::OpenRead);
+	ion::io::File meshFile("..\\meshes\\TestBox1.ion.mesh", ion::io::File::OpenRead);
 
 	if(meshFile.IsOpen())
 	{
@@ -108,8 +108,8 @@ bool AnimationTest::Initialise()
 		meshFile.Close();
 	}
 
-	//Get first submesh
-	mTestSubMesh = &mTestMesh->GetSubMeshes()[0][0];
+	//Get first submesh from first LOD level
+	mTestSubMesh = *mTestMesh->GetSubMeshes(0).begin();
 
 	/*
 	//Create submesh
