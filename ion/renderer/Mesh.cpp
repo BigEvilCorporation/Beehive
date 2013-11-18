@@ -257,33 +257,32 @@ namespace ion
 
 		Mesh::SubMesh* Mesh::CreateSubMesh()
 		{
-			//TODO: LOD support
+			//TODO: LOD support, just add the one LOD set with one submesh
+			std::list<SubMesh*> lodSet;
 
-			//Resize submesh set vector to insert new element
-			mSubMeshes.resize(mSubMeshes.size() + 1);
+			//Create new submesh
+			SubMesh* lod = new SubMesh();
 
-			//Get tail submesh set
-			std::vector<SubMesh>& subMeshSet = mSubMeshes[mSubMeshes.size() - 1];
+			//Add to LOD set
+			lodSet.push_back(lod);
 
-			//Resize submesh set to insert new submesh
-			subMeshSet.resize(1);
+			//Add LOD set to submesh list
+			mLodSets.push_back(lodSet);
 
-			//Get submesh
-			SubMesh* subMesh = &subMeshSet[0];
+			//Set parent
+			lod->SetParentMesh(this);
 
-			subMesh->SetParentMesh(this);
-
-			return subMesh;
+			return lod;
 		}
 
 		void Mesh::Finalise()
 		{
-			for(std::vector<std::vector<SubMesh>>::iterator subMesh = mSubMeshes.begin(), subMeshEnd = mSubMeshes.end(); subMesh != subMeshEnd; ++subMesh)
+			for(std::vector<std::list<SubMesh*>>::iterator subMesh = mLodSets.begin(), subMeshEnd = mLodSets.end(); subMesh != subMeshEnd; ++subMesh)
 			{
-				for(std::vector<SubMesh>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
+				for(std::list<SubMesh*>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
 				{
-					lod->SetParentMesh(this);
-					lod->Finalise();
+					(*lod)->SetParentMesh(this);
+					(*lod)->Finalise();
 				}
 			}
 
@@ -305,13 +304,13 @@ namespace ion
 			mBounds.min = Vector3(maths::FLOAT_MAX, maths::FLOAT_MAX, maths::FLOAT_MAX);
 			mBounds.max = Vector3(maths::FLOAT_MIN, maths::FLOAT_MIN, maths::FLOAT_MIN);
 
-			for(std::vector<std::vector<SubMesh>>::iterator subMesh = mSubMeshes.begin(), subMeshEnd = mSubMeshes.end(); subMesh != subMeshEnd; ++subMesh)
+			for(std::vector<std::list<SubMesh*>>::iterator subMesh = mLodSets.begin(), subMeshEnd = mLodSets.end(); subMesh != subMeshEnd; ++subMesh)
 			{
-				for(std::vector<SubMesh>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
+				for(std::list<SubMesh*>::iterator lod = subMesh->begin(), lodEnd = subMesh->end(); lod != lodEnd; lod++)
 				{
-					for(int i = 0; i < (*lod).GetNumVertices(); i++)
+					for(int i = 0; i < (*lod)->GetNumVertices(); i++)
 					{
-						Vertex& vert = (*lod).GetVertices()[i];
+						Vertex& vert = (*lod)->GetVertices()[i];
 
 						if(vert.x < mBounds.min.x) mBounds.min.x = vert.x;
 						if(vert.x > mBounds.max.x) mBounds.max.x = vert.x;
@@ -331,13 +330,17 @@ namespace ion
 		}
 		#endif
 
-		std::vector<std::vector<Mesh::SubMesh>>& Mesh::GetSubMeshes()
+		std::list<Mesh::SubMesh*>& Mesh::GetSubMeshes(u32 lodLevel)
 		{
-			return mSubMeshes;
+			debug::Assert(lodLevel >= 0 && lodLevel < mLodSets.size(), "Mesh::GetSubMeshes() - LOD level out of range");
+			return mLodSets[lodLevel];
 		}
 
 		void Mesh::Serialise(serialise::Archive& archive)
 		{
+			//Register pointer types
+			archive.RegisterPointerType<Mesh::SubMesh>();
+
 			//If serialising out, calculate bounds first
 			if(archive.GetDirection() == serialise::Archive::Out)
 			{
@@ -345,7 +348,7 @@ namespace ion
 			}
 
 			//Serialise submeshes
-			archive.Serialise(mSubMeshes);
+			archive.Serialise(mLodSets);
 
 			//Serialise bounds
 			archive.Serialise(mBounds.min);
