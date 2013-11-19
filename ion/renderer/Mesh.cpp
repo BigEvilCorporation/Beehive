@@ -23,14 +23,8 @@ namespace ion
 {
 	namespace renderer
 	{
-		//Minimum file version supported by Mesh::Load()
-		const int Mesh::sMinFileVersion = 2;
-
-		//File version output by Mesh::Save()
-		const int Mesh::sCurrentFileVersion = 2;
-
-		//Mesh file header type
-		const char* Mesh::sFileType = "ion::mesh";
+		//Stream version supported by Mesh::Serialise()
+		const int Mesh::sSerialiseVersion = 2;
 
 		int Mesh::sMeshIndex = 0;
 

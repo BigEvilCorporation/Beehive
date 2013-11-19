@@ -9,7 +9,7 @@
 
 #include "../core/maths/Vector.h"
 #include "../core/Colour.h"
-#include "../core/BinaryFile.h"
+#include "../core/Archive.h"
 
 #if defined ION_OGRE
 #include <Ogre/OgreLight.h>
@@ -27,6 +27,7 @@ namespace ion
 		public:
 			enum Type { Point, Spot, Directional };
 
+			Light();
 			Light(Scene& scene);
 			Light(Type type, Scene& scene);
 			~Light();
@@ -46,8 +47,12 @@ namespace ion
 
 			void CastShadows(bool enabled);
 
-			bool Read(io::BinaryFile::Chunk& binaryChunk);
-			u64 Write(io::BinaryFile::Chunk& binaryChunk);
+			void Finalise();
+
+			//Serialisation
+			void Serialise(serialise::Archive& archive);
+			
+			static const int sSerialiseVersion;
 
 			#if defined ION_OGRE
 			Ogre::Light* GetOgreLightIFace();
@@ -58,29 +63,16 @@ namespace ion
 			Ogre::Light* mOgreLight;
 			#endif
 
-			enum ChunkIds
-			{
-				ChunkId_Params		= 10,
-				ChunkId_Position	= 20,
-				ChunkId_Direction	= 30
-			};
-
-			struct Params
-			{
-				char mType;
-				ColourRGB mDiffuse;
-				ColourRGB mSpecular;
-				float mMaxDistance;
-				float mConstant;
-				float mLinear;
-				float mMinConeAngle;
-				float mMaxConeAngle;
-				char mCastShadows;
-			};
-
-			Params mParams;
 			Vector3 mPosition;
 			Vector3 mDirection;
+
+			char mType;
+			ColourRGB mDiffuse;
+			ColourRGB mSpecular;
+			float mMaxDistance;
+			float mMinConeAngle;
+			float mMaxConeAngle;
+			char mCastShadows;
 		};
 	}
 }
