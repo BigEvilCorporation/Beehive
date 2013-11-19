@@ -58,7 +58,6 @@ namespace ion
 			//Ogre::SceneManager destroyed with the renderer
 		}
 
-		#if defined ION_PLUGIN
 		Mesh* Scene::GetSceneMesh()
 		{
 			return mSceneMesh;
@@ -68,7 +67,6 @@ namespace ion
 		{
 			return mLights;
 		}
-		#endif
 
 		#if defined ION_OGRE
 		Ogre::SceneManager* Scene::GetOgreSceneMgrIFace()
@@ -124,173 +122,18 @@ namespace ion
 
 		void Scene::Serialise(serialise::Archive& archive)
 		{
+			//Register pointer types
+			archive.RegisterPointerType<ion::renderer::Mesh>();
+			archive.RegisterPointerType<ion::renderer::Light>();
+
 			//Serialise scene properties
 			archive.Serialise(mAmbientLight);
 
 			//Serialise scene mesh
-			archive.Serialise(*mSceneMesh);
+			archive.Serialise(mSceneMesh);
 
 			//Serialise lights
 			archive.Serialise(mLights);
 		}
-
-		/*
-		bool Scene::Load(std::string filename)
-		{
-			//Open file for reading
-			io::BinaryFile file(filename, ion::io::File::OpenRead);
-
-			if(file.IsOpen())
-			{
-				//Check header
-				if(stricmp(sFileType, file.GetFileType().c_str()) != 0)
-				{
-					ion::debug::Error("Scene::Load() - Not an ion::scene file");
-				}
-
-				//Check version
-				if(file.GetFileVersion() < sMinFileVersion)
-				{
-					ion::debug::Error("Scene::Load() - Unsupported file version");
-				}
-
-				//If no bounds chunk found, we need to manually calculate from vertices
-				bool boundsFound = false;
-
-				//For all root chunks
-				for(io::BinaryFile::Chunk rootChunk = file.GetTrunk().Begin(), rootEnd = file.GetTrunk().End(); rootChunk != rootEnd; rootChunk = rootChunk.Next())
-				{
-					if(rootChunk.GetID() == ChunkId_SceneMeshData)
-					{
-						for(io::BinaryFile::Chunk meshChunk = rootChunk.Begin(), meshEnd = rootChunk.End(); meshChunk != meshEnd; meshChunk = meshChunk.Next())
-						{
-							if(meshChunk.GetID() == ChunkId_SubMesh)
-							{
-								//Create submesh
-								Mesh::SubMesh* subMesh = mSceneMesh->CreateSubMesh();
-
-								//Read submesh data
-								subMesh->Read(meshChunk);
-							}
-							else if(meshChunk.GetID() == ChunkId_Bounds)
-							{
-								//TODO
-							}
-						}
-					}
-					else if(rootChunk.GetID() == ChunkId_Light)
-					{
-						//Create light
-						Light* light = new Light(*this);
-
-						//Read data
-						light->Read(rootChunk);
-
-						//Add
-						mLights.push_back(light);
-					}
-				}
-
-				//Done, finalise mesh
-				if(mSceneMesh)
-				{
-					if(!boundsFound)
-					{
-						mSceneMesh->CalculateBounds();
-					}
-
-					mSceneMesh->Finalise();
-				}
-
-				return true;
-			}
-
-			return false;
-		}
-
-		u64 Scene::Save(std::string filename)
-		{
-			u64 fileSize = 0;
-
-			//Open file for writing
-			io::BinaryFile file(filename, ion::io::File::OpenWrite);
-
-			if(file.IsOpen())
-			{
-				//Setup header
-				file.SetFileType(sFileType);
-				file.SetFileVersion(sCurrentFileVersion);
-
-				//Set trunk node id
-				file.GetTrunk().SetID(ChunkId_Root);
-
-				if(mSceneMesh)
-				{
-					if(mSceneMesh->GetSubMeshes().size() > 0)
-					{
-						//Create scene mesh data chunk
-						io::BinaryFile::Chunk sceneMeshChunk;
-						sceneMeshChunk.SetID(ChunkId_SceneMeshData);
-
-						//For all submeshes
-						for(std::list<std::list<Mesh::SubMesh*>>::iterator subMesh = mSceneMesh->GetSubMeshes().begin(), subMeshEnd = mSceneMesh->GetSubMeshes().end(); subMesh != subMeshEnd; ++subMesh)
-						{
-							if((*subMesh).size() > 0)
-							{
-								//Create submesh chunk
-								io::BinaryFile::Chunk subMeshChunk;
-								subMeshChunk.SetID(ChunkId_SubMesh);
-
-								//Only use one lod for scene data
-								Mesh::SubMesh* firstLod = (*(*subMesh).begin());
-
-								//Write
-								firstLod->Write(subMeshChunk);
-
-								//Add submesh chunk to scene data chunk
-								sceneMeshChunk.AddChild(subMeshChunk);
-							}
-						}
-
-						//Add scene mesh chunk to trunk
-						file.GetTrunk().AddChild(sceneMeshChunk);
-					}
-				}
-
-				//For all lights
-				for(std::list<Light*>::iterator light = mLights.begin(), end = mLights.end(); light != end; ++light)
-				{
-					//Create light chunk
-					io::BinaryFile::Chunk lightChunk;
-					lightChunk.SetID(ChunkId_Light);
-
-					//Write data
-					(*light)->Write(lightChunk);
-
-					//Add to trunk
-					file.GetTrunk().AddChild(lightChunk);
-				}
-
-				//Calculate world bounds
-				CalculateBounds();
-
-				//Create bounds chunk
-				io::BinaryFile::Chunk boundsChunk;
-				boundsChunk.SetID(ChunkId_Bounds);
-				boundsChunk.SetData(&mBounds, sizeof(mBounds), 1);
-				file.GetTrunk().AddChild(boundsChunk);
-
-				//Get total filesize
-				fileSize = file.GetTrunk().GetChunkSize() + sizeof(io::BinaryFile::FileHeader);
-
-				//Write file
-				file.Write();
-
-				//Close file
-				file.Close();
-			}
-			return fileSize;
-		}
-		*/
 	}
 }

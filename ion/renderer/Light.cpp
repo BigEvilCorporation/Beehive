@@ -16,6 +16,10 @@ namespace ion
 {
 	namespace renderer
 	{
+		Light::Light()
+		{
+		}
+
 		Light::Light(Type type, Scene& scene)
 		{
 			#if defined ION_OGRE
@@ -62,7 +66,7 @@ namespace ion
 			};
 			#endif
 
-			mParams.mType = type;
+			mType = type;
 		}
 
 		void Light::SetPosition(const Vector3& position)
@@ -99,7 +103,7 @@ namespace ion
 			mOgreLight->setDiffuseColour(Ogre::ColourValue(diffuse.r, diffuse.g, diffuse.b));
 			#endif
 
-			mParams.mDiffuse = diffuse;
+			mDiffuse = diffuse;
 		}
 
 		void Light::SetSpecular(ColourRGB& specular)
@@ -108,7 +112,7 @@ namespace ion
 			mOgreLight->setSpecularColour(Ogre::ColourValue(specular.r, specular.g, specular.b));
 			#endif
 
-			mParams.mSpecular = specular;
+			mSpecular = specular;
 		}
 
 		void Light::SetAttenuation(float maxDistance)
@@ -117,9 +121,9 @@ namespace ion
 			mOgreLight->setAttenuation(maxDistance, 1.0f, 4.5f / maxDistance, 75.0f / (maxDistance * maxDistance));
 			#endif
 
-			mParams.mMaxDistance = maxDistance;
-			//mParams.mConstant = constant;
-			//mParams.mLinear = linear;
+			mMaxDistance = maxDistance;
+			//mConstant = constant;
+			//mLinear = linear;
 		}
 
 		void Light::SetSpotRange(float minAngle, float maxAngle)
@@ -128,8 +132,8 @@ namespace ion
 			mOgreLight->setSpotlightRange(Ogre::Degree(minAngle), Ogre::Degree(maxAngle));
 			#endif
 
-			mParams.mMinConeAngle = minAngle;
-			mParams.mMaxConeAngle = maxAngle;
+			mMinConeAngle = minAngle;
+			mMaxConeAngle = maxAngle;
 		}
 
 		void Light::CastShadows(bool enabled)
@@ -138,71 +142,24 @@ namespace ion
 			mOgreLight->setCastShadows(enabled);
 			#endif
 
-			mParams.mCastShadows = (char)enabled;
+			mCastShadows = (char)enabled;
 		}
 
-		bool Light::Read(io::BinaryFile::Chunk& binaryChunk)
+		void Light::Finalise()
 		{
-			for(io::BinaryFile::Chunk rootChunk = binaryChunk.Begin(), rootEnd = binaryChunk.End(); rootChunk != rootEnd; rootChunk = rootChunk.Next())
-			{
-				if(rootChunk.GetID() == ChunkId_Params)
-				{		
-					//If this assert is caught, might be time to look at better serialisation techniques, since struct packing between platforms will be different
-					ion::debug::Assert(rootChunk.GetDataSize() == sizeof(Params), "Light::Read() - Incorrect chunk data size");
-
-					//Read params data
-					rootChunk.ReadData(&mParams, sizeof(Params));
-				}
-				else if(rootChunk.GetID() == ChunkId_Position)
-				{
-					io::BinaryFile::ChunkT<Vector3>& posChunk = (io::BinaryFile::ChunkT<Vector3>&)rootChunk;
-					Vector3 position = posChunk.ReadData();
-					SetPosition(position);
-				}
-				else if(rootChunk.GetID() == ChunkId_Direction)
-				{
-					io::BinaryFile::ChunkT<Vector3>& dirChunk = (io::BinaryFile::ChunkT<Vector3>&)rootChunk;
-					Vector3 direction = dirChunk.ReadData();
-					SetDirection(direction);
-				}
-			}
-
-			//Set all params
-			SetType((Type)mParams.mType);
-			SetDiffuse(mParams.mDiffuse);
-			SetSpecular(mParams.mSpecular);
-			//SetAttenuation(mParams.mMaxDistance, mParams.mConstant, mParams.mLinear);
-			CastShadows(mParams.mCastShadows != 0);
-
-			if(mParams.mType == Spot)
-			{
-				SetSpotRange(mParams.mMinConeAngle, mParams.mMaxConeAngle);
-			}
-
-			return true;
 		}
 
-		u64 Light::Write(io::BinaryFile::Chunk& binaryChunk)
+		void Light::Serialise(serialise::Archive& archive)
 		{
-			//Create params chunk
-			io::BinaryFile::Chunk lightParamsChunk;
-			lightParamsChunk.SetID(ChunkId_Params);
-			lightParamsChunk.SetData(&mParams, sizeof(Params), 1);
-
-			//Create position chunk
-			io::BinaryFile::ChunkT<Vector3> positionChunk;
-			positionChunk.SetData(GetPosition());
-
-			//Create direction chunk
-			io::BinaryFile::ChunkT<Vector3> directionChunk;
-			directionChunk.SetData(GetDirection());
-
-			//Add chunks
-			binaryChunk.AddChild(lightParamsChunk);
-			binaryChunk.AddChild(positionChunk);
-			binaryChunk.AddChild(directionChunk);
-
-			return binaryChunk.GetChunkSize();
+			archive.Serialise(mPosition);
+			archive.Serialise(mDirection);
+			archive.Serialise(mType);
+			archive.Serialise(mDiffuse);
+			archive.Serialise(mSpecular);
+			archive.Serialise(mMaxDistance);
+			archive.Serialise(mMinConeAngle);
+			archive.Serialise(mMaxConeAngle);
+			archive.Serialise(mCastShadows);
 		}
 
 		#if defined ION_OGRE

@@ -132,11 +132,9 @@ namespace ion
 			//Serialise
 			void Serialise(serialise::Archive& archive);
 
-		private:
+			static const int sSerialiseVersion;
 
-			static const int sMinFileVersion;
-			static const int sCurrentFileVersion;
-			static const char* sFileType;
+		private:
 			
 			//For unique name generation
 			static int sMeshIndex;

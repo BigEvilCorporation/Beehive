@@ -10,6 +10,7 @@
 #include "../core/Types.h"
 #include "../core/Colour.h"
 #include "Light.h"
+#include "../core/Archive.h"
 
 #if defined ION_OGRE
 #include <Ogre/OgreSceneManager.h>
