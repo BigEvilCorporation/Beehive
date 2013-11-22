@@ -67,7 +67,20 @@ bool RenderTest::Initialise()
 	std::vector<ion::io::FileDevice::DirectoryItem> directoryItems;
 	defaultFileDevice->ReadDirectory(currentDirectory, directoryItems);
 
-	//mScene->Load("scenes\\testscene.ion.scene");
+	//Create and open scene file stream for reading
+	ion::io::File file("..\\scenes\\TestScene1.ion.scene", ion::io::File::OpenRead);
+
+	if(file.IsOpen())
+	{
+		//Create archive for serialising in
+		ion::serialise::Archive archiveIn(file, ion::serialise::Archive::In, ion::renderer::Scene::sSerialiseVersion);
+
+		//Serialise
+		archiveIn.Serialise(*mScene);
+
+		//Close file
+		file.Close();
+	}
 
 	//Set default ambient light and window background colour
 	mScene->SetAmbientLight(ion::ColourRGB(0.1f, 0.1f, 0.1f));
@@ -80,6 +93,7 @@ bool RenderTest::Initialise()
 	mCamera->SetPosition(ion::Vector3(0.0f, 0.0f, 10.0f));
 	mCamera->LookAt(ion::Vector3(0.0f, 0.0f, 0.0f));
 
+	/*
 	//Create material
 	mMaterial = new ion::renderer::Material();
 
@@ -122,6 +136,7 @@ bool RenderTest::Initialise()
 	mSphereNode = new ion::renderer::SceneNode(*mScene);
 	mSphereNode->Attach(*mSphere);
 	mSphereNode->SetPosition(ion::Vector3(2.0f, 0.5f, 0.0f));
+	*/
 
 	//mCamera->SetPosition(ion::Vector3(0.0f, 0.0f, 5.0f));
 	//mCamera->LookAt(ion::Vector3(0.0f, 0.0f, 0.0f));

@@ -7,6 +7,7 @@
 
 #include "Scene.h"
 #include "Mesh.h"
+#include "SceneNode.h"
 #include "../core/Colour.h"
 #include "../core/BinaryFile.h"
 #include "../core/Debug.h"
@@ -35,9 +36,6 @@ namespace ion
 			std::stringstream sceneName;
 			sceneName << "Scene_" << sceneId++;
 			mOgreSceneMgrIFace = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC, sceneName.str().c_str());
-
-			Ogre::Entity* sceneMeshEntity = mOgreSceneMgrIFace->createEntity(mSceneMesh->GetOgreMesh()->getName());
-			mOgreSceneMgrIFace->getRootSceneNode()->attachObject(sceneMeshEntity);
 
 			//Default shadow setup
 			mOgreSceneMgrIFace->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_ADDITIVE);
@@ -134,6 +132,19 @@ namespace ion
 
 			//Serialise lights
 			archive.Serialise(mLights);
+
+			//If serialising in, finalise
+			if(archive.GetDirection() == serialise::Archive::In)
+			{
+				Finalise();
+			}
+		}
+
+		void Scene::Finalise()
+		{
+			mSceneMeshInstance = new MeshInstance(*mSceneMesh, *this);
+			mSceneMeshNode = new SceneNode(*this);
+			mSceneMeshNode->Attach(*mSceneMeshInstance);
 		}
 	}
 }
