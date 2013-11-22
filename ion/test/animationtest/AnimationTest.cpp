@@ -99,7 +99,7 @@ bool AnimationTest::Initialise()
 	if(meshFile.IsOpen())
 	{
 		//Create archive for serialising in
-		ion::serialise::Archive archiveIn(meshFile, ion::serialise::Archive::In, ion::renderer::Skeleton::sSerialiseVersion);
+		ion::serialise::Archive archiveIn(meshFile, ion::serialise::Archive::In, ion::renderer::Mesh::sSerialiseVersion);
 
 		//Serialise
 		archiveIn.Serialise(*mTestMesh);

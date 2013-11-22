@@ -147,6 +147,7 @@ namespace ion
 
 		void Light::Finalise()
 		{
+
 		}
 
 		void Light::Serialise(serialise::Archive& archive)

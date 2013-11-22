@@ -25,6 +25,8 @@ namespace ion
 		//Forward declaration
 		class Primitive;
 		class Mesh;
+		class MeshInstance;
+		class SceneNode;
 
 		class Scene
 		{
@@ -54,7 +56,14 @@ namespace ion
 
 		private:
 
+			void Finalise();
+
+			//Scene mesh, instance and node
 			Mesh* mSceneMesh;
+			MeshInstance* mSceneMeshInstance;
+			SceneNode* mSceneMeshNode;
+
+			//Lighting
 			ColourRGB mAmbientLight;
 			std::list<Light*> mLights;
 
