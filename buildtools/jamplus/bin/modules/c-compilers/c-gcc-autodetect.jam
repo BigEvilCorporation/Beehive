@@ -1,32 +1,41 @@
-rule FindGCC
-{
-	local PATHS =
-		$(PATH)
-	;
+if ! [ RuleExists FindGCC ] {
+	rule FindGCC {
+		local PATHS =
+			$(PATH)
+		;
 
-	local gcc = [ Glob $(PATHS) : gcc ] ;
-	if ! $(gcc)
-	{
-		return ;
+		local gcc = [ Glob $(PATHS) : gcc ] ;
+		if ! $(gcc)
+		{
+			return ;
+		}
+		return [ Match (.+)/ : $(gcc[1]) ] ;
 	}
-
-	GCC_ROOT = [ Match (.+)/ : $(gcc[1]) ] ;
 }
 
 rule C.AutoDetect {
-	FindGCC ;
+	local COMPILER_BIN_PATH = [ FindGCC ] ;
 
-	if ! $(GCC_ROOT) {
+	if ! $(COMPILER_BIN_PATH) {
 		return ;
 	}
 
-	COMPILER.$(PLATFORM) = gcc ;
+	C.COMPILER = gcc ;
 
-	UseModule c-compilers/c-gcc ;
+	C.COMPILER_SUITE = gcc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	COMPILER_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH) ;
+
+	IncludeModule c-compilers/c-gcc ;
+
 	if $(PLATFORM) != *  &&  $(CONFIG) != * {
-		UseModule c-compilers/$(PLATFORM)-gcc ;
-		UseModule c-compilers/$(PLATFORM)-gcc-$(CONFIG) ;
+		IncludeModule c-compilers/$(PLATFORM)-gcc ;
 	}
 
-	return $(COMPILER.$(PLATFORM)) ;
+	C.COMPILER_SUITE = gcc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	return $(C.COMPILER) ;
 }
+

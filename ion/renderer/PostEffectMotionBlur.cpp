@@ -7,7 +7,7 @@
 
 #include "PostEffectMotionBlur.h"
 
-#if defined ION_OGRE
+#if defined ION_RENDERER_OGRE3D
 #include <Ogre/OgrePass.h>
 #include <Ogre/OgreTechnique.h>
 #endif
@@ -16,7 +16,7 @@ namespace ion
 {
 	namespace renderer
 	{
-		#if defined ION_OGRE
+		#if defined ION_RENDERER_OGRE3D
 		PostEffectMotionBlurListener::PostEffectMotionBlurListener(u32 blurPassId)
 		{
 			mBlurPassId = blurPassId;
@@ -60,7 +60,7 @@ namespace ion
 			PostEffectPass* mPassCopy = new PostEffectPass(*mTechnique, PostEffectPass::Composition);
 			PostEffectPass* mPassOutput = new PostEffectPass(*mTechnique, PostEffectPass::Output);
 
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mPostEffectListener = new PostEffectMotionBlurListener(mPassBlur->GetPassId());
 			mOgreCompositorListener = mPostEffectListener;
 			#endif
@@ -81,7 +81,7 @@ namespace ion
 
 		void PostEffectMotionBlur::SetBlurWeight(float weight)
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mPostEffectListener->mBlurWeight = weight;
 			#endif
 		}

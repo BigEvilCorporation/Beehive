@@ -3,6 +3,8 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+local uuid = require 'uuid'
+
 local VisualStudio201xProjectMetaTable = {  __index = VisualStudio201xProjectMetaTable  }
 
 local function GetMapPlatformToVSPlatform(platformName)
@@ -73,18 +75,25 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 ]])
 
 	-- Write Globals
-	table.insert(self.Contents, expand([[
+	do
+		local extraInfo = {}
+		if self.Options.vs2010 then
+			extraInfo.TargetFrameworkVersion = "v4.0"
+		elseif self.Options.vs2012 then
+			extraInfo.TargetFrameworkVersion = "v4.5"
+		end
+		table.insert(self.Contents, expand([[
   <PropertyGroup Label="Globals">
     <ProjectGUID>$(Uuid)</ProjectGUID>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>$(TargetFrameworkVersion)</TargetFrameworkVersion>
     <Keyword>MakeFileProj</Keyword>
     <ProjectName>$(Name)</ProjectName>
   </PropertyGroup>
-]], info))
+]], extraInfo, info))
+	end
 
 	table.insert(self.Contents, [[
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 ]])
 
 	-- Write Configurations.
@@ -113,8 +122,12 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 				if project.IncludePaths and project.IncludePaths[platformName] and project.IncludePaths[platformName][configName] then
 					configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
 				end
-				if project.OutputPaths and project.OutputPaths[platformName] and project.OutputPaths[platformName][configName] then
+				if project.OutputPaths and project.OutputPaths[platformName] and project.OutputPaths[platformName][configName] 
+					and project.OutputNames and project.OutputNames[platformName] and project.OutputNames[platformName][configName] then
 					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
+				end
+				if project.DebuggerOutputNames  and  project.DebuggerOutputNames[platformName]  and  project.DebuggerOutputNames[platformName][configName] then
+					configInfo.Output = project.DebuggerOutputNames[platformName][configName]
 				end
 				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
 				configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
@@ -139,10 +152,42 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <NMakeReBuildCommandLine>$(RebuildCommandLine)</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>$(Defines)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(Includes)</NMakeIncludeSearchPath>
-  </PropertyGroup>
 ]==], configInfo, info, _G))
+			if self.Options.vs2012 then
+				self.Contents[#self.Contents + 1] = [[
+    <PlatformToolset>v110</PlatformToolset>
+]]
+			end
+			self.Contents[#self.Contents + 1] = [[
+  </PropertyGroup>
+]]
+
+			self.Contents[#self.Contents + 1] = expand([==[
+  <ItemDefinitionGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'">
+    <Link>
+]==], configInfo, info, _G)
+			if project.Options then
+				if project.Options.windows then
+					self.Contents[#self.Contents + 1] = [==[
+      <SubSystem>Windows</SubSystem>
+]==]
+				else
+					self.Contents[#self.Contents + 1] = [==[
+      <SubSystem>Console</SubSystem>
+]==]
+				end
+			end
+
+			self.Contents[#self.Contents + 1] = expand([==[
+    </Link>
+  </ItemDefinitionGroup>
+]==])
 		end
 	end
+
+	table.insert(self.Contents, [[
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+]])
 
 	-- Write Files.
 	table.insert(self.Contents, [[
@@ -315,10 +360,17 @@ function VisualStudio201xSolutionMetaTable:Write(outputPath)
 	-- Write header.
 	table.insert(self.Contents, '\xef\xbb\xbf\n')
 
-	table.insert(self.Contents, [[
+	if self.Options.vs2010 then
+		table.insert(self.Contents, [[
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 ]])
+	elseif self.Options.vs2012 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+]])
+	end
 
 	-- Write projects.
 	for projectName in ivalues(workspace.Projects) do

@@ -2,59 +2,22 @@
 // File:		Camera.h
 // Date:		3rd August 2011
 // Authors:		Matt Phillips
-// Description:	Ogre camera
+// Description:	Camera
 ///////////////////////////////////////////////////
 
 #pragma once
 
-#include "../core/maths/Vector.h"
-#include "../core/maths/Matrix.h"
-#include "../core/maths/Quaternion.h"
-
-#if defined ION_OGRE
-#include <Ogre/OgreCamera.h>
-#endif
+#include "renderer/Entity.h"
 
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
-		//Forward declaration
-		class Scene;
-
-		class Camera
+		class Camera : public Entity
 		{
 		public:
-			enum DrawMode { Solid, Wireframe };
-			enum Projection { Perspective, Orthographic };
-
-			Camera(Scene& scene);
+			Camera();
 			~Camera();
-			
-			void SetPosition(const Vector3& position);
-			void LookAt(const Vector3& lookat);
-			void Move(const Vector3& moveVector);
-			void Pitch(float pitch);
-			void Yaw(float yaw);
-			void Roll(float roll);
-
-			const Vector3& GetPosition();
-
-			void SetDrawMode(DrawMode drawMode);
-			void SetProjection(Projection projection);
-			void SetOrthoDimensions(float width, float height);
-			void SetAspectRatio(float aspectRatio);
-
-			#if defined ION_OGRE
-			Ogre::Camera* GetOgreCameraIFace();
-			#endif
-
-		private:
-			#if defined ION_OGRE
-			Ogre::Camera* mOgreCameraIFace;
-			#endif
-
-			Vector3 mPosition;
 		};
 	}
 }

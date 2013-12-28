@@ -2,16 +2,23 @@
 #################################################
 ## Apply ion::engine libraries
 #################################################
+rule ApplyIonIncludes TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion ;
+}
+
 rule ApplyIonLib TARGET : LIBNAME
 {
 	SubInclude bigevilcorp ion $(LIBNAME) : $(LIBNAME) ;
-	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion ;
+	ApplyIonIncludes $(TARGET) ;
 	C.LinkLibraries $(TARGET) : $(LIBNAME) ;
 }
 
 rule ApplyIonCore TARGET
 {
 	ApplyIonLib $(TARGET) : core ;
+	ApplyIonLib $(TARGET) : maths ;
+	ApplyIonLib $(TARGET) : io ;
 
 	ApplyWin32SDK $(TARGET) ;
 }
@@ -39,13 +46,26 @@ rule ApplyIonInput TARGET
 	ApplyXInputSDK $(TARGET) ;
 }
 
-rule ApplyIonRenderer TARGET
+rule ApplyIonRenderer TARGET : RENDER_IMPL
 {
 	ApplyIonLib $(TARGET) : renderer ;
 
 	ApplyWin32SDK $(TARGET) ;
-	ApplyOgreSDK $(TARGET) ;
-	ApplyDirectXSDK $(TARGET) ;
+
+	if ( ogre3d in $(RENDER_IMPL) )
+	{
+		ApplyIonRendererOgre $(TARGET) ;
+	}
+
+	if ( direct3d in $(RENDER_IMPL) )
+	{
+		ApplyIonRendererDirect3D $(TARGET) ;
+	}
+
+	if ( opengl in $(RENDER_IMPL) )
+	{
+		ApplyIonRendererOpenGL $(TARGET) ;
+	}
 }
 
 rule ApplyIonPhysics TARGET
@@ -58,6 +78,40 @@ rule ApplyIonPhysics TARGET
 rule ApplyIonGameKit TARGET
 {
 	ApplyIonLib $(TARGET) : gamekit ;
+}
+
+#################################################
+## Apply API implementations
+#################################################
+rule ApplyIonRendererOgre TARGET
+{
+	SubInclude bigevilcorp ion renderer ogre3d : ogre3d ;
+
+	C.Defines $(TARGET) : ION_RENDERER_OGRE3D ;
+
+	ApplyIonIncludes $(TARGET) ;
+	ApplyOgreSDK $(TARGET) ;
+
+	C.LinkLibraries $(TARGET) : ogre3d ;
+}
+
+rule ApplyIonRendererDirect3D TARGET
+{
+
+}
+
+rule ApplyIonRendererOpenGL TARGET
+{
+	SubInclude bigevilcorp ion renderer opengl : opengl ;
+
+	C.Defines $(TARGET) : ION_RENDERER_OPENGL ;
+
+	ApplyIonIncludes $(TARGET) ;
+	ApplyOpenGLSDK $(TARGET) ;
+	ApplySDLSDK $(TARGET) ;
+	ApplyCgSDK $(TARGET) ;
+
+	C.LinkLibraries $(TARGET) : opengl ;
 }
 
 #################################################
@@ -112,6 +166,46 @@ rule ApplyDirectXSDK TARGET
 	C.LinkPrebuiltLibraries $(TARGET) : $(DIRECTX_LIBS) ;
 }
 
+rule ApplyOpenGLSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/OpenGL/include ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/OpenGL/lib ;
+
+	OPENGL_LIBS =
+		OpenGL32.lib
+		glu32.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(OPENGL_LIBS) ;
+}
+
+rule ApplySDLSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDL/include ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDL/lib ;
+
+	SDL_LIBS =
+		SDLmain.lib
+		sdl.lib
+		sdl_image.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(SDL_LIBS) ;
+}
+
+rule ApplyCgSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/Cg/include ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/Cg/lib ;
+
+	CG_LIBS =
+		cg.lib
+		cgGL.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(CG_LIBS) ;
+}
+
 rule ApplyOgreSDK TARGET
 {
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Include ;
@@ -120,8 +214,6 @@ rule ApplyOgreSDK TARGET
 	#Required for Ogre itself, since it doesn't prepend directories to its #includes
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Include/OGRE ;
 	
-	C.Defines $(TARGET) : ION_OGRE ;
-
 	OGRE_LIBS_DEBUG = 
 		OgreMain_d.lib
 		RenderSystem_Direct3D9_d.lib
@@ -152,6 +244,9 @@ rule ApplyOgreSDK TARGET
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(OGRE_DEPENDENCIES_DEBUG) $(OGRE_LIBS_DEBUG) : debug ;
 	C.LinkPrebuiltLibraries $(TARGET) : $(OGRE_DEPENDENCIES_RELEASE) $(OGRE_LIBS_RELEASE) : release ;
+
+	# Ogre3d built against DirectX
+	ApplyDirectXSDK $(TARGET) ;
 }
 
 rule ApplyCEGUISDK TARGET
@@ -199,4 +294,12 @@ rule ApplyBulletSDK TARGET
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_DEBUG) : debug ;
 	C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_RELEASE) : release ;
+}
+
+#################################################
+## Compiler options
+#################################################
+rule ShowIncludes TARGET
+{
+	C.C++Flags $(TARGET) : /showIncludes ;
 }

@@ -5,54 +5,16 @@
 // Description:	Material class and file loader
 ///////////////////////////////////////////////////
 
-#include "Material.h"
-#include "Texture.h"
+#include "renderer/Material.h"
 
-#include "../Core/Debug.h"
+#include "core/Debug.h"
 
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
-		//Minimum file version supported by Material::Load()
-		const int Material::sMinFileVersion = 1;
-
-		//File version output by Material::Save()
-		const int Material::sCurrentFileVersion = 1;
-
-		//Material file header type
-		const char* Material::sFileType = "ion::material";
-
-		//For unique name generation
-		int Material::sMaterialIndex = 0;
-
-		//Chunk IDs
-		const u32 Material::sChunkIds[NumChunkIds] = 
-		{
-			Hash("MaterialRoot"),
-			Hash("BlendMode"),
-			Hash("ColourAmbient"),
-			Hash("ColourDiffuse"),
-			Hash("ColourSpecular"),
-			Hash("ColourEmissive"),
-			Hash("MapDiffuse"),
-			Hash("MapNormal"),
-			Hash("MapSpecular"),
-			Hash("MapOpacity")
-		};
-
 		Material::Material()
 		{
-			#if defined ION_OGRE
-			std::stringstream name;
-			name << "Material_" << sMaterialIndex++;
-			mOgreMaterialName = name.str();
-			mOgreMaterial = Ogre::MaterialManager::getSingleton().create(mOgreMaterialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-			mOgreMaterial->load();
-			mOgreTechnique = mOgreMaterial->getTechnique(0);
-			mOgrePass = mOgreTechnique->getPass(0);
-			#endif
-
 			//Set default lighting and shadows
 			SetLightingEnabled(true);
 			SetLightingMode(Phong);
@@ -63,6 +25,73 @@ namespace ion
 		{
 		}
 
+		void Material::Bind(const Matrix4& worldMtx, const Matrix4& viewMtx, const Matrix4& projectionMtx)
+		{
+			if(mVertexShader)
+			{
+				mVertexShader->Bind();
+			}
+
+			if(mPixelShader)
+			{
+				mPixelShader->Bind();
+			}
+
+			ApplyShaderParams(worldMtx, viewMtx, projectionMtx);
+		}
+
+		void Material::Unbind()
+		{
+			if(mVertexShader)
+			{
+				mVertexShader->Unbind();
+			}
+
+			if(mPixelShader)
+			{
+				mPixelShader->Unbind();
+			}
+		}
+
+		void Material::SetVertexShader(Shader* shader)
+		{
+			mVertexShader = shader;
+
+			if(shader)
+			{
+				mVertexShaderParams.mMatrices.mWorld = shader->CreateParamHndl<Matrix4>("gWorldMatrix");
+				mVertexShaderParams.mMatrices.mWorldViewProjection = shader->CreateParamHndl<Matrix4>("gWorldViewProjectionMatrix");
+				mVertexShaderParams.mColours.mAmbient = shader->CreateParamHndl<Colour>("gAmbientColour");
+				mVertexShaderParams.mColours.mDiffuse = shader->CreateParamHndl<Colour>("gDiffuseColour");
+				mVertexShaderParams.mColours.mSpecular = shader->CreateParamHndl<Colour>("gSpecularColour");
+				mVertexShaderParams.mColours.mEmissive = shader->CreateParamHndl<Colour>("gEmissiveColour");
+				mVertexShaderParams.mTextures.mDiffuseMap = shader->CreateParamHndl<Texture>("gDiffuseTexture");
+				mVertexShaderParams.mTextures.mNormalMap = shader->CreateParamHndl<Texture>("gNormalTexture");
+				mVertexShaderParams.mTextures.mOpacityMap = shader->CreateParamHndl<Texture>("gOpacityTexture");
+				mVertexShaderParams.mTextures.mSpecularMap = shader->CreateParamHndl<Texture>("gSpecularTexture");
+			}
+		}
+
+		void Material::SetPixelShader(Shader* shader)
+		{
+			mPixelShader = shader;
+
+			if(shader)
+			{
+				mPixelShaderParams.mMatrices.mWorld = shader->CreateParamHndl<Matrix4>("gWorldMatrix");
+				mPixelShaderParams.mMatrices.mWorldViewProjection = shader->CreateParamHndl<Matrix4>("gWorldViewProjectionMatrix");
+				mPixelShaderParams.mColours.mAmbient = shader->CreateParamHndl<Colour>("gAmbientColour");
+				mPixelShaderParams.mColours.mDiffuse = shader->CreateParamHndl<Colour>("gDiffuseColour");
+				mPixelShaderParams.mColours.mSpecular = shader->CreateParamHndl<Colour>("gSpecularColour");
+				mPixelShaderParams.mColours.mEmissive = shader->CreateParamHndl<Colour>("gEmissiveColour");
+				mPixelShaderParams.mTextures.mDiffuseMap = shader->CreateParamHndl<Texture>("gDiffuseTexture");
+				mPixelShaderParams.mTextures.mNormalMap = shader->CreateParamHndl<Texture>("gNormalTexture");
+				mPixelShaderParams.mTextures.mOpacityMap = shader->CreateParamHndl<Texture>("gOpacityTexture");
+				mPixelShaderParams.mTextures.mSpecularMap = shader->CreateParamHndl<Texture>("gSpecularTexture");
+			}
+		}
+
+		/*
 		bool Material::Load(std::string filename)
 		{
 			//Open file for reading
@@ -234,39 +263,10 @@ namespace ion
 
 			return fileSize;
 		}
+		*/
 
 		void Material::SetBlendMode(BlendMode blendMode)
 		{
-
-			#if defined ION_OGRE
-			Ogre::SceneBlendType ogreBlendType = Ogre::SBT_REPLACE;
-
-			switch(blendMode)
-			{
-			case Additive:
-				ogreBlendType = Ogre::SBT_ADD;
-				break;
-
-			case Modulative:
-				ogreBlendType = Ogre::SBT_MODULATE;
-				break;
-
-			case Replace:
-				ogreBlendType = Ogre::SBT_REPLACE;
-				break;
-
-			case TransparentAlpha:
-				ogreBlendType = Ogre::SBT_TRANSPARENT_ALPHA;
-				break;
-
-			case TransparentColour:
-				ogreBlendType = Ogre::SBT_TRANSPARENT_COLOUR;
-				break;
-			};
-
-			mOgreMaterial->getTechnique(0)->getPass(0)->setSceneBlending(ogreBlendType);
-			#endif
-
 			mBlendMode = blendMode;
 		}
 
@@ -277,38 +277,21 @@ namespace ion
 
 		void Material::SetAmbientColour(const Colour& ambient)
 		{
-			#if defined ION_OGRE
-			mOgrePass->setAmbient(ambient.r, ambient.g, ambient.b);
-			#endif
-
 			mAmbientColour = ambient;
 		}
 
 		void Material::SetDiffuseColour(const Colour& diffuse)
 		{
-			#if defined ION_OGRE
-			mOgrePass->setDiffuse(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
-			#endif
-
 			mDiffuseColour = diffuse;
 		}
 
 		void Material::SetSpecularColour(const Colour& specular)
 		{
-			#if defined ION_OGRE
-			mOgrePass->setSpecular(specular.r, specular.g, specular.b, 1.0f);
-			mOgrePass->setShininess(specular.a);
-			#endif
-
 			mSpecularColour = specular;
 		}
 
 		void Material::SetEmissiveColour(const Colour& emissive)
 		{
-			#if defined ION_OGRE
-			mOgrePass->setSelfIllumination(emissive.r, emissive.g, emissive.b);
-			#endif
-
 			mEmissiveColour = emissive;
 		}
 
@@ -332,50 +315,14 @@ namespace ion
 			return mEmissiveColour;
 		}
 
-		void Material::AssignVertexColour(ColourType colourType)
-		{
-			#if defined ION_OGRE
-			int ogreColourType = Ogre::TVC_AMBIENT;
-
-			switch(colourType)
-			{
-			case Ambient:
-				ogreColourType = Ogre::TVC_AMBIENT;
-				break;
-			case Diffuse:
-				ogreColourType = Ogre::TVC_DIFFUSE;
-				break;
-			case Specular:
-				ogreColourType = Ogre::TVC_SPECULAR;
-				break;
-			case Emissive:
-				ogreColourType = Ogre::TVC_EMISSIVE;
-				break;
-			}
-
-			mOgrePass->setVertexColourTracking(ogreColourType);
-			#endif
-		}
-
 		void Material::AddDiffuseMap(Texture* diffuse)
 		{
 			mDiffuseMaps.push_back(diffuse);
-
-			#if defined ION_OGRE
-			Ogre::TextureUnitState* textureState = mOgrePass->createTextureUnitState(diffuse->GetOgreTextureName());
-			textureState->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
-			textureState->setTextureAnisotropy(8);
-			#endif
 		}
 
 		void Material::SetNormalMap(Texture* normal)
 		{
 			mNormalMap = normal;
-
-			#if defined ION_OGRE
-			//Ogre::TextureUnitState* textureState = mOgrePass->createTextureUnitState(diffuse->GetOgreTextureName());
-			//textureState->setContentType(Ogre::TextureUnitState::Conte
-			#endif
 		}
 
 		void Material::SetSpecularMap(Texture* specular)
@@ -415,10 +362,6 @@ namespace ion
 
 		void Material::SetLightingEnabled(bool lighting)
 		{
-			#if defined ION_OGRE
-			mOgreMaterial->setLightingEnabled(lighting);
-			#endif
-
 			mLightingEnabled = lighting;
 		}
 
@@ -429,25 +372,6 @@ namespace ion
 
 		void Material::SetLightingMode(LightingMode mode)
 		{
-			#if defined ION_OGRE
-			Ogre::ShadeOptions ogreShadeMode = Ogre::SO_FLAT ;
-
-			switch(mode)
-			{
-			case Flat:
-				ogreShadeMode = Ogre::SO_FLAT;
-				break;
-			case Gouraud:
-				ogreShadeMode = Ogre::SO_GOURAUD;
-				break;
-			case Phong:
-				ogreShadeMode = Ogre::SO_PHONG;
-				break;
-			};
-
-			mOgreMaterial->setShadingMode(ogreShadeMode);
-			#endif
-
 			mLightingMode = mode;
 		}
 
@@ -458,10 +382,6 @@ namespace ion
 
 		void Material::SetReceiveShadows(bool shadows)
 		{
-			#if defined ION_OGRE
-			mOgreMaterial->setReceiveShadows(shadows);
-			#endif
-
 			mReceiveShadows = shadows;
 		}
 
@@ -472,38 +392,76 @@ namespace ion
 
 		void Material::SetDepthTest(bool enabled)
 		{
-			#if defined ION_OGRE
-			mOgrePass->setDepthCheckEnabled(enabled);
-			#endif
+
 		}
 
 		void Material::SetDepthWrite(bool enabled)
 		{
-			#if defined ION_OGRE
-			mOgrePass->setDepthWriteEnabled(enabled);
-			#endif
+
 		}
 
 		void Material::SetCullMode(CullMode cullMode)
 		{
-			#if defined ION_OGRE
-			Ogre::CullingMode ogreCullMode = Ogre::CULL_NONE;
 
-			switch(cullMode)
+		}
+
+		void Material::ApplyShaderParams(const Matrix4& worldMtx, const Matrix4& viewMtx, const Matrix4& projectionMtx)
+		{
+			Matrix4 worldViewProjMtx = worldMtx * viewMtx * projectionMtx;
+
+			mVertexShaderParams.mMatrices.mWorld.SetValue(worldMtx);
+			mVertexShaderParams.mMatrices.mWorldViewProjection.SetValue(worldViewProjMtx);
+			mVertexShaderParams.mColours.mAmbient.SetValue(mAmbientColour);
+			mVertexShaderParams.mColours.mDiffuse.SetValue(mDiffuseColour);
+			mVertexShaderParams.mColours.mSpecular.SetValue(mSpecularColour);
+			mVertexShaderParams.mColours.mEmissive.SetValue(mEmissiveColour);
+
+			if(mDiffuseMaps.size() > 0)
 			{
-				case None:
-					ogreCullMode = Ogre::CULL_NONE;
-					break;
-				case Clockwise:
-					ogreCullMode = Ogre::CULL_CLOCKWISE;
-					break;
-				case CounterClockwise:
-					ogreCullMode = Ogre::CULL_ANTICLOCKWISE;
-					break;
+				mVertexShaderParams.mTextures.mDiffuseMap.SetValue(*mDiffuseMaps[0]);
 			}
 
-			mOgrePass->setCullingMode(ogreCullMode);
-			#endif
+			if(mNormalMap)
+			{
+				mVertexShaderParams.mTextures.mNormalMap.SetValue(*mNormalMap);
+			}
+
+			if(mSpecularMap)
+			{
+				mVertexShaderParams.mTextures.mSpecularMap.SetValue(*mSpecularMap);
+			}
+
+			if(mOpacityMap)
+			{
+				mVertexShaderParams.mTextures.mOpacityMap.SetValue(*mOpacityMap);
+			}
+
+			mPixelShaderParams.mMatrices.mWorld.SetValue(worldMtx);
+			mPixelShaderParams.mMatrices.mWorldViewProjection.SetValue(worldViewProjMtx);
+			mPixelShaderParams.mColours.mAmbient.SetValue(mAmbientColour);
+			mPixelShaderParams.mColours.mDiffuse.SetValue(mDiffuseColour);
+			mPixelShaderParams.mColours.mSpecular.SetValue(mSpecularColour);
+			mPixelShaderParams.mColours.mEmissive.SetValue(mEmissiveColour);
+
+			if(mDiffuseMaps.size() > 0)
+			{
+				mPixelShaderParams.mTextures.mDiffuseMap.SetValue(*mDiffuseMaps[0]);
+			}
+
+			if(mNormalMap)
+			{
+				mPixelShaderParams.mTextures.mNormalMap.SetValue(*mNormalMap);
+			}
+
+			if(mSpecularMap)
+			{
+				mPixelShaderParams.mTextures.mSpecularMap.SetValue(*mSpecularMap);
+			}
+
+			if(mOpacityMap)
+			{
+				mPixelShaderParams.mTextures.mOpacityMap.SetValue(*mOpacityMap);
+			}
 		}
 	}
 }

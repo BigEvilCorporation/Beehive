@@ -9,11 +9,11 @@
 
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
 		Animation::Animation()
 		{
-			mLength = 0.0f;
+			mLength = 1.0f;
 			mCurrentFrame = 0.0f;
 			mPreviousFrame = 0.0f;
 			mPlaybackSpeed = 1.0f;
@@ -170,7 +170,7 @@ namespace ion
 		{
 			float floatValue = 0.0f;
 
-			const Keyframe<float>* keyframeA = GetLastKeyframe(time);
+			const Keyframe<float>* keyframeA = GetPrevKeyframe(time);
 			const Keyframe<float>* keyframeB = GetNextKeyframe(time);
 
 			if(keyframeA && keyframeB)
@@ -193,7 +193,7 @@ namespace ion
 		{
 			Matrix4 resultMatrix;
 
-			const Keyframe<Matrix4>* keyframeA = GetLastKeyframe(time);
+			const Keyframe<Matrix4>* keyframeA = GetPrevKeyframe(time);
 			const Keyframe<Matrix4>* keyframeB = GetNextKeyframe(time);
 
 			if(keyframeA && keyframeB)

@@ -6,8 +6,8 @@
 ///////////////////////////////////////////////////
 
 #include "Keyboard.h"
-#include "../core/MemoryManager.h"
-#include "../core/Debug.h"
+#include "core/MemoryManager.h"
+#include "core/Debug.h"
 
 namespace ion
 {
@@ -93,7 +93,7 @@ namespace ion
 			}
 		}
 
-		void Keyboard::SetCooperativeWindow(HWND windowHandle, CoopLevel coopLevel)
+		void Keyboard::SetCooperativeWindow(CoopLevel coopLevel)
 		{
 			int windowsCoopLevel = 0;
 
@@ -112,7 +112,7 @@ namespace ion
 				break;
 			}
 
-			mKeyboardDevice->SetCooperativeLevel(windowHandle, windowsCoopLevel);
+			mKeyboardDevice->SetCooperativeLevel(GetActiveWindow(), windowsCoopLevel);
 		}
 	}
 }

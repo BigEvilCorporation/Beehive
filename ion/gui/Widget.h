@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../core/maths/Vector.h"
+#include "core/maths/Vector.h"
 
 #include "EventListener.h"
 

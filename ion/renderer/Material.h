@@ -7,35 +7,21 @@
 
 #pragma once
 
-#include "../core/Types.h"
-#include "../core/Colour.h"
-#include "../core/BinaryFile.h"
+#include "core/Types.h"
+#include "renderer/Colour.h"
+#include "renderer/Shader.h"
+#include "renderer/Texture.h"
 
 #include <string>
 #include <vector>
 
-#if defined ION_OGRE
-#include <Ogre/OgreMaterial.h>
-#include <Ogre/OgreMaterialManager.h>
-#include <Ogre/OgreTechnique.h>
-#include <Ogre/OgrePass.h>
-#endif
-
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
-		//Forward declaration
-		class Texture;
-
 		class Material
 		{
 		public:
-			Material();
-			~Material();
-
-			bool Load(std::string filename);
-			u64 Save(std::string filename);
 
 			enum BlendMode
 			{
@@ -68,9 +54,16 @@ namespace ion
 				Emissive
 			};
 
-			//Blend mode
-			void SetBlendMode(BlendMode blendMode);
-			BlendMode GetBlendMode() const;
+			Material();
+			~Material();
+
+			//Bind/unbind
+			void Bind(const Matrix4& worldMtx, const Matrix4& viewMtx, const Matrix4& projectionMtx);
+			void Unbind();
+
+			//Shaders
+			void SetVertexShader(Shader* shader);
+			void SetPixelShader(Shader* shader);
 
 			//Colour
 			void SetAmbientColour(const Colour& ambient);
@@ -96,9 +89,6 @@ namespace ion
 
 			int GetNumDiffuseMaps() const;
 
-			//Vertex colours
-			void AssignVertexColour(ColourType colourType);
-
 			//Lighting and shadows
 			void SetLightingEnabled(bool lighting);
 			void SetLightingMode(LightingMode mode);
@@ -108,41 +98,18 @@ namespace ion
 			LightingMode GetLightingMode() const;
 			bool GetReceiveShadows() const;
 
+			//Blend mode
+			void SetBlendMode(BlendMode blendMode);
+			BlendMode GetBlendMode() const;
+
 			//Depth and culling
 			void SetDepthTest(bool enabled);
 			void SetDepthWrite(bool enabled);
 			void SetCullMode(CullMode cullMode);
 
-			#if defined ION_OGRE
-			const std::string& GetOgreMaterialName() { return mOgreMaterialName; }
-			#endif
+		protected:
 
-		private:
-
-			enum ChunkIds
-			{
-				ChunkId_Root,
-					ChunkId_BlendMode,
-					ChunkId_ColourAmbient,
-					ChunkId_ColourDiffuse,
-					ChunkId_ColourSpecular,
-					ChunkId_ColourEmissive,
-					ChunkId_MapDiffuse,
-					ChunkId_MapNormal,
-					ChunkId_MapSpecular,
-					ChunkId_MapOpacity,
-
-				NumChunkIds
-			}; 
-
-			static const u32 sChunkIds[NumChunkIds];
-
-			static const int sMinFileVersion;
-			static const int sCurrentFileVersion;
-			static const char* sFileType;
-
-			//For unique name generation
-			static int sMaterialIndex;
+			void ApplyShaderParams(const Matrix4& worldMtx, const Matrix4& viewMtx, const Matrix4& projectionMtx);
 
 			Colour mAmbientColour;
 			Colour mDiffuseColour;
@@ -154,18 +121,42 @@ namespace ion
 			Texture* mSpecularMap;
 			Texture* mOpacityMap;
 
+			Shader* mVertexShader;
+			Shader* mPixelShader;
+
+			struct ShaderParams
+			{
+				struct MatrixParams
+				{
+					Shader::ParamHndl<Matrix4> mWorld;
+					Shader::ParamHndl<Matrix4> mWorldViewProjection;
+				} mMatrices;
+
+				struct ColourParams
+				{
+					Shader::ParamHndl<Colour> mAmbient;
+					Shader::ParamHndl<Colour> mDiffuse;
+					Shader::ParamHndl<Colour> mSpecular;
+					Shader::ParamHndl<Colour> mEmissive;
+				} mColours;
+
+				struct TextureParams
+				{
+					Shader::ParamHndl<Texture> mDiffuseMap;
+					Shader::ParamHndl<Texture> mNormalMap;
+					Shader::ParamHndl<Texture> mSpecularMap;
+					Shader::ParamHndl<Texture> mOpacityMap;
+				} mTextures;
+			};
+
+			ShaderParams mVertexShaderParams;
+			ShaderParams mPixelShaderParams;
+
 			bool mLightingEnabled;
 			bool mReceiveShadows;
 			LightingMode mLightingMode;
 
 			BlendMode mBlendMode;
-
-			#if defined ION_OGRE
-			Ogre::MaterialPtr mOgreMaterial;
-			Ogre::Technique* mOgreTechnique;
-			Ogre::Pass* mOgrePass;
-			std::string mOgreMaterialName;
-			#endif
 		};
 	}
 }

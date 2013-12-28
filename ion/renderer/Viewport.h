@@ -7,17 +7,10 @@
 
 #pragma once
 
-#include "../Core/Colour.h"
-
-#if defined ION_OGRE
-#include <Ogre/OgreViewport.h>
-#endif
+#include "core/Colour.h"
 
 namespace ion
 {
-	//Forward declaration
-	class Colour;
-
 	namespace renderer
 	{
 		//Forward declaration
@@ -27,26 +20,21 @@ namespace ion
 		class Viewport
 		{
 		public:
-			Viewport(Renderer& renderer, Camera& camera, int zOrder = 0);
-			~Viewport();
+			static Viewport* Create(Renderer& renderer, Camera& camera, int zOrder = 0);
+			static void Release(Viewport* viewport);
 
 			int GetWidth() const;
 			int GetHeight() const;
 
-			void SetBackgroundColour(const Colour& colour);
+			virtual void SetBackgroundColour(const Colour& colour);
 
-			#if defined ION_OGRE
-			Ogre::Viewport* GetOgreViewportInterface();
-			#endif
+		protected:
+			Viewport(Renderer& renderer, Camera& camera, int zOrder = 0);
+			virtual ~Viewport();
 
-		private:
 			int mWidth;
 			int mHeight;
 			Colour mBackgroundColour;
-
-			#if defined ION_OGRE
-			Ogre::Viewport* mOgreViewportIFace;
-			#endif
 		};
 	}
 }

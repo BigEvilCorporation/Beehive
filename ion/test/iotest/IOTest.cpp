@@ -68,7 +68,26 @@ void IOTest::TestBasicSerialisation()
 	sourceObject.mTestSubClassPtrBase = new TestSerialisable::SubClass();
 	sourceObject.mTestSubClassPtrDerived1 = new TestSerialisable::SubClassDerived();
 	sourceObject.mTestSubClassPtrDerived2 = new TestSerialisable::SubClassDerived();
+	sourceObject.mTestSubClassPtrDerived3 = new TestSerialisable::SubClassDerivedSerialiseAsBase();
 	sourceObject.mNullPtr = NULL;
+
+	sourceObject.mTestSubClassPtrBase->mTestInt = 1;
+	sourceObject.mTestSubClassPtrBase->mTestIntV2 = 2;
+	sourceObject.mTestSubClassPtrBase->mTestFloat = 3.14195f;
+
+	sourceObject.mTestSubClassPtrDerived1->mTestInt = 3;
+	sourceObject.mTestSubClassPtrDerived1->mTestIntV2 = 4;
+	sourceObject.mTestSubClassPtrDerived1->mTestFloat = 9876.5f;
+	sourceObject.mTestSubClassPtrDerived1->mTestString = "TestSubClassDerived1";
+
+	sourceObject.mTestSubClassPtrDerived2->mTestInt = 5;
+	sourceObject.mTestSubClassPtrDerived2->mTestIntV2 = 6;
+	sourceObject.mTestSubClassPtrDerived2->mTestFloat = 5678.9f;
+	sourceObject.mTestSubClassPtrDerived2->mTestString = "TestSubClassDerived2";
+
+	sourceObject.mTestSubClassPtrDerived3->mTestInt = 7;
+	sourceObject.mTestSubClassPtrDerived3->mTestIntV2 = 8;
+	sourceObject.mTestSubClassPtrDerived3->mTestFloat = 101010.1f;
 
 	const char* filename = "ion_serialise_test.bin";
 
@@ -147,7 +166,26 @@ void IOTest::TestVersionedSerialisation()
 	sourceObject.mTestSubClassPtrBase = new TestSerialisable::SubClass();
 	sourceObject.mTestSubClassPtrDerived1 = new TestSerialisable::SubClassDerived();
 	sourceObject.mTestSubClassPtrDerived2 = new TestSerialisable::SubClassDerived();
+	sourceObject.mTestSubClassPtrDerived3 = new TestSerialisable::SubClassDerivedSerialiseAsBase();
 	sourceObject.mNullPtr = NULL;
+
+	sourceObject.mTestSubClassPtrBase->mTestInt = 1;
+	sourceObject.mTestSubClassPtrBase->mTestIntV2 = 2;
+	sourceObject.mTestSubClassPtrBase->mTestFloat = 3.14195f;
+
+	sourceObject.mTestSubClassPtrDerived1->mTestInt = 3;
+	sourceObject.mTestSubClassPtrDerived1->mTestIntV2 = 4;
+	sourceObject.mTestSubClassPtrDerived1->mTestFloat = 9876.5f;
+	sourceObject.mTestSubClassPtrDerived1->mTestString = "TestSubClassDerived1";
+
+	sourceObject.mTestSubClassPtrDerived2->mTestInt = 5;
+	sourceObject.mTestSubClassPtrDerived2->mTestIntV2 = 6;
+	sourceObject.mTestSubClassPtrDerived2->mTestFloat = 5678.9f;
+	sourceObject.mTestSubClassPtrDerived2->mTestString = "TestSubClassDerived2";
+
+	sourceObject.mTestSubClassPtrDerived3->mTestInt = 7;
+	sourceObject.mTestSubClassPtrDerived3->mTestIntV2 = 8;
+	sourceObject.mTestSubClassPtrDerived3->mTestFloat = 101010.1f;
 
 	const char* filenameV1 = "ion_serialise_test_v1.bin";
 	const char* filenameV2 = "ion_serialise_test_v2.bin";
