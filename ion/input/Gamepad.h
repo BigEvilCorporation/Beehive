@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../core/MemoryManager.h"
+#include "core/MemoryManager.h"
 
 //TODO: Windows headers in platform header
 #include <windows.h>

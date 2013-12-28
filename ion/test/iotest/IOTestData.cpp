@@ -66,6 +66,7 @@ bool TestSerialisable::operator == (TestSerialisable& rhs)
 		&& *mTestSubClassPtrBase == *rhs.mTestSubClassPtrBase
 		&& *mTestSubClassPtrDerived1 == *rhs.mTestSubClassPtrDerived1
 		&& *mTestSubClassPtrDerived2 == *rhs.mTestSubClassPtrDerived2
+		&& *mTestSubClassPtrDerived3 == *rhs.mTestSubClassPtrDerived3
 		&& mNullPtr == rhs.mNullPtr;
 }
 
@@ -116,6 +117,9 @@ void TestSerialisable::Serialise(ion::serialise::Archive& archive)
 	archive.RegisterPointerType<TestSerialisable::SubClass>();
 	archive.RegisterPointerType<TestSerialisable::SubClassDerived>();
 
+	//Register pointer types with strict serialise type
+	archive.RegisterPointerTypeStrict<TestSerialisable::SubClass, TestSerialisable::SubClassDerivedSerialiseAsBase>();
+
 	archive.Serialise(mTestInt);
 	archive.Serialise(mTestFloat);
 	
@@ -137,14 +141,15 @@ void TestSerialisable::Serialise(ion::serialise::Archive& archive)
 	archive.Serialise(mTestSubClassPtrBase);
 	archive.Serialise(mTestSubClassPtrDerived1);
 	archive.Serialise(mTestSubClassPtrDerived2);
+	archive.Serialise(mTestSubClassPtrDerived3);
 	archive.Serialise(mNullPtr);
 }
 
 TestSerialisable::SubClass::SubClass()
 {
-	mTestInt = 1;
-	mTestFloat = 3.14195f;
-	mTestIntV2 = 2;
+	mTestInt = 0;
+	mTestFloat = 0.0f;
+	mTestIntV2 = 0;
 }
 
 bool TestSerialisable::SubClass::operator == (TestSerialisable::SubClass& rhs)

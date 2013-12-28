@@ -10,21 +10,20 @@ if not OS  or  not OSPLAT  or  not JAM_EXECUTABLE then
 	os.exit(-1)
 end
 
-require 'list'
-require 'getopt'
+local getopt = require 'getopt'
 require 'ex'
-require 'md5'
-require 'uuid'
+local md5 = require 'md5'
 expand = require 'expand'
 
 scriptPath = os.path.simplify(os.path.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
 package.path = scriptPath .. "?.lua;" .. package.path
-require 'FolderTree'
+FolderTree = require 'FolderTree'
 
 jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
 
 Compilers =
 {
+	{ 'vs2012', 'Visual Studio 2012' },
 	{ 'vs2010', 'Visual Studio 2010' },
 	{ 'vs2008', 'Visual Studio 2008' },
 	{ 'vs2005', 'Visual Studio 2005' },
@@ -83,6 +82,17 @@ function list_find(searchList, value)
 	end
 end
 
+--- Merge one table into another. <code>u</code> is merged into <code>t</code>.
+-- @param t first table
+-- @param u second table
+-- @return first table
+function table_merge (t, u)
+  for i, v in pairs (u) do
+    t[i] = v
+  end
+  return t
+end
+
 function ErrorHandler(inMessage)
 	message = {}
 	table.insert(message, [[
@@ -134,25 +144,37 @@ end
 
 
 function ProcessCommandLine()
-	JamFlags = { }
+	JambaseFlags = { }
 
-	function ProcessJamFlags(newarg, oldarg)
+	function ProcessJambaseFlags(newarg, oldarg)
 		local key, value = newarg:match('(.+)=(.+)')
 		if not key then
-			errors = { 'Invalid --jamflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
+			errors = { 'Invalid --jambaseflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
 			Usage()
 		end
-		JamFlags[#JamFlags + 1] = { Key = key, Value = value }
+		JambaseFlags[#JambaseFlags + 1] = { Key = key, Value = value }
 	end
 
-	local options = Options {
-		Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
-		Option {{"gui"}, "Pop up a GUI to set options"},
-		Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
-		Option {{"postfix"}, "Extra text for the IDE project name"},
-		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
-		Option {{"jamflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
-		Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
+	JamfileFlags = { }
+
+	function ProcessJamfileFlags(newarg, oldarg)
+		local key, value = newarg:match('(.+)=(.+)')
+		if not key then
+			errors = { 'Invalid --jamfileflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
+			Usage()
+		end
+		JamfileFlags[#JamfileFlags + 1] = { Key = key, Value = value }
+	end
+
+	local options = getopt.makeOptions{
+		getopt.Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
+		getopt.Option {{"gui"}, "Pop up a GUI to set options"},
+		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
+		getopt.Option {{"postfix"}, "Extra text for the IDE project name"},
+		getopt.Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
+		getopt.Option {{"jambaseflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		getopt.Option {{"jamfileflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		getopt.Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
 	}
 
 	function Usage()
@@ -169,26 +191,36 @@ function ProcessCommandLine()
 		local genOptions = {}
 		for exporterName in ivalues(sortedExporters) do
 			genOptions[#genOptions + 1] =
-				Option{ { exporterName }, Exporters[exporterName].Description }
+				getopt.Option{ { exporterName }, Exporters[exporterName].Description }
 		end
-		genOptions = Options(genOptions)
 
-		print(getopt.usageInfo("\nAvailable workspace generators:", genOptions))
+		print(getopt.usageInfo("\nAvailable workspace generators:", getopt.makeOptions(genOptions)))
 
 		local compilerOptions = {}
 		for compilerInfo in ivalues(Compilers) do
 			compilerOptions[#compilerOptions + 1] =
-				Option{ { compilerInfo[1] }, compilerInfo[2] }
+				getopt.Option{ { compilerInfo[1] }, compilerInfo[2] }
 		end
-		compilerOptions = Options(compilerOptions)
 
-		print(getopt.usageInfo("\nAvailable compilers:", compilerOptions))
+		print(getopt.usageInfo("\nAvailable compilers:", getopt.makeOptions(compilerOptions)))
 
 		os.exit(-1)
 	end
 
 	nonOpts, opts, errors = getopt.getOpt (arg, options)
-	opts.gen = opts.gen or 'none'
+	opts.gen = opts.gen and opts.gen[#opts.gen] or 'none'
+	opts.compiler = opts.compiler and opts.compiler[#opts.compiler]
+	opts.config = opts.config and opts.config[#opts.config]
+	opts.jambaseflags = opts.jambaseflags and opts.jambaseflags[#opts.jambaseflags]
+	if opts.jambaseflags then
+		ProcessJambaseFlags(opts.jambaseflags)
+	end
+	opts.jamfileflags = opts.jamfileflags and opts.jamfileflags[#opts.jamfileflags]
+	if opts.jamfileflags then
+		ProcessJamfileFlags(opts.jamfileflags)
+	end
+	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
+
 	if #errors > 0  or
 		(#nonOpts ~= 1  and  #nonOpts ~= 2) or
 		not Exporters[opts.gen]
@@ -270,12 +302,12 @@ function CreateTargetInfoFiles(outPath)
 		end
 	end
 
-	for configName in ivalues(workspaceConfigurations) do
-		DumpConfig('*', configName)
-	end
+--	for configName in ivalues(workspaceConfigurations) do
+--		DumpConfig('*', configName)
+--	end
 
 	for platformName in ivalues(workspacePlatforms) do
-		DumpConfig(platformName, '*')
+--		DumpConfig(platformName, '*')
 		for configName in ivalues(workspaceConfigurations) do
 			DumpConfig(platformName, configName)
 		end
@@ -284,7 +316,7 @@ end
 
 function ReadTargetInfoFiles(outPath)
 	for platformName in ivalues(Config.Platforms) do
-		ReadTargetInfo(outPath, platformName, '*')
+--		ReadTargetInfo(outPath, platformName, '*')
 		for configName in ivalues(Config.Configurations) do
 			ReadTargetInfo(outPath, platformName, configName)
 		end
@@ -301,6 +333,7 @@ require 'ide/vs2003'
 require 'ide/vs2005'
 require 'ide/vs2008'
 require 'ide/vs2010'
+require 'ide/vs2012'
 require 'ide/codeblocks'
 require 'ide/xcode'
 
@@ -377,6 +410,19 @@ Exporters =
 		Options =
 		{
 			vs2010 = true,
+		}
+	},
+
+	vs2012 =
+	{
+		Initialize = VisualStudio201xInitialize,
+		ProjectExporter = VisualStudio201xProject,
+		WorkspaceExporter = VisualStudio201xSolution,
+		Shutdown = VisualStudio201xShutdown,
+		Description = 'Generate Visual Studio 2012 solutions and projects.',
+		Options =
+		{
+			vs2012 = true,
 		}
 	},
 
@@ -516,7 +562,8 @@ function DumpWorkspace(workspace)
 	Projects[updateWorkspaceName] = {}
 	Projects[updateWorkspaceName].Sources =
 	{
-		jamPath:gsub('\\', '/') .. '/Jambase.jam'
+		jamPath:gsub('\\', '/') .. '/Jambase.jam',
+		os.path.combine(destinationRootPath, 'customsettings.jam'),
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	Projects[updateWorkspaceName].Name = updateWorkspaceName
@@ -578,12 +625,48 @@ function DumpWorkspace(workspace)
 end
 
 
+function GetUserInput(variable)
+    if type(variable[2]) == 'table' then
+        local values = {}
+        for _, nonExpandedValue in ipairs(variable[2]) do
+            values[#values + 1] = expand(tostring(nonExpandedValue), expandTable, _G)
+        end
+
+        local userChoice
+        while true do
+            io.write('Choose setting for ' .. variable[1] .. ':\n')
+            for index, value in ipairs(values) do
+                io.write('    ' .. index .. ') ' .. value .. '\n')
+            end
+            io.write('Your choice? ');  io.stdout:flush()
+            userChoice = tonumber(io.read('*l'))
+            if userChoice >= 1  and  userChoice <= #values then
+                break
+            end
+
+            io.write('Invalid choice.  Try again.\n\n')
+        end
+
+        variable[2] = values[userChoice]
+    end
+end
+
+
 function BuildProject()
+	-- Fill in User Variables
+	local userVariables = {}
+	if type(Config.UserVariables) == 'table' then
+		for _, variable in ipairs(Config.UserVariables) do
+		    GetUserInput(variable)
+		end
+	end
+
 	print('Creating build environment...')
 	os.mkdir(destinationRootPath)
 
 	local exporter = Exporters[opts.gen]
-	exporter.Options.compiler = opts.compiler or opts.gen
+	opts.compiler = opts.compiler  or  opts.gen
+	exporter.Options.compiler = opts.compiler
 
 	locateTargetText =
 	{
@@ -621,9 +704,14 @@ include "$(settingsFile)" ;
 	-- Write the Jamfile variables out.
 	if Config.JamfileVariables then
 		for _, variable in ipairs(Config.JamfileVariables) do
-			jamfileText[#jamfileText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2])) .. '" ;\n'
-		end
+		    GetUserInput(variable)
+            jamfileText[#jamfileText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2]), userVariables, _G) .. '" ;\n'
+        end
 		jamfileText[#jamfileText + 1] = '\n'
+	end
+
+	for _, info in ipairs(Config.JamfileFlags) do
+		jamfileText[#jamfileText + 1] = expand(info.Key .. ' = "' .. info.Value .. '" ;\n', exporter.Options, userVariables, _G)
 	end
 
 	-- Write all the SubDir roots.
@@ -690,7 +778,8 @@ include "$(settingsFile)" ;
 		-- Write the Jambase variables out.
 		if type(Config.JambaseVariables) == 'table' then
 			for _, variable in ipairs(Config.JambaseVariables) do
-				jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2]), variablesTable) .. '" ;\n'
+                GetUserInput(variable)
+				jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2]), userVariables, variablesTable) .. '" ;\n'
 			end
 			jambaseText[#jambaseText + 1] = '\n'
 		end
@@ -704,17 +793,17 @@ include "$(settingsFile)" ;
 			jambaseText[#jambaseText + 1] = '\n}\n'
 		end
 
-		for _, info in ipairs(Config.JamFlags) do
-			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
+		for _, info in ipairs(Config.JambaseFlags) do
+			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = "' .. info.Value .. '" ;\n', exporter.Options, _G)
 		end
 
 		-- Write the Jambase variables out.
 		if type(Config.JamModulesUserPath) == 'table' then
 			for _, path in ipairs(Config.JamModulesUserPath) do
-				jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(path, variablesTable) .. '" ;\n'
+				jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(path, userVariables, variablesTable) .. '" ;\n'
 			end
 		elseif type(Config.JamModulesUserPath) == 'string' then
-			jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(Config.JamModulesUserPath, variablesTable) .. '" ;\n'
+			jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(Config.JamModulesUserPath, userVariables, variablesTable) .. '" ;\n'
 		end
 
 		jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
@@ -899,7 +988,8 @@ Config.SubIncludes =
 	{ 'AppRoot', '"$(sourceRootPath)"', sourceJamfile },
 }
 
-Config.JamFlags = JamFlags
+Config.JambaseFlags = JambaseFlags
+Config.JamfileFlags = JamfileFlags
 
 -- Do the same with the destination.
 destinationRootPath = os.path.simplify(os.path.add_slash(os.path.make_absolute(nonOpts[2] or '.')))
@@ -923,7 +1013,7 @@ if opts.config then
 		os.exit(-1)
 	end
 
-	Config = table.merge(Config, configFile.Config)
+	Config = table_merge(Config, configFile.Config)
 end
 
 local result, message = xpcall(BuildProject, ErrorHandler)

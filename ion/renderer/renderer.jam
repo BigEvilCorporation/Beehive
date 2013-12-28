@@ -5,40 +5,54 @@ SRC =
 	Animation.h
 	Camera.cpp
 	Camera.h
-	Light.cpp
-	Light.h
+	Colour.cpp
+	Colour.h
+	Entity.cpp
+	Entity.h
+	Face.h
+	IndexBuffer.h
+	#Light.cpp
+	#Light.h
 	Material.cpp
 	Material.h
-	Mesh.cpp
-	Mesh.h
-	PostEffect.cpp
-	PostEffect.h
-	PostEffectBloom.cpp
-	PostEffectBloom.h
-	PostEffectMotionBlur.cpp
-	PostEffectMotionBlur.h
+	#Mesh.cpp
+	#Mesh.h
+	# PostEffect.cpp
+	# PostEffect.h
+	# PostEffectBloom.cpp
+	# PostEffectBloom.h
+	# PostEffectMotionBlur.cpp
+	# PostEffectMotionBlur.h
 	Primitive.cpp
 	Primitive.h
 	Renderer.cpp
 	Renderer.h
-	Scene.cpp
-	Scene.h
-	SceneNode.cpp
-	SceneNode.h
-	Skeleton.cpp
-	Skeleton.h
+	#Scene.cpp
+	#Scene.h
+	#SceneNode.cpp
+	#SceneNode.h
+	Shader.cpp
+	Shader.h
+	#Skeleton.cpp
+	#Skeleton.h
+	Sprite.cpp
+	Sprite.h
 	TexCoord.cpp
 	TexCoord.h
 	Texture.cpp
 	Texture.h
 	Vertex.h
-	Viewport.cpp
-	Viewport.h
+	VertexBuffer.cpp
+	VertexBuffer.h
+	#Viewport.cpp
+	#Viewport.h
 	;
 
+ApplyIonIncludes renderer ;
 ApplyWin32SDK renderer ;
-ApplyOgreSDK renderer ;
-ApplyDirectXSDK renderer ;
+# ApplyDirectXSDK renderer ;
+ApplyOpenGLSDK renderer ;
+ApplySDLSDK renderer ;
 
 AutoSourceGroup renderer : $(SRC) ;
 

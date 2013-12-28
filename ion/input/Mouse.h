@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../core/Types.h"
+#include "core/Types.h"
 
 //Need DirectInput header and device from Keyboard.h. TODO: Clean this up
 #include "Keyboard.h"
@@ -39,7 +39,7 @@ namespace ion
 
 			void ShowCursor(bool enabled);
 
-			void SetCooperativeWindow(HWND windowHandle, CoopLevel coopLevel);
+			void SetCooperativeWindow(CoopLevel coopLevel);
 
 		private:
 			LPDIRECTINPUTDEVICE8 mMouseDevice;

@@ -8,11 +8,11 @@
 #pragma once
 
 #include "Viewport.h"
-#include "../core/Types.h"
+#include "core/Types.h"
 
 #include <string>
 
-#if defined ION_OGRE
+#if defined ION_RENDERER_OGRE3D
 #include <Ogre/OgreCompositorManager.h>
 #include <Ogre/OgreCompositor.h>
 #include <Ogre/OgreCompositorInstance.h>
@@ -39,7 +39,7 @@ namespace ion
 		protected:
 			std::string mName;
 
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			Ogre::CompositorPtr mOgreCompositor;
 			Ogre::CompositorInstance::Listener* mOgreCompositorListener;
 			#endif
@@ -53,7 +53,7 @@ namespace ion
 			PostEffectTechnique(PostEffect& postEffect);
 
 		protected:
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			Ogre::CompositionTechnique* mOgreTechnique;
 			#endif
 
@@ -79,7 +79,7 @@ namespace ion
 		protected:
 			PassType mPassType;
 
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			Ogre::CompositionPass* mOgrePass;
 			Ogre::CompositionTargetPass* mOgreTargetPass;
 			u32 mOgrePassId;
@@ -99,7 +99,7 @@ namespace ion
 		protected:
 			std::string mName;
 
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			Ogre::CompositionTechnique::TextureDefinition* mTextureDef;
 			#endif
 		};

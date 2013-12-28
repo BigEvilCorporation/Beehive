@@ -7,13 +7,13 @@
 
 #pragma once
 
-#include "../core/maths/matrix.h"
+#include "maths/matrix.h"
 
 #include <vector>
 
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
 		class Animation
 		{
@@ -102,8 +102,11 @@ namespace ion
 			//Get blended value at time
 			virtual const T GetValue(float time) const = 0;
 
+			//Get time of last keyframe
+			float GetLength() const;
+
 			//Get nearest keyframes to time
-			const Keyframe<T>* GetLastKeyframe(float time) const;
+			const Keyframe<T>* GetPrevKeyframe(float time) const;
 			const Keyframe<T>* GetNextKeyframe(float time) const;
 
 			//Set/get blend mode
@@ -161,7 +164,19 @@ namespace ion
 			mKeyframes.push_back(keyframe);
 		}
 
-		template <class T> const Keyframe<T>* AnimationTrack<T>::GetLastKeyframe(float time) const
+		template <class T> float AnimationTrack<T>::GetLength() const
+		{
+			float lastTime = 0.0f;
+
+			if(mKeyframes.size() > 0)
+			{
+				lastTime = mKeyframes[mKeyframes.size() - 1].GetTime();
+			}
+
+			return lastTime;
+		}
+
+		template <class T> const Keyframe<T>* AnimationTrack<T>::GetPrevKeyframe(float time) const
 		{
 			const Keyframe<T>* idealKeyframe = NULL;
 
@@ -172,6 +187,7 @@ namespace ion
 				if(mKeyframes.size() > 1)
 				{
 					idealKeyframe = NULL;
+
 					const Keyframe<T>* prevKeyframe = &mKeyframes[0];
 
 					for(unsigned int i = 1; i < mKeyframes.size() && !idealKeyframe; i++)

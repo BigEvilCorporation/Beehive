@@ -7,25 +7,18 @@
 
 #pragma once
 
-#include "../core/Types.h"
-#include "../core/Colour.h"
-#include "../core/maths/Vector.h"
-#include "../core/Archive.h"
-#include "Vertex.h"
-#include "TexCoord.h"
-#include "Skeleton.h"
+#include "core/Types.h"
+#include "core/Colour.h"
+#include "core/maths/Vector.h"
+#include "core/Archive.h"
+#include "renderer/Vertex.h"
+#include "renderer/TexCoord.h"
+#include "renderer/Skeleton.h"
 
 #include <string>
 #include <list>
 #include <vector>
 #include <map>
-
-#if defined ION_OGRE
-#include <Ogre/OgreMesh.h>
-#include <Ogre/OgreSubMesh.h>
-#include <Ogre/OgreEntity.h>
-#include <Ogre/OgreSubEntity.h>
-#endif
 
 namespace ion
 {
@@ -55,22 +48,24 @@ namespace ion
 		class Mesh
 		{
 		public:
-			Mesh();
-			~Mesh();
+			//Factory
+			static Mesh* Create();
+			static void Release(Mesh* mesh);
 
 			class SubMesh
 			{
 			public:
-				SubMesh();
-				~SubMesh();
+				//Factory
+				static SubMesh* Create();
+				static void Release(SubMesh* subMesh);
 
 				void AddVertex(Vertex& vertex);
 				void AddNormal(Vector3& normal);
 				void AddFace(Face& face);
 
-				void MapBone(Bone& bone, u32 vertexIdx, float weight);
+				virtual void MapBone(Bone& bone, u32 vertexIdx, float weight);
 
-				void Finalise();
+				virtual void Finalise();
 
 				int GetNumVertices();
 				int GetNumNormals();
@@ -90,10 +85,12 @@ namespace ion
 				void Serialise(serialise::Archive& archive);
 
 			protected:
-				
-				void SetParentMesh(Mesh* mesh);
 
-			private:
+				SubMesh();
+				virtual ~SubMesh();
+				
+				virtual void SetParentMesh(Mesh* mesh);
+
 				std::string mName;
 				std::string mMaterialName;
 
@@ -101,27 +98,14 @@ namespace ion
 				std::vector<Vector3> mNormals;
 				std::vector<Face> mFaces;
 
-				#if defined ION_OGRE
-				Ogre::SubMesh* mOgreSubMesh;
-				Ogre::VertexData* mOgreVertexData;
-				Ogre::HardwareVertexBufferSharedPtr mOgreVertexBuffer;
-				Ogre::HardwareVertexBufferSharedPtr mOgreNormalBuffer;
-				Ogre::HardwareVertexBufferSharedPtr mOgreTexCoordBuffer;
-				Ogre::HardwareIndexBufferSharedPtr mOgreIndexBuffer;
-				int mHardwareBufferIndex;
-				#endif
-
 				friend class Mesh;
 			};
 
 			SubMesh* CreateSubMesh();
-			void Finalise();
 
-			void SetSkeleton(Skeleton& skeleton);
+			virtual void Finalise();
 
-			#if defined ION_OGRE
-			Ogre::MeshPtr& GetOgreMesh();
-			#endif
+			virtual void SetSkeleton(Skeleton& skeleton);
 
 			//Get LOD set
 			std::list<Mesh::SubMesh*>& GetSubMeshes(u32 lodLevel);
@@ -134,10 +118,9 @@ namespace ion
 
 			static const int sSerialiseVersion;
 
-		private:
-			
-			//For unique name generation
-			static int sMeshIndex;
+		protected:
+			Mesh();
+			virtual ~Mesh();
 			
 			//Submesh/LOD hierarchy
 			std::vector<std::list<SubMesh*>> mLodSets;
@@ -148,34 +131,29 @@ namespace ion
 				Vector3 min;
 				Vector3 max;
 			} mBounds;
-
-			#if defined ION_OGRE
-			Ogre::MeshPtr mOgreMesh;
-			#endif
 		};
 
 		class MeshInstance
 		{
 		public:
-			MeshInstance(Mesh& mesh, Scene& scene);
+			//Factory
+			static MeshInstance* Create();
+			static void Release(MeshInstance* meshInstance);
 
 			//TODO: Materials
 			//void SetMaterial(Material& material);
-			void SetCastShadows(bool castShadows);
-			void SetDrawDebugSkeleton(bool drawSkeleton);
+			virtual void SetCastShadows(bool castShadows);
+			virtual void SetDrawDebugSkeleton(bool drawSkeleton);
 
 			//TODO: Copy skeleton locally
-			void MapBone(Mesh::SubMesh& subMesh, Bone& bone, u32 vertexIdx, float weight);
-			void SetBoneTransform(Bone& bone, const Matrix4& transform);
-
-			#if defined ION_OGRE
-			Ogre::Entity* GetOgreEntity() const { return mOgreEntity; }
-			#endif
+			virtual void MapBone(Mesh::SubMesh& subMesh, Bone& bone, u32 vertexIdx, float weight);
+			virtual void SetBoneTransform(Bone& bone, const Matrix4& transform);
 
 		protected:
-			#if defined ION_OGRE
-			Ogre::Entity* mOgreEntity;
-			#endif
+			MeshInstance(Mesh& mesh);
+			virtual ~MeshInstance();
+
+			Mesh& mMesh;
 		};
 	}
 }

@@ -1,0 +1,19 @@
+SubDir bigevilcorp ion renderer opengl ;
+
+SRC =
+	RendererOpenGL.cpp
+	RendererOpenGL.h
+	ShaderCgGL.cpp
+	ShaderCgGL.h
+	TextureOpenGL.cpp
+	TextureOpenGL.h
+	;
+
+ApplyIonIncludes opengl ;
+ApplyOpenGLSDK opengl ;
+ApplySDLSDK opengl ;
+ApplyCgSDK opengl ;
+
+AutoSourceGroup opengl : $(SRC) ;
+
+C.Library opengl : $(SRC) ;

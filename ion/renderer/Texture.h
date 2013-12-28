@@ -7,31 +7,30 @@
 
 #pragma once
 
-#include <string>
+#include "core/Types.h"
 
-#if defined ION_OGRE
-#include <Ogre/OgreTextureManager.h>
-#endif
+#include <string>
 
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
 		class Texture
 		{
 		public:
-			bool Load(std::string filename);
+			static Texture* Create();
+			virtual ~Texture();
 
-			#if defined ION_OGRE
-			const std::string& GetOgreTextureName() const;
-			#endif
+			virtual bool Load(const std::string& filename);
 
-		private:
-		#if defined ION_OGRE
-			Ogre::TexturePtr mOgreTexture;
-			std::string mOgreTextureName;
-			static int sTextureIndex;
-		#endif
+			bool GetWidth() const;
+			bool GetHeight() const;
+
+		protected:
+			Texture();
+
+			u32 mWidth;
+			u32 mHeight;
 		};
 	}
 }

@@ -7,19 +7,12 @@
 
 #pragma once
 
-#include "../core/Types.h"
-#include "../core/maths/Matrix.h"
-#include "../core/maths/Vector.h"
-#include "../core/maths/Quaternion.h"
-#include "../core/Archive.h"
-
-#include "Animation.h"
-
-#if defined ION_OGRE
-#include <OgreBone.h>
-#include <OgreSkeleton.h>
-#include <OgreSkeletonManager.h>
-#endif
+#include "core/Types.h"
+#include "core/maths/Matrix.h"
+#include "core/maths/Vector.h"
+#include "core/maths/Quaternion.h"
+#include "core/Archive.h"
+#include "renderer/Animation.h"
 
 #include <list>
 #include <map>
@@ -43,14 +36,10 @@ namespace ion
 			//Serialise
 			void Serialise(serialise::Archive& archive);
 
-			#if defined ION_OGRE
-			Bone(const char* name, Ogre::Bone* ogreBone);
-			#endif
-
 			//Set local offset transform
-			void SetOffsetTransform(const Matrix4& transform);
-			void SetOffsetTranslation(const Vector3& translation);
-			void SetOffsetRotation(const Quaternion& rotation);
+			virtual void SetOffsetTransform(const Matrix4& transform);
+			virtual void SetOffsetTranslation(const Vector3& translation);
+			virtual void SetOffsetRotation(const Quaternion& rotation);
 
 			//Get world transform
 			const Matrix4 GetWorldTransform() const;
@@ -60,14 +49,14 @@ namespace ion
 			const Matrix4& GetBindPoseWorldTransform() const;
 
 			//Move/rotate
-			void Translate(const Vector3& positionDelta);
-			void Rotate(const Quaternion& rotationDelta);
+			virtual void Translate(const Vector3& positionDelta);
+			virtual void Rotate(const Quaternion& rotationDelta);
 
 			//Fix current position/rotation as binding pose
-			void FixBindingPose();
+			virtual void FixBindingPose();
 
 			//Reset to binding pose
-			void SetBindingPose();
+			virtual void SetBindingPose();
 
 			//Get/set parent bone
 			void SetParent(Bone* parent);
@@ -80,21 +69,10 @@ namespace ion
 			const std::string& GetParentName() const;
 			void SetParentName(const char* name);
 
-			#if defined ION_OGRE
-			void SetOgreBone(Ogre::Bone* ogreBone) { mOgreBone = ogreBone; }
-			Ogre::Bone* GetOgreBone() const { return mOgreBone; }
-			#endif
-
 #if defined ION_PLUGIN
 			//Set bind pose transforms
 			void SetLocalBindPoseTransform(const Matrix4& transform);
 			void SetWorldBindPoseTransform(const Matrix4& transform);
-
-			//Calculate world transform from object transforms, traversing up to root
-			Matrix4 CalculateWorldBindPoseTransform();
-
-			//Calculate object transform from world transforms, traversing up to root
-			Matrix4 CalculateLocalBindPoseTransform();
 #endif
 
 		protected:
@@ -108,11 +86,6 @@ namespace ion
 			std::string mName;
 			std::string mParentName;
 			Bone* mParent;
-
-			#if defined ION_OGRE
-			void UpdateOgreMtx();
-			Ogre::Bone* mOgreBone;
-			#endif
 		};
 
 		class Skeleton
@@ -132,27 +105,17 @@ namespace ion
 			Bone* FindBone(const char* name) const;
 
 			//Fix current position/rotation as binding pose
-			void FixBindingPose();
+			virtual void FixBindingPose();
 
 			//Reset to binding pose
-			void SetBindingPose();
+			virtual void SetBindingPose();
 
 			//Finalise - build tree
-			void Finalise();
-
-			#if defined ION_OGRE
-			Ogre::Skeleton* GetOgreSkeleton() const { return mOgreSkeleton.get(); }
-			#endif
+			virtual void Finalise();
 
 		protected:
-
-			static int sSkeletonIndex;
 			std::map<std::string, Bone> mBones;
-
-			#if defined ION_OGRE
-			void BuildOgreSkeleton(Bone* rootBone);
-			Ogre::SkeletonPtr mOgreSkeleton;
-			#endif
+			Bone* mRootBone;
 		};
 
 		class SkeletalAnimation : public Animation
@@ -167,7 +130,7 @@ namespace ion
 
 		private:
 			MeshInstance& mMeshInstance;
-			std::vector< std::pair<Bone*, const AnimationTrackTransform*> > mTracks;
+			std::vector<std::pair<Bone*, const AnimationTrackTransform*>> mTracks;
 		};
 	}
 }

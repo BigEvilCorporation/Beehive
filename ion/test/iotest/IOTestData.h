@@ -11,6 +11,7 @@ public:
 
 	static const u32 sVersion = 2;
 
+	//A base subclass
 	class SubClass
 	{
 	public:
@@ -31,6 +32,7 @@ public:
 		void Serialise(ion::serialise::Archive& archive);
 	};
 
+	//A derived class
 	class SubClassDerived : public SubClass
 	{
 	public:
@@ -45,6 +47,17 @@ public:
 
 		int mTestInt2;
 		int mTestInt3;
+	};
+
+	//A derived class to be strictly serialised as base (but reconstructed as derived)
+	class SubClassDerivedSerialiseAsBase : public SubClass
+	{
+	public:
+
+		SubClassDerivedSerialiseAsBase() { mDummyData = 1234; }
+
+		//Not serialised
+		int mDummyData;
 	};
 
 	TestSerialisable();
@@ -72,6 +85,7 @@ public:
 	SubClass* mTestSubClassPtrDerived1;
 	SubClassDerived* mTestSubClassPtrDerived2;
 	SubClass* mNullPtr;
+	SubClassDerivedSerialiseAsBase* mTestSubClassPtrDerived3;
 
 	void Serialise(ion::serialise::Archive& archive);
 };

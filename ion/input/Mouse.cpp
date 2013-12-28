@@ -6,8 +6,8 @@
 ///////////////////////////////////////////////////
 
 #include "Mouse.h"
-#include "../core/MemoryManager.h"
-#include "../core/Debug.h"
+#include "core/MemoryManager.h"
+#include "core/Debug.h"
 
 namespace ion
 {
@@ -122,7 +122,7 @@ namespace ion
 			::ShowCursor(enabled);
 		}
 
-		void Mouse::SetCooperativeWindow(HWND windowHandle, CoopLevel coopLevel)
+		void Mouse::SetCooperativeWindow(CoopLevel coopLevel)
 		{
 			int windowsCoopLevel = 0;
 
@@ -142,7 +142,7 @@ namespace ion
 			}
 
 			mMouseDevice->Unacquire();
-			mMouseDevice->SetCooperativeLevel(windowHandle, windowsCoopLevel);
+			mMouseDevice->SetCooperativeLevel(GetActiveWindow(), windowsCoopLevel);
 			mMouseDevice->Acquire();
 		}
 	}

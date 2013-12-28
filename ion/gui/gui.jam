@@ -32,6 +32,7 @@ SRC =
 	CommonDlg/MessageBox.h
 	;
 
+ApplyIonIncludes gui ;
 ApplyWin32SDK gui ;
 ApplyDirectXSDK gui ;
 ApplyOgreSDK gui ;

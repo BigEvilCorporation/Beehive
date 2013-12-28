@@ -2,19 +2,14 @@
 // File:		Scene.h
 // Date:		3rd August 2011
 // Authors:		Matt Phillips
-// Description:	Ogre scene manager
+// Description:	Scene manager
 ///////////////////////////////////////////////////
 
 #pragma once
 
-#include "../core/Types.h"
-#include "../core/Colour.h"
-#include "Light.h"
-#include "../core/Archive.h"
-
-#if defined ION_OGRE
-#include <Ogre/OgreSceneManager.h>
-#endif
+#include "core/Types.h"
+#include "core/Colour.h"
+#include "core/Archive.h"
 
 #include <list>
 
@@ -23,39 +18,46 @@ namespace ion
 	namespace renderer
 	{
 		//Forward declaration
-		class Primitive;
 		class Mesh;
 		class MeshInstance;
 		class SceneNode;
+		class Light;
 
 		class Scene
 		{
 		public:
-			Scene();
-			~Scene();
+			
+			//Factory
+			static Scene* Create();
+			static void Release(Scene* scene);
+
+			//Scene nodes
+			virtual void AddSceneNode(SceneNode& sceneNode);
 
 			//Lighting and shadows
-			void AddLight(Light& light);
-			void SetAmbientLight(const ColourRGB& colour);
-			void SetShadowColour(const ColourRGB& colour);
-			void SetShadowFarDistance(float distance);
-			void SetShadowTextureResolution(int resolution);
-			void SetShadowTextureCount(int count);
+			virtual void SetAmbientLight(const ColourRGB& colour);
+			virtual void SetShadowColour(const ColourRGB& colour);
+			virtual void SetShadowFarDistance(float distance);
+			virtual void SetShadowTextureResolution(int resolution);
+			virtual void SetShadowTextureCount(int count);
 
 			Mesh* GetSceneMesh();
 			std::list<Light*>& GetLights();
-
-			#if defined ION_OGRE
-			Ogre::SceneManager* GetOgreSceneMgrIFace();
-			#endif
 
 			//Serialisation
 			void Serialise(serialise::Archive& archive);
 			
 			static const int sSerialiseVersion;
 
+		protected:
+
+			//Use factory Create()/Release()
+			Scene();
+			virtual ~Scene();
+
 		private:
 
+			//Post-serialisation finalise
 			void Finalise();
 
 			//Scene mesh, instance and node
@@ -63,13 +65,18 @@ namespace ion
 			MeshInstance* mSceneMeshInstance;
 			SceneNode* mSceneMeshNode;
 
-			//Lighting
+			//Scene properties
 			ColourRGB mAmbientLight;
-			std::list<Light*> mLights;
+			ColourRGB mShadowColour;
+			float mShadowFarDistance;
+			int mShadowTextureResolution;
+			int mShadowTextureCount;
 
-			#if defined ION_OGRE
-			Ogre::SceneManager* mOgreSceneMgrIFace;
-			#endif
+			//Scene nodes
+			std::list<SceneNode*> mSceneNodes;
+
+			//Lights
+			std::list<Light*> mLights;
 		};
 	}
 }

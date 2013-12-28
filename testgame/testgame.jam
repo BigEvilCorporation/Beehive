@@ -1,0 +1,20 @@
+SubDir bigevilcorp testgame ;
+
+ApplyIonIncludes TestGame ;
+ApplyIonCore TestGame ;
+# ApplyIonEditor TestGame ;
+# ApplyIonGui TestGame ;
+ApplyIonInput TestGame ;
+ApplyIonRenderer TestGame : opengl ;
+
+SRC = 
+	main.cpp
+	TestGame.cpp
+	TestGame.h
+	Ship.cpp
+	Ship.h
+	;
+
+AutoSourceGroup TestGame : $(SRC) ;
+C.RuntimeType TestGame : dynamic ;
+C.Application TestGame : $(SRC) ;

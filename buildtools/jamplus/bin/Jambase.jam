@@ -97,8 +97,7 @@ JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../modules:R=) ;
 rule UseModule MODULE_NAME : OPTIONS
 {
 	local include_marker = included_module_$(MODULE_NAME:J=_) ;
-	if $($(include_marker))
-	{
+	if $($(include_marker))  &&  ! ( force in $(OPTIONS) ) {
 		return ;
 	}
 	$(include_marker) = true ;
@@ -137,13 +136,14 @@ rule MakeLocate TARGETS : DIRECTORY
 	# so that directory path components and other
 	# targets don't conflict.
 
-	if $(DIRECTORY)
-	{
-#		DIRECTORY = $(DIRECTORY:R=$(SUBDIR:E="")) ;
-	    LOCATE on $(TARGETS) = $(DIRECTORY) ;
-	    Depends $(TARGETS) : $(DIRECTORY[1]:G=!dir!) ;
-	    MkDir $(DIRECTORY[1]:G=!dir!) ;
+	if ! $(DIRECTORY) {
+		DIRECTORY = $(LOCATE_TARGET) ;
 	}
+#		DIRECTORY = $(DIRECTORY:R=$(SUBDIR:E="")) ;
+
+	LOCATE on $(TARGETS) = $(DIRECTORY) ;
+	Depends $(TARGETS) : $(DIRECTORY[1]:G=!dir!) ;
+	MkDir $(DIRECTORY[1]:G=!dir!) ;
 }
 
 rule MkDir
@@ -413,6 +413,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	LOCATE_SOURCE = $(LOCATE_SOURCE)$(target:E=) ;
 	LOCATE_TARGET = [ FDirName $(ALL_LOCATE_TARGET) $(_optionalRoot) $(SUBDIR_DOWN) ] ;
 	LOCATE_TARGET = $(LOCATE_TARGET)$(target:E=) ;
+
 	SOURCE_GRIST = [ FGrist $(ALL_SUBDIR_TOKENS) ] ;
 	SOURCE_GRIST = $(SOURCE_GRIST)$(target:E=) ;
 	## LOCAL CHANGE -- OPT_HEADER_CACHE_EXT.  With the header
@@ -645,11 +646,19 @@ actions piecemeal together existing removeemptydirs Clean
 	$(RM) $(>:C)
 }
 
+actions piecemeal together existing removeemptydirs CleanTree {
+	$(RM) -rf "$(2:\\)"
+}
+
 if $(NT)
 {
 	actions piecemeal together existing removeemptydirs Clean
 	{
 	$(RM) $(>:\\C)
+	}
+
+	actions piecemeal together existing removeemptydirs CleanTree {
+		rd /q /s "$(2:\\)"
 	}
 }
 
@@ -679,46 +688,10 @@ if $(NT)
 	}
 }
 
-#
-# NT specific actions
-#
-
-if $(NT) && $(MSVCNT)
-{
-	actions piecemeal together existing removeemptydirs Clean
-	{
-		$(RM) $(>:\\C)
-	}
-}
-
-if $(WIN98)
-{
-    actions existing removeemptydirs Clean
-    {
-	del $(>:\\C)
-    }
-}
-
-
 ########################################################################
 ########################################################################
 
-rule _retrieveActiveTargetName TARGET
-{
-	if $(TARGET) = * {  return C.* ;  }
-	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
-}
-
-rule RetrieveActiveTarget TARGET
-{
-	if $(TARGET) = * {  return C.* ;  }
-	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
-}
-
-########################################################################
-########################################################################
-
-actions quietly WriteFile
+actions WriteFile
 {
 	^^($(1)|$(CONTENTS))
 }
@@ -726,18 +699,17 @@ actions quietly WriteFile
 ########################################################################
 ########################################################################
 
-ACTIVE_PROJECT = "" ;
-
-rule ActiveTarget TARGET
-{
-	ACTIVE_PROJECT = $(TARGET) ;
-	if $(ALL_SUBDIR_TOKENS) {
-		SubDir : $(TARGET) ;
-	}
+rule ActiveProject TARGET {
+	return [ C.ActiveTarget $(TARGET) ] ;
 }
 
 
-rule AutoSourceGroup TARGET : SOURCES
+rule ActiveTarget TARGET {
+	return [ C.ActiveTarget $(TARGET) ] ;
+}
+
+
+rule AutoSourceGroup SOURCES
 {
 }
 

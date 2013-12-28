@@ -7,67 +7,55 @@
 
 #pragma once
 
-#include "Vertex.h"
-#include "TexCoord.h"
-#include "../core/maths/Vector.h"
-#include "../core/Colour.h"
+#include "maths/Vector.h"
+#include "renderer/colour.h"
+#include "renderer/VertexBuffer.h"
+#include "renderer/IndexBuffer.h"
+#include "renderer/Entity.h"
 
 #include <string>
 
-#if defined ION_OGRE
-#include <Ogre/OgreManualObject.h>
-#endif
-
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
 		//Forward declaration
-		class Scene;
 		class Material;
 
-		class Primitive
+		class Primitive : public Entity
 		{
 		public:
-			enum Pattern { Line, Triangle, Quad };
-			enum Projection { Proj3D, Proj2D };
-			enum QuadAxis { xy, xz, yz };
+			Primitive(Material* material);
+			virtual ~Primitive();
 
-			Primitive(Scene& scene, Projection projection);
-			~Primitive();
-
-			//Begin/end material/vertex/index list
-			void Begin(Material* material, Pattern pattern);
-			void End();
-
-			//Clear primitive
-			void Clear();
-
-			//Add components
-			void AddVertex(const Vertex& vertex);
-			void AddNormal(const Vector3& normal);
-			void AddColour(const Colour& colour);
-			void AddTextureCoord(const TexCoord& coord);
-			void AddIndex(unsigned int index);
-
-			//Add built-in primitives (no need to call Begin()/End())
-			void AddQuad(Material* material, float width, float height, QuadAxis axis, const Vector3& offset);
-			void AddBox(Material* material, const Vector3& halfExtents, const Vector3& offset);
-			void AddSphere(Material* material, float radius, int rings, int segments);
-
-			//Shadows
 			void SetCastShadows(bool shadows);
 
-			#if defined ION_OGRE
-			Ogre::ManualObject* GetOgreManualObj();
-			#endif
+			const VertexBuffer& GetVertexBuffer() const { return mVertexBuffer; }
+			const IndexBuffer& GetIndexBuffer() const { return mIndexBuffer; }
 
-		private:
-			#if defined ION_OGRE
-			Ogre::ManualObject* mManualPrimitive;
-			#endif
+		protected:
+			VertexBuffer mVertexBuffer;
+			IndexBuffer mIndexBuffer;
+			Material* mMaterial;
+		};
 
-			Projection mProjection;
+		class Quad : public Primitive
+		{
+		public:
+			enum Axis { xy, xz, yz };
+			Quad(Material* material, Axis axis, const Vector2& halfExtents, const Vector3& offset);
+		};
+
+		class Box : public Primitive
+		{
+		public:
+			Box(Material* material, const Vector3& halfExtents, const Vector3& offset);
+		};
+
+		class Sphere : public Primitive
+		{
+		public:
+			Sphere(Material* material, float radius, int rings, int segments);
 		};
 	}
 }

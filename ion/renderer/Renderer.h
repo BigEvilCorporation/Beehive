@@ -2,47 +2,83 @@
 // File:		Renderer.h
 // Date:		26th July 2011
 // Authors:		Matt Phillips
-// Description:	Ogre3D renderer
+// Description:	Renderer base class
 ///////////////////////////////////////////////////
 
 #pragma once
 
-#if defined ION_OGRE
-#include <Ogre/OgreRoot.h>
-#include <Ogre/OgreRenderWindow.h>
-#endif
+#include "maths/Matrix.h"
+#include "maths/Vector.h"
+
+#include <string>
 
 namespace ion
 {
-	namespace renderer
+	//Forward declaration
+	class Colour;
+
+	namespace render
 	{
 		//Forward declaration
-		class Viewport;
+		class VertexBuffer;
+		class IndexBuffer;
+		class Material;
+		class Texture;
 
 		class Renderer
 		{
 		public:
-			Renderer(const char* windowTitle, int windowWidth, int windowHeight, bool fullscreen, int fsaaLevel);
-			~Renderer();
+			//Alpha blending types
+			enum AlphaBlendType { NoBlend, Additive, Subtractive, Translucent };
 
-			void AddViewport(Viewport& viewport);
+			//Culling modes
+			enum CullingMode { NoCull, Clockwise, CounterClockwise };
 
-			void Update(float deltaTime);
+			//Render perspectives
+			enum PerspectiveMode { Perspective3D, Ortho2DNormalised, Ortho2DAbsolute };
 
-			void SetWindowTitle(const char* title);
+			//Render vertex pattern type
+			enum VertexPattern { Triangles, Quads };
 
-			#if defined ION_OGRE
-			Ogre::Root* GetOgreRoot();
-			Ogre::RenderWindow* GetOgreRenderWindow();
-			HWND GetWindowHandle();
-			#endif
+			static Renderer* Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+			virtual ~Renderer();
 
-		private:
-			#if defined ION_OGRE
-			Ogre::Root* mOgreRoot;
-			Ogre::RenderWindow* mOgreWindow;
-			HWND mWindowHandle;
-			#endif
+			//Update renderer
+			virtual bool Update(float deltaTime) = 0;
+
+			//The the window title
+			virtual void SetWindowTitle(const std::string& title) = 0;
+
+			//Resize callback
+			virtual void OnResize(int width, int height) = 0;
+
+			//Get dimensions
+			int GetWidth() { return mWindowWidth; }
+			int GetHeight() { return mWindowHeight; }
+
+			//Fixed function transforms
+			virtual void SetMatrix(const Matrix4& matrix) = 0;
+			virtual Matrix4 GetProjectionMatrix() = 0;
+
+			//Rendering - general
+			virtual void SwapBuffers() = 0;
+			virtual void ClearColour() = 0;
+			virtual void ClearDepth() = 0;
+			virtual void SetClearColour(const Colour& colour) = 0;
+
+			//Render states
+			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType) = 0;
+			virtual void SetFaceCulling(CullingMode cullingMode) = 0;
+
+			//Vertex buffer drawing
+			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer) = 0;
+			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer) = 0;
+
+		protected:
+			Renderer(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+
+			int mWindowWidth;
+			int mWindowHeight;
 		};
 	}
 }

@@ -1,22 +1,30 @@
 #include "core/Application.h"
-#include "core/FileSystem.h"
-#include "core/maths/Vector.h"
-#include "core/maths/Matrix.h"
+#include "core/Version.h"
+#include "core/Debug.h"
+#include "core/Thread.h"
+#include "core/Time.h"
+#include "io/fileSystem.h"
+#include "maths/Vector.h"
+#include "maths/Matrix.h"
 #include "input/Keyboard.h"
 #include "input/Mouse.h"
 #include "input/Gamepad.h"
 #include "renderer/Renderer.h"
-#include "renderer/Scene.h"
-#include "renderer/SceneNode.h"
+#include "renderer/CoordSys.h"
+#include "renderer/Colour.h"
+#include "renderer/Shader.h"
+//#include "renderer/Scene.h"
+//#include "renderer/SceneNode.h"
 #include "renderer/Camera.h"
-#include "renderer/Viewport.h"
+//#include "renderer/Viewport.h"
 #include "renderer/Primitive.h"
-#include "renderer/Mesh.h"
-#include "renderer/Light.h"
-#include "renderer/Material.h"
+//#include "renderer/Mesh.h"
+//#include "renderer/Light.h"
+//#include "renderer/Material.h"
 #include "renderer/Texture.h"
-#include "renderer/PostEffect.h"
-#include "renderer/PostEffectBloom.h"
+#include "renderer/Sprite.h"
+//#include "renderer/PostEffect.h"
+//#include "renderer/PostEffectBloom.h"
 
 class RenderTest : public ion::framework::Application
 {
@@ -30,42 +38,64 @@ public:
 	void Render();
 
 	ion::io::FileSystem* mFileSystem;
-	
-	ion::renderer::Renderer* mRenderer;
-	ion::renderer::Scene* mScene;
-	ion::renderer::Camera* mCamera;
-	ion::renderer::Viewport* mViewport;
+
 	ion::input::Keyboard* mKeyboard;
 	ion::input::Mouse* mMouse;
 	ion::input::Gamepad* mGamepad;
+	
+	ion::render::Renderer* mRenderer;
+	ion::render::Camera* mCamera;
 
-	ion::renderer::PostEffectBloom* mPostEffectBloom;
+	ion::render::Primitive* mQuad;
+	ion::render::Primitive* mBox;
+	ion::render::Primitive* mSphere;
 
-	ion::renderer::Primitive* mCube;
-	ion::renderer::SceneNode* mCubeNode;
+	ion::render::Shader* mShaderDefaultV;
+	ion::render::Shader* mShaderDefaultF;
 
-	ion::renderer::Primitive* mQuad;
-	ion::renderer::SceneNode* mQuadNode;
+	ion::render::Shader::ParamHndl<ion::Matrix4> mShaderParamWorldMtx;
+	ion::render::Shader::ParamHndl<ion::Matrix4> mShaderParamWorldViewProjMtx;
+	ion::render::Shader::ParamHndl<ion::render::Texture> mShaderParamTexture;
 
-	ion::renderer::Primitive* mSphere;
-	ion::renderer::SceneNode* mSphereNode;
+	ion::render::Texture* mTexture;
+	ion::render::Sprite* mSprite;
+	ion::render::SpriteAnimation* mSpriteAnim;
+	ion::render::AnimationTrackFloat* mSpriteAnimTrack;
 
-	ion::renderer::Mesh* mMesh;
-	ion::renderer::SceneNode* mMeshNode;
+	/*
+	ion::render::Scene* mScene;
+	ion::render::Viewport* mViewport;
 
-	ion::renderer::Light* mPointLight[4];
-	ion::renderer::Light* mSpotLight;
-	ion::renderer::Light* mDirectionalLight;
+	ion::render::PostEffectBloom* mPostEffectBloom;
 
-	ion::renderer::SceneNode* mPointLightNode[4];
-	ion::renderer::SceneNode* mSpotLightNode;
-	ion::renderer::SceneNode* mDirectionalLightNode;
+	ion::render::SceneNode* mCameraNode;
 
-	ion::renderer::Primitive* mPointLightDebugSphere[4];
-	ion::renderer::Material* mPointLightDebugSphereMaterial;
+	ion::render::Primitive* mCube;
+	ion::render::SceneNode* mCubeNode;
 
-	ion::renderer::Material* mMaterial;
-	ion::renderer::Texture* mTexture;
+	ion::render::Primitive* mQuad;
+	ion::render::SceneNode* mQuadNode;
+
+	ion::render::Primitive* mSphere;
+	ion::render::SceneNode* mSphereNode;
+
+	ion::render::Mesh* mMesh;
+	ion::render::SceneNode* mMeshNode;
+
+	ion::render::Light* mPointLight[4];
+	ion::render::Light* mSpotLight;
+	ion::render::Light* mDirectionalLight;
+
+	ion::render::SceneNode* mPointLightNode[4];
+	ion::render::SceneNode* mSpotLightNode;
+	ion::render::SceneNode* mDirectionalLightNode;
+
+	ion::render::Primitive* mPointLightDebugSphere[4];
+	ion::render::Material* mPointLightDebugSphereMaterial;
+
+	ion::render::Material* mMaterial;
+	ion::render::Texture* mTexture;
+	*/
 
 	float mCameraPitch;
 	float mCameraYaw;

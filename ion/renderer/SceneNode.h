@@ -7,53 +7,33 @@
 
 #pragma once
 
-#include "../core/maths/Vector.h"
-#include "../core/maths/Matrix.h"
-#include "../core/maths/Quaternion.h"
-
-#if defined ION_OGRE
-#include <Ogre/OgreSceneNode.h>
-#include <Ogre/OgreSceneManager.h>
-#endif
+#include "renderer/Entity.h"
 
 namespace ion
 {
 	namespace renderer
 	{
-		//Forward declaration
-		class Scene;
-		class Primitive;
-		class Camera;
-		class MeshInstance;
-		class Light;
-
-		class SceneNode
+		class SceneNode : public Entity
 		{
 		public:
-			SceneNode(Scene& scene);
-			~SceneNode();
 
-			void SetPosition(const Vector3& position);
-			void SetOrientation(const Quaternion& orientation);
-			void SetTransform(const Matrix4& matrix);
-			void SetLookAt(const Vector3& position);
+			//Factory
+			static SceneNode* Create();
+			static void Release(SceneNode* scene);
 
-			void Attach(Primitive& primitive);
-			void Attach(Camera& camera);
-			void Attach(MeshInstance& meshInstance);
-			void Attach(Light& light);
+			//Attach/remove entity
+			virtual void AttachEntity(Entity& entity);
+			virtual void RemoveEntity(Entity& entity);
 
-			void Detach(Primitive& primitive);
+		protected:
 
-			#if defined ION_OGRE
-			Ogre::SceneNode* GetOgreSceneNode();
-			#endif
+			//Use factory Create()/Release()
+			SceneNode();
+			virtual ~SceneNode();
 
 		private:
-			#if defined ION_OGRE
-			Ogre::SceneNode* mOgreSceneNode;
-			Ogre::SceneManager* mOgreScene;
-			#endif
+
+			std::list<Entity*> mEntities;
 		};
 	}
 }

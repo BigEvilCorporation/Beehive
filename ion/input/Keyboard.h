@@ -32,7 +32,7 @@ namespace ion
 
 			void Update();
 
-			void SetCooperativeWindow(HWND windowHandle, CoopLevel coopLevel);
+			void SetCooperativeWindow(CoopLevel coopLevel);
 
 		private:
 			static const int sMaxKeys = 256;

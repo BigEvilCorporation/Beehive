@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include "../core/maths/Vector.h"
+#include "maths/Vector.h"
 
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
 		typedef Vector3 Vertex;
 	}

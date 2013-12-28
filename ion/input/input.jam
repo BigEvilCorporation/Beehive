@@ -10,6 +10,7 @@ SRC =
 	Mouse.h
 	;
 
+ApplyIonIncludes input ;
 ApplyWin32SDK input ;
 ApplyXInputSDK input ;
 

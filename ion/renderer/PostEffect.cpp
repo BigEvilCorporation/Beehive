@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////
 
 #include "PostEffect.h"
-#include "../core/Debug.h"
+#include "core/Debug.h"
 
 namespace ion
 {
@@ -18,7 +18,7 @@ namespace ion
 		{
 			mName = name;
 
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mOgreCompositor = Ogre::CompositorManager::getSingleton().create(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 			mOgreCompositorListener = NULL;
 			#endif
@@ -26,7 +26,7 @@ namespace ion
 
 		void PostEffect::AssignToViewport(Viewport& viewport)
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			Ogre::CompositorInstance* compositorInstance = Ogre::CompositorManager::getSingleton().addCompositor(viewport.GetOgreViewportInterface(), mName.c_str());
 			ion::debug::Assert(compositorInstance != NULL, "PostEffect::AssignToViewport() - Could not create compositor instance, did its materials load successfully?");
 			compositorInstance->setEnabled(true);
@@ -40,14 +40,14 @@ namespace ion
 
 		PostEffectTechnique::PostEffectTechnique(PostEffect& postEffect)
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mOgreTechnique = postEffect.mOgreCompositor->createTechnique();
 			#endif
 		}
 
 		PostEffectPass::PostEffectPass(PostEffectTechnique& technique, PassType passType, bool initialOnly)
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			switch(passType)
 			{
 			case Input:
@@ -80,28 +80,28 @@ namespace ion
 
 		void PostEffectPass::SetInput(PostEffectRenderTarget& input, int index)
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mOgrePass->setInput(index, input.GetName());
 			#endif
 		}
 
 		void PostEffectPass::SetOutput(PostEffectRenderTarget& output)
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mOgreTargetPass->setOutputName(output.GetName());
 			#endif
 		}
 
 		void PostEffectPass::SetMaterial(const char* material)
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mOgrePass->setMaterialName(material);
 			#endif
 		}
 
 		u32 PostEffectPass::GetPassId() const
 		{
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			return mOgrePassId;
 			#else
 			return 0;
@@ -112,7 +112,7 @@ namespace ion
 		{
 			mName = name;
 
-			#if defined ION_OGRE
+			#if defined ION_RENDERER_OGRE3D
 			mTextureDef = technique.mOgreTechnique->createTextureDefinition(name);
 			mTextureDef->width = width;
 			mTextureDef->height = height;

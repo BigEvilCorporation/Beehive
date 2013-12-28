@@ -1,0 +1,36 @@
+SubDir bigevilcorp ion renderer ogre3d ;
+
+SRC =
+	CameraOgre.cpp
+	CameraOgre.h
+	Factory.h
+	EntityOgre.cpp
+	EntityOgre.h
+	LightOgre.cpp
+	LightOgre.h
+	MaterialOgre.cpp
+	MaterialOgre.h
+	MeshOgre.cpp
+	MeshOgre.h
+	PostEffectOgre.cpp
+	PostEffectOgre.h
+	PrimitiveOgre.cpp
+	PrimitiveOgre.h
+	SceneNodeOgre.cpp
+	SceneNodeOgre.h
+	SceneOgre.cpp
+	SceneOgre.h
+	SkeletonOgre.cpp
+	SkeletonOgre.h
+	TextureOgre.cpp
+	TextureOgre.h
+	ViewportOgre.cpp
+	ViewportOgre.h
+	;
+
+ApplyIonIncludes ogre3d ;
+ApplyOgreSDK ogre3d ;
+
+AutoSourceGroup ogre3d : $(SRC) ;
+
+C.Library ogre3d : $(SRC) ;

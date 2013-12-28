@@ -7,13 +7,9 @@
 
 #pragma once
 
-#include "../core/maths/Vector.h"
-#include "../core/Colour.h"
-#include "../core/Archive.h"
-
-#if defined ION_OGRE
-#include <Ogre/OgreLight.h>
-#endif
+#include "core/maths/Vector.h"
+#include "core/Colour.h"
+#include "core/Archive.h"
 
 namespace ion
 {
@@ -27,41 +23,33 @@ namespace ion
 		public:
 			enum Type { Point, Spot, Directional };
 
-			Light();
-			Light(Scene& scene);
-			Light(Type type, Scene& scene);
-			~Light();
+			static Light* Create();
+			static void Release(Light* light);
 
-			void SetType(Type type);
+			virtual void SetType(Type type);
 
-			void SetPosition(const Vector3& position);
-			void SetDirection(const Vector3& direction);
+			virtual void SetPosition(const Vector3& position);
+			virtual void SetDirection(const Vector3& direction);
+
 			const Vector3& GetPosition() const;
 			const Vector3& GetDirection() const;
 
-			void SetDiffuse(ColourRGB& diffuse);
-			void SetSpecular(ColourRGB& specular);
+			virtual void SetDiffuse(const ColourRGB& diffuse);
+			virtual void SetSpecular(const ColourRGB& specular);
 
-			void SetAttenuation(float maxDistance);
-			void SetSpotRange(float minAngle, float maxAngle);
+			virtual void SetAttenuation(float maxDistance);
+			virtual void SetSpotRange(float minAngle, float maxAngle);
 
-			void CastShadows(bool enabled);
-
-			void Finalise();
+			virtual void CastShadows(bool enabled);
 
 			//Serialisation
 			void Serialise(serialise::Archive& archive);
 			
 			static const int sSerialiseVersion;
 
-			#if defined ION_OGRE
-			Ogre::Light* GetOgreLightIFace();
-			#endif
-
-		private:
-			#if defined ION_OGRE
-			Ogre::Light* mOgreLight;
-			#endif
+		protected:
+			Light();
+			virtual ~Light();
 
 			Vector3 mPosition;
 			Vector3 mDirection;
