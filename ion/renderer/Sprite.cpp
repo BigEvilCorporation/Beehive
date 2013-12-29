@@ -34,8 +34,8 @@ namespace ion
 			{
 				sVertexShader = Shader::Create();
 				sPixelShader = Shader::Create();
-				sVertexShader->Load("../shaders/sprite.cgfx", "VertexProgram", Shader::Vertex);
-				sPixelShader->Load("../shaders/sprite.cgfx", "FragmentProgram", Shader::Fragment);
+				//sVertexShader->Load("../shaders/sprite.cgfx", "VertexProgram", Shader::Vertex);
+				//sPixelShader->Load("../shaders/sprite.cgfx", "FragmentProgram", Shader::Fragment);
 				sShaderParamWorldViewProjMtx = sVertexShader->CreateParamHndl<Matrix4>("gWorldViewProjectionMatrix");
 				sShaderParamDiffuseColour = sVertexShader->CreateParamHndl<Colour>("gDiffuseColour");
 				sShaderParamSpriteSheetGridSize = sVertexShader->CreateParamHndl<Vector2>("gSpriteSheetGridSize");

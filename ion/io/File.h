@@ -19,8 +19,8 @@ namespace ion
 {
 	namespace io
 	{
-		bool FileExists(std::string filename);
-		u64 GetFileSize(std::string filename);
+		bool FileExists(const std::string& filename);
+		u64 GetFileSize(const std::string& filename);
 
 		class File : public io::Stream
 		{
@@ -29,10 +29,10 @@ namespace ion
 			enum SeekMode { Start, Current };
 
 			File();
-			File(std::string filename, OpenMode openMode = OpenRead);
+			File(const std::string& filename, OpenMode openMode = OpenRead);
 			virtual ~File();
 
-			virtual bool Open(std::string filename, OpenMode openMode = OpenRead);
+			virtual bool Open(const std::string& filename, OpenMode openMode = OpenRead);
 			virtual void Close();
 
 			u64 Seek(u64 position, SeekMode origin = Current);

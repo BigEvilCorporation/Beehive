@@ -13,12 +13,12 @@ namespace ion
 {
 	namespace io
 	{
-		bool FileExists(std::string filename)
+		bool FileExists(const std::string& filename)
 		{
 			return false;
 		}
 
-		u64 GetFileSize(std::string filename)
+		u64 GetFileSize(const std::string& filename)
 		{
 			return false;
 		}
@@ -31,7 +31,7 @@ namespace ion
 			mOpen = false;
 		}
 
-		File::File(std::string filename, File::OpenMode openMode)
+		File::File(const std::string& filename, File::OpenMode openMode)
 		{
 			mOpenMode = openMode;
 			mSize = 0;
@@ -47,7 +47,7 @@ namespace ion
 				Close();
 		}
 
-		bool File::Open(std::string filename, File::OpenMode openMode)
+		bool File::Open(const std::string& filename, File::OpenMode openMode)
 		{
 			std::ios::openmode mode = std::ios::binary;
 

@@ -9,6 +9,7 @@
 #include "renderer/colour.h"
 #include "renderer/VertexBuffer.h"
 #include "renderer/IndexBuffer.h"
+#include "renderer/Shader.h"
 #include "renderer/opengl/RendererOpenGL.h"
 
 namespace ion
@@ -149,10 +150,14 @@ namespace ion
 
 			//Set window caption
 			SetWindowTitle(windowTitle);
+
+			//Initialise shader manager
+			mShaderManager = ShaderManager::Create();
 		}
 
 		RendererOpenGL::~RendererOpenGL()
 		{
+			delete mShaderManager;
 			SDL_Quit();
 		}
 

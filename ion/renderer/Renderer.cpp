@@ -22,6 +22,7 @@ namespace ion
 		{
 			mWindowWidth = windowWidth;
 			mWindowHeight = windowHeight;
+			mShaderManager = NULL;
 		}
 
 		Renderer::~Renderer()

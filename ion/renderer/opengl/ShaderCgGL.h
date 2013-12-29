@@ -12,18 +12,35 @@
 #include <Cg\cg.h>
 #include <Cg\cgGL.h>
 
+#include <Windows.h>
+#include <WinDef.h>
+#include <Wingdi.h>
+
 namespace ion
 {
 	namespace render
 	{
+		class ShaderManagerCgGL : public ShaderManager
+		{
+		public:
+			ShaderManagerCgGL();
+			virtual ~ShaderManagerCgGL();
+
+			static bool CheckCgError();
+
+			static CGcontext sCgContext;
+			static int sContextRefCount;
+
+			//Windows GL context (for multithreaded Cg)
+			static HGLRC sGLContext;
+			static HDC sHDC;
+		};
+
 		class ShaderCgGL : public Shader
 		{
 		public:
 			ShaderCgGL();
 			virtual ~ShaderCgGL();
-
-			//Load shader from file
-			virtual bool Load(const std::string& filename, const std::string& entryPoint, ProgramType programType);
 
 			//Bind/unbind
 			virtual void Bind();
@@ -47,12 +64,9 @@ namespace ion
 				CGparameter mCgParam;
 			};
 
+			virtual bool Load();
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName);
 
-			static bool CheckCgError();
-
-			static CGcontext sCgContext;
-			static int sContextRefCount;
 			CGprogram mCgProgram;
 			CGprofile mCgProfile;
 		};

@@ -6,6 +6,9 @@
 #include "io/fileSystem.h"
 #include "maths/Vector.h"
 #include "maths/Matrix.h"
+#include "io/Resource.h"
+#include "io/ResourceManager.h"
+#include "io/File.h"
 #include "input/Keyboard.h"
 #include "input/Mouse.h"
 #include "input/Gamepad.h"
@@ -39,6 +42,7 @@ public:
 	void Render();
 
 	ion::io::FileSystem* mFileSystem;
+	ion::io::ResourceManager* mResourceManager;
 
 	ion::input::Keyboard* mKeyboard;
 	ion::input::Mouse* mMouse;
@@ -50,6 +54,9 @@ public:
 	Ship* mPlayer;
 
 	ion::render::Box* mBoxPrimitive;
+
+	ion::io::ResourceHandle<ion::render::Shader> mVertexShader;
+	ion::io::ResourceHandle<ion::render::Shader> mPixelShader;
 
 	float mMouseSensitivity;
 

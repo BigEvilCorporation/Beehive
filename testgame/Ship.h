@@ -20,6 +20,8 @@ public:
 	virtual void Move(MoveDirection direction, float deltaTime);
 	virtual void Shoot(ShootType shootType);
 
+	void SetMaterial(ion::render::Material* material);
+
 protected:
 	int mHealth;
 	int mMaxHealth;

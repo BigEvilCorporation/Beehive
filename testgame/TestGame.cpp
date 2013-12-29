@@ -43,11 +43,50 @@ bool TestGame::Initialise()
 	mKeyboard->SetCooperativeWindow(ion::input::Keyboard::Exclusive);
 	mMouse->SetCooperativeWindow(ion::input::Mouse::Exclusive);
 
+	//Create resource manager
+	mResourceManager = new ion::io::ResourceManager();
+
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
 
 	//Set up game
 	mPlayer = new Ship(mSceneCylinderRadius, mSceneCylinderHeight);
+
+	ion::render::Material* material = new ion::render::Material();
+
+	mVertexShader = mResourceManager->RequestLoad<ion::render::Shader>("../shaders/default_v.ion.shader");
+
+	mResourceManager->WaitUntilEmpty();
+
+	/*ion::render::Shader* vertexShader = NULL;
+	ion::render::Shader* pixelShader = NULL;
+
+	ion::io::File fileV("../shaders/default_v.ion.shader", ion::io::File::OpenRead);
+	if(fileV.IsOpen())
+	{
+		ion::io::Archive archiveIn(fileV, ion::io::Archive::In);
+		ion::render::Shader::RegisterSerialiseType(archiveIn);
+		archiveIn.Serialise(vertexShader);
+		fileV.Close();
+	}
+
+	ion::io::File fileP("../shaders/default_p.ion.shader", ion::io::File::OpenRead);
+	if(fileP.IsOpen())
+	{
+		ion::io::Archive archiveIn(fileP, ion::io::Archive::In);
+		ion::render::Shader::RegisterSerialiseType(archiveIn);
+		archiveIn.Serialise(pixelShader);
+		fileP.Close();
+	}*/
+
+	ion::render::Texture* texture = ion::render::Texture::Create();
+	texture->Load("../textures/placeholder256.png");
+
+	material->SetVertexShader(mVertexShader.Get());
+	material->SetPixelShader(mPixelShader.Get());
+	material->AddDiffuseMap(texture);
+
+	mPlayer->SetMaterial(material);
 
 	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, 3.0f, 0.2f), ion::Vector3());
 

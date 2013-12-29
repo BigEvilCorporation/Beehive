@@ -11,20 +11,11 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	SetPosition(ion::Vector3(0.0f, sceneCylinderHeight / 2.0f, -sceneCylinderRadius));
 
 	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, 0.1f, 0.2f), ion::Vector3());
+}
 
-	mMaterial = new ion::render::Material();
-
-	ion::render::Shader* vertexShader = ion::render::Shader::Create();
-	ion::render::Shader* pixelShader = ion::render::Shader::Create();
-	vertexShader->Load("../shaders/default.cgfx", "VertexProgram", ion::render::Shader::Vertex);
-	pixelShader->Load("../shaders/default.cgfx", "FragmentProgram", ion::render::Shader::Fragment);
-
-	ion::render::Texture* texture = ion::render::Texture::Create();
-	texture->Load("../textures/placeholder256.png");
-
-	mMaterial->SetVertexShader(vertexShader);
-	mMaterial->SetPixelShader(pixelShader);
-	mMaterial->AddDiffuseMap(texture);
+void Ship::SetMaterial(ion::render::Material* material)
+{
+	mMaterial = material;
 }
 
 Ship::~Ship()
