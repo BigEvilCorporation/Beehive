@@ -31,7 +31,8 @@ namespace ion
 
 	template <typename T, int SIZE> Queue<T, SIZE>::Queue()
 	{
-
+		mProducerIdx = 0;
+		mConsumerIdx = 0;
 	}
 
 	template <typename T, int SIZE> Queue<T, SIZE>::~Queue()

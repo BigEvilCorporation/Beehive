@@ -16,6 +16,7 @@ namespace ion
 			: mResourceManager(resourceManager)
 		{
 			mFilename = filename;
+			mIsLoaded = false;
 		}
 
 		Resource::~Resource()
@@ -30,11 +31,6 @@ namespace ion
 
 		void Resource::Reference()
 		{
-			if(!mResourceCount)
-			{
-				mResourceManager.RequestLoad(*this);
-			}
-
 			//TODO: Atomic increment
 			++mResourceCount;
 		}

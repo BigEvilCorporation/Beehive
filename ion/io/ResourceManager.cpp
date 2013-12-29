@@ -21,20 +21,28 @@ namespace ion
 			delete mWorkerThread;
 		}
 
-		void ResourceManager::RequestLoad(Resource& resource)
-		{
-			mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Load, resource));
-		}
-
 		void ResourceManager::RequestUnload(Resource& resource)
 		{
 			mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Unload, resource));
 		}
 
+		void ResourceManager::WaitUntilEmpty()
+		{
+			mWorkerThread->WaitUntilEmpty();
+		}
+
 		void ResourceManager::WorkerThread::PushJob(Job& job)
 		{
 			mJobQueue.Push(job);
-			mThreadEvent.Signal();
+			mJobPushThreadEvent.Signal();
+		}
+
+		void ResourceManager::WorkerThread::WaitUntilEmpty()
+		{
+			if(!mJobQueue.IsEmpty())
+			{
+				mQueueEmptyThreadEvent.Wait();
+			}
 		}
 
 		void ResourceManager::WorkerThread::Entry()
@@ -42,7 +50,7 @@ namespace ion
 			while(true)
 			{
 				//Wait for event
-				mThreadEvent.Wait();
+				mJobPushThreadEvent.Wait();
 
 				//Pop job from queue
 				Job job = mJobQueue.Pop();
@@ -56,6 +64,11 @@ namespace ion
 				{
 					//Unload resource
 					job.mResource->Unload();
+				}
+
+				if(mJobQueue.IsEmpty())
+				{
+					mQueueEmptyThreadEvent.Signal();
 				}
 			}
 		}

@@ -10,6 +10,7 @@
 #include "maths/Vector.h"
 #include "maths/Matrix.h"
 #include "maths/Quaternion.h"
+#include "io/Archive.h"
 #include "renderer/colour.h"
 
 #include <string>
@@ -21,6 +22,16 @@ namespace ion
 	{
 		//Forward declaration
 		class Texture;
+
+		class ShaderManager
+		{
+		public:
+			static ShaderManager* Create();
+			virtual ~ShaderManager() {}
+
+		protected:
+			ShaderManager() {}
+		};
 
 		class Shader
 		{
@@ -48,8 +59,8 @@ namespace ion
 			static Shader* Create();
 			virtual ~Shader();
 
-			//Load shader from file
-			virtual bool Load(const std::string& filename, const std::string& entryPoint, ProgramType programType) = 0;
+			//Set entry point, program type and program filename
+			void SetProgram(const std::string programFilename, const std::string& entryPoint, ProgramType programtype);
 
 			//Get handle to a shader parameter
 			template <typename T> ParamHndl<T> CreateParamHndl(const std::string& name);
@@ -57,6 +68,10 @@ namespace ion
 			//Bind/unbind
 			virtual void Bind() = 0;
 			virtual void Unbind() = 0;
+
+			//Serialise
+			static void RegisterSerialiseType(io::Archive& archive);
+			void Serialise(io::Archive& archive);
 
 		protected:
 
@@ -73,8 +88,12 @@ namespace ion
 			};
 
 			Shader();
-
+			virtual bool Load() = 0;
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName) = 0;
+
+			std::string mProgramFilename;
+			std::string mEntryPoint;
+			ProgramType mProgramType;
 		};
 
 		template <typename T> Shader::ParamHndl<T> Shader::CreateParamHndl(const std::string& name)

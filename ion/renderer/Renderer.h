@@ -24,6 +24,7 @@ namespace ion
 		class IndexBuffer;
 		class Material;
 		class Texture;
+		class ShaderManager;
 
 		class Renderer
 		{
@@ -76,6 +77,8 @@ namespace ion
 
 		protected:
 			Renderer(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+
+			ShaderManager* mShaderManager;
 
 			int mWindowWidth;
 			int mWindowHeight;

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "core/Types.h"
+#include "core/Debug.h"
 #include "io/Archive.h"
 #include "io/File.h"
 
@@ -22,17 +23,16 @@ namespace ion
 		public:
 			virtual ~Resource();
 
+			void Reference();
+			void Release();
 			u32 GetResourceCount() const;
+
+			virtual bool Load() { return false; };
+			virtual void Unload() {};
+			virtual bool IsLoaded() { return false; };
 
 		protected:
 			Resource(ResourceManager& resourceManager, const std::string& filename);
-
-			virtual bool Load() = 0;
-			virtual void Unload() = 0;
-			virtual bool IsLoaded() = 0;
-
-			void Reference();
-			void Release();
 
 			ResourceManager& mResourceManager;
 			std::string mFilename;
@@ -47,15 +47,20 @@ namespace ion
 		{
 		public:
 			ResourceT(ResourceManager& resourceManager, const std::string& filename)
-				: Resource(resourceManager, filename) {}
+				: Resource(resourceManager, filename)
+			{
+				mResourceObject = NULL;
+			}
 
 			virtual ~ResourceT() {}
 
-		protected:
-			virtual bool Load() = 0;
-			virtual void Unload() = 0;
+			virtual bool Load();
+			virtual void Unload();
 			virtual bool IsLoaded() { return mIsLoaded; }
 
+			T* Get() const { return mResourceObject; }
+
+		protected:
 			T* mResourceObject;
 			bool mIsLoaded;
 		};
@@ -70,6 +75,9 @@ namespace ion
 				//Create archive for serialising in
 				Archive archiveIn(file, Archive::In);
 
+				//Register pointer type
+				T::RegisterSerialiseType(archiveIn);
+
 				//Serialise pointer
 				archiveIn.Serialise(mResourceObject);
 
@@ -79,6 +87,8 @@ namespace ion
 				//Loaded
 				mIsLoaded = true;
 			}
+
+			return mIsLoaded;
 		}
 
 		template <class T> void ResourceT<T>::Unload()
@@ -92,7 +102,7 @@ namespace ion
 		{
 		public:
 			ResourceHandle();
-			ResourceHandle(Resource* resource);
+			ResourceHandle(ResourceT<T>* resource);
 			ResourceHandle(const ResourceHandle<T>& rhs);
 			~ResourceHandle();
 
@@ -102,9 +112,10 @@ namespace ion
 			ResourceHandle<T>& operator = (const ResourceHandle& rhs);
 			operator bool () const;
 			T* operator -> () const;
+			T* Get() const;
 
 		protected:
-			T* mResource;
+			ResourceT<T>* mResource;
 
 			friend class ResourceManager;
 		};
@@ -114,7 +125,7 @@ namespace ion
 			mResource = NULL;
 		}
 
-		template <class T> ResourceHandle<T>::ResourceHandle(Resource* resource)
+		template <class T> ResourceHandle<T>::ResourceHandle(ResourceT<T>* resource)
 		{
 			mResource = resource;
 			mResource->Reference();
@@ -151,6 +162,7 @@ namespace ion
 			Clear();
 			mResource = rhs.mResource;
 			mResource->Reference();
+			return *this;
 		}
 
 		template <class T> ResourceHandle<T>::operator bool () const
@@ -158,9 +170,15 @@ namespace ion
 			return IsValid();
 		}
 
+		template <class T> T* ResourceHandle<T>::Get() const
+		{
+			debug::Assert(IsValid(), "Resource not loaded");
+			return mResource->Get();
+		}
+
 		template <class T> T* ResourceHandle<T>::operator -> () const
 		{
-			return mResource;
+			return Get();
 		}
 	}
 }
