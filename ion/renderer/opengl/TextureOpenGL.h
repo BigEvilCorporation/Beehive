@@ -9,7 +9,7 @@
 
 #include "renderer/Texture.h"
 
-#ifdef _WIN32
+#ifdef ION_PLATFORM_WINDOWS
 #include <windows.h>
 #endif
 
@@ -30,11 +30,11 @@ namespace ion
 			TextureOpenGL();
 			virtual ~TextureOpenGL();
 
-			virtual bool Load(const std::string& filename);
-
 			GLuint GetTextureId() const;
 
 		protected:
+			virtual bool Load();
+
 			GLuint mGLTextureId;
 		};
 	}

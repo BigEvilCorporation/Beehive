@@ -1,22 +1,44 @@
 SubDir bigevilcorp ion core ;
 
 SRC =
-	Application.cpp
-	Application.h
-	Debug.cpp
-	Debug.h
-	Hash.cpp
-	Hash.h
-	MemoryManager.cpp
-	MemoryManager.h
-	Thread.cpp
-	Thread.h
-	Time.cpp
-	Time.h
+	# Debugging
+	debug/Debug.cpp
+	debug/Debug.h
+
+	# Bootstrapping and entry point
+	bootstrap/Application.cpp
+	bootstrap/Application.h
+	
+	# Cryptography
+	cryptography/Hash.cpp
+	cryptography/Hash.h
+
+	# Memory management
+	memory/Memory.cpp
+	memory/Memory.h
+
+	# Threading and synchronisation
+	thread/Atomic.cpp
+	thread/Atomic.h
+	thread/CriticalSection.cpp
+	thread/CriticalSection.h
+	thread/Event.cpp
+	thread/Event.h
+	thread/Semaphore.cpp
+	thread/Semaphore.h
+	thread/Thread.cpp
+	thread/Thread.h
+
+	# System time
+	time/Time.cpp
+	time/Time.h
+
+	# Base
 	Types.h
 	version.h
 	;
 
+ApplyIonDefines core ;
 ApplyIonIncludes core ;
 ApplyWin32SDK core ;
 

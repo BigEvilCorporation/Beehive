@@ -5,7 +5,7 @@
 // Description:	OpenGL renderer implementation
 ///////////////////////////////////////////////////
 
-#include "core/Debug.h"
+#include "core/debug/Debug.h"
 #include "renderer/colour.h"
 #include "renderer/VertexBuffer.h"
 #include "renderer/IndexBuffer.h"
@@ -29,6 +29,9 @@ namespace ion
 		PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
 		PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
 		PFNGLDRAWBUFFERSPROC glDrawBuffers;
+
+		HGLRC RendererOpenGL::sGLContext = 0;
+		HDC RendererOpenGL::sHDC = 0;
 
 		Renderer* Renderer::Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 		{
@@ -153,12 +156,27 @@ namespace ion
 
 			//Initialise shader manager
 			mShaderManager = ShaderManager::Create();
+
+			//Get current GL context and DC
+			sGLContext = wglGetCurrentContext();
+			sHDC = wglGetCurrentDC();
 		}
 
 		RendererOpenGL::~RendererOpenGL()
 		{
 			delete mShaderManager;
 			SDL_Quit();
+		}
+
+		void RendererOpenGL::SetThreadGLContext()
+		{
+			HGLRC glContext = wglGetCurrentContext();
+			if(!glContext)
+			{
+				glContext = wglCreateContext(sHDC);
+				wglShareLists(sGLContext, glContext);
+				wglMakeCurrent(sHDC, glContext);
+			}
 		}
 
 		void RendererOpenGL::SetWindowTitle(const std::string& title)

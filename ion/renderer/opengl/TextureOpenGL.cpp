@@ -8,6 +8,7 @@
 #pragma once
 
 #include "renderer/OpenGL/TextureOpenGL.h"
+#include "renderer/OpenGL/RendererOpenGL.h"
 
 namespace ion
 {
@@ -16,6 +17,11 @@ namespace ion
 		Texture* Texture::Create()
 		{
 			return new TextureOpenGL();
+		}
+
+		void Texture::RegisterSerialiseType(io::Archive& archive)
+		{
+			archive.RegisterPointerTypeStrict<Texture, TextureOpenGL>();
 		}
 
 		TextureOpenGL::TextureOpenGL()
@@ -28,13 +34,16 @@ namespace ion
 
 		}
 
-		bool TextureOpenGL::Load(const std::string& filename)
+		bool TextureOpenGL::Load()
 		{
+			//Set OpenGL context for current thread
+			RendererOpenGL::SetThreadGLContext();
+
 			//New SDL surface
 			SDL_Surface* sdlSurface;
 
 			//Load the image
-			sdlSurface = IMG_Load(filename.c_str());
+			sdlSurface = IMG_Load(mImageFilename.c_str());
 
 			if(sdlSurface)
 			{

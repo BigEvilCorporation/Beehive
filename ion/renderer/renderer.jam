@@ -48,6 +48,7 @@ SRC =
 	#Viewport.h
 	;
 
+ApplyIonDefines renderer ;
 ApplyIonIncludes renderer ;
 ApplyWin32SDK renderer ;
 # ApplyDirectXSDK renderer ;

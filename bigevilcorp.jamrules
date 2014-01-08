@@ -7,6 +7,11 @@ rule ApplyIonIncludes TARGET
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion ;
 }
 
+rule ApplyIonDefines TARGET
+{
+	C.Defines $(TARGET) : ION_PLATFORM_WINDOWS ION_PLATFORMION_PLATFORM_WINDOWS ;
+}
+
 rule ApplyIonLib TARGET : LIBNAME
 {
 	SubInclude bigevilcorp ion $(LIBNAME) : $(LIBNAME) ;

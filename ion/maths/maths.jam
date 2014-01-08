@@ -11,6 +11,7 @@ SRC =
 	Vector.h
 	;
 
+ApplyIonDefines maths ;
 ApplyIonIncludes maths ;
 ApplyWin32SDK maths ;
 

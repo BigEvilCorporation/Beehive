@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include "core/Debug.h"
+#include "core/debug/Debug.h"
 #include "io/file.h"
 #include "renderer/opengl/ShaderCgGL.h"
 #include "renderer/opengl/TextureOpenGL.h"
+#include "renderer/opengl/RendererOpenGL.h"
 
 namespace ion
 {
@@ -18,8 +19,6 @@ namespace ion
 	{
 		CGcontext ShaderManagerCgGL::sCgContext = 0;
 		int ShaderManagerCgGL::sContextRefCount = 0;
-		HGLRC ShaderManagerCgGL::sGLContext = 0;
-		HDC ShaderManagerCgGL::sHDC = 0;
 
 		ShaderManager* ShaderManager::Create()
 		{
@@ -37,10 +36,6 @@ namespace ion
 
 				//Set managed texture params (automatically binds/unbinds textures)
 				cgGLSetManageTextureParameters(sCgContext, true);
-
-				//Get current GL context and DC
-				sGLContext = wglGetCurrentContext();
-				sHDC = wglGetCurrentDC();
 			}
 
 			sContextRefCount++;
@@ -89,6 +84,7 @@ namespace ion
 		ShaderCgGL::ShaderCgGL()
 		{
 			mCgProgram = 0;
+			mProgramLoaded = false;
 		}
 
 		ShaderCgGL::~ShaderCgGL()
@@ -109,16 +105,16 @@ namespace ion
 			if(file.IsOpen())
 			{
 				//Load file contents
-				int fileSize = file.GetSize();
-				char* programText = new char[fileSize + 1];
+				u64 fileSize = file.GetSize();
+				char* programText = new char[(int)fileSize + 1];
 				file.Read(programText, fileSize);
 				programText[fileSize] = 0;
 
 				//Done with file
 				file.Close();
 
-				//Set GL context for current thread
-				wglMakeCurrent(ShaderManagerCgGL::sHDC, ShaderManagerCgGL::sGLContext);
+				//Set OpenGL context for current thread
+				RendererOpenGL::SetThreadGLContext();
 
 				if(mProgramType == Vertex)
 				{
@@ -134,26 +130,23 @@ namespace ion
 				//Compile program
 				mCgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, mCgProfile, mEntryPoint.c_str(), NULL);
 
-				if(ShaderManagerCgGL::CheckCgError())
-				{
-					//Load Cg program
-					cgGLLoadProgram(mCgProgram);
-
-					if(ShaderManagerCgGL::CheckCgError())
-					{
-						result = true;
-					}
-				}
-
 				//Done with file text
 				delete programText;
 			}
 
-			return result;
+			return ShaderManagerCgGL::CheckCgError();
 		}
 
 		void ShaderCgGL::Bind()
 		{
+			if(!mProgramLoaded)
+			{
+				//Load Cg program
+				cgGLLoadProgram(mCgProgram);
+				ShaderManagerCgGL::CheckCgError();
+				mProgramLoaded = true;
+			}
+
 			cgGLEnableProfile(mCgProfile);
 			cgGLBindProgram(mCgProgram);
 			ShaderManagerCgGL::CheckCgError();

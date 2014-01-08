@@ -1,8 +1,8 @@
-#include "core/Application.h"
+#include "core/bootstrap/Application.h"
 #include "core/Version.h"
-#include "core/Debug.h"
-#include "core/Thread.h"
-#include "core/Time.h"
+#include "core/debug/Debug.h"
+#include "core/thread/Thread.h"
+#include "core/time/Time.h"
 #include "io/fileSystem.h"
 #include "maths/Vector.h"
 #include "maths/Matrix.h"
@@ -57,6 +57,7 @@ public:
 
 	ion::io::ResourceHandle<ion::render::Shader> mVertexShader;
 	ion::io::ResourceHandle<ion::render::Shader> mPixelShader;
+	ion::io::ResourceHandle<ion::render::Texture> mTexture;
 
 	float mMouseSensitivity;
 

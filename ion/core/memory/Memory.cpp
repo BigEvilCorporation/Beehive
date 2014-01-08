@@ -5,7 +5,7 @@
 // Description:	Memory management
 ///////////////////////////////////////////////////
 
-#include "MemoryManager.h"
+#include "core/memory/Memory.h"
 
 namespace ion
 {

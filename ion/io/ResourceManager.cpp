@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////
 
 #include "io/ResourceManager.h"
+#include "core/thread/Atomic.h"
 
 namespace ion
 {
@@ -21,36 +22,52 @@ namespace ion
 			delete mWorkerThread;
 		}
 
+		u32 ResourceManager::GetNumResourcesWaiting() const
+		{
+			return mWorkerThread->GetNumJobsInQueue();
+		}
+
+		void ResourceManager::RequestLoad(Resource& resource)
+		{
+			mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Load, resource));
+		}
+
 		void ResourceManager::RequestUnload(Resource& resource)
 		{
 			mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Unload, resource));
 		}
 
-		void ResourceManager::WaitUntilEmpty()
+		ResourceManager::WorkerThread::WorkerThread()
+			: mJobQueueSemaphore(sJobQueueSize)
 		{
-			mWorkerThread->WaitUntilEmpty();
+			mNumJobsInQueue = 0;
+		}
+
+		ResourceManager::WorkerThread::~WorkerThread()
+		{
+			Job shutdownJob;
+			shutdownJob.mJobType = Job::Shutdown;
+			PushJob(shutdownJob);
 		}
 
 		void ResourceManager::WorkerThread::PushJob(Job& job)
 		{
 			mJobQueue.Push(job);
-			mJobPushThreadEvent.Signal();
+			thread::atomic::Increment(mNumJobsInQueue);
+			mJobQueueSemaphore.Signal();
 		}
 
-		void ResourceManager::WorkerThread::WaitUntilEmpty()
+		u32 ResourceManager::WorkerThread::GetNumJobsInQueue() const
 		{
-			if(!mJobQueue.IsEmpty())
-			{
-				mQueueEmptyThreadEvent.Wait();
-			}
+			return mNumJobsInQueue;
 		}
 
 		void ResourceManager::WorkerThread::Entry()
 		{
 			while(true)
 			{
-				//Wait for event
-				mJobPushThreadEvent.Wait();
+				//Wait for job
+				mJobQueueSemaphore.Wait();
 
 				//Pop job from queue
 				Job job = mJobQueue.Pop();
@@ -60,16 +77,13 @@ namespace ion
 					//Load resource
 					job.mResource->Load();
 				}
-				else
+				else if(job.mJobType == ResourceManager::WorkerThread::Job::Unload)
 				{
 					//Unload resource
 					job.mResource->Unload();
 				}
 
-				if(mJobQueue.IsEmpty())
-				{
-					mQueueEmptyThreadEvent.Signal();
-				}
+				thread::atomic::Decrement(mNumJobsInQueue);
 			}
 		}
 	}

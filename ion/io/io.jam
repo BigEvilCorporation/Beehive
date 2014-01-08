@@ -19,6 +19,7 @@ SRC =
 	Stream.h
 	;
 
+ApplyIonDefines io ;
 ApplyIonIncludes io ;
 ApplyWin32SDK io ;
 

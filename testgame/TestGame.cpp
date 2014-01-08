@@ -46,6 +46,10 @@ bool TestGame::Initialise()
 	//Create resource manager
 	mResourceManager = new ion::io::ResourceManager();
 
+	//Set resource directories
+	mResourceManager->SetResourceDirectory<ion::render::Shader>("../shaders");
+	mResourceManager->SetResourceDirectory<ion::render::Texture>("../textures");
+
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
 
@@ -54,37 +58,31 @@ bool TestGame::Initialise()
 
 	ion::render::Material* material = new ion::render::Material();
 
-	mVertexShader = mResourceManager->RequestLoad<ion::render::Shader>("../shaders/default_v.ion.shader");
+	mVertexShader = mResourceManager->GetResource<ion::render::Shader>("default_v.ion.shader");
+	mPixelShader = mResourceManager->GetResource<ion::render::Shader>("default_p.ion.shader");
+	mTexture = mResourceManager->GetResource<ion::render::Texture>("placeholder256.ion.texture");
 
-	mResourceManager->WaitUntilEmpty();
-
-	/*ion::render::Shader* vertexShader = NULL;
-	ion::render::Shader* pixelShader = NULL;
-
-	ion::io::File fileV("../shaders/default_v.ion.shader", ion::io::File::OpenRead);
-	if(fileV.IsOpen())
+	while(mResourceManager->GetNumResourcesWaiting() > 0)
 	{
-		ion::io::Archive archiveIn(fileV, ion::io::Archive::In);
-		ion::render::Shader::RegisterSerialiseType(archiveIn);
-		archiveIn.Serialise(vertexShader);
-		fileV.Close();
 	}
 
-	ion::io::File fileP("../shaders/default_p.ion.shader", ion::io::File::OpenRead);
-	if(fileP.IsOpen())
-	{
-		ion::io::Archive archiveIn(fileP, ion::io::Archive::In);
-		ion::render::Shader::RegisterSerialiseType(archiveIn);
-		archiveIn.Serialise(pixelShader);
-		fileP.Close();
-	}*/
+	//ion::render::Texture* texture = ion::render::Texture::Create();
+	//texture->SetImageFilename("../textures/images/placeholder256.png");
 
-	ion::render::Texture* texture = ion::render::Texture::Create();
-	texture->Load("../textures/placeholder256.png");
+	/*
+	ion::io::File fileV("../textures/placeholder256.ion.texture", ion::io::File::OpenWrite);
+	if(fileV.IsOpen())
+	{
+		ion::io::Archive archiveIn(fileV, ion::io::Archive::Out);
+		ion::render::Texture::RegisterSerialiseType(archiveIn);
+		archiveIn.Serialise(texture);
+		fileV.Close();
+	}
+	*/
 
 	material->SetVertexShader(mVertexShader.Get());
 	material->SetPixelShader(mPixelShader.Get());
-	material->AddDiffuseMap(texture);
+	material->AddDiffuseMap(mTexture.Get());
 
 	mPlayer->SetMaterial(material);
 

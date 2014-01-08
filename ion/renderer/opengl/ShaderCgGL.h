@@ -30,10 +30,6 @@ namespace ion
 
 			static CGcontext sCgContext;
 			static int sContextRefCount;
-
-			//Windows GL context (for multithreaded Cg)
-			static HGLRC sGLContext;
-			static HDC sHDC;
 		};
 
 		class ShaderCgGL : public Shader
@@ -69,6 +65,8 @@ namespace ion
 
 			CGprogram mCgProgram;
 			CGprofile mCgProfile;
+
+			bool mProgramLoaded;
 		};
 	}
 }

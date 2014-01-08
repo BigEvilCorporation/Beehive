@@ -5,7 +5,7 @@
 // Description:	Manually built primitive
 ///////////////////////////////////////////////////
 
-#include "core/Debug.h"
+#include "core/debug/Debug.h"
 #include "renderer/Primitive.h"
 #include "renderer/Material.h"
 #include "renderer/TexCoord.h"

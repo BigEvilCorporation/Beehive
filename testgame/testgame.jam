@@ -1,5 +1,6 @@
 SubDir bigevilcorp testgame ;
 
+ApplyIonDefines TestGame ;
 ApplyIonIncludes TestGame ;
 ApplyIonCore TestGame ;
 # ApplyIonEditor TestGame ;

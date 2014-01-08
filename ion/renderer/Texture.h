@@ -8,6 +8,7 @@
 #pragma once
 
 #include "core/Types.h"
+#include "io/Archive.h"
 
 #include <string>
 
@@ -21,16 +22,24 @@ namespace ion
 			static Texture* Create();
 			virtual ~Texture();
 
-			virtual bool Load(const std::string& filename);
+			u32 GetWidth() const;
+			u32 GetHeight() const;
 
-			bool GetWidth() const;
-			bool GetHeight() const;
+			void SetImageFilename(const std::string& filename);
+
+			//Serialise
+			static void RegisterSerialiseType(io::Archive& archive);
+			void Serialise(io::Archive& archive);
 
 		protected:
 			Texture();
 
+			virtual bool Load() { return false; }
+
 			u32 mWidth;
 			u32 mHeight;
+
+			std::string mImageFilename;
 		};
 	}
 }

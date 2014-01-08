@@ -7,6 +7,7 @@
 
 #include "io/Resource.h"
 #include "io/ResourceManager.h"
+#include "core/thread/Atomic.h"
 
 namespace ion
 {
@@ -17,6 +18,7 @@ namespace ion
 		{
 			mFilename = filename;
 			mIsLoaded = false;
+			mResourceCount = 0;
 		}
 
 		Resource::~Resource()
@@ -31,14 +33,17 @@ namespace ion
 
 		void Resource::Reference()
 		{
-			//TODO: Atomic increment
-			++mResourceCount;
+			if(!mResourceCount)
+			{
+				mResourceManager.RequestLoad(*this);
+			}
+
+			thread::atomic::Increment(mResourceCount);
 		}
 
 		void Resource::Release()
 		{
-			//TODO: atomic decrement
-			--mResourceCount;
+			thread::atomic::Decrement(mResourceCount);
 
 			if(!mResourceCount)
 			{

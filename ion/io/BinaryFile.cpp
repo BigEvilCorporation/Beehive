@@ -8,9 +8,9 @@
 */
 
 #include "io/BinaryFile.h"
-#include "core/MemoryManager.h"
+#include "core/memory/Memory.h"
 
-#include "core/Debug.h"
+#include "core/debug/Debug.h"
 
 namespace ion
 {
