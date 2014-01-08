@@ -22,20 +22,29 @@ namespace ion
 
 		}
 
-		bool Texture::Load(const std::string& filename)
+		void Texture::SetImageFilename(const std::string& filename)
 		{
-			//TODO: generic texture load using image library
-			return false;
+			mImageFilename = filename;
 		}
 
-		bool Texture::GetWidth() const
+		u32 Texture::GetWidth() const
 		{
 			return mWidth;
 		}
 
-		bool Texture::GetHeight() const
+		u32 Texture::GetHeight() const
 		{
 			return mHeight;
+		}
+
+		void Texture::Serialise(io::Archive& archive)
+		{
+			archive.Serialise(mImageFilename);
+
+			if(archive.GetDirection() == io::Archive::In)
+			{
+				Load();
+			}
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////
-// File:		Thread.h
-// Date:		25th July 2011
+// File:		Event.h
+// Date:		8th January 2014
 // Authors:		Matt Phillips
 // Description:	Threading and synchronisation
 ///////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 
 #include "core/Types.h"
 
-#if defined _WIN32
+#if defined ION_PLATFORM_WINDOWS
 #include <Windows.h>
 #endif
 
@@ -17,28 +17,6 @@ namespace ion
 {
 	namespace thread
 	{
-		class Thread
-		{
-		public:
-			Thread(const char* name = NULL);
-			virtual ~Thread();
-
-			void Join();
-			u32 GetId() const;
-
-		protected:
-			virtual void Entry() = 0;
-
-		private:
-			static unsigned long WINAPI ThreadFunction(void* params);
-
-			unsigned long mThreadId;
-
-			#if defined _WIN32
-			HANDLE mThreadHndl;
-			#endif
-		};
-
 		class Event
 		{
 		public:
@@ -49,7 +27,7 @@ namespace ion
 			void Wait();
 
 		private:
-			#if defined _WIN32
+			#if defined ION_PLATFORM_WINDOWS
 			HANDLE mThreadEventHndl;
 			#endif
 		};

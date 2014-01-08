@@ -46,6 +46,15 @@ namespace ion
 			//Vertex buffer drawing
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer);
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
+
+			//Share main GL context with current thread
+			static void SetThreadGLContext();
+
+			#if defined ION_PLATFORM_WINDOWS
+			//Windows main thread GL context
+			static HGLRC sGLContext;
+			static HDC sHDC;
+			#endif
 		};
 	}
 }

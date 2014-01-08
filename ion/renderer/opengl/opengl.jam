@@ -9,6 +9,7 @@ SRC =
 	TextureOpenGL.h
 	;
 
+ApplyIonDefines opengl ;
 ApplyIonIncludes opengl ;
 ApplyOpenGLSDK opengl ;
 ApplySDLSDK opengl ;

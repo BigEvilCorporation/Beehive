@@ -10,7 +10,7 @@
 #pragma once
 
 #include "io/File.h"
-#include "core/Hash.h"
+#include "core/cryptography/Hash.h"
 
 #include <string>
 #include <list>

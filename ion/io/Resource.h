@@ -8,7 +8,7 @@
 #pragma once
 
 #include "core/Types.h"
-#include "core/Debug.h"
+#include "core/debug/Debug.h"
 #include "io/Archive.h"
 #include "io/File.h"
 
@@ -27,9 +27,9 @@ namespace ion
 			void Release();
 			u32 GetResourceCount() const;
 
-			virtual bool Load() { return false; };
+			virtual bool Load() { return false; }
 			virtual void Unload() {};
-			virtual bool IsLoaded() { return false; };
+			virtual bool IsLoaded() { return false; }
 
 		protected:
 			Resource(ResourceManager& resourceManager, const std::string& filename);
@@ -62,13 +62,17 @@ namespace ion
 
 		protected:
 			T* mResourceObject;
-			bool mIsLoaded;
 		};
 
 		template <class T> bool ResourceT<T>::Load()
 		{
+			//Prepend directory
+			std::string fullPath = mResourceManager.GetResourceDirectory<T>();
+			fullPath += "/";
+			fullPath += mFilename;
+
 			//Create and open scene file stream for reading
-			File file(mFilename, File::OpenRead);
+			File file(fullPath, File::OpenRead);
 
 			if(file.IsOpen())
 			{

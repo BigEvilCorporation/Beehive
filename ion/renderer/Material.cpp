@@ -7,7 +7,7 @@
 
 #include "renderer/Material.h"
 
-#include "core/Debug.h"
+#include "core/debug/Debug.h"
 
 namespace ion
 {

@@ -5,7 +5,7 @@
 // Description:	Threading and synchronisation
 ///////////////////////////////////////////////////
 
-#include "core/Thread.h"
+#include "core/thread/Thread.h"
 
 namespace ion
 {
@@ -18,7 +18,7 @@ namespace ion
 				name = "ion::thread";
 			}
 
-			#if defined _WIN32
+			#if defined ION_PLATFORM_WINDOWS
 			mThreadHndl = CreateThread(	NULL,                   //Default security attributes
 										0,                      //Default stack size  
 										Thread::ThreadFunction, //Thread function
@@ -55,14 +55,14 @@ namespace ion
 
 		Thread::~Thread()
 		{
-			#if defined _WIN32
+			#if defined ION_PLATFORM_WINDOWS
 			CloseHandle(mThreadHndl);
 			#endif
 		}
 
 		void Thread::Join()
 		{
-			#if defined _WIN32
+			#if defined ION_PLATFORM_WINDOWS
 			WaitForSingleObject(mThreadHndl, INFINITE);
 			#endif
 		}
@@ -77,34 +77,6 @@ namespace ion
 			Thread* thread = (Thread*)params;
 			thread->Entry();
 			return 0;
-		}
-
-		Event::Event()
-		{
-			#if defined _WIN32
-			mThreadEventHndl = CreateEvent(NULL, TRUE, FALSE, NULL);
-			#endif
-		}
-
-		Event::~Event()
-		{
-			#if defined _WIN32
-			CloseHandle(mThreadEventHndl);
-			#endif
-		}
-
-		void Event::Signal()
-		{
-			#if defined _WIN32
-			SetEvent(mThreadEventHndl);
-			#endif
-		}
-
-		void Event::Wait()
-		{
-			#if defined _WIN32
-			WaitForSingleObject(mThreadEventHndl, INFINITE);
-			#endif
 		}
 	}
 }
