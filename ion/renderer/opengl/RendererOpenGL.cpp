@@ -30,8 +30,7 @@ namespace ion
 		PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
 		PFNGLDRAWBUFFERSPROC glDrawBuffers;
 
-		HGLRC RendererOpenGL::sGLContext = 0;
-		HDC RendererOpenGL::sHDC = 0;
+		SDL_GLContext RendererOpenGL::sSDLGLContext;
 
 		Renderer* Renderer::Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 		{
@@ -41,73 +40,45 @@ namespace ion
 		RendererOpenGL::RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 			: Renderer(windowTitle, windowWidth, windowHeight, fullscreen)
 		{
-			//Env vars to tell SDL to centre its window
-			putenv("SDL_VIDEO_WINDOW_POS=center");
-			putenv("SDL_VIDEO_CENTERED=1");
+			//Set OpenGL version
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
-			//Initialise SDL
-			if(SDL_Init(SDL_INIT_VIDEO) != 0)
-			{
-				debug::Error("Could not initialise SDL");
-			}
+			//Set OpenGL flags
+			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-			//Get video info
-			const SDL_VideoInfo* sdlVideoInfo = SDL_GetVideoInfo();
-			if(!sdlVideoInfo)
-			{
-				debug::Error("Could not query SDL video info");
-			}
+			//Set window creation flags
+			int windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
-			//Get screen BPP
-			int bitsPerPixel = sdlVideoInfo->vfmt->BitsPerPixel;
-
-			//Video flags
-			int videoFlags = 0;
-			videoFlags  = SDL_OPENGL;
-			videoFlags |= SDL_HWPALETTE;
-			videoFlags |= SDL_HWSURFACE;
-			videoFlags |= SDL_HWACCEL;
-			videoFlags |= SDL_ANYFORMAT;
-			videoFlags |= SDL_OPENGLBLIT;
-
-			//Add fullscreen flag
 			if(fullscreen)
 			{
-				videoFlags |= SDL_FULLSCREEN;
+				windowFlags |= SDL_WINDOW_FULLSCREEN;
 			}
 
-			//Use double buffer
-			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
-
-			//Set depth buffer
-			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-
-			//Framebuffer colour components
-			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-			SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-
-			//Set video mode
-			if(!SDL_SetVideoMode(windowWidth, windowHeight, bitsPerPixel, videoFlags))
+			//Create window
+			mSDLWindow = SDL_CreateWindow(windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, windowFlags);
+			if(!mSDLWindow)
 			{
-				debug::Error("Unable to set SDL video mode");
+				debug::Error("Unable to create SDL window");
 			}
+
+			//Create main OpenGL context
+			sSDLGLContext = SDL_GL_CreateContext(mSDLWindow);
 
 			//Intialise OpenGL extensions
-			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) wglGetProcAddress("glActiveTextureARB");
-			glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
-			glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
-			glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC) wglGetProcAddress("glGenRenderbuffersEXT");
-			glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC) wglGetProcAddress("glBindRenderbufferEXT");
-			glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC) wglGetProcAddress("glRenderbufferStorageEXT");
-			glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) wglGetProcAddress("glFramebufferRenderbufferEXT");
-			glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
-			glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) wglGetProcAddress("glCheckFramebufferStatusEXT");
-			glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC) wglGetProcAddress("glDeleteFramebuffersEXT");
-			glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC) wglGetProcAddress("glDeleteRenderbuffersEXT");
-			glDrawBuffers = (PFNGLDRAWBUFFERSPROC) wglGetProcAddress("glDrawBuffers");
+			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) SDL_GL_GetProcAddress("glActiveTextureARB");
+			glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC) SDL_GL_GetProcAddress("glGenFramebuffersEXT");
+			glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC) SDL_GL_GetProcAddress("glBindFramebufferEXT");
+			glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC) SDL_GL_GetProcAddress("glGenRenderbuffersEXT");
+			glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC) SDL_GL_GetProcAddress("glBindRenderbufferEXT");
+			glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC) SDL_GL_GetProcAddress("glRenderbufferStorageEXT");
+			glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) SDL_GL_GetProcAddress("glFramebufferRenderbufferEXT");
+			glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
+			glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
+			glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC) SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
+			glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC) SDL_GL_GetProcAddress("glDeleteRenderbuffersEXT");
+			glDrawBuffers = (PFNGLDRAWBUFFERSPROC) SDL_GL_GetProcAddress("glDrawBuffers");
 
 			//Background colour
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -156,32 +127,33 @@ namespace ion
 
 			//Initialise shader manager
 			mShaderManager = ShaderManager::Create();
-
-			//Get current GL context and DC
-			sGLContext = wglGetCurrentContext();
-			sHDC = wglGetCurrentDC();
 		}
 
 		RendererOpenGL::~RendererOpenGL()
 		{
 			delete mShaderManager;
+			
+			SDL_GL_DeleteContext(sSDLGLContext);
+			SDL_DestroyWindow(mSDLWindow);
 			SDL_Quit();
 		}
 
 		void RendererOpenGL::SetThreadGLContext()
 		{
-			HGLRC glContext = wglGetCurrentContext();
-			if(!glContext)
-			{
-				glContext = wglCreateContext(sHDC);
-				wglShareLists(sGLContext, glContext);
-				wglMakeCurrent(sHDC, glContext);
-			}
+			//SDL_GLContext glContext = SDL_GL_GetCurrentContext();
+			//if(!glContext)
+			//{
+			//	glContext = SDL_GL_CreateContext(sSDLGLWindow);
+			//	wglShareLists(sGLContext, glContext);
+			//	wglMakeCurrent(sHDC, glContext);
+			//}
+
+			SDL_GL_MakeCurrent(SDL_GL_GetCurrentWindow(), sSDLGLContext);
 		}
 
 		void RendererOpenGL::SetWindowTitle(const std::string& title)
 		{
-			SDL_WM_SetCaption(title.c_str(), title.c_str());
+			SDL_SetWindowTitle(mSDLWindow, title.c_str());
 		}
 
 		bool RendererOpenGL::Update(float deltaTime)
@@ -250,7 +222,7 @@ namespace ion
 
 		void RendererOpenGL::SwapBuffers()
 		{
-			SDL_GL_SwapBuffers();
+			SDL_GL_SwapWindow(mSDLWindow);
 		}
 
 		void RendererOpenGL::ClearColour()

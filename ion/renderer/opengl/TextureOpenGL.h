@@ -16,7 +16,7 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDLImage/SDL_image.h>
 
 #include <string>
 
