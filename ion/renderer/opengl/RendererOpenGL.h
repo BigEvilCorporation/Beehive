@@ -50,11 +50,11 @@ namespace ion
 			//Share main GL context with current thread
 			static void SetThreadGLContext();
 
-			#if defined ION_PLATFORM_WINDOWS
-			//Windows main thread GL context
-			static HGLRC sGLContext;
-			static HDC sHDC;
-			#endif
+			//SDL window context
+			SDL_Window* mSDLWindow;
+
+			//SDL OpenGL context
+			static SDL_GLContext sSDLGLContext;
 		};
 	}
 }

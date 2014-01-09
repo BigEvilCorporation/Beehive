@@ -187,12 +187,14 @@ rule ApplyOpenGLSDK TARGET
 rule ApplySDLSDK TARGET
 {
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDL/include ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDL/include/SDL ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDLImage/include ;
 	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDL/lib ;
 
 	SDL_LIBS =
-		SDLmain.lib
-		sdl.lib
-		sdl_image.lib
+		SDL2main_d.lib
+		SDL2_d.lib
+		SDL2_image_d.lib
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(SDL_LIBS) ;
