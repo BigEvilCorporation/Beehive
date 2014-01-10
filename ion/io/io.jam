@@ -13,6 +13,7 @@ SRC =
 	FileSystem.h
 	Resource.cpp
 	Resource.h
+	ResourceHandle.h
 	ResourceManager.cpp
 	ResourceManager.h
 	Stream.cpp

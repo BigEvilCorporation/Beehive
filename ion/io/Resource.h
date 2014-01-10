@@ -9,8 +9,8 @@
 
 #include "core/Types.h"
 #include "core/debug/Debug.h"
-#include "io/Archive.h"
-#include "io/File.h"
+
+#include <string>
 
 namespace ion
 {
@@ -26,6 +26,8 @@ namespace ion
 			void Reference();
 			void Release();
 			u32 GetResourceCount() const;
+
+			const std::string& GetFilename() const;
 
 			virtual bool Load() { return false; }
 			virtual void Unload() {};
@@ -63,7 +65,21 @@ namespace ion
 		protected:
 			T* mResourceObject;
 		};
+	}
+}
 
+////////////////////////////////////////////////////////////////
+// Template definitions
+////////////////////////////////////////////////////////////////
+
+#include "io/Archive.h"
+#include "io/ResourceManager.h"
+#include "io/File.h"
+
+namespace ion
+{
+	namespace io
+	{
 		template <class T> bool ResourceT<T>::Load()
 		{
 			//Prepend directory
@@ -77,7 +93,7 @@ namespace ion
 			if(file.IsOpen())
 			{
 				//Create archive for serialising in
-				Archive archiveIn(file, Archive::In);
+				Archive archiveIn(file, Archive::In, &mResourceManager);
 
 				//Register pointer type
 				T::RegisterSerialiseType(archiveIn);
@@ -100,89 +116,6 @@ namespace ion
 			mIsLoaded = false;
 			delete mResourceObject;
 			mResourceObject = NULL;
-		}
-
-		template <class T> class ResourceHandle
-		{
-		public:
-			ResourceHandle();
-			ResourceHandle(ResourceT<T>* resource);
-			ResourceHandle(const ResourceHandle<T>& rhs);
-			~ResourceHandle();
-
-			bool IsValid() const;
-			void Clear();
-
-			ResourceHandle<T>& operator = (const ResourceHandle& rhs);
-			operator bool () const;
-			T* operator -> () const;
-			T* Get() const;
-
-		protected:
-			ResourceT<T>* mResource;
-
-			friend class ResourceManager;
-		};
-
-		template <class T> ResourceHandle<T>::ResourceHandle()
-		{
-			mResource = NULL;
-		}
-
-		template <class T> ResourceHandle<T>::ResourceHandle(ResourceT<T>* resource)
-		{
-			mResource = resource;
-			mResource->Reference();
-		}
-
-		template <class T> ResourceHandle<T>::ResourceHandle(const ResourceHandle<T>& rhs)
-		{
-			Clear();
-			mResource = rhs.mResource;
-			mResource->Reference();
-		}
-
-		template <class T> ResourceHandle<T>::~ResourceHandle()
-		{
-			Clear();
-		}
-
-		template <class T> bool ResourceHandle<T>::IsValid() const
-		{
-			return mResource && mResource->IsLoaded();
-		}
-
-		template <class T> void ResourceHandle<T>::Clear()
-		{
-			if(mResource)
-			{
-				mResource->Release();
-				mResource = NULL;
-			}
-		}
-
-		template <class T> ResourceHandle<T>& ResourceHandle<T>::operator = (const ResourceHandle& rhs)
-		{
-			Clear();
-			mResource = rhs.mResource;
-			mResource->Reference();
-			return *this;
-		}
-
-		template <class T> ResourceHandle<T>::operator bool () const
-		{
-			return IsValid();
-		}
-
-		template <class T> T* ResourceHandle<T>::Get() const
-		{
-			debug::Assert(IsValid(), "Resource not loaded");
-			return mResource->Get();
-		}
-
-		template <class T> T* ResourceHandle<T>::operator -> () const
-		{
-			return Get();
 		}
 	}
 }

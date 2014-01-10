@@ -18,6 +18,7 @@ namespace ion
 			//Set default lighting and shadows
 			SetLightingEnabled(true);
 			SetLightingMode(Phong);
+			SetBlendMode(Additive);
 			SetReceiveShadows(true);
 		}
 
@@ -53,7 +54,7 @@ namespace ion
 			}
 		}
 
-		void Material::SetVertexShader(Shader* shader)
+		void Material::SetVertexShader(const io::ResourceHandle<Shader>& shader)
 		{
 			mVertexShader = shader;
 
@@ -72,7 +73,7 @@ namespace ion
 			}
 		}
 
-		void Material::SetPixelShader(Shader* shader)
+		void Material::SetPixelShader(const io::ResourceHandle<Shader>& shader)
 		{
 			mPixelShader = shader;
 
@@ -88,6 +89,42 @@ namespace ion
 				mPixelShaderParams.mTextures.mNormalMap = shader->CreateParamHndl<Texture>("gNormalTexture");
 				mPixelShaderParams.mTextures.mOpacityMap = shader->CreateParamHndl<Texture>("gOpacityTexture");
 				mPixelShaderParams.mTextures.mSpecularMap = shader->CreateParamHndl<Texture>("gSpecularTexture");
+			}
+		}
+
+		void Material::RegisterSerialiseType(io::Archive& archive)
+		{
+			archive.RegisterPointerType<Material>();
+		}
+
+		void Material::Serialise(io::Archive& archive)
+		{
+			//Colours
+			archive.Serialise(mAmbientColour);
+			archive.Serialise(mDiffuseColour);
+			archive.Serialise(mSpecularColour);
+			archive.Serialise(mEmissiveColour);
+
+			//Textures
+			archive.Serialise(mDiffuseMaps);
+			archive.Serialise(mNormalMap);
+			archive.Serialise(mSpecularMap);
+			archive.Serialise(mOpacityMap);
+
+			//Shaders
+			archive.Serialise(mVertexShader);
+			archive.Serialise(mPixelShader);
+
+			//Params
+			archive.Serialise(mLightingEnabled);
+			archive.Serialise(mReceiveShadows);
+			archive.Serialise((u32&)mLightingMode);
+			archive.Serialise((u32&)mBlendMode);
+
+			if(archive.GetDirection() == io::Archive::In)
+			{
+				SetVertexShader(mVertexShader);
+				SetPixelShader(mPixelShader);
 			}
 		}
 
@@ -315,42 +352,49 @@ namespace ion
 			return mEmissiveColour;
 		}
 
-		void Material::AddDiffuseMap(Texture* diffuse)
+		void Material::AddDiffuseMap(const io::ResourceHandle<Texture>& diffuse)
 		{
 			mDiffuseMaps.push_back(diffuse);
 		}
 
-		void Material::SetNormalMap(Texture* normal)
+		void Material::SetNormalMap(const io::ResourceHandle<Texture>& normal)
 		{
 			mNormalMap = normal;
 		}
 
-		void Material::SetSpecularMap(Texture* specular)
+		void Material::SetSpecularMap(const io::ResourceHandle<Texture>& specular)
 		{
 			mSpecularMap = specular;
 		}
 
-		void Material::SetOpacityMap(Texture* opacity)
+		void Material::SetOpacityMap(const io::ResourceHandle<Texture>& opacity)
 		{
 			mOpacityMap = opacity;
 		}
 
-		const Texture* Material::GetDiffuseMap(int diffuseMapIdx) const
+		const io::ResourceHandle<Texture>* Material::GetDiffuseMap(int diffuseMapIdx) const
 		{
-			return mDiffuseMaps[diffuseMapIdx];
+			const io::ResourceHandle<Texture>* textureHndl = NULL;
+
+			if(diffuseMapIdx < (int)mDiffuseMaps.size())
+			{
+				textureHndl = &mDiffuseMaps[diffuseMapIdx];
+			}
+
+			return textureHndl;
 		}
 
-		const Texture* Material::GetNormalMap() const
+		const io::ResourceHandle<Texture>& Material::GetNormalMap() const
 		{
 			return mNormalMap;
 		}
 
-		const Texture* Material::GetSpecularMap() const
+		const io::ResourceHandle<Texture>& Material::GetSpecularMap() const
 		{
 			return mSpecularMap;
 		}
 
-		const Texture* Material::GetOpacityMap() const
+		const io::ResourceHandle<Texture>& Material::GetOpacityMap() const
 		{
 			return mOpacityMap;
 		}

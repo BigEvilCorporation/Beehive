@@ -30,8 +30,6 @@ namespace ion
 		PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
 		PFNGLDRAWBUFFERSPROC glDrawBuffers;
 
-		SDL_GLContext RendererOpenGL::sSDLGLContext;
-
 		Renderer* Renderer::Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 		{
 			return new RendererOpenGL(windowTitle, windowWidth, windowHeight, fullscreen);
@@ -47,6 +45,9 @@ namespace ion
 			//Set OpenGL flags
 			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+			//Set shared contexts for threading
+			SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 
 			//Set window creation flags
 			int windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
@@ -64,7 +65,10 @@ namespace ion
 			}
 
 			//Create main OpenGL context
-			sSDLGLContext = SDL_GL_CreateContext(mSDLWindow);
+			mSDLGLContext = SDL_GL_CreateContext(mSDLWindow);
+
+			//Set as current context for this thread
+			SDL_GL_MakeCurrent(mSDLWindow, mSDLGLContext);
 
 			//Intialise OpenGL extensions
 			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) SDL_GL_GetProcAddress("glActiveTextureARB");
@@ -133,7 +137,7 @@ namespace ion
 		{
 			delete mShaderManager;
 			
-			SDL_GL_DeleteContext(sSDLGLContext);
+			SDL_GL_DeleteContext(mSDLGLContext);
 			SDL_DestroyWindow(mSDLWindow);
 			SDL_Quit();
 		}
@@ -143,12 +147,9 @@ namespace ion
 			//SDL_GLContext glContext = SDL_GL_GetCurrentContext();
 			//if(!glContext)
 			//{
-			//	glContext = SDL_GL_CreateContext(sSDLGLWindow);
-			//	wglShareLists(sGLContext, glContext);
-			//	wglMakeCurrent(sHDC, glContext);
+			//	glContext = SDL_GL_CreateContext(SDL_GL_GetCurrentWindow());
+			//	SDL_GL_MakeCurrent(SDL_GL_GetCurrentWindow(), glContext);
 			//}
-
-			SDL_GL_MakeCurrent(SDL_GL_GetCurrentWindow(), sSDLGLContext);
 		}
 
 		void RendererOpenGL::SetWindowTitle(const std::string& title)

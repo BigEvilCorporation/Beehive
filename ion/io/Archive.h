@@ -21,12 +21,15 @@ namespace ion
 {
 	namespace io
 	{
+		class ResourceManager;
+		template <class T> class ResourceHandle;
+
 		class Archive
 		{
 		public:
 			enum Direction { In, Out };
 
-			Archive(Stream& stream, Direction direction, u32 version = 0);
+			Archive(Stream& stream, Direction direction, ResourceManager* resourceManager = NULL, u32 version = 0);
 
 			//Register pointer type mapping
 			template <typename T> void RegisterPointerType();
@@ -39,6 +42,9 @@ namespace ion
 
 			//Pointer serialise
 			template <typename T> void Serialise(T*& object);
+
+			//Resource serialise
+			template <typename T> void Serialise(ResourceHandle<T>& object);
 
 			//Raw serialisation (no endian flipping)
 			void Serialise(void* data, u64 size);
@@ -65,6 +71,7 @@ namespace ion
 
 			Direction GetDirection() const;
 			u32 GetVersion() const;
+			ResourceManager* GetResourceManager() const;
 
 		private:
 			//i/o stream
@@ -75,6 +82,9 @@ namespace ion
 
 			//Serialise direction
 			Direction mDirection;
+
+			//Resource manager
+			ResourceManager* mResourceManager;
 
 			//Pointer constructor/serialiser
 			struct PointerMappingBase
@@ -109,7 +119,20 @@ namespace ion
 			std::map<std::string, PointerMappingBase*> mPointerMappingsByRuntimeName;
 			std::map<std::string, PointerMappingBase*> mPointerMappingsBySerialiseName;
 		};
+	}
+}
 
+////////////////////////////////////////////////////////////////
+// Template definitions
+////////////////////////////////////////////////////////////////
+
+#include "io/ResourceHandle.h"
+#include "io/ResourceManager.h"
+
+namespace ion
+{
+	namespace io
+	{
 		template <typename T> void Archive::RegisterPointerType()
 		{
 			std::string className = typeid(T).name();
@@ -142,12 +165,12 @@ namespace ion
 
 		template <typename T> void Archive::Serialise(T*& object)
 		{
+			//Serialise NULL flag
+			bool nullPtr = (object == NULL);
+			Serialise(nullPtr);
+
 			if(GetDirection() == In)
 			{
-				//Serialise NULL flag
-				bool nullPtr = false;
-				Serialise(nullPtr);
-
 				if(nullPtr)
 				{
 					//Pointer was NULL when serialised out
@@ -172,10 +195,6 @@ namespace ion
 			}
 			else
 			{
-				//Serialise NULL flag
-				bool nullPtr = (object == NULL);
-				Serialise(nullPtr);
-
 				if(!nullPtr)
 				{
 					//Serialising pointer out, determine actual type
@@ -190,6 +209,34 @@ namespace ion
 
 					//Serialise out
 					it->second->Serialise(*this, object);
+				}
+			}
+		}
+
+		template <typename T> void Archive::Serialise(ResourceHandle<T>& handle)
+		{
+			//Serialise NULL ptr flag
+			bool validResource = handle.IsValid();
+			Serialise(validResource);
+
+			if(validResource)
+			{
+				if(GetDirection() == Archive::In)
+				{
+					debug::Assert(mResourceManager != NULL, "No ResourceManager, cannot serialise in Resources with this archive");
+
+					//Read resource name
+					std::string resourceName;
+					Serialise(resourceName);
+
+					//Request resource
+					handle = mResourceManager->GetResource<T>(resourceName);
+				}
+				else
+				{
+					//Write resource name
+					std::string resourceName = handle.GetName();
+					Serialise(resourceName);
 				}
 			}
 		}

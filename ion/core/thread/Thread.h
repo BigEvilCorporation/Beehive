@@ -17,6 +17,8 @@ namespace ion
 {
 	namespace thread
 	{
+		typedef u32 ThreadId;
+
 		class Thread
 		{
 		public:

@@ -11,7 +11,6 @@
 #include "core/thread/Thread.h"
 #include "core/thread/Semaphore.h"
 #include "core/containers/Queue.h"
-#include "io/Resource.h"
 
 #include <map>
 
@@ -19,6 +18,9 @@ namespace ion
 {
 	namespace io
 	{
+		class Resource;
+		template <class T> class ResourceHandle;
+
 		class ResourceManager
 		{
 		public:
@@ -87,7 +89,20 @@ namespace ion
 
 			friend class Resource;
 		};
+	}
+}
 
+////////////////////////////////////////////////////////////////
+// Template definitions
+////////////////////////////////////////////////////////////////
+
+#include "io/Resource.h"
+#include "io/ResourceHandle.h"
+
+namespace ion
+{
+	namespace io
+	{
 		template <class T> void ResourceManager::SetResourceDirectory(const std::string& directory)
 		{
 			std::string typeName = typeid(T).name();
