@@ -49,6 +49,7 @@ bool TestGame::Initialise()
 	//Set resource directories
 	mResourceManager->SetResourceDirectory<ion::render::Shader>("../shaders");
 	mResourceManager->SetResourceDirectory<ion::render::Texture>("../textures");
+	mResourceManager->SetResourceDirectory<ion::render::Material>("../materials");
 
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
@@ -58,33 +59,24 @@ bool TestGame::Initialise()
 
 	ion::render::Material* material = new ion::render::Material();
 
-	mVertexShader = mResourceManager->GetResource<ion::render::Shader>("default_v.ion.shader");
-	mPixelShader = mResourceManager->GetResource<ion::render::Shader>("default_p.ion.shader");
-	mTexture = mResourceManager->GetResource<ion::render::Texture>("placeholder256.ion.texture");
+	mMaterial = mResourceManager->GetResource<ion::render::Material>("ship.ion.material");
 
 	while(mResourceManager->GetNumResourcesWaiting() > 0)
 	{
 	}
 
-	//ion::render::Texture* texture = ion::render::Texture::Create();
-	//texture->SetImageFilename("../textures/images/placeholder256.png");
-
 	/*
-	ion::io::File fileV("../textures/placeholder256.ion.texture", ion::io::File::OpenWrite);
+	ion::io::File fileV("../materials/ship.ion.material", ion::io::File::OpenWrite);
 	if(fileV.IsOpen())
 	{
 		ion::io::Archive archiveIn(fileV, ion::io::Archive::Out);
-		ion::render::Texture::RegisterSerialiseType(archiveIn);
-		archiveIn.Serialise(texture);
+		ion::render::Material::RegisterSerialiseType(archiveIn);
+		archiveIn.Serialise(material);
 		fileV.Close();
 	}
 	*/
 
-	material->SetVertexShader(mVertexShader.Get());
-	material->SetPixelShader(mPixelShader.Get());
-	material->AddDiffuseMap(mTexture.Get());
-
-	mPlayer->SetMaterial(material);
+	mPlayer->SetMaterial(mMaterial.Get());
 
 	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, 3.0f, 0.2f), ion::Vector3());
 

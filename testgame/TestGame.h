@@ -1,32 +1,32 @@
-#include "core/bootstrap/Application.h"
-#include "core/Version.h"
-#include "core/debug/Debug.h"
-#include "core/thread/Thread.h"
-#include "core/time/Time.h"
-#include "io/fileSystem.h"
-#include "maths/Vector.h"
-#include "maths/Matrix.h"
-#include "io/Resource.h"
-#include "io/ResourceManager.h"
-#include "io/File.h"
-#include "input/Keyboard.h"
-#include "input/Mouse.h"
-#include "input/Gamepad.h"
-#include "renderer/Renderer.h"
-#include "renderer/Colour.h"
-#include "renderer/Shader.h"
-//#include "renderer/Scene.h"
-//#include "renderer/SceneNode.h"
-#include "renderer/Camera.h"
-//#include "renderer/Viewport.h"
-#include "renderer/Primitive.h"
-//#include "renderer/Mesh.h"
-//#include "renderer/Light.h"
-//#include "renderer/Material.h"
-#include "renderer/Texture.h"
-#include "renderer/Sprite.h"
-//#include "renderer/PostEffect.h"
-//#include "renderer/PostEffectBloom.h"
+#include <ion/core/bootstrap/Application.h>
+#include <ion/core/Version.h>
+#include <ion/core/debug/Debug.h>
+#include <ion/core/thread/Thread.h>
+#include <ion/core/time/Time.h>
+#include <ion/io/fileSystem.h>
+#include <ion/maths/Vector.h>
+#include <ion/maths/Matrix.h>
+#include <ion/io/Resource.h>
+#include <ion/io/ResourceManager.h>
+#include <ion/io/File.h>
+#include <ion/input/Keyboard.h>
+#include <ion/input/Mouse.h>
+#include <ion/input/Gamepad.h>
+#include <ion/renderer/Renderer.h>
+#include <ion/renderer/Colour.h>
+#include <ion/renderer/Shader.h>
+//#include <ion/renderer/Scene.h>
+//#include <ion/renderer/SceneNode.h>
+#include <ion/renderer/Camera.h>
+//#include <ion/renderer/Viewport.h>
+#include <ion/renderer/Primitive.h>
+//#include <ion/renderer/Mesh.h>
+//#include <ion/renderer/Light.h>
+//#include <ion/renderer/Material.h>
+#include <ion/renderer/Texture.h>
+#include <ion/renderer/Sprite.h>
+//#include <ion/renderer/PostEffect.h>
+//#include <ion/renderer/PostEffectBloom.h>
 
 #include "Ship.h"
 
@@ -55,9 +55,7 @@ public:
 
 	ion::render::Box* mBoxPrimitive;
 
-	ion::io::ResourceHandle<ion::render::Shader> mVertexShader;
-	ion::io::ResourceHandle<ion::render::Shader> mPixelShader;
-	ion::io::ResourceHandle<ion::render::Texture> mTexture;
+	ion::io::ResourceHandle<ion::render::Material> mMaterial;
 
 	float mMouseSensitivity;
 

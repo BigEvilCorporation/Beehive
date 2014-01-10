@@ -11,6 +11,8 @@
 #include "renderer/Colour.h"
 #include "renderer/Shader.h"
 #include "renderer/Texture.h"
+#include "io/Archive.h"
+#include "io/ResourceHandle.h"
 
 #include <string>
 #include <vector>
@@ -62,8 +64,8 @@ namespace ion
 			void Unbind();
 
 			//Shaders
-			void SetVertexShader(Shader* shader);
-			void SetPixelShader(Shader* shader);
+			void SetVertexShader(const io::ResourceHandle<Shader>& shader);
+			void SetPixelShader(const io::ResourceHandle<Shader>& shader);
 
 			//Colour
 			void SetAmbientColour(const Colour& ambient);
@@ -77,15 +79,15 @@ namespace ion
 			const Colour& GetEmissiveColour() const;
 
 			//Texture maps
-			void AddDiffuseMap(Texture* diffuse);
-			void SetNormalMap(Texture* normal);
-			void SetSpecularMap(Texture* specular);
-			void SetOpacityMap(Texture* opacity);
+			void AddDiffuseMap(const io::ResourceHandle<Texture>& diffuse);
+			void SetNormalMap(const io::ResourceHandle<Texture>& normal);
+			void SetSpecularMap(const io::ResourceHandle<Texture>& specular);
+			void SetOpacityMap(const io::ResourceHandle<Texture>& opacity);
 
-			const Texture* GetDiffuseMap(int diffuseMapIdx) const;
-			const Texture* GetNormalMap() const;
-			const Texture* GetSpecularMap() const;
-			const Texture* GetOpacityMap() const;
+			const io::ResourceHandle<Texture>* GetDiffuseMap(int diffuseMapIdx) const;
+			const io::ResourceHandle<Texture>& GetNormalMap() const;
+			const io::ResourceHandle<Texture>& GetSpecularMap() const;
+			const io::ResourceHandle<Texture>& GetOpacityMap() const;
 
 			int GetNumDiffuseMaps() const;
 
@@ -107,6 +109,10 @@ namespace ion
 			void SetDepthWrite(bool enabled);
 			void SetCullMode(CullMode cullMode);
 
+			//Serialisation
+			static void RegisterSerialiseType(io::Archive& archive);
+			void Serialise(io::Archive& archive);
+
 		protected:
 
 			void ApplyShaderParams(const Matrix4& worldMtx, const Matrix4& viewMtx, const Matrix4& projectionMtx);
@@ -116,13 +122,13 @@ namespace ion
 			Colour mSpecularColour;
 			Colour mEmissiveColour;
 
-			std::vector<Texture*> mDiffuseMaps;
-			Texture* mNormalMap;
-			Texture* mSpecularMap;
-			Texture* mOpacityMap;
+			std::vector<io::ResourceHandle<Texture>> mDiffuseMaps;
+			io::ResourceHandle<Texture> mNormalMap;
+			io::ResourceHandle<Texture> mSpecularMap;
+			io::ResourceHandle<Texture> mOpacityMap;
 
-			Shader* mVertexShader;
-			Shader* mPixelShader;
+			io::ResourceHandle<Shader> mVertexShader;
+			io::ResourceHandle<Shader> mPixelShader;
 
 			struct ShaderParams
 			{

@@ -50,5 +50,10 @@ namespace ion
 				mResourceManager.RequestUnload(*this);
 			}
 		}
+
+		const std::string& Resource::GetFilename() const
+		{
+			return mFilename;
+		}
 	}
 }

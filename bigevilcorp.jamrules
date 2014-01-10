@@ -4,6 +4,7 @@
 #################################################
 rule ApplyIonIncludes TARGET
 {
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp) ;
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion ;
 }
 

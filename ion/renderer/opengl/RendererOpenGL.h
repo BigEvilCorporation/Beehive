@@ -53,8 +53,8 @@ namespace ion
 			//SDL window context
 			SDL_Window* mSDLWindow;
 
-			//SDL OpenGL context
-			static SDL_GLContext sSDLGLContext;
+			//Main SDL OpenGL context
+			SDL_GLContext mSDLGLContext;
 		};
 	}
 }

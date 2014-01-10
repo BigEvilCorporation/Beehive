@@ -12,11 +12,12 @@ namespace ion
 {
 	namespace io
 	{
-		Archive::Archive(Stream& stream, Direction direction, u32 version)
+		Archive::Archive(Stream& stream, Direction direction, ResourceManager* resourceManager, u32 version)
 			: mStream(stream)
 		{
 			mDirection = direction;
 			mVersion = version;
+			mResourceManager = resourceManager;
 		}
 
 		void Archive::Serialise(void* data, u64 size)
