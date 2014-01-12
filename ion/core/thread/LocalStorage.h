@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////
-// File:		Thread.h
-// Date:		25th July 2011
+// File:		LocalStorage.h
+// Date:		10th January 2014
 // Authors:		Matt Phillips
 // Description:	Threading and synchronisation
 ///////////////////////////////////////////////////
@@ -8,6 +8,8 @@
 #pragma once
 
 #include "core/Types.h"
+#include "core/thread/CriticalSection.h"
+#include <vector>
 
 #if defined ION_PLATFORM_WINDOWS
 #include <Windows.h>
@@ -17,29 +19,24 @@ namespace ion
 {
 	namespace thread
 	{
-		typedef u32 ThreadId;
-
-		ThreadId GetCurrentThreadId();
-
-		class Thread
+		class StorageData
 		{
 		public:
-			Thread(const char* name = NULL);
-			virtual ~Thread();
+			virtual ~StorageData() {}
+		};
 
-			void Join();
-			u32 GetId() const;
+		class LocalStorage
+		{
+		public:
+			LocalStorage();
+			~LocalStorage();
 
-		protected:
-			virtual void Entry() = 0;
+			void SetData(StorageData& data);
+			StorageData* GetData() const;
 
 		private:
-			static unsigned long WINAPI ThreadFunction(void* params);
-
-			unsigned long mThreadId;
-
 			#if defined ION_PLATFORM_WINDOWS
-			HANDLE mThreadHndl;
+			DWORD mTLSIndex;
 			#endif
 		};
 	}

@@ -11,8 +11,9 @@ namespace ion
 {
 	namespace render
 	{
-		VertexBuffer::VertexBuffer()
+		VertexBuffer::VertexBuffer(Pattern pattern)
 		{
+			mPattern = pattern;
 			mNumVertices = 0;
 		}
 

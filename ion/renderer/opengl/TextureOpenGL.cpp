@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "core/debug/Debug.h"
 #include "renderer/OpenGL/TextureOpenGL.h"
 #include "renderer/OpenGL/RendererOpenGL.h"
 
@@ -26,7 +27,7 @@ namespace ion
 
 		TextureOpenGL::TextureOpenGL()
 		{
-
+			mGLTextureId = 0;
 		}
 
 		TextureOpenGL::~TextureOpenGL()
@@ -37,13 +38,10 @@ namespace ion
 		bool TextureOpenGL::Load()
 		{
 			//Set OpenGL context for current thread
-			RendererOpenGL::SetThreadGLContext();
+			RendererOpenGL::SetGLThreadContext();
 
-			//New SDL surface
-			SDL_Surface* sdlSurface;
-
-			//Load the image
-			sdlSurface = IMG_Load(mImageFilename.c_str());
+			//Load image onto a new SDL surface
+			SDL_Surface* sdlSurface = IMG_Load(mImageFilename.c_str());
 
 			if(sdlSurface)
 			{
@@ -54,14 +52,14 @@ namespace ion
 				int mode = 0;
 
 				//Check colour format
-				if (sdlSurface->format->BytesPerPixel == 4)
+				if(sdlSurface->format->BytesPerPixel == 4)
 				{
 					if (sdlSurface->format->Rmask == 0x000000ff)
 						mode = GL_RGBA;
 					else
 						mode = GL_BGRA;
 				}
-				else if (sdlSurface->format->BytesPerPixel == 3)
+				else if(sdlSurface->format->BytesPerPixel == 3)
 				{
 					if (sdlSurface->format->Rmask == 0x000000ff)
 						mode = GL_RGB;
@@ -73,6 +71,8 @@ namespace ion
 				{
 					//Generate texture
 					glGenTextures(1, &mGLTextureId);
+
+					debug::Assert(mGLTextureId != 0, "Could not create OpenGL texture");
 
 					//Bind the texture
 					glBindTexture(GL_TEXTURE_2D, mGLTextureId);

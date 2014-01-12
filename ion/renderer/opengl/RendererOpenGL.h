@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "core/thread/CriticalSection.h"
+#include "core/thread/LocalStorage.h"
 #include "renderer/Renderer.h"
 
 #include <windows.h>
@@ -47,14 +49,30 @@ namespace ion
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer);
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
 
-			//Share main GL context with current thread
-			static void SetThreadGLContext();
+			//Set OpenGL context for current thread
+			static void SetGLThreadContext();
 
-			//SDL window context
-			SDL_Window* mSDLWindow;
+		protected:
+			//SDL window context - TODO: Support for multiple windows
+			static SDL_Window* sSDLWindow;
 
-			//Main SDL OpenGL context
-			SDL_GLContext mSDLGLContext;
+			//Thread OpenGL contexts
+			static const int sMaxGLThreadContexts;
+			static std::vector<SDL_GLContext> sGLThreadContexts;
+			static thread::LocalStorage sGLThreadContextStorage;
+			static thread::CriticalSection sGLThreadContextCriticalSection;
+
+			class GLThreadContext : public thread::StorageData
+			{
+			public:
+				GLThreadContext(SDL_GLContext& context, SDL_Window& window);
+				~GLThreadContext();
+				void Set();
+
+			private:
+				SDL_Window* mSDLWindow;
+				SDL_GLContext mGLContext;
+			};
 		};
 	}
 }

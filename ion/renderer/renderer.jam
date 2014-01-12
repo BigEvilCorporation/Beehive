@@ -46,6 +46,8 @@ SRC =
 	VertexBuffer.h
 	#Viewport.cpp
 	#Viewport.h
+	Window.cpp
+	Window.h
 	;
 
 ApplyIonDefines renderer ;

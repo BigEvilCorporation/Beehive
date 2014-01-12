@@ -21,7 +21,9 @@ namespace ion
 		class VertexBuffer
 		{
 		public:
-			VertexBuffer();
+			enum Pattern { Triangles, Quads };
+
+			VertexBuffer(Pattern pattern);
 			~VertexBuffer();
 
 			void AddVertex(const Vector3& position, const Vector3& normal, const TexCoord& texCoord);
@@ -41,6 +43,7 @@ namespace ion
 			bool Unlock();
 			bool IsLocked() const { return mLocked; }
 
+			Pattern GetPattern() const { return mPattern; }
 			int GetNumVerts() const { return mNumVertices; }
 			int GetStride() const;
 
@@ -59,6 +62,8 @@ namespace ion
 			static const int sTexCoordSize = 2;
 
 			std::vector<float> mBuffer;
+
+			Pattern mPattern;
 			int mNumVertices;
 			bool mLocked;
 		};
