@@ -24,6 +24,8 @@ SRC =
 	thread/CriticalSection.h
 	thread/Event.cpp
 	thread/Event.h
+	thread/LocalStorage.cpp
+	thread/LocalStorage.h
 	thread/Semaphore.cpp
 	thread/Semaphore.h
 	thread/Thread.cpp

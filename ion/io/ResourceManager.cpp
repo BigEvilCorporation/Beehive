@@ -29,12 +29,30 @@ namespace ion
 
 		void ResourceManager::RequestLoad(Resource& resource)
 		{
-			mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Load, resource));
+			if(thread::GetCurrentThreadId() == mWorkerThread->GetId())
+			{
+				//Already on worker thread, do job immediately
+				resource.Load();
+			}
+			else
+			{
+				//Push to job to worker thread
+				mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Load, resource));
+			}
 		}
 
 		void ResourceManager::RequestUnload(Resource& resource)
 		{
-			mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Unload, resource));
+			if(thread::GetCurrentThreadId() == mWorkerThread->GetId())
+			{
+				//Already on worker thread, do job immediately
+				resource.Load();
+			}
+			else
+			{
+				//Push to job to worker thread
+				mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Unload, resource));
+			}
 		}
 
 		ResourceManager::WorkerThread::WorkerThread()

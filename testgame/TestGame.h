@@ -27,6 +27,7 @@
 #include <ion/renderer/Sprite.h>
 //#include <ion/renderer/PostEffect.h>
 //#include <ion/renderer/PostEffectBloom.h>
+#include <ion/renderer/Window.h>
 
 #include "Ship.h"
 

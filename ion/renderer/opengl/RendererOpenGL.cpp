@@ -30,6 +30,12 @@ namespace ion
 		PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
 		PFNGLDRAWBUFFERSPROC glDrawBuffers;
 
+		const int RendererOpenGL::sMaxGLThreadContexts = 8;
+		std::vector<SDL_GLContext> RendererOpenGL::sGLThreadContexts;
+		thread::LocalStorage RendererOpenGL::sGLThreadContextStorage;
+		thread::CriticalSection RendererOpenGL::sGLThreadContextCriticalSection;
+		SDL_Window* RendererOpenGL::sSDLWindow = NULL;
+
 		Renderer* Renderer::Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 		{
 			return new RendererOpenGL(windowTitle, windowWidth, windowHeight, fullscreen);
@@ -58,17 +64,23 @@ namespace ion
 			}
 
 			//Create window
-			mSDLWindow = SDL_CreateWindow(windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, windowFlags);
-			if(!mSDLWindow)
+			sSDLWindow = SDL_CreateWindow(windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, windowFlags);
+			if(!sSDLWindow)
 			{
 				debug::Error("Unable to create SDL window");
 			}
 
-			//Create main OpenGL context
-			mSDLGLContext = SDL_GL_CreateContext(mSDLWindow);
+			//Create OpenGL contexts for all threads
+			for(int i = 0; i < sMaxGLThreadContexts; i++)
+			{
+				sGLThreadContexts.push_back(SDL_GL_CreateContext(sSDLWindow));
+			}
 
-			//Set as current context for this thread
-			SDL_GL_MakeCurrent(mSDLWindow, mSDLGLContext);
+			//Set OpenGL context for this thread
+			SetGLThreadContext();
+
+			//Get version
+			const char* version = (const char*)glGetString(GL_VERSION);
 
 			//Intialise OpenGL extensions
 			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) SDL_GL_GetProcAddress("glActiveTextureARB");
@@ -137,24 +149,42 @@ namespace ion
 		{
 			delete mShaderManager;
 			
-			SDL_GL_DeleteContext(mSDLGLContext);
-			SDL_DestroyWindow(mSDLWindow);
+			SDL_DestroyWindow(sSDLWindow);
 			SDL_Quit();
 		}
 
-		void RendererOpenGL::SetThreadGLContext()
+		void RendererOpenGL::SetGLThreadContext()
 		{
-			//SDL_GLContext glContext = SDL_GL_GetCurrentContext();
-			//if(!glContext)
-			//{
-			//	glContext = SDL_GL_CreateContext(SDL_GL_GetCurrentWindow());
-			//	SDL_GL_MakeCurrent(SDL_GL_GetCurrentWindow(), glContext);
-			//}
+			GLThreadContext* threadContext = (GLThreadContext*)sGLThreadContextStorage.GetData();
+			if(!threadContext)
+			{
+				//Find a context
+				sGLThreadContextCriticalSection.Begin();
+
+				for(int i = 0; i < sMaxGLThreadContexts && !threadContext; i++)
+				{
+					if(sGLThreadContexts[i])
+					{
+						threadContext = new GLThreadContext(sGLThreadContexts[i], *sSDLWindow);
+						sGLThreadContexts[i] = NULL;
+					}
+				}
+
+				sGLThreadContextCriticalSection.End();
+
+				debug::Assert(threadContext != NULL, "Could not get OpenGL thread context");
+
+				//Store for current thread
+				sGLThreadContextStorage.SetData(*threadContext);
+			}
+
+			//Set context
+			threadContext->Set();
 		}
 
 		void RendererOpenGL::SetWindowTitle(const std::string& title)
 		{
-			SDL_SetWindowTitle(mSDLWindow, title.c_str());
+			SDL_SetWindowTitle(sSDLWindow, title.c_str());
 		}
 
 		bool RendererOpenGL::Update(float deltaTime)
@@ -223,7 +253,7 @@ namespace ion
 
 		void RendererOpenGL::SwapBuffers()
 		{
-			SDL_GL_SwapWindow(mSDLWindow);
+			SDL_GL_SwapWindow(sSDLWindow);
 		}
 
 		void RendererOpenGL::ClearColour()
@@ -305,17 +335,17 @@ namespace ion
 			int drawPattern = 0;
 			int numVertices = vertexBuffer.GetNumVerts();
 
-			//TEMP
-			if(numVertices % 3 == 0)
+			switch(vertexBuffer.GetPattern())
 			{
+			case VertexBuffer::Triangles:
 				drawPattern = GL_TRIANGLES;
-			}
-			else if(numVertices % 4 == 0)
-			{
+				break;
+
+			case VertexBuffer::Quads:
 				drawPattern = GL_QUADS;
-			}
-			else
-			{
+				break;
+
+			default:
 				debug::Error("Invalid number of vertices");
 			}
 
@@ -349,17 +379,17 @@ namespace ion
 			int drawPattern = 0;
 			int numVertices = vertexBuffer.GetNumVerts();
 
-			//TEMP
-			if(numVertices % 3 == 0)
+			switch(vertexBuffer.GetPattern())
 			{
+			case VertexBuffer::Triangles:
 				drawPattern = GL_TRIANGLES;
-			}
-			else if(numVertices % 4 == 0)
-			{
+				break;
+
+			case VertexBuffer::Quads:
 				drawPattern = GL_QUADS;
-			}
-			else
-			{
+				break;
+
+			default:
 				debug::Error("Invalid number of vertices");
 			}
 
@@ -375,6 +405,22 @@ namespace ion
 			{
 				debug::Error("Could not draw vertex buffer");
 			}
+		}
+
+		RendererOpenGL::GLThreadContext::GLThreadContext(SDL_GLContext& context, SDL_Window& window)
+		{
+			mSDLWindow = &window;
+			mGLContext = context;
+		}
+
+		RendererOpenGL::GLThreadContext::~GLThreadContext()
+		{
+			SDL_GL_DeleteContext(mGLContext);
+		}
+
+		void RendererOpenGL::GLThreadContext::Set()
+		{
+			SDL_GL_MakeCurrent(mSDLWindow, mGLContext);
 		}
 	}
 }

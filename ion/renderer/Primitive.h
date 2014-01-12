@@ -25,7 +25,7 @@ namespace ion
 		class Primitive : public Entity
 		{
 		public:
-			Primitive(Material* material);
+			Primitive(VertexBuffer::Pattern vertexPattern, Material* material);
 			virtual ~Primitive();
 
 			void SetCastShadows(bool shadows);

@@ -84,7 +84,6 @@ namespace ion
 		ShaderCgGL::ShaderCgGL()
 		{
 			mCgProgram = 0;
-			mProgramLoaded = false;
 		}
 
 		ShaderCgGL::~ShaderCgGL()
@@ -114,7 +113,7 @@ namespace ion
 				file.Close();
 
 				//Set OpenGL context for current thread
-				RendererOpenGL::SetThreadGLContext();
+				RendererOpenGL::SetGLThreadContext();
 
 				if(mProgramType == Vertex)
 				{
@@ -130,23 +129,25 @@ namespace ion
 				//Compile program
 				mCgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, mCgProfile, mEntryPoint.c_str(), NULL);
 
+				if(ShaderManagerCgGL::CheckCgError())
+				{
+					cgGLLoadProgram(mCgProgram);
+
+					if(ShaderManagerCgGL::CheckCgError())
+					{
+						result = true;
+					}
+				}
+
 				//Done with file text
 				delete programText;
 			}
 
-			return ShaderManagerCgGL::CheckCgError();
+			return result;
 		}
 
 		void ShaderCgGL::Bind()
 		{
-			if(!mProgramLoaded)
-			{
-				//Load Cg program
-				cgGLLoadProgram(mCgProgram);
-				ShaderManagerCgGL::CheckCgError();
-				mProgramLoaded = true;
-			}
-
 			cgGLEnableProfile(mCgProfile);
 			cgGLBindProgram(mCgProgram);
 			ShaderManagerCgGL::CheckCgError();

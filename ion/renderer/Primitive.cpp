@@ -15,7 +15,8 @@ namespace ion
 {
 	namespace render
 	{
-		Primitive::Primitive(Material* material)
+		Primitive::Primitive(VertexBuffer::Pattern vertexPattern, Material* material)
+			: mVertexBuffer(vertexPattern)
 		{
 			mMaterial = material;
 		}
@@ -31,7 +32,7 @@ namespace ion
 		}
 
 		Quad::Quad(Material* material, Axis axis, const Vector2& halfExtents, const Vector3& offset)
-			: Primitive(material)
+			: Primitive(VertexBuffer::Triangles, material)
 		{
 			if(axis == xy)
 			{
@@ -60,7 +61,7 @@ namespace ion
 		}
 
 		Box::Box(Material* material, const Vector3& halfExtents, const Vector3& offset)
-			: Primitive(material)
+			: Primitive(VertexBuffer::Triangles, material)
 		{
 			//Top
 			mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z + halfExtents.z), Vector3(0.0f, 1.0f, 0.0f), TexCoord(0.0f, 1.0f));
@@ -123,7 +124,7 @@ namespace ion
 		}
 
 		Sphere::Sphere(Material* material, float radius, int rings, int segments)
-			: Primitive(material)
+			: Primitive(VertexBuffer::Triangles, material)
 		{
 			float deltaRingAngle = (maths::PI / rings);
 			float deltaSegAngle = (2.0f * maths::PI / segments);

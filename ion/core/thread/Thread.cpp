@@ -11,6 +11,13 @@ namespace ion
 {
 	namespace thread
 	{
+		ThreadId GetCurrentThreadId()
+		{
+			#if defined ION_PLATFORM_WINDOWS
+			return (ThreadId)::GetCurrentThreadId();
+			#endif
+		}
+
 		Thread::Thread(const char* name)
 		{
 			if(!name)
