@@ -37,9 +37,6 @@ namespace ion
 
 		bool TextureOpenGL::Load()
 		{
-			//Set OpenGL context for current thread
-			RendererOpenGL::SetGLThreadContext();
-
 			//Load image onto a new SDL surface
 			SDL_Surface* sdlSurface = IMG_Load(mImageFilename.c_str());
 
@@ -69,6 +66,9 @@ namespace ion
 					
 				if(mode != 0)
 				{
+					//GL thread safety
+					RendererOpenGL::LockGLContext();
+
 					//Generate texture
 					glGenTextures(1, &mGLTextureId);
 
@@ -89,6 +89,9 @@ namespace ion
 
 					//Unbind texture
 					glBindTexture(GL_TEXTURE_2D, 0);
+
+					//GL thread safety
+					RendererOpenGL::UnlockGLContext();
 				}
 
 				//Free SDL surface

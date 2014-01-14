@@ -9,8 +9,9 @@
 
 #include "renderer/Shader.h"
 
-#include <Cg\cg.h>
-#include <Cg\cgGL.h>
+#include <GL/glew.h>
+#include <Cg/cg.h>
+#include <Cg/cgGL.h>
 
 #include <Windows.h>
 #include <WinDef.h>

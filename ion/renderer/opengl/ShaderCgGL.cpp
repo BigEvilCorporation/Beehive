@@ -29,6 +29,8 @@ namespace ion
 		{
 			if(!sContextRefCount)
 			{
+				RendererOpenGL::LockGLContext();
+
 				sCgContext = cgCreateContext();
 
 				//Case sensitive semantics
@@ -36,6 +38,8 @@ namespace ion
 
 				//Set managed texture params (automatically binds/unbinds textures)
 				cgGLSetManageTextureParameters(sCgContext, true);
+
+				RendererOpenGL::UnlockGLContext();
 			}
 
 			sContextRefCount++;
@@ -53,6 +57,7 @@ namespace ion
 
 		bool ShaderManagerCgGL::CheckCgError()
 		{
+			RendererOpenGL::LockGLContext();
 			CGerror error = cgGetError();
 
 			if(error)
@@ -67,6 +72,8 @@ namespace ion
 
 				debug::Error(errorStr.c_str());
 			}
+
+			RendererOpenGL::UnlockGLContext();
 
 			return error == CG_NO_ERROR;
 		}
@@ -90,7 +97,9 @@ namespace ion
 		{
 			if(mCgProgram)
 			{
+				RendererOpenGL::LockGLContext();
 				cgDestroyProgram(mCgProgram);
+				RendererOpenGL::UnlockGLContext();
 			}
 		}
 
@@ -112,8 +121,8 @@ namespace ion
 				//Done with file
 				file.Close();
 
-				//Set OpenGL context for current thread
-				RendererOpenGL::SetGLThreadContext();
+				//OpenGL thread safety
+				RendererOpenGL::LockGLContext();
 
 				if(mProgramType == Vertex)
 				{
@@ -129,15 +138,10 @@ namespace ion
 				//Compile program
 				mCgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, mCgProfile, mEntryPoint.c_str(), NULL);
 
-				if(ShaderManagerCgGL::CheckCgError())
-				{
-					cgGLLoadProgram(mCgProgram);
+				result = ShaderManagerCgGL::CheckCgError();
 
-					if(ShaderManagerCgGL::CheckCgError())
-					{
-						result = true;
-					}
-				}
+				//OpenGL thread safety
+				RendererOpenGL::UnlockGLContext();
 
 				//Done with file text
 				delete programText;
@@ -148,16 +152,21 @@ namespace ion
 
 		void ShaderCgGL::Bind()
 		{
+			RendererOpenGL::LockGLContext();
+			cgGLLoadProgram(mCgProgram);
 			cgGLEnableProfile(mCgProfile);
 			cgGLBindProgram(mCgProgram);
 			ShaderManagerCgGL::CheckCgError();
+			RendererOpenGL::UnlockGLContext();
 		}
 
 		void ShaderCgGL::Unbind()
 		{
+			RendererOpenGL::LockGLContext();
 			cgGLUnbindProgram(mCgProfile);
 			cgGLDisableProfile(mCgProfile);
 			ShaderManagerCgGL::CheckCgError();
+			RendererOpenGL::UnlockGLContext();
 		}
 
 		Shader::ShaderParamDelegate* ShaderCgGL::CreateShaderParamDelegate(const std::string& paramName)

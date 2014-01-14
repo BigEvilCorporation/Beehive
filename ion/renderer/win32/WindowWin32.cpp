@@ -59,6 +59,9 @@ namespace ion
 				debug::Error("Could not create window");
 			}
 
+			//Get draw context
+			mDrawContext = GetDC(mWindowHandle);
+
 			//Show and update
 			ShowWindow(mWindowHandle, SW_SHOW);
 			UpdateWindow(mWindowHandle);

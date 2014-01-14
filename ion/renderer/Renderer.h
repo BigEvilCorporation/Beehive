@@ -9,6 +9,7 @@
 
 #include "maths/Matrix.h"
 #include "maths/Vector.h"
+#include "renderer/Window.h"
 
 #include <string>
 
@@ -44,18 +45,14 @@ namespace ion
 			static Renderer* Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
 			virtual ~Renderer();
 
+			//Get window
+			virtual Window* GetWindow() const = 0;
+
 			//Update renderer
 			virtual bool Update(float deltaTime) = 0;
 
-			//The the window title
-			virtual void SetWindowTitle(const std::string& title) = 0;
-
 			//Resize callback
 			virtual void OnResize(int width, int height) = 0;
-
-			//Get dimensions
-			int GetWidth() { return mWindowWidth; }
-			int GetHeight() { return mWindowHeight; }
 
 			//Fixed function transforms
 			virtual void SetMatrix(const Matrix4& matrix) = 0;
@@ -79,9 +76,6 @@ namespace ion
 			Renderer(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
 
 			ShaderManager* mShaderManager;
-
-			int mWindowWidth;
-			int mWindowHeight;
 		};
 	}
 }

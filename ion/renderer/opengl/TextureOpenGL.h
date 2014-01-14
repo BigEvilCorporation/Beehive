@@ -13,6 +13,7 @@
 #include <windows.h>
 #endif
 
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <SDL/SDL.h>
