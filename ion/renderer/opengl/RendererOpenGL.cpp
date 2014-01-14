@@ -139,9 +139,6 @@ namespace ion
 			ClearColour();
 			ClearDepth();
 
-			//Hide the cursor by default
-			//SDL_ShowCursor(SDL_DISABLE);
-
 			//Create shader manager
 			mShaderManager = ShaderManager::Create();
 		}
@@ -175,7 +172,6 @@ namespace ion
 			sGLContextLockStack--;
 			if(!sGLContextLockStack)
 			{
-				glFinish();
 				wglMakeCurrent(sDrawContext, NULL);
 			}
 
