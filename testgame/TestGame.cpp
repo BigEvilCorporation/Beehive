@@ -1,7 +1,5 @@
 #include "TestGame.h"
 
-//#include <ion/renderer/opengl/RendererOpenGL.h>
-
 #include <sstream>
 
 TestGame::TestGame()
@@ -29,16 +27,6 @@ bool TestGame::Initialise()
 {
 	std::stringstream windowTitle;
 	windowTitle << "ion::engine - build " << ion::sVersion.Major << "." << ion::sVersion.Minor << "." << ion::sVersion.Build;
-
-	/*
-	ion::render::Window* window = new ion::render::WindowWin32(windowTitle.str(), 1280, 720, false);
-
-	while(window->Update())
-	{
-	}
-
-	return false;
-	*/
 
 	//Create renderer, scene, camera and viewport
 	mRenderer = ion::render::Renderer::Create(windowTitle.str(), 1280, 720, false);
