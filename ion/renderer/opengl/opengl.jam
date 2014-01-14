@@ -16,6 +16,7 @@ ApplyIonIncludes opengl ;
 ApplyOpenGLSDK opengl ;
 ApplySDLSDK opengl ;
 ApplyCgSDK opengl ;
+ApplyGlewSDK opengl ;
 
 AutoSourceGroup opengl : $(SRC) ;
 

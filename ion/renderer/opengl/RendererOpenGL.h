@@ -8,14 +8,13 @@
 #pragma once
 
 #include "core/thread/CriticalSection.h"
-#include "core/thread/LocalStorage.h"
 #include "renderer/Renderer.h"
+#include "renderer/win32/WindowWin32.h"
 
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glext.h>
-#include <SDL/SDL.h>
 
 namespace ion
 {
@@ -27,8 +26,10 @@ namespace ion
 			RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
 			virtual ~RendererOpenGL();
 
+			//Get window
+			virtual Window* GetWindow() const;
+
 			virtual bool Update(float deltaTime);
-			virtual void SetWindowTitle(const std::string& title);
 			virtual void OnResize(int width, int height);
 
 			//Fixed function transforms
@@ -49,30 +50,25 @@ namespace ion
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer);
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
 
-			//Set OpenGL context for current thread
-			static void SetGLThreadContext();
+			//OpenGL context thread safety
+			static void LockGLContext();
+			static void UnlockGLContext();
+
+			//Check for OpenGL errors
+			static bool CheckGLError();
 
 		protected:
-			//SDL window context - TODO: Support for multiple windows
-			static SDL_Window* sSDLWindow;
+			//Window
+			WindowWin32* mWindow;
 
-			//Thread OpenGL contexts
-			static const int sMaxGLThreadContexts;
-			static std::vector<SDL_GLContext> sGLThreadContexts;
-			static thread::LocalStorage sGLThreadContextStorage;
-			static thread::CriticalSection sGLThreadContextCriticalSection;
+			//Main OpenGL context
+			static HGLRC sOpenGLContext;
 
-			class GLThreadContext : public thread::StorageData
-			{
-			public:
-				GLThreadContext(SDL_GLContext& context, SDL_Window& window);
-				~GLThreadContext();
-				void Set();
+			//Window DC
+			static HDC sDrawContext;
 
-			private:
-				SDL_Window* mSDLWindow;
-				SDL_GLContext mGLContext;
-			};
+			static thread::CriticalSection sGLContextCriticalSection;
+			static u32 sGLContextLockStack;
 		};
 	}
 }

@@ -1,6 +1,6 @@
 #include "TestGame.h"
 
-#include <ion/renderer/win32/WindowWin32.h>
+//#include <ion/renderer/opengl/RendererOpenGL.h>
 
 #include <sstream>
 
@@ -172,7 +172,7 @@ bool TestGame::Update(float deltaTime)
 		text.setf(std::ios::fixed, std::ios::floatfield);
 		text.precision(2);
 		text << "FPS: " << framesPerSecond;
-		mRenderer->SetWindowTitle(text.str().c_str());
+		mRenderer->GetWindow()->SetTitle(text.str().c_str());
 
 		//Reset timer
 		mStartTicks = ion::time::GetSystemTicks();
@@ -183,6 +183,8 @@ bool TestGame::Update(float deltaTime)
 
 void TestGame::Render()
 {
+	//ion::render::RendererOpenGL::SetGLThreadContext();
+
 	mRenderer->ClearColour();
 	mRenderer->ClearDepth();
 

@@ -116,6 +116,7 @@ rule ApplyIonRendererOpenGL TARGET
 	ApplyOpenGLSDK $(TARGET) ;
 	ApplySDLSDK $(TARGET) ;
 	ApplyCgSDK $(TARGET) ;
+	ApplyGlewSDK $(TARGET) ;
 
 	C.LinkLibraries $(TARGET) : opengl ;
 }
@@ -127,7 +128,7 @@ rule ApplyWin32SDK TARGET
 {
 	C.Defines $(TARGET) : WIN32_LEAN_AND_MEAN VC_EXTRALEAN ;
 
-	WIN32_LIBS =
+	local WIN32_LIBS =
 		kernel32.lib
 		user32.lib
 		gdi32.lib
@@ -146,7 +147,7 @@ rule ApplyXInputSDK TARGET
 	C.LinkDirectories $(TARGET) : $(DXSDK_DIR:J=" ")/Lib/x86 ;
 	C.Defines $(TARGET) : DIRECTINPUT_VERSION=0x0800 ;
 	
-	XINPUT_LIBS =
+	local XINPUT_LIBS =
 		xinput.lib
 		dinput8.lib
 		DxErr.lib
@@ -161,7 +162,7 @@ rule ApplyDirectXSDK TARGET
 	C.IncludeDirectories $(TARGET) : $(DXSDK_DIR:J=" ")/Include ;
 	C.LinkDirectories $(TARGET) : $(DXSDK_DIR:J=" ")/Lib/x86 ;
 
-	DIRECTX_LIBS =
+	local DIRECTX_LIBS =
 		d3dx9d.lib
 		d3d9.lib
 		DxErr.lib
@@ -177,12 +178,25 @@ rule ApplyOpenGLSDK TARGET
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/OpenGL/include ;
 	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/OpenGL/lib ;
 
-	OPENGL_LIBS =
+	local OPENGL_LIBS =
 		OpenGL32.lib
 		glu32.lib
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(OPENGL_LIBS) ;
+}
+
+rule ApplyGlewSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/glew/include ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/glew/lib ;
+
+	local GLEW_LIBS =
+		glew32.lib
+		glew32s.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(GLEW_LIBS) ;
 }
 
 rule ApplySDLSDK TARGET
@@ -192,7 +206,7 @@ rule ApplySDLSDK TARGET
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDLImage/include ;
 	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/SDL/lib ;
 
-	SDL_LIBS =
+	local SDL_LIBS =
 		SDL2main_d.lib
 		SDL2_d.lib
 		SDL2_image_d.lib
@@ -206,7 +220,7 @@ rule ApplyCgSDK TARGET
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/Cg/include ;
 	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/Cg/lib ;
 
-	CG_LIBS =
+	local CG_LIBS =
 		cg.lib
 		cgGL.lib
 		;

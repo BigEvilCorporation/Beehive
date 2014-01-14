@@ -30,11 +30,10 @@ namespace ion
 		PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
 		PFNGLDRAWBUFFERSPROC glDrawBuffers;
 
-		const int RendererOpenGL::sMaxGLThreadContexts = 8;
-		std::vector<SDL_GLContext> RendererOpenGL::sGLThreadContexts;
-		thread::LocalStorage RendererOpenGL::sGLThreadContextStorage;
-		thread::CriticalSection RendererOpenGL::sGLThreadContextCriticalSection;
-		SDL_Window* RendererOpenGL::sSDLWindow = NULL;
+		HGLRC RendererOpenGL::sOpenGLContext = 0;
+		HDC RendererOpenGL::sDrawContext = 0;
+		thread::CriticalSection RendererOpenGL::sGLContextCriticalSection;
+		u32 RendererOpenGL::sGLContextLockStack = 0;
 
 		Renderer* Renderer::Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 		{
@@ -44,57 +43,62 @@ namespace ion
 		RendererOpenGL::RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 			: Renderer(windowTitle, windowWidth, windowHeight, fullscreen)
 		{
-			//Set OpenGL version
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-
-			//Set OpenGL flags
-			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-			//Set shared contexts for threading
-			SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-
-			//Set window creation flags
-			int windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
-
-			if(fullscreen)
-			{
-				windowFlags |= SDL_WINDOW_FULLSCREEN;
-			}
-
 			//Create window
-			sSDLWindow = SDL_CreateWindow(windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, windowFlags);
-			if(!sSDLWindow)
+			mWindow = new WindowWin32(windowTitle, windowWidth, windowHeight, fullscreen);
+
+			//Get draw context
+			sDrawContext = mWindow->GetDrawContext();
+
+			//Create pixel format descriptor
+			PIXELFORMATDESCRIPTOR pixelFormatDesc = {0};
+			pixelFormatDesc.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+			pixelFormatDesc.nVersion = 1;
+			pixelFormatDesc.dwFlags =  PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+			pixelFormatDesc.iPixelType = PFD_TYPE_RGBA;
+			pixelFormatDesc.cColorBits = 32;
+			pixelFormatDesc.cDepthBits = 24;
+			pixelFormatDesc.cStencilBits = 8;
+			pixelFormatDesc.iLayerType = PFD_MAIN_PLANE;
+
+			//Check pixel format
+			int pixelFormat = ChoosePixelFormat(sDrawContext, &pixelFormatDesc);
+			if(!pixelFormat)
 			{
-				debug::Error("Unable to create SDL window");
+				debug::Error("Invalid pixel format");
 			}
 
-			//Create OpenGL contexts for all threads
-			for(int i = 0; i < sMaxGLThreadContexts; i++)
+			//Set pixel format
+			if(!SetPixelFormat(sDrawContext, pixelFormat, &pixelFormatDesc))
 			{
-				sGLThreadContexts.push_back(SDL_GL_CreateContext(sSDLWindow));
+				debug::Error("Could not set pixel format");
 			}
 
-			//Set OpenGL context for this thread
-			SetGLThreadContext();
+			//Create OpenGL context
+			sOpenGLContext = wglCreateContext(sDrawContext);
+			if(!sOpenGLContext)
+			{
+				debug::Error("Could not create OpenGL context");
+			}
+
+			//Set as current context
+			wglMakeCurrent(sDrawContext, sOpenGLContext);
 
 			//Get version
 			const char* version = (const char*)glGetString(GL_VERSION);
 
 			//Intialise OpenGL extensions
-			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) SDL_GL_GetProcAddress("glActiveTextureARB");
-			glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC) SDL_GL_GetProcAddress("glGenFramebuffersEXT");
-			glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC) SDL_GL_GetProcAddress("glBindFramebufferEXT");
-			glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC) SDL_GL_GetProcAddress("glGenRenderbuffersEXT");
-			glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC) SDL_GL_GetProcAddress("glBindRenderbufferEXT");
-			glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC) SDL_GL_GetProcAddress("glRenderbufferStorageEXT");
-			glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) SDL_GL_GetProcAddress("glFramebufferRenderbufferEXT");
-			glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
-			glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
-			glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC) SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
-			glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC) SDL_GL_GetProcAddress("glDeleteRenderbuffersEXT");
-			glDrawBuffers = (PFNGLDRAWBUFFERSPROC) SDL_GL_GetProcAddress("glDrawBuffers");
+			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) wglGetProcAddress("glActiveTextureARB");
+			glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
+			glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
+			glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC) wglGetProcAddress("glGenRenderbuffersEXT");
+			glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC) wglGetProcAddress("glBindRenderbufferEXT");
+			glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC) wglGetProcAddress("glRenderbufferStorageEXT");
+			glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) wglGetProcAddress("glFramebufferRenderbufferEXT");
+			glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
+			glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) wglGetProcAddress("glCheckFramebufferStatusEXT");
+			glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC) wglGetProcAddress("glDeleteFramebuffersEXT");
+			glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC) wglGetProcAddress("glDeleteRenderbuffersEXT");
+			glDrawBuffers = (PFNGLDRAWBUFFERSPROC) wglGetProcAddress("glDrawBuffers");
 
 			//Background colour
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -126,7 +130,7 @@ namespace ion
 			OnResize(windowWidth, windowHeight);
 
 			//Check for OpenGL errors
-			if(glGetError() != GL_NO_ERROR)
+			if(!CheckGLError())
 			{
 				debug::Error("Could not initialise OpenGL");
 			}
@@ -136,89 +140,79 @@ namespace ion
 			ClearDepth();
 
 			//Hide the cursor by default
-			SDL_ShowCursor(SDL_DISABLE);
+			//SDL_ShowCursor(SDL_DISABLE);
 
-			//Set window caption
-			SetWindowTitle(windowTitle);
-
-			//Initialise shader manager
+			//Create shader manager
 			mShaderManager = ShaderManager::Create();
 		}
 
 		RendererOpenGL::~RendererOpenGL()
 		{
 			delete mShaderManager;
-			
-			SDL_DestroyWindow(sSDLWindow);
-			SDL_Quit();
+			delete mWindow;
 		}
 
-		void RendererOpenGL::SetGLThreadContext()
+		Window* RendererOpenGL::GetWindow() const
 		{
-			GLThreadContext* threadContext = (GLThreadContext*)sGLThreadContextStorage.GetData();
-			if(!threadContext)
+			return mWindow;
+		}
+
+		void RendererOpenGL::LockGLContext()
+		{
+			sGLContextCriticalSection.Begin();
+
+			if(sGLContextLockStack == 0)
 			{
-				//Find a context
-				sGLThreadContextCriticalSection.Begin();
-
-				for(int i = 0; i < sMaxGLThreadContexts && !threadContext; i++)
-				{
-					if(sGLThreadContexts[i])
-					{
-						threadContext = new GLThreadContext(sGLThreadContexts[i], *sSDLWindow);
-						sGLThreadContexts[i] = NULL;
-					}
-				}
-
-				sGLThreadContextCriticalSection.End();
-
-				debug::Assert(threadContext != NULL, "Could not get OpenGL thread context");
-
-				//Store for current thread
-				sGLThreadContextStorage.SetData(*threadContext);
+				wglMakeCurrent(sDrawContext, sOpenGLContext);
 			}
 
-			//Set context
-			threadContext->Set();
+			sGLContextLockStack++;
 		}
 
-		void RendererOpenGL::SetWindowTitle(const std::string& title)
+		void RendererOpenGL::UnlockGLContext()
 		{
-			SDL_SetWindowTitle(sSDLWindow, title.c_str());
+			debug::Assert(sGLContextLockStack > 0, "Bad OpenGL context lock count");
+			sGLContextLockStack--;
+			if(!sGLContextLockStack)
+			{
+				glFinish();
+				wglMakeCurrent(sDrawContext, NULL);
+			}
+
+			sGLContextCriticalSection.End();
+		}
+
+		bool RendererOpenGL::CheckGLError()
+		{
+			LockGLContext();
+			GLenum error = glGetError();
+			UnlockGLContext();
+
+			if(error != GL_NO_ERROR)
+			{
+				debug::Error("OpenGL error");
+			}
+
+			return error == GL_NO_ERROR;
 		}
 
 		bool RendererOpenGL::Update(float deltaTime)
 		{
-			SDL_PumpEvents();
-
-			SDL_Event sdlEvent;
-			while(SDL_PollEvent(&sdlEvent) != 0)
-			{
-				switch(sdlEvent.type)
-				{
-				case SDL_QUIT:
-					return false;
-					break;
-
-				default:
-					break;
-				}
-			}
-
-			return true;
+			return mWindow->Update();
 		}
 
 		void RendererOpenGL::OnResize(int width, int height)
 		{
+			LockGLContext();
+
 			//Make sure height is at least 1
 			if(height == 0)
 			{
 				height = 1;
 			}
 
-			//Set window dimensions
-			mWindowWidth = width;
-			mWindowHeight = height;
+			//Resize window
+			mWindow->Resize(width, height);
 
 			//Set the viewport
 			glViewport(0, 0, width, height);
@@ -237,44 +231,68 @@ namespace ion
 
 			//Reset the modelview matrix
 			glLoadIdentity();
+
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::SetMatrix(const Matrix4& matrix)
 		{
+			LockGLContext();
 			glLoadMatrixf(matrix.GetAsFloatArray());
+			UnlockGLContext();
 		}
 
 		Matrix4 RendererOpenGL::GetProjectionMatrix()
 		{
 			float matrix[16] = { 0.0f };
+
+			LockGLContext();
 			glGetFloatv(GL_PROJECTION_MATRIX, matrix);
+			UnlockGLContext();
+
 			return Matrix4(matrix);
 		}
 
 		void RendererOpenGL::SwapBuffers()
 		{
-			SDL_GL_SwapWindow(sSDLWindow);
+			LockGLContext();
+			::SwapBuffers(sDrawContext);
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::ClearColour()
 		{
+			LockGLContext();
+
 			//Clear colour buffer
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::ClearDepth()
 		{
+			LockGLContext();
+
 			//Clear depth buffer
 			glClear(GL_DEPTH_BUFFER_BIT);
+
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::SetClearColour(const Colour& colour)
 		{
+			LockGLContext();
+
 			glClearColor(colour.r, colour.g, colour.b, colour.a);
+
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::SetAlphaBlending(AlphaBlendType alphaBlendType)
 		{
+			LockGLContext();
+
 			switch(alphaBlendType)
 			{
 			case NoBlend:
@@ -294,10 +312,14 @@ namespace ion
 			default:
 				break;
 			}
+
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::SetFaceCulling(CullingMode cullingMode)
 		{
+			LockGLContext();
+
 			switch(cullingMode)
 			{
 			case NoCull:
@@ -306,21 +328,25 @@ namespace ion
 
 			case Clockwise:
 				glEnable(GL_CULL_FACE);
-				//glCullMode(GL_CULL_CW);
+				glCullFace(GL_FRONT);
 				break;
 
 			case CounterClockwise:
 				glEnable(GL_CULL_FACE);
-				//glCullMode(GL_CULL_CCW);
+				glCullFace(GL_BACK);
 				break;
 
 			default:
 				break;
 			}
+
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::DrawVertexBuffer(const VertexBuffer& vertexBuffer)
 		{
+			LockGLContext();
+
 			//Enable client states
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_NORMAL_ARRAY);
@@ -361,10 +387,14 @@ namespace ion
 			{
 				debug::Error("Could not draw vertex buffer");
 			}
+
+			UnlockGLContext();
 		}
 
 		void RendererOpenGL::DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
 		{
+			LockGLContext();
+
 			//Enable client states
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glEnableClientState(GL_NORMAL_ARRAY);
@@ -401,26 +431,9 @@ namespace ion
 			glDisableClientState(GL_NORMAL_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-			if(glGetError() != GL_NO_ERROR)
-			{
-				debug::Error("Could not draw vertex buffer");
-			}
-		}
+			CheckGLError();
 
-		RendererOpenGL::GLThreadContext::GLThreadContext(SDL_GLContext& context, SDL_Window& window)
-		{
-			mSDLWindow = &window;
-			mGLContext = context;
-		}
-
-		RendererOpenGL::GLThreadContext::~GLThreadContext()
-		{
-			SDL_GL_DeleteContext(mGLContext);
-		}
-
-		void RendererOpenGL::GLThreadContext::Set()
-		{
-			SDL_GL_MakeCurrent(mSDLWindow, mGLContext);
+			UnlockGLContext();
 		}
 	}
 }
