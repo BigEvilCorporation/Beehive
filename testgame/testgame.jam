@@ -14,6 +14,8 @@ SRC =
 	TestGame.h
 	Ship.cpp
 	Ship.h
+	Utils.cpp
+	Utils.h
 	;
 
 AutoSourceGroup TestGame : $(SRC) ;

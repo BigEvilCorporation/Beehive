@@ -4,13 +4,16 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	: mSceneCylinderRadius(sceneCylinderRadius),
 	mSceneCylinderHeight(sceneCylinderHeight)
 {
-	mMoveSpeedX = 0.5f;
-	mMoveSpeedY = 10.0f;
+	mMoveSpeedX = 2.0f;
+	mMoveSpeedY = 1.5f;
+
+	mPositionY = sceneCylinderHeight / 2.0f;
+	mRotationY = 0.0f;
 
 	//Set initial position
-	SetPosition(ion::Vector3(0.0f, sceneCylinderHeight / 2.0f, -sceneCylinderRadius));
+	SetPosition(ion::Vector3(0.0f, mPositionY, -sceneCylinderRadius));
 
-	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, 0.1f, 0.2f), ion::Vector3());
+	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, 0.1f, 0.2f));
 }
 
 void Ship::SetMaterial(ion::render::Material* material)
@@ -25,7 +28,18 @@ Ship::~Ship()
 
 void Ship::Update(float deltaTime)
 {
+	/*
+	//Rotate around Y
+	ion::Quaternion quat;
+	quat.FromAxis(mRotationY, ion::Vector3(0.0f, 1.0f, 0.0f));
+	ion::Matrix4 matrix = quat.ToMatrix();
+	SetTransform(matrix);
 
+	//Move to Y and Z
+	Entity::Move(ion::Vector3(0.0f, mPositionY, mSceneCylinderRadius));
+	*/
+
+	SetTransform(utils::CalculateCylinderTransform(mRotationY, mPositionY, mSceneCylinderRadius));
 }
 
 void Ship::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
@@ -37,37 +51,16 @@ void Ship::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
 
 void Ship::Move(MoveDirection direction, float deltaTime)
 {
-	float moveX = 0.0f;
-	float moveY = 0.0f;
-
 	if(direction & Up)
-		moveY += mMoveSpeedY * deltaTime;
+		mPositionY += mMoveSpeedY * deltaTime;
 	if(direction & Down)
-		moveY -= mMoveSpeedY * deltaTime;
+		mPositionY -= mMoveSpeedY * deltaTime;
 	if(direction & Left)
-		moveX -= mMoveSpeedX * deltaTime;
+		mRotationY -= mMoveSpeedX * deltaTime;
 	if(direction & Right)
-		moveX += mMoveSpeedX * deltaTime;
+		mRotationY += mMoveSpeedX * deltaTime;
 
-	//Move to centre
-	ion::Vector3 position = GetTransform().GetTranslation();
-	ion::Vector3 directionToCentre = ion::Vector3(0.0f, position.y, 0.0f) - position;
-	Entity::Move(directionToCentre);
-
-	//Rotate around Y
-	ion::Quaternion quat;
-	quat.FromAxis(moveX, ion::Vector3(0.0f, 1.0f, 0.0f));
-	ion::Matrix4 matrix = quat.ToMatrix() * GetTransform();
-	matrix.SetTranslation(ion::Vector3(0.0f, position.y, 0.0f));
-
-	//Set transform
-	SetTransform(matrix);
-
-	//Move back
-	Entity::Move(ion::Vector3(0.0f, 0.0f, 0.0f) - directionToCentre);
-
-	//Set new Y
-	SetPosition(GetTransform().GetTranslation() + ion::Vector3(0.0f, moveY, 0.0f));
+	mPositionY = ion::maths::Clamp(mPositionY, 0.0f, mSceneCylinderHeight);
 }
 
 void Ship::Shoot(ShootType shootType)

@@ -30,6 +30,7 @@
 #include <ion/renderer/Window.h>
 
 #include "Ship.h"
+#include "Utils.h"
 
 class TestGame : public ion::framework::Application
 {

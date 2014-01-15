@@ -1,9 +1,11 @@
-#include "renderer/Camera.h"
-#include "renderer/Entity.h"
-#include "renderer/Primitive.h"
-#include "renderer/Renderer.h"
-#include "renderer/Material.h"
-#include "renderer/Shader.h"
+#include <ion/maths/Maths.h>
+#include <ion/renderer/Camera.h>
+#include <ion/renderer/Entity.h>
+#include <ion/renderer/Primitive.h>
+#include <ion/renderer/Renderer.h>
+#include <ion/renderer/Material.h>
+
+#include "Utils.h"
 
 class Ship : public ion::render::Entity
 {
@@ -22,14 +24,28 @@ public:
 
 	void SetMaterial(ion::render::Material* material);
 
+	float GetPositionY() const { return mPositionY; }
+	float GetRotationY() const { return mRotationY; }
+
 protected:
+
+	//Health and shield
 	int mHealth;
 	int mMaxHealth;
 	int mShield;
 	int mMaxShield;
+
+	//Movement speed
 	float mMoveSpeedX;
 	float mMoveSpeedY;
 
+	//Vertical position up cylinder
+	float mPositionY;
+
+	//Rotation around cylinder
+	float mRotationY;
+
+	//Scene dimensions
 	const float mSceneCylinderRadius;
 	const float mSceneCylinderHeight;
 

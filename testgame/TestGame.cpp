@@ -6,7 +6,7 @@ TestGame::TestGame()
 	: ion::framework::Application("TestGame"),
 	mSceneCylinderRadius(5.0f),
 	mSceneCylinderHeight(4.0f),
-	mCameraDistance(1.0f)
+	mCameraDistance(3.0f)
 {
 	mRenderer = NULL;
 
@@ -78,9 +78,11 @@ bool TestGame::Initialise()
 
 	mPlayer->SetMaterial(mMaterial.Get());
 
-	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, 3.0f, 0.2f), ion::Vector3());
+	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, mSceneCylinderHeight / 2.0f, 0.2f), ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 0.0f));
 
 	mRenderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
+
+	mCamera->SetPosition(ion::Vector3(0.0f, 2.0f, 12.0f));
 	
 	return true;
 }
@@ -130,16 +132,8 @@ bool TestGame::Update(float deltaTime)
 	//Update player
 	mPlayer->Update(deltaTime);
 
-	//Position camera behind ship
-	ion::Vector3 playerPosition = mPlayer->GetTransform().GetTranslation();
-	ion::Vector3 lookCentre(0.0f, playerPosition.y, 0.0f);
-	ion::Vector3 playerDirectionFromCentre = lookCentre - playerPosition;
-	ion::Vector3 cameraPosition = playerDirectionFromCentre.Normalise() * (mSceneCylinderRadius + mCameraDistance);
-	cameraPosition.y = playerPosition.y;
-	mCamera->SetPosition(cameraPosition);
-
-	//Point at centre
-	//mCamera->SetLookAt(lookCentre);
+	//Position camera behind ship, half-way up the cylinder
+	mCamera->SetTransform(utils::CalculateCylinderTransform(mPlayer->GetRotationY(), mSceneCylinderHeight / 2.0f, mSceneCylinderRadius + mCameraDistance));
 
 	//Update renderer
 	exit |= !mRenderer->Update(0.0f);
@@ -171,14 +165,12 @@ bool TestGame::Update(float deltaTime)
 
 void TestGame::Render()
 {
-	//ion::render::RendererOpenGL::SetGLThreadContext();
-
 	mRenderer->ClearColour();
 	mRenderer->ClearDepth();
 
-	mRenderer->SetMatrix(mCamera->GetTransform().GetInverse() * mRenderer->GetProjectionMatrix());
+	mMaterial->Bind(ion::Matrix4(), mCamera->GetTransform().GetInverse(), mRenderer->GetProjectionMatrix());
 	mRenderer->DrawVertexBuffer(mBoxPrimitive->GetVertexBuffer(), mBoxPrimitive->GetIndexBuffer());
-	mRenderer->SetMatrix(ion::Matrix4());
+	mMaterial->Unbind();
 
 	//Render player
 	mPlayer->Render(*mRenderer, *mCamera);
