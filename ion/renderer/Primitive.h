@@ -25,7 +25,7 @@ namespace ion
 		class Primitive : public Entity
 		{
 		public:
-			Primitive(VertexBuffer::Pattern vertexPattern, Material* material);
+			Primitive(VertexBuffer::Pattern vertexPattern);
 			virtual ~Primitive();
 
 			void SetCastShadows(bool shadows);
@@ -43,19 +43,19 @@ namespace ion
 		{
 		public:
 			enum Axis { xy, xz, yz };
-			Quad(Material* material, Axis axis, const Vector2& halfExtents, const Vector3& offset = Vector3());
+			Quad(Axis axis, const Vector2& halfExtents, const Vector3& offset = Vector3());
 		};
 
 		class Box : public Primitive
 		{
 		public:
-			Box(Material* material, const Vector3& halfExtents, const Vector3& offset = Vector3());
+			Box(const Vector3& halfExtents, const Vector3& offset = Vector3());
 		};
 
 		class Sphere : public Primitive
 		{
 		public:
-			Sphere(Material* material, float radius, int rings, int segments);
+			Sphere(float radius, int rings, int segments);
 		};
 	}
 }
