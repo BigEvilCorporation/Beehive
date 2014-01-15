@@ -43,13 +43,13 @@ namespace ion
 		{
 		public:
 			enum Axis { xy, xz, yz };
-			Quad(Material* material, Axis axis, const Vector2& halfExtents, const Vector3& offset);
+			Quad(Material* material, Axis axis, const Vector2& halfExtents, const Vector3& offset = Vector3());
 		};
 
 		class Box : public Primitive
 		{
 		public:
-			Box(Material* material, const Vector3& halfExtents, const Vector3& offset);
+			Box(Material* material, const Vector3& halfExtents, const Vector3& offset = Vector3());
 		};
 
 		class Sphere : public Primitive
