@@ -59,7 +59,7 @@ bool TestGame::Initialise()
 
 	ion::render::Material* material = new ion::render::Material();
 
-	mMaterial = mResourceManager->GetResource<ion::render::Material>("ship.ion.material");
+	temp::Materials::LoadTempMaterials(*mResourceManager);
 
 	while(mResourceManager->GetNumResourcesWaiting() > 0)
 	{
@@ -76,9 +76,9 @@ bool TestGame::Initialise()
 	}
 	*/
 
-	mPlayer->SetMaterial(mMaterial.Get());
+	mPlayer->SetMaterial(temp::Materials::sDefault.Get());
 
-	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, mSceneCylinderHeight / 2.0f, 0.2f), ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 0.0f));
+	mBoxPrimitive = new ion::render::Box(ion::Vector3(0.2f, mSceneCylinderHeight / 2.0f, 0.2f), ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 0.0f));
 
 	mRenderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
 
@@ -135,6 +135,10 @@ bool TestGame::Update(float deltaTime)
 	//Position camera behind ship, half-way up the cylinder
 	mCamera->SetTransform(utils::CalculateCylinderTransform(mPlayer->GetRotationY(), mSceneCylinderHeight / 2.0f, mSceneCylinderRadius + mCameraDistance));
 
+	//Check fire button
+	if(mKeyboard->KeyDown(DIK_SPACE))
+		mPlayer->Fire(Ship::Primary);
+
 	//Update renderer
 	exit |= !mRenderer->Update(0.0f);
 
@@ -168,9 +172,9 @@ void TestGame::Render()
 	mRenderer->ClearColour();
 	mRenderer->ClearDepth();
 
-	mMaterial->Bind(ion::Matrix4(), mCamera->GetTransform().GetInverse(), mRenderer->GetProjectionMatrix());
+	temp::Materials::sDefault.Get()->Bind(ion::Matrix4(), mCamera->GetTransform().GetInverse(), mRenderer->GetProjectionMatrix());
 	mRenderer->DrawVertexBuffer(mBoxPrimitive->GetVertexBuffer(), mBoxPrimitive->GetIndexBuffer());
-	mMaterial->Unbind();
+	temp::Materials::sDefault.Get()->Unbind();
 
 	//Render player
 	mPlayer->Render(*mRenderer, *mCamera);

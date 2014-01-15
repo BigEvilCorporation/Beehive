@@ -15,3 +15,13 @@ namespace utils
 		return matrix;
 	}
 }
+
+namespace temp
+{
+	ion::io::ResourceHandle<ion::render::Material> Materials::sDefault;
+
+	void Materials::LoadTempMaterials(ion::io::ResourceManager& resourceManager)
+	{
+		sDefault = resourceManager.GetResource<ion::render::Material>("ship.ion.material");
+	}
+}

@@ -57,8 +57,6 @@ public:
 
 	ion::render::Box* mBoxPrimitive;
 
-	ion::io::ResourceHandle<ion::render::Material> mMaterial;
-
 	float mMouseSensitivity;
 
 	const float mSceneCylinderRadius;

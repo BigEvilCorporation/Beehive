@@ -13,7 +13,14 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	//Set initial position
 	SetPosition(ion::Vector3(0.0f, mPositionY, -sceneCylinderRadius));
 
-	mBoxPrimitive = new ion::render::Box(NULL, ion::Vector3(0.2f, 0.1f, 0.2f));
+	mBoxPrimitive = new ion::render::Box(ion::Vector3(0.2f, 0.1f, 0.2f));
+
+	for(int i = 0; i < MaxWeapons; i++)
+	{
+		mWeapons[i] = NULL;
+	}
+
+	mWeapons[Primary] = new Weapon(*this);
 }
 
 void Ship::SetMaterial(ion::render::Material* material)
@@ -28,18 +35,15 @@ Ship::~Ship()
 
 void Ship::Update(float deltaTime)
 {
-	/*
-	//Rotate around Y
-	ion::Quaternion quat;
-	quat.FromAxis(mRotationY, ion::Vector3(0.0f, 1.0f, 0.0f));
-	ion::Matrix4 matrix = quat.ToMatrix();
-	SetTransform(matrix);
-
-	//Move to Y and Z
-	Entity::Move(ion::Vector3(0.0f, mPositionY, mSceneCylinderRadius));
-	*/
-
 	SetTransform(utils::CalculateCylinderTransform(mRotationY, mPositionY, mSceneCylinderRadius));
+
+	for(int i = 0; i < MaxWeapons; i++)
+	{
+		if(mWeapons[i])
+		{
+			mWeapons[i]->Update(deltaTime);
+		}
+	}
 }
 
 void Ship::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
@@ -47,6 +51,14 @@ void Ship::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
 	mMaterial->Bind(GetTransform(), camera.GetTransform().GetInverse(), renderer.GetProjectionMatrix());
 	renderer.DrawVertexBuffer(mBoxPrimitive->GetVertexBuffer(), mBoxPrimitive->GetIndexBuffer());
 	mMaterial->Unbind();
+
+	for(int i = 0; i < MaxWeapons; i++)
+	{
+		if(mWeapons[i])
+		{
+			mWeapons[i]->Render(renderer, camera);
+		}
+	}
 }
 
 void Ship::Move(MoveDirection direction, float deltaTime)
@@ -63,7 +75,11 @@ void Ship::Move(MoveDirection direction, float deltaTime)
 	mPositionY = ion::maths::Clamp(mPositionY, 0.0f, mSceneCylinderHeight);
 }
 
-void Ship::Shoot(ShootType shootType)
+void Ship::Fire(ShootType shootType)
 {
-
+	Weapon* weapon = mWeapons[shootType];
+	if(weapon)
+	{
+		weapon->Fire();
+	}
 }

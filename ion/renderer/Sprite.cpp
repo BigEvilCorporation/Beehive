@@ -28,7 +28,7 @@ namespace ion
 			mSpriteSheetGridSizeY = spriteSheetGridSizeY;
 			mSpriteSheet = spriteSheet;
 			mCurrentFrame = 0;
-			mQuadPrimitive = new Quad(NULL, Quad::xy, Vector2(width / 2.0f, height / 2.0f), Vector3());
+			mQuadPrimitive = new Quad(Quad::xy, Vector2(width / 2.0f, height / 2.0f), Vector3());
 
 			if(!sShaderRefCount)
 			{

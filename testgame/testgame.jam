@@ -10,12 +10,16 @@ ApplyIonRenderer TestGame : opengl ;
 
 SRC = 
 	main.cpp
+	Bullet.cpp
+	Bullet.h
 	TestGame.cpp
 	TestGame.h
 	Ship.cpp
 	Ship.h
 	Utils.cpp
 	Utils.h
+	Weapon.cpp
+	Weapon.h
 	;
 
 AutoSourceGroup TestGame : $(SRC) ;
