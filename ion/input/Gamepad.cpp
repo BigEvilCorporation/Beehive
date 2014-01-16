@@ -18,6 +18,8 @@ namespace ion
 			mControllerIndex = FindAvailableController();
 			mConnected = false;
 			memory::MemSet(&mInputState, 0, sizeof(XINPUT_STATE));
+			mDeadZone = 0.05f;
+			mOuterZone = 0.9f;
 		}
 
 		Gamepad::~Gamepad()
@@ -83,44 +85,44 @@ namespace ion
 			return mConnected;
 		}
 
-		float Gamepad::GetLeftStickX()
+		ion::Vector2 Gamepad::GetLeftStick()
 		{
 			float lx = (float)mInputState.Gamepad.sThumbLX;
+			float ly = (float)mInputState.Gamepad.sThumbLY;
 
 			if(lx != 0.0f)
 				lx /= 32768;
 
-			return lx;
-		}
-
-		float Gamepad::GetLeftStickY()
-		{
-			float ly = (float)mInputState.Gamepad.sThumbLY;
-
 			if(ly != 0.0f)
 				ly /= 32768;
 
-			return ly;
+			if(lx > -mDeadZone && lx < mDeadZone)
+				lx = 0.0f;
+
+			if(ly > -mDeadZone && ly < mDeadZone)
+				ly = 0.0f;
+
+			return ion::Vector2(lx, ly);
 		}
 
-		float Gamepad::GetRightStickX()
+		ion::Vector2 Gamepad::GetRightStick()
 		{
 			float rx = (float)mInputState.Gamepad.sThumbRX;
+			float ry = (float)mInputState.Gamepad.sThumbRY;
 
 			if(rx != 0.0f)
 				rx /= 32768;
 
-			return rx;
-		}
-
-		float Gamepad::GetRightStickY()
-		{
-			float ry = (float)mInputState.Gamepad.sThumbRY;
-
 			if(ry != 0.0f)
 				ry /= 32768;
 
-			return ry;
+			if(rx > -mDeadZone && rx < mDeadZone)
+				rx = 0.0f;
+
+			if(ry > -mDeadZone && ry < mDeadZone)
+				ry = 0.0f;
+
+			return ion::Vector2(rx, ry);
 		}
 
 		bool Gamepad::ButtonDown(Buttons button)
@@ -153,6 +155,26 @@ namespace ion
 			}
 
 			return xInputButton;
+		}
+
+		void Gamepad::SetDeadZone(float deadZone)
+		{
+			mDeadZone = deadZone;
+		}
+
+		float Gamepad::GetDeadZone() const
+		{
+			return mDeadZone;
+		}
+
+		void Gamepad::SetOuterZone(float outerZone)
+		{
+			mOuterZone = outerZone;
+		}
+
+		float Gamepad::GetOuterZone() const
+		{
+			return mOuterZone;
 		}
 	}
 }

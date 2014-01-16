@@ -24,8 +24,14 @@ namespace ion
 		Vector2(const Vector2& vector);
 		float operator [](int index) const;
 
+		Vector2 operator *(float Scalar) const;
+		Vector2 operator *(const Vector2 &Vector) const;
+
 		float GetLength() const;
 		float Dot(const Vector2& vector) const;
+
+		//Interpolation with another vector, with a given weight
+		Vector2 Lerp(const Vector2 &Vector, float Weight) const;
 
 		//Serialisation
 		void Serialise(io::Archive& archive);
@@ -47,7 +53,6 @@ namespace ion
 
 		float operator [](int Index) const;
 
-		//float operator *(const Vector3 &Vector) const;
 		Vector3 operator *(float Scalar) const;
 		Vector3 operator *(const Vector3 &Vector) const;
 		Vector3 operator -(const Vector3 &Vector) const;

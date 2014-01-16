@@ -29,6 +29,9 @@ namespace ion
 			void AddVertex(const Vector3& position, const Vector3& normal, const TexCoord& texCoord);
 			void AddFace(const Face& face);
 
+			void Reserve(int size);
+			void SetVertex(int vertexIdx, const Vector3& position, const Vector3& normal, const TexCoord& texCoord);
+
 			Vertex GetVertex(int index) const;
 			Face GetFace(int index) const;
 
