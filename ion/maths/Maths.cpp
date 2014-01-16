@@ -78,6 +78,16 @@ namespace ion
 			return time;
 		}
 
+		float Cos(float value)
+		{
+			return cos(value);
+		}
+
+		float Sin(float value)
+		{
+			return sin(value);
+		}
+
 		float DegreesToRadians(float degrees)
 		{
 			return degrees * DEGREES_TO_RADIANS;

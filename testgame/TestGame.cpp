@@ -4,9 +4,9 @@
 
 TestGame::TestGame()
 	: ion::framework::Application("TestGame"),
-	mSceneCylinderRadius(5.0f),
-	mSceneCylinderHeight(4.0f),
-	mCameraDistance(3.0f)
+	mSceneCylinderRadius(30.0f),
+	mSceneCylinderHeight(6.0f),
+	mCameraDistance(10.0f)
 {
 	mRenderer = NULL;
 
@@ -78,7 +78,7 @@ bool TestGame::Initialise()
 
 	mPlayer->SetMaterial(temp::Materials::sDefault.Get());
 
-	mBoxPrimitive = new ion::render::Box(ion::Vector3(0.2f, mSceneCylinderHeight / 2.0f, 0.2f), ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 0.0f));
+	mCylinderPrimitive = new ion::render::Cylinder(mSceneCylinderRadius - 5.0f, mSceneCylinderHeight, 16, ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 0.0f));
 
 	mRenderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
 
@@ -115,15 +115,20 @@ bool TestGame::Update(float deltaTime)
 	bool exit = mKeyboard->KeyDown(DIK_ESCAPE);
 	exit |= mGamepad->ButtonDown(ion::input::Gamepad::SELECT);
 
-	//Create camera move vector from WASD state
+	//Create move vector from left stick
+	ion::Vector2 moveVector = mGamepad->GetLeftStick();
+
+	//Create move vector from WASD state
 	if(mKeyboard->KeyDown(DIK_W))
-		mPlayer->Move(Ship::Up, deltaTime);
+		moveVector.y = 1.0f;
 	if(mKeyboard->KeyDown(DIK_S))
-		mPlayer->Move(Ship::Down, deltaTime);
+		moveVector.y = -1.0f;
 	if(mKeyboard->KeyDown(DIK_A))
-		mPlayer->Move(Ship::Left, deltaTime);
+		moveVector.x = -1.0f;
 	if(mKeyboard->KeyDown(DIK_D))
-		mPlayer->Move(Ship::Right, deltaTime);
+		moveVector.x = 1.0f;
+
+	mPlayer->Move(moveVector);
 
 	//Get mouse deltas
 	float mouseDeltaX = (float)mMouse->GetDeltaX();
@@ -135,8 +140,8 @@ bool TestGame::Update(float deltaTime)
 	//Position camera behind ship, half-way up the cylinder
 	mCamera->SetTransform(utils::CalculateCylinderTransform(mPlayer->GetRotationY(), mSceneCylinderHeight / 2.0f, mSceneCylinderRadius + mCameraDistance));
 
-	//Check fire button
-	if(mKeyboard->KeyDown(DIK_SPACE))
+	//Check fire buttons
+	if(mGamepad->ButtonDown(ion::input::Gamepad::BUTTON_A) || mKeyboard->KeyDown(DIK_SPACE))
 		mPlayer->Fire(Ship::Primary);
 
 	//Update renderer
@@ -173,7 +178,7 @@ void TestGame::Render()
 	mRenderer->ClearDepth();
 
 	temp::Materials::sDefault.Get()->Bind(ion::Matrix4(), mCamera->GetTransform().GetInverse(), mRenderer->GetProjectionMatrix());
-	mRenderer->DrawVertexBuffer(mBoxPrimitive->GetVertexBuffer(), mBoxPrimitive->GetIndexBuffer());
+	mRenderer->DrawVertexBuffer(mCylinderPrimitive->GetVertexBuffer(), mCylinderPrimitive->GetIndexBuffer());
 	temp::Materials::sDefault.Get()->Unbind();
 
 	//Render player

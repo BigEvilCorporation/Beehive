@@ -5,11 +5,11 @@
 Weapon::Weapon(const Ship& owner)
 	: mOwner(owner)
 {
-	mFireRate = 6.0f;
-	mBulletSpeed = 3.0f;
+	mFireRate = 4.0f;
+	mBulletVelocity = 0.5f;
 	mBulletDamage = 1.0f;
-	mBulletRange = 1.5f;
-	mAmmo = 100;
+	mBulletRange = 4.0f;
+	mAmmo = sUnlimitedAmmo;
 	mCoolDown = 0.0f;
 }
 
@@ -19,7 +19,7 @@ Weapon::~Weapon()
 
 bool Weapon::Update(float deltaTime)
 {
-	mCoolDown-= deltaTime;
+	mCoolDown -= deltaTime;
 	if(mCoolDown < 0.0f)
 		mCoolDown = 0.0f;
 
@@ -48,9 +48,9 @@ void Weapon::Render(ion::render::Renderer& renderer, ion::render::Camera& camera
 
 bool Weapon::Fire()
 {
-	if(mCoolDown == 0.0f && mAmmo > 0)
+	if(mCoolDown == 0.0f && (mAmmo > 0 || mAmmo == sUnlimitedAmmo))
 	{
-		mActiveBullets.push_back(new Bullet(*this, mOwner.GetPositionY(), mOwner.GetRotationY(), mOwner.GetCylinderRadius()));
+		mActiveBullets.push_back(new Bullet(*this, mOwner.GetPositionY(), mOwner.GetRotationY(), mOwner.GetCurrentVelocity().x + mBulletVelocity, mOwner.GetCylinderRadius()));
 		mAmmo--;
 		mCoolDown = 1.0f / mFireRate;
 

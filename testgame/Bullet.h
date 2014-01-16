@@ -14,7 +14,7 @@ class Weapon;
 class Bullet : public ion::render::Entity
 {
 public:
-	Bullet(Weapon& weapon, float initialPositionY, float initialRotationY, float cylinderRadius);
+	Bullet(Weapon& weapon, float initialPositionY, float initialRotationY, float velocity, float cylinderRadius);
 	virtual ~Bullet();
 
 	virtual bool Update(float deltaTime);
@@ -24,6 +24,7 @@ protected:
 	float mLifeRemaining;
 	float mPositionY;
 	float mRotationY;
+	float mVelocity;
 	float mSceneCylinderRadius;
 
 	const Weapon& mWeapon;

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "core/memory/Memory.h"
+#include "maths/Vector.h"
 
 //TODO: Windows headers in platform header
 #include <windows.h>
@@ -51,12 +52,16 @@ namespace ion
 			//Test if connected
 			bool IsConnected();
 
-			float GetLeftStickX();
-			float GetLeftStickY();
-			float GetRightStickX();
-			float GetRightStickY();
+			ion::Vector2 GetLeftStick();
+			ion::Vector2 GetRightStick();
 
 			bool ButtonDown(Buttons button);
+
+			void SetDeadZone(float deadZone);
+			float GetDeadZone() const;
+
+			void SetOuterZone(float outerZone);
+			float GetOuterZone() const;
 
 		private:
 			static int FindAvailableController();
@@ -65,6 +70,8 @@ namespace ion
 			int mControllerIndex;
 			bool mConnected;
 			XINPUT_STATE mInputState;
+			float mDeadZone;
+			float mOuterZone;
 
 			static const int sInvalidIndex = -1;
 			static const int sMaxControllers = 4;

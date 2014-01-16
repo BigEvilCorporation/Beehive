@@ -55,7 +55,7 @@ public:
 
 	Ship* mPlayer;
 
-	ion::render::Box* mBoxPrimitive;
+	ion::render::Cylinder* mCylinderPrimitive;
 
 	float mMouseSensitivity;
 

@@ -41,6 +41,9 @@ namespace ion
 		float Lerp(float valueA, float valueB, float time);
 		float UnLerp(float valueFrom, float valueTo, float valueCurrent);
 
+		float Cos(float value);
+		float Sin(float value);
+
 		int RandInt();
 		float RandFloat();
 

@@ -150,5 +150,37 @@ namespace ion
 				}
 			}
 		}
+
+		Cylinder::Cylinder(float radius, float height, int steps, const Vector3& offset)
+			: Primitive(VertexBuffer::Triangles)
+		{
+			float halfHeight = height * 0.5f;
+			float a = 0.0f;
+			float step = (maths::TWO_PI / (float)steps) * 2.0f;
+
+			//Sides
+			for(int i = 0; i < steps; i++)
+			{
+				float x = maths::Cos(a) * radius;
+				float z = maths::Sin(a) * radius;
+
+				mVertexBuffer.AddVertex(Vector3(x, -halfHeight, z) + offset, Vector3(x, z, 0.0f).Normalise(), TexCoord(i%2==0 ? 0.0f : 1.0f, 1.0f));
+				mVertexBuffer.AddVertex(Vector3(x,  halfHeight, z) + offset, Vector3(x, z, 0.0f).Normalise(), TexCoord(i%2==0 ? 0.0f : 1.0f, 0.0f));
+				a += step;
+
+				mIndexBuffer.Add(i,   i+1, i+2);
+				mIndexBuffer.Add(i+2, i+1, i+3);
+			}
+
+			//Caps
+			mVertexBuffer.AddVertex(Vector3(0.0f, 0.0f, -halfHeight), Vector3(0.0f, -1.0f, 0.0f).Normalise(), TexCoord(0.5f, 0.5f));
+			mVertexBuffer.AddVertex(Vector3(0.0f, 0.0f,  halfHeight), Vector3(0.0f,  1.0f, 0.0f).Normalise(), TexCoord(0.5f, 0.5f));
+
+			for(int i = 0; i < steps; i++)
+			{
+				mIndexBuffer.Add(i*2, steps, (i+1)*2);
+				mIndexBuffer.Add((i+1)*2+1, steps+1, i*2+1);
+			}
+		}
 	}
 }

@@ -4,8 +4,11 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	: mSceneCylinderRadius(sceneCylinderRadius),
 	mSceneCylinderHeight(sceneCylinderHeight)
 {
-	mMoveSpeedX = 2.0f;
-	mMoveSpeedY = 1.5f;
+	mMaxVelocity.x = 0.5f;
+	mMaxVelocity.y = 8.0f;
+
+	mAcceleration.x = 3.0f;
+	mAcceleration.y = 8.0f;
 
 	mPositionY = sceneCylinderHeight / 2.0f;
 	mRotationY = 0.0f;
@@ -35,6 +38,29 @@ Ship::~Ship()
 
 void Ship::Update(float deltaTime)
 {
+	//Lerp from current velocity towards target velocity
+	ion::Vector2 targetVelocity = mMoveVector * mMaxVelocity;
+
+	mVelocity.x = ion::maths::Lerp(mVelocity.x, targetVelocity.x, mAcceleration.x * deltaTime);
+	mVelocity.y = ion::maths::Lerp(mVelocity.y, targetVelocity.y, mAcceleration.y * deltaTime);
+
+	//Apply velocity
+	mRotationY += mVelocity.x * deltaTime;
+	mPositionY += mVelocity.y * deltaTime;
+	
+	//Clamp Y
+	mPositionY = ion::maths::Clamp(mPositionY, 0.0f, mSceneCylinderHeight);
+
+	//If Y has hit limits, zero Y velocity
+	if(mPositionY == 0.0f || mPositionY == mSceneCylinderHeight)
+	{
+		mVelocity.y = 0.0f;
+	}
+
+	//Reset move vector
+	mMoveVector = ion::Vector2();
+
+	//Apply transform
 	SetTransform(utils::CalculateCylinderTransform(mRotationY, mPositionY, mSceneCylinderRadius));
 
 	for(int i = 0; i < MaxWeapons; i++)
@@ -61,18 +87,9 @@ void Ship::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
 	}
 }
 
-void Ship::Move(MoveDirection direction, float deltaTime)
+void Ship::Move(const ion::Vector2& moveVector)
 {
-	if(direction & Up)
-		mPositionY += mMoveSpeedY * deltaTime;
-	if(direction & Down)
-		mPositionY -= mMoveSpeedY * deltaTime;
-	if(direction & Left)
-		mRotationY -= mMoveSpeedX * deltaTime;
-	if(direction & Right)
-		mRotationY += mMoveSpeedX * deltaTime;
-
-	mPositionY = ion::maths::Clamp(mPositionY, 0.0f, mSceneCylinderHeight);
+	mMoveVector = moveVector;
 }
 
 void Ship::Fire(ShootType shootType)

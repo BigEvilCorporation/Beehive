@@ -30,6 +30,16 @@ namespace ion
 			return 0.0f;
 	}
 
+	Vector2 Vector2::operator *(float Scalar) const
+	{
+		return Vector2(x * Scalar, y * Scalar);
+	}
+
+	Vector2 Vector2::operator *(const Vector2 &Vector) const
+	{
+		return Vector2(x * Vector.x, y * Vector.y);
+	}
+
 	float Vector2::GetLength() const
 	{
 		return sqrt(x*x + y*y);
@@ -38,6 +48,27 @@ namespace ion
 	float Vector2::Dot(const Vector2& vector) const
 	{
 		return (x * vector.x + y * vector.y);
+	}
+
+	Vector2 Vector2::Lerp(const Vector2& Vector, float Weight) const
+	{
+		Vector2 Result;
+
+		if (Weight <= 0.0f)
+		{
+			Result = (*this);
+		}
+		else if(Weight >= 1.0f)
+		{
+			Result = Vector;
+		}
+		else
+		{
+			Result.x = x + Weight * (Vector.x - x);
+			Result.y = y + Weight * (Vector.y - y);
+		}
+
+		return Result;
 	}
 
 	void Vector2::Serialise(io::Archive& archive)
@@ -99,13 +130,6 @@ namespace ion
 			return x;
 		}
 	}
-
-	/*
-	float Vector3::operator *(const Vector3 &Vector) const
-	{
-		return (x * Vector.x) + (y * Vector.y) + (z * Vector.z);
-	}
-	*/
 
 	Vector3 Vector3::operator *(float Scalar) const
 	{

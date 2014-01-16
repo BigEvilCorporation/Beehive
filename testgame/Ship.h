@@ -13,7 +13,6 @@
 class Ship : public ion::render::Entity
 {
 public:
-	enum MoveDirection { Up = 1, Down = 2, Left = 4, Right = 8 };
 	enum ShootType { Primary, Secondary, Special, MaxWeapons };
 
 	Ship(float sceneCylinderRadius, float sceneCylinderHeight);
@@ -22,7 +21,7 @@ public:
 	virtual void Update(float deltaTime);
 	virtual void Render(ion::render::Renderer& renderer, ion::render::Camera& camera);
 
-	virtual void Move(MoveDirection direction, float deltaTime);
+	virtual void Move(const ion::Vector2& moveVector);
 	virtual void Fire(ShootType shootType);
 
 	void SetMaterial(ion::render::Material* material);
@@ -30,6 +29,8 @@ public:
 	float GetPositionY() const { return mPositionY; }
 	float GetRotationY() const { return mRotationY; }
 	float GetCylinderRadius() const { return mSceneCylinderRadius; }
+
+	const ion::Vector2& GetCurrentVelocity() const { return mVelocity; }
 
 	const ion::Vector3& GetWeaponOffset() const { return mWeaponOffset; }
 
@@ -41,15 +42,23 @@ protected:
 	int mShield;
 	int mMaxShield;
 
-	//Movement speed
-	float mMoveSpeedX;
-	float mMoveSpeedY;
+	//Max velocity
+	ion::Vector2 mMaxVelocity;
+
+	//Velocity
+	ion::Vector2 mVelocity;
+
+	//Acceleration
+	ion::Vector2 mAcceleration;
 
 	//Vertical position up cylinder
 	float mPositionY;
 
 	//Rotation around cylinder
 	float mRotationY;
+
+	//Current move state
+	ion::Vector2 mMoveVector;
 
 	//Weapons
 	Weapon* mWeapons[MaxWeapons];

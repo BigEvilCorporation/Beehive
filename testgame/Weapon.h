@@ -14,6 +14,8 @@ class Bullet;
 class Weapon
 {
 public:
+	static const int sUnlimitedAmmo = -1;
+
 	Weapon(const Ship& owner);
 	virtual ~Weapon();
 
@@ -28,7 +30,7 @@ public:
 	const Ship& GetOwner() const { return mOwner; }
 
 	float GetFireRate() const { return mFireRate; }
-	float GetBulletSpeed() const { return mBulletSpeed; }
+	float GetBulletVelocity() const { return mBulletVelocity; }
 	float GetBulletDamage() const { return mBulletDamage; }
 	float GetBulletRange() const { return mBulletRange; }
 
@@ -36,7 +38,7 @@ protected:
 
 	//Stats
 	float mFireRate;
-	float mBulletSpeed;
+	float mBulletVelocity;
 	float mBulletDamage;
 	float mBulletRange;
 
