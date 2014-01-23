@@ -154,43 +154,42 @@ namespace ion
 		x = axis.x;
 		y = axis.y;
 		z = axis.z;
-		if (x == 0.0f && y == 0.0f && z == 0.0f) x = 1.0f;
+		if (x == 0.0f && y == 0.0f && z == 0.0f)
+		{
+			x = 1.0f;
+		}
+		
 		Normalise();
 
 		radians = radians / 2;
 		w = (float)cos(radians);
 
-		float Scale = (float)sin(radians);
-		x *= Scale;
-		y *= Scale;
-		z *= Scale;
+		float scale = (float)sin(radians);
+		x *= scale;
+		y *= scale;
+		z *= scale;
 	}
 
-	void Quaternion::FromLookAt(const Vector3& forward, const Vector3& position, const Vector3& target, float factor)
+	void Quaternion::FromLookAt(const Vector3& position, const Vector3& target, const Vector3& forward)
 	{
-		Vector3 direction = (target - position).Normalise();
-		Vector3 right = forward.Cross(direction).Normalise();
-		Vector3 up = direction.Cross(right).Normalise();
+		Vector3 forwardVector = target - position;
 
-		Matrix4 lookAtMatrix;
-		lookAtMatrix.SetRight(right);
-		lookAtMatrix.SetUp(up);
-		lookAtMatrix.SetForward(forward);
+		float dot = forward.Dot(forwardVector);
 
-		Quaternion targetQuat;
-		targetQuat.FromMatrix(lookAtMatrix);
-
-		//Slerp current quaternion using new quaternion, by factor
-		if(factor == 1.0f)
+		if(maths::Abs(dot + 1.0f) < maths::FLOAT_EPSILON)
 		{
-			*this = targetQuat;
+			x = 0.0f;
+			y = 1.0f;
+			z = 0.0f;
+			w = maths::PI;
 		}
-		else if(factor > 0.0f)
+		else if(maths::Abs(dot - 1.0f) >= maths::FLOAT_EPSILON)
 		{
-			Slerp((*this), targetQuat, factor);
+			float rotAngle = acosf(dot);
+			Vector3 rotAxis = forward.Cross(forwardVector);
+			rotAxis = rotAxis.Normalise();
+			FromAxis(rotAngle, rotAxis);
 		}
-
-		*this = targetQuat;
 	}
 
 	Matrix4 Quaternion::ToMatrix() const
@@ -308,46 +307,25 @@ namespace ion
 
 	void Quaternion::Slerp(const Quaternion &quat1, const Quaternion &quat2, float time)
 	{
-		float omega, cosom, sinom, sclp, sclq;
+		float dotproduct = quat1.x * quat2.x + quat1.y * quat2.y + quat1.z * quat2.z + quat1.w * quat2.w;
+		float theta, st, sut, sout, coeff1, coeff2;
 
-		cosom = quat1.x*quat2.x + quat1.y*quat2.y + quat1.z*quat2.z + quat1.w*quat2.w;
+		theta = (float)acos(dotproduct);
+		if (theta<0.0)
+			theta=-theta;
+	
+		st = (float) sin(theta);
+		sut = (float) sin(time*theta);
+		sout = (float) sin((1.0f-time)*theta);
+		coeff1 = sout/st;
+		coeff2 = sut/st;
 
+		x = coeff1*quat1.x + coeff2*quat2.x;
+		y = coeff1*quat1.y + coeff2*quat2.y;
+		z = coeff1*quat1.z + coeff2*quat2.z;
+		w = coeff1*quat1.w + coeff2*quat2.w;
 
-		if ((1.0f+cosom) > maths::FLOAT_EPSILON)
-		{
-			if ((1.0f-cosom) > maths::FLOAT_EPSILON)
-			{
-				omega = acos(cosom);
-				sinom = sin(omega);
-				sclp = sin((1.0f-time)*omega) / sinom;
-				sclq = sin(time*omega) / sinom;
-			}
-			else
-			{
-				sclp = 1.0f - time;
-				sclq = time;
-			}
-
-			x = sclp*quat1.x + sclq*quat2.x;
-			y = sclp*quat1.y + sclq*quat2.y;
-			z = sclp*quat1.z + sclq*quat2.z;
-			w = sclp*quat1.w + sclq*quat2.w;
-
-		}
-		else
-		{
-			x =-quat1.y;
-			y = quat1.x;
-			z =-quat1.w;
-			w = quat1.z;
-
-			sclp = (float)sin((1.0f - time) * maths::PI * 0.5f);
-			sclq = (float)sin(time * maths::PI * 0.5f);
-
-			x = sclp*quat1.x + sclq*quat2.x;
-			y = sclp*quat1.y + sclq*quat2.y;
-			z = sclp*quat1.z + sclq*quat2.z;
-		}
+		Normalise();
 	}
 
 	void Quaternion::Exp()

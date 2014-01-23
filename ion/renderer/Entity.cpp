@@ -49,7 +49,7 @@ namespace ion
 		void Entity::SetLookAt(const Vector3& position)
 		{
 			Quaternion orientation;
-			orientation.FromLookAt(mMatrix.GetForward(), mMatrix.GetTranslation(), position, 1.0f);
+			orientation.FromLookAt(mMatrix.GetTranslation(), position, ion::Vector3(0.0f, 0.0f, -1.0f));
 			SetOrientation(orientation);
 		}
 
