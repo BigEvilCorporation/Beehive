@@ -2,6 +2,11 @@
 
 namespace utils
 {
+	float XPositionToCylinderYRotation(float positionX, float distancefromCentre)
+	{
+		return (positionX != 0.0f) ? (distancefromCentre / positionX) : 0.0f;
+	}
+
 	ion::Matrix4 CalculateCylinderTransform(float rotationY, float positionY, float distanceFromCentre)
 	{
 		//Rotate around Y

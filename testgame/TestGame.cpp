@@ -54,11 +54,12 @@ bool TestGame::Initialise()
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
 
-	//Set up game
-	mPlayer = new Ship(mSceneCylinderRadius, mSceneCylinderHeight);
+	//Set scene clear colour
+	mRenderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
 
-	ion::render::Material* material = new ion::render::Material();
+	//ion::render::Material* material = new ion::render::Material();
 
+	//Load temp materials
 	temp::Materials::LoadTempMaterials(*mResourceManager);
 
 	while(mResourceManager->GetNumResourcesWaiting() > 0)
@@ -76,13 +77,30 @@ bool TestGame::Initialise()
 	}
 	*/
 
-	mPlayer->SetMaterial(temp::Materials::sDefault.Get());
-
+	//Set up scene
 	mCylinderPrimitive = new ion::render::Cylinder(mSceneCylinderRadius - 5.0f, mSceneCylinderHeight, 16, ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 0.0f));
 
-	mRenderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
+	//Set up player ship
+	mPlayer = new Ship(mSceneCylinderRadius, mSceneCylinderHeight);
+	mPlayer->SetMaterial(temp::Materials::sDefault.Get());
 
-	mCamera->SetPosition(ion::Vector3(0.0f, 2.0f, 12.0f));
+	/*
+	//Set up enemy ships
+	SpawnPattern* spawnPattern = new SpawnLine(mSceneCylinderRadius, mSceneCylinderHeight, ion::Vector2(5.0f, 5.0f));
+
+	const int numEnemies = 10;
+	for(int i = 0; i < numEnemies; i++)
+	{
+		float time = (float)numEnemies / (float)i;
+		ion::Matrix4 spawnTransform = spawnPattern->GetSpawnTransform(time, ion::Vector2(0.0f, 0.0f));
+		Enemy* enemy = new Enemy(mSceneCylinderRadius, mSceneCylinderHeight);
+		enemy->SetTransform(spawnTransform);
+		mEnemies.push_back(enemy);
+	}
+	*/
+
+	//Initial camera position
+	mCamera->SetPosition(ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 1.0f));
 	
 	return true;
 }
@@ -177,12 +195,19 @@ void TestGame::Render()
 	mRenderer->ClearColour();
 	mRenderer->ClearDepth();
 
+	//Render scene
 	temp::Materials::sDefault.Get()->Bind(ion::Matrix4(), mCamera->GetTransform().GetInverse(), mRenderer->GetProjectionMatrix());
 	mRenderer->DrawVertexBuffer(mCylinderPrimitive->GetVertexBuffer(), mCylinderPrimitive->GetIndexBuffer());
 	temp::Materials::sDefault.Get()->Unbind();
 
 	//Render player
 	mPlayer->Render(*mRenderer, *mCamera);
+
+	//Render enemies
+	for(int i = 0; i < mEnemies.size(); i++)
+	{
+		mEnemies[i]->Render(*mRenderer, *mCamera);
+	}
 
 	mRenderer->SwapBuffers();
 }

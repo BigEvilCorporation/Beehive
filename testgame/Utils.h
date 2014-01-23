@@ -10,6 +10,9 @@
 
 namespace utils
 {
+	//Calculates a Y rotation around cylinder from a given X coordinate
+	float XPositionToCylinderYRotation(float positionX, float distancefromCentre);
+
 	//Calculates a pos/rot matrix to position an object around the outside of a cylinder, facing its centre
 	ion::Matrix4 CalculateCylinderTransform(float rotationY, float positionY, float distanceFromCentre);
 }

@@ -1,20 +1,20 @@
 #include "Bullet.h"
 #include "Weapon.h"
 
-ion::render::Sphere* Bullet::sSpherePrimitive = NULL;
+ion::render::Primitive* Bullet::sPrimitive = NULL;
 
 Bullet::Bullet(Weapon& weapon, float initialPositionY, float initialRotationY, float velocity, float cylinderRadius)
 	: mWeapon(weapon)
 {
-	mLifeRemaining = weapon.GetBulletRange() * velocity;
+	mLifeRemaining = weapon.GetBulletRange() * ion::maths::Abs(velocity);
 	mPositionY = initialPositionY;
 	mRotationY = initialRotationY;
 	mVelocity = velocity;
 	mSceneCylinderRadius = cylinderRadius;
 
-	if(!sSpherePrimitive)
+	if(!sPrimitive)
 	{
-		sSpherePrimitive = new ion::render::Sphere(0.1f, 6, 6);
+		sPrimitive = new ion::render::Box(ion::Vector3(0.05f, 0.05f, 0.05f)); //ion::render::Sphere(0.05f, 6, 6);
 	}
 }
 
@@ -37,6 +37,6 @@ bool Bullet::Update(float deltaTime)
 void Bullet::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
 {
 	temp::Materials::sDefault.Get()->Bind(GetTransform(), camera.GetTransform().GetInverse(), renderer.GetProjectionMatrix());
-	renderer.DrawVertexBuffer(sSpherePrimitive->GetVertexBuffer(), sSpherePrimitive->GetIndexBuffer());
+	renderer.DrawVertexBuffer(sPrimitive->GetVertexBuffer(), sPrimitive->GetIndexBuffer());
 	temp::Materials::sDefault.Get()->Unbind();
 }

@@ -39,7 +39,7 @@ namespace ion
 		void FromAxis(float radian, const Vector3& axis);
 		void FromEuler(const Vector3& euler);
 		void FromMatrix(const Matrix4& Matrix);
-		void FromLookAt(const Vector3& forward, const Vector3& position, const Vector3& target, float factor);
+		void FromLookAt(const Vector3& position, const Vector3& target, const Vector3& forward);
 
 		Matrix4 ToMatrix() const;
 		Vector3 ToEuler() const;

@@ -30,5 +30,5 @@ protected:
 	const Weapon& mWeapon;
 
 	//Temp until mesh is done
-	static ion::render::Sphere* sSpherePrimitive;
+	static ion::render::Primitive* sPrimitive;
 };

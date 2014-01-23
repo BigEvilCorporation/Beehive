@@ -4,14 +4,19 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	: mSceneCylinderRadius(sceneCylinderRadius),
 	mSceneCylinderHeight(sceneCylinderHeight)
 {
-	mMaxVelocity.x = 0.5f;
+	mMaxVelocity.x = 0.3f;
 	mMaxVelocity.y = 8.0f;
 
 	mAcceleration.x = 3.0f;
 	mAcceleration.y = 8.0f;
 
+	mRotationSpeed = 2.0f;
+	mRotationTime = 0.0f;
+	mFireRotationThreshold = 0.9f;
+
 	mPositionY = sceneCylinderHeight / 2.0f;
 	mRotationY = 0.0f;
+	mTargetDirection.x = 1.0f;
 
 	//Set initial position
 	SetPosition(ion::Vector3(0.0f, mPositionY, -sceneCylinderRadius));
@@ -57,11 +62,30 @@ void Ship::Update(float deltaTime)
 		mVelocity.y = 0.0f;
 	}
 
-	//Reset move vector
-	mMoveVector = ion::Vector2();
+	//Slerp rotation
+	ion::Quaternion currentRotation;
+	ion::Quaternion targetRotation;
+	targetRotation.FromAxis(ion::maths::DegreesToRadians(180.0f), ion::Vector3(0.0f, 1.0f, 0.0f));
+
+	if(mTargetDirection.x < 0.0f)
+	{
+		mRotationTime = ion::maths::Clamp(mRotationTime - mRotationSpeed * deltaTime, 0.0f, 1.0f);
+	}
+	else
+	{
+		mRotationTime = ion::maths::Clamp(mRotationTime + mRotationSpeed * deltaTime, 0.0f, 1.0f);
+	}
+
+	ion::Quaternion newRotation;
+	newRotation.Slerp(currentRotation, targetRotation, mRotationTime);
+
+	ion::Matrix4 newTransform = newRotation.ToMatrix() * utils::CalculateCylinderTransform(mRotationY, mPositionY, mSceneCylinderRadius);
 
 	//Apply transform
-	SetTransform(utils::CalculateCylinderTransform(mRotationY, mPositionY, mSceneCylinderRadius));
+	SetTransform(newTransform);
+
+	//Reset move vector
+	mMoveVector = ion::Vector2();
 
 	for(int i = 0; i < MaxWeapons; i++)
 	{
@@ -90,13 +114,23 @@ void Ship::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
 void Ship::Move(const ion::Vector2& moveVector)
 {
 	mMoveVector = moveVector;
+
+	if(moveVector.x != 0.0f)
+	{
+		mTargetDirection.x = mMoveVector.x;
+		mTargetDirection = mTargetDirection.Normalise();
+	}
 }
 
 void Ship::Fire(ShootType shootType)
 {
-	Weapon* weapon = mWeapons[shootType];
-	if(weapon)
+	//Don't fire if rotating
+	if(mRotationTime > mFireRotationThreshold || mRotationTime < (1.0f - mFireRotationThreshold))
 	{
-		weapon->Fire();
+		Weapon* weapon = mWeapons[shootType];
+		if(weapon)
+		{
+			weapon->Fire();
+		}
 	}
 }

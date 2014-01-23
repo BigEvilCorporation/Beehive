@@ -12,10 +12,14 @@ SRC =
 	main.cpp
 	Bullet.cpp
 	Bullet.h
+	Enemy.cpp
+	Enemy.h
 	TestGame.cpp
 	TestGame.h
 	Ship.cpp
 	Ship.h
+	SpawnPattern.cpp
+	#SpawnPattern.h
 	Utils.cpp
 	Utils.h
 	Weapon.cpp

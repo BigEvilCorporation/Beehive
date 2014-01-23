@@ -5,7 +5,7 @@
 Weapon::Weapon(const Ship& owner)
 	: mOwner(owner)
 {
-	mFireRate = 4.0f;
+	mFireRate = 6.0f;
 	mBulletVelocity = 0.5f;
 	mBulletDamage = 1.0f;
 	mBulletRange = 4.0f;
@@ -50,7 +50,10 @@ bool Weapon::Fire()
 {
 	if(mCoolDown == 0.0f && (mAmmo > 0 || mAmmo == sUnlimitedAmmo))
 	{
-		mActiveBullets.push_back(new Bullet(*this, mOwner.GetPositionY(), mOwner.GetRotationY(), mOwner.GetCurrentVelocity().x + mBulletVelocity, mOwner.GetCylinderRadius()));
+		float shipVelocity = mOwner.GetCurrentVelocity().x;
+		const ion::Vector3& shipDirection = mOwner.GetTargetDirection();
+		float velocity = (shipDirection.x > 0.0f) ? (shipVelocity + mBulletVelocity) : (shipVelocity - mBulletVelocity);
+		mActiveBullets.push_back(new Bullet(*this, mOwner.GetPositionY(), mOwner.GetRotationY(), velocity, mOwner.GetCylinderRadius()));
 		mAmmo--;
 		mCoolDown = 1.0f / mFireRate;
 

@@ -30,7 +30,11 @@
 #include <ion/renderer/Window.h>
 
 #include "Ship.h"
+#include "Enemy.h"
 #include "Utils.h"
+//#include "SpawnPattern.h"
+
+#include <vector>
 
 class TestGame : public ion::framework::Application
 {
@@ -54,6 +58,7 @@ public:
 	ion::render::Camera* mCamera;
 
 	Ship* mPlayer;
+	std::vector<Enemy*> mEnemies;
 
 	ion::render::Cylinder* mCylinderPrimitive;
 
