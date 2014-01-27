@@ -8,6 +8,8 @@
 #pragma once
 
 #include "core/Types.h"
+#include "io/ResourceHandle.h"
+#include "io/ResourceManager.h"
 #include "renderer/colour.h"
 #include "renderer/Animation.h"
 #include "renderer/Camera.h"
@@ -24,7 +26,9 @@ namespace ion
 		class Sprite : public Entity
 		{
 		public:
-			Sprite(float width, float height, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const Texture* spriteSheet);
+			enum RenderType { Render2D, Render3D };
+
+			Sprite(RenderType renderType, float width, float height, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const std::string& spriteSheet, io::ResourceManager& resourceManager);
 			virtual ~Sprite();
 
 			void SetFrame(int frame);
@@ -35,22 +39,28 @@ namespace ion
 			void Render(Renderer& renderer, Camera& camera);
 
 		protected:
-			static Shader* sVertexShader;
-			static Shader* sPixelShader;
-			static Shader::ParamHndl<Matrix4> sShaderParamWorldViewProjMtx;
-			static Shader::ParamHndl<Colour> sShaderParamDiffuseColour;
-			static Shader::ParamHndl<Texture> sShaderParamSpriteSheet;
-			static Shader::ParamHndl<Vector2> sShaderParamSpriteSheetGridSize;
-			static Shader::ParamHndl<float> sShaderParamSpriteAnimFrame;
-			static int sShaderRefCount;
+			io::ResourceHandle<Shader> mVertexShader;
+			io::ResourceHandle<Shader> mPixelShader;
+			io::ResourceHandle<Texture> mSpriteSheet;
 
+			struct ShaderParams
+			{
+				Shader::ParamHndl<Matrix4> mWorldViewProjMtx;
+				Shader::ParamHndl<Colour> mDiffuseColour;
+				Shader::ParamHndl<Texture> mSpriteSheet;
+				Shader::ParamHndl<Vector2> mSpriteSheetGridSize;
+				Shader::ParamHndl<float> mSpriteAnimFrame;
+			};
+
+			ShaderParams mShaderParams;
+
+			RenderType mRenderType;
 			float mWidth;
 			float mHeight;
 			int mSpriteSheetGridSizeX;
 			int mSpriteSheetGridSizeY;
 			int mCurrentFrame;
 			Colour mColour;
-			const Texture* mSpriteSheet;
 
 			Quad* mQuadPrimitive;
 		};

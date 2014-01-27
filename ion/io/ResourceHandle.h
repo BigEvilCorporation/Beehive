@@ -10,6 +10,8 @@
 #include "core/Types.h"
 #include "core/debug/Debug.h"
 
+#include <string>
+
 namespace ion
 {
 	namespace io

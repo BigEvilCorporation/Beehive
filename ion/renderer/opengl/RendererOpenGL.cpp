@@ -120,12 +120,6 @@ namespace ion
 			//Set default blending mode
 			glBlendFunc(GL_ONE, GL_ONE);
 
-			//Flip all texture drawing (SDL textures are upside down to OpenGL)
-			glMatrixMode(GL_TEXTURE);
-			glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
-			glScalef(-1.0f, 1.0f, 1.0f);
-			glMatrixMode(GL_MODELVIEW);
-
 			//Call resize to setup viewport
 			OnResize(windowWidth, windowHeight);
 
