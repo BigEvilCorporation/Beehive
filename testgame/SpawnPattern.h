@@ -31,7 +31,7 @@ public:
 	virtual ion::Matrix4 GetSpawnTransform(float time, const Vector2& offset) const;
 };
 
-class SpawnSquare : public SpawnPattern
+class SpawnBox : public SpawnPattern
 {
 public:
 	virtual ion::Matrix4 GetSpawnTransform(float time, const Vector2& offset) const;

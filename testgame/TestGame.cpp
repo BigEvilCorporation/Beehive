@@ -57,23 +57,26 @@ bool TestGame::Initialise()
 	//Set scene clear colour
 	mRenderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
 
-	//ion::render::Material* material = new ion::render::Material();
-
 	//Load temp materials
 	temp::Materials::LoadTempMaterials(*mResourceManager);
+
+	//Create sprites
+	mSprite = new ion::render::Sprite(ion::render::Sprite::Render2D, 1.0f, 1.0f, 1, 1, "placeholder256.ion.texture", *mResourceManager);
 
 	while(mResourceManager->GetNumResourcesWaiting() > 0)
 	{
 	}
 
 	/*
-	ion::io::File fileV("../materials/ship.ion.material", ion::io::File::OpenWrite);
-	if(fileV.IsOpen())
+	ion::io::File file("../shaders/sprite_p.ion.shader", ion::io::File::OpenWrite);
+	if(file.IsOpen())
 	{
-		ion::io::Archive archiveIn(fileV, ion::io::Archive::Out);
-		ion::render::Material::RegisterSerialiseType(archiveIn);
-		archiveIn.Serialise(material);
-		fileV.Close();
+		ion::render::Shader* shader = ion::render::Shader::Create();
+		shader->SetProgram("../shaders/programs/cg/sprite.cgfx", "FragmentProgram", ion::render::Shader::Fragment);
+		ion::io::Archive archive(file, ion::io::Archive::Out);
+		ion::render::Shader::RegisterSerialiseType(archive);
+		archive.Serialise(shader);
+		file.Close();
 	}
 	*/
 
@@ -84,20 +87,14 @@ bool TestGame::Initialise()
 	mPlayer = new Ship(mSceneCylinderRadius, mSceneCylinderHeight);
 	mPlayer->SetMaterial(temp::Materials::sDefault.Get());
 
-	/*
 	//Set up enemy ships
-	SpawnPattern* spawnPattern = new SpawnLine(mSceneCylinderRadius, mSceneCylinderHeight, ion::Vector2(5.0f, 5.0f));
+	WaveParams waveParams;
+	waveParams.spawnPattern = WaveParams::Line;
+	waveParams.spawnLine = ion::Vector2(0.5f, 0.5f);
+	waveParams.minNumUnits = 5;
+	waveParams.maxNumUnits = 10;
 
-	const int numEnemies = 10;
-	for(int i = 0; i < numEnemies; i++)
-	{
-		float time = (float)numEnemies / (float)i;
-		ion::Matrix4 spawnTransform = spawnPattern->GetSpawnTransform(time, ion::Vector2(0.0f, 0.0f));
-		Enemy* enemy = new Enemy(mSceneCylinderRadius, mSceneCylinderHeight);
-		enemy->SetTransform(spawnTransform);
-		mEnemies.push_back(enemy);
-	}
-	*/
+	mEnemyWaves.push_back(new EnemyWave(waveParams, 5, mSceneCylinderRadius, mSceneCylinderHeight));
 
 	//Initial camera position
 	mCamera->SetPosition(ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 1.0f));
@@ -204,10 +201,13 @@ void TestGame::Render()
 	mPlayer->Render(*mRenderer, *mCamera);
 
 	//Render enemies
-	for(int i = 0; i < mEnemies.size(); i++)
+	for(unsigned int i = 0; i < mEnemyWaves.size(); i++)
 	{
-		mEnemies[i]->Render(*mRenderer, *mCamera);
+		mEnemyWaves[i]->Render(*mRenderer, *mCamera);
 	}
+
+	//Render sprites
+	mSprite->Render(*mRenderer, *mCamera);
 
 	mRenderer->SwapBuffers();
 }

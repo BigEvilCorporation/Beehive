@@ -31,8 +31,9 @@
 
 #include "Ship.h"
 #include "Enemy.h"
+#include "EnemyWave.h"
 #include "Utils.h"
-//#include "SpawnPattern.h"
+#include "SpawnPattern.h"
 
 #include <vector>
 
@@ -58,9 +59,11 @@ public:
 	ion::render::Camera* mCamera;
 
 	Ship* mPlayer;
-	std::vector<Enemy*> mEnemies;
+	std::vector<EnemyWave*> mEnemyWaves;
 
 	ion::render::Cylinder* mCylinderPrimitive;
+
+	ion::render::Sprite* mSprite;
 
 	float mMouseSensitivity;
 
