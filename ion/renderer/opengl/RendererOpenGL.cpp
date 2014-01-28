@@ -243,6 +243,16 @@ namespace ion
 			return Matrix4(matrix);
 		}
 
+		void RendererOpenGL::BeginFrame()
+		{
+			LockGLContext();
+		}
+
+		void RendererOpenGL::EndFrame()
+		{
+			UnlockGLContext();
+		}
+
 		void RendererOpenGL::SwapBuffers()
 		{
 			LockGLContext();

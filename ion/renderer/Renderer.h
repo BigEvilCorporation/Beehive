@@ -59,6 +59,8 @@ namespace ion
 			virtual Matrix4 GetProjectionMatrix() = 0;
 
 			//Rendering - general
+			virtual void BeginFrame() = 0;
+			virtual void EndFrame() = 0;
 			virtual void SwapBuffers() = 0;
 			virtual void ClearColour() = 0;
 			virtual void ClearDepth() = 0;

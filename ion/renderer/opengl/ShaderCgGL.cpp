@@ -91,6 +91,7 @@ namespace ion
 		ShaderCgGL::ShaderCgGL()
 		{
 			mCgProgram = 0;
+			mCgProgramLoaded = false;
 		}
 
 		ShaderCgGL::~ShaderCgGL()
@@ -153,10 +154,14 @@ namespace ion
 		void ShaderCgGL::Bind()
 		{
 			RendererOpenGL::LockGLContext();
-			cgGLLoadProgram(mCgProgram);
+
+			if(!mCgProgramLoaded)
+				cgGLLoadProgram(mCgProgram);
+
 			cgGLEnableProfile(mCgProfile);
 			cgGLBindProgram(mCgProgram);
 			ShaderManagerCgGL::CheckCgError();
+
 			RendererOpenGL::UnlockGLContext();
 		}
 
