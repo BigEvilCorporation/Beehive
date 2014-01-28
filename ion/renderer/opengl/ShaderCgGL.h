@@ -66,6 +66,7 @@ namespace ion
 
 			CGprogram mCgProgram;
 			CGprofile mCgProfile;
+			bool mCgProgramLoaded;
 		};
 	}
 }

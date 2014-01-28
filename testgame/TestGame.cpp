@@ -189,6 +189,8 @@ bool TestGame::Update(float deltaTime)
 
 void TestGame::Render()
 {
+	mRenderer->BeginFrame();
+
 	mRenderer->ClearColour();
 	mRenderer->ClearDepth();
 
@@ -210,4 +212,6 @@ void TestGame::Render()
 	mSprite->Render(*mRenderer, *mCamera);
 
 	mRenderer->SwapBuffers();
+
+	mRenderer->EndFrame();
 }
