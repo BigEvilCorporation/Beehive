@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Body.h"
+#include "physics/Body.h"
 
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 #include "BulletDynamics/Character/btKinematicCharacterController.h"

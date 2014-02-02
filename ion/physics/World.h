@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "../core/maths/Vector.h"
-#include "../core/maths/Matrix.h"
-#include "../core/maths/Quaternion.h"
+#include "maths/Vector.h"
+#include "maths/Matrix.h"
+#include "maths/Quaternion.h"
 
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"

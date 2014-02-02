@@ -9,8 +9,10 @@ SRC =
 	World.h
 	;
 
+ApplyIonDefines physics ;
+ApplyIonIncludes physics ;
 ApplyBulletSDK physics ;
 
 AutoSourceGroup physics : $(SRC) ;
-
+C.RuntimeType physics : static ;
 C.Library physics : $(SRC) ;

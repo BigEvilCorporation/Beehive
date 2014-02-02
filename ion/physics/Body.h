@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "../core/maths/Vector.h"
-#include "../core/maths/Matrix.h"
-#include "../core/maths/Quaternion.h"
+#include "maths/Vector.h"
+#include "maths/Matrix.h"
+#include "maths/Quaternion.h"
 
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
@@ -38,7 +38,7 @@ namespace ion
 			void ApplyLinearImpulse(const ion::Vector3& impulse, const ion::Vector3& relativePosition);
 			void ApplyAngularImpulse(const ion::Vector3& impulse);
 
-			const ion::Matrix4& GetTransform();
+			const ion::Matrix4& GetTransform() const;
 			float GetMass() const;
 			float GetFriction() const;
 			float GetRestitution() const;

@@ -58,5 +58,5 @@ ApplyOpenGLSDK renderer ;
 ApplySDLSDK renderer ;
 
 AutoSourceGroup renderer : $(SRC) ;
-
+C.RuntimeType renderer : static ;
 C.Library renderer : $(SRC) ;

@@ -23,7 +23,7 @@ namespace ion
 			Entity();
 			virtual ~Entity();
 
-			const Matrix4& GetTransform() const;
+			virtual const Matrix4& GetTransform() const;
 
 			virtual void SetTransform(const Matrix4& matrix);
 			virtual void SetPosition(const Vector3& position);

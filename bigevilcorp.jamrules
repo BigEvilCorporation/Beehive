@@ -10,7 +10,7 @@ rule ApplyIonIncludes TARGET
 
 rule ApplyIonDefines TARGET
 {
-	C.Defines $(TARGET) : ION_PLATFORM_WINDOWS ION_PLATFORMION_PLATFORM_WINDOWS ;
+	C.Defines $(TARGET) : ION_PLATFORM_WINDOWS ;
 }
 
 rule ApplyIonLib TARGET : LIBNAME
@@ -315,7 +315,7 @@ rule ApplyBulletSDK TARGET
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_DEBUG) : debug ;
-	C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_RELEASE) : release ;
+	# C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_RELEASE) : release ;
 }
 
 #################################################

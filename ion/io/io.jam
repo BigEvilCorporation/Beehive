@@ -25,5 +25,5 @@ ApplyIonIncludes io ;
 ApplyWin32SDK io ;
 
 AutoSourceGroup io : $(SRC) ;
-
+C.RuntimeType io : static ;
 C.Library io : $(SRC) ;
