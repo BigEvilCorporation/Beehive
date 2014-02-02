@@ -45,5 +45,5 @@ ApplyIonIncludes core ;
 ApplyWin32SDK core ;
 
 AutoSourceGroup core : $(SRC) ;
-
+C.RuntimeType core : static ;
 C.Library core : $(SRC) ;

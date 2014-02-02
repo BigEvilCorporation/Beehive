@@ -5,7 +5,7 @@
 // Description:	Physics body
 ///////////////////////////////////////////////////
 
-#include "Body.h"
+#include "physics/Body.h"
 
 namespace ion
 {
@@ -111,7 +111,7 @@ namespace ion
 			mBulletBody->applyTorqueImpulse(btVector3(impulse.x, impulse.y, impulse.z));
 		}
 
-		const ion::Matrix4& Body::GetTransform()
+		const ion::Matrix4& Body::GetTransform() const
 		{
 			return mBulletMotionState->mMatrix;
 		}

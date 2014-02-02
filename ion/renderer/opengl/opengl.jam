@@ -19,5 +19,5 @@ ApplyCgSDK opengl ;
 ApplyGlewSDK opengl ;
 
 AutoSourceGroup opengl : $(SRC) ;
-
+C.RuntimeType opengl : static ;
 C.Library opengl : $(SRC) ;

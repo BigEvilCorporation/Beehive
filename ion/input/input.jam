@@ -16,5 +16,5 @@ ApplyWin32SDK input ;
 ApplyXInputSDK input ;
 
 AutoSourceGroup input : $(SRC) ;
-
+C.RuntimeType input : static ;
 C.Library input : $(SRC) ;

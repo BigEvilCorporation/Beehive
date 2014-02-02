@@ -5,7 +5,7 @@
 // Description:	Kinematic character controller
 ///////////////////////////////////////////////////
 
-#include "Character.h"
+#include "physics/Character.h"
 
 namespace ion
 {

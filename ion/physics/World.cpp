@@ -5,9 +5,9 @@
 // Description:	Physics world
 ///////////////////////////////////////////////////
 
-#include "World.h"
-#include "Body.h"
-#include "Character.h"
+#include "physics/World.h"
+#include "physics/Body.h"
+#include "physics/Character.h"
 
 namespace ion
 {

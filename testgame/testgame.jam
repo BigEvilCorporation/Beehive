@@ -6,6 +6,7 @@ ApplyIonCore TestGame ;
 # ApplyIonEditor TestGame ;
 # ApplyIonGui TestGame ;
 ApplyIonInput TestGame ;
+ApplyIonPhysics TestGame ;
 ApplyIonRenderer TestGame : opengl ;
 
 SRC = 
@@ -29,5 +30,5 @@ SRC =
 	;
 
 AutoSourceGroup TestGame : $(SRC) ;
-C.RuntimeType TestGame : dynamic ;
+C.RuntimeType TestGame : static ;
 C.Application TestGame : $(SRC) ;
