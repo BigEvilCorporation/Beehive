@@ -1,19 +1,29 @@
-#include "core/Application.h"
-#include "core/maths/Vector.h"
-#include "core/maths/Matrix.h"
-#include "input/Keyboard.h"
-#include "input/Mouse.h"
-#include "input/Gamepad.h"
-#include "renderer/Renderer.h"
-#include "renderer/Scene.h"
-#include "renderer/SceneNode.h"
-#include "renderer/Camera.h"
-#include "renderer/Viewport.h"
-#include "renderer/Primitive.h"
-#include "renderer/Light.h"
-#include "physics/World.h"
-#include "physics/Body.h"
-#include "physics/Character.h"
+#include <ion/core/bootstrap/Application.h>
+#include <ion/core/Version.h>
+#include <ion/core/debug/Debug.h>
+#include <ion/core/thread/Thread.h>
+#include <ion/core/time/Time.h>
+#include <ion/io/fileSystem.h>
+#include <ion/maths/Vector.h>
+#include <ion/maths/Matrix.h>
+#include <ion/io/Resource.h>
+#include <ion/io/ResourceManager.h>
+#include <ion/io/File.h>
+#include <ion/input/Keyboard.h>
+#include <ion/input/Mouse.h>
+#include <ion/input/Gamepad.h>
+#include <ion/physics/World.h>
+#include <ion/physics/Body.h>
+#include <ion/physics/Character.h>
+#include <ion/renderer/Renderer.h>
+#include <ion/renderer/Colour.h>
+#include <ion/renderer/Shader.h>
+#include <ion/renderer/Camera.h>
+#include <ion/renderer/Primitive.h>
+#include <ion/renderer/Material.h>
+#include <ion/renderer/Texture.h>
+#include <ion/renderer/Sprite.h>
+#include <ion/renderer/Window.h>
 
 class PhysicsTest : public ion::framework::Application
 {
@@ -26,33 +36,28 @@ public:
 	bool Update(float deltaTime);
 	void Render();
 	
-	ion::renderer::Renderer* mRenderer;
-	ion::renderer::Scene* mScene;
-	ion::renderer::Camera* mCamera;
-	ion::renderer::Viewport* mViewport;
+	ion::render::Renderer* mRenderer;
+	ion::render::Camera* mCamera;
 	ion::input::Keyboard* mKeyboard;
 	ion::input::Mouse* mMouse;
 	ion::input::Gamepad* mGamepad;
-
-	ion::renderer::Light* mDirectionalLight;
+	ion::io::ResourceManager* mResourceManager;
 
 	static const int sBoxStackWidth = 5;
 	static const int sBoxStackHeight = 5;
 
-	ion::renderer::Primitive* mQuad;
-	ion::renderer::Primitive* mCubes[sBoxStackWidth][sBoxStackHeight];
-	ion::renderer::Primitive* mProjectile;
-	ion::renderer::Primitive* mCharacter;
-	ion::renderer::SceneNode* mQuadNode;
-	ion::renderer::SceneNode* mCubeNodes[sBoxStackWidth][sBoxStackHeight];
-	ion::renderer::SceneNode* mProjectileNode;
-	ion::renderer::SceneNode* mCharacterNode;
+	ion::render::Primitive* mQuad;
+	ion::render::Primitive* mCube;
+	ion::render::Primitive* mProjectile;
+	ion::render::Primitive* mCharacter;
 
 	ion::physics::World* mPhysicsWorld;
 	ion::physics::Body* mPhysicsFloor;
 	ion::physics::Body* mPhysicsBoxes[sBoxStackWidth][sBoxStackHeight];
 	ion::physics::Body* mPhysicsProjectile;
 	ion::physics::Character* mPhysicsCharacter;
+
+	ion::io::ResourceHandle<ion::render::Material> mMaterial;
 
 	bool mProjectileTriggered;
 

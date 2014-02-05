@@ -1,9 +1,11 @@
 SubDir bigevilcorp ion test physicstest ;
 
+ApplyIonDefines physicstest ;
+ApplyIonIncludes physicstest ;
 ApplyIonCore physicstest ;
 ApplyIonInput physicstest ;
-ApplyIonRenderer physicstest ;
 ApplyIonPhysics physicstest ;
+ApplyIonRenderer physicstest : opengl ;
 
 SRC = 
 	main.cpp
@@ -12,5 +14,5 @@ SRC =
 	;
 	
 AutoSourceGroup physicstest : $(SRC) ;
-C.RuntimeType physicstest : dynamic ;
+C.RuntimeType physicstest : static ;
 C.Application physicstest : $(SRC) ;

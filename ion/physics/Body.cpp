@@ -45,6 +45,8 @@ namespace ion
 			btRigidBody::btRigidBodyConstructionInfo bulletBodyInfo(mMass, mBulletMotionState, mBulletShape, initialInertia);
 			bulletBodyInfo.m_restitution = initialRestitution;
 			bulletBodyInfo.m_friction = initialFriction;
+			bulletBodyInfo.m_linearSleepingThreshold = 0.1f;
+			bulletBodyInfo.m_angularSleepingThreshold = 0.1f;
 
 			//Create bullet body
 			mBulletBody = new btRigidBody(bulletBodyInfo);
