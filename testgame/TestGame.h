@@ -12,6 +12,9 @@
 #include <ion/input/Keyboard.h>
 #include <ion/input/Mouse.h>
 #include <ion/input/Gamepad.h>
+#include <ion/physics/World.h>
+#include <ion/physics/Body.h>
+#include <ion/physics/Character.h>
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Colour.h>
 #include <ion/renderer/Shader.h>
@@ -57,6 +60,8 @@ public:
 	
 	ion::render::Renderer* mRenderer;
 	ion::render::Camera* mCamera;
+
+	ion::physics::World* mPhysicsWorld;
 
 	Ship* mPlayer;
 	std::vector<EnemyWave*> mEnemyWaves;

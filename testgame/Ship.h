@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ion/maths/Maths.h>
+#include <ion/physics/Body.h>
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Entity.h>
 #include <ion/renderer/Primitive.h>
@@ -18,6 +19,9 @@ public:
 	Ship(float sceneCylinderRadius, float sceneCylinderHeight);
 	virtual ~Ship();
 
+	virtual const ion::Matrix4& GetTransform() const;
+	virtual void SetTransform(const ion::Matrix4& matrix);
+
 	virtual void Update(float deltaTime);
 	virtual void Render(ion::render::Renderer& renderer, ion::render::Camera& camera);
 
@@ -25,6 +29,8 @@ public:
 	virtual void Fire(ShootType shootType);
 
 	void SetMaterial(ion::render::Material* material);
+
+	ion::physics::Body& GetPhysicsBody() { return mPhysicsBody; }
 
 	float GetPositionY() const { return mPositionY; }
 	float GetRotationY() const { return mRotationY; }
@@ -82,6 +88,8 @@ protected:
 	//Scene dimensions
 	const float mSceneCylinderRadius;
 	const float mSceneCylinderHeight;
+
+	ion::physics::Body mPhysicsBody;
 
 	ion::render::Box* mBoxPrimitive;
 	ion::render::Material* mMaterial;

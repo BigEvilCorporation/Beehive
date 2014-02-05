@@ -2,7 +2,8 @@
 
 Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	: mSceneCylinderRadius(sceneCylinderRadius),
-	mSceneCylinderHeight(sceneCylinderHeight)
+	mSceneCylinderHeight(sceneCylinderHeight),
+	mPhysicsBody(ion::physics::Body::Box, ion::Vector3(0.2f, 0.1f, 0.2f))
 {
 	mMaxVelocity.x = 0.3f;
 	mMaxVelocity.y = 8.0f;
@@ -18,8 +19,9 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	mRotationY = 0.0f;
 	mTargetDirection.x = 1.0f;
 
-	//Set initial position
-	SetPosition(ion::Vector3(0.0f, mPositionY, -sceneCylinderRadius));
+	//Set initial transform
+	ion::Matrix4 transform = utils::CalculateCylinderTransform(mRotationY, mPositionY, mSceneCylinderRadius);
+	SetTransform(transform);
 
 	mBoxPrimitive = new ion::render::Box(ion::Vector3(0.2f, 0.1f, 0.2f));
 
@@ -29,6 +31,9 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	}
 
 	mWeapons[Primary] = new Weapon(*this);
+
+	//Setup physics body
+	mPhysicsBody.SetMass(0.5f);
 }
 
 void Ship::SetMaterial(ion::render::Material* material)
@@ -41,6 +46,17 @@ Ship::~Ship()
 	delete mBoxPrimitive;
 }
 
+const ion::Matrix4& Ship::GetTransform() const
+{
+	return mPhysicsBody.GetTransform();
+}
+
+void Ship::SetTransform(const ion::Matrix4& matrix)
+{
+	Entity::SetTransform(matrix);
+	mPhysicsBody.SetTransform(matrix);
+}
+
 void Ship::Update(float deltaTime)
 {
 	//Lerp from current velocity towards target velocity
@@ -49,6 +65,7 @@ void Ship::Update(float deltaTime)
 	mVelocity.x = ion::maths::Lerp(mVelocity.x, targetVelocity.x, mAcceleration.x * deltaTime);
 	mVelocity.y = ion::maths::Lerp(mVelocity.y, targetVelocity.y, mAcceleration.y * deltaTime);
 
+	/*
 	//Apply velocity
 	mRotationY += mVelocity.x * deltaTime;
 	mPositionY += mVelocity.y * deltaTime;
@@ -83,6 +100,10 @@ void Ship::Update(float deltaTime)
 
 	//Apply transform
 	SetTransform(newTransform);
+	*/
+
+	//mPhysicsBody.SetLinearVelocity(ion::Vector3(mVelocity.x, mVelocity.y, 0.0f));
+	mPhysicsBody.ApplyLinearForce(ion::Vector3(targetVelocity.x, targetVelocity.y, 0.0f), ion::Vector3());
 
 	//Reset move vector
 	mMoveVector = ion::Vector2();

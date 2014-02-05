@@ -51,6 +51,10 @@ bool TestGame::Initialise()
 	mResourceManager->SetResourceDirectory<ion::render::Texture>("../textures");
 	mResourceManager->SetResourceDirectory<ion::render::Material>("../materials");
 
+	//Create physics world
+	mPhysicsWorld = new ion::physics::World();
+	mPhysicsWorld->SetGravity(ion::Vector3(0.0f, 0.0f, 0.0f));
+
 	//Initialise FPS timer
 	mStartTicks = ion::time::GetSystemTicks();
 
@@ -86,6 +90,7 @@ bool TestGame::Initialise()
 	//Set up player ship
 	mPlayer = new Ship(mSceneCylinderRadius, mSceneCylinderHeight);
 	mPlayer->SetMaterial(temp::Materials::sDefault.Get());
+	mPhysicsWorld->AddBody(mPlayer->GetPhysicsBody());
 
 	//Set up enemy ships
 	WaveParams waveParams;
@@ -94,7 +99,7 @@ bool TestGame::Initialise()
 	waveParams.minNumUnits = 5;
 	waveParams.maxNumUnits = 10;
 
-	mEnemyWaves.push_back(new EnemyWave(waveParams, 5, mSceneCylinderRadius, mSceneCylinderHeight));
+	//mEnemyWaves.push_back(new EnemyWave(waveParams, 5, mSceneCylinderRadius, mSceneCylinderHeight));
 
 	//Initial camera position
 	mCamera->SetPosition(ion::Vector3(0.0f, mSceneCylinderHeight / 2.0f, 1.0f));
@@ -159,6 +164,9 @@ bool TestGame::Update(float deltaTime)
 	if(mGamepad->ButtonDown(ion::input::Gamepad::BUTTON_A) || mKeyboard->KeyDown(DIK_SPACE))
 		mPlayer->Fire(Ship::Primary);
 
+	//Update physics world
+	mPhysicsWorld->Step(deltaTime, 10);
+
 	//Update renderer
 	exit |= !mRenderer->Update(0.0f);
 
@@ -209,7 +217,7 @@ void TestGame::Render()
 	}
 
 	//Render sprites
-	mSprite->Render(*mRenderer, *mCamera);
+	//mSprite->Render(*mRenderer, *mCamera);
 
 	mRenderer->SwapBuffers();
 
