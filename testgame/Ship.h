@@ -1,7 +1,9 @@
 #pragma once
 
 #include <ion/maths/Maths.h>
+#include <ion/physics/World.h>
 #include <ion/physics/Body.h>
+#include <ion/physics/Constraint.h>
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Entity.h>
 #include <ion/renderer/Primitive.h>
@@ -30,7 +32,7 @@ public:
 
 	void SetMaterial(ion::render::Material* material);
 
-	ion::physics::Body& GetPhysicsBody() { return mPhysicsBody; }
+	void AddToPhysicsWorld(ion::physics::World& world);
 
 	float GetPositionY() const { return mPositionY; }
 	float GetRotationY() const { return mRotationY; }
@@ -89,7 +91,8 @@ protected:
 	const float mSceneCylinderRadius;
 	const float mSceneCylinderHeight;
 
-	ion::physics::Body mPhysicsBody;
+	ion::physics::Body* mPhysicsBody;
+	ion::physics::BallSocket* mPhysicsConstraint;
 
 	ion::render::Box* mBoxPrimitive;
 	ion::render::Material* mMaterial;

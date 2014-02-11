@@ -5,6 +5,8 @@ SRC =
 	Body.h
 	Character.cpp
 	Character.h
+	Constraint.cpp
+	Constraint.h
 	World.cpp
 	World.h
 	;

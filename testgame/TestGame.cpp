@@ -90,7 +90,7 @@ bool TestGame::Initialise()
 	//Set up player ship
 	mPlayer = new Ship(mSceneCylinderRadius, mSceneCylinderHeight);
 	mPlayer->SetMaterial(temp::Materials::sDefault.Get());
-	mPhysicsWorld->AddBody(mPlayer->GetPhysicsBody());
+	mPlayer->AddToPhysicsWorld(*mPhysicsWorld);
 
 	//Set up enemy ships
 	WaveParams waveParams;

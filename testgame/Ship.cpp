@@ -2,8 +2,7 @@
 
 Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	: mSceneCylinderRadius(sceneCylinderRadius),
-	mSceneCylinderHeight(sceneCylinderHeight),
-	mPhysicsBody(ion::physics::Body::Box, ion::Vector3(0.2f, 0.1f, 0.2f))
+	mSceneCylinderHeight(sceneCylinderHeight)
 {
 	mMaxVelocity.x = 0.3f;
 	mMaxVelocity.y = 8.0f;
@@ -19,9 +18,16 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	mRotationY = 0.0f;
 	mTargetDirection.x = 1.0f;
 
+	//Create rigid body
+	mPhysicsBody = new ion::physics::Body(ion::physics::Body::Box, ion::Vector3(0.2f, 0.1f, 0.2f));
+	mPhysicsBody->SetMass(0.5f);
+
 	//Set initial transform
 	ion::Matrix4 transform = utils::CalculateCylinderTransform(mRotationY, mPositionY, mSceneCylinderRadius);
 	SetTransform(transform);
+
+	//Create constraint
+	mPhysicsConstraint = new ion::physics::BallSocket(*mPhysicsBody, ion::Vector3(0.0f, 0.0f, 5.0f));
 
 	mBoxPrimitive = new ion::render::Box(ion::Vector3(0.2f, 0.1f, 0.2f));
 
@@ -31,9 +37,13 @@ Ship::Ship(float sceneCylinderRadius, float sceneCylinderHeight)
 	}
 
 	mWeapons[Primary] = new Weapon(*this);
+}
 
-	//Setup physics body
-	mPhysicsBody.SetMass(0.5f);
+Ship::~Ship()
+{
+	delete mBoxPrimitive;
+	delete mPhysicsConstraint;
+	delete mPhysicsBody;
 }
 
 void Ship::SetMaterial(ion::render::Material* material)
@@ -41,20 +51,21 @@ void Ship::SetMaterial(ion::render::Material* material)
 	mMaterial = material;
 }
 
-Ship::~Ship()
+void Ship::AddToPhysicsWorld(ion::physics::World& world)
 {
-	delete mBoxPrimitive;
+	world.AddBody(*mPhysicsBody);
+	world.AddConstraint(*mPhysicsConstraint);
 }
 
 const ion::Matrix4& Ship::GetTransform() const
 {
-	return mPhysicsBody.GetTransform();
+	return mPhysicsBody->GetTransform();
 }
 
 void Ship::SetTransform(const ion::Matrix4& matrix)
 {
 	Entity::SetTransform(matrix);
-	mPhysicsBody.SetTransform(matrix);
+	mPhysicsBody->SetTransform(matrix);
 }
 
 void Ship::Update(float deltaTime)
@@ -103,7 +114,7 @@ void Ship::Update(float deltaTime)
 	*/
 
 	//mPhysicsBody.SetLinearVelocity(ion::Vector3(mVelocity.x, mVelocity.y, 0.0f));
-	mPhysicsBody.ApplyLinearForce(ion::Vector3(targetVelocity.x, targetVelocity.y, 0.0f), ion::Vector3());
+	mPhysicsBody->ApplyLinearForce(ion::Vector3(targetVelocity.x, targetVelocity.y, 0.0f), ion::Vector3());
 
 	//Reset move vector
 	mMoveVector = ion::Vector2();

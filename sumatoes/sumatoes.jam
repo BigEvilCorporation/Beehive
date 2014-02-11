@@ -1,0 +1,17 @@
+SubDir bigevilcorp sumatoes ;
+
+ApplyIonDefines Sumatoes ;
+ApplyIonIncludes Sumatoes ;
+ApplyIonCore Sumatoes ;
+ApplyIonInput Sumatoes ;
+ApplyIonRenderer Sumatoes : opengl ;
+
+SRC = 
+	main.cpp
+	Sumatoes.cpp
+	Sumatoes.h
+	;
+
+AutoSourceGroup Sumatoes : $(SRC) ;
+C.RuntimeType Sumatoes : static ;
+C.Application Sumatoes : $(SRC) ;
