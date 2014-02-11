@@ -3,8 +3,6 @@ SubDir bigevilcorp ion io ;
 SRC =
 	Archive.cpp
 	Archive.h
-	BinaryFile.cpp
-	BinaryFile.h
 	File.cpp
 	File.h
 	FileDevice.cpp
@@ -22,6 +20,7 @@ SRC =
 
 ApplyIonDefines io ;
 ApplyIonIncludes io ;
+ApplyTinyXMLSDK io ;
 ApplyWin32SDK io ;
 
 AutoSourceGroup io : $(SRC) ;

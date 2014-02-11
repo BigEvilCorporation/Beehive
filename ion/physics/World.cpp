@@ -8,6 +8,7 @@
 #include "physics/World.h"
 #include "physics/Body.h"
 #include "physics/Character.h"
+#include "physics/Constraint.h"
 
 namespace ion
 {
@@ -52,6 +53,16 @@ namespace ion
 		{
 			mBulletDynamicsWorld->removeCollisionObject(character.GetBulletGhost());
 			mBulletDynamicsWorld->removeAction(character.GetBulletCharacter());
+		}
+
+		void World::AddConstraint(Constraint& constraint)
+		{
+			mBulletDynamicsWorld->addConstraint(constraint.GetBulletConstraint());
+		}
+
+		void World::RemoveConstraint(Constraint& constraint)
+		{
+			mBulletDynamicsWorld->removeConstraint(constraint.GetBulletConstraint());
 		}
 
 		void World::Step(float deltaTime, int numSubSteps)

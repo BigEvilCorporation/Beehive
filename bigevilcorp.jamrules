@@ -228,73 +228,18 @@ rule ApplyCgSDK TARGET
 	C.LinkPrebuiltLibraries $(TARGET) : $(CG_LIBS) ;
 }
 
-rule ApplyOgreSDK TARGET
+rule ApplyTinyXMLSDK TARGET
 {
-	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Include ;
-	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Lib ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/TinyXML ;
 
-	#Required for Ogre itself, since it doesn't prepend directories to its #includes
-	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/OgreSDK/Include/OGRE ;
-	
-	OGRE_LIBS_DEBUG = 
-		OgreMain_d.lib
-		RenderSystem_Direct3D9_d.lib
-		Plugin_CgProgramManager_d.lib
+	C.RuntimeType tinyxml : static ;
+
+	C.Library tinyxml :
+		$(bigevilcorp)/ion/dependencies/TinyXML/tinyxml2.h
+		$(bigevilcorp)/ion/dependencies/TinyXML/tinyxml2.cpp
 		;
 
-	OGRE_LIBS_RELEASE = 
-		OgreMain.lib
-		RenderSystem_Direct3D9.lib
-		Plugin_CgProgramManager.lib
-		;
-	
-	OGRE_DEPENDENCIES_DEBUG =
-		cg.lib
-		freetype_d.lib
-		FreeImage_d.lib
-		zlib_d.lib
-		zziplib_d.lib
-		;
-			
-	OGRE_DEPENDENCIES_RELEASE =
-		cg.lib
-		freetype.lib
-		FreeImage.lib
-		zlib.lib
-		zziplib.lib
-		;
-
-	C.LinkPrebuiltLibraries $(TARGET) : $(OGRE_DEPENDENCIES_DEBUG) $(OGRE_LIBS_DEBUG) : debug ;
-	C.LinkPrebuiltLibraries $(TARGET) : $(OGRE_DEPENDENCIES_RELEASE) $(OGRE_LIBS_RELEASE) : release ;
-
-	# Ogre3d built against DirectX
-	ApplyDirectXSDK $(TARGET) ;
-}
-
-rule ApplyCEGUISDK TARGET
-{
-	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/CEGUI/Include ;
-	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/Dependencies/CEGUI/Lib ;
-	C.Defines $(TARGET) : CEGUI_VERSION=7 ;
-
-	CEGUI_LIBS_DEBUG = 
-		CEGUIBase_d.lib
-		CEGUIOgreRenderer_d.lib
-		CEGUIFalagardWRBase_d.lib
-		CEGUIFreeImageImageCodec_d.lib
-		CEGUITinyXMLParser_d.lib
-		;
-
-	CEGUI_LIBS_RELEASE = 
-		CEGUIBase.lib
-		CEGUIOgreRenderer.lib
-		CEGUIFalagardWRBase.lib
-		CEGUIFreeImageImageCodec.lib
-		CEGUITinyXMLParser.lib
-		;
-
-	C.LinkPrebuiltLibraries $(TARGET) : $(CEGUI_LIBS_DEBUG) : debug ;
-	C.LinkPrebuiltLibraries $(TARGET) : $(CEGUI_LIBS_RELEASE) : release ;
+	C.LinkLibraries $(TARGET) : tinyxml ;
 }
 
 rule ApplyBulletSDK TARGET

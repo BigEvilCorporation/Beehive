@@ -35,10 +35,10 @@ namespace ion
 		{
 			if(axis == xy)
 			{
-				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(1.0f, 0.0f));
-				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(1.0f, 1.0f));
-				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(0.0f, 1.0f));
-				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(0.0f, 0.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(0.0f, 1.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(0.0f, 0.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(1.0f, 0.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(1.0f, 1.0f));
 
 				mIndexBuffer.Add(2, 1, 0);
 				mIndexBuffer.Add(3, 2, 0);
