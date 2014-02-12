@@ -23,6 +23,8 @@
 
 #include <sstream>
 
+#include "Level.h"
+
 class Sumatoes : public ion::framework::Application
 {
 public:
@@ -34,6 +36,10 @@ public:
 	bool Update(float deltaTime);
 	void Render();
 
+	///////////////////////////////////////////////////
+	// Engine
+	///////////////////////////////////////////////////
+
 	ion::io::FileSystem* mFileSystem;
 	ion::io::ResourceManager* mResourceManager;
 
@@ -44,12 +50,22 @@ public:
 	ion::render::Renderer* mRenderer;
 	ion::render::Camera* mCamera;
 
-	ion::render::Sprite* mSprite;
-	float mSpriteTimer;
-	float mSpriteSpeed;
-
 	u64 mStartTicks;
 	u32 mFrameCount;
 
+	const int mScreenWidth;
+	const int mScreenHeight;
+	const float mAspectRatio;
+
 	std::stringstream mWindowTitle;
+
+	///////////////////////////////////////////////////
+	// Game
+	///////////////////////////////////////////////////
+
+	Level* mCurrentLevel;
+
+	ion::render::Sprite* mSprite;
+	float mSpriteTimer;
+	float mSpriteSpeed;
 };

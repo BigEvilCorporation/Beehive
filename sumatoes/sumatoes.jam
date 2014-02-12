@@ -8,6 +8,8 @@ ApplyIonRenderer Sumatoes : opengl ;
 
 SRC = 
 	main.cpp
+	Level.cpp
+	Level.h
 	Sumatoes.cpp
 	Sumatoes.h
 	;

@@ -2,6 +2,9 @@
 
 Sumatoes::Sumatoes()
 	: ion::framework::Application("Sumatoes")
+	, mScreenWidth(1136)
+	, mScreenHeight(640)
+	, mAspectRatio((float)mScreenWidth / (float)mScreenHeight)
 {
 	mRenderer = NULL;
 
@@ -24,7 +27,7 @@ bool Sumatoes::Initialise()
 	mWindowTitle << "Sumatoes - ion::engine - build " << ion::sVersion.Major << "." << ion::sVersion.Minor << "." << ion::sVersion.Build;
 
 	//Create renderer
-	mRenderer = ion::render::Renderer::Create(mWindowTitle.str(), 1136, 640, false);
+	mRenderer = ion::render::Renderer::Create(mWindowTitle.str(), mScreenWidth, mScreenHeight, false);
 
 	//Create camera
 	mCamera = new ion::render::Camera();
@@ -55,10 +58,12 @@ bool Sumatoes::Initialise()
 	//Set blend mode
 	mRenderer->SetAlphaBlending(ion::render::Renderer::Translucent);
 
-	float aspectX = 1280.0f / 720.0f;
+	//Create level
+	mCurrentLevel = new Level();
+	mCurrentLevel->Load("placeholder256.ion.texture", ion::Vector2((float)mScreenWidth, (float)mScreenHeight), *mResourceManager);
 
 	//Create sprites
-	mSprite = new ion::render::Sprite(ion::render::Sprite::Render2D, 0.2f, 0.2f * aspectX, 4, 4, "placeholder256.ion.texture", *mResourceManager);
+	mSprite = new ion::render::Sprite(ion::render::Sprite::Render2D, 0.2f, 0.2f * mAspectRatio, 4, 4, "placeholder256.ion.texture", *mResourceManager);
 	mSprite->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
 
 	while(mResourceManager->GetNumResourcesWaiting() > 0)
@@ -154,6 +159,9 @@ void Sumatoes::Render()
 
 	mRenderer->ClearColour();
 	mRenderer->ClearDepth();
+
+	//Render level
+	mCurrentLevel->Render(*mRenderer, *mCamera);
 
 	//Render sprites
 	mSprite->Render(*mRenderer, *mCamera);
