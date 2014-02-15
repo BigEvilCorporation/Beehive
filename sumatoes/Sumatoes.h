@@ -55,7 +55,6 @@ public:
 
 	const int mScreenWidth;
 	const int mScreenHeight;
-	const float mAspectRatio;
 
 	std::stringstream mWindowTitle;
 

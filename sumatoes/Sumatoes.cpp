@@ -2,9 +2,8 @@
 
 Sumatoes::Sumatoes()
 	: ion::framework::Application("Sumatoes")
-	, mScreenWidth(1136)
-	, mScreenHeight(640)
-	, mAspectRatio((float)mScreenWidth / (float)mScreenHeight)
+	, mScreenWidth(1280)
+	, mScreenHeight(720)
 {
 	mRenderer = NULL;
 
@@ -63,8 +62,7 @@ bool Sumatoes::Initialise()
 	mCurrentLevel->Load("placeholder256.ion.texture", ion::Vector2((float)mScreenWidth, (float)mScreenHeight), *mResourceManager);
 
 	//Create sprites
-	mSprite = new ion::render::Sprite(ion::render::Sprite::Render2D, 0.2f, 0.2f * mAspectRatio, 4, 4, "placeholder256.ion.texture", *mResourceManager);
-	mSprite->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
+	mSprite = new ion::render::Sprite(ion::render::Sprite::Render2D, ion::Vector2(0.1f * mRenderer->GetWindow()->GetAspectRatio(), 0.1f), 0.001f, 4, 4, "placeholder256.ion.texture", *mResourceManager);
 
 	while(mResourceManager->GetNumResourcesWaiting() > 0)
 	{
@@ -161,11 +159,11 @@ void Sumatoes::Render()
 	mRenderer->ClearDepth();
 
 	//Render level
-	mCurrentLevel->Render(*mRenderer, *mCamera);
+	//mCurrentLevel->Render(*mRenderer, *mCamera);
 
 	//Render sprites
 	mSprite->Render(*mRenderer, *mCamera);
-
+	
 	mRenderer->SwapBuffers();
 
 	mRenderer->EndFrame();

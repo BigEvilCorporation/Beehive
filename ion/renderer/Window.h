@@ -17,19 +17,27 @@ namespace ion
 		class Window
 		{
 		public:
-			Window(const std::string& title, u32 width, u32 height, bool fullscreen);
+			Window(const std::string& title, u32 clientAreaWidth, u32 clientAreaHeight, bool fullscreen);
 			virtual ~Window() {}
 
-			u32 GetWidth() const;
-			u32 GetHeight() const;
+			u32 GetWindowWidth() const;
+			u32 GetWindowHeight() const;
+
+			u32 GetClientAreaWidth() const;
+			u32 GetClientAreaHeight() const;
+
+			float GetAspectRatio() const;
 
 			virtual bool Update() = 0;
 			virtual void SetFullscreen(bool fullscreen) = 0;
 			virtual void SetTitle(const std::string& title) = 0;
 
 		protected:
-			u32 mWidth;
-			u32 mHeight;
+			u32 mWindowWidth;
+			u32 mWindowHeight;
+			u32 mClientAreaWidth;
+			u32 mClientAreaHeight;
+			float mAspectRatio;
 		};
 	}
 }

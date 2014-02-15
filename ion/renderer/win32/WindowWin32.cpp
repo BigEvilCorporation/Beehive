@@ -14,8 +14,8 @@ namespace ion
 {
 	namespace render
 	{
-		WindowWin32::WindowWin32(const std::string& title, u32 width, u32 height, bool fullscreen)
-			: Window(title, width, height, fullscreen)
+		WindowWin32::WindowWin32(const std::string& title, u32 clientAreaWidth, u32 clientAreaHeight, bool fullscreen)
+			: Window(title, clientAreaWidth, clientAreaHeight, fullscreen)
 		{
 			const char* windowClassName = "WindowClass";
 			mhInstance = GetModuleHandle(NULL);
@@ -40,19 +40,42 @@ namespace ion
 				debug::Error("Could not register window class");
 			}
 
-			//Style flags
-			DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
-
 			//Get desktop resolution
 			int desktopWidth = GetSystemMetrics(SM_CXSCREEN);
 			int desktopHeight = GetSystemMetrics(SM_CYSCREEN);
 
+			//Setup window style flags
+			DWORD windowStyle = 0;
+			DWORD windowStyleEx = 0;
+
+			if(fullscreen)
+			{
+				windowStyle = WS_POPUP;
+				windowStyleEx = WS_EX_APPWINDOW;
+			}
+			else
+			{
+				windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
+				windowStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+			}
+
+			//Setup window rect
+			RECT windowRect = {0};
+			windowRect.right = (long)clientAreaWidth;
+			windowRect.bottom = (long)clientAreaHeight;
+
+			//Adjust rect to account for window border
+			AdjustWindowRectEx(&windowRect, windowStyle, FALSE, windowStyleEx);
+
+			mWindowWidth = windowRect.right - windowRect.left;
+			mWindowHeight = windowRect.bottom - windowRect.top;
+
 			//Calculate centre position
-			int x = (desktopWidth / 2) - (width / 2);
-			int y = (desktopHeight / 2) - (height / 2);
+			int x = (desktopWidth / 2) - (mWindowWidth / 2);
+			int y = (desktopHeight / 2) - (mWindowHeight / 2);
 
 			//Create window
-			mWindowHandle = CreateWindowEx(WS_EX_CLIENTEDGE, windowClassName, title.c_str(), style, x, y, width, height, NULL, NULL, mhInstance, NULL);
+			mWindowHandle = CreateWindowEx(windowStyleEx, windowClassName, title.c_str(), windowStyle, x, y, mWindowWidth, mWindowHeight, NULL, NULL, mhInstance, NULL);
 
 			if(!mWindowHandle)
 			{

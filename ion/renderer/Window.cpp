@@ -11,20 +11,36 @@ namespace ion
 {
 	namespace render
 	{
-		Window::Window(const std::string& title, u32 width, u32 height, bool fullscreen)
+		Window::Window(const std::string& title, u32 clientAreaWidth, u32 clientAreaHeight, bool fullscreen)
 		{
-			mWidth = width;
-			mHeight = height;
+			mClientAreaWidth = clientAreaWidth;
+			mClientAreaHeight = clientAreaHeight;
+			mAspectRatio = (float)clientAreaHeight / (float)clientAreaWidth;
 		}
 
-		u32 Window::GetWidth() const
+		u32 Window::GetWindowWidth() const
 		{
-			return mWidth;
+			return mWindowWidth;
 		}
 
-		u32 Window::GetHeight() const
+		u32 Window::GetWindowHeight() const
 		{
-			return mHeight;
+			return mWindowHeight;
+		}
+
+		u32 Window::GetClientAreaWidth() const
+		{
+			return mClientAreaWidth;
+		}
+
+		u32 Window::GetClientAreaHeight() const
+		{
+			return mClientAreaHeight;
+		}
+
+		float Window::GetAspectRatio() const
+		{
+			return mAspectRatio;
 		}
 	}
 }

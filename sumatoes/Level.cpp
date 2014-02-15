@@ -14,7 +14,7 @@ Level::~Level()
 void Level::Load(const std::string& backgroundTexture, const ion::Vector2& screenSize, ion::io::ResourceManager& resourceManager)
 {
 	mScreenSize = screenSize;
-	mBackground = new ion::render::Sprite(ion::render::Sprite::Render2D, 1.0f, 1.0f, 1, 1, backgroundTexture, resourceManager);
+	mBackground = new ion::render::Sprite(ion::render::Sprite::Render2D, ion::Vector2(1.0f, 1.0f), 0.001f, 1, 1, backgroundTexture, resourceManager);
 }
 
 void Level::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)

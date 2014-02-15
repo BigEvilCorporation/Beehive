@@ -28,7 +28,7 @@ namespace ion
 		public:
 			enum RenderType { Render2D, Render3D };
 
-			Sprite(RenderType renderType, float width, float height, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const std::string& spriteSheet, io::ResourceManager& resourceManager);
+			Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const std::string& spriteSheet, io::ResourceManager& resourceManager);
 			virtual ~Sprite();
 
 			void SetFrame(int frame);
@@ -53,10 +53,9 @@ namespace ion
 			};
 
 			ShaderParams mShaderParams;
-
 			RenderType mRenderType;
-			float mWidth;
-			float mHeight;
+			Vector2 mSize;
+			float mDrawDepth;
 			int mSpriteSheetGridSizeX;
 			int mSpriteSheetGridSizeY;
 			int mCurrentFrame;
