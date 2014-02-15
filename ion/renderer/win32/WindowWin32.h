@@ -17,7 +17,7 @@ namespace ion
 		class WindowWin32 : public Window
 		{
 		public:
-			WindowWin32(const std::string& title, u32 width, u32 height, bool fullscreen);
+			WindowWin32(const std::string& title, u32 clientAreaWidth, u32 clientAreaHeight, bool fullscreen);
 			virtual ~WindowWin32();
 
 			virtual bool Update();

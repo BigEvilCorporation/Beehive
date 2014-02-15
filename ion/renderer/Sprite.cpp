@@ -11,15 +11,15 @@ namespace ion
 {
 	namespace render
 	{
-		Sprite::Sprite(RenderType renderType, float width, float height, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const std::string& spriteSheet, io::ResourceManager& resourceManager)
+		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const std::string& spriteSheet, io::ResourceManager& resourceManager)
 		{
 			mRenderType = renderType;
-			mWidth = width;
-			mHeight = height;
+			mSize = size;
+			mDrawDepth = drawDepth;
 			mSpriteSheetGridSizeX = spriteSheetGridSizeX;
 			mSpriteSheetGridSizeY = spriteSheetGridSizeY;
 			mCurrentFrame = 0;
-			mQuadPrimitive = new Quad(Quad::xy, Vector2(width / 2.0f, height / 2.0f), Vector3());
+			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f), Vector3());
 
 			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
 			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
@@ -48,7 +48,7 @@ namespace ion
 
 		void Sprite::Render(Renderer& renderer, Camera& camera)
 		{
-			if(mVertexShader && mPixelShader)
+			if(mVertexShader && mPixelShader && mSpriteSheet)
 			{
 				if(!mShaderParams.mWorldViewProjMtx.IsValid())
 				{
@@ -63,29 +63,30 @@ namespace ion
 				mVertexShader.Get()->Bind();
 				mPixelShader.Get()->Bind();
 
-				Matrix4 worldViewProj;
+				Matrix4 drawMatrix;
 
 				if(mRenderType == Render2D)
 				{
-					worldViewProj = GetTransform();
-					worldViewProj.SetTranslation(worldViewProj.GetTranslation() + Vector3(0.0f, -0.01f, 0.0f));
+					Vector3 position = Vector3(GetTransform().GetTranslation().x, GetTransform().GetTranslation().y, -mDrawDepth);
+					Vector3 scale = Vector3(mSize.x, mSize.y, 1.0f);
+
+					drawMatrix.SetTranslation(position);
+					drawMatrix.SetScale(scale);
 				}
 				else
 				{
-					worldViewProj = GetTransform() * camera.GetTransform().GetInverse() * renderer.GetProjectionMatrix();
+					//Use a world view projection matrix
+					drawMatrix = GetTransform() * camera.GetTransform().GetInverse() * renderer.GetProjectionMatrix();
 				}
 
 				//Set world view projection matrix
-				mShaderParams.mWorldViewProjMtx.SetValue(worldViewProj);
+				mShaderParams.mWorldViewProjMtx.SetValue(drawMatrix);
 
 				//Set colour
 				mShaderParams.mDiffuseColour.SetValue(mColour);
 			
 				//Set texture
-				if(mSpriteSheet)
-				{
-					mShaderParams.mSpriteSheet.SetValue(*mSpriteSheet);
-				}
+				mShaderParams.mSpriteSheet.SetValue(*mSpriteSheet);
 
 				//Set grid size
 				mShaderParams.mSpriteSheetGridSize.SetValue(Vector2((float)mSpriteSheetGridSizeX, (float)mSpriteSheetGridSizeY));
