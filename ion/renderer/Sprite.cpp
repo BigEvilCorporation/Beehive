@@ -59,10 +59,6 @@ namespace ion
 					mShaderParams.mSpriteSheet = mPixelShader.Get()->CreateParamHndl<Texture>("gSpriteSheet");
 				}
 
-				//Bind shaders
-				mVertexShader.Get()->Bind();
-				mPixelShader.Get()->Bind();
-
 				Matrix4 drawMatrix;
 
 				if(mRenderType == Render2D)
@@ -93,6 +89,10 @@ namespace ion
 
 				//Set current anim frame
 				mShaderParams.mSpriteAnimFrame.SetValue((float)mCurrentFrame);
+
+				//Bind shaders
+				mVertexShader.Get()->Bind();
+				mPixelShader.Get()->Bind();
 
 				//Render VBO
 				renderer.DrawVertexBuffer(mQuadPrimitive->GetVertexBuffer(), mQuadPrimitive->GetIndexBuffer());

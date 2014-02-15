@@ -59,10 +59,11 @@ bool Sumatoes::Initialise()
 
 	//Create level
 	mCurrentLevel = new Level();
-	mCurrentLevel->Load("placeholder256.ion.texture", ion::Vector2((float)mScreenWidth, (float)mScreenHeight), *mResourceManager);
+	mCurrentLevel->Load("placeholder_bg_1280_720.ion.texture", ion::Vector2((float)mScreenWidth, (float)mScreenHeight), *mResourceManager);
 
 	//Create sprites
 	mSprite = new ion::render::Sprite(ion::render::Sprite::Render2D, ion::Vector2(0.1f * mRenderer->GetWindow()->GetAspectRatio(), 0.1f), 0.001f, 4, 4, "placeholder256.ion.texture", *mResourceManager);
+	mSprite->SetPosition(ion::Vector3(0.0f, 0.4f, 0.0f));
 
 	while(mResourceManager->GetNumResourcesWaiting() > 0)
 	{
@@ -159,7 +160,7 @@ void Sumatoes::Render()
 	mRenderer->ClearDepth();
 
 	//Render level
-	//mCurrentLevel->Render(*mRenderer, *mCamera);
+	mCurrentLevel->Render(*mRenderer, *mCamera);
 
 	//Render sprites
 	mSprite->Render(*mRenderer, *mCamera);
