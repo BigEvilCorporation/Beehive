@@ -9,6 +9,9 @@ SRC =
 	bootstrap/Application.cpp
 	bootstrap/Application.h
 	
+	# Containers
+	containers/Queue.h
+
 	# Cryptography
 	cryptography/Hash.cpp
 	cryptography/Hash.h

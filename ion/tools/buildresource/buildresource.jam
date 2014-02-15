@@ -1,0 +1,15 @@
+SubDir bigevilcorp ion tools buildresource ;
+
+ApplyIonDefines buildresource ;
+ApplyIonIncludes buildresource ;
+ApplyIonCore buildresource ;
+ApplyIonRenderer buildresource : opengl ;
+
+SRC =
+	BuildResource.cpp
+	BuildResource.h
+	;
+	
+AutoSourceGroup buildresource : $(SRC) ;
+C.RuntimeType buildresource : static ;
+C.Application buildresource : $(SRC) ;

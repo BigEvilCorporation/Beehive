@@ -8,6 +8,7 @@
 #pragma once
 
 #include "core/Types.h"
+#include "core/thread/Atomic.h"
 
 namespace ion
 {
@@ -44,18 +45,14 @@ namespace ion
 	{
 		int index = mProducerIdx % SIZE;
 		mItems[index] = item;
-
-		//TODO: Atomic increment
-		++mProducerIdx;
+		thread::atomic::Increment(mProducerIdx);
 	}
 
 	template <typename T, int SIZE> T Queue<T, SIZE>::Pop()
 	{
 		int index = mConsumerIdx % SIZE;
 		T item = mItems[index];
-
-		//TODO: Atomic increment
-		++mConsumerIdx;
+		thread::atomic::Increment(mConsumerIdx);
 
 		return item;
 	}
