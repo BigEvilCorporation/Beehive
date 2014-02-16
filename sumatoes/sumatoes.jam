@@ -4,6 +4,7 @@ ApplyIonDefines Sumatoes ;
 ApplyIonIncludes Sumatoes ;
 ApplyIonCore Sumatoes ;
 ApplyIonInput Sumatoes ;
+ApplyIonIo Sumatoes ;
 ApplyIonRenderer Sumatoes : opengl ;
 
 SRC = 

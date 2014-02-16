@@ -57,6 +57,9 @@ bool Sumatoes::Initialise()
 	//Set blend mode
 	mRenderer->SetAlphaBlending(ion::render::Renderer::Translucent);
 
+	//Load settings XML
+	mSettings.Parse("../scripts/game.xml");
+
 	//Create level
 	mCurrentLevel = new Level();
 	mCurrentLevel->Load("placeholder_bg_1280_720.ion.texture", ion::Vector2((float)mScreenWidth, (float)mScreenHeight), *mResourceManager);
@@ -168,4 +171,27 @@ void Sumatoes::Render()
 	mRenderer->SwapBuffers();
 
 	mRenderer->EndFrame();
+}
+
+
+bool Sumatoes::Settings::Parse(const std::string& filename)
+{
+	ion::io::XML xml;
+	if(xml.Load(filename))
+	{
+		xml.GetAttribute("int", mInt);
+		xml.GetAttribute("float", mFloat);
+		xml.GetAttribute("string", mString);
+
+		ion::io::XML* child = xml.FindChild("testChild");
+		if(child)
+		{
+			child->GetAttribute("childint", mChildInt);
+			child->GetAttribute("childfloat", mChildFloat);
+			child->GetAttribute("childstring", mChildString);
+		}
+		return true;
+	}
+
+	return false;
 }

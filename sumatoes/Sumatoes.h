@@ -9,6 +9,7 @@
 #include <ion/io/Resource.h>
 #include <ion/io/ResourceManager.h>
 #include <ion/io/File.h>
+#include <ion/io/XML.h>
 #include <ion/input/Keyboard.h>
 #include <ion/input/Mouse.h>
 #include <ion/input/Gamepad.h>
@@ -61,6 +62,21 @@ public:
 	///////////////////////////////////////////////////
 	// Game
 	///////////////////////////////////////////////////
+
+	struct Settings
+	{
+		bool Parse(const std::string& filename);
+
+		float mFloat;
+		int mInt;
+		std::string mString;
+
+		float mChildFloat;
+		int mChildInt;
+		std::string mChildString;
+	};
+
+	Settings mSettings;
 
 	Level* mCurrentLevel;
 

@@ -52,6 +52,13 @@ rule ApplyIonInput TARGET
 	ApplyXInputSDK $(TARGET) ;
 }
 
+rule ApplyIonIo TARGET
+{
+	ApplyIonLib $(TARGET) : io ;
+
+	ApplyTinyXMLSDK $(TARGET) ;
+}
+
 rule ApplyIonRenderer TARGET : RENDER_IMPL
 {
 	ApplyIonLib $(TARGET) : renderer ;
@@ -230,13 +237,13 @@ rule ApplyCgSDK TARGET
 
 rule ApplyTinyXMLSDK TARGET
 {
-	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/TinyXML ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/TinyXML/include ;
 
 	C.RuntimeType tinyxml : static ;
 
 	C.Library tinyxml :
-		$(bigevilcorp)/ion/dependencies/TinyXML/tinyxml2.h
-		$(bigevilcorp)/ion/dependencies/TinyXML/tinyxml2.cpp
+		$(bigevilcorp)/ion/dependencies/TinyXML/include/TinyXML/tinyxml2.h
+		$(bigevilcorp)/ion/dependencies/TinyXML/src/tinyxml2.cpp
 		;
 
 	C.LinkLibraries $(TARGET) : tinyxml ;

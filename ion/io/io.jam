@@ -16,6 +16,8 @@ SRC =
 	ResourceManager.h
 	Stream.cpp
 	Stream.h
+	XML.cpp
+	XML.h
 	;
 
 ApplyIonDefines io ;
