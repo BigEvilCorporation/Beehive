@@ -38,17 +38,18 @@ namespace ion
 
 		void CameraThirdPerson::Update(float deltaTime)
 		{
-			renderer::Camera* camera = GetCurrentCamera();
+			render::Camera* camera = GetCurrentCamera();
 
 			if(camera)
 			{
-				const ion::Vector3& currentPosition = camera->GetPosition();
+				const ion::Matrix4& transform = camera->GetTransform();
+				const ion::Vector3& currentPosition = transform.GetTranslation();
 
 				ion::Vector3 newPosition = currentPosition.Lerp(mTargetHeadPosition, mMoveSpeed * deltaTime);
 				ion::Vector3 newFocus = mFocusPosition.Lerp(mTargetFocusPosition, mMoveSpeed * deltaTime);
 
 				camera->SetPosition(newPosition);
-				camera->LookAt(newFocus);
+				camera->SetLookAt(newFocus);
 
 				mFocusPosition = newFocus;
 			}

@@ -1,6 +1,6 @@
 SubDir bigevilcorp ion renderer ;
 
-SRC =
+local SRC =
 	Animation.cpp
 	Animation.h
 	Camera.cpp

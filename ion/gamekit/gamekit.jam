@@ -1,16 +1,21 @@
 SubDir bigevilcorp ion gamekit ;
 
-SRC =
+ApplyIonDefines gamekit ;
+ApplyIonIncludes gamekit ;
+ApplyIonCore gamekit ;
+ApplyIonInput gamekit ;
+ApplyIonIo gamekit ;
+ApplyIonRenderer gamekit ;
+
+local SRC = 
+	StateManager.cpp
+	StateManager.h
 	CameraController.cpp
- 	CameraController.h
- 	CameraThirdPerson.cpp
- 	CameraThirdPerson.h
+	CameraController.h
+	CameraThirdPerson.cpp
+	CameraThirdPerson.h
 	;
 
-ApplyIonCore gamekit ;
-ApplyIonRenderer gamekit ;
-ApplyIonPhysics gamekit ;
-
 AutoSourceGroup gamekit : $(SRC) ;
-
+C.RuntimeType gamekit : static ;
 C.Library gamekit : $(SRC) ;

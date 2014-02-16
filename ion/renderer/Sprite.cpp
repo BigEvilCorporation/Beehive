@@ -26,6 +26,21 @@ namespace ion
 			mSpriteSheet = resourceManager.GetResource<Texture>(spriteSheet);
 		}
 
+		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const io::ResourceHandle<Texture>& spriteSheet, io::ResourceManager& resourceManager)
+		{
+			mRenderType = renderType;
+			mSize = size;
+			mDrawDepth = drawDepth;
+			mSpriteSheetGridSizeX = spriteSheetGridSizeX;
+			mSpriteSheetGridSizeY = spriteSheetGridSizeY;
+			mCurrentFrame = 0;
+			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f), Vector3());
+
+			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
+			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
+			mSpriteSheet = spriteSheet;
+		}
+
 		Sprite::~Sprite()
 		{
 			delete mQuadPrimitive;
