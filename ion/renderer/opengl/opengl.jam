@@ -1,6 +1,6 @@
 SubDir bigevilcorp ion renderer opengl ;
 
-SRC =
+local SRC =
 	RendererOpenGL.cpp
 	RendererOpenGL.h
 	ShaderCgGL.cpp

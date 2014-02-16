@@ -19,15 +19,15 @@ namespace ion
 			CameraController();
 			virtual ~CameraController();
 
-			void SetCurrentCamera(ion::renderer::Camera* camera);
+			void SetCurrentCamera(ion::render::Camera* camera);
 
 			virtual void Update() {}
 
 		protected:
-			ion::renderer::Camera* GetCurrentCamera() const;
+			ion::render::Camera* GetCurrentCamera() const;
 
 		private:
-			ion::renderer::Camera* mCamera;
+			ion::render::Camera* mCamera;
 		};
 	}
 }

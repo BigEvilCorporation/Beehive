@@ -52,25 +52,17 @@ bool Sumatoes::Initialise()
 	mStartTicks = ion::time::GetSystemTicks();
 
 	//Set scene clear colour
-	mRenderer->SetClearColour(ion::Colour(0.3f, 0.8f, 0.7f));
+	mRenderer->SetClearColour(ion::Colour(0.0f, 0.0f, 0.0f));
 
 	//Set blend mode
 	mRenderer->SetAlphaBlending(ion::render::Renderer::Translucent);
 
-	//Load settings XML
-	mSettings.Parse("../scripts/game.xml");
+	//Create game states
+	mStateMainMenu = new MainMenu(mStateManager, *mResourceManager);
+	mStateLoadingScreenGlobal = new LoadingScreenGlobal(mStateManager, *mResourceManager, *mStateMainMenu);
 
-	//Create level
-	mCurrentLevel = new Level();
-	mCurrentLevel->Load("placeholder_bg_1280_720.ion.texture", ion::Vector2((float)mScreenWidth, (float)mScreenHeight), *mResourceManager);
-
-	//Create sprites
-	mSprite = new ion::render::Sprite(ion::render::Sprite::Render2D, ion::Vector2(0.1f * mRenderer->GetWindow()->GetAspectRatio(), 0.1f), 0.001f, 4, 4, "placeholder256.ion.texture", *mResourceManager);
-	mSprite->SetPosition(ion::Vector3(0.0f, 0.4f, 0.0f));
-
-	while(mResourceManager->GetNumResourcesWaiting() > 0)
-	{
-	}
+	//Push first state
+	mStateManager.PushState(*mStateLoadingScreenGlobal);
 	
 	return true;
 }
@@ -120,12 +112,8 @@ bool Sumatoes::Update(float deltaTime)
 	float mouseDeltaX = (float)mMouse->GetDeltaX();
 	float mouseDeltaY = (float)mMouse->GetDeltaY();
 
-	mSpriteTimer += deltaTime;
-	if(mSpriteTimer > mSpriteSpeed)
-	{
-		mSpriteTimer = 0.0f;
-		mSprite->SetFrame((mSprite->GetFrame() + 1) % 16);
-	}
+	//Update state manager
+	mStateManager.Update(deltaTime);
 
 	//Update renderer
 	exit |= !mRenderer->Update(0.0f);
@@ -162,36 +150,10 @@ void Sumatoes::Render()
 	mRenderer->ClearColour();
 	mRenderer->ClearDepth();
 
-	//Render level
-	mCurrentLevel->Render(*mRenderer, *mCamera);
-
-	//Render sprites
-	mSprite->Render(*mRenderer, *mCamera);
+	//Render current state
+	mStateManager.Render(*mRenderer, *mCamera);
 	
 	mRenderer->SwapBuffers();
 
 	mRenderer->EndFrame();
-}
-
-
-bool Sumatoes::Settings::Parse(const std::string& filename)
-{
-	ion::io::XML xml;
-	if(xml.Load(filename))
-	{
-		xml.GetAttribute("int", mInt);
-		xml.GetAttribute("float", mFloat);
-		xml.GetAttribute("string", mString);
-
-		ion::io::XML* child = xml.FindChild("testChild");
-		if(child)
-		{
-			child->GetAttribute("childint", mChildInt);
-			child->GetAttribute("childfloat", mChildFloat);
-			child->GetAttribute("childstring", mChildString);
-		}
-		return true;
-	}
-
-	return false;
 }

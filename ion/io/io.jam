@@ -1,6 +1,6 @@
 SubDir bigevilcorp ion io ;
 
-SRC =
+local SRC =
 	Archive.cpp
 	Archive.h
 	File.cpp

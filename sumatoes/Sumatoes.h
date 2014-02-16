@@ -21,10 +21,13 @@
 #include <ion/renderer/Texture.h>
 #include <ion/renderer/Sprite.h>
 #include <ion/renderer/Window.h>
+#include <ion/gamekit/StateManager.h>
 
 #include <sstream>
 
 #include "Level.h"
+#include "States/LoadingScreenGlobal.h"
+#include "States/MainMenu.h"
 
 class Sumatoes : public ion::framework::Application
 {
@@ -51,6 +54,8 @@ public:
 	ion::render::Renderer* mRenderer;
 	ion::render::Camera* mCamera;
 
+	ion::gamekit::StateManager mStateManager;
+
 	u64 mStartTicks;
 	u32 mFrameCount;
 
@@ -63,22 +68,9 @@ public:
 	// Game
 	///////////////////////////////////////////////////
 
-	struct Settings
-	{
-		bool Parse(const std::string& filename);
-
-		float mFloat;
-		int mInt;
-		std::string mString;
-
-		float mChildFloat;
-		int mChildInt;
-		std::string mChildString;
-	};
-
-	Settings mSettings;
-
-	Level* mCurrentLevel;
+	//Game states
+	ion::gamekit::State* mStateLoadingScreenGlobal;
+	ion::gamekit::State* mStateMainMenu;
 
 	ion::render::Sprite* mSprite;
 	float mSpriteTimer;

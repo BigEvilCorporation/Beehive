@@ -1,6 +1,6 @@
 SubDir bigevilcorp ion input ;
 
-SRC =
+local SRC =
 	Gamepad.cpp
  	Gamepad.h
 	input.jam

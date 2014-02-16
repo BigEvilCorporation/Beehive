@@ -6,13 +6,20 @@ ApplyIonCore Sumatoes ;
 ApplyIonInput Sumatoes ;
 ApplyIonIo Sumatoes ;
 ApplyIonRenderer Sumatoes : opengl ;
+ApplyIonGameKit Sumatoes ;
 
-SRC = 
+local SRC = 
 	main.cpp
+	GlobalResources.cpp
+	GlobalResources.h
 	Level.cpp
 	Level.h
 	Sumatoes.cpp
 	Sumatoes.h
+	States/LoadingScreenGlobal.cpp
+	States/LoadingScreenGlobal.h
+	States/MainMenu.cpp
+	States/MainMenu.h
 	;
 
 AutoSourceGroup Sumatoes : $(SRC) ;

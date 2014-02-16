@@ -1,6 +1,6 @@
 SubDir bigevilcorp ion core ;
 
-SRC =
+local SRC =
 	# Debugging
 	debug/Debug.cpp
 	debug/Debug.h
