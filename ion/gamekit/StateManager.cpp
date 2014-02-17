@@ -67,10 +67,10 @@ namespace ion
 				mStateStack.back()->OnResumeState();
 		}
 
-		void StateManager::Update(float deltaTime)
+		void StateManager::Update(float deltaTime, input::Keyboard* keyboard, input::Mouse* mouse, input::Gamepad* gamepad)
 		{
 			if(mStateStack.size() > 0)
-				mStateStack.back()->Update(deltaTime);
+				mStateStack.back()->Update(deltaTime, keyboard, mouse, gamepad);
 		}
 
 		void StateManager::Render(render::Renderer& renderer, render::Camera& camera)
