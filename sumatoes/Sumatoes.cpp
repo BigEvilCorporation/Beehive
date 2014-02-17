@@ -58,8 +58,8 @@ bool Sumatoes::Initialise()
 	mRenderer->SetAlphaBlending(ion::render::Renderer::Translucent);
 
 	//Create game states
-	mStateMainMenu = new MainMenu(mStateManager, *mResourceManager);
-	mStateLoadingScreenGlobal = new LoadingScreenGlobal(mStateManager, *mResourceManager, *mStateMainMenu);
+	mStateMainMenu = new StateMainMenu(mStateManager, *mResourceManager);
+	mStateLoadingScreenGlobal = new StateLoadingScreenGlobal(mStateManager, *mResourceManager, *mStateMainMenu);
 
 	//Push first state
 	mStateManager.PushState(*mStateLoadingScreenGlobal);
@@ -69,6 +69,10 @@ bool Sumatoes::Initialise()
 
 void Sumatoes::Shutdown()
 {
+	//Todo: Fix thread death + resource handle scope clash
+	//if(mResourceManager)
+		//delete mResourceManager;
+
 	if(mKeyboard)
 		delete mKeyboard;
 
@@ -113,7 +117,7 @@ bool Sumatoes::Update(float deltaTime)
 	float mouseDeltaY = (float)mMouse->GetDeltaY();
 
 	//Update state manager
-	mStateManager.Update(deltaTime);
+	mStateManager.Update(deltaTime, mKeyboard, mMouse, mGamepad);
 
 	//Update renderer
 	exit |= !mRenderer->Update(0.0f);

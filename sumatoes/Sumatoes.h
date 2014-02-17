@@ -26,8 +26,8 @@
 #include <sstream>
 
 #include "Level.h"
-#include "States/LoadingScreenGlobal.h"
-#include "States/MainMenu.h"
+#include "States/StateLoadingScreenGlobal.h"
+#include "States/StateMainMenu.h"
 
 class Sumatoes : public ion::framework::Application
 {

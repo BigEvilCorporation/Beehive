@@ -6,18 +6,18 @@
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Sprite.h>
 
-class LoadingScreenGlobal : public ion::gamekit::State
+class StateLoadingScreenGlobal : public ion::gamekit::State
 {
 public:
-	LoadingScreenGlobal(ion::gamekit::StateManager& stateManager, ion::io::ResourceManager& resourceManager, ion::gamekit::State& nextState);
-	virtual ~LoadingScreenGlobal();
+	StateLoadingScreenGlobal(ion::gamekit::StateManager& stateManager, ion::io::ResourceManager& resourceManager, ion::gamekit::State& nextState);
+	virtual ~StateLoadingScreenGlobal();
 
 	virtual void OnEnterState();
 	virtual void OnLeaveState();
 	virtual void OnPauseState();
 	virtual void OnResumeState();
 
-	virtual void Update(float deltaTime);
+	virtual void Update(float deltaTime, ion::input::Keyboard* keyboard, ion::input::Mouse* mouse, ion::input::Gamepad* gamepad);
 	virtual void Render(ion::render::Renderer& renderer, ion::render::Camera& camera);
 
 private:

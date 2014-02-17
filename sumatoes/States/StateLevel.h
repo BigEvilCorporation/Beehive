@@ -6,20 +6,24 @@
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Sprite.h>
 
-class MainMenu : public ion::gamekit::State
+class StateLevel : public ion::gamekit::State
 {
 public:
-	MainMenu(ion::gamekit::StateManager& stateManager, ion::io::ResourceManager& resourceManager);
-	virtual ~MainMenu();
+	StateLevel(ion::gamekit::StateManager& stateManager, ion::io::ResourceManager& resourceManager);
+	virtual ~StateLevel();
 
 	virtual void OnEnterState();
 	virtual void OnLeaveState();
 	virtual void OnPauseState();
 	virtual void OnResumeState();
 
-	virtual void Update(float deltaTime);
+	virtual void Update(float deltaTime, ion::input::Keyboard* keyboard, ion::input::Mouse* mouse, ion::input::Gamepad* gamepad);
 	virtual void Render(ion::render::Renderer& renderer, ion::render::Camera& camera);
 
+	void LoadResources(const std::string& levelName, const std::string& character1, const std::string& character2);
+
 private:
+
+	float mTimeout;
 	ion::render::Sprite* mSpriteBackground;
 };

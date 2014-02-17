@@ -22,6 +22,13 @@ namespace ion
 		class ResourceManager;
 	}
 
+	namespace input
+	{
+		class Keyboard;
+		class Mouse;
+		class Gamepad;
+	}
+
 	namespace gamekit
 	{
 		class StateManager;
@@ -37,7 +44,7 @@ namespace ion
 			virtual void OnPauseState() = 0;
 			virtual void OnResumeState() = 0;
 
-			virtual void Update(float deltaTime) = 0;
+			virtual void Update(float deltaTime, input::Keyboard* keyboard, input::Mouse* mouse, input::Gamepad* gamepad) = 0;
 			virtual void Render(render::Renderer& renderer, render::Camera& camera) = 0;
 
 		protected:
@@ -58,7 +65,7 @@ namespace ion
 			void Pause();
 			void Resume();
 
-			void Update(float deltaTime);
+			void Update(float deltaTime, input::Keyboard* keyboard, input::Mouse* mouse, input::Gamepad* gamepad);
 			void Render(render::Renderer& renderer, render::Camera& camera);
 
 		private:

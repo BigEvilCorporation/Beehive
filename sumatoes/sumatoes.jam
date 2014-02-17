@@ -16,10 +16,14 @@ local SRC =
 	Level.h
 	Sumatoes.cpp
 	Sumatoes.h
-	States/LoadingScreenGlobal.cpp
-	States/LoadingScreenGlobal.h
-	States/MainMenu.cpp
-	States/MainMenu.h
+	States/StateLoadingScreenGlobal.cpp
+	States/StateLoadingScreenGlobal.h
+	States/StateLoadingScreenLevel.cpp
+	States/StateLoadingScreenLevel.h
+	States/StateMainMenu.cpp
+	States/StateMainMenu.h
+	States/StateLevel.cpp
+	States/StateLevel.h
 	;
 
 AutoSourceGroup Sumatoes : $(SRC) ;
