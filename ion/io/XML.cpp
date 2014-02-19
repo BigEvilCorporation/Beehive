@@ -102,6 +102,20 @@ namespace ion
 			return false;
 		}
 
+		bool XML::GetAttribute(const std::string& name, bool& value) const
+		{
+			std::string nameLower = string::ToLower(name);
+			std::map<std::string, std::string>::const_iterator it = mAttributes.find(nameLower);
+			if(it != mAttributes.end())
+			{
+				std::string valueLower = string::ToLower(it->second);
+				value =  (valueLower == "1" || valueLower == "true") ? true : false;
+				return true;
+			}
+
+			return false;
+		}
+
 		void XML::SetAttribute(const std::string& name, const std::string& value)
 		{
 			std::string nameLower = string::ToLower(name);
@@ -121,6 +135,13 @@ namespace ion
 			char text[128] = {0};
 			sprintf_s(text, 128, "%f", value);
 			mAttributes.insert(std::make_pair(nameLower, std::string(text)));
+		}
+
+		void XML::SetAttribute(const std::string& name, bool value)
+		{
+			std::string nameLower = string::ToLower(name);
+			char text[4] = {0};
+			mAttributes.insert(std::make_pair(nameLower, value ? "true" : "false"));
 		}
 
 		void XML::ParseTinyXmlElement(const tinyxml2::XMLElement& element)

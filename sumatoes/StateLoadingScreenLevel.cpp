@@ -1,5 +1,5 @@
 #include "StateLoadingScreenLevel.h"
-#include "../GlobalResources.h"
+#include "GlobalResources.h"
 
 StateLoadingScreenLevel::StateLoadingScreenLevel(ion::gamekit::StateManager& stateManager, ion::io::ResourceManager& resourceManager, ion::gamekit::State& levelState)
 	: State(stateManager, resourceManager)

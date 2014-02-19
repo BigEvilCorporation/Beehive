@@ -1,5 +1,5 @@
 #include "StateMainMenu.h"
-#include "../GlobalResources.h"
+#include "GlobalResources.h"
 
 #include <ion/input/Keyboard.h>
 #include <ion/input/Mouse.h>

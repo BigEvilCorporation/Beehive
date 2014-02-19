@@ -1,5 +1,5 @@
 #include "StateLoadingScreenGlobal.h"
-#include "../GlobalResources.h"
+#include "GlobalResources.h"
 
 StateLoadingScreenGlobal::StateLoadingScreenGlobal(ion::gamekit::StateManager& stateManager, ion::io::ResourceManager& resourceManager, ion::gamekit::State& nextState)
 	: State(stateManager, resourceManager)

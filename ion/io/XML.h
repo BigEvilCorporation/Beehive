@@ -32,14 +32,19 @@ namespace ion
 			XML* FindChild(const std::string& name) const;
 			XML* AddChild(const std::string& name);
 
+			//Node data
+			const std::string& GetData() const { return mData; }
+
 			//Attributes
 			bool GetAttribute(const std::string& name, std::string& value) const;
 			bool GetAttribute(const std::string& name, int& value) const;
 			bool GetAttribute(const std::string& name, float& value) const;
+			bool GetAttribute(const std::string& name, bool& value) const;
 
 			void SetAttribute(const std::string& name, const std::string& value);
 			void SetAttribute(const std::string& name, int value);
 			void SetAttribute(const std::string& name, float value);
+			void SetAttribute(const std::string& name, bool value);
 
 		protected:
 			void ParseTinyXmlElement(const tinyxml2::XMLElement& element);

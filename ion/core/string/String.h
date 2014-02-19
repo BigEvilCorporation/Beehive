@@ -10,17 +10,36 @@
 #include <string>
 #include <locale>
 #include <algorithm>
+#include <vector>
 
 namespace ion
 {
 	namespace string
 	{
-		std::string ToLower(const std::string& string)
+		static std::string ToLower(const std::string& string)
 		{
 			std::locale locale;
 			std::string stringLower = string;
 			std::transform(stringLower.begin(), stringLower.end(), stringLower.begin(), ::tolower);
 			return stringLower;
+		}
+
+		static int Tokenise(const std::string input, std::vector<std::string>& tokens, char separator)
+		{
+			int lastSeparator = 0;
+
+			for(unsigned int i = 0; i < input.size(); i++)
+			{
+				if(input[i] == separator)
+				{
+					tokens.push_back(input.substr(lastSeparator, i - lastSeparator));
+					lastSeparator = i +	1;
+				}
+			}
+
+			tokens.push_back(input.substr(lastSeparator, input.size() - lastSeparator));
+
+			return tokens.size();
 		}
 	}
 }

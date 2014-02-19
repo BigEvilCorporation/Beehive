@@ -1,5 +1,5 @@
 #include "StateLevel.h"
-#include "../GlobalResources.h"
+#include "GlobalResources.h"
 
 #include <ion/input/Keyboard.h>
 #include <ion/input/Mouse.h>
@@ -9,6 +9,8 @@ StateLevel::StateLevel(ion::gamekit::StateManager& stateManager, ion::io::Resour
 	: State(stateManager, resourceManager)
 {
 	mSpriteBackground = NULL;
+	mPlayer1 = NULL;
+	mPlayer2 = NULL;
 }
 
 StateLevel::~StateLevel()
@@ -41,23 +43,35 @@ void StateLevel::Update(float deltaTime, ion::input::Keyboard* keyboard, ion::in
 		//Back to main menu
 		mStateManager.PopState();
 	}
+
+	if(mPlayer1)
+		mPlayer1->Update(deltaTime, keyboard, mouse, gamepad);
+
+	if(mPlayer2)
+		mPlayer2->Update(deltaTime, keyboard, mouse, gamepad);
 }
 
 void StateLevel::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)
 {
 	mSpriteBackground->Render(renderer, camera);
+
+	if(mPlayer1)
+		mPlayer1->Render(renderer, camera);
+
+	if(mPlayer2)
+		mPlayer2->Render(renderer, camera);
 }
 
 void StateLevel::LoadResources(const std::string& levelName, const std::string& character1, const std::string& character2)
 {
-	std::string filename = "../levels/";
-	filename += levelName;
-	filename += ".xml";
+	std::string levelFile = "../scripts/levels/";
+	levelFile += levelName;
+	levelFile += ".xml";
 
-	ion::io::XML xml;
-	if(xml.Load(filename))
+	ion::io::XML levelXml;
+	if(levelXml.Load(levelFile))
 	{
-		ion::io::XML* texturesNode = xml.FindChild("Textures");
+		ion::io::XML* texturesNode = levelXml.FindChild("Textures");
 		if(texturesNode)
 		{
 			std::string textureName;
@@ -65,9 +79,12 @@ void StateLevel::LoadResources(const std::string& levelName, const std::string& 
 			texturesNode->GetAttribute("background", textureName);
 			mSpriteBackground = new ion::render::Sprite(ion::render::Sprite::Render2D, ion::Vector2(1.0f, 1.0f), 0.001f, 1, 1, textureName, mResourceManager);
 		}
+
+		mPlayer1 = new Character();
+		mPlayer1->LoadResources(character1, mResourceManager);
 	}
 	else
 	{
-		ion::debug::Error((std::string("Could not load ") + filename).c_str());
+		ion::debug::Error((std::string("Could not load ") + levelFile).c_str());
 	}
 }

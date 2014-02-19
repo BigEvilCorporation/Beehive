@@ -10,20 +10,20 @@ ApplyIonGameKit Sumatoes ;
 
 local SRC = 
 	main.cpp
+	Character.cpp
+	Character.h
 	GlobalResources.cpp
 	GlobalResources.h
-	Level.cpp
-	Level.h
 	Sumatoes.cpp
 	Sumatoes.h
-	States/StateLoadingScreenGlobal.cpp
-	States/StateLoadingScreenGlobal.h
-	States/StateLoadingScreenLevel.cpp
-	States/StateLoadingScreenLevel.h
-	States/StateMainMenu.cpp
-	States/StateMainMenu.h
-	States/StateLevel.cpp
-	States/StateLevel.h
+	StateLoadingScreenGlobal.cpp
+	StateLoadingScreenGlobal.h
+	StateLoadingScreenLevel.cpp
+	StateLoadingScreenLevel.h
+	StateMainMenu.cpp
+	StateMainMenu.h
+	StateLevel.cpp
+	StateLevel.h
 	;
 
 AutoSourceGroup Sumatoes : $(SRC) ;

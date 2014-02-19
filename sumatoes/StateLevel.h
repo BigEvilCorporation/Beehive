@@ -6,6 +6,8 @@
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Sprite.h>
 
+#include "Character.h"
+
 class StateLevel : public ion::gamekit::State
 {
 public:
@@ -26,4 +28,7 @@ private:
 
 	float mTimeout;
 	ion::render::Sprite* mSpriteBackground;
+
+	Character* mPlayer1;
+	Character* mPlayer2;
 };
