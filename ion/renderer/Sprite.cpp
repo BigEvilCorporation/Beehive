@@ -48,6 +48,9 @@ namespace ion
 
 		void Sprite::SetFrame(int frame)
 		{
+			char text[128] = {0};
+			sprintf(text, "%i\n", frame);
+			ion::debug::Log(text);
 			mCurrentFrame = frame;
 		}
 
@@ -124,7 +127,7 @@ namespace ion
 			mAnimationTrack = NULL;
 		}
 
-		void SpriteAnimation::SetAnimationTrack(const AnimationTrackFloat& animationTrack)
+		void SpriteAnimation::SetAnimationTrack(const AnimationTrackInt& animationTrack)
 		{
 			mAnimationTrack = &animationTrack;
 		}
@@ -133,8 +136,8 @@ namespace ion
 		{
 			if(mAnimationTrack)
 			{
-				float value = mAnimationTrack->GetValue(frame);
-				mSprite.SetFrame((int)maths::Floor(value));
+				int value = mAnimationTrack->GetValue(frame);
+				mSprite.SetFrame(value);
 			}
 		}
 	}
