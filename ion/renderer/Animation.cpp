@@ -54,6 +54,9 @@ namespace ion
 						{
 							//Clamp to end
 							mCurrentFrame = mLength;
+
+							//Finished
+							SetState(Stopped);
 						}
 					}
 				}
@@ -77,6 +80,9 @@ namespace ion
 						{
 							//Clamp to start
 							mCurrentFrame = 0.0f;
+
+							//Finished
+							SetState(Stopped);
 						}
 					}
 				}
@@ -187,6 +193,27 @@ namespace ion
 			}
 
 			return floatValue;
+		}
+
+		const int AnimationTrackInt::GetValue(float time) const
+		{
+			int intValue = 0;
+
+			const Keyframe<int>* keyframeA = GetPrevKeyframe(time);
+			const Keyframe<int>* keyframeB = GetNextKeyframe(time);
+
+			if(keyframeA && keyframeB)
+			{
+				float timeA = keyframeA->GetTime();
+				float timeB = keyframeB->GetTime();
+
+				if((timeB - timeA) >= 0.5f)
+					intValue = keyframeB->GetValue();
+				else
+					intValue = keyframeA->GetValue();
+			}
+
+			return intValue;
 		}
 
 		const Matrix4 AnimationTrackTransform::GetValue(float time) const

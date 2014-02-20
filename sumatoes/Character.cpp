@@ -72,7 +72,7 @@ void Character::ParseAnimation(Actions action, ion::io::XML* node)
 	if(node)
 	{
 		ion::render::SpriteAnimation* animation = new ion::render::SpriteAnimation(*mSpriteSheet);
-		ion::render::AnimationTrackFloat* animTrack = new ion::render::AnimationTrackFloat();
+		ion::render::AnimationTrackInt* animTrack = new ion::render::AnimationTrackInt();
 		animation->SetAnimationTrack(*animTrack);
 		mAnimations[action] = animation;
 
@@ -89,15 +89,30 @@ void Character::ParseAnimation(Actions action, ion::io::XML* node)
 
 		for(int i = 0; i < numFrames; i++)
 		{
-			animTrack->AddKeyframe(ion::render::Keyframe<float>((duration / (float)numFrames) * (float)i, (float)atoi(frames[i].c_str())));
+			animTrack->AddKeyframe(ion::render::Keyframe<int>(ion::maths::UnLerp(0.0f, (float)numFrames-1.0f, (float)i), atoi(frames[i].c_str())));
 		}
 	}
 }
 
 void Character::Update(float deltaTime, ion::input::Keyboard* keyboard, ion::input::Mouse* mouse, ion::input::Gamepad* gamepad)
 {
+	if(keyboard)
+	{
+		if(keyboard->KeyPressedThisFrame(DIK_SPACE))
+			PerformAction(Jump);
+	}
+
 	if(mCurrentAnimation)
+	{
+		//Update animation
 		mCurrentAnimation->Update(deltaTime);
+
+		//If anim finished, revert to idle
+		if(mCurrentAnimation->GetState() == ion::render::Animation::Stopped)
+		{
+			PerformAction(Idle);
+		}
+	}
 }
 
 void Character::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)

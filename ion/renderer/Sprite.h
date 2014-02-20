@@ -70,14 +70,14 @@ namespace ion
 		public:
 			SpriteAnimation(Sprite& sprite);
 
-			void SetAnimationTrack(const AnimationTrackFloat& animationTrack);
+			void SetAnimationTrack(const AnimationTrackInt& animationTrack);
 
 		protected:
 			virtual void ApplyFrame(float frame);
 
 		private:
 			Sprite& mSprite;
-			const AnimationTrackFloat* mAnimationTrack;
+			const AnimationTrackInt* mAnimationTrack;
 		};
 	}
 }

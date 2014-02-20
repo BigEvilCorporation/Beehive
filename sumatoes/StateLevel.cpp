@@ -48,7 +48,7 @@ void StateLevel::Update(float deltaTime, ion::input::Keyboard* keyboard, ion::in
 		mPlayer1->Update(deltaTime, keyboard, mouse, gamepad);
 
 	if(mPlayer2)
-		mPlayer2->Update(deltaTime, keyboard, mouse, gamepad);
+		mPlayer2->Update(deltaTime, NULL, NULL, NULL);
 }
 
 void StateLevel::Render(ion::render::Renderer& renderer, ion::render::Camera& camera)

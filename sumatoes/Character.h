@@ -3,6 +3,7 @@
 #include <ion/gamekit/StateManager.h>
 #include <ion/io/ResourceManager.h>
 #include <ion/io/XML.h>
+#include <ion/input/Keyboard.h>
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Sprite.h>

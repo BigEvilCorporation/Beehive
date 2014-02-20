@@ -124,6 +124,12 @@ namespace ion
 			virtual const float GetValue(float time) const;
 		};
 
+		class AnimationTrackInt : public AnimationTrack<int>
+		{
+		public:
+			virtual const int GetValue(float time) const;
+		};
+
 		class AnimationTrackTransform : public AnimationTrack<Matrix4>
 		{
 		public:
