@@ -71,7 +71,7 @@ void StateLevel::LoadResources(const std::string& levelName, const std::string& 
 	ion::io::XML levelXml;
 	if(levelXml.Load(levelFile))
 	{
-		ion::io::XML* texturesNode = levelXml.FindChild("Textures");
+		const ion::io::XML* texturesNode = levelXml.FindChild("Textures");
 		if(texturesNode)
 		{
 			std::string textureName;

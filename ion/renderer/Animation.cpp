@@ -202,7 +202,7 @@ namespace ion
 			const Keyframe<int>* keyframeA = GetPrevKeyframe(time);
 			const Keyframe<int>* keyframeB = GetNextKeyframe(time);
 
-			if(keyframeA && keyframeB)
+ 			if(keyframeA && keyframeB)
 			{
 				float timeA = keyframeA->GetTime();
 				float timeB = keyframeB->GetTime();

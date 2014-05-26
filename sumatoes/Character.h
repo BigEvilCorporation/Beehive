@@ -39,7 +39,7 @@ public:
 	int GetHealth() const;
 
 protected:
-	void ParseAnimation(Actions action, ion::io::XML* node);
+	void ParseAnimation(const ion::io::XML& node);
 	void PerformAction(Actions action);
 	void DealDamage(Character& character, int damage) const;
 
@@ -55,8 +55,14 @@ protected:
 		float lungeDistance;
 		float stepBackDistance;
 
-		void Read(ion::io::XML& xmlNode);
+		void Read(const ion::io::XML& xmlNode);
 	} mStats;
+
+	struct Action
+	{
+		int spriteAnimationId;
+		int moveAnimationId;
+	};
 
 	int mHealth;
 
@@ -73,6 +79,7 @@ protected:
 	float mCurrentLerpSpeed;
 
 	ion::render::Sprite* mSpriteSheet;
-	std::vector<ion::render::SpriteAnimation*> mAnimations;
+	std::vector<ion::render::SpriteAnimation*> mSpriteAnimations;
+	std::vector<ion::render::Animation*> mMoveAnimations;
 	ion::render::SpriteAnimation* mCurrentAnimation;
 };

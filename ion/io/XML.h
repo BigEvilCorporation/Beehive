@@ -8,10 +8,11 @@
 #pragma once
 
 #include "core/Types.h"
+#include "core/cryptography/Hash.h"
 
 #include <string>
 #include <map>
-#include <list>
+#include <vector>
 
 #include <TinyXML/tinyxml2.h>
 
@@ -29,7 +30,9 @@ namespace ion
 			bool Load(const std::string& filename);
 
 			//Hierarchy
-			XML* FindChild(const std::string& name) const;
+			int GetNumChildren() const;
+			const XML* GetChild(int index) const;
+			const XML* FindChild(const std::string& name) const;
 			XML* AddChild(const std::string& name);
 
 			//Node data
@@ -49,9 +52,10 @@ namespace ion
 		protected:
 			void ParseTinyXmlElement(const tinyxml2::XMLElement& element);
 
+			std::string mName;
 			std::string mData;
 			std::map<std::string, std::string> mAttributes;
-			std::map<std::string, XML> mChildren;
+			std::vector< std::pair<u32, XML> > mChildren;
 		};
 	}
 }

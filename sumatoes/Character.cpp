@@ -4,7 +4,6 @@
 
 Character::Character()
 {
-	mAnimations.resize(NumActions);
 	mSpriteSheet = NULL;
 	mCurrentAnimation = NULL;
 }
@@ -26,13 +25,13 @@ void Character::LoadResources(const std::string& characterName, ion::io::Resourc
 	ion::io::XML xml;
 	if(xml.Load(filename))
 	{
-		ion::io::XML* statsNode = xml.FindChild("Stats");
+		const ion::io::XML* statsNode = xml.FindChild("Stats");
 		if(statsNode)
 		{
 			mStats.Read(*statsNode);
 		}
 
-		ion::io::XML* spriteSheetNode = xml.FindChild("SpriteSheet");
+		const ion::io::XML* spriteSheetNode = xml.FindChild("SpriteSheet");
 		if(spriteSheetNode)
 		{
 			int width = 1;
@@ -45,17 +44,16 @@ void Character::LoadResources(const std::string& characterName, ion::io::Resourc
 			mSpriteSheet = new ion::render::Sprite(ion::render::Sprite::Render2D, mStats.size, 0.001f, width, height, textureFile, resourceManager);
 		}
 
-		ion::io::XML* animationNode = xml.FindChild("Animations");
-		if(animationNode)
+		const ion::io::XML* spriteAnimationNode = xml.FindChild("SpriteAnimations");
+		if(spriteAnimationNode)
 		{
-			ParseAnimation(Idle,			animationNode->FindChild("Idle"));
-			ParseAnimation(LungeForward,	animationNode->FindChild("LungeForward"));
-			ParseAnimation(StepBackward,	animationNode->FindChild("StepBackward"));
-			ParseAnimation(Jump,			animationNode->FindChild("Jump"));
-			ParseAnimation(Punch,			animationNode->FindChild("Punch"));
-			ParseAnimation(Kick,			animationNode->FindChild("Kick"));
-			ParseAnimation(Block,			animationNode->FindChild("Block"));
-			ParseAnimation(Special,			animationNode->FindChild("Special"));
+			int numAnimations = spriteAnimationNode->GetNumChildren();
+			mSpriteAnimations.reserve(numAnimations);
+
+			for(int i = 0; i < numAnimations; i++)
+			{
+				ParseAnimation(*spriteAnimationNode->GetChild(i));
+			}
 		}
 
 		//Data ready, begin idle action
@@ -67,30 +65,27 @@ void Character::LoadResources(const std::string& characterName, ion::io::Resourc
 	}
 }
 
-void Character::ParseAnimation(Actions action, ion::io::XML* node)
+void Character::ParseAnimation(const ion::io::XML& node)
 {
-	if(node)
+	ion::render::SpriteAnimation* animation = new ion::render::SpriteAnimation(*mSpriteSheet);
+	ion::render::AnimationTrackInt* animTrack = new ion::render::AnimationTrackInt();
+	animation->SetAnimationTrack(*animTrack);
+	mSpriteAnimations.push_back(animation);
+
+	float duration = 1.0f;
+	node.GetAttribute("Duration", duration);
+	animation->SetPlaybackSpeed(1.0f / duration);
+
+	bool loop = false;
+	node.GetAttribute("Loop", loop);
+	animation->SetPlaybackBehaviour(loop ? ion::render::Animation::Loop : ion::render::Animation::PlayOnce);
+
+	std::vector<std::string> frames;
+	int numFrames = ion::string::Tokenise(node.GetData(), frames, ',');
+
+	for(int i = 0; i < numFrames; i++)
 	{
-		ion::render::SpriteAnimation* animation = new ion::render::SpriteAnimation(*mSpriteSheet);
-		ion::render::AnimationTrackInt* animTrack = new ion::render::AnimationTrackInt();
-		animation->SetAnimationTrack(*animTrack);
-		mAnimations[action] = animation;
-
-		float duration = 1.0f;
-		node->GetAttribute("Duration", duration);
-		animation->SetPlaybackSpeed(1.0f / duration);
-
-		bool loop = false;
-		node->GetAttribute("Loop", loop);
-		animation->SetPlaybackBehaviour(loop ? ion::render::Animation::Loop : ion::render::Animation::PlayOnce);
-
-		std::vector<std::string> frames;
-		int numFrames = ion::string::Tokenise(node->GetData(), frames, ',');
-
-		for(int i = 0; i < numFrames; i++)
-		{
-			animTrack->AddKeyframe(ion::render::Keyframe<int>(ion::maths::UnLerp(0.0f, (float)numFrames-1.0f, (float)i), atoi(frames[i].c_str())));
-		}
+		animTrack->AddKeyframe(ion::render::Keyframe<int>(ion::maths::UnLerp(0.0f, (float)numFrames-1.0f, (float)i), atoi(frames[i].c_str())));
 	}
 }
 
@@ -138,7 +133,7 @@ void Character::PerformAction(Actions action)
 		mCurrentAnimation->SetFrame(0.0f);
 	}
 
-	mCurrentAnimation = mAnimations[action];
+	mCurrentAnimation = mSpriteAnimations[action];
 	mCurrentAnimation->SetFrame(0.0f);
 	mCurrentAnimation->SetState(ion::render::Animation::Playing);
 }
@@ -147,7 +142,7 @@ void Character::DealDamage(Character& character, int damage) const
 {
 }
 
-void Character::Stats::Read(ion::io::XML& xmlNode)
+void Character::Stats::Read(const ion::io::XML& xmlNode)
 {
 	xmlNode.GetAttribute("sizeX", size.x);
 	xmlNode.GetAttribute("sizeY", size.y);

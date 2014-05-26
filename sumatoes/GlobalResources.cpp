@@ -18,7 +18,7 @@ namespace resources
 		ion::io::XML xml;
 		if(xml.Load("../scripts/Game.xml"))
 		{
-			ion::io::XML* texturesNode = xml.FindChild("Textures");
+			const ion::io::XML* texturesNode = xml.FindChild("Textures");
 			if(texturesNode)
 			{
 				std::string filename;
@@ -31,7 +31,7 @@ namespace resources
 					Textures::sDemoLevelBg = resourceManager.GetResource<ion::render::Texture>(filename);
 			}
 
-			ion::io::XML* demoNode = xml.FindChild("Demo");
+			const ion::io::XML* demoNode = xml.FindChild("Demo");
 			if(demoNode)
 			{
 				demoNode->GetAttribute("level", Levels::sDemoLevel);

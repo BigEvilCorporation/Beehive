@@ -41,16 +41,29 @@ namespace ion
 			return false;
 		}
 
-		XML* XML::FindChild(const std::string& name) const
+		int XML::GetNumChildren() const
 		{
-			XML* child = NULL;
+			return mChildren.size();
+		}
+
+		const XML* XML::GetChild(int index) const
+		{
+			return &mChildren[index].second;
+		}
+
+		const XML* XML::FindChild(const std::string& name) const
+		{
+			const XML* child = NULL;
 
 			std::string nameLower = string::ToLower(name);
+			u32 hash = ion::Hash(nameLower.c_str());
 
-			std::map<std::string, XML>::const_iterator it = mChildren.find(nameLower);
-			if(it != mChildren.end())
+			for(int i = 0; i < mChildren.size() && !child; i++)
 			{
-				child = (XML*)&it->second;
+				if(mChildren[i].first == hash)
+				{
+					child = &mChildren[i].second;
+				}
 			}
 
 			return child;
@@ -59,8 +72,9 @@ namespace ion
 		XML* XML::AddChild(const std::string& name)
 		{
 			std::string nameLower = string::ToLower(name);
-			std::pair<std::map<std::string, XML>::iterator, bool> result = mChildren.insert(std::make_pair(nameLower, XML()));
-			return &result.first->second;
+			u32 hash = ion::Hash(nameLower.c_str());
+			mChildren.push_back(std::make_pair(hash, XML()));
+			return &mChildren.back().second;
 		}
 
 		bool XML::GetAttribute(const std::string& name, std::string& value) const
