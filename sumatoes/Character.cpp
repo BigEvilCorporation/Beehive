@@ -6,6 +6,7 @@ Character::Character()
 {
 	mSpriteSheet = NULL;
 	mCurrentAnimation = NULL;
+	mCurrentAction = Idle;
 }
 
 Character::~Character()
@@ -93,8 +94,10 @@ void Character::Update(float deltaTime, ion::input::Keyboard* keyboard, ion::inp
 {
 	if(keyboard)
 	{
-		if(keyboard->KeyPressedThisFrame(DIK_SPACE))
+		if(keyboard->KeyPressedThisFrame(DIK_SPACE) && mCurrentAction != Jump)
+		{
 			PerformAction(Jump);
+		}
 	}
 
 	if(mCurrentAnimation)
@@ -136,6 +139,7 @@ void Character::PerformAction(Actions action)
 	mCurrentAnimation = mSpriteAnimations[action];
 	mCurrentAnimation->SetFrame(0.0f);
 	mCurrentAnimation->SetState(ion::render::Animation::Playing);
+	mCurrentAction = action;
 }
 
 void Character::DealDamage(Character& character, int damage) const

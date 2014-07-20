@@ -1,9 +1,10 @@
 #pragma once
 
-#include <ion/gamekit/StateManager.h>
 #include <ion/io/ResourceManager.h>
 #include <ion/io/XML.h>
 #include <ion/input/Keyboard.h>
+#include <ion/input/Mouse.h>
+#include <ion/input/Gamepad.h>
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Sprite.h>
@@ -82,4 +83,5 @@ protected:
 	std::vector<ion::render::SpriteAnimation*> mSpriteAnimations;
 	std::vector<ion::render::Animation*> mMoveAnimations;
 	ion::render::SpriteAnimation* mCurrentAnimation;
+	Actions mCurrentAction;
 };

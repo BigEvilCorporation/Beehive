@@ -1,0 +1,16 @@
+SubDir bigevilcorp ion test audiotest ;
+
+ApplyIonDefines AudioTest ;
+ApplyIonIncludes AudioTest ;
+ApplyIonCore AudioTest ;
+ApplyIonAudio AudioTest ;
+
+SRC = 
+	main.cpp
+	AudioTest.cpp
+	AudioTest.h
+	;
+
+AutoSourceGroup AudioTest : $(SRC) ;
+C.RuntimeType AudioTest : static ;
+C.Application AudioTest : $(SRC) ;

@@ -34,6 +34,14 @@ rule ApplyIonEditor TARGET
 	ApplyIonLib $(TARGET) : editor ;
 }
 
+rule ApplyIonAudio TARGET
+{
+	ApplyIonLib $(TARGET) : audio ;
+
+	ApplyWin32SDK $(TARGET) ;
+	ApplyXAudio2SDK $(TARGET) ;
+}
+
 rule ApplyIonGui TARGET
 {
 	ApplyIonLib $(TARGET) : gui ;
@@ -143,9 +151,19 @@ rule ApplyWin32SDK TARGET
 		advapi32.lib
 		shell32.lib
 		uuid.lib
+		ole32.lib
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(WIN32_LIBS) ;
+}
+
+rule ApplyXAudio2SDK TARGET
+{
+	local XAUDIO2_LIBS =
+		xaudio2.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(XAUDIO2_LIBS) ;
 }
 
 rule ApplyXInputSDK TARGET
