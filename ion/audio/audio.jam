@@ -1,0 +1,47 @@
+SubDir bigevilcorp ion audio ;
+
+local SRC =
+	Buffer.cpp
+	Buffer.h
+	Callback.h
+	DataFormat.h
+	Decoder.h
+	DecoderOGG.h
+	Device.h
+	Effect.h
+	Encoder.h
+	Engine.cpp
+	Engine.h
+	FileReader.cpp
+	FileReader.h
+	FileReaderOGG.h
+	FileReaderWAV.cpp
+	FileReaderWAV.h
+	FileSource.cpp
+	FileSource.h
+	OutputDevice.h
+	Source.cpp
+	Source.h
+	StreamDesc.h
+	Voice.cpp
+	Voice.h
+	;
+
+#if ( win32 in $(PLATFORM) )
+SRC +=
+	xaudio/EngineXAudio.cpp
+	xaudio/EngineXAudio.h
+	xaudio/OutputDeviceXAudio.cpp
+	xaudio/OutputDeviceXAudio.h
+	xaudio/VoiceXAudio.cpp
+	xaudio/VoiceXAudio.h
+	;
+
+ApplyIonDefines audio ;
+ApplyIonIncludes audio ;
+ApplyWin32SDK audio ;
+ApplyXAudio2SDK audio ;
+
+AutoSourceGroup audio : $(SRC) ;
+C.RuntimeType audio : static ;
+C.Library audio : $(SRC) ;

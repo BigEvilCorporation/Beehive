@@ -34,7 +34,9 @@ namespace ion
 			virtual void Entry() = 0;
 
 		private:
+			#if defined ION_PLATFORM_WINDOWS
 			static unsigned long WINAPI ThreadFunction(void* params);
+			#endif
 
 			unsigned long mThreadId;
 
