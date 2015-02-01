@@ -13,6 +13,8 @@ local SRC =
 	MDStudio.h
 	ui/MainWindow.cpp
 	ui/MainWindow.h
+	ui/MainWindowTemplate.cpp
+	ui/MainWindowTemplate.h
 	ui/WxApp.cpp
 	ui/WxApp.h
 	;

@@ -14,8 +14,8 @@ MDStudio::~MDStudio()
 
 bool MDStudio::Initialise()
 {
-	wxApp::SetInstance( new MDStudioWxApp() );
-	wxEntryStart( 0, NULL);
+	wxApp::SetInstance(new MDStudioWxApp());
+	wxEntryStart(0, NULL);
 	wxTheApp->OnInit();
 	wxTheApp->OnRun();
 
