@@ -288,6 +288,22 @@ rule ApplyBulletSDK TARGET
 	# C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_RELEASE) : release ;
 }
 
+rule ApplyWxSDK TARGET
+{
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/wx/include ;
+	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/wx/include/wx ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/wx/lib ;
+
+	C.Defines $(TARGET) : WXUSINGDLL wxMSVC_VERSION_AUTO UNICODE _UNICODE ;
+
+	WX_LIBS =
+		wxbase30u.lib
+		wxmsw30u_core.lib
+		;
+
+	C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS) : debug release ;
+}
+
 #################################################
 ## Compiler options
 #################################################
