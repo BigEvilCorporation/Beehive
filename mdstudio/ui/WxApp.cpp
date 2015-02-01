@@ -17,7 +17,7 @@ MDStudioWxApp::~MDStudioWxApp()
 
 bool MDStudioWxApp::OnInit()
 {
-	MainWindow* frame = new MainWindow("MD Studio", wxPoint(50, 50), wxSize(450, 340));
+	MainWindow* frame = new MainWindow();
     frame->Show(true);
 
 	return true;

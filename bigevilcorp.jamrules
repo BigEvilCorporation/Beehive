@@ -298,7 +298,28 @@ rule ApplyWxSDK TARGET
 
 	WX_LIBS =
 		wxbase30u.lib
+		wxbase30u_net.lib
+		wxbase30u_xml.lib
+		wxexpat.lib
+		wxjpeg.lib
+		wxmsw30u_adv.lib
+		wxmsw30u_aui.lib
 		wxmsw30u_core.lib
+		wxmsw30u_gl.lib
+		wxmsw30u_html.lib
+		wxmsw30u_media.lib
+		wxmsw30u_propgrid.lib
+		wxmsw30u_qa.lib
+		wxmsw30u_ribbon.lib
+		wxmsw30u_richtext.lib
+		wxmsw30u_stc.lib
+		wxmsw30u_webview.lib
+		wxmsw30u_xrc.lib
+		wxpng.lib
+		wxregexu.lib
+		wxscintilla.lib
+		wxtiff.lib
+		wxzlib.lib
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS) : debug release ;
