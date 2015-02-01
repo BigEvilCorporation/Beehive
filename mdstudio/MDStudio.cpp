@@ -14,17 +14,18 @@ MDStudio::~MDStudio()
 
 bool MDStudio::Initialise()
 {
-	//wxAppInitializer wxTheAppInitializer((wxAppInitializerFunction) wxCreateApp);
-	MDStudioWxApp wxApp;
+	wxApp::SetInstance( new MDStudioWxApp() );
+	wxEntryStart( 0, NULL);
+	wxTheApp->OnInit();
+	wxTheApp->OnRun();
 
-	int numArgs = 0;
-	wxApp.Initialize(numArgs, NULL);
-	return true;
+	return false;
 }
 
 void MDStudio::Shutdown()
 {
-
+	wxTheApp->OnExit();
+	wxEntryCleanup();
 }
 
 bool MDStudio::Update(float deltaTime)
