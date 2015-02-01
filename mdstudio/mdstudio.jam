@@ -1,0 +1,22 @@
+SubDir bigevilcorp mdstudio ;
+
+ApplyIonDefines MDStudio ;
+ApplyIonIncludes MDStudio ;
+ApplyIonCore MDStudio ;
+ApplyIonIo MDStudio ;
+
+ApplyWxSDK MDStudio ;
+
+local SRC = 
+	main.cpp
+	MDStudio.cpp
+	MDStudio.h
+	ui/MainWindow.cpp
+	ui/MainWindow.h
+	ui/WxApp.cpp
+	ui/WxApp.h
+	;
+
+AutoSourceGroup MDStudio : $(SRC) ;
+C.RuntimeType MDStudio : static ;
+C.Application MDStudio : $(SRC) ;
