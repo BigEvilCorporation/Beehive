@@ -10,6 +10,8 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
+class MapPanel;
+
 #include <wx/string.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
@@ -24,14 +26,18 @@
 #include <wx/ribbon/control.h>
 #include <wx/ribbon/art.h>
 #include <wx/ribbon/bar.h>
-#include <wx/scrolwin.h>
+#include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
-#include <wx/toolbar.h>
+#include <wx/aui/aui.h>
+#include <wx/aui/auibar.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
+#define wxID_BTN_TILES_IMPORT 1000
+#define wxID_BTN_TOOLS_MAPEDIT 1001
+#define wxID_MAPPANEL 1002
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowTemplate
@@ -63,14 +69,21 @@ class MainWindowTemplate : public wxFrame
 		wxRibbonPage* m_ribbonPageTools;
 		wxRibbonPanel* m_ribbonPanelTools;
 		wxRibbonButtonBar* m_ribbonButtonBarTools;
-		wxScrolledWindow* m_scrolledWindowMap;
 		wxStatusBar* m_statusBarMain;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnProjSave( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnProjExport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	
 	public:
+		MapPanel* m_mapPanel;
 		
 		MainWindowTemplate( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
@@ -86,15 +99,16 @@ class ToolboxMapEditTemplate : public wxFrame
 	private:
 	
 	protected:
-		wxToolBar* m_toolBarMapEdit;
-		wxToolBarToolBase* m_toolMapPaint; 
-		wxToolBarToolBase* m_toolMapFlipH; 
-		wxToolBarToolBase* m_toolMapFlipV; 
-		wxToolBarToolBase* m_toolMapAssignPal; 
+		wxAuiToolBar* m_toolbarMapEdit;
+		wxAuiToolBarItem* m_tool5; 
+		wxAuiToolBarItem* m_tool6; 
+		wxAuiToolBarItem* m_tool7; 
+		wxAuiToolBarItem* m_tool8; 
+		wxAuiToolBarItem* m_tool10; 
 	
 	public:
 		
-		ToolboxMapEditTemplate( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Map Editing"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL );
+		ToolboxMapEditTemplate( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Map Editing"), const wxPoint& pos = wxPoint( -1,-1 ), const wxSize& size = wxSize( 128,400 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxSIMPLE_BORDER|wxTAB_TRAVERSAL );
 		
 		~ToolboxMapEditTemplate();
 	
