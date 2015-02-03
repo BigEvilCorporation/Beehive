@@ -11,10 +11,19 @@ local SRC =
 	main.cpp
 	MDStudio.cpp
 	MDStudio.h
+
+	Map.cpp
+	Map.h
+	Tile.cpp
+	Tile.h
+	Palette.h
+
 	ui/MainWindow.cpp
 	ui/MainWindow.h
 	ui/MainWindowTemplate.cpp
 	ui/MainWindowTemplate.h
+	ui/MapPanel.cpp
+	ui/MapPanel.h
 	ui/WxApp.cpp
 	ui/WxApp.h
 	;
