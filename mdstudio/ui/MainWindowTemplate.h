@@ -11,6 +11,7 @@
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
 class MapPanel;
+class TilesPanel;
 
 #include <wx/string.h>
 #include <wx/bitmap.h>
@@ -30,6 +31,7 @@ class MapPanel;
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
+#include <wx/scrolwin.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 
@@ -38,7 +40,9 @@ class MapPanel;
 #define wxID_MAINWINDOW 1000
 #define wxID_BTN_TILES_IMPORT 1001
 #define wxID_BTN_TOOLS_MAPEDIT 1002
-#define wxID_MAPPANEL 1003
+#define wxID_BTN_TOOLS_TILES 1003
+#define wxID_MAPPANEL 1004
+#define wxID_TILESPANEL 1005
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowTemplate
@@ -89,6 +93,24 @@ class MainWindowTemplate : public wxFrame
 		MainWindowTemplate( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowTemplate();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ToolboxTilesTemplate
+///////////////////////////////////////////////////////////////////////////////
+class ToolboxTilesTemplate : public wxFrame 
+{
+	private:
+	
+	protected:
+		TilesPanel* m_tilesPanel;
+	
+	public:
+		
+		ToolboxTilesTemplate( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Tiles"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL );
+		
+		~ToolboxTilesTemplate();
 	
 };
 

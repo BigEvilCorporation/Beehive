@@ -15,9 +15,10 @@ protected:
 	virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 	virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 	virtual void OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event );
-	virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+	virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event );
 	virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 
 private:
 	wxWeakRef<ToolboxMapEditTemplate> m_toolboxMapEdit;
+	wxWeakRef<ToolboxTilesTemplate> m_toolboxTiles;
 };

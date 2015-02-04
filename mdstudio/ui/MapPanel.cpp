@@ -1,4 +1,5 @@
 #include "MapPanel.h"
+#include "TileRendering.h"
 
 MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxPanel(parent, winid, pos, size, style, name)
@@ -167,7 +168,7 @@ void MapPanel::PaintTile(ion::Vector2 mousePos, const Tile& tile)
 
 		//Paint tile to canvas dc
 		wxMemoryDC dc(m_canvas);
-		PaintTileToDc(x, y, tile, dc);
+		tilerendering::PaintTileToDc(x, y, tile, dc);
 		
 		//Invalidate screen rect
 		wxRect refreshRect(	((x * 8) * m_cameraZoom) + m_cameraPos.x,
@@ -185,29 +186,7 @@ void MapPanel::PaintMapToDc(wxDC& dc)
 	{
 		for(int y = 0; y < m_map.height; y++)
 		{
-			PaintTileToDc(x, y, m_map.GetTile(x, y), dc);
-		}
-	}
-}
-
-void MapPanel::PaintTileToDc(int x, int y, const Tile& tile, wxDC& dc)
-{
-	int startPixelX = x * 8;
-	int startPixelY = y * 8;
-
-	for(int tileX = 0; tileX < 8; tileX++)
-	{
-		for(int tileY = 0; tileY < 8; tileY++)
-		{
-			u8 colourIdx = tile.GetPixelColour(tileX, tileY);
-
-			//TODO: Convert to MD colour
-			if(colourIdx == 0)
-				dc.SetPen(*wxGREEN_PEN);
-			else
-				dc.SetPen(*wxBLUE_PEN);
-
-			dc.DrawPoint(startPixelX + tileX, startPixelY + tileY);
+			tilerendering::PaintTileToDc(x, y, m_map.GetTile(x, y), dc);
 		}
 	}
 }

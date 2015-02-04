@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include "MapPanel.h"
+#include "TilesPanel.h"
 
 #include "MainWindowTemplate.h"
 
@@ -54,7 +55,7 @@ MainWindowTemplate::MainWindowTemplate( wxWindow* parent, wxWindowID id, const w
 	m_ribbonPanelTools = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Toolbox") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarTools = new wxRibbonButtonBar( m_ribbonPanelTools, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAPEDIT, wxT("Map Editing"), wxNullBitmap, wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_ANY, wxT("Tiles"), wxNullBitmap, wxEmptyString);
+	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_TILES, wxT("Tiles"), wxNullBitmap, wxEmptyString);
 	m_ribbonButtonBarTools->AddButton( wxID_ANY, wxT("Stamps"), wxNullBitmap, wxEmptyString);
 	m_ribbonBarMain->Realize();
 	
@@ -77,7 +78,7 @@ MainWindowTemplate::MainWindowTemplate( wxWindow* parent, wxWindowID id, const w
 	this->Connect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnTilesImport ) );
 	this->Connect( wxID_ANY, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnTilesDelete ) );
 	this->Connect( wxID_BTN_TOOLS_MAPEDIT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsMapEdit ) );
-	this->Connect( wxID_ANY, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsTiles ) );
+	this->Connect( wxID_BTN_TOOLS_TILES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsTiles ) );
 	this->Connect( wxID_ANY, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsStamps ) );
 }
 
@@ -90,9 +91,31 @@ MainWindowTemplate::~MainWindowTemplate()
 	this->Disconnect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnTilesImport ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnTilesDelete ) );
 	this->Disconnect( wxID_BTN_TOOLS_MAPEDIT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsMapEdit ) );
-	this->Disconnect( wxID_ANY, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsTiles ) );
+	this->Disconnect( wxID_BTN_TOOLS_TILES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsTiles ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowTemplate::OnBtnToolsStamps ) );
 	
+}
+
+ToolboxTilesTemplate::ToolboxTilesTemplate( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxVERTICAL );
+	
+	m_tilesPanel = new TilesPanel( this, wxID_TILESPANEL, wxDefaultPosition, wxDefaultSize, wxALWAYS_SHOW_SB|wxVSCROLL );
+	m_tilesPanel->SetScrollRate( 5, 5 );
+	bSizer2->Add( m_tilesPanel, 1, wxEXPAND | wxALL, 5 );
+	
+	
+	this->SetSizer( bSizer2 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+}
+
+ToolboxTilesTemplate::~ToolboxTilesTemplate()
+{
 }
 
 ToolboxMapEditTemplate::ToolboxMapEditTemplate( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
