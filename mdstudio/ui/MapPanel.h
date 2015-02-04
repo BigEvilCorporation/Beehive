@@ -31,9 +31,6 @@ private:
 	//Paint tile to canvas
 	void PaintTile(ion::Vector2 mousePos, const Tile& tile);
 
-	//Paint single tile to dc
-	void PaintTileToDc(int x, int y, const Tile& tile, wxDC& dc);
-
 	//Paint whole map to dc
 	void PaintMapToDc(wxDC& dc);
 

@@ -24,6 +24,10 @@ local SRC =
 	ui/MainWindowTemplate.h
 	ui/MapPanel.cpp
 	ui/MapPanel.h
+	ui/TileRendering.cpp
+	ui/TileRendering.h
+	ui/TilesPanel.cpp
+	ui/TilesPanel.h
 	ui/WxApp.cpp
 	ui/WxApp.h
 	;
