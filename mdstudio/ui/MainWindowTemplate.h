@@ -35,9 +35,10 @@ class MapPanel;
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define wxID_BTN_TILES_IMPORT 1000
-#define wxID_BTN_TOOLS_MAPEDIT 1001
-#define wxID_MAPPANEL 1002
+#define wxID_MAINWINDOW 1000
+#define wxID_BTN_TILES_IMPORT 1001
+#define wxID_BTN_TOOLS_MAPEDIT 1002
+#define wxID_MAPPANEL 1003
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowTemplate
@@ -85,7 +86,7 @@ class MainWindowTemplate : public wxFrame
 	public:
 		MapPanel* m_mapPanel;
 		
-		MainWindowTemplate( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
+		MainWindowTemplate( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowTemplate();
 	

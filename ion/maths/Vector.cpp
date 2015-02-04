@@ -45,6 +45,11 @@ namespace ion
 		return Vector2(Vector.x + x, Vector.y + y);
 	}
 
+	Vector2 Vector2::operator -(const Vector2 &Vector) const
+	{
+		return Vector2(Vector.x - x, Vector.y - y);
+	}
+
 	float Vector2::GetLength() const
 	{
 		return sqrt(x*x + y*y);
