@@ -27,6 +27,7 @@ namespace ion
 		Vector2 operator *(float Scalar) const;
 		Vector2 operator *(const Vector2 &Vector) const;
 		Vector2 operator +(const Vector2 &Vector) const;
+		Vector2 operator -(const Vector2 &Vector) const;
 
 		float GetLength() const;
 		float Dot(const Vector2& vector) const;

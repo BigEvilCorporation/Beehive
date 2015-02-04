@@ -2,124 +2,195 @@
 
 MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxPanel(parent, winid, pos, size, style, name)
+	, m_canvas(Map::defaultWidth * 8, Map::defaultHeight * 8)
 {
 	m_paintTile = NULL;
+	m_eraseTile = NULL;
 	m_cameraZoom = 1.0f;
+	m_cameraPanSpeed = 1.0f;
 
-	Bind(wxEVT_LEFT_DOWN,	&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_LEFT_UP,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MIDDLE_DOWN, &MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MIDDLE_UP,	&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_RIGHT_DOWN,	&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_RIGHT_UP,	&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MOTION,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MOUSEWHEEL,	&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_PAINT,		&MapPanel::OnPaint, this, wxID_MAPPANEL);
+	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_MIDDLE_DOWN,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_MIDDLE_UP,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_RIGHT_DOWN,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_RIGHT_UP,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_MOTION,			&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_MOUSEWHEEL,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
+	Bind(wxEVT_PAINT,			&MapPanel::OnPaint, this, wxID_MAPPANEL);
+	Bind(wxEVT_ERASE_BACKGROUND,&MapPanel::OnErase, this, wxID_MAPPANEL);
 
 	//TEST
-	m_paintTile = new Tile;
+	Tile* testPaintTile = new Tile;
+	Tile* testEraseTile = new Tile;
 
-	int x = 0;
-	int y = 0;
-	for(int i = 0; i < 8; i++)
+	int testTile[8*8] = 
 	{
-		m_paintTile->SetPixelColour(x, y, 1);
-		x++;
-		y++;
+		1,1,1,1,1,1,1,1,
+		1,1,0,0,0,0,1,1,
+		1,0,1,0,0,1,0,1,
+		1,0,0,1,1,0,0,1,
+		1,0,0,1,1,0,0,1,
+		1,0,1,0,0,1,0,1,
+		1,1,0,0,0,0,1,1,
+		1,1,1,1,1,1,1,1
+	};
+
+	for(int i = 0; i < 8*8; i++)
+	{
+		int y = i / 8;
+		int x = i % 8;
+		testPaintTile->SetPixelColour(x, y, testTile[i]);
 	}
+
+	m_paintTile = testPaintTile;
+	m_eraseTile = testEraseTile;
+
+	//Initialise canvas
+	wxMemoryDC dc(m_canvas);
+	PaintMapToDc(dc);
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event)
 {
-	//Get mouse position in dc space
-	wxPaintDC paintDc(this);
-	wxAffineMatrix2D matrix;
-	matrix.Translate(m_cameraPos.x, m_cameraPos.y);
-	matrix.Scale(m_cameraZoom, m_cameraZoom);
-	paintDc.SetTransformMatrix(matrix);
-	wxPoint mousePosWx = event.GetLogicalPosition(paintDc);
-	ion::Vector2 mousePos(mousePosWx.x, mousePosWx.y);
+	//Get mouse delta
+	ion::Vector2 mousePos(event.GetX(), event.GetY());
+	ion::Vector2 mouseDelta = m_mousePrevPos - mousePos;
+	m_mousePrevPos = mousePos;
 
-	if(event.Dragging())
+	//Get mouse position in canvas and map space
+	wxPaintDC paintDc(this);
+	wxPoint mouseCanvasPosWx = event.GetLogicalPosition(paintDc);
+
+	ion::Vector2 mousePosCanvasSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
+	ion::Vector2 mousePosMapSpace((mouseCanvasPosWx.x - m_cameraPos.x) / m_cameraZoom, (mouseCanvasPosWx.y - m_cameraPos.y) / m_cameraZoom);
+
+	//Panting/erasing
+	if(mousePosMapSpace.x >= 0.0f && mousePosMapSpace.y >= 0.0f
+		&& mousePosMapSpace.x < (m_map.width * 8) && mousePosMapSpace.y < (m_map.height * 8))
 	{
 		if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 		{
-			//Paint
-			PaintTile(mousePos);
+			//Paint (dragging)
+			if(m_paintTile)
+				PaintTile(mousePosMapSpace, *m_paintTile);
 		}
 		else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
 		{
-			//Erase
-			EraseTile(mousePos);
-		}
-		else if(event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
-		{
-			//Pan
-			m_cameraPos.x += event.GetX();
-			m_cameraPos.y += event.GetX();
+			//Erase (dragging)
+			if(m_eraseTile)
+				PaintTile(mousePosMapSpace, *m_eraseTile);
 		}
 	}
-	else if(event.LeftDown())
+
+	//Camera pan/zoom
+	if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 	{
-		//Paint
-		PaintTile(mousePos);
+		//Pan camera
+		m_cameraPos.x += mouseDelta.x * m_cameraPanSpeed;
+		m_cameraPos.y += mouseDelta.y * m_cameraPanSpeed;
+
+		//Invalidate whole frame
+		Refresh();
 	}
-	else if(event.RightDown())
+	else if(event.GetWheelRotation() != 0)
 	{
-		//Erase
-		EraseTile(mousePos);
+		//Zoom camera
+		int wheelDelta = event.GetWheelRotation();
+		const float zoomSpeed = 1.0f;
+
+		//One notch at a time
+		if(wheelDelta > 0)
+			m_cameraZoom += zoomSpeed;
+		else if(wheelDelta < 0)
+			m_cameraZoom -= zoomSpeed;
+
+		//Clamp
+		if(m_cameraZoom < 1.0f)
+			m_cameraZoom = 1.0f;
+		else if(m_cameraZoom > 10.0f)
+			m_cameraZoom = 10.0f;
+
+		//Invalidate whole frame
+		Refresh();
 	}
-	else if(event.GetWheelDelta() != 0)
-	{
-		//Zoom
-		int wheelDelta = event.GetWheelDelta();
-		const float zoomSpeed = 0.1f;
-		m_cameraZoom += (float)wheelDelta * zoomSpeed;
-	}
+
+	event.Skip();
 }
 
-void MapPanel::OnPaint(wxPaintEvent& evt)
+void MapPanel::OnPaint(wxPaintEvent& event)
 {
-	wxPaintDC paintDc(this);
-	Render(paintDc);
+	//Source context
+	wxMemoryDC sourceContext(m_canvas);
+
+	//Double buffered dest context
+	wxAutoBufferedPaintDC destContext(this);
+
+	//TODO: Transform by window scroll
+
+	//Update all invalidated regions
+	for(wxRegionIterator it = GetUpdateRegion(); it; it++)
+	{
+		//Get invalidated rect
+		wxRect sourceRect(it.GetRect());
+		wxRect destRect(sourceRect);
+
+		//Clear rect
+		destContext.SetBrush(*wxBLACK_BRUSH);
+		destContext.DrawRectangle(destRect);
+
+		//Transform by camera pan/zoom
+		sourceRect.x -= m_cameraPos.x;
+		sourceRect.y -= m_cameraPos.y;
+		sourceRect.x /= m_cameraZoom;
+		sourceRect.y /= m_cameraZoom;
+		sourceRect.width /= m_cameraZoom;
+		sourceRect.height /= m_cameraZoom;
+		
+		//Copy rect from canvas
+		destContext.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &sourceContext, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
+	}
 }
 
-void MapPanel::Render(wxDC& dc)
+void MapPanel::OnErase(wxEraseEvent& event)
 {
-	wxAffineMatrix2D matrix;
-	matrix.Translate(m_cameraPos.x, m_cameraPos.y);
-	matrix.Scale(m_cameraZoom, m_cameraZoom);
-	dc.SetTransformMatrix(matrix);
- 
-	PaintMapToCanvas(dc);
+	//Ignore event
 }
 
-void MapPanel::PaintTile(ion::Vector2 mousePos)
+void MapPanel::PaintTile(ion::Vector2 mousePos, const Tile& tile)
 {
 	if(m_paintTile)
 	{
 		int x = (int)floor(mousePos.x / 8.0f);
 		int y = (int)floor(mousePos.y / 8.0f);
-		m_map.SetTile(x, y, *m_paintTile);
+		m_map.SetTile(x, y, tile);
+
+		//Paint tile to canvas dc
+		wxMemoryDC dc(m_canvas);
+		PaintTileToDc(x, y, tile, dc);
+		
+		//Invalidate screen rect
+		wxRect refreshRect(	((x * 8) * m_cameraZoom) + m_cameraPos.x,
+							((y * 8) * m_cameraZoom) + m_cameraPos.y,
+							8 * m_cameraZoom,
+							8 * m_cameraZoom);
+
+		RefreshRect(refreshRect);
 	}
 }
 
-void MapPanel::EraseTile(ion::Vector2 mousePos)
-{
-}
-
-void MapPanel::PaintMapToCanvas(wxDC& dc)
+void MapPanel::PaintMapToDc(wxDC& dc)
 {
 	for(int x = 0; x < m_map.width; x++)
 	{
 		for(int y = 0; y < m_map.height; y++)
 		{
-			PaintTileToCanvas(x, y, m_map.GetTile(x, y), dc);
+			PaintTileToDc(x, y, m_map.GetTile(x, y), dc);
 		}
 	}
 }
 
-void MapPanel::PaintTileToCanvas(int x, int y, const Tile& tile, wxDC& dc)
+void MapPanel::PaintTileToDc(int x, int y, const Tile& tile, wxDC& dc)
 {
 	int startPixelX = x * 8;
 	int startPixelY = y * 8;

@@ -6,6 +6,7 @@
 #include <wx/panel.h>
 #include <wx/dc.h>
 #include <wx/dcclient.h>
+#include <wx/dcbuffer.h>
 
 #include "MainWindowTemplate.h"
 #include "../Map.h"
@@ -17,21 +18,42 @@ public:
 	MapPanel(wxWindow *parent,  wxWindowID winid = wxID_ANY,  const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 
 	void OnMouse(wxMouseEvent& event);
-	void OnPaint(wxPaintEvent& evt);
-    void Render(wxDC& dc);
+	void OnPaint(wxPaintEvent& event);
+	void OnErase(wxEraseEvent& event);
 
-	void SetPaintTile(const Tile* tile) { m_paintTile = m_paintTile; }
+	//Set current tile used for painting
+	void SetPaintTile(const Tile* tile) { m_paintTile = tile; }
+
+	//Set current tile used for erasing
+	void SetEraseTile(const Tile* tile) { m_eraseTile = tile; }
 
 private:
-	void PaintTile(ion::Vector2 mousePos);
-	void EraseTile(ion::Vector2 mousePos);
+	//Paint tile to canvas
+	void PaintTile(ion::Vector2 mousePos, const Tile& tile);
 
-	void PaintMapToCanvas(wxDC& dc);
-	void PaintTileToCanvas(int x, int y, const Tile& tile, wxDC& dc);
+	//Paint single tile to dc
+	void PaintTileToDc(int x, int y, const Tile& tile, wxDC& dc);
 
+	//Paint whole map to dc
+	void PaintMapToDc(wxDC& dc);
+
+	//Genesis map
+	Map m_map;
+
+	//Local drawing canvas
+	wxBitmap m_canvas;
+
+	//Tile used for painting
+	const Tile* m_paintTile;
+
+	//Tile used for erasing
+	const Tile* m_eraseTile;
+
+	//Camera
 	ion::Vector2 m_cameraPos;
 	float m_cameraZoom;
+	float m_cameraPanSpeed;
 
-	Map m_map;
-	/* const */ Tile* m_paintTile;
+	//For mouse delta
+	ion::Vector2 m_mousePrevPos;
 };
