@@ -2,21 +2,29 @@
 
 #include <vector>
 
-#include "Tile.h"
+#include "Tileset.h"
 
-struct Map
+class Map
 {
+public:
 	static const int defaultWidth = 64;
 	static const int defaultHeight = 64;
 
 	Map();
 
+	int GetWidth() const;
+	int GetHeight() const;
+
 	void Resize(int w, int h);
-	void SetTile(int x, int y, const Tile& tile);
-	const Tile& GetTile(int x, int y) const;
+	void SetTile(int x, int y, TileId tile);
+	TileId GetTile(int x, int y) const;
 
-	int width;
-	int height;
+	Tileset& GetTileset();
 
-	std::vector<Tile> tiles;
+private:
+	int m_width;
+	int m_height;
+
+	Tileset m_tileset;
+	std::vector<TileId> m_tiles;
 };

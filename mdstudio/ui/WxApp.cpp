@@ -17,8 +17,8 @@ MDStudioWxApp::~MDStudioWxApp()
 
 bool MDStudioWxApp::OnInit()
 {
-	MainWindow* frame = new MainWindow();
-    frame->Show(true);
+	m_mainWindow = new MainWindow();
+    m_mainWindow->Show(true);
 
 	return true;
 }

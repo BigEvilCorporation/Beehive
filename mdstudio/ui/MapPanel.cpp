@@ -5,8 +5,7 @@ MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const
 	: wxPanel(parent, winid, pos, size, style, name)
 	, m_canvas(Map::defaultWidth * 8, Map::defaultHeight * 8)
 {
-	m_paintTile = NULL;
-	m_eraseTile = NULL;
+	m_project = NULL;
 	m_cameraZoom = 1.0f;
 	m_cameraPanSpeed = 1.0f;
 
@@ -20,100 +19,95 @@ MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const
 	Bind(wxEVT_MOUSEWHEEL,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
 	Bind(wxEVT_PAINT,			&MapPanel::OnPaint, this, wxID_MAPPANEL);
 	Bind(wxEVT_ERASE_BACKGROUND,&MapPanel::OnErase, this, wxID_MAPPANEL);
+}
 
-	//TEST
-	Tile* testPaintTile = new Tile;
-	Tile* testEraseTile = new Tile;
-
-	int testTile[8*8] = 
-	{
-		1,1,1,1,1,1,1,1,
-		1,1,0,0,0,0,1,1,
-		1,0,1,0,0,1,0,1,
-		1,0,0,1,1,0,0,1,
-		1,0,0,1,1,0,0,1,
-		1,0,1,0,0,1,0,1,
-		1,1,0,0,0,0,1,1,
-		1,1,1,1,1,1,1,1
-	};
-
-	for(int i = 0; i < 8*8; i++)
-	{
-		int y = i / 8;
-		int x = i % 8;
-		testPaintTile->SetPixelColour(x, y, testTile[i]);
-	}
-
-	m_paintTile = testPaintTile;
-	m_eraseTile = testEraseTile;
+void MapPanel::SetProject(Project* project)
+{
+	m_project = project;
 
 	//Initialise canvas
 	wxMemoryDC dc(m_canvas);
 	PaintMapToDc(dc);
+
+	//Centre camera on canvas
+	wxSize clientSize = GetClientSize();
+	m_cameraPos.x = (clientSize.x / 2.0f) - ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
+	m_cameraPos.y = (clientSize.y / 2.0f) - ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
+
+	//Reset zoom
+	m_cameraZoom = 1.0f;
+
+	//Invalidate panel
+	Refresh();
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event)
 {
-	//Get mouse delta
-	ion::Vector2 mousePos(event.GetX(), event.GetY());
-	ion::Vector2 mouseDelta = m_mousePrevPos - mousePos;
-	m_mousePrevPos = mousePos;
-
-	//Get mouse position in canvas and map space
-	wxPaintDC paintDc(this);
-	wxPoint mouseCanvasPosWx = event.GetLogicalPosition(paintDc);
-
-	ion::Vector2 mousePosCanvasSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
-	ion::Vector2 mousePosMapSpace((mouseCanvasPosWx.x - m_cameraPos.x) / m_cameraZoom, (mouseCanvasPosWx.y - m_cameraPos.y) / m_cameraZoom);
-
-	//Panting/erasing
-	if(mousePosMapSpace.x >= 0.0f && mousePosMapSpace.y >= 0.0f
-		&& mousePosMapSpace.x < (m_map.width * 8) && mousePosMapSpace.y < (m_map.height * 8))
+	if(m_project)
 	{
-		if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+		//Get mouse delta
+		ion::Vector2 mousePos(event.GetX(), event.GetY());
+		ion::Vector2 mouseDelta = m_mousePrevPos - mousePos;
+		m_mousePrevPos = mousePos;
+
+		//Get mouse position in canvas and map space
+		wxPaintDC paintDc(this);
+		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(paintDc);
+
+		ion::Vector2 mousePosCanvasSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
+		ion::Vector2 mousePosMapSpace((mouseCanvasPosWx.x - m_cameraPos.x) / m_cameraZoom, (mouseCanvasPosWx.y - m_cameraPos.y) / m_cameraZoom);
+
+		//Panting/erasing
+		if(		mousePosMapSpace.x >= 0.0f
+			&&	mousePosMapSpace.y >= 0.0f
+			&&	mousePosMapSpace.x < (m_project->GetMap().GetWidth() * 8)
+			&&	mousePosMapSpace.y < (m_project->GetMap().GetHeight() * 8))
 		{
-			//Paint (dragging)
-			if(m_paintTile)
-				PaintTile(mousePosMapSpace, *m_paintTile);
+			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+			{
+				//Paint
+				if(m_project->GetPaintTile())
+					PaintTile(mousePosMapSpace, m_project->GetPaintTile());
+			}
+			else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
+			{
+				//Erase
+				if(m_project->GetEraseTile())
+					PaintTile(mousePosMapSpace, m_project->GetEraseTile());
+			}
 		}
-		else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
+
+		//Camera pan/zoom
+		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 		{
-			//Erase (dragging)
-			if(m_eraseTile)
-				PaintTile(mousePosMapSpace, *m_eraseTile);
+			//Pan camera
+			m_cameraPos.x += mouseDelta.x * m_cameraPanSpeed;
+			m_cameraPos.y += mouseDelta.y * m_cameraPanSpeed;
+
+			//Invalidate whole frame
+			Refresh();
 		}
-	}
+		else if(event.GetWheelRotation() != 0)
+		{
+			//Zoom camera
+			int wheelDelta = event.GetWheelRotation();
+			const float zoomSpeed = 1.0f;
 
-	//Camera pan/zoom
-	if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
-	{
-		//Pan camera
-		m_cameraPos.x += mouseDelta.x * m_cameraPanSpeed;
-		m_cameraPos.y += mouseDelta.y * m_cameraPanSpeed;
+			//One notch at a time
+			if(wheelDelta > 0)
+				m_cameraZoom += zoomSpeed;
+			else if(wheelDelta < 0)
+				m_cameraZoom -= zoomSpeed;
 
-		//Invalidate whole frame
-		Refresh();
-	}
-	else if(event.GetWheelRotation() != 0)
-	{
-		//Zoom camera
-		int wheelDelta = event.GetWheelRotation();
-		const float zoomSpeed = 1.0f;
+			//Clamp
+			if(m_cameraZoom < 1.0f)
+				m_cameraZoom = 1.0f;
+			else if(m_cameraZoom > 10.0f)
+				m_cameraZoom = 10.0f;
 
-		//One notch at a time
-		if(wheelDelta > 0)
-			m_cameraZoom += zoomSpeed;
-		else if(wheelDelta < 0)
-			m_cameraZoom -= zoomSpeed;
-
-		//Clamp
-		if(m_cameraZoom < 1.0f)
-			m_cameraZoom = 1.0f;
-		else if(m_cameraZoom > 10.0f)
-			m_cameraZoom = 10.0f;
-
-		//Invalidate whole frame
-		Refresh();
+			//Invalidate whole frame
+			Refresh();
+		}
 	}
 
 	event.Skip();
@@ -137,7 +131,7 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 		wxRect destRect(sourceRect);
 
 		//Clear rect
-		destContext.SetBrush(*wxBLACK_BRUSH);
+		destContext.SetBrush(*wxLIGHT_GREY_BRUSH);
 		destContext.DrawRectangle(destRect);
 
 		//Transform by camera pan/zoom
@@ -158,17 +152,22 @@ void MapPanel::OnErase(wxEraseEvent& event)
 	//Ignore event
 }
 
-void MapPanel::PaintTile(ion::Vector2 mousePos, const Tile& tile)
+void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)
 {
-	if(m_paintTile)
+	if(m_project)
 	{
 		int x = (int)floor(mousePos.x / 8.0f);
 		int y = (int)floor(mousePos.y / 8.0f);
-		m_map.SetTile(x, y, tile);
+
+		//Set new tile in map
+		m_project->GetMap().SetTile(x, y, tileId);
 
 		//Paint tile to canvas dc
-		wxMemoryDC dc(m_canvas);
-		tilerendering::PaintTileToDc(x, y, tile, dc);
+		if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
+		{
+			wxMemoryDC dc(m_canvas);
+			tilerendering::PaintTileToDc(x, y, *tile, dc);
+		}
 		
 		//Invalidate screen rect
 		wxRect refreshRect(	((x * 8) * m_cameraZoom) + m_cameraPos.x,
@@ -182,11 +181,18 @@ void MapPanel::PaintTile(ion::Vector2 mousePos, const Tile& tile)
 
 void MapPanel::PaintMapToDc(wxDC& dc)
 {
-	for(int x = 0; x < m_map.width; x++)
+	if(m_project)
 	{
-		for(int y = 0; y < m_map.height; y++)
+		for(int x = 0; x < m_project->GetMap().GetWidth(); x++)
 		{
-			tilerendering::PaintTileToDc(x, y, m_map.GetTile(x, y), dc);
+			for(int y = 0; y < m_project->GetMap().GetHeight(); y++)
+			{
+				TileId tileId = m_project->GetMap().GetTile(x, y);
+				if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
+				{
+					tilerendering::PaintTileToDc(x, y, *tile, dc);
+				}
+			}
 		}
 	}
 }

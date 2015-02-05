@@ -1,12 +1,21 @@
 #pragma once
 
-#include "MainWindowTemplate.h"
+#include "UIBase.h"
+#include "ToolboxTiles.h"
+#include "ToolboxMapEdit.h"
 
-class MainWindow : public MainWindowTemplate 
+#include "../Project.h"
+
+class MainWindow : public MainWindowBase
 {
 public:
 	MainWindow();
 	virtual ~MainWindow();
+
+	void SetProject(Project* project);
+
+	void ShowToolboxTiles();
+	void ShowToolboxMapEdit();
 
 protected:
 	virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -19,6 +28,8 @@ protected:
 	virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 
 private:
-	wxWeakRef<ToolboxMapEditTemplate> m_toolboxMapEdit;
-	wxWeakRef<ToolboxTilesTemplate> m_toolboxTiles;
+	wxWeakRef<ToolboxMapEdit> m_toolboxMapEdit;
+	wxWeakRef<ToolboxTiles> m_toolboxTiles;
+
+	Project* m_project;
 };
