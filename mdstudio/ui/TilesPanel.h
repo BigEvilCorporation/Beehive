@@ -6,22 +6,23 @@
 
 #include <vector>
 
-#include "MainWindowTemplate.h"
-#include "../Tile.h"
+#include "UIBase.h"
+#include "../Project.h"
 
 class TilesPanel : public wxScrolledWindow
 {
 public:
 	TilesPanel(wxWindow* parent, wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxHSCROLL | wxVSCROLL, const wxString& name = "scrolledWindow");
 
-	void AddTile(const Tile& tile);
+	void SetProject(Project* project) { m_project = project; }
 
 	void OnMouse(wxMouseEvent& event);
 	void OnPaint(wxPaintEvent& event);
 	void OnErase(wxEraseEvent& event);
 
 private:
-	std::vector<const Tile*> m_tiles;
+	Project* m_project;
 	float m_zoom;
-	int m_currentSelection;
+	int m_currentSelectionLeft;
+	int m_currentSelectionRight;
 };

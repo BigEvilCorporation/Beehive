@@ -16,18 +16,26 @@ local SRC =
 	Map.h
 	Tile.cpp
 	Tile.h
+	Tileset.cpp
+	Tileset.h
 	Palette.h
+	Project.cpp
+	Project.h
 
 	ui/MainWindow.cpp
 	ui/MainWindow.h
-	ui/MainWindowTemplate.cpp
-	ui/MainWindowTemplate.h
 	ui/MapPanel.cpp
 	ui/MapPanel.h
 	ui/TileRendering.cpp
 	ui/TileRendering.h
 	ui/TilesPanel.cpp
 	ui/TilesPanel.h
+	ui/ToolboxTiles.cpp
+	ui/ToolboxTiles.h
+	ui/ToolboxMapEdit.cpp
+	ui/ToolboxMapEdit.h
+	ui/UIBase.cpp
+	ui/UIBase.h
 	ui/WxApp.cpp
 	ui/WxApp.h
 	;

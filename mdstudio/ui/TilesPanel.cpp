@@ -6,48 +6,20 @@
 TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxScrolledWindow(parent, id, pos, size, style, name)
 {
+	m_project = NULL;
 	m_zoom = 4.0f;
-	m_currentSelection = 0;
+	m_currentSelectionLeft = -1;
+	m_currentSelectionRight = -1;
 
 	Bind(wxEVT_LEFT_DOWN,		&TilesPanel::OnMouse, this, wxID_TILESPANEL);
+	Bind(wxEVT_RIGHT_DOWN,		&TilesPanel::OnMouse, this, wxID_TILESPANEL);
 	Bind(wxEVT_PAINT,			&TilesPanel::OnPaint, this, wxID_TILESPANEL);
 	Bind(wxEVT_ERASE_BACKGROUND,&TilesPanel::OnErase, this, wxID_TILESPANEL);
-
-	//TEST
-	Tile* testPaintTile = new Tile;
-	Tile* testEraseTile = new Tile;
-
-	int testTile[8*8] = 
-	{
-		0,0,0,0,0,0,0,0,
-		0,0,1,1,1,1,0,0,
-		0,1,0,1,1,0,1,0,
-		0,1,1,0,0,1,1,0,
-		0,1,1,0,0,1,1,0,
-		0,1,0,1,1,0,1,0,
-		0,0,1,1,1,1,0,0,
-		0,0,0,0,0,0,0,0
-	};
-
-	for(int i = 0; i < 8*8; i++)
-	{
-		int y = i / 8;
-		int x = i % 8;
-		testPaintTile->SetPixelColour(x, y, testTile[i]);
-	}
-
-	AddTile(*testPaintTile);
-}
-
-void TilesPanel::AddTile(const Tile& tile)
-{
-	m_tiles.push_back(&tile);
-	Refresh();
 }
 
 void TilesPanel::OnMouse(wxMouseEvent& event)
 {
-	if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+	if(event.ButtonIsDown(wxMOUSE_BTN_LEFT) || event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
 	{
 		//Get mouse position in map space
 		wxPaintDC paintDc(this);
@@ -59,7 +31,43 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 		int y = (int)floor(mousePosMapSpace.y / 8.0f);
 		wxSize clientSize = GetClientSize();
 		int numCols = (clientSize.x / 8) / m_zoom;
-		m_currentSelection = (y * numCols) + x;
+		int selection = (y * numCols) + x;
+
+		if(selection < m_project->GetMap().GetTileset().GetCount())
+		{
+			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+			{
+				m_currentSelectionLeft = selection;
+
+				TileId tileId = 0;
+
+				//TODO: Very slow, use indexed multimap
+				auto it = m_project->GetMap().GetTileset().Begin();
+				auto end = m_project->GetMap().GetTileset().End();
+				for(int i = 0; i <= m_currentSelectionLeft && it != end; ++i, ++it)
+				{
+					tileId = it->first;
+				}
+
+				m_project->SetPaintTile(tileId);
+			}
+			else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
+			{
+				m_currentSelectionRight = selection;
+
+				TileId tileId = 0;
+
+				//TODO: Very slow, use indexed multimap
+				auto it = m_project->GetMap().GetTileset().Begin();
+				auto end = m_project->GetMap().GetTileset().End();
+				for(int i = 0; i <= m_currentSelectionRight && it != end; ++i, ++it)
+				{
+					tileId = it->first;
+				}
+
+				m_project->SetEraseTile(tileId);
+			}
+		}
 
 		//Redraw window
 		Refresh();
@@ -77,7 +85,11 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 	wxSize clientSize = GetClientSize();
 	wxRect clientRect(0, 0, clientSize.x, clientSize.y);
 
-	int numTiles = m_tiles.size();
+	//Clear dest rect
+	destDC.SetBrush(*wxBLACK_BRUSH);
+	destDC.DrawRectangle(clientRect);
+
+	int numTiles = m_project->GetMap().GetTileset().GetCount();
 	int numCols = (clientSize.x / 8) / m_zoom;
 
 	//Bitmap source and dc
@@ -87,18 +99,15 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 	//Paint tiles to source dc
 	if(numCols > 0)
 	{
-		for(int i = 0; i < numTiles; i++)
+		int i = 0;
+		for(auto it = m_project->GetMap().GetTileset().Begin(), end = m_project->GetMap().GetTileset().End(); it != end; ++it, ++i)
 		{
 			int y = i / numCols;
 			int x = i % numCols;
 
-			tilerendering::PaintTileToDc(x, y, *m_tiles[i], sourceDC);
+			tilerendering::PaintTileToDc(x, y, it->second, sourceDC);
 		}
 	}
-
-	//Clear dest rect
-	destDC.SetBrush(*wxBLACK_BRUSH);
-	destDC.DrawRectangle(clientRect);
 
 	//Paint scaled tiles to dest dc
 	wxRect sourceRect(0, 0, clientRect.width, clientRect.height);
@@ -107,12 +116,28 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 	//Copy rect from canvas
 	destDC.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &sourceDC, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
 
-	//Draw rectangle around current selection
-	destDC.SetPen(*wxRED_PEN);
+	//Draw rectangles around current selections
 	destDC.SetBrush(*wxTRANSPARENT_BRUSH);
-	int currSelectionY = (m_currentSelection / numCols) * 8 * m_zoom;
-	int currSelectionX = (m_currentSelection % numCols) * 8 * m_zoom;
-	destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
+
+	if(m_currentSelectionLeft > -1)
+	{
+		wxPen pen(*wxRED_PEN);
+		pen.SetWidth(2);
+		destDC.SetPen(pen);
+		int currSelectionY = (m_currentSelectionLeft / numCols) * 8 * m_zoom;
+		int currSelectionX = (m_currentSelectionLeft % numCols) * 8 * m_zoom;
+		destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
+	}
+
+	if(m_currentSelectionRight > -1)
+	{
+		wxPen pen(*wxYELLOW_PEN);
+		pen.SetWidth(2);
+		destDC.SetPen(pen);
+		int currSelectionY = (m_currentSelectionRight / numCols) * 8 * m_zoom;
+		int currSelectionX = (m_currentSelectionRight % numCols) * 8 * m_zoom;
+		destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
+	}
 }
 
 void TilesPanel::OnErase(wxEraseEvent& event)

@@ -5,8 +5,8 @@
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef __MAINWINDOWTEMPLATE_H__
-#define __MAINWINDOWTEMPLATE_H__
+#ifndef __UIBASE_H__
+#define __UIBASE_H__
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
@@ -32,8 +32,6 @@ class TilesPanel;
 #include <wx/statusbr.h>
 #include <wx/frame.h>
 #include <wx/scrolwin.h>
-#include <wx/aui/aui.h>
-#include <wx/aui/auibar.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -45,9 +43,9 @@ class TilesPanel;
 #define wxID_TILESPANEL 1005
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class MainWindowTemplate
+/// Class MainWindowBase
 ///////////////////////////////////////////////////////////////////////////////
-class MainWindowTemplate : public wxFrame 
+class MainWindowBase : public wxFrame 
 {
 	private:
 	
@@ -90,16 +88,16 @@ class MainWindowTemplate : public wxFrame
 	public:
 		MapPanel* m_mapPanel;
 		
-		MainWindowTemplate( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
+		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
-		~MainWindowTemplate();
+		~MainWindowBase();
 	
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class ToolboxTilesTemplate
+/// Class ToolboxTilesBase
 ///////////////////////////////////////////////////////////////////////////////
-class ToolboxTilesTemplate : public wxFrame 
+class ToolboxTilesBase : public wxFrame 
 {
 	private:
 	
@@ -108,33 +106,27 @@ class ToolboxTilesTemplate : public wxFrame
 	
 	public:
 		
-		ToolboxTilesTemplate( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Tiles"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL );
+		ToolboxTilesBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Tiles"), const wxPoint& pos = wxPoint( 800,300 ), const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL );
 		
-		~ToolboxTilesTemplate();
+		~ToolboxTilesBase();
 	
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class ToolboxMapEditTemplate
+/// Class ToolboxMapEditBase
 ///////////////////////////////////////////////////////////////////////////////
-class ToolboxMapEditTemplate : public wxFrame 
+class ToolboxMapEditBase : public wxFrame 
 {
 	private:
 	
 	protected:
-		wxAuiToolBar* m_toolbarMapEdit;
-		wxAuiToolBarItem* m_tool5; 
-		wxAuiToolBarItem* m_tool6; 
-		wxAuiToolBarItem* m_tool7; 
-		wxAuiToolBarItem* m_tool8; 
-		wxAuiToolBarItem* m_tool10; 
 	
 	public:
 		
-		ToolboxMapEditTemplate( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Map Editing"), const wxPoint& pos = wxPoint( -1,-1 ), const wxSize& size = wxSize( 128,400 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxSIMPLE_BORDER|wxTAB_TRAVERSAL );
+		ToolboxMapEditBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Map Editing"), const wxPoint& pos = wxPoint( 30,100 ), const wxSize& size = wxSize( 128,400 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxSIMPLE_BORDER|wxTAB_TRAVERSAL );
 		
-		~ToolboxMapEditTemplate();
+		~ToolboxMapEditBase();
 	
 };
 
-#endif //__MAINWINDOWTEMPLATE_H__
+#endif //__UIBASE_H__

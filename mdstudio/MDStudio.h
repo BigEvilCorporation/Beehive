@@ -5,6 +5,10 @@
 #include <ion/core/time/Time.h>
 #include <ion/io/XML.h>
 
+#include "Project.h"
+
+class MDStudioWxApp;
+
 class MDStudio : public ion::framework::Application
 {
 public:
@@ -15,4 +19,8 @@ public:
 	virtual void Shutdown();
 	virtual bool Update(float deltaTime);
 	virtual void Render();
+
+private:
+	MDStudioWxApp* m_wxApp;
+	Project* m_project;
 };

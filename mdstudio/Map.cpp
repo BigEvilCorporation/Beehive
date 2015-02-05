@@ -3,26 +3,50 @@
 Map::Map()
 {
 	Resize(defaultWidth, defaultHeight);
+
+	//Create one blank tile for background
+	TileId backgroundId = m_tileset.AddTile();
+
+	//Fill background
+	for(int i = 0; i < m_tiles.size(); i++)
+	{
+		m_tiles[i] = backgroundId;
+	}
 }
 
-void Map::Resize(int w, int h)
+int Map::GetWidth() const
 {
-	int size = w * h;
-	tiles.resize(size);
-	width = w;
-	height = h;
+	return m_width;
 }
 
-void Map::SetTile(int x, int y, const Tile& tile)
+int Map::GetHeight() const
 {
-	int tileIdx = (y * height) + x;
-	ion::debug::Assert(tileIdx < (width * height), "Out of range");
-	tiles[tileIdx] = tile;
+	return m_height;
 }
 
-const Tile& Map::GetTile(int x, int y) const
+void Map::Resize(int width, int height)
 {
-	int tileIdx = (y * height) + x;
-	ion::debug::Assert(tileIdx < (width * height), "Out of range");
-	return tiles[tileIdx];
+	int size = width * height;
+	m_tiles.resize(size);
+	m_width = width;
+	m_height = height;
+}
+
+void Map::SetTile(int x, int y, TileId tile)
+{
+	int tileIdx = (y * m_height) + x;
+	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
+	m_tiles[tileIdx] = tile;
+}
+
+TileId Map::GetTile(int x, int y) const
+{
+	int tileIdx = (y * m_height) + x;
+	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
+	return m_tiles[tileIdx];
+}
+
+Tileset& Map::GetTileset()
+{
+	return m_tileset;
 }
