@@ -1,3 +1,9 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #pragma once
 
 #include <maths/Vector.h>
@@ -23,6 +29,8 @@ public:
 
 	//Set current project
 	void SetProject(Project* project);
+
+	virtual void Refresh(bool eraseBackground=true, const wxRect *rect=NULL);
 
 private:
 	//Paint tile to canvas

@@ -1,3 +1,9 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #include "TilesPanel.h"
 #include "TileRendering.h"
 
@@ -15,6 +21,8 @@ TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
 	Bind(wxEVT_RIGHT_DOWN,		&TilesPanel::OnMouse, this, wxID_TILESPANEL);
 	Bind(wxEVT_PAINT,			&TilesPanel::OnPaint, this, wxID_TILESPANEL);
 	Bind(wxEVT_ERASE_BACKGROUND,&TilesPanel::OnErase, this, wxID_TILESPANEL);
+
+	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
 
 void TilesPanel::OnMouse(wxMouseEvent& event)
@@ -22,8 +30,8 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 	if(event.ButtonIsDown(wxMOUSE_BTN_LEFT) || event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
 	{
 		//Get mouse position in map space
-		wxPaintDC paintDc(this);
-		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(paintDc);
+		wxClientDC clientDc(this);
+		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
 		ion::Vector2 mousePosMapSpace(mouseCanvasPosWx.x / m_zoom, mouseCanvasPosWx.y / m_zoom);
 
 		//Set current selection
@@ -105,7 +113,11 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 			int y = i / numCols;
 			int x = i % numCols;
 
-			tilerendering::PaintTileToDc(x, y, it->second, sourceDC);
+			const Palette* palette = m_project->GetPalette(it->second.GetPaletteId());
+			if(palette)
+			{
+				tilerendering::PaintTileToDc(x, y, it->second, *palette, sourceDC);
+			}
 		}
 	}
 

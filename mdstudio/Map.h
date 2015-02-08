@@ -1,7 +1,14 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #pragma once
 
 #include <vector>
-
+#include <sstream>
+#include <io/Archive.h>
 #include "Tileset.h"
 
 class Map
@@ -20,6 +27,9 @@ public:
 	TileId GetTile(int x, int y) const;
 
 	Tileset& GetTileset();
+
+	void Serialise(ion::io::Archive& archive) {}
+	void Export(std::stringstream& outputText) {}
 
 private:
 	int m_width;

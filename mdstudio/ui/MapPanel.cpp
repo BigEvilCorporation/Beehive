@@ -1,3 +1,9 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #include "MapPanel.h"
 #include "TileRendering.h"
 
@@ -19,15 +25,13 @@ MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const
 	Bind(wxEVT_MOUSEWHEEL,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
 	Bind(wxEVT_PAINT,			&MapPanel::OnPaint, this, wxID_MAPPANEL);
 	Bind(wxEVT_ERASE_BACKGROUND,&MapPanel::OnErase, this, wxID_MAPPANEL);
+
+	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
 
 void MapPanel::SetProject(Project* project)
 {
 	m_project = project;
-
-	//Initialise canvas
-	wxMemoryDC dc(m_canvas);
-	PaintMapToDc(dc);
 
 	//Centre camera on canvas
 	wxSize clientSize = GetClientSize();
@@ -38,6 +42,7 @@ void MapPanel::SetProject(Project* project)
 	m_cameraZoom = 1.0f;
 
 	//Invalidate panel
+	m_project->InvalidateMap(true);
 	Refresh();
 }
 
@@ -51,8 +56,8 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		m_mousePrevPos = mousePos;
 
 		//Get mouse position in canvas and map space
-		wxPaintDC paintDc(this);
-		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(paintDc);
+		wxClientDC clientDc(this);
+		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
 
 		ion::Vector2 mousePosCanvasSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
 		ion::Vector2 mousePosMapSpace((mouseCanvasPosWx.x - m_cameraPos.x) / m_cameraZoom, (mouseCanvasPosWx.y - m_cameraPos.y) / m_cameraZoom);
@@ -152,6 +157,19 @@ void MapPanel::OnErase(wxEraseEvent& event)
 	//Ignore event
 }
 
+void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
+{
+	if(m_project->MapIsInvalidated())
+	{
+		//Full refresh, redraw map to canvas
+		wxMemoryDC dc(m_canvas);
+		PaintMapToDc(dc);
+		m_project->InvalidateMap(false);
+	}
+
+	wxPanel::Refresh(eraseBackground, rect);
+}
+
 void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)
 {
 	if(m_project)
@@ -165,8 +183,11 @@ void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)
 		//Paint tile to canvas dc
 		if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
 		{
-			wxMemoryDC dc(m_canvas);
-			tilerendering::PaintTileToDc(x, y, *tile, dc);
+			if(const Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
+			{
+				wxMemoryDC dc(m_canvas);
+				tilerendering::PaintTileToDc(x, y, *tile, *palette, dc);
+			}
 		}
 		
 		//Invalidate screen rect
@@ -190,7 +211,10 @@ void MapPanel::PaintMapToDc(wxDC& dc)
 				TileId tileId = m_project->GetMap().GetTile(x, y);
 				if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
 				{
-					tilerendering::PaintTileToDc(x, y, *tile, dc);
+					if(const Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
+					{
+						tilerendering::PaintTileToDc(x, y, *tile, *palette, dc);
+					}
 				}
 			}
 		}
