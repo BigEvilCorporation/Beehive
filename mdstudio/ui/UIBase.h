@@ -11,6 +11,7 @@
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
 class MapPanel;
+class PalettesPanel;
 class TilesPanel;
 
 #include <wx/string.h>
@@ -39,8 +40,11 @@ class TilesPanel;
 #define wxID_BTN_TILES_IMPORT 1001
 #define wxID_BTN_TOOLS_MAPEDIT 1002
 #define wxID_BTN_TOOLS_TILES 1003
-#define wxID_MAPPANEL 1004
-#define wxID_TILESPANEL 1005
+#define wxID_BTN_TOOLS_PALETTES 1004
+#define wxID_MAPPANEL 1005
+#define wxID_TILESPANEL 1006
+#define wxID_TOOLBOX_PALETTES 1007
+#define wxID_PALETTESPANEL 1008
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -83,6 +87,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	
 	public:
@@ -126,6 +131,24 @@ class ToolboxMapEditBase : public wxFrame
 		ToolboxMapEditBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Map Editing"), const wxPoint& pos = wxPoint( 30,100 ), const wxSize& size = wxSize( 128,400 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxSIMPLE_BORDER|wxTAB_TRAVERSAL );
 		
 		~ToolboxMapEditBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ToolboxPalettesBase
+///////////////////////////////////////////////////////////////////////////////
+class ToolboxPalettesBase : public wxFrame 
+{
+	private:
+	
+	protected:
+		PalettesPanel* m_palettesPanel;
+	
+	public:
+		
+		ToolboxPalettesBase( wxWindow* parent, wxWindowID id = wxID_TOOLBOX_PALETTES, const wxString& title = wxT("Palettes"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,128 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL );
+		
+		~ToolboxPalettesBase();
 	
 };
 

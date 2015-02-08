@@ -1,6 +1,13 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #pragma once
 
 #include <map>
+#include <sstream>
 #include <io/Archive.h>
 
 #include "Tile.h"
@@ -23,6 +30,7 @@ public:
 	int GetCount() const;
 
 	void Serialise(ion::io::Archive& archive);
+	void Export(std::stringstream& outputText);
 	
 private:
 	TileId m_nextFreeId;

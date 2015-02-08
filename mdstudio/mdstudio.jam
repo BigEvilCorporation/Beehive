@@ -18,6 +18,7 @@ local SRC =
 	Tile.h
 	Tileset.cpp
 	Tileset.h
+	Palette.cpp
 	Palette.h
 	Project.cpp
 	Project.h
@@ -34,6 +35,10 @@ local SRC =
 	ui/ToolboxTiles.h
 	ui/ToolboxMapEdit.cpp
 	ui/ToolboxMapEdit.h
+	ui/ToolboxPalettes.cpp
+	ui/ToolboxPalettes.h
+	ui/PalettesPanel.cpp
+	ui/PalettesPanel.h
 	ui/UIBase.cpp
 	ui/UIBase.h
 	ui/WxApp.cpp

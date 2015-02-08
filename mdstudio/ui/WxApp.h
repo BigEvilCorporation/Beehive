@@ -1,3 +1,9 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #include <wx/setup.h>
 #include <wx/wx.h>
 

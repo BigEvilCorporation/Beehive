@@ -1,7 +1,15 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #pragma once
 
 #include <io/Archive.h>
 #include <sstream>
+
+#include "Palette.h"
 
 struct Pixel
 {
@@ -9,8 +17,9 @@ struct Pixel
 	u8 collisionBits;
 };
 
-struct Tile
+class Tile
 {
+public:
 	static const int tileWidth = 8;
 	static const int tileHeight = 8;
 	static const int pixelsPerTile = tileWidth*tileHeight;
@@ -23,15 +32,21 @@ struct Tile
 	void AddPixelCollisionBits(int x, int y, u8 collisionBits);
 	u8 GetPixelCollisionBits(int x, int y) const;
 
+	void SetPaletteId(PaletteId palette);
+	PaletteId GetPaletteId() const;
+
 	void Serialise(ion::io::Archive& archive);
-	void ExportColourText(std::stringstream& outputString);
-	void ExportCollisionText(std::stringstream& outputString);
+	void ExportColour(std::stringstream& outputString);
+	void ExportCollision(std::stringstream& outputString);
 
 	void CalculateColourHash();
 	void CalculateCollisionHash();
+	u32 GetColourHash() const;
+	u32 GetCollisionHash() const;
 
-	u8 defaultPaletteIdx;
-	u32 colourHash;
-	u32 collisionHash;
-	Pixel pixels[pixelsPerTile];
+private:
+	PaletteId m_palette;
+	u32 m_colourHash;
+	u32 m_collisionHash;
+	Pixel m_pixels[pixelsPerTile];
 };

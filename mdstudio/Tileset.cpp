@@ -1,3 +1,9 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #include "Tileset.h"
 
 Tileset::Tileset()
@@ -24,7 +30,7 @@ TileId Tileset::FindDuplicate(const Tile& tile) const
 {
 	for(TileMap::const_iterator it = m_tiles.begin(), end = m_tiles.end(); it != end; ++it)
 	{
-		if(it->second.colourHash == tile.colourHash)
+		if(it->second.GetColourHash() == tile.GetColourHash())
 		{
 			return it->first;
 		}

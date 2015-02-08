@@ -1,3 +1,9 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #include <ion/core/bootstrap/Application.h>
 #include <ion/core/Version.h>
 #include <ion/core/debug/Debug.h>
