@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <wx/filedlg.h>
+
 #include "MainWindow.h"
 #include "MapPanel.h"
 
@@ -99,6 +101,18 @@ void MainWindow::ShowToolboxPalettes()
 		if(!m_toolboxPalettes->IsShown())
 		{
 			m_toolboxPalettes->Show();
+		}
+	}
+}
+
+void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
+{
+	if(m_project)
+	{
+		wxFileDialog dialogue(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+		if(dialogue.ShowModal() == wxID_OK)
+		{
+			m_project->ImportBitmap(dialogue.GetPath().c_str().AsChar());
 		}
 	}
 }
