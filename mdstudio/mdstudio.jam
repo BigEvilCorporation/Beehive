@@ -12,6 +12,8 @@ local SRC =
 	MDStudio.cpp
 	MDStudio.h
 
+	BMPReader.cpp
+	BMPReader.h
 	Map.cpp
 	Map.h
 	Tile.cpp

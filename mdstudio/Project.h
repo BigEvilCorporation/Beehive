@@ -15,6 +15,12 @@
 class Project
 {
 public:
+	enum BMPImportFlags
+	{
+		BMPImportReplaceAll	= (1<<0),
+		BMPImportDrawToMap	= (1<<1),
+	};
+
 	Project();
 
 	//Load/save project
@@ -38,6 +44,10 @@ public:
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
 
+	//Import bitmap
+	bool ImportBitmap(const std::string& filename, u8 importFlags = (BMPImportFlags)(0));
+
+	//Serialise
 	void Serialise(ion::io::Archive& archive) {}
 
 private:
