@@ -70,7 +70,7 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 				if(dialogue.ShowModal() == wxID_OK)
 				{
 					wxColour wxcolour = dialogue.GetColourData().GetColour();
-					Colour colour((float)wxcolour.Red() / 255.0f, (float)wxcolour.Green() / 255.0f, (float)wxcolour.Blue() / 255.0f);
+					Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
 					palette->SetColour(colourId, colour);
 
 					//Invalidate map
@@ -112,7 +112,7 @@ void PalettesPanel::OnPaint(wxPaintEvent& event)
 		{
 			const Colour& colour = palette->GetColour(j);
 			wxBrush brush;
-			brush.SetColour(wxColour(colour.r * 255, colour.g * 255, colour.b * 255));
+			brush.SetColour(wxColour(colour.r, colour.g, colour.b));
 			destDC.SetBrush(brush);
 			destDC.DrawRectangle(j * colourRectSize, i * colourRectSize, colourRectSize, colourRectSize);
 		}

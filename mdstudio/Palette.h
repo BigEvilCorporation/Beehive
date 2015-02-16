@@ -13,11 +13,13 @@
 struct Colour
 {
 	Colour();
-	Colour(float red, float green, float blue);
+	Colour(u8 red, u8 green, u8 blue);
+	bool operator == (const Colour& rhs) const;
+	bool operator != (const Colour& rhs) const { return !(*this == rhs); }
 
 	u16 ToVDPFormat() const;
 
-	float r, g, b;
+	u8 r, g, b;
 };
 
 typedef u8 PaletteId;
@@ -27,10 +29,16 @@ class Palette
 public:
 	static const int coloursPerPalette = 16;
 
+	enum NearestColourAlgo
+	{
+		eExact = 0
+	};
+
 	Palette();
 
 	void SetColour(int colourIdx, const Colour& colour);
 	const Colour& GetColour(int colourIdx) const;
+	const bool GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const;
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& outputText);
