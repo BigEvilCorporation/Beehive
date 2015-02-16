@@ -11,16 +11,21 @@
 
 Colour::Colour()
 {
-	r = 0.0f;
-	g = 0.0f;
-	b = 0.0f;
+	r = 0;
+	g = 0;
+	b = 0;
 }
 
-Colour::Colour(float red, float green, float blue)
+Colour::Colour(u8 red, u8 green, u8 blue)
 {
 	r = red;
 	g = green;
 	b = blue;
+}
+
+bool Colour::operator == (const Colour& rhs) const
+{
+	return r == rhs.r && g == rhs.g && b == rhs.b;
 }
 
 u16 Colour::ToVDPFormat() const
@@ -43,6 +48,23 @@ const Colour& Palette::GetColour(int colourIdx) const
 {
 	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
 	return m_colours[colourIdx];
+}
+
+const bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const
+{
+	if(algorithm == eExact)
+	{
+		for(int i = 0; i < coloursPerPalette; i++)
+		{
+			if(m_colours[i] == colour)
+			{
+				colourIdx = i;
+				return true;
+			}
+		}
+	}
+	
+	return false;
 }
 
 void Palette::Serialise(ion::io::Archive& archive)

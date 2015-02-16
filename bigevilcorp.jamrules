@@ -296,12 +296,36 @@ rule ApplyWxSDK TARGET
 
 	C.Defines $(TARGET) : WXUSINGDLL wxMSVC_VERSION_AUTO UNICODE _UNICODE ;
 
-	WX_LIBS =
+	WX_LIBS_DEBUG =
+		wxbase30ud.lib
+		wxbase30ud_net.lib
+		wxbase30ud_xml.lib
+		wxmsw30u_adv.lib
+		wxmsw30ud_aui.lib
+		wxmsw30ud_core.lib
+		wxmsw30ud_gl.lib
+		wxmsw30ud_html.lib
+		wxmsw30ud_media.lib
+		wxmsw30ud_propgrid.lib
+		wxmsw30ud_qa.lib
+		wxmsw30ud_ribbon.lib
+		wxmsw30ud_richtext.lib
+		wxmsw30ud_stc.lib
+		wxmsw30ud_webview.lib
+		wxmsw30ud_xrc.lib
+		wxexpatd.lib
+		wxjpegd.lib
+		wxpngd.lib
+		wxregexud.lib
+		wxscintillad.lib
+		wxtiffd.lib
+		wxzlibd.lib
+		;
+
+	WX_LIBS_RELEASE =
 		wxbase30u.lib
 		wxbase30u_net.lib
 		wxbase30u_xml.lib
-		wxexpat.lib
-		wxjpeg.lib
 		wxmsw30u_adv.lib
 		wxmsw30u_aui.lib
 		wxmsw30u_core.lib
@@ -315,6 +339,8 @@ rule ApplyWxSDK TARGET
 		wxmsw30u_stc.lib
 		wxmsw30u_webview.lib
 		wxmsw30u_xrc.lib
+		wxexpat.lib
+		wxjpeg.lib
 		wxpng.lib
 		wxregexu.lib
 		wxscintilla.lib
@@ -322,7 +348,8 @@ rule ApplyWxSDK TARGET
 		wxzlib.lib
 		;
 
-	C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS) : debug release ;
+	C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_DEBUG) : debug ;
+	#C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_RELEASE) : release ;
 }
 
 #################################################

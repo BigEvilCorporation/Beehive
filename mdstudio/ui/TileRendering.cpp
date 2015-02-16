@@ -23,7 +23,7 @@ namespace tilerendering
 				u8 colourIdx = tile.GetPixelColour(tileX, tileY);
 
 				const Colour& colour = palette.GetColour(colourIdx);
-				pen.SetColour(wxColour(colour.r * 255, colour.g * 255, colour.b * 255, 1.0f));
+				pen.SetColour(wxColour(colour.r, colour.g, colour.b, 1.0f));
 				dc.SetPen(pen);
 				dc.DrawPoint(startPixelX + tileX, startPixelY + tileY);
 			}

@@ -86,12 +86,12 @@ bool MDStudio::Initialise()
 	}
 
 	Palette* palette = m_project->GetPalette(0);
-	palette->SetColour(0, Colour(1.0f, 1.0f, 1.0f));
-	palette->SetColour(1, Colour(1.0f, 0.0f, 0.0f));
-	palette->SetColour(2, Colour(0.0f, 1.0f, 0.0f));
-	palette->SetColour(3, Colour(0.0f, 0.0f, 1.0f));
-	palette->SetColour(4, Colour(1.0f, 1.0f, 0.0f));
-	palette->SetColour(5, Colour(0.0f, 1.0f, 1.0f));
+	palette->SetColour(0, Colour(255, 255, 255));
+	palette->SetColour(1, Colour(255, 0, 0));
+	palette->SetColour(2, Colour(255, 0, 255));
+	palette->SetColour(3, Colour(0, 0, 255));
+	palette->SetColour(4, Colour(255, 255, 0));
+	palette->SetColour(5, Colour(0, 255, 255));
 
 	m_wxApp = new MDStudioWxApp();
 

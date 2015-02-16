@@ -11,6 +11,7 @@
 
 #include "Map.h"
 #include "Palette.h"
+#include "Tile.h"
 
 class Project
 {
@@ -51,12 +52,17 @@ public:
 	void Serialise(ion::io::Archive& archive) {}
 
 private:
+	//Find palette matching 8x8 colour grid
+	bool FindPalette(Colour* colours, PaletteId& paletteId) const;
+	bool ImportPalette(Colour* colours, PaletteId paletteId);
+
 	//Genesis map
 	Map m_map;
 
 	//Palettes
 	//TODO: Add/remove palettes
-	Palette m_palettes[4];
+	static const int numPalettes = 4;
+	Palette m_palettes[numPalettes];
 
 	//Tile used for painting
 	TileId m_paintTile;

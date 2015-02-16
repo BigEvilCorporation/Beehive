@@ -113,6 +113,9 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 		if(dialogue.ShowModal() == wxID_OK)
 		{
 			m_project->ImportBitmap(dialogue.GetPath().c_str().AsChar());
+
+			//Refresh whole application
+			Refresh();
 		}
 	}
 }
