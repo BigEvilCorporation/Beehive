@@ -112,7 +112,9 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 		wxFileDialog dialogue(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 		if(dialogue.ShowModal() == wxID_OK)
 		{
-			m_project->ImportBitmap(dialogue.GetPath().c_str().AsChar());
+			//m_project->ImportBitmap(dialogue.GetPath().c_str().AsChar());
+			m_mapPanel->m_bmpReader.Read(dialogue.GetPath().c_str().AsChar());
+			m_mapPanel->Refresh();
 
 			//Refresh whole application
 			Refresh();
