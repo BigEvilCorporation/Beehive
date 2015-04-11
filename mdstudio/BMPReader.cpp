@@ -10,7 +10,11 @@ BMPReader::BMPReader()
 {
 	m_width = 0;
 	m_height = 0;
+	m_bitsPerPixel = 0;
 	m_data = NULL;
+	m_palette = NULL;
+	m_dataSize = 0;
+	m_paletteSize = 0;
 }
 
 BMPReader::~BMPReader()
@@ -32,32 +36,60 @@ bool BMPReader::Read(const std::string& filename)
 			BMPHeader bmpHeader = {0};
 			if(file.Read(&bmpHeader, sizeof(BMPHeader)))
 			{
-				//Sanity check palette size
-				if(bmpHeader.colourTableSize > 0)
+				//Sanity check used colours
+				if(bmpHeader.numUsedColours > 0)
 				{
 					//Sanity check size
 					if(bmpHeader.imageWidth > 0 || bmpHeader.imageHeight > 0)
 					{
-						//Seek to palette pos
+						//Set width/height/data size
+						m_width = bmpHeader.imageWidth;
+						m_height = bmpHeader.imageHeight;
+						m_dataSize = bmpHeader.dataSizeBytes;
 
-						//Read palette
-
-						//Seek to data pos
-						if(file.Seek(fileHeader.dataOffset, ion::io::File::Start))
+						//Set bits per pixel
+						switch(bmpHeader.bitFormat)
 						{
-							//Alloc buffer
-							m_data = new u8[bmpHeader.dataSizeBytes];
+						case eIndexed16Colour:
+							m_bitsPerPixel = 4;
+							break;
 
-							//Read data
-							if(file.Read(m_data, bmpHeader.dataSizeBytes))
+						case eIndexed256Colour:
+							m_bitsPerPixel = 8;
+							break;
+
+						default:
+							break;
+						}
+
+						if(m_bitsPerPixel > 0)
+						{
+							//Seek to palette pos
+							u64 paletteDataPos = sizeof(FileHeader) + bmpHeader.headerSize;
+							if(file.Seek(paletteDataPos, ion::io::File::Start) == paletteDataPos)
 							{
-								//Done, set width/height/BPP//palette size
-								m_width = bmpHeader.imageWidth;
-								m_height = bmpHeader.imageHeight;
-								m_bitsPerPixel = bmpHeader.bitsPerPixel;
-								m_paletteSize = bmpHeader.colourTableSize;
+								//Calc palette size and alloc
+								m_paletteSize = (1 << m_bitsPerPixel);
+								m_palette = new RGBQuad[m_paletteSize];
 
-								return true;
+								//Read palette
+								u64 paletteSizeBytes = m_paletteSize * sizeof(RGBQuad);
+								if(file.Read(m_palette, paletteSizeBytes) == paletteSizeBytes)
+								{
+									//Seek to data pos
+									if(file.Seek(fileHeader.dataOffset, ion::io::File::Start) == fileHeader.dataOffset)
+									{
+										//Alloc pixel data buffer
+										m_data = new u8[m_dataSize];
+
+										//Read pixel data
+										if(file.Read(m_data, m_dataSize) == m_dataSize)
+										{
+											//Success
+											return true;
+										}
+									}
+								}
 							}
 						}
 					}
@@ -70,6 +102,12 @@ bool BMPReader::Read(const std::string& filename)
 	{
 		delete m_data;
 		m_data = NULL;
+	}
+
+	if(m_palette)
+	{
+		delete m_palette;
+		m_palette = NULL;
 	}
 
 	return false;
@@ -85,23 +123,32 @@ int BMPReader::GetHeight() const
 	return m_height;
 }
 
-int BMPReader::GetPixelColourIdx(int x, int y) const
+Colour BMPReader::GetPixel(int x, int y) const
 {
 	ion::debug::Assert(x < m_width && y < m_height, "Out of range");
-	int index = (y * m_width) + x;
-	
-}
 
-Colour BMPReader::GetColour(int colourIdx) const
-{
+	u32 mask = ((u32)((s32)(1 << m_bitsPerPixel)-1));
+	u32 pixelOffset = ((y * m_width) + x);
+	u32 bitOffset = m_bitsPerPixel * pixelOffset;
+	u32 byteOffset = bitOffset / 8;
+	u32 intOffset = byteOffset / sizeof(u32);
+	u32 pixelsPerByte = ((sizeof(u32) * 8) / m_bitsPerPixel);
+	u32 shift = (bitOffset / m_bitsPerPixel) % pixelsPerByte;
+
+	ion::debug::Assert(byteOffset < m_dataSize, "Out of range");
+
+	u32* intData = (u32*)m_data;
+
+	u32 packedInteger = intData[intOffset];
+
+	u32 colourIndex = (packedInteger >> shift) & mask;
+	ion::debug::Assert(colourIndex < m_paletteSize, "Out of range");
+
+	RGBQuad rgbQuad = m_palette[colourIndex];
+
 	Colour colour;
-	colour.r = m_data[index+2];
-	colour.g = m_data[index+1];
-	colour.b = m_data[index];
+	colour.r = rgbQuad.r;
+	colour.g = rgbQuad.g;
+	colour.b = rgbQuad.b;
 	return colour;
-}
-
-int BMPReader::GetColourPaletteSize() const
-{
-
 }

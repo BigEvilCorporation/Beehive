@@ -17,6 +17,8 @@
 #include "UIBase.h"
 #include "../Project.h"
 
+#include "../BMPReader.h"
+
 class MapPanel : public wxPanel
 {
 public:
@@ -31,6 +33,8 @@ public:
 	void SetProject(Project* project);
 
 	virtual void Refresh(bool eraseBackground=true, const wxRect *rect=NULL);
+
+	BMPReader m_bmpReader;
 
 private:
 	//Paint tile to canvas

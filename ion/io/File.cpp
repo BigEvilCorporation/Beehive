@@ -74,7 +74,7 @@ namespace ion
 
 		u64 File::Seek(u64 position, SeekMode origin)
 		{
-			u64 newPosition = 0;
+			u64 newPosition = mCurrentPosition;
 
 			if(mOpen && position != mCurrentPosition)
 			{
