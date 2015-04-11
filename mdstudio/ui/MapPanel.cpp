@@ -159,7 +159,7 @@ void MapPanel::OnErase(wxEraseEvent& event)
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	//if(m_project->MapIsInvalidated())
+	if(m_project->MapIsInvalidated())
 	{
 		//Full refresh, redraw map to canvas
 		wxMemoryDC dc(m_canvas);
@@ -202,23 +202,6 @@ void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)
 
 void MapPanel::PaintMapToDc(wxDC& dc)
 {
-	if(m_bmpReader.GetWidth() > 0)
-	{
-		wxPen pen;
-		pen.SetWidth(1);
-
-		for(int x = 0; x < m_bmpReader.GetWidth(); x++)
-		{
-			for(int y = 0; y < m_bmpReader.GetHeight(); y++)
-			{
-				const Colour& colour = m_bmpReader.GetPixel(x, y);
-				pen.SetColour(wxColour(colour.r, colour.g, colour.b, 1.0f));
-				dc.SetPen(pen);
-				dc.DrawPoint(x, y);
-			}
-		}
-	}
-	else
 	if(m_project)
 	{
 		for(int x = 0; x < m_project->GetMap().GetWidth(); x++)

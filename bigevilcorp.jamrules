@@ -292,7 +292,7 @@ rule ApplyWxSDK TARGET
 {
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/wx/include ;
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/wx/include/wx ;
-	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/wx/lib ;
+	C.LinkDirectories $(TARGET) : $(bigevilcorp)/ion/dependencies/wx/lib/vc120 ;
 
 	C.Defines $(TARGET) : WXUSINGDLL wxMSVC_VERSION_AUTO UNICODE _UNICODE ;
 

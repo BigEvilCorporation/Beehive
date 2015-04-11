@@ -11,6 +11,12 @@ Tileset::Tileset()
 	m_nextFreeId = 1;
 }
 
+void Tileset::Clear()
+{
+	m_tiles.clear();
+	m_nextFreeId = 1;
+}
+
 TileId Tileset::AddTile()
 {
 	m_tiles.insert(std::make_pair(m_nextFreeId, Tile()));
@@ -30,7 +36,8 @@ TileId Tileset::FindDuplicate(const Tile& tile) const
 {
 	for(TileMap::const_iterator it = m_tiles.begin(), end = m_tiles.end(); it != end; ++it)
 	{
-		if(it->second.GetColourHash() == tile.GetColourHash())
+		if(it->second.GetPaletteId() == tile.GetPaletteId()
+			&& it->second.GetColourHash() == tile.GetColourHash())
 		{
 			return it->first;
 		}
