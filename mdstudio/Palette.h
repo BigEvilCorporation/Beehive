@@ -36,6 +36,8 @@ public:
 
 	Palette();
 
+	void Clear();
+
 	void SetColour(int colourIdx, const Colour& colour);
 	const Colour& GetColour(int colourIdx) const;
 	const bool GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const;

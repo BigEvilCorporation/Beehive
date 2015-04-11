@@ -9,6 +9,13 @@
 Map::Map()
 {
 	Resize(defaultWidth, defaultHeight);
+	Clear();
+}
+
+void Map::Clear()
+{
+	//Clear tileset
+	m_tileset.Clear();
 
 	//Create one blank tile for background
 	TileId backgroundId = m_tileset.AddTile();

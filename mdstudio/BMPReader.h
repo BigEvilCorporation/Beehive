@@ -3,7 +3,7 @@
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 //
-// Reader indexed BMP files
+// Reader for indexed 16 colour, 4bpp BMP files
 ///////////////////////////////////////////////////////
 
 #include <string>

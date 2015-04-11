@@ -16,6 +16,16 @@ Project::Project()
 	m_mapInvalidated = true;
 }
 
+void Project::Clear()
+{
+	for(int i = 0; i < numPalettes; i++)
+	{
+		m_palettes[i].Clear();
+	}
+
+	m_map.Clear();
+}
+
 void Project::SetPaintTile(TileId tile)
 {
 	m_paintTile = tile;
@@ -50,7 +60,7 @@ bool Project::FindPalette(Colour* colours, PaletteId& paletteId) const
 		{
 			int colourIdx = 0;
 
-			//Check if this pixel colour in contained in the palette
+			//Check if this pixel colour is contained in the palette
 			if(!palette.GetNearestColourIdx(colours[i], Palette::eExact, colourIdx))
 			{
 				match = false;
@@ -103,7 +113,8 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 {
 	if(importFlags & BMPImportReplaceAll)
 	{
-		//TODO: Clear map, tiles and palettes
+		//Clear map, tiles and palettes
+		Clear();
 	}
 
 	//Read BMP
@@ -168,9 +179,8 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 				//Get palette
 				Palette& palette = m_palettes[paletteId];
 
-				//Create new tile
-				TileId tileId = m_map.GetTileset().AddTile();
-				Tile* tile = m_map.GetTileset().GetTile(tileId);
+				Tile tile;
+				tile.SetPaletteId(paletteId);
 
 				//Find pixel colours from palette
 				for(int pixelX = 0; pixelX < 8; pixelX++)
@@ -187,25 +197,36 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 								return false;
 							}
 
-							tile->SetPixelColour(pixelX, pixelY, colourIdx);
+							tile.SetPixelColour(pixelX, pixelY, colourIdx);
 						}
 					}
 				}
 
-				//Set in map
-				m_map.SetTile(tileX, tileY, tileId);
+				
+				TileId tileId = 0;
 
-				//Read each pixel, map unique colours, assign an index to each unique colour
-				//Warn if >15 unique colours in tile
-				//Map 15 colour combination, if unique copy to new palette and assign tile a palette id
-				//Warn if >4 palettes
-				//Calc tile hash and find duplicate
-				//Assign tile id if dupe, add new tile if not
+				TileId duplicateId = m_map.GetTileset().FindDuplicate(tile);
+				if(duplicateId)
+				{
+					//Tile already exists
+					tileId = duplicateId;
+				}
+				else
+				{
+					//Create new tile and copy
+					tileId = m_map.GetTileset().AddTile();
+					Tile* newTile = m_map.GetTileset().GetTile(tileId);
+					*newTile = tile;
+				}
 
 				if(importFlags & BMPImportDrawToMap)
 				{
-					//Set tile id on map
+					//Set in map
+					m_map.SetTile(tileX, tileY, tileId);
 				}
+
+				//Invalidate map
+				InvalidateMap(true);
 			}
 		}
 	}

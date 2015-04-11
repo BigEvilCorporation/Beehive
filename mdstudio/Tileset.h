@@ -20,6 +20,8 @@ class Tileset
 public:
 	Tileset();
 
+	void Clear();
+
 	TileId AddTile();
 	void RemoveTile(TileId tileId);
 	TileId FindDuplicate(const Tile& tile) const;

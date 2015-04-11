@@ -19,6 +19,8 @@ public:
 
 	Map();
 
+	void Clear();
+
 	int GetWidth() const;
 	int GetHeight() const;
 

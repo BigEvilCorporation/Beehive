@@ -28,6 +28,9 @@ public:
 	bool Load(const std::string& filename) { return false; }
 	bool Save(const std::string& filename) { return false; }
 
+	//Clear project (palettes, tiles, map)
+	void Clear();
+
 	//Get Genesis map
 	Map& GetMap() { return m_map; }
 

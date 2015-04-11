@@ -2,6 +2,8 @@
 // MD Studio: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
+//
+// Reader for indexed 16 colour, 4bpp BMP files
 ///////////////////////////////////////////////////////
 
 #include "BMPReader.h"
@@ -48,18 +50,9 @@ bool BMPReader::Read(const std::string& filename)
 						m_dataSize = bmpHeader.dataSizeBytes;
 
 						//Set bits per pixel
-						switch(bmpHeader.bitFormat)
+						if(bmpHeader.bitFormat == eIndexed16Colour)
 						{
-						case eIndexed16Colour:
 							m_bitsPerPixel = 4;
-							break;
-
-						case eIndexed256Colour:
-							m_bitsPerPixel = 8;
-							break;
-
-						default:
-							break;
 						}
 
 						if(m_bitsPerPixel > 0)
@@ -127,21 +120,15 @@ Colour BMPReader::GetPixel(int x, int y) const
 {
 	ion::debug::Assert(x < m_width && y < m_height, "Out of range");
 
-	u32 mask = ((u32)((s32)(1 << m_bitsPerPixel)-1));
-	u32 pixelOffset = ((y * m_width) + x);
-	u32 bitOffset = m_bitsPerPixel * pixelOffset;
-	u32 byteOffset = bitOffset / 8;
-	u32 intOffset = byteOffset / sizeof(u32);
-	u32 pixelsPerByte = ((sizeof(u32) * 8) / m_bitsPerPixel);
-	u32 shift = (bitOffset / m_bitsPerPixel) % pixelsPerByte;
+	u32 pixelOffset = (((m_height - y - 1) * m_width) + x);
+	u32 byteOffset = (pixelOffset & 0xFFFFFFFE) / 2;
+	u8 colourIndex = m_data[byteOffset];
 
-	ion::debug::Assert(byteOffset < m_dataSize, "Out of range");
+	if (pixelOffset & 1)
+		colourIndex = colourIndex >> 4;
+	else
+		colourIndex &= 0x0F;
 
-	u32* intData = (u32*)m_data;
-
-	u32 packedInteger = intData[intOffset];
-
-	u32 colourIndex = (packedInteger >> shift) & mask;
 	ion::debug::Assert(colourIndex < m_paletteSize, "Out of range");
 
 	RGBQuad rgbQuad = m_palette[colourIndex];

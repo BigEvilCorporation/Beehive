@@ -38,6 +38,14 @@ Palette::Palette()
 	ion::memory::MemSet(m_colours, 0, sizeof(Colour) * coloursPerPalette);
 }
 
+void Palette::Clear()
+{
+	for(int i = 0; i < coloursPerPalette; i++)
+	{
+		m_colours[i] = Colour();
+	}
+}
+
 void Palette::SetColour(int colourIdx, const Colour& colour)
 {
 	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
