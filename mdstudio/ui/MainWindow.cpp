@@ -105,6 +105,18 @@ void MainWindow::ShowToolboxPalettes()
 	}
 }
 
+void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
+{
+	if(m_project)
+	{
+		wxFileDialog dialogue(this, _("Write ASM file"), "", "", "ASM files (*.asm)|*.asm", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		if(dialogue.ShowModal() == wxID_OK)
+		{
+			m_project->ExportPalettes(dialogue.GetPath().c_str().AsChar());
+		}
+	}
+}
+
 void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 {
 	if(m_project)
@@ -112,7 +124,7 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 		wxFileDialog dialogue(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 		if(dialogue.ShowModal() == wxID_OK)
 		{
-			m_project->ImportBitmap(dialogue.GetPath().c_str().AsChar(), Project::BMPImportReplaceAll | Project::BMPImportDrawToMap);
+			m_project->ImportBitmap(dialogue.GetPath().c_str().AsChar(), Project::eBMPImportReplaceAll | Project::eBMPImportDrawToMap);
 
 			//Refresh whole application
 			m_mapPanel->Refresh();

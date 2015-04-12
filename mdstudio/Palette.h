@@ -46,7 +46,7 @@ public:
 	int GetNumColours() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& outputText);
+	void Export(std::stringstream& stream) const;
 
 private:
 	Colour m_colours[coloursPerPalette];
