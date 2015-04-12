@@ -25,12 +25,17 @@ Colour::Colour(u8 red, u8 green, u8 blue)
 
 bool Colour::operator == (const Colour& rhs) const
 {
-	return r == rhs.r && g == rhs.g && b == rhs.b;
+	return ToVDPFormat() == rhs.ToVDPFormat();
 }
 
 u16 Colour::ToVDPFormat() const
 {
-	return 0;
+	u8 rNybble = (u8)(((float)r / (float)0xFF) * (float)0xE);
+	u8 gNybble = (u8)(((float)g / (float)0xFF) * (float)0xE);
+	u8 bNybble = (u8)(((float)b / (float)0xFF) * (float)0xE);
+
+	u16 mdValue = bNybble << 8 | gNybble << 4 | rNybble;
+	return mdValue;
 }
 
 Palette::Palette()
@@ -98,6 +103,23 @@ void Palette::Serialise(ion::io::Archive& archive)
 {
 }
 
-void Palette::Export(std::stringstream& outputText)
+void Palette::Export(std::stringstream& stream) const
 {
+	for(int i = 0; i < coloursPerPalette; i++)
+	{
+		stream << "\tdc.w\t0x";
+
+		if(i < m_numColours)
+		{
+			char text[8];
+			sprintf(text, "%03X", m_colours[i].ToVDPFormat());
+			stream << text;
+		}
+		else
+		{
+			stream << "000";
+		}
+
+		stream << std::endl;
+	}
 }

@@ -15,6 +15,7 @@ Project::Project()
 	m_paintTile = 0;
 	m_eraseTile = 0;
 	m_mapInvalidated = true;
+	m_name = "untitled";
 }
 
 void Project::Clear()
@@ -142,7 +143,7 @@ bool Project::MergePalettes(Palette& dest, const Palette& source)
 
 bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 {
-	if(importFlags & BMPImportReplaceAll)
+	if(importFlags & eBMPImportReplaceAll)
 	{
 		//Clear map, tiles and palettes
 		Clear();
@@ -281,7 +282,7 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 					*newTile = tile;
 				}
 
-				if(importFlags & BMPImportDrawToMap)
+				if(importFlags & eBMPImportDrawToMap)
 				{
 					//Set in map
 					m_map.SetTile(tileX, tileY, tileId);
@@ -298,4 +299,41 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 	}
 
 	return true;
+}
+
+bool Project::ExportPalettes(const std::string& filename) const
+{
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		stream << "palette_" << m_name << ":" << std::endl;
+
+		for(int i = 0; i < numPalettes; i++)
+		{
+			m_palettes[i].Export(stream);
+			stream << std::endl;
+		}
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Project::ExportTiles(const std::string& filename) const
+{
+	return false;
+}
+
+bool Project::ExportCollision(const std::string& filename) const
+{
+	return false;
+}
+
+bool Project::ExportMap(const std::string& filename) const
+{
+	return false;
 }

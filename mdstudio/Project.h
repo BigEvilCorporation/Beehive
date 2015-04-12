@@ -18,8 +18,8 @@ class Project
 public:
 	enum BMPImportFlags
 	{
-		BMPImportReplaceAll	= (1<<0),
-		BMPImportDrawToMap	= (1<<1),
+		eBMPImportReplaceAll	= (1<<0),
+		eBMPImportDrawToMap		= (1<<1),
 	};
 
 	Project();
@@ -27,6 +27,10 @@ public:
 	//Load/save project
 	bool Load(const std::string& filename) { return false; }
 	bool Save(const std::string& filename) { return false; }
+
+	//Get/set name
+	const std::string& GetName() const { return m_name; }
+	void SetName(const std::string& name) { m_name = name; }
 
 	//Clear project (palettes, tiles, map)
 	void Clear();
@@ -51,6 +55,12 @@ public:
 	//Import bitmap
 	bool ImportBitmap(const std::string& filename, u8 importFlags = (BMPImportFlags)(0));
 
+	//Export
+	bool ExportPalettes(const std::string& filename) const;
+	bool ExportTiles(const std::string& filename) const;
+	bool ExportCollision(const std::string& filename) const;
+	bool ExportMap(const std::string& filename) const;
+
 	//Serialise
 	void Serialise(ion::io::Archive& archive) {}
 
@@ -59,6 +69,9 @@ private:
 	bool FindPalette(Colour* pixels, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const;
 	bool ImportPalette(Colour* pixels, Palette& palette);
 	bool MergePalettes(Palette& dest, const Palette& source);
+
+	//Project name
+	std::string m_name;
 
 	//Genesis map
 	Map m_map;
