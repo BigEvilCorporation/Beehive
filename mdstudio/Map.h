@@ -28,10 +28,11 @@ public:
 	void SetTile(int x, int y, TileId tile);
 	TileId GetTile(int x, int y) const;
 
+	const Tileset& GetTileset() const;
 	Tileset& GetTileset();
 
 	void Serialise(ion::io::Archive& archive) {}
-	void Export(std::stringstream& outputText) {}
+	void Export(std::stringstream& stream) const;
 
 private:
 	int m_width;

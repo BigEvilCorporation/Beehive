@@ -7,6 +7,7 @@
 #pragma once
 
 #include <sstream>
+#include <iomanip>
 #include <core/Types.h>
 #include <io/Archive.h>
 

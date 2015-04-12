@@ -7,6 +7,8 @@
 #pragma once
 
 #include <wx/filedlg.h>
+#include <wx/dirdlg.h>
+#include <string>
 
 #include "MainWindow.h"
 #include "MapPanel.h"
@@ -109,10 +111,19 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project)
 	{
-		wxFileDialog dialogue(this, _("Write ASM file"), "", "", "ASM files (*.asm)|*.asm", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		wxDirDialog dialogue(this, "Select export directory");
 		if(dialogue.ShowModal() == wxID_OK)
 		{
-			m_project->ExportPalettes(dialogue.GetPath().c_str().AsChar());
+			std::string directory = dialogue.GetPath();
+			std::string filenamePalettes = directory + "\\" + m_project->GetName() + "_pal.asm";
+			std::string filenameTiles = directory + "\\" + m_project->GetName() + "_til.asm";
+			std::string filenameMap = directory + "\\" + m_project->GetName() + "_map.asm";
+			std::string filenameCollision = directory + "\\" + m_project->GetName() + "_col.asm";
+
+			m_project->ExportPalettes(filenamePalettes);
+			m_project->ExportTiles(filenameTiles);
+			m_project->ExportMap(filenameMap);
+			m_project->ExportCollision(filenameCollision);
 		}
 	}
 }

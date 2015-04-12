@@ -36,8 +36,8 @@ public:
 	PaletteId GetPaletteId() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void ExportColour(std::stringstream& outputString);
-	void ExportCollision(std::stringstream& outputString);
+	void ExportColour(std::stringstream& stream) const;
+	void ExportCollision(std::stringstream& stream) const;
 
 	void CalculateColourHash();
 	void CalculateCollisionHash();

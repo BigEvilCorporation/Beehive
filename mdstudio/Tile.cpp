@@ -71,40 +71,42 @@ void Tile::Serialise(ion::io::Archive& archive)
 	}
 }
 
-void Tile::ExportColour(std::stringstream& outputString)
+void Tile::ExportColour(std::stringstream& stream) const
 {
+	stream << std::hex << std::setfill('0') << std::uppercase;
+
 	for(int y = 0; y < tileHeight; y++)
 	{
-		outputString << "dc.b\t";
+		stream << "\tdc.b\t0x";
 
 		for(int x = 0; x < tileWidth; x++)
 		{
-			outputString << GetPixelColour(x, y);
-
-			if(x < 8)
-				outputString << ',';
-			else
-				outputString << '\r';
+			stream << std::setw(1) << (int)GetPixelColour(x, y);
 		}
+
+		stream << std::endl;
 	}
+
+	stream << std::dec;
 }
 
-void Tile::ExportCollision(std::stringstream& outputString)
+void Tile::ExportCollision(std::stringstream& stream) const
 {
+	stream << std::hex << std::setfill('0') << std::uppercase;
+
 	for(int y = 0; y < tileHeight; y++)
 	{
-		outputString << "dc.b\t";
+		stream << "\tdc.l\t0x";
 
 		for(int x = 0; x < tileWidth; x++)
 		{
-			outputString << GetPixelCollisionBits(x, y);
-
-			if(x < 7)
-				outputString << ',';
-			else
-				outputString << '\r';
+			stream << std::setw(1) << (int)GetPixelCollisionBits(x, y);
 		}
+
+		stream << std::endl;
 	}
+
+	stream << std::dec;
 }
 
 void Tile::CalculateColourHash()
