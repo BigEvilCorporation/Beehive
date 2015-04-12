@@ -93,11 +93,11 @@
                 <property name="name">bSizer1</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="1">
+                <object class="sizeritem" expanded="0">
                     <property name="border">5</property>
                     <property name="flag">wxALL|wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxRibbonBar" expanded="1">
+                    <object class="wxRibbonBar" expanded="0">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -182,7 +182,7 @@
                         <event name="OnSetFocus"></event>
                         <event name="OnSize"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -228,7 +228,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -275,7 +275,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -465,7 +465,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -511,7 +511,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -558,7 +558,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -700,7 +700,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -746,7 +746,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -793,7 +793,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -935,7 +935,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -981,7 +981,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1028,7 +1028,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1122,7 +1122,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap">Load From File; </property>
                             <property name="context_help"></property>
@@ -1168,7 +1168,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1215,7 +1215,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1309,7 +1309,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -1355,7 +1355,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1402,7 +1402,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1544,7 +1544,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -1590,7 +1590,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1637,7 +1637,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1824,7 +1824,7 @@
                                         <event name="OnSize"></event>
                                         <event name="OnUpdateUI"></event>
                                     </object>
-                                    <object class="ribbonButton" expanded="1">
+                                    <object class="ribbonButton" expanded="0">
                                         <property name="bg"></property>
                                         <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
                                         <property name="context_help"></property>

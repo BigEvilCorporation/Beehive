@@ -13,7 +13,7 @@
 #include "Tile.h"
 
 typedef unsigned int TileId;
-typedef std::map<TileId, Tile> TileMap;
+typedef std::map<TileId, Tile> TTileMap;
 
 class Tileset
 {
@@ -27,15 +27,15 @@ public:
 	TileId FindDuplicate(const Tile& tile) const;
 
 	Tile* GetTile(TileId tileId);
-	const TileMap::const_iterator Begin() const;
-	const TileMap::const_iterator End() const;
+	const TTileMap::const_iterator Begin() const;
+	const TTileMap::const_iterator End() const;
 	int GetCount() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& outputText);
+	void Export(std::stringstream& stream) const;
 	
 private:
 	TileId m_nextFreeId;
 	
-	TileMap m_tiles;
+	TTileMap m_tiles;
 };

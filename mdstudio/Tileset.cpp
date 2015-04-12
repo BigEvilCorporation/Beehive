@@ -25,7 +25,7 @@ TileId Tileset::AddTile()
 
 void Tileset::RemoveTile(TileId tileId)
 {
-	TileMap::iterator it = m_tiles.find(tileId);
+	TTileMap::iterator it = m_tiles.find(tileId);
 	if(it != m_tiles.end())
 	{
 		m_tiles.erase(it);
@@ -34,7 +34,7 @@ void Tileset::RemoveTile(TileId tileId)
 
 TileId Tileset::FindDuplicate(const Tile& tile) const
 {
-	for(TileMap::const_iterator it = m_tiles.begin(), end = m_tiles.end(); it != end; ++it)
+	for(TTileMap::const_iterator it = m_tiles.begin(), end = m_tiles.end(); it != end; ++it)
 	{
 		if(it->second.GetPaletteId() == tile.GetPaletteId()
 			&& it->second.GetColourHash() == tile.GetColourHash())
@@ -50,7 +50,7 @@ Tile* Tileset::GetTile(TileId tileId)
 {
 	Tile* tile = NULL;
 
-	TileMap::iterator it = m_tiles.find(tileId);
+	TTileMap::iterator it = m_tiles.find(tileId);
 	if(it != m_tiles.end())
 	{
 		tile = &it->second;
@@ -59,12 +59,12 @@ Tile* Tileset::GetTile(TileId tileId)
 	return tile;
 }
 
-const TileMap::const_iterator Tileset::Begin() const
+const TTileMap::const_iterator Tileset::Begin() const
 {
 	return m_tiles.begin();
 }
 
-const TileMap::const_iterator Tileset::End() const
+const TTileMap::const_iterator Tileset::End() const
 {
 	return m_tiles.end();
 }
@@ -76,4 +76,13 @@ int Tileset::GetCount() const
 
 void Tileset::Serialise(ion::io::Archive& archive)
 {
+}
+
+void Tileset::Export(std::stringstream& stream) const
+{
+	for(TTileMap::const_iterator it = m_tiles.begin(), end = m_tiles.end(); it != end; ++it)
+	{
+		it->second.ExportColour(stream);
+		stream << std::endl;
+	}
 }

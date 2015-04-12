@@ -59,7 +59,17 @@ TileId Map::GetTile(int x, int y) const
 	return m_tiles[tileIdx];
 }
 
+const Tileset& Map::GetTileset() const
+{
+	return m_tileset;
+}
+
 Tileset& Map::GetTileset()
 {
 	return m_tileset;
+}
+
+void Map::Export(std::stringstream& stream) const
+{
+
 }

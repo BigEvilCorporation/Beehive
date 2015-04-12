@@ -105,21 +105,20 @@ void Palette::Serialise(ion::io::Archive& archive)
 
 void Palette::Export(std::stringstream& stream) const
 {
+	stream << std::hex << std::setfill('0') << std::uppercase;
+
 	for(int i = 0; i < coloursPerPalette; i++)
 	{
 		stream << "\tdc.w\t0x";
 
+		u32 value = 0;
 		if(i < m_numColours)
 		{
-			char text[8];
-			sprintf(text, "%03X", m_colours[i].ToVDPFormat());
-			stream << text;
-		}
-		else
-		{
-			stream << "000";
+			value = m_colours[i].ToVDPFormat();
 		}
 
-		stream << std::endl;
+		stream << std::setw(4) << m_colours[i].ToVDPFormat() << std::endl;
 	}
+
+	stream << std::dec;
 }

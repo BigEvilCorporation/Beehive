@@ -325,6 +325,30 @@ bool Project::ExportPalettes(const std::string& filename) const
 
 bool Project::ExportTiles(const std::string& filename) const
 {
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		stream << "tiles_" << m_name << ":" << std::endl;
+
+		for(int i = 0; i < numPalettes; i++)
+		{
+			const Tileset& tileset = m_map.GetTileset();
+			tileset.Export(stream);
+			stream << std::endl;
+		}
+
+		stream << "tiles_" << m_name << "_end:" << std::endl;
+		stream << "tiles_" << m_name << "_size_b: equ(tiles_" << m_name << "_end - tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "tiles_" << m_name << "_size_w: equ(tiles_" << m_name << "_size_b / 2)\t; Size in words" << std::endl;
+		stream << "tiles_" << m_name << "_size_l: equ(tiles_" << m_name << "_size_l / 4)\t; Size in longwords" << std::endl;
+		stream << "tiles_" << m_name << "_size_t: equ(tiles_" << m_name << "_size_t / 32)\t; Size in tiles" << std::endl;
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
 	return false;
 }
 
@@ -335,5 +359,25 @@ bool Project::ExportCollision(const std::string& filename) const
 
 bool Project::ExportMap(const std::string& filename) const
 {
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		stream << "map_" << m_name << ":" << std::endl;
+
+		for(int i = 0; i < numPalettes; i++)
+		{
+			m_map.Export(stream);
+			stream << std::endl;
+		}
+
+		stream << "map_" << m_name << "_width: equ " << m_map.GetWidth();
+		stream << "map_" << m_name << "_height: equ " << m_map.GetHeight();
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
 	return false;
 }
