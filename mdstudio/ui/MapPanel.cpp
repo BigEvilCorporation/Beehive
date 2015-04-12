@@ -126,29 +126,59 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 	//Double buffered dest context
 	wxAutoBufferedPaintDC destContext(this);
 
-	//TODO: Transform by window scroll
-
 	//Update all invalidated regions
 	for(wxRegionIterator it = GetUpdateRegion(); it; it++)
 	{
 		//Get invalidated rect
-		wxRect sourceRect(it.GetRect());
-		wxRect destRect(sourceRect);
+		wxRect destRect(it.GetRect());
 
 		//Clear rect
 		destContext.SetBrush(*wxLIGHT_GREY_BRUSH);
 		destContext.DrawRectangle(destRect);
 
-		//Transform by camera pan/zoom
+		//Transform panned/zoomed dest rect back to orignal source rect
+		wxRect sourceRect(destRect);
 		sourceRect.x -= m_cameraPos.x;
 		sourceRect.y -= m_cameraPos.y;
 		sourceRect.x /= m_cameraZoom;
 		sourceRect.y /= m_cameraZoom;
 		sourceRect.width /= m_cameraZoom;
 		sourceRect.height /= m_cameraZoom;
+
+		//Adjust dest rect for rounding error
+		destRect.x -= (int)((float)destRect.x - (((float)sourceRect.x * m_cameraZoom) + m_cameraPos.x));
+		destRect.y -= (int)((float)destRect.y - (((float)sourceRect.y * m_cameraZoom) + m_cameraPos.y));
+		destRect.width -= (int)((float)destRect.width - ((float)sourceRect.width * m_cameraZoom));
+		destRect.height -= (int)((float)destRect.height - ((float)sourceRect.height * m_cameraZoom));
 		
 		//Copy rect from canvas
 		destContext.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &sourceContext, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
+	}
+
+	//Draw grid
+	destContext.SetBrush(*wxBLACK_BRUSH);
+
+	int mapWidth = m_project->GetMap().GetWidth();
+	int mapHeight = m_project->GetMap().GetHeight();
+
+	for(int x = 1; x < mapWidth; x++)
+	{
+		float lineHeight = (float)mapHeight * (8.0f * m_cameraZoom);
+		float lineX = ((x * 8) * m_cameraZoom) + m_cameraPos.x;
+
+		wxPoint pointY1(lineX, m_cameraPos.y);
+		wxPoint pointY2(lineX, m_cameraPos.y + lineHeight);
+		destContext.DrawLine(pointY1, pointY2);
+
+		for(int y = 1; y < mapHeight; y++)
+		{
+			float lineWidth = (float)mapWidth * (8.0f * m_cameraZoom);
+			float lineY = ((y * 8) * m_cameraZoom) + m_cameraPos.y;
+			
+			wxPoint pointX1(m_cameraPos.x, lineY);
+			wxPoint pointX2(m_cameraPos.x + lineWidth, lineY);
+			destContext.DrawLine(pointX1, pointX2);
+		}
 	}
 }
 

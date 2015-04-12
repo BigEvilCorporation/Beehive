@@ -56,8 +56,9 @@ public:
 
 private:
 	//Find palette matching 8x8 colour grid
-	bool FindPalette(Colour* colours, PaletteId& paletteId) const;
-	bool ImportPalette(Colour* colours, PaletteId paletteId);
+	bool FindPalette(Colour* pixels, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const;
+	bool ImportPalette(Colour* pixels, Palette& palette);
+	bool MergePalettes(Palette& dest, const Palette& source);
 
 	//Genesis map
 	Map m_map;

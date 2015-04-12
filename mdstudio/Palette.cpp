@@ -36,6 +36,7 @@ u16 Colour::ToVDPFormat() const
 Palette::Palette()
 {
 	ion::memory::MemSet(m_colours, 0, sizeof(Colour) * coloursPerPalette);
+	m_numColours = 0;
 }
 
 void Palette::Clear()
@@ -46,15 +47,33 @@ void Palette::Clear()
 	}
 }
 
+int Palette::GetNumColours() const
+{
+	return m_numColours;
+}
+
+int Palette::AddColour(const Colour& colour)
+{
+	int index = -1;
+
+	if(m_numColours < coloursPerPalette)
+	{
+		index = m_numColours++;
+		SetColour(index, colour);
+	}
+
+	return index;
+}
+
 void Palette::SetColour(int colourIdx, const Colour& colour)
 {
-	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
+	ion::debug::Assert(colourIdx < m_numColours, "Out of range");
 	m_colours[colourIdx] = colour;
 }
 
 const Colour& Palette::GetColour(int colourIdx) const
 {
-	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
+	ion::debug::Assert(colourIdx < m_numColours, "Out of range");
 	return m_colours[colourIdx];
 }
 
@@ -62,7 +81,7 @@ const bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo 
 {
 	if(algorithm == eExact)
 	{
-		for(int i = 0; i < coloursPerPalette; i++)
+		for(int i = 0; i < m_numColours; i++)
 		{
 			if(m_colours[i] == colour)
 			{

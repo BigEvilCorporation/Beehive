@@ -102,13 +102,11 @@ void PalettesPanel::OnPaint(wxPaintEvent& event)
 	//No outline
 	destDC.SetPen(wxNullPen);
 
-	
-
 	for(int i = 0; i < 4; i++)
 	{
 		const Palette* palette = m_project->GetPalette(i);
 
-		for(int j = 0; j < Palette::coloursPerPalette; j++)
+		for(int j = 0; j < palette->GetNumColours(); j++)
 		{
 			const Colour& colour = palette->GetColour(j);
 			wxBrush brush;

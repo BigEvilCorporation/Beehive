@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////
 
 #include <wx/msgdlg.h>
+#include <set>
 
 #include "Project.h"
 #include "BMPReader.h"
@@ -46,22 +47,30 @@ TileId Project::GetEraseTile() const
 	return m_eraseTile;
 }
 
-bool Project::FindPalette(Colour* colours, PaletteId& paletteId) const
+bool Project::FindPalette(Colour* pixels, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const
 {
+	//Set of found colour idxs
+	std::set<int> colourMatches;
+
 	//For each palette
 	for(int paletteIdx = 0; paletteIdx < numPalettes; paletteIdx++)
 	{
 		const Palette& palette = m_palettes[paletteIdx];
 
 		bool match = true;
+		colourMatches.clear();
 
 		//For each pixel
-		for(int i = 0; i < 8*8 && match; i++)
+		for(int i = 0; i < 8*8; i++)
 		{
 			int colourIdx = 0;
 
 			//Check if this pixel colour is contained in the palette
-			if(!palette.GetNearestColourIdx(colours[i], Palette::eExact, colourIdx))
+			if(palette.GetNearestColourIdx(pixels[i], Palette::eExact, colourIdx))
+			{
+				colourMatches.insert(colourIdx);
+			}
+			else
 			{
 				match = false;
 			}
@@ -72,18 +81,22 @@ bool Project::FindPalette(Colour* colours, PaletteId& paletteId) const
 			paletteId = paletteIdx;
 			return true;
 		}
+
+		if(colourMatches.size() > closestColourCount)
+		{
+			//Found a closer match
+			closestColourCount = colourMatches.size();
+			closestPalette = paletteIdx;
+		}
 	}
 
 	return false;
 }
 
-bool Project::ImportPalette(Colour* colours, PaletteId paletteId)
+bool Project::ImportPalette(Colour* pixels, Palette& palette)
 {
-	//Get palette
-	Palette& palette = m_palettes[paletteId];
-
 	//Add first colour
-	palette.SetColour(0, colours[0]);
+	palette.AddColour(pixels[0]);
 
 	//Keep running colour count
 	int numColours = 1;
@@ -92,7 +105,7 @@ bool Project::ImportPalette(Colour* colours, PaletteId paletteId)
 	for(int i = 1; i < 8*8; i++)
 	{
 		int colourIdx = 0;
-		if(!palette.GetNearestColourIdx(colours[i], Palette::eExact, colourIdx))
+		if(!palette.GetNearestColourIdx(pixels[i], Palette::eExact, colourIdx))
 		{
 			if(numColours == Palette::coloursPerPalette)
 			{
@@ -101,8 +114,26 @@ bool Project::ImportPalette(Colour* colours, PaletteId paletteId)
 			}
 
 			//Add new colour
-			palette.SetColour(numColours, colours[i]);
+			palette.AddColour(pixels[i]);
 			numColours++;
+		}
+	}
+
+	return true;
+}
+
+bool Project::MergePalettes(Palette& dest, const Palette& source)
+{
+	for(int i = 0; i < source.GetNumColours(); i++)
+	{
+		const Colour& sourceColour = source.GetColour(i);
+		int colourIdx = 0;
+		if(!dest.GetNearestColourIdx(sourceColour, Palette::eExact, colourIdx))
+		{
+			if(!dest.AddColour(sourceColour))
+			{
+				return false;
+			}
 		}
 	}
 
@@ -138,27 +169,32 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 
 		int newPaletteCount = 0;
 
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+
 		//For all 8x8 tiles
 		for(int tileX = 0; tileX < tilesWidth; tileX++)
 		{
 			for(int tileY = 0; tileY < tilesHeight; tileY++)
 			{
-				Colour colours[8*8];
+				Colour pixels[tileWidth * tileHeight];
 
 				//Read pixel colours from bitmap
-				for(int pixelX = 0; pixelX < 8; pixelX++)
+				for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 				{
-					for(int pixelY = 0; pixelY < 8; pixelY++)
+					for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 					{
-						int soucePixelX = (tileX * 8) + pixelX;
-						int soucePixelY = (tileY * 8) + pixelY;
-						colours[(pixelY * 8) + pixelX] = reader.GetPixel(soucePixelX, soucePixelY);
+						int soucePixelX = (tileX * tileWidth) + pixelX;
+						int soucePixelY = (tileY * tileHeight) + pixelY;
+						pixels[(pixelY * tileWidth) + pixelX] = reader.GetPixel(soucePixelX, soucePixelY);
 					}
 				}
 
 				//Find or create palette
 				PaletteId paletteId = 0;
-				if(!FindPalette(colours, paletteId))
+				PaletteId closestPaletteId = 0;
+				int closestPaletteColourMatches = 0;
+				if(!FindPalette(pixels, paletteId, closestPaletteId, closestPaletteColourMatches))
 				{
 					//No existing palette found, create new
 					if(newPaletteCount == numPalettes)
@@ -167,13 +203,37 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 						return false;
 					}
 
-					if(!ImportPalette(colours, newPaletteCount))
+					Palette importedPalette;
+					if(!ImportPalette(pixels, importedPalette))
 					{
 						wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK);
 						return false;
 					}
 
-					paletteId = newPaletteCount++;
+					//If closest palette has enough space to merge
+					bool merged = false;
+					if(closestPaletteColourMatches > 0)
+					{
+						int spareColours = Palette::coloursPerPalette - m_palettes[closestPaletteId].GetNumColours();
+						int requiredNewColours = importedPalette.GetNumColours() - closestPaletteColourMatches;
+
+						if(spareColours >= requiredNewColours)
+						{
+							//Merge palettes
+							if(MergePalettes(m_palettes[closestPaletteId], importedPalette))
+							{
+								paletteId = closestPaletteId;
+								merged = true;
+							}
+						}
+					}
+					
+					if(!merged)
+					{
+						//Use imported palette
+						paletteId = newPaletteCount++;
+						m_palettes[paletteId] = importedPalette;
+					}
 				}
 
 				//Get palette
@@ -183,14 +243,14 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 				tile.SetPaletteId(paletteId);
 
 				//Find pixel colours from palette
-				for(int pixelX = 0; pixelX < 8; pixelX++)
+				for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 				{
-					for(int pixelY = 0; pixelY < 8; pixelY++)
+					for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 					{
 						for(int i = 0; i < Palette::coloursPerPalette; i++)
 						{
 							int colourIdx = 0;
-							if(!palette.GetNearestColourIdx(colours[(pixelY * 8) + pixelX], Palette::eExact, colourIdx))
+							if(!palette.GetNearestColourIdx(pixels[(pixelY * tileWidth) + pixelX], Palette::eExact, colourIdx))
 							{
 								//Shouldn't reach here - palette should have been validated
 								wxMessageBox("Error mapping colour indices", "Error", wxOK);
@@ -202,9 +262,11 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 					}
 				}
 
-				
-				TileId tileId = 0;
+				//Hash invalidated, recalculate
+				tile.CalculateColourHash();
 
+				//Find duplicate or create new
+				TileId tileId = 0;
 				TileId duplicateId = m_map.GetTileset().FindDuplicate(tile);
 				if(duplicateId)
 				{
