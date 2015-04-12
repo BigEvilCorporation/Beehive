@@ -8,6 +8,8 @@
 #include <core/memory/Memory.h>
 #include <core/cryptography/Hash.h>
 
+#include <string>
+
 #include "Tile.h"
 
 Tile::Tile()
@@ -23,7 +25,6 @@ void Tile::SetPixelColour(int x, int y, u8 colourIdx)
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
 	m_pixels[pixelIdx].colourIdx = colourIdx;
-	CalculateColourHash();
 }
 
 u8 Tile::GetPixelColour(int x, int y) const
@@ -38,7 +39,6 @@ void Tile::AddPixelCollisionBits(int x, int y, u8 collisionBits)
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
 	m_pixels[pixelIdx].collisionBits = collisionBits;
-	CalculateCollisionHash();
 }
 
 u8 Tile::GetPixelCollisionBits(int x, int y) const
@@ -109,24 +109,26 @@ void Tile::ExportCollision(std::stringstream& outputString)
 
 void Tile::CalculateColourHash()
 {
-	std::stringstream stream;
+	std::string string;
+	string.reserve(pixelsPerTile);
 	for(int i = 0; i < pixelsPerTile; i++)
 	{
-		stream << m_pixels[i].colourIdx;
+		string += ('a' + m_pixels[i].colourIdx);
 	}
 
-	m_colourHash = ion::Hash(stream.str().c_str());
+	m_colourHash = ion::Hash(string.c_str());
 }
 
 void Tile::CalculateCollisionHash()
 {
-	std::stringstream stream;
+	std::string string;
+	string.reserve(pixelsPerTile);
 	for(int i = 0; i < pixelsPerTile; i++)
 	{
-		stream << m_pixels[i].collisionBits;
+		string += ('a' + m_pixels[i].collisionBits);
 	}
 
-	m_collisionHash = ion::Hash(stream.str().c_str());
+	m_collisionHash = ion::Hash(string.c_str());
 }
 
 u32 Tile::GetColourHash() const

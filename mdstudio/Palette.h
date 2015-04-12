@@ -38,13 +38,17 @@ public:
 
 	void Clear();
 
+	int AddColour(const Colour& colour);
 	void SetColour(int colourIdx, const Colour& colour);
 	const Colour& GetColour(int colourIdx) const;
 	const bool GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const;
+
+	int GetNumColours() const;
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& outputText);
 
 private:
 	Colour m_colours[coloursPerPalette];
+	int m_numColours;
 };

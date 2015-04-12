@@ -125,9 +125,9 @@ Colour BMPReader::GetPixel(int x, int y) const
 	u8 colourIndex = m_data[byteOffset];
 
 	if (pixelOffset & 1)
-		colourIndex = colourIndex >> 4;
-	else
 		colourIndex &= 0x0F;
+	else
+		colourIndex = colourIndex >> 4;
 
 	ion::debug::Assert(colourIndex < m_paletteSize, "Out of range");
 
