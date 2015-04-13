@@ -31,4 +31,5 @@ private:
 	float m_zoom;
 	int m_currentSelectionLeft;
 	int m_currentSelectionRight;
+	int m_tileCount;
 };
