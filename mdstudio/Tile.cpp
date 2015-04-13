@@ -77,7 +77,7 @@ void Tile::ExportColour(std::stringstream& stream) const
 
 	for(int y = 0; y < tileHeight; y++)
 	{
-		stream << "\tdc.b\t0x";
+		stream << "\tdc.l\t0x";
 
 		for(int x = 0; x < tileWidth; x++)
 		{

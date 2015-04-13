@@ -16,6 +16,7 @@ TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
 	m_zoom = 4.0f;
 	m_currentSelectionLeft = -1;
 	m_currentSelectionRight = -1;
+	m_tileCount = 0;
 
 	Bind(wxEVT_LEFT_DOWN,		&TilesPanel::OnMouse, this, wxID_TILESPANEL);
 	Bind(wxEVT_RIGHT_DOWN,		&TilesPanel::OnMouse, this, wxID_TILESPANEL);
@@ -86,6 +87,15 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 
 void TilesPanel::OnPaint(wxPaintEvent& event)
 {
+	//Update frame title
+	if(m_tileCount != m_project->GetMap().GetTileset().GetCount())
+	{
+		m_tileCount = m_project->GetMap().GetTileset().GetCount();
+		std::stringstream name;
+		name << "Tiles (" << m_tileCount << ")";
+		GetParent()->SetLabel(name.str());
+	}
+
 	//Double buffered dest dc
 	wxAutoBufferedPaintDC destDC(this);
 

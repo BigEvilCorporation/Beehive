@@ -338,11 +338,11 @@ bool Project::ExportTiles(const std::string& filename) const
 			stream << std::endl;
 		}
 
-		stream << "tiles_" << m_name << "_end:" << std::endl;
-		stream << "tiles_" << m_name << "_size_b: equ(tiles_" << m_name << "_end - tiles_" << m_name << ")\t; Size in bytes" << std::endl;
-		stream << "tiles_" << m_name << "_size_w: equ(tiles_" << m_name << "_size_b / 2)\t; Size in words" << std::endl;
-		stream << "tiles_" << m_name << "_size_l: equ(tiles_" << m_name << "_size_l / 4)\t; Size in longwords" << std::endl;
-		stream << "tiles_" << m_name << "_size_t: equ(tiles_" << m_name << "_size_t / 32)\t; Size in tiles" << std::endl;
+		stream << "tiles_" << m_name << "_end" << std::endl;
+		stream << "tiles_" << m_name << "_size_b\tequ (tiles_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "tiles_" << m_name << "_size_w\tequ (tiles_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "tiles_" << m_name << "_size_l\tequ (tiles_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << "tiles_" << m_name << "_size_t\tequ (tiles_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
 
 		file.Write(stream.str().c_str(), stream.str().size());
 
@@ -368,13 +368,13 @@ bool Project::ExportMap(const std::string& filename) const
 		m_map.Export(stream);
 
 		stream << "map_" << m_name << "_end:" << std::endl;
-		stream << "map_" << m_name << "_size_b: equ(map_" << m_name << "_end - tiles_" << m_name << ")\t; Size in bytes" << std::endl;
-		stream << "map_" << m_name << "_size_w: equ(map_" << m_name << "_size_b / 2)\t; Size in words" << std::endl;
-		stream << "map_" << m_name << "_size_l: equ(map_" << m_name << "_size_l / 4)\t; Size in longwords" << std::endl;
+		stream << "map_" << m_name << "_size_b\tequ (map_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "map_" << m_name << "_size_w\tequ (map_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "map_" << m_name << "_size_l\tequ (map_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << "map_" << m_name << "_width: equ " << "0x" << std::setw(2) << m_map.GetWidth() << std::endl;
-		stream << "map_" << m_name << "_height: equ " << "0x" << std::setw(2) <<  m_map.GetHeight() << std::endl;
+		stream << "map_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_map.GetWidth() << std::endl;
+		stream << "map_" << m_name << "_height\tequ " << "0x" << std::setw(2) <<  m_map.GetHeight() << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());
