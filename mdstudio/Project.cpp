@@ -365,14 +365,17 @@ bool Project::ExportMap(const std::string& filename) const
 		std::stringstream stream;
 		stream << "map_" << m_name << ":" << std::endl;
 
-		for(int i = 0; i < numPalettes; i++)
-		{
-			m_map.Export(stream);
-			stream << std::endl;
-		}
+		m_map.Export(stream);
 
-		stream << "map_" << m_name << "_width: equ " << m_map.GetWidth();
-		stream << "map_" << m_name << "_height: equ " << m_map.GetHeight();
+		stream << "map_" << m_name << "_end:" << std::endl;
+		stream << "map_" << m_name << "_size_b: equ(map_" << m_name << "_end - tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "map_" << m_name << "_size_w: equ(map_" << m_name << "_size_b / 2)\t; Size in words" << std::endl;
+		stream << "map_" << m_name << "_size_l: equ(map_" << m_name << "_size_l / 4)\t; Size in longwords" << std::endl;
+
+		stream << std::hex << std::setfill('0') << std::uppercase;
+		stream << "map_" << m_name << "_width: equ " << "0x" << std::setw(2) << m_map.GetWidth() << std::endl;
+		stream << "map_" << m_name << "_height: equ " << "0x" << std::setw(2) <<  m_map.GetHeight() << std::endl;
+		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());
 

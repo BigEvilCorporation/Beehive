@@ -117,7 +117,7 @@ void Palette::Export(std::stringstream& stream) const
 			value = m_colours[i].ToVDPFormat();
 		}
 
-		stream << std::setw(4) << m_colours[i].ToVDPFormat() << std::endl;
+		stream << std::setw(4) << (u32)m_colours[i].ToVDPFormat() << std::endl;
 	}
 
 	stream << std::dec;

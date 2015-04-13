@@ -71,5 +71,24 @@ Tileset& Map::GetTileset()
 
 void Map::Export(std::stringstream& stream) const
 {
+	stream << std::hex << std::setfill('0') << std::uppercase;
 
+	for(int y = 0; y < m_height; y++)
+	{
+		stream << "\tdc.b\t";
+
+		for(int x = 0; x < m_width; x++)
+		{
+			//TODO: V/H flip bits
+			u8 byte = m_tiles[(y * m_width) + x];
+			stream << "0x" << std::setw(2) << (u32)byte;
+
+			if(x < (m_width - 1))
+				stream << ",";
+		}
+
+		stream << std::endl;
+	}
+
+	stream << std::dec;
 }
