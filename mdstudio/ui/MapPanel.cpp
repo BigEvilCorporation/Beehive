@@ -34,9 +34,9 @@ void MapPanel::SetProject(Project* project)
 	m_project = project;
 
 	//Centre camera on canvas
-	wxSize clientSize = GetClientSize();
-	m_cameraPos.x = (clientSize.x / 2.0f) - ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
-	m_cameraPos.y = (clientSize.y / 2.0f) - ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
+	wxRect clientRect = GetClientRect();
+	m_cameraPos.x = clientRect.x - (clientRect.width / 2.0f) + ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
+	m_cameraPos.y = clientRect.y - (clientRect.height / 2.0f) + ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
 
 	//Reset zoom
 	m_cameraZoom = 1.0f;
@@ -156,28 +156,31 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 	}
 
 	//Draw grid
-	destContext.SetBrush(*wxBLACK_BRUSH);
-
-	int mapWidth = m_project->GetMap().GetWidth();
-	int mapHeight = m_project->GetMap().GetHeight();
-
-	for(int x = 1; x < mapWidth; x++)
+	if(m_project)
 	{
-		float lineHeight = (float)mapHeight * (8.0f * m_cameraZoom);
-		float lineX = ((x * 8) * m_cameraZoom) + m_cameraPos.x;
+		destContext.SetBrush(*wxBLACK_BRUSH);
 
-		wxPoint pointY1(lineX, m_cameraPos.y);
-		wxPoint pointY2(lineX, m_cameraPos.y + lineHeight);
-		destContext.DrawLine(pointY1, pointY2);
+		int mapWidth = m_project->GetMap().GetWidth();
+		int mapHeight = m_project->GetMap().GetHeight();
 
-		for(int y = 1; y < mapHeight; y++)
+		for(int x = 1; x < mapWidth; x++)
 		{
-			float lineWidth = (float)mapWidth * (8.0f * m_cameraZoom);
-			float lineY = ((y * 8) * m_cameraZoom) + m_cameraPos.y;
-			
-			wxPoint pointX1(m_cameraPos.x, lineY);
-			wxPoint pointX2(m_cameraPos.x + lineWidth, lineY);
-			destContext.DrawLine(pointX1, pointX2);
+			float lineHeight = (float)mapHeight * (8.0f * m_cameraZoom);
+			float lineX = ((x * 8) * m_cameraZoom) + m_cameraPos.x;
+
+			wxPoint pointY1(lineX, m_cameraPos.y);
+			wxPoint pointY2(lineX, m_cameraPos.y + lineHeight);
+			destContext.DrawLine(pointY1, pointY2);
+
+			for(int y = 1; y < mapHeight; y++)
+			{
+				float lineWidth = (float)mapWidth * (8.0f * m_cameraZoom);
+				float lineY = ((y * 8) * m_cameraZoom) + m_cameraPos.y;
+
+				wxPoint pointX1(m_cameraPos.x, lineY);
+				wxPoint pointX2(m_cameraPos.x + lineWidth, lineY);
+				destContext.DrawLine(pointX1, pointX2);
+			}
 		}
 	}
 }
@@ -191,7 +194,8 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(m_project && m_project->MapIsInvalidated())
 	{
-		//Full refresh, redraw map to canvas
+		//Full refresh, resize canvas and redraw map
+		m_canvas = wxBitmap(m_project->GetMap().GetWidth() * 8, m_project->GetMap().GetHeight() * 8);
 		wxMemoryDC dc(m_canvas);
 		PaintMapToDc(dc);
 		m_project->InvalidateMap(false);

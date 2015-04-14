@@ -50,7 +50,9 @@ public:
 	TileId GetEraseTile() const;
 
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
+	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
+	bool TilesAreInvalidated() const { return m_tilesInvalidated; }
 
 	//Import bitmap
 	bool ImportBitmap(const std::string& filename, u8 importFlags = (BMPImportFlags)(0));
@@ -89,4 +91,5 @@ private:
 
 	//Map needs redraw
 	bool m_mapInvalidated;
+	bool m_tilesInvalidated;
 };

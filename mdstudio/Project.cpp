@@ -12,19 +12,23 @@
 
 Project::Project()
 {
-	m_paintTile = 0;
-	m_eraseTile = 0;
-	m_mapInvalidated = true;
-	m_name = "untitled";
+	Clear();
 }
 
 void Project::Clear()
 {
+	m_paintTile = 0;
+	m_eraseTile = 0;
+	m_mapInvalidated = true;
+	m_tilesInvalidated = true;
+	m_name = "untitled";
+
 	for(int i = 0; i < numPalettes; i++)
 	{
 		m_palettes[i].Clear();
 	}
 
+	m_palettes[0].AddColour(Colour(255, 255, 255));
 	m_map.Clear();
 }
 
@@ -290,6 +294,7 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 
 				//Invalidate map
 				InvalidateMap(true);
+				InvalidateTiles(true);
 			}
 		}
 	}

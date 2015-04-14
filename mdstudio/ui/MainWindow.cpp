@@ -62,6 +62,32 @@ void MainWindow::SetProject(Project* project)
 	Refresh();
 }
 
+void MainWindow::ShowPanelPalettes()
+{
+	if(m_project)
+	{
+		if(!m_palettesPanel)
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(200, 100);
+			paneInfo.Left();
+			paneInfo.Caption("Palettes");
+			paneInfo.CaptionVisible(true);
+
+			m_palettesPanel = new PalettesPanel(m_dockArea, NewControlId());
+			m_palettesPanel->SetProject(m_project);
+			m_auiManager.AddPane(m_palettesPanel, paneInfo);
+		}
+
+		if(!m_palettesPanel->IsShown())
+		{
+			m_palettesPanel->Show();
+		}
+	}
+}
+
 void MainWindow::ShowPanelTiles()
 {
 	if(m_project)
@@ -76,7 +102,7 @@ void MainWindow::ShowPanelTiles()
 			paneInfo.Caption("Tiles");
 			paneInfo.CaptionVisible(true);
 			
-			m_tilesPanel = new TilesPanel(m_dockArea, NewControlId());
+			m_tilesPanel = new TilesPanel(m_dockArea, NewControlId(), wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxALWAYS_SHOW_SB);
 			m_tilesPanel->SetProject(m_project);
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
 		}
@@ -110,32 +136,6 @@ void MainWindow::ShowPanelMap()
 		if(!m_mapPanel->IsShown())
 		{
 			m_mapPanel->Show();
-		}
-	}
-}
-
-void MainWindow::ShowPanelPalettes()
-{
-	if(m_project)
-	{
-		if(!m_palettesPanel)
-		{
-			wxAuiPaneInfo paneInfo;
-			paneInfo.Dockable(true);
-			paneInfo.DockFixed(false);
-			paneInfo.BestSize(200, 100);
-			paneInfo.Left();
-			paneInfo.Caption("Palettes");
-			paneInfo.CaptionVisible(true);
-
-			m_palettesPanel = new PalettesPanel(m_dockArea, NewControlId());
-			m_palettesPanel->SetProject(m_project);
-			m_auiManager.AddPane(m_palettesPanel, paneInfo);
-		}
-
-		if(!m_palettesPanel->IsShown())
-		{
-			m_palettesPanel->Show();
 		}
 	}
 }
