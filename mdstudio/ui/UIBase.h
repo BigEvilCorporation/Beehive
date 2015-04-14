@@ -10,10 +10,6 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
-class MapPanel;
-class PalettesPanel;
-class TilesPanel;
-
 #include <wx/string.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
@@ -32,7 +28,6 @@ class TilesPanel;
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
-#include <wx/scrolwin.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -41,10 +36,6 @@ class TilesPanel;
 #define wxID_BTN_TOOLS_MAPEDIT 1002
 #define wxID_BTN_TOOLS_TILES 1003
 #define wxID_BTN_TOOLS_PALETTES 1004
-#define wxID_MAPPANEL 1005
-#define wxID_TILESPANEL 1006
-#define wxID_TOOLBOX_PALETTES 1007
-#define wxID_PALETTESPANEL 1008
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -54,7 +45,7 @@ class MainWindowBase : public wxFrame
 	private:
 	
 	protected:
-		wxRibbonBar* m_ribbonBarMain;
+		wxRibbonBar* m_ribbonBar;
 		wxRibbonPage* m_ribbonPageProject;
 		wxRibbonPanel* m_ribbonPanelProject;
 		wxRibbonButtonBar* m_ribbonButtonBarProject;
@@ -76,7 +67,8 @@ class MainWindowBase : public wxFrame
 		wxRibbonPage* m_ribbonPageTools;
 		wxRibbonPanel* m_ribbonPanelTools;
 		wxRibbonButtonBar* m_ribbonButtonBarTools;
-		wxStatusBar* m_statusBarMain;
+		wxPanel* m_dockArea;
+		wxStatusBar* m_statusBar;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -91,64 +83,10 @@ class MainWindowBase : public wxFrame
 		
 	
 	public:
-		MapPanel* m_mapPanel;
 		
-		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
+		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 720,489 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowBase();
-	
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class ToolboxTilesBase
-///////////////////////////////////////////////////////////////////////////////
-class ToolboxTilesBase : public wxFrame 
-{
-	private:
-	
-	protected:
-		TilesPanel* m_tilesPanel;
-	
-	public:
-		
-		ToolboxTilesBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Tiles"), const wxPoint& pos = wxPoint( 800,300 ), const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL );
-		
-		~ToolboxTilesBase();
-	
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class ToolboxMapEditBase
-///////////////////////////////////////////////////////////////////////////////
-class ToolboxMapEditBase : public wxFrame 
-{
-	private:
-	
-	protected:
-	
-	public:
-		
-		ToolboxMapEditBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Map Editing"), const wxPoint& pos = wxPoint( 30,100 ), const wxSize& size = wxSize( 128,400 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxSIMPLE_BORDER|wxTAB_TRAVERSAL );
-		
-		~ToolboxMapEditBase();
-	
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class ToolboxPalettesBase
-///////////////////////////////////////////////////////////////////////////////
-class ToolboxPalettesBase : public wxFrame 
-{
-	private:
-	
-	protected:
-		PalettesPanel* m_palettesPanel;
-	
-	public:
-		
-		ToolboxPalettesBase( wxWindow* parent, wxWindowID id = wxID_TOOLBOX_PALETTES, const wxString& title = wxT("Palettes"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 400,128 ), long style = wxDEFAULT_FRAME_STYLE|wxFRAME_FLOAT_ON_PARENT|wxFRAME_TOOL_WINDOW|wxTAB_TRAVERSAL );
-		
-		~ToolboxPalettesBase();
 	
 };
 

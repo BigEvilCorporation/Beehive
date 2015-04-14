@@ -8,16 +8,21 @@
 
 #include <wx/filedlg.h>
 #include <wx/dirdlg.h>
+#include <wx/aui/framemanager.h>
+
 #include <string>
 
 #include "MainWindow.h"
+
+#include "PalettesPanel.h"
+#include "TilesPanel.h"
 #include "MapPanel.h"
 
 MainWindow::MainWindow()
 	: MainWindowBase(NULL)
 {
+	m_auiManager.SetManagedWindow(m_dockArea);
 	m_project = NULL;
-	m_toolboxMapEdit = NULL;
 }
 
 MainWindow::~MainWindow()
@@ -29,80 +34,108 @@ void MainWindow::SetProject(Project* project)
 	if(project && project != m_project)
 	{
 		m_project = project;
-		m_mapPanel->SetProject(project);
 
-		//New project, open default toolboxes
-		ShowToolboxTiles();
-		ShowToolboxMapEdit();
-		ShowToolboxPalettes();
+		//New project, open default panels
+		ShowPanelPalettes();
+		ShowPanelTiles();
+		ShowPanelMap();
 	}
 	else
 	{
-		//Project closed, close toolboxes
-		if(m_toolboxMapEdit)
-			delete m_toolboxMapEdit;
+		//Project closed, close panels
+		if(m_tilesPanel)
+			delete m_tilesPanel;
 
-		if(m_toolboxTiles)
-			delete m_toolboxTiles;
+		if(m_palettesPanel)
+			delete m_palettesPanel;
 
-		if(m_toolboxPalettes)
-			delete m_toolboxPalettes;
+		if(m_mapPanel)
+			delete m_mapPanel;
 
-		m_mapPanel->SetProject(NULL);
 		m_project = NULL;
 	}
+
+	//Refresh AUI manager
+	m_auiManager.Update();
 
 	//Refresh whole window
 	Refresh();
 }
 
-void MainWindow::ShowToolboxTiles()
+void MainWindow::ShowPanelTiles()
 {
 	if(m_project)
 	{
-		if(!m_toolboxTiles)
+		if(!m_tilesPanel)
 		{
-			m_toolboxTiles = new ToolboxTiles(*m_project, this);
-			m_toolboxTiles->SetPosition(wxPoint(600, 200));
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(200, 100);
+			paneInfo.Left();
+			paneInfo.Caption("Tiles");
+			paneInfo.CaptionVisible(true);
+			
+			m_tilesPanel = new TilesPanel(m_dockArea, NewControlId());
+			m_tilesPanel->SetProject(m_project);
+			m_auiManager.AddPane(m_tilesPanel, paneInfo);
 		}
 
-		if(!m_toolboxTiles->IsShown())
+		if(!m_tilesPanel->IsShown())
 		{
-			m_toolboxTiles->Show();
+			m_tilesPanel->Show();
 		}
 	}
 }
 
-void MainWindow::ShowToolboxMapEdit()
+void MainWindow::ShowPanelMap()
 {
 	if(m_project)
 	{
-		if(!m_toolboxMapEdit)
+		if(!m_mapPanel)
 		{
-			m_toolboxMapEdit = new ToolboxMapEdit(*m_project, this);
-			m_toolboxMapEdit->SetPosition(wxPoint(50, 200));
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Centre();
+			paneInfo.Caption("Map");
+			paneInfo.CaptionVisible(true);
+
+			m_mapPanel = new MapPanel(m_dockArea, NewControlId());
+			m_mapPanel->SetProject(m_project);
+			m_auiManager.AddPane(m_mapPanel, paneInfo);
 		}
 
-		if(!m_toolboxMapEdit->IsShown())
+		if(!m_mapPanel->IsShown())
 		{
-			m_toolboxMapEdit->Show();
+			m_mapPanel->Show();
 		}
 	}
 }
 
-void MainWindow::ShowToolboxPalettes()
+void MainWindow::ShowPanelPalettes()
 {
 	if(m_project)
 	{
-		if(!m_toolboxPalettes)
+		if(!m_palettesPanel)
 		{
-			m_toolboxPalettes = new ToolboxPalettes(*m_project, this);
-			m_toolboxPalettes->SetPosition(wxPoint(400, 400));
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(200, 100);
+			paneInfo.Left();
+			paneInfo.Caption("Palettes");
+			paneInfo.CaptionVisible(true);
+
+			m_palettesPanel = new PalettesPanel(m_dockArea, NewControlId());
+			m_palettesPanel->SetProject(m_project);
+			m_auiManager.AddPane(m_palettesPanel, paneInfo);
 		}
 
-		if(!m_toolboxPalettes->IsShown())
+		if(!m_palettesPanel->IsShown())
 		{
-			m_toolboxPalettes->Show();
+			m_palettesPanel->Show();
 		}
 	}
 }
@@ -146,15 +179,15 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 
 void MainWindow::OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event )
 {
-	ShowToolboxMapEdit();
+
 }
 
 void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )
 {
-	ShowToolboxTiles();
+	ShowPanelTiles();
 }
 
 void MainWindow::OnBtnToolsPalettes( wxRibbonButtonBarEvent& event )
 {
-	ShowToolboxPalettes();
+	ShowPanelPalettes();
 }

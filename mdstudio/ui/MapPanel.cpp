@@ -15,16 +15,16 @@ MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const
 	m_cameraZoom = 1.0f;
 	m_cameraPanSpeed = 1.0f;
 
-	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MIDDLE_DOWN,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MIDDLE_UP,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_RIGHT_DOWN,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_RIGHT_UP,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MOTION,			&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_MOUSEWHEEL,		&MapPanel::OnMouse, this, wxID_MAPPANEL);
-	Bind(wxEVT_PAINT,			&MapPanel::OnPaint, this, wxID_MAPPANEL);
-	Bind(wxEVT_ERASE_BACKGROUND,&MapPanel::OnErase, this, wxID_MAPPANEL);
+	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_MIDDLE_DOWN,		&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_MIDDLE_UP,		&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_RIGHT_DOWN,		&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_RIGHT_UP,		&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_MOTION,			&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_MOUSEWHEEL,		&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_PAINT,			&MapPanel::OnPaint, this, GetId());
+	Bind(wxEVT_ERASE_BACKGROUND,&MapPanel::OnErase, this, GetId());
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
@@ -189,7 +189,7 @@ void MapPanel::OnErase(wxEraseEvent& event)
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	if(m_project->MapIsInvalidated())
+	if(m_project && m_project->MapIsInvalidated())
 	{
 		//Full refresh, redraw map to canvas
 		wxMemoryDC dc(m_canvas);
