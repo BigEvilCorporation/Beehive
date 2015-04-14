@@ -76,6 +76,8 @@ int Tileset::GetCount() const
 
 void Tileset::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_tiles);
+	archive.Serialise(m_nextFreeId);
 }
 
 void Tileset::Export(std::stringstream& stream) const

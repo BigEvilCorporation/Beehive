@@ -25,6 +25,7 @@ MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const
 	Bind(wxEVT_MOUSEWHEEL,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_PAINT,			&MapPanel::OnPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND,&MapPanel::OnErase, this, GetId());
+	Bind(wxEVT_SIZE,			&MapPanel::OnResize, this, GetId());
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
@@ -34,16 +35,10 @@ void MapPanel::SetProject(Project* project)
 	m_project = project;
 
 	//Centre camera on canvas
-	wxRect clientRect = GetClientRect();
-	m_cameraPos.x = clientRect.x - (clientRect.width / 2.0f) + ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
-	m_cameraPos.y = clientRect.y - (clientRect.height / 2.0f) + ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
+	CentreCamera();
 
 	//Reset zoom
 	m_cameraZoom = 1.0f;
-
-	//Invalidate panel
-	m_project->InvalidateMap(true);
-	Refresh();
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event)
@@ -190,6 +185,11 @@ void MapPanel::OnErase(wxEraseEvent& event)
 	//Ignore event
 }
 
+void MapPanel::OnResize(wxSizeEvent& event)
+{
+	CentreCamera();
+}
+
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(m_project && m_project->MapIsInvalidated())
@@ -202,6 +202,16 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	}
 
 	wxPanel::Refresh(eraseBackground, rect);
+}
+
+void MapPanel::CentreCamera()
+{
+	if(m_project)
+	{
+		wxRect clientRect = GetClientRect();
+		m_cameraPos.x = (clientRect.width / 2.0f) - ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
+		m_cameraPos.y = (clientRect.height / 2.0f) - ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
+	}
 }
 
 void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)

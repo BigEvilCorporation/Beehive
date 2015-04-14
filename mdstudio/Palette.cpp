@@ -40,7 +40,7 @@ u16 Colour::ToVDPFormat() const
 
 Palette::Palette()
 {
-	ion::memory::MemSet(m_colours, 0, sizeof(Colour) * coloursPerPalette);
+	m_colours.resize(coloursPerPalette);
 	m_numColours = 0;
 }
 
@@ -101,6 +101,8 @@ const bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo 
 
 void Palette::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_colours);
+	archive.Serialise(m_numColours);
 }
 
 void Palette::Export(std::stringstream& stream) const

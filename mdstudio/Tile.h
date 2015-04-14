@@ -15,6 +15,12 @@ struct Pixel
 {
 	u8 colourIdx;
 	u8 collisionBits;
+
+	void Serialise(ion::io::Archive& archive)
+	{
+		archive.Serialise(colourIdx);
+		archive.Serialise(collisionBits);
+	}
 };
 
 class Tile
@@ -48,5 +54,5 @@ private:
 	PaletteId m_palette;
 	u32 m_colourHash;
 	u32 m_collisionHash;
-	Pixel m_pixels[pixelsPerTile];
+	std::vector<Pixel> m_pixels;
 };

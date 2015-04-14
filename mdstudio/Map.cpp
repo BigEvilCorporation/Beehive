@@ -27,6 +27,14 @@ void Map::Clear()
 	}
 }
 
+void Map::Serialise(ion::io::Archive& archive)
+{
+	archive.Serialise(m_width);
+	archive.Serialise(m_height);
+	archive.Serialise(m_tileset);
+	archive.Serialise(m_tiles);
+}
+
 int Map::GetWidth() const
 {
 	return m_width;
@@ -47,14 +55,14 @@ void Map::Resize(int width, int height)
 
 void Map::SetTile(int x, int y, TileId tile)
 {
-	int tileIdx = (y * m_height) + x;
+	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
 	m_tiles[tileIdx] = tile;
 }
 
 TileId Map::GetTile(int x, int y) const
 {
-	int tileIdx = (y * m_height) + x;
+	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
 	return m_tiles[tileIdx];
 }

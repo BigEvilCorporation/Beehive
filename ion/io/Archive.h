@@ -425,7 +425,7 @@ namespace ion
 				for(std::map<KEY, T>::iterator it = objects.begin(), end = objects.end(); it != end; ++it)
 				{
 					//Serialise key (lose const correctness, direction is known)
-					Serialise((std::string&)it->first);
+					Serialise((KEY&)it->first);
 
 					//Serialise object
 					Serialise(it->second);

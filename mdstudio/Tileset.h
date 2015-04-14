@@ -12,7 +12,7 @@
 
 #include "Tile.h"
 
-typedef unsigned int TileId;
+typedef u32 TileId;
 typedef std::map<TileId, Tile> TTileMap;
 
 class Tileset

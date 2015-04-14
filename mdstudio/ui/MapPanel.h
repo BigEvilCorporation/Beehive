@@ -26,6 +26,7 @@ public:
 	void OnMouse(wxMouseEvent& event);
 	void OnPaint(wxPaintEvent& event);
 	void OnErase(wxEraseEvent& event);
+	void OnResize(wxSizeEvent& event);
 
 	//Set current project
 	void SetProject(Project* project);
@@ -38,6 +39,9 @@ private:
 
 	//Paint whole map to dc
 	void PaintMapToDc(wxDC& dc);
+
+	//Centre camera on canvas
+	void CentreCamera();
 
 	//Main project
 	Project* m_project;

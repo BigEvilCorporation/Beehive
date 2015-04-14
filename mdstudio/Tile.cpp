@@ -17,7 +17,7 @@ Tile::Tile()
 	m_palette = 0;
 	m_colourHash = 0;
 	m_collisionHash = 0;
-	ion::memory::MemSet(&m_pixels, 0, sizeof(Pixel) * pixelsPerTile);
+	m_pixels.resize(pixelsPerTile);
 }
 
 void Tile::SetPixelColour(int x, int y, u8 colourIdx)
@@ -63,12 +63,7 @@ void Tile::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_palette);
 	archive.Serialise(m_colourHash);
 	archive.Serialise(m_collisionHash);
-	
-	for(int i = 0; i < pixelsPerTile; i++)
-	{
-		archive.Serialise(m_pixels[i].colourIdx);
-		archive.Serialise(m_pixels[i].collisionBits);
-	}
+	archive.Serialise(m_pixels);
 }
 
 void Tile::ExportColour(std::stringstream& stream) const

@@ -8,6 +8,7 @@
 
 #include <io/Archive.h>
 #include <string>
+#include <vector>
 
 #include "Map.h"
 #include "Palette.h"
@@ -25,12 +26,15 @@ public:
 	Project();
 
 	//Load/save project
-	bool Load(const std::string& filename) { return false; }
-	bool Save(const std::string& filename) { return false; }
+	bool Load(const std::string& filename);
+	bool Save(const std::string& filename);
 
 	//Get/set name
 	const std::string& GetName() const { return m_name; }
 	void SetName(const std::string& name) { m_name = name; }
+
+	//Get filename
+	const std::string& GetFilename() { return m_filename; }
 
 	//Clear project (palettes, tiles, map)
 	void Clear();
@@ -64,7 +68,7 @@ public:
 	bool ExportMap(const std::string& filename) const;
 
 	//Serialise
-	void Serialise(ion::io::Archive& archive) {}
+	void Serialise(ion::io::Archive& archive);
 
 private:
 	//Find palette matching 8x8 colour grid
@@ -75,13 +79,16 @@ private:
 	//Project name
 	std::string m_name;
 
+	//Filename
+	std::string m_filename;
+
 	//Genesis map
 	Map m_map;
 
 	//Palettes
 	//TODO: Add/remove palettes
 	static const int numPalettes = 4;
-	Palette m_palettes[numPalettes];
+	std::vector<Palette> m_palettes;
 
 	//Tile used for painting
 	TileId m_paintTile;
