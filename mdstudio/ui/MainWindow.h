@@ -28,9 +28,13 @@ public:
 	void ShowPanelTiles();
 	void ShowPanelMap();
 
+	void RefreshAll();
+
 protected:
 	virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-	virtual void OnBtnProjSave( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnProjSave(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnProjSaveAs(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjExport(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event );
 	virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }

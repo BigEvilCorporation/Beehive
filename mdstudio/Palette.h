@@ -19,6 +19,12 @@ struct Colour
 	bool operator != (const Colour& rhs) const { return !(*this == rhs); }
 
 	u16 ToVDPFormat() const;
+	void Serialise(ion::io::Archive& archive)
+	{
+		archive.Serialise(r);
+		archive.Serialise(g);
+		archive.Serialise(b);
+	}
 
 	u8 r, g, b;
 };
@@ -50,6 +56,6 @@ public:
 	void Export(std::stringstream& stream) const;
 
 private:
-	Colour m_colours[coloursPerPalette];
+	std::vector<Colour> m_colours;
 	int m_numColours;
 };

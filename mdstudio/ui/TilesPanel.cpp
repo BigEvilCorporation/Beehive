@@ -35,7 +35,6 @@ TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
 void TilesPanel::SetProject(Project* project)
 {
 	m_project = project;
-	Refresh();
 }
 
 void TilesPanel::OnMouse(wxMouseEvent& event)
@@ -98,7 +97,7 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 				m_project->SetEraseTile(tileId);
 
 				//Invalidate old and new rects
-				InvalidateTileRect(m_currentSelectionLeft);
+				InvalidateTileRect(m_currentSelectionRight);
 				InvalidateTileRect(selection);
 
 				//Update selection
@@ -203,8 +202,6 @@ void TilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	{
 		//Full refresh, redraw tiles to canvas
 		InitPanel();
-
-		m_project->InvalidateTiles(false);
 	}
 
 	wxPanel::Refresh(eraseBackground, rect);
@@ -242,6 +239,8 @@ void TilesPanel::InitPanel()
 		//Paint all tiles to canvas
 		wxMemoryDC dc(m_canvas);
 		PaintAllToDc(dc);
+
+		m_project->InvalidateTiles(false);
 	}
 }
 

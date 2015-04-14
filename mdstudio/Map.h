@@ -31,7 +31,7 @@ public:
 	const Tileset& GetTileset() const;
 	Tileset& GetTileset();
 
-	void Serialise(ion::io::Archive& archive) {}
+	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
 
 private:

@@ -4,6 +4,7 @@
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
 
+#include <io/Archive.h>
 #include <wx/msgdlg.h>
 #include <set>
 
@@ -22,6 +23,7 @@ void Project::Clear()
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
 	m_name = "untitled";
+	m_palettes.resize(numPalettes);
 
 	for(int i = 0; i < numPalettes; i++)
 	{
@@ -30,6 +32,45 @@ void Project::Clear()
 
 	m_palettes[0].AddColour(Colour(255, 255, 255));
 	m_map.Clear();
+}
+
+bool Project::Load(const std::string& filename)
+{
+	ion::io::File file(filename, ion::io::File::OpenRead);
+	if(file.IsOpen())
+	{
+		ion::io::Archive archive(file, ion::io::Archive::In);
+		Serialise(archive);
+
+		InvalidateMap(true);
+		InvalidateTiles(true);
+
+		m_filename = filename;
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Project::Save(const std::string& filename)
+{
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		ion::io::Archive archive(file, ion::io::Archive::Out);
+		Serialise(archive);
+		m_filename = filename;
+		return true;
+	}
+
+	return false;
+}
+
+void Project::Serialise(ion::io::Archive& archive)
+{
+	archive.Serialise(m_palettes);
+	archive.Serialise(m_map);
 }
 
 void Project::SetPaintTile(TileId tile)
@@ -159,7 +200,7 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 	{
 		if(reader.GetWidth() % 8 != 0 || reader.GetHeight() % 8 != 0)
 		{
-			if(wxMessageBox("Bitmap width/height is not multiple of 8, image will be truncated", "Warning", wxOK | wxCANCEL) == wxCANCEL)
+			if(wxMessageBox("Bitmap width/height is not multiple of 8, image will be truncated", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
 			{
 				return false;
 			}
@@ -204,14 +245,14 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 					//No existing palette found, create new
 					if(newPaletteCount == numPalettes)
 					{
-						wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK);
+						wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK | wxICON_ERROR);
 						return false;
 					}
 
 					Palette importedPalette;
 					if(!ImportPalette(pixels, importedPalette))
 					{
-						wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK);
+						wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK | wxICON_ERROR);
 						return false;
 					}
 
@@ -258,7 +299,7 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 							if(!palette.GetNearestColourIdx(pixels[(pixelY * tileWidth) + pixelX], Palette::eExact, colourIdx))
 							{
 								//Shouldn't reach here - palette should have been validated
-								wxMessageBox("Error mapping colour indices", "Error", wxOK);
+								wxMessageBox("Error mapping colour indices", "Error", wxOK | wxICON_ERROR);
 								return false;
 							}
 

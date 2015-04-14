@@ -32,10 +32,15 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #define wxID_MAINWINDOW 1000
-#define wxID_BTN_TILES_IMPORT 1001
-#define wxID_BTN_TOOLS_MAPEDIT 1002
-#define wxID_BTN_TOOLS_TILES 1003
-#define wxID_BTN_TOOLS_PALETTES 1004
+#define wxID_BTN_PROJ_NEW 1001
+#define wxID_BTN_PROJ_OPEN 1002
+#define wxID_BTN_PROJ_SAVEAS 1003
+#define wxID_BTN_PROJ_SAVE 1004
+#define wxID_BTN_PROJ_EXPORT 1005
+#define wxID_BTN_TILES_IMPORT 1006
+#define wxID_BTN_TOOLS_MAPEDIT 1007
+#define wxID_BTN_TOOLS_TILES 1008
+#define wxID_BTN_TOOLS_PALETTES 1009
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -72,6 +77,8 @@ class MainWindowBase : public wxFrame
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnProjOpen( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnProjSaveAs( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjSave( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjExport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -84,7 +91,7 @@ class MainWindowBase : public wxFrame
 	
 	public:
 		
-		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("MD Studio"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 720,489 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
+		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEE v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 720,489 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowBase();
 	
