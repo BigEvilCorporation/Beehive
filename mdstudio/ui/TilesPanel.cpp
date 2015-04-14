@@ -19,6 +19,8 @@ TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
 	m_currentSelectionLeft = -1;
 	m_currentSelectionRight = -1;
 	m_tileCount = 0;
+	m_numCols = 0;
+	m_numRows = 0;
 
 	Bind(wxEVT_LEFT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_RIGHT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
@@ -54,8 +56,7 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 		int x = (int)floor(mousePosMapSpace.x / 8.0f);
 		int y = (int)floor(mousePosMapSpace.y / 8.0f);
 		wxSize clientSize = GetClientSize();
-		int numCols = (clientSize.x / 8) / m_zoom;
-		int selection = (y * numCols) + x;
+		int selection = (y * m_numCols) + x;
 
 		if(selection < m_project->GetMap().GetTileset().GetCount())
 		{
@@ -135,14 +136,6 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 
 void TilesPanel::OnPaint(wxPaintEvent& event)
 {
-	int tileCount = m_project ? m_project->GetMap().GetTileset().GetCount() : 0;
-	if(m_tileCount != tileCount)
-	{
-		//Tile count changed, redraw canvas
-		InitPanel();
-		m_tileCount = tileCount;
-	}
-
 	//Double buffered dest dc
 	wxAutoBufferedPaintDC destDC(this);
 
@@ -167,8 +160,7 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 	}
 
 	//Draw rectangles around current selections
-	int numCols = (GetClientSize().x / 8) / m_zoom;
-	if(m_tileCount && numCols > 0)
+	if(m_tileCount > 0)
 	{
 		destDC.SetBrush(*wxTRANSPARENT_BRUSH);
 
@@ -177,8 +169,8 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 			wxPen pen(*wxRED_PEN);
 			pen.SetWidth(2);
 			destDC.SetPen(pen);
-			int currSelectionY = ((m_currentSelectionLeft / numCols) * 8 * m_zoom) - scrollOffset.y;
-			int currSelectionX = (m_currentSelectionLeft % numCols) * 8 * m_zoom;
+			int currSelectionY = ((m_currentSelectionLeft / m_numCols) * 8 * m_zoom) - scrollOffset.y;
+			int currSelectionX = (m_currentSelectionLeft % m_numCols) * 8 * m_zoom;
 			destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
 		}
 
@@ -187,8 +179,8 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 			wxPen pen(*wxYELLOW_PEN);
 			pen.SetWidth(2);
 			destDC.SetPen(pen);
-			int currSelectionY = ((m_currentSelectionRight / numCols) * 8 * m_zoom) - scrollOffset.y;
-			int currSelectionX = (m_currentSelectionRight % numCols) * 8 * m_zoom;
+			int currSelectionY = ((m_currentSelectionRight / m_numCols) * 8 * m_zoom) - scrollOffset.y;
+			int currSelectionX = (m_currentSelectionRight % m_numCols) * 8 * m_zoom;
 			destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
 		}
 	}
@@ -222,20 +214,30 @@ void TilesPanel::InitPanel()
 {
 	if(m_project)
 	{
-		//Update frame title
+		//Update tile count
 		m_tileCount = m_project->GetMap().GetTileset().GetCount();
+		m_numCols = ion::maths::Ceil(((float)GetClientSize().x / 8.0f) / m_zoom);
+		m_numRows = m_numCols > 0 ? ion::maths::Ceil((float)m_tileCount / (float)m_numCols) : 0;
+
+		//Update frame title
 		std::stringstream name;
 		name << "Tiles (" << m_tileCount << ")";
 		SetLabel(name.str());
 
-		//Update scroll page size and scroll rate
-		int numCols = (GetClientSize().x / 8) / m_zoom;
-		int scrollPageHeight = max(numCols > 0 ? ((m_tileCount / numCols) * 8 * m_zoom) : 0, 8 * m_zoom);
-		SetVirtualSize(wxSize(GetClientSize().x, scrollPageHeight));
-		GetScrollHelper()->SetScrollRate(0, 8 * m_zoom);
+		//Set pixels per scroll unit, scroll rate and num units
+		int pixelsPerScrollUnitY = 8 * m_zoom;
+		GetScrollHelper()->SetScrollbars(1, pixelsPerScrollUnitY, 1, m_numRows, 0, 0, true);
+		GetScrollHelper()->SetScrollRate(0, 1);
+
+		//Calc canvas size
+		int scrollPageHeight = max(pixelsPerScrollUnitY * m_numRows, 8 * m_zoom);
+		wxSize canvasSize(GetClientSize().x, scrollPageHeight);
+
+		//Set scroll page size
+		SetVirtualSize(canvasSize);
 
 		//Recreate local canvas
-		m_canvas = wxBitmap(GetClientSize().x, scrollPageHeight);
+		m_canvas = wxBitmap(canvasSize);
 
 		//Paint all tiles to canvas
 		wxMemoryDC dc(m_canvas);
@@ -248,9 +250,8 @@ void TilesPanel::InvalidateTileRect(int tileId)
 	if(tileId >= 0)
 	{
 		wxPoint scrollOffset = GetScrollHelper()->CalcUnscrolledPosition(wxPoint());
-		int numCols = (GetClientSize().x / 8) / m_zoom;
-		int tileY = (tileId / numCols) * 8 * m_zoom;
-		int tileX = (tileId % numCols) * 8 * m_zoom;
+		int tileY = (tileId / m_numCols) * 8 * m_zoom;
+		int tileX = (tileId % m_numCols) * 8 * m_zoom;
 		RefreshRect(wxRect(tileX - 1, tileY - 1 - scrollOffset.y, (8 * m_zoom) + 1, (8 * m_zoom) + 1));
 	}
 }
@@ -267,16 +268,13 @@ void TilesPanel::PaintAllToDc(wxDC& dc)
 		dc.SetBrush(*wxBLACK_BRUSH);
 		dc.DrawRectangle(canvasRect);
 
-		m_tileCount = m_project->GetMap().GetTileset().GetCount();
-		int numCols = (GetClientSize().x / 8) / m_zoom;
-
-		if(numCols > 0)
+		if(m_numCols > 0)
 		{
 			int i = 0;
 			for(auto it = m_project->GetMap().GetTileset().Begin(), end = m_project->GetMap().GetTileset().End(); it != end; ++it, ++i)
 			{
-				int y = i / numCols;
-				int x = i % numCols;
+				int y = i / m_numCols;
+				int x = i % m_numCols;
 
 				const Palette* palette = m_project->GetPalette(it->second.GetPaletteId());
 				if(palette)
@@ -286,8 +284,8 @@ void TilesPanel::PaintAllToDc(wxDC& dc)
 			}
 
 			//Scale canvas
-			int originalWidth = numCols * 8;
-			int originalHeight = (m_tileCount / numCols) * 8;
+			int originalWidth = m_numCols * 8;
+			int originalHeight = m_numRows * 8;
 			wxRect sourceRect(0, 0, originalWidth, originalHeight);
 			wxRect destRect(0, 0, originalWidth * m_zoom, originalHeight * m_zoom);
 
