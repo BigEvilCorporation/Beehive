@@ -18,9 +18,9 @@ PalettesPanel::PalettesPanel(	wxWindow *parent,
 {
 	m_project = NULL;
 
-	Bind(wxEVT_LEFT_DOWN,		&PalettesPanel::OnMouse, this, wxID_PALETTESPANEL);
-	Bind(wxEVT_PAINT,			&PalettesPanel::OnPaint, this, wxID_PALETTESPANEL);
-	Bind(wxEVT_ERASE_BACKGROUND,&PalettesPanel::OnErase, this, wxID_PALETTESPANEL);
+	Bind(wxEVT_LEFT_DOWN,		&PalettesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_PAINT,			&PalettesPanel::OnPaint, this, GetId());
+	Bind(wxEVT_ERASE_BACKGROUND,&PalettesPanel::OnErase, this, GetId());
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }

@@ -18,10 +18,10 @@ TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
 	m_currentSelectionRight = -1;
 	m_tileCount = 0;
 
-	Bind(wxEVT_LEFT_DOWN,		&TilesPanel::OnMouse, this, wxID_TILESPANEL);
-	Bind(wxEVT_RIGHT_DOWN,		&TilesPanel::OnMouse, this, wxID_TILESPANEL);
-	Bind(wxEVT_PAINT,			&TilesPanel::OnPaint, this, wxID_TILESPANEL);
-	Bind(wxEVT_ERASE_BACKGROUND,&TilesPanel::OnErase, this, wxID_TILESPANEL);
+	Bind(wxEVT_LEFT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_RIGHT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_PAINT,			 &TilesPanel::OnPaint, this, GetId());
+	Bind(wxEVT_ERASE_BACKGROUND, &TilesPanel::OnErase, this, GetId());
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
@@ -93,7 +93,7 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 		m_tileCount = m_project->GetMap().GetTileset().GetCount();
 		std::stringstream name;
 		name << "Tiles (" << m_tileCount << ")";
-		GetParent()->SetLabel(name.str());
+		SetLabel(name.str());
 	}
 
 	//Double buffered dest dc
@@ -115,7 +115,7 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 	wxMemoryDC sourceDC(canvas);
 
 	//Paint tiles to source dc
-	if(numCols > 0)
+	if(numTiles > 0 && numCols > 0)
 	{
 		int i = 0;
 		for(auto it = m_project->GetMap().GetTileset().Begin(), end = m_project->GetMap().GetTileset().End(); it != end; ++it, ++i)
@@ -129,36 +129,36 @@ void TilesPanel::OnPaint(wxPaintEvent& event)
 				tilerendering::PaintTileToDc(x, y, it->second, *palette, sourceDC);
 			}
 		}
-	}
 
-	//Paint scaled tiles to dest dc
-	wxRect sourceRect(0, 0, clientRect.width, clientRect.height);
-	wxRect destRect(0, 0, clientRect.width * m_zoom, clientRect.height * m_zoom);
-		
-	//Copy rect from canvas
-	destDC.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &sourceDC, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
+		//Paint scaled tiles to dest dc
+		wxRect sourceRect(0, 0, clientRect.width, clientRect.height);
+		wxRect destRect(0, 0, clientRect.width * m_zoom, clientRect.height * m_zoom);
 
-	//Draw rectangles around current selections
-	destDC.SetBrush(*wxTRANSPARENT_BRUSH);
+		//Copy rect from canvas
+		destDC.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &sourceDC, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
 
-	if(m_currentSelectionLeft > -1)
-	{
-		wxPen pen(*wxRED_PEN);
-		pen.SetWidth(2);
-		destDC.SetPen(pen);
-		int currSelectionY = (m_currentSelectionLeft / numCols) * 8 * m_zoom;
-		int currSelectionX = (m_currentSelectionLeft % numCols) * 8 * m_zoom;
-		destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
-	}
+		//Draw rectangles around current selections
+		destDC.SetBrush(*wxTRANSPARENT_BRUSH);
 
-	if(m_currentSelectionRight > -1)
-	{
-		wxPen pen(*wxYELLOW_PEN);
-		pen.SetWidth(2);
-		destDC.SetPen(pen);
-		int currSelectionY = (m_currentSelectionRight / numCols) * 8 * m_zoom;
-		int currSelectionX = (m_currentSelectionRight % numCols) * 8 * m_zoom;
-		destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
+		if(m_currentSelectionLeft > -1)
+		{
+			wxPen pen(*wxRED_PEN);
+			pen.SetWidth(2);
+			destDC.SetPen(pen);
+			int currSelectionY = (m_currentSelectionLeft / numCols) * 8 * m_zoom;
+			int currSelectionX = (m_currentSelectionLeft % numCols) * 8 * m_zoom;
+			destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
+		}
+
+		if(m_currentSelectionRight > -1)
+		{
+			wxPen pen(*wxYELLOW_PEN);
+			pen.SetWidth(2);
+			destDC.SetPen(pen);
+			int currSelectionY = (m_currentSelectionRight / numCols) * 8 * m_zoom;
+			int currSelectionX = (m_currentSelectionRight % numCols) * 8 * m_zoom;
+			destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
+		}
 	}
 }
 

@@ -6,10 +6,13 @@
 
 #pragma once
 
+#include <wx/aui/aui.h>
+
 #include "UIBase.h"
-#include "ToolboxTiles.h"
-#include "ToolboxMapEdit.h"
-#include "ToolboxPalettes.h"
+
+#include "PalettesPanel.h"
+#include "TilesPanel.h"
+#include "MapPanel.h"
 
 #include "../Project.h"
 
@@ -21,9 +24,9 @@ public:
 
 	void SetProject(Project* project);
 
-	void ShowToolboxTiles();
-	void ShowToolboxMapEdit();
-	void ShowToolboxPalettes();
+	void ShowPanelPalettes();
+	void ShowPanelTiles();
+	void ShowPanelMap();
 
 protected:
 	virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -37,9 +40,11 @@ protected:
 	virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event );
 
 private:
-	wxWeakRef<ToolboxMapEdit> m_toolboxMapEdit;
-	wxWeakRef<ToolboxTiles> m_toolboxTiles;
-	wxWeakRef<ToolboxPalettes> m_toolboxPalettes;
+	wxAuiManager m_auiManager;
+
+	wxWeakRef<PalettesPanel> m_palettesPanel;
+	wxWeakRef<TilesPanel> m_tilesPanel;
+	wxWeakRef<MapPanel> m_mapPanel;
 
 	Project* m_project;
 };
