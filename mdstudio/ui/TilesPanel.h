@@ -43,7 +43,10 @@ private:
 	float m_zoom;
 	int m_currentSelectionLeft;
 	int m_currentSelectionRight;
+
 	int m_tileCount;
+	int m_numCols;
+	int m_numRows;
 
 	//Local drawing canvas
 	wxBitmap m_canvas;
