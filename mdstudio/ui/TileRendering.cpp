@@ -6,12 +6,17 @@
 
 #include "TileRendering.h"
 
-namespace tilerendering
+TileRenderer::TTileCacheMap TileRenderer::s_tileCache;
+
+void TileRenderer::PaintTileToDc(int x, int y, const Tile& tile, const Palette& palette, u32 tileFlags, wxMemoryDC& dc)
 {
-	void PaintTileToDc(int x, int y, const Tile& tile, const Palette& palette, wxDC& dc)
+	TTileCacheMap::iterator it = s_tileCache.find(tile.GetColourHash());
+	if(it == s_tileCache.end())
 	{
-		int startPixelX = x * 8;
-		int startPixelY = y * 8;
+		//First use of tile, draw and cache bitmap
+		it = s_tileCache.insert(std::make_pair(tile.GetColourHash(), wxBitmap(8, 8))).first;
+
+		wxMemoryDC cacheDC(it->second);
 
 		wxPen pen;
 		pen.SetWidth(1);
@@ -24,9 +29,36 @@ namespace tilerendering
 
 				const Colour& colour = palette.GetColour(colourIdx);
 				pen.SetColour(wxColour(colour.r, colour.g, colour.b, 1.0f));
-				dc.SetPen(pen);
-				dc.DrawPoint(startPixelX + tileX, startPixelY + tileY);
+				cacheDC.SetPen(pen);
+				cacheDC.DrawPoint(tileX, tileY);
 			}
 		}
+	}
+
+	wxRect sourceRect(0, 0, 8, 8);
+	wxRect destRect(x * 8, y * 8, 8, 8);
+	wxMemoryDC cacheDC(it->second);
+
+	//Blit to destination dc
+	if(tileFlags & Map::eFlipX || tileFlags & Map::eFlipY)
+	{
+		if(tileFlags & Map::eFlipX)
+		{
+			//sourceRect.x = 8;
+			//sourceRect.width = -1;
+		}
+
+		if(tileFlags & Map::eFlipY)
+		{
+			//sourceRect.y = 8;
+			//sourceRect.height = -1;
+		}
+
+		dc.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &cacheDC, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
+	}
+	else
+	{
+		//Ni flipping, non-scaled blit is faster
+		dc.Blit(destRect.x, destRect.y, destRect.width, destRect.height, &cacheDC, sourceRect.x, sourceRect.y);
 	}
 }

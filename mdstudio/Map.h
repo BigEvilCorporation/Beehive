@@ -17,6 +17,13 @@ public:
 	static const int defaultWidth = 64;
 	static const int defaultHeight = 64;
 
+	enum TileFlags
+	{
+		eFlipX = 1<<0,
+		eFlipY = 1<<1,
+		eHighPlane = 1<<2
+	};
+
 	Map();
 
 	void Clear();
@@ -28,6 +35,9 @@ public:
 	void SetTile(int x, int y, TileId tile);
 	TileId GetTile(int x, int y) const;
 
+	void SetTileFlags(int x, int y, u32 flags);
+	u32 GetTileFlags(int x, int y) const;
+
 	const Tileset& GetTileset() const;
 	Tileset& GetTileset();
 
@@ -38,6 +48,20 @@ private:
 	int m_width;
 	int m_height;
 
+	struct TileDesc
+	{
+		TileDesc() { m_id = 0; m_flags = eFlipX; }
+
+		void Serialise(ion::io::Archive& archive)
+		{
+			archive.Serialise(m_id);
+			archive.Serialise(m_flags);
+		}
+
+		TileId m_id;
+		u32 m_flags;
+	};
+
 	Tileset m_tileset;
-	std::vector<TileId> m_tiles;
+	std::vector<TileDesc> m_tiles;
 };

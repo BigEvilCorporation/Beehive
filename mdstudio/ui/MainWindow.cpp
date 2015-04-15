@@ -24,7 +24,7 @@ MainWindow::MainWindow()
 {
 	m_auiManager.SetManagedWindow(m_dockArea);
 	m_project = NULL;
-	SetStatusText("Welcome to BEE!");
+	SetStatusText("Big Evil Editor v0.1");
 }
 
 MainWindow::~MainWindow()
