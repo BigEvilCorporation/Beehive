@@ -38,7 +38,7 @@ private:
 	void PaintTile(ion::Vector2 mousePos, TileId tile);
 
 	//Paint whole map to dc
-	void PaintMapToDc(wxDC& dc);
+	void PaintMapToDc(wxMemoryDC& dc);
 
 	//Centre camera on canvas
 	void CentreCamera();

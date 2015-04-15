@@ -34,7 +34,7 @@ private:
 	void InitPanel();
 
 	//Paint all tiles to dc
-	void PaintAllToDc(wxDC& dc);
+	void PaintAllToDc(wxMemoryDC& dc);
 
 	//Invalidate tile rect
 	void InvalidateTileRect(int tileId);

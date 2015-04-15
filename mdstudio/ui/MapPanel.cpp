@@ -227,10 +227,12 @@ void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)
 		//Paint tile to canvas dc
 		if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
 		{
+			u32 tileFlags = m_project->GetMap().GetTileFlags(x, y);
+
 			if(const Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
 			{
 				wxMemoryDC dc(m_canvas);
-				tilerendering::PaintTileToDc(x, y, *tile, *palette, dc);
+				TileRenderer::PaintTileToDc(x, y, *tile, *palette, tileFlags, dc);
 			}
 		}
 		
@@ -244,7 +246,7 @@ void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)
 	}
 }
 
-void MapPanel::PaintMapToDc(wxDC& dc)
+void MapPanel::PaintMapToDc(wxMemoryDC& dc)
 {
 	if(m_project)
 	{
@@ -255,9 +257,11 @@ void MapPanel::PaintMapToDc(wxDC& dc)
 				TileId tileId = m_project->GetMap().GetTile(x, y);
 				if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
 				{
+					u32 tileFlags = m_project->GetMap().GetTileFlags(x, y);
+
 					if(const Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
 					{
-						tilerendering::PaintTileToDc(x, y, *tile, *palette, dc);
+						TileRenderer::PaintTileToDc(x, y, *tile, *palette, tileFlags, dc);
 					}
 				}
 			}

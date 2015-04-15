@@ -23,7 +23,7 @@ void Map::Clear()
 	//Fill background
 	for(int i = 0; i < m_tiles.size(); i++)
 	{
-		m_tiles[i] = backgroundId;
+		m_tiles[i].m_id = backgroundId;
 	}
 }
 
@@ -57,14 +57,28 @@ void Map::SetTile(int x, int y, TileId tile)
 {
 	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
-	m_tiles[tileIdx] = tile;
+	m_tiles[tileIdx].m_id = tile;
 }
 
 TileId Map::GetTile(int x, int y) const
 {
 	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
-	return m_tiles[tileIdx];
+	return m_tiles[tileIdx].m_id;
+}
+
+void Map::SetTileFlags(int x, int y, u32 flags)
+{
+	int tileIdx = (y * m_width) + x;
+	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
+	m_tiles[tileIdx].m_flags = flags;
+}
+
+u32 Map::GetTileFlags(int x, int y) const
+{
+	int tileIdx = (y * m_width) + x;
+	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
+	return m_tiles[tileIdx].m_flags;
 }
 
 const Tileset& Map::GetTileset() const
@@ -88,7 +102,7 @@ void Map::Export(std::stringstream& stream) const
 		for(int x = 0; x < m_width; x++)
 		{
 			//TODO: V/H flip bits
-			u8 byte = m_tiles[(y * m_width) + x];
+			u8 byte = m_tiles[(y * m_width) + x].m_id;
 			stream << "0x" << std::setw(2) << (u32)byte;
 
 			if(x < (m_width - 1))

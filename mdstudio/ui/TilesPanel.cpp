@@ -255,7 +255,7 @@ void TilesPanel::InvalidateTileRect(int tileId)
 	}
 }
 
-void TilesPanel::PaintAllToDc(wxDC& dc)
+void TilesPanel::PaintAllToDc(wxMemoryDC& dc)
 {
 	if(m_project)
 	{
@@ -278,7 +278,7 @@ void TilesPanel::PaintAllToDc(wxDC& dc)
 				const Palette* palette = m_project->GetPalette(it->second.GetPaletteId());
 				if(palette)
 				{
-					tilerendering::PaintTileToDc(x, y, it->second, *palette, dc);
+					TileRenderer::PaintTileToDc(x, y, it->second, *palette, 0, dc);
 				}
 			}
 
