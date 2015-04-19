@@ -44,9 +44,12 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	//Create renderer (no panel size yet, init with a default)
 	m_renderer = ion::render::Renderer::Create(windowHandle, m_context->GetGLRC(), 320, 240);
 
+	//Set 2D orthographic mode
+	m_renderer->SetPerspectiveMode(ion::render::Renderer::Ortho2DAbsolute);
+
 	//Create camera
 	m_camera = new ion::render::Camera();
-	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 2.0f));
+	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 1.0f));
 
 	//Set scene clear colour
 	m_renderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
@@ -69,11 +72,12 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	//Create default material
 	m_material = new ion::render::Material();
 	m_material->AddDiffuseMap(m_tilesetTextureHndl);
-	m_material->SetDiffuseColour(ion::Colour(0.7f, 0.1f, 0.1f));
+	m_material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 	m_material->SetVertexShader(m_vertexShader);
 	m_material->SetPixelShader(m_pixelShader);
 
 	//Create rendering primitive
+	//m_primitive = new ion::render::Quad(ion::render::Quad::xz, ion::Vector2(50.0f, 50.0f));
 	m_primitive = new ion::render::Box(ion::Vector3(0.5f, 0.5f, 0.5f));
 }
 
@@ -105,7 +109,7 @@ void MapPanel::SetProject(Project* project)
 	u32 textureHeight = tilesetSizeSqrt * tileHeight;
 	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
 
-	char* data = new char[textureSize];
+	u8* data = new u8[textureSize];
 	ion::memory::MemSet(data, 0, textureSize);
 
 	u32 i = 0;
@@ -116,8 +120,8 @@ void MapPanel::SetProject(Project* project)
 		PaletteId paletteId = tile.GetPaletteId();
 		Palette* palette = m_project->GetPalette(paletteId);
 
-		u32 x = i % numTiles;
-		u32 y = i / numTiles;
+		u32 x = i % tilesetSizeSqrt;
+		u32 y = i / tilesetSizeSqrt;
 
 		for(int pixelX = 0; pixelX < 8; pixelX++)
 		{

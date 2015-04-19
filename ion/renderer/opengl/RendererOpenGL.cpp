@@ -52,6 +52,7 @@ namespace ion
 
 		RendererOpenGL::RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 			: Renderer(windowTitle, windowWidth, windowHeight, fullscreen)
+			, m_perspectiveMode(Perspective3D)
 		{
 			//Create window
 			CreateWindow(windowTitle, windowWidth, windowHeight, fullscreen);
@@ -65,6 +66,7 @@ namespace ion
 
 		RendererOpenGL::RendererOpenGL(HWND window, int windowWidth, int windowHeight)
 			: Renderer("", windowWidth, windowHeight, false)
+			, m_perspectiveMode(Perspective3D)
 		{
 			mWindow = NULL;
 
@@ -80,6 +82,7 @@ namespace ion
 
 		RendererOpenGL::RendererOpenGL(HWND window, HGLRC context, int windowWidth, int windowHeight)
 			: Renderer("", windowWidth, windowHeight, false)
+			, m_perspectiveMode(Perspective3D)
 		{
 			mWindow = NULL;
 
@@ -142,10 +145,14 @@ namespace ion
 			}
 		}
 
-		void RendererOpenGL::InitContext(int windowWidth, int windowHeight)
+		void RendererOpenGL::InitContext(int viewportWidth, int viewportHeight)
 		{
 			//Set as current context
 			wglMakeCurrent(sDrawContext, sOpenGLContext);
+			
+			//Set viewport width/height
+			m_viewportWidth = viewportWidth;
+			m_viewportHeight = viewportHeight;
 
 			//Get version
 			const char* version = (const char*)glGetString(GL_VERSION);
@@ -185,7 +192,7 @@ namespace ion
 			glBlendFunc(GL_ONE, GL_ONE);
 
 			//Call resize to setup viewport
-			OnResize(windowWidth, windowHeight);
+			OnResize(viewportWidth, viewportHeight);
 
 			//Check for OpenGL errors
 			if(!CheckGLError())
@@ -265,6 +272,9 @@ namespace ion
 				mWindow->Resize(width, height);
 			}
 
+			m_viewportWidth = width;
+			m_viewportHeight = height;
+
 			//Set the viewport
 			glViewport(0, 0, width, height);
 
@@ -275,7 +285,24 @@ namespace ion
 			glLoadIdentity();
 
 			//Calculate aspect ratio
-			gluPerspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 10000.0f);
+			float aspectRatio = (float)width / (float)height;
+
+			//Set perspective mode
+			switch(m_perspectiveMode)
+			{
+			case Perspective3D:
+				//TODO: Expose FOV and near/far
+				gluPerspective(45.0f, aspectRatio, 0.1f, 10000.0f);
+				break;
+
+			case Ortho2DNormalised:
+				glOrtho(0.0, 1.0f, 0.0, 1.0f, -1.0, 1.0);
+				break;
+
+			case Ortho2DAbsolute:
+				glOrtho(0, (float)width, 0, (float)height, -1.0, 1.0);
+				break;
+			}
 
 			//Select the modelview matrix
 			glMatrixMode(GL_MODELVIEW);
@@ -348,6 +375,12 @@ namespace ion
 			glClearColor(colour.r, colour.g, colour.b, colour.a);
 
 			UnlockGLContext();
+		}
+
+		void RendererOpenGL::SetPerspectiveMode(PerspectiveMode perspectiveMode)
+		{
+			m_perspectiveMode = perspectiveMode;
+			OnResize(m_viewportWidth, m_viewportHeight);
 		}
 
 		void RendererOpenGL::SetAlphaBlending(AlphaBlendType alphaBlendType)

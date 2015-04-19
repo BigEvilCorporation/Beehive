@@ -65,7 +65,7 @@ namespace ion
 				}
 				
 				//Load image to OpenGL texture
-				Load(mWidth, mHeight, format, BitsPerPixel(sdlSurface->format->BytesPerPixel * 8), (const char*)sdlSurface->pixels);
+				Load(mWidth, mHeight, format, BitsPerPixel(sdlSurface->format->BytesPerPixel * 8), (const u8*)sdlSurface->pixels);
 
 				//Free SDL surface
 				SDL_FreeSurface(sdlSurface);
@@ -74,7 +74,7 @@ namespace ion
 			return mGLTextureId != 0;
 		}
 
-		bool TextureOpenGL::Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const char* data)
+		bool TextureOpenGL::Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data)
 		{
 			//GL thread safety
 			RendererOpenGL::LockGLContext();
