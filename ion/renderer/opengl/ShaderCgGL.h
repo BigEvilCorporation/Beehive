@@ -61,7 +61,7 @@ namespace ion
 				CGparameter mCgParam;
 			};
 
-			virtual bool Load();
+			virtual bool Load(const std::string& shaderDirectory);
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName);
 
 			CGprogram mCgProgram;

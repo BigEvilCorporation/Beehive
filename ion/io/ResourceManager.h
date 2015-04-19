@@ -34,6 +34,9 @@ namespace ion
 			//Get resource handle
 			template <class T> ResourceHandle<T> GetResource(const std::string& filename);
 
+			//Manually add resource
+			template <class T> ResourceHandle<T> AddResource(const std::string& filename, T& resourceObject);
+
 			//Get number of resources in thread queue
 			u32 GetNumResourcesWaiting() const;
 
@@ -140,6 +143,23 @@ namespace ion
 			{
 				std::pair<std::map<std::string, Resource*>::iterator, bool> result = mResourceMap.insert(std::pair<std::string, Resource*>(filename, new ResourceT<T>(*this, filename)));
 				it = result.first;
+			}
+
+			return ResourceHandle<T>((ResourceT<T>*)it->second);
+		}
+
+		template <class T> ResourceHandle<T> ResourceManager::AddResource(const std::string& filename, T& resourceObject)
+		{
+			std::map<std::string, Resource*>::iterator it = mResourceMap.find(filename);
+
+			if(it == mResourceMap.end())
+			{
+				std::pair<std::map<std::string, Resource*>::iterator, bool> result = mResourceMap.insert(std::pair<std::string, Resource*>(filename, new ResourceT<T>(*this, filename, &resourceObject)));
+				it = result.first;
+			}
+			else
+			{
+				ion::debug::Error("ResourceManager::AddResource() - Resource already exists");
 			}
 
 			return ResourceHandle<T>((ResourceT<T>*)it->second);

@@ -8,6 +8,8 @@
 
 #include <wx/aui/aui.h>
 
+#include <ion/io/ResourceManager.h>
+
 #include "UIBase.h"
 
 #include "PalettesPanel.h"
@@ -19,7 +21,7 @@
 class MainWindow : public MainWindowBase
 {
 public:
-	MainWindow();
+	MainWindow(ion::io::ResourceManager& resourceManager);
 	virtual ~MainWindow();
 
 	void SetProject(Project* project);
@@ -44,6 +46,8 @@ protected:
 	virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event );
 
 private:
+	ion::io::ResourceManager& m_resourceManager;
+
 	wxAuiManager m_auiManager;
 
 	wxWeakRef<PalettesPanel> m_palettesPanel;

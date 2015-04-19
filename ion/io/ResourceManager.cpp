@@ -46,7 +46,7 @@ namespace ion
 			if(thread::GetCurrentThreadId() == mWorkerThread->GetId())
 			{
 				//Already on worker thread, do job immediately
-				resource.Load();
+				resource.Unload();
 			}
 			else
 			{

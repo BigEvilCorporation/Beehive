@@ -230,9 +230,9 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 				{
 					for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 					{
-						int soucePixelX = (tileX * tileWidth) + pixelX;
-						int soucePixelY = (tileY * tileHeight) + pixelY;
-						pixels[(pixelY * tileWidth) + pixelX] = reader.GetPixel(soucePixelX, soucePixelY);
+						int sourcePixelX = (tileX * tileWidth) + pixelX;
+						int sourcePixelY = (tileY * tileHeight) + pixelY;
+						pixels[(pixelY * tileWidth) + pixelX] = reader.GetPixel(sourcePixelX, sourcePixelY);
 					}
 				}
 

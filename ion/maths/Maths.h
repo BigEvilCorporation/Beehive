@@ -32,7 +32,7 @@ namespace ion
 		int Round(double x);
 		float RoundToNearest(float value, int nearest);
 		int NextPowerOfTwo(int x);
-
+		float Sqrt(float value);
 		float Floor(float value);
 		float Ceil(float value);
 		float Clamp(float value, float min, float max);

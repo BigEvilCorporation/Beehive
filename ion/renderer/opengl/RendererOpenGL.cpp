@@ -40,8 +40,66 @@ namespace ion
 			return new RendererOpenGL(windowTitle, windowWidth, windowHeight, fullscreen);
 		}
 
+		Renderer* Renderer::Create(HWND window, int windowWidth, int windowHeight)
+		{
+			return new RendererOpenGL(window, windowWidth, windowHeight);
+		}
+
+		Renderer* Renderer::Create(HWND window, HGLRC context, int windowWidth, int windowHeight)
+		{
+			return new RendererOpenGL(window, windowWidth, windowHeight);
+		}
+
 		RendererOpenGL::RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 			: Renderer(windowTitle, windowWidth, windowHeight, fullscreen)
+		{
+			//Create window
+			CreateWindow(windowTitle, windowWidth, windowHeight, fullscreen);
+
+			//Create OpenGL context
+			CreateContext();
+
+			//Init context
+			InitContext(windowWidth, windowHeight);
+		}
+
+		RendererOpenGL::RendererOpenGL(HWND window, int windowWidth, int windowHeight)
+			: Renderer("", windowWidth, windowHeight, false)
+		{
+			mWindow = NULL;
+
+			//Get window draw context
+			sDrawContext = GetWindowDC(window);
+
+			//Create OpenGL context
+			CreateContext();
+
+			//Init context
+			InitContext(windowWidth, windowHeight);
+		}
+
+		RendererOpenGL::RendererOpenGL(HWND window, HGLRC context, int windowWidth, int windowHeight)
+			: Renderer("", windowWidth, windowHeight, false)
+		{
+			mWindow = NULL;
+
+			//Get window draw context
+			sDrawContext = GetWindowDC(window);
+
+			//Using existing OpenGL context
+			sOpenGLContext = context;
+
+			//Init context
+			InitContext(windowWidth, windowHeight);
+		}
+
+		RendererOpenGL::~RendererOpenGL()
+		{
+			delete mShaderManager;
+			delete mWindow;
+		}
+
+		void RendererOpenGL::CreateWindow(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
 		{
 			//Create window
 			mWindow = new WindowWin32(windowTitle, windowWidth, windowHeight, fullscreen);
@@ -50,10 +108,10 @@ namespace ion
 			sDrawContext = mWindow->GetDrawContext();
 
 			//Create pixel format descriptor
-			PIXELFORMATDESCRIPTOR pixelFormatDesc = {0};
+			PIXELFORMATDESCRIPTOR pixelFormatDesc = { 0 };
 			pixelFormatDesc.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 			pixelFormatDesc.nVersion = 1;
-			pixelFormatDesc.dwFlags =  PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+			pixelFormatDesc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 			pixelFormatDesc.iPixelType = PFD_TYPE_RGBA;
 			pixelFormatDesc.cColorBits = 32;
 			pixelFormatDesc.cDepthBits = 24;
@@ -72,14 +130,20 @@ namespace ion
 			{
 				debug::Error("Could not set pixel format");
 			}
+		}
 
+		void RendererOpenGL::CreateContext()
+		{
 			//Create OpenGL context
 			sOpenGLContext = wglCreateContext(sDrawContext);
 			if(!sOpenGLContext)
 			{
 				debug::Error("Could not create OpenGL context");
 			}
+		}
 
+		void RendererOpenGL::InitContext(int windowWidth, int windowHeight)
+		{
 			//Set as current context
 			wglMakeCurrent(sDrawContext, sOpenGLContext);
 
@@ -87,18 +151,18 @@ namespace ion
 			const char* version = (const char*)glGetString(GL_VERSION);
 
 			//Intialise OpenGL extensions
-			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) wglGetProcAddress("glActiveTextureARB");
-			glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC) wglGetProcAddress("glGenFramebuffersEXT");
-			glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC) wglGetProcAddress("glBindFramebufferEXT");
-			glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC) wglGetProcAddress("glGenRenderbuffersEXT");
-			glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC) wglGetProcAddress("glBindRenderbufferEXT");
-			glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC) wglGetProcAddress("glRenderbufferStorageEXT");
-			glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) wglGetProcAddress("glFramebufferRenderbufferEXT");
-			glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) wglGetProcAddress("glFramebufferTexture2DEXT");
-			glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) wglGetProcAddress("glCheckFramebufferStatusEXT");
-			glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC) wglGetProcAddress("glDeleteFramebuffersEXT");
-			glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC) wglGetProcAddress("glDeleteRenderbuffersEXT");
-			glDrawBuffers = (PFNGLDRAWBUFFERSPROC) wglGetProcAddress("glDrawBuffers");
+			glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
+			glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)wglGetProcAddress("glGenFramebuffersEXT");
+			glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)wglGetProcAddress("glBindFramebufferEXT");
+			glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)wglGetProcAddress("glGenRenderbuffersEXT");
+			glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)wglGetProcAddress("glBindRenderbufferEXT");
+			glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)wglGetProcAddress("glRenderbufferStorageEXT");
+			glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)wglGetProcAddress("glFramebufferRenderbufferEXT");
+			glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)wglGetProcAddress("glFramebufferTexture2DEXT");
+			glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)wglGetProcAddress("glCheckFramebufferStatusEXT");
+			glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)wglGetProcAddress("glDeleteFramebuffersEXT");
+			glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)wglGetProcAddress("glDeleteRenderbuffersEXT");
+			glDrawBuffers = (PFNGLDRAWBUFFERSPROC)wglGetProcAddress("glDrawBuffers");
 
 			//Background colour
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -135,12 +199,6 @@ namespace ion
 
 			//Create shader manager
 			mShaderManager = ShaderManager::Create();
-		}
-
-		RendererOpenGL::~RendererOpenGL()
-		{
-			delete mShaderManager;
-			delete mWindow;
 		}
 
 		Window* RendererOpenGL::GetWindow() const
@@ -202,7 +260,10 @@ namespace ion
 			}
 
 			//Resize window
-			mWindow->Resize(width, height);
+			if(mWindow)
+			{
+				mWindow->Resize(width, height);
+			}
 
 			//Set the viewport
 			glViewport(0, 0, width, height);

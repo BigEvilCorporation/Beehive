@@ -7,17 +7,22 @@
 #include <wx/setup.h>
 #include <wx/wx.h>
 
+#include <ion/io/ResourceManager.h>
+
 class MainWindow;
 
 class MDStudioWxApp : public wxApp
 {
 public:
-	MDStudioWxApp();
+	MDStudioWxApp(ion::io::ResourceManager& resourceManager);
 	virtual ~MDStudioWxApp();
 
 	virtual bool OnInit();
 
 	MDStudioWxApp& wxGetApp() { return *static_cast<MDStudioWxApp*>(wxApp::GetInstance()); }
+	wxWeakRef<MainWindow> GetMainWindow() const { return m_mainWindow; }
 
+private:
+	ion::io::ResourceManager& m_resourceManager;
 	wxWeakRef<MainWindow> m_mainWindow;
 };

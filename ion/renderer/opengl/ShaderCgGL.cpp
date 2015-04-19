@@ -104,12 +104,13 @@ namespace ion
 			}
 		}
 
-		bool ShaderCgGL::Load()
+		bool ShaderCgGL::Load(const std::string& shaderDirectory)
 		{
-			bool result = false;
-
 			//Open file
-			io::File file(mProgramFilename, io::File::OpenRead);
+			std::string path = shaderDirectory + "/programs/" + mProgramFilename;
+			io::File file(path, io::File::OpenRead);
+
+			bool result = false;
 
 			if(file.IsOpen())
 			{
@@ -156,7 +157,10 @@ namespace ion
 			RendererOpenGL::LockGLContext();
 
 			if(!mCgProgramLoaded)
+			{
 				cgGLLoadProgram(mCgProgram);
+				mCgProgramLoaded = true;
+			}
 
 			cgGLEnableProfile(mCgProfile);
 			cgGLBindProgram(mCgProgram);

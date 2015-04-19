@@ -4,6 +4,7 @@ ApplyIonDefines MDStudio ;
 ApplyIonIncludes MDStudio ;
 ApplyIonCore MDStudio ;
 ApplyIonIo MDStudio ;
+ApplyIonRenderer MDStudio : opengl ;
 
 ApplyWxSDK MDStudio ;
 

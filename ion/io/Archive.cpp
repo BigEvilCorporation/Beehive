@@ -41,5 +41,10 @@ namespace ion
 		{
 			return mVersion;
 		}
+
+		ResourceManager* Archive::GetResourceManager() const
+		{
+			return mResourceManager;
+		}
 	}
 }

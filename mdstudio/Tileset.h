@@ -27,6 +27,7 @@ public:
 	TileId FindDuplicate(const Tile& tile) const;
 
 	Tile* GetTile(TileId tileId);
+	const Tile* GetTile(TileId tileId) const;
 	const TTileMap::const_iterator Begin() const;
 	const TTileMap::const_iterator End() const;
 	int GetCount() const;

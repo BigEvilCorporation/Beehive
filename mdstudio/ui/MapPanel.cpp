@@ -4,11 +4,14 @@
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
 
+#include <ion/core/memory/Memory.h>
+
 #include "MapPanel.h"
 #include "TileRendering.h"
 
-MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: wxPanel(parent, winid, pos, size, style, name)
+MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: wxGLCanvas(parent, winid, NULL, pos, size, style, name, wxNullPalette)
+	, m_resourceManager(resourceManager)
 	, m_canvas(Map::defaultWidth * 8, Map::defaultHeight * 8)
 {
 	m_project = NULL;
@@ -28,6 +31,56 @@ MapPanel::MapPanel(wxWindow *parent, wxWindowID winid, const wxPoint& pos, const
 	Bind(wxEVT_SIZE,			&MapPanel::OnResize, this, GetId());
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
+
+	//Create wx compatible OpenGL context
+	m_context = new wxGLContext(this);
+
+	//Set context
+	SetCurrent(*m_context);
+
+	//Get panel window handle
+	HWND windowHandle = (HWND)GetHWND();
+
+	//Create renderer (no panel size yet, init with a default)
+	m_renderer = ion::render::Renderer::Create(windowHandle, m_context->GetGLRC(), 320, 240);
+
+	//Create camera
+	m_camera = new ion::render::Camera();
+	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 2.0f));
+
+	//Set scene clear colour
+	m_renderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
+
+	//Load shaders
+	m_vertexShader = m_resourceManager.GetResource<ion::render::Shader>("default_v.ion.shader");
+	m_pixelShader = m_resourceManager.GetResource<ion::render::Shader>("default_p.ion.shader");
+
+	//Hack: wait for resources
+	//TODO: SetVertexShader() fetches param handles, only succeeds if finished loading
+	while(m_resourceManager.GetNumResourcesWaiting() > 0)
+	{
+		wxSleep(1);
+	}
+
+	//Create tileset texture
+	m_tilesetTexture = ion::render::Texture::Create();
+	m_tilesetTextureHndl = m_resourceManager.AddResource("tilesetTexture", *m_tilesetTexture);
+
+	//Create default material
+	m_material = new ion::render::Material();
+	m_material->AddDiffuseMap(m_tilesetTextureHndl);
+	m_material->SetDiffuseColour(ion::Colour(0.7f, 0.1f, 0.1f));
+	m_material->SetVertexShader(m_vertexShader);
+	m_material->SetPixelShader(m_pixelShader);
+
+	//Create rendering primitive
+	m_primitive = new ion::render::Box(ion::Vector3(0.5f, 0.5f, 0.5f));
+}
+
+MapPanel::~MapPanel()
+{
+	delete m_renderer;
+	delete m_context;
 }
 
 void MapPanel::SetProject(Project* project)
@@ -39,6 +92,57 @@ void MapPanel::SetProject(Project* project)
 
 	//Reset zoom
 	m_cameraZoom = 1.0f;
+
+	//Recreate tileset texture
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	const Tileset& tileset = m_project->GetMap().GetTileset();
+	u32 numTiles = tileset.GetCount();
+	u32 bytesPerPixel = 3;
+	u32 tilesetSizeSqrt = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles));
+	u32 textureWidth = tilesetSizeSqrt * tileWidth;
+	u32 textureHeight = tilesetSizeSqrt * tileHeight;
+	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+
+	char* data = new char[textureSize];
+	ion::memory::MemSet(data, 0, textureSize);
+
+	u32 i = 0;
+
+	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++i)
+	{
+		const Tile& tile = it->second;
+		PaletteId paletteId = tile.GetPaletteId();
+		Palette* palette = m_project->GetPalette(paletteId);
+
+		u32 x = i % numTiles;
+		u32 y = i / numTiles;
+
+		for(int pixelX = 0; pixelX < 8; pixelX++)
+		{
+			for(int pixelY = 0; pixelY < 8; pixelY++)
+			{
+				const Colour& colour = palette->GetColour(tile.GetPixelColour(pixelX, pixelY));
+
+				int destPixelX = (x * tileWidth) + pixelX;
+				int destPixelY = (y * tileHeight) + pixelY;
+				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+				u32 dataOffset = pixelIdx * bytesPerPixel;
+				ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+				data[dataOffset] = colour.r;
+				data[dataOffset + 1] = colour.g;
+				data[dataOffset + 2] = colour.b;
+			}
+		}
+	}
+
+	m_tilesetTexture->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
+	m_tilesetTexture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
+
+	delete data;
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event)
@@ -115,6 +219,21 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 
 void MapPanel::OnPaint(wxPaintEvent& event)
 {
+	//Begin rendering
+	m_renderer->BeginFrame();
+	m_renderer->ClearColour();
+	m_renderer->ClearDepth();
+
+	//Draw primitive
+	m_material->Bind(ion::Matrix4(), m_camera->GetTransform().GetInverse(), m_renderer->GetProjectionMatrix());
+	m_renderer->DrawVertexBuffer(m_primitive->GetVertexBuffer(), m_primitive->GetIndexBuffer());
+	m_material->Unbind();
+
+	//End rendering
+	m_renderer->SwapBuffers();
+	m_renderer->EndFrame();
+	return;
+
 	//Source context
 	wxMemoryDC sourceContext(m_canvas);
 
@@ -188,6 +307,11 @@ void MapPanel::OnErase(wxEraseEvent& event)
 void MapPanel::OnResize(wxSizeEvent& event)
 {
 	CentreCamera();
+
+	wxSize panelSize = GetClientSize();
+	m_renderer->OnResize(panelSize.x, panelSize.y);
+
+	Refresh();
 }
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -201,7 +325,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		m_project->InvalidateMap(false);
 	}
 
-	wxPanel::Refresh(eraseBackground, rect);
+	wxGLCanvas::Refresh(eraseBackground, rect);
 }
 
 void MapPanel::CentreCamera()

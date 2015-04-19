@@ -9,7 +9,11 @@
 #include <ion/core/debug/Debug.h>
 #include <ion/core/thread/Thread.h>
 #include <ion/core/time/Time.h>
-#include <ion/io/XML.h>
+#include <ion/io/Resource.h>
+#include <ion/io/ResourceManager.h>
+#include <ion/renderer/Material.h>
+
+#include <vector>
 
 #include "Project.h"
 
@@ -29,4 +33,7 @@ public:
 private:
 	MDStudioWxApp* m_wxApp;
 	Project* m_project;
+
+	//Resource manager
+	ion::io::ResourceManager* m_resourceManager;
 };

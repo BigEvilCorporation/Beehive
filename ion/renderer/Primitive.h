@@ -61,7 +61,7 @@ namespace ion
 		class Cylinder : public Primitive
 		{
 		public:
-			Cylinder::Cylinder(float radius, float height, int steps, const Vector3& offset = Vector3());
+			Cylinder(float radius, float height, int steps, const Vector3& offset = Vector3());
 		};
 	}
 }

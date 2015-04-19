@@ -1,0 +1,84 @@
+
+//Parameters
+float FurLength = 1.0f;
+float CurrentLayer = 1.0f;
+
+//Samplers
+sampler2D DiffuseTexture;
+sampler2D MaskTexture;
+
+//Lighting
+float4 DiffuseColour = float4(1.0f, 1.0f, 1.0f, 1.0f);
+float3 DirectionalLightDir = float3(1.0f, 1.0f, 1.0f);
+float3 DirectionalLightColour = float3(1.0f, 1.0f, 1.0f);
+float3 AmbientLightColour = float3(0.3f, 0.3f, 0.3f);
+
+//Matrices
+float4x4 WorldMatrix;
+float4x4 ModelViewProjectionMatrix;
+
+//Dynamics
+float3 Gravity = float3(0.0f, -0.25f, 0.0f);
+
+struct InputV
+{
+	float4 Position	: POSITION;
+	float2 TexCoord	: TEXCOORD0;
+	float3 Normal	: NORMAL;
+	float4 Colour	: COLOR;
+};
+
+struct OutputV
+{
+	float4 Position	: POSITION;
+	float2 TexCoord	: TEXCOORD0;
+	float3 Normal	: TEXCOORD1;
+	float4 Colour	: COLOR;
+};
+
+OutputV VertexProgram(InputV Input)
+{
+	OutputV Output;
+
+	//Offset by current layer length
+	float3 Position = Input.Position.xyz + (Input.Normal * FurLength * CurrentLayer);
+
+	//Translate to world space
+	float4 WorldPos = mul(ModelViewProjectionMatrix, float4(Position, 1.0f));
+
+	//Calc exponential curve for gravity and alpha
+	float Curve = pow(CurrentLayer, 3);
+
+	//Add gravity
+	WorldPos.xyz += Gravity * Curve;
+
+	Output.Position = WorldPos;
+	Output.TexCoord = Input.TexCoord;
+	Output.Colour = float4(DiffuseColour.rgb, 1.0f - Curve);
+	Output.Normal = normalize(mul(WorldMatrix, float4(Input.Normal, 1.0f)));
+
+	return Output;
+}
+
+float4 FragmentProgram(OutputV Input) : COLOR
+{
+	//Ambient light
+	float3 Ambient = AmbientLightColour;
+
+	//Texture colour
+	float4 Diffuse = Input.Colour * tex2D(DiffuseTexture, Input.TexCoord);
+
+	//Directional light
+	float3 Light = DirectionalLightColour * max(dot(Input.Normal, DirectionalLightDir), 0.0f);
+
+	//Get length from mask texture alpha
+	float Length = tex2D(MaskTexture, Input.TexCoord).a;
+
+	// if(Length < CurrentLayer) Mask = 1.0f else mask = 0.0f
+	float Mask = clamp(Length - CurrentLayer, 0.0f, 1.0f);
+	Mask = clamp(Mask * 100.0f, 0.0f, 1.0);
+
+	float4 OutColour =  float4((Ambient * Diffuse.rgb) + Diffuse.rgb * Light, Diffuse.a * Mask);
+
+	return OutColour;
+};
