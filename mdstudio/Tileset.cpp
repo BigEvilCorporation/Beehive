@@ -59,6 +59,19 @@ Tile* Tileset::GetTile(TileId tileId)
 	return tile;
 }
 
+const Tile* Tileset::GetTile(TileId tileId) const
+{
+	const Tile* tile = NULL;
+
+	TTileMap::const_iterator it = m_tiles.find(tileId);
+	if(it != m_tiles.end())
+	{
+		tile = &it->second;
+	}
+
+	return tile;
+}
+
 const TTileMap::const_iterator Tileset::Begin() const
 {
 	return m_tiles.begin();

@@ -16,6 +16,15 @@
 #include <GL/glu.h>
 #include <GL/glext.h>
 
+//Undefine Windows macro clashes
+#ifdef CreateWindow
+#undef CreateWindow
+#endif
+
+#ifdef CreateWindowA
+#undef CreateWindowA
+#endif
+
 namespace ion
 {
 	namespace render
@@ -23,7 +32,15 @@ namespace ion
 		class RendererOpenGL : public Renderer
 		{
 		public:
+			//Create with window
 			RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+
+			//Create context and viewport only
+			RendererOpenGL(HWND window, int windowWidth, int windowHeight);
+
+			//Create from existing context
+			RendererOpenGL(HWND window, HGLRC context, int windowWidth, int windowHeight);
+
 			virtual ~RendererOpenGL();
 
 			//Get window
@@ -60,6 +77,11 @@ namespace ion
 			static bool CheckGLError();
 
 		protected:
+
+			void CreateWindow(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+			void CreateContext();
+			void InitContext(int windowWidth, int windowHeight);
+
 			//Window
 			WindowWin32* mWindow;
 

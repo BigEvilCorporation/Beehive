@@ -88,7 +88,7 @@ namespace ion
 			};
 
 			Shader();
-			virtual bool Load() = 0;
+			virtual bool Load(const std::string& shaderDirectory) = 0;
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName) = 0;
 
 			std::string mProgramFilename;

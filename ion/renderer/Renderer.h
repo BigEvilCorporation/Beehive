@@ -43,6 +43,9 @@ namespace ion
 			enum VertexPattern { Triangles, Quads };
 
 			static Renderer* Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+			static Renderer* Create(HWND window, int windowWidth, int windowHeight);
+			static Renderer* Create(HWND window, HGLRC context, int windowWidth, int windowHeight);
+
 			virtual ~Renderer();
 
 			//Get window

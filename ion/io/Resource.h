@@ -54,6 +54,13 @@ namespace ion
 				mResourceObject = NULL;
 			}
 
+			ResourceT(ResourceManager& resourceManager, const std::string& filename, T* resourceObject)
+				: Resource(resourceManager, filename)
+			{
+				mResourceObject = resourceObject;
+				mIsLoaded = true;
+			}
+
 			virtual ~ResourceT() {}
 
 			virtual bool Load();

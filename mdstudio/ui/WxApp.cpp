@@ -9,11 +9,14 @@
 
 wxAppConsole *wxCreateApp()
 {
-	wxAppConsole::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, "MDStudio");
-	return new MDStudioWxApp;
+	ion::debug::Error("Not supported");
+	return NULL;
+	//wxAppConsole::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, "MDStudio");
+	//return new MDStudioWxApp;
 }
 
-MDStudioWxApp::MDStudioWxApp()
+MDStudioWxApp::MDStudioWxApp(ion::io::ResourceManager& resourceManager)
+	: m_resourceManager(resourceManager)
 {
 }
 
@@ -23,7 +26,7 @@ MDStudioWxApp::~MDStudioWxApp()
 
 bool MDStudioWxApp::OnInit()
 {
-	m_mainWindow = new MainWindow();
+	m_mainWindow = new MainWindow(m_resourceManager);
 	SetTopWindow(m_mainWindow);
     m_mainWindow->Show(true);
 

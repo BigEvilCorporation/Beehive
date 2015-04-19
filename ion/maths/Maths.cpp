@@ -29,6 +29,11 @@ namespace ion
 			return Round(pow((double)2, (double)ceil(logbase2)));
 		}
 
+		float Sqrt(float value)
+		{
+			return sqrt(value);
+		}
+
 		float Floor(float value)
 		{
 			return floor(value);

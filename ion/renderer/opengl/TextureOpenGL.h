@@ -31,10 +31,17 @@ namespace ion
 			TextureOpenGL();
 			virtual ~TextureOpenGL();
 
+			virtual bool Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const char* data);
 			GLuint GetTextureId() const;
+
+			virtual void SetMinifyFilter(Filter filter);
+			virtual void SetMagnifyFilter(Filter filter);
+			virtual void SetWrapping(Wrapping wrapping);
 
 		protected:
 			virtual bool Load();
+			virtual void Unload();
+			static int GetOpenGLMode(Format format, BitsPerPixel bitsPerPixel);
 
 			GLuint mGLTextureId;
 		};

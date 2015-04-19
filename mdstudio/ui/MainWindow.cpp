@@ -19,8 +19,9 @@
 #include "TilesPanel.h"
 #include "MapPanel.h"
 
-MainWindow::MainWindow()
+MainWindow::MainWindow(ion::io::ResourceManager& resourceManager)
 	: MainWindowBase(NULL)
+	, m_resourceManager(resourceManager)
 {
 	m_auiManager.SetManagedWindow(m_dockArea);
 	m_project = NULL;
@@ -127,7 +128,7 @@ void MainWindow::ShowPanelMap()
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
 
-			m_mapPanel = new MapPanel(m_dockArea, NewControlId());
+			m_mapPanel = new MapPanel(m_resourceManager, m_dockArea, NewControlId());
 			m_mapPanel->SetProject(m_project);
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
 		}
