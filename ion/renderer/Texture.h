@@ -51,14 +51,14 @@ namespace ion
 			};
 
 			static Texture* Create();
-			static Texture* Create(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const char* data);
+			static Texture* Create(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data);
 
 			virtual ~Texture();
 
 			u32 GetWidth() const;
 			u32 GetHeight() const;
 
-			virtual bool Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const char* data) { return false; }
+			virtual bool Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data) { return false; }
 			void SetImageFilename(const std::string& filename);
 
 			virtual void SetMinifyFilter(Filter filter) = 0;
@@ -71,7 +71,7 @@ namespace ion
 
 		protected:
 			Texture();
-			Texture(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const char* data);
+			Texture(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data);
 
 			virtual bool Load() { return false; }
 			virtual void Unload() { }

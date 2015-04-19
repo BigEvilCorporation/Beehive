@@ -70,6 +70,7 @@ namespace ion
 			virtual void SetClearColour(const Colour& colour) = 0;
 
 			//Render states
+			virtual void SetPerspectiveMode(PerspectiveMode perspectiveMode) = 0;
 			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType) = 0;
 			virtual void SetFaceCulling(CullingMode cullingMode) = 0;
 

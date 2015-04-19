@@ -62,6 +62,7 @@ namespace ion
 			virtual void SetClearColour(const Colour& colour);
 
 			//Render states
+			virtual void SetPerspectiveMode(PerspectiveMode perspectiveMode);
 			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType);
 			virtual void SetFaceCulling(CullingMode cullingMode);
 
@@ -84,6 +85,13 @@ namespace ion
 
 			//Window
 			WindowWin32* mWindow;
+
+			//Viewport
+			u32 m_viewportWidth;
+			u32 m_viewportHeight;
+
+			//State
+			PerspectiveMode m_perspectiveMode;
 
 			//Main OpenGL context
 			static HGLRC sOpenGLContext;
