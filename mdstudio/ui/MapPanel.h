@@ -74,7 +74,7 @@ private:
 	ion::render::Material* m_material;
 
 	//Rendering primitive
-	ion::render::Primitive* m_primitive;
+	ion::render::Grid* m_primitive;
 
 	//Tileset texture
 	ion::render::Texture* m_tilesetTexture;

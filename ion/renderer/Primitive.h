@@ -46,6 +46,14 @@ namespace ion
 			Quad(Axis axis, const Vector2& halfExtents, const Vector3& offset = Vector3());
 		};
 
+		class Grid : public Primitive
+		{
+		public:
+			enum Axis { xy, xz, yz };
+			Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells, bool uniqueVerts);
+			void SetCellTexCoords(int cellIndex, TexCoord coords[4]);
+		};
+
 		class Box : public Primitive
 		{
 		public:

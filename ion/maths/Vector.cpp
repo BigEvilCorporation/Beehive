@@ -151,6 +151,11 @@ namespace ion
 		return Vector3(x * Vector.x, y * Vector.y, z * Vector.z);
 	}
 
+	Vector3 Vector3::operator /(const Vector3 &Vector) const
+	{
+		return Vector3(x / Vector.x, y / Vector.y, z / Vector.z);
+	}
+
 	Vector3 Vector3::operator -(float Scalar) const
 	{
 		return Vector3(x - Scalar, y - Scalar, z - Scalar);

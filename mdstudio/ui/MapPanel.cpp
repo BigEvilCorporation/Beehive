@@ -49,7 +49,7 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 
 	//Create camera
 	m_camera = new ion::render::Camera();
-	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 1.0f));
+	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
 
 	//Set scene clear colour
 	m_renderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
@@ -77,8 +77,7 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_material->SetPixelShader(m_pixelShader);
 
 	//Create rendering primitive
-	//m_primitive = new ion::render::Quad(ion::render::Quad::xz, ion::Vector2(50.0f, 50.0f));
-	m_primitive = new ion::render::Box(ion::Vector3(0.5f, 0.5f, 0.5f));
+	m_primitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2(100.0f, 100.0f), 64, 64, true);
 }
 
 MapPanel::~MapPanel()
@@ -91,11 +90,20 @@ void MapPanel::SetProject(Project* project)
 {
 	m_project = project;
 
-	//Centre camera on canvas
-	CentreCamera();
+	//Create rendering primitive
+	if(m_primitive)
+		delete m_primitive;
+
+	int mapWidth = m_project->GetMap().GetWidth();
+	int mapHeight = m_project->GetMap().GetHeight();
+	m_primitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)mapWidth * 8.0f, (float)mapHeight * 8.0f), mapWidth, mapHeight, true);
 
 	//Reset zoom
 	m_cameraZoom = 1.0f;
+	m_camera->SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+
+	//Centre camera on canvas
+	CentreCamera();
 
 	//Recreate tileset texture
 	const int tileWidth = 8;
@@ -146,6 +154,36 @@ void MapPanel::SetProject(Project* project)
 	m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 	m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
 
+	//Map texture coords to tileset
+	for(int x = 0; x < mapWidth; x++)
+	{
+		for(int y = 0; y < mapHeight; y++)
+		{
+			int mapCellIndex = (y * mapWidth) + x;
+			TileId tileId = m_project->GetMap().GetTile(x, y);
+			int tileX = (tileId % tilesetSizeSqrt);
+			int tileY = (tileId / tilesetSizeSqrt);
+
+			ion::render::TexCoord coords[4];
+			ion::Vector2 cellSizeTextureSpace((1.0f / (float)mapWidth), (1.0f / (float)mapHeight));
+
+			//Top left
+			coords[0].x = (cellSizeTextureSpace.x * tileX);
+			coords[0].y = (cellSizeTextureSpace.y * tileY) + cellSizeTextureSpace.y;
+			//Bottom left
+			coords[1].x = (cellSizeTextureSpace.x * tileX);
+			coords[1].y = (cellSizeTextureSpace.y * tileY);
+			//Bottom right
+			coords[2].x = (cellSizeTextureSpace.x * tileX) + cellSizeTextureSpace.x;
+			coords[2].y = (cellSizeTextureSpace.y * tileY);
+			//Top right
+			coords[3].x = (cellSizeTextureSpace.x * tileX) + cellSizeTextureSpace.x;
+			coords[3].y = (cellSizeTextureSpace.y * tileY) + cellSizeTextureSpace.y;
+
+			m_primitive->SetCellTexCoords(mapCellIndex, coords);
+		}
+	}
+
 	delete data;
 }
 
@@ -189,14 +227,18 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 		{
 			//Pan camera
-			m_cameraPos.x += mouseDelta.x * m_cameraPanSpeed;
-			m_cameraPos.y += mouseDelta.y * m_cameraPanSpeed;
+			m_cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
+			m_cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
+
+			m_camera->SetPosition(ion::Vector3(m_cameraPos.x, m_cameraPos.y, 0.0f));
 
 			//Invalidate whole frame
 			Refresh();
 		}
 		else if(event.GetWheelRotation() != 0)
 		{
+			float prevZoom = m_cameraZoom;
+
 			//Zoom camera
 			int wheelDelta = event.GetWheelRotation();
 			const float zoomSpeed = 1.0f;
@@ -212,6 +254,17 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 				m_cameraZoom = 1.0f;
 			else if(m_cameraZoom > 10.0f)
 				m_cameraZoom = 10.0f;
+
+			//Set camera zoom
+			m_camera->SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+
+			//Compensate camera pos
+			wxSize panelSize = GetClientSize();
+			ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
+			ion::Vector2 newViewportSize((float)panelSize.x / m_cameraZoom, (float)panelSize.y / m_cameraZoom);
+			m_cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
+			m_cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
+			m_camera->SetPosition(ion::Vector3(m_cameraPos.x, m_cameraPos.y, 0.0f));
 
 			//Invalidate whole frame
 			Refresh();
@@ -337,8 +390,8 @@ void MapPanel::CentreCamera()
 	if(m_project)
 	{
 		wxRect clientRect = GetClientRect();
-		m_cameraPos.x = (clientRect.width / 2.0f) - ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
-		m_cameraPos.y = (clientRect.height / 2.0f) - ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
+		//m_cameraPos.x = (clientRect.width / 2.0f) - ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
+		//m_cameraPos.y = (clientRect.height / 2.0f) - ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
 	}
 }
 

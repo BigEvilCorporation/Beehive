@@ -57,6 +57,7 @@ namespace ion
 
 		Vector3 operator *(float Scalar) const;
 		Vector3 operator *(const Vector3 &Vector) const;
+		Vector3 operator /(const Vector3 &Vector) const;
 		Vector3 operator -(const Vector3 &Vector) const;
 		Vector3 operator +(const Vector3 &Vector) const;
 		Vector3 operator -(float Scalar) const;

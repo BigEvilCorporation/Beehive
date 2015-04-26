@@ -20,5 +20,12 @@ namespace ion
 		{
 
 		}
+
+		void Camera::SetZoom(const Vector3& zoom)
+		{
+			Matrix4 transform = GetTransform();
+			transform.SetScale(Vector3(1.0f, 1.0f, 1.0f) / zoom);
+			SetTransform(transform);
+		}
 	}
 }
