@@ -67,9 +67,9 @@ namespace ion
 			if(axis == xy)
 			{
 				int vertexCount = 0;
-				for(int x = 0; x < widthCells; x++)
+				for(int y = 0; y < heightCells; y++)
 				{
-					for(int y = 0; y < heightCells; y++)
+					for(int x = 0; x < widthCells; x++)
 					{
 						if(uniqueVerts)
 						{
