@@ -23,7 +23,7 @@
 #include "UIBase.h"
 #include "../Project.h"
 
-class MapPanel : public wxGLCanvas //wxPanel
+class MapPanel : public wxGLCanvas
 {
 public:
 	MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
@@ -52,6 +52,9 @@ private:
 
 	//Paint whole map to canvas
 	void PaintWholeMap();
+
+	//Paint single tile to canvas
+	void PaintTile(TileId tileId, int x, int y);
 
 	//Centre camera on canvas
 	void CentreCamera();
@@ -85,6 +88,12 @@ private:
 
 	//Map tile IDs to indices
 	std::map<TileId, u32> m_tileIndexMap;
+
+	//Tileset size sq
+	u32 m_tilesetSizeSq;
+
+	//Tileset texture cell size sq
+	float m_cellSizeTexSpaceSq;
 
 	//Camera
 	ion::Vector2 m_cameraPos;
