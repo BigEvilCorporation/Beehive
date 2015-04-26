@@ -12,7 +12,6 @@
 MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxGLCanvas(parent, winid, NULL, pos, size, style, name, wxNullPalette)
 	, m_resourceManager(resourceManager)
-	, m_canvas(Map::defaultWidth * 8, Map::defaultHeight * 8)
 {
 	m_project = NULL;
 	m_cameraZoom = 1.0f;
@@ -90,101 +89,166 @@ void MapPanel::SetProject(Project* project)
 {
 	m_project = project;
 
-	//Create rendering primitive
-	if(m_primitive)
-		delete m_primitive;
-
-	int mapWidth = m_project->GetMap().GetWidth();
-	int mapHeight = m_project->GetMap().GetHeight();
-	m_primitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)mapWidth * 8.0f, (float)mapHeight * 8.0f), mapWidth, mapHeight, true);
-
 	//Reset zoom
 	m_cameraZoom = 1.0f;
 	m_camera->SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+
+	//Create canvas
+	CreateCanvas();
 
 	//Centre camera on canvas
 	CentreCamera();
 
 	//Recreate tileset texture
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	CreateTilesetTexture();
 
-	const Tileset& tileset = m_project->GetMap().GetTileset();
-	u32 numTiles = tileset.GetCount();
-	u32 bytesPerPixel = 3;
-	u32 tilesetSizeSqrt = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles));
-	u32 textureWidth = tilesetSizeSqrt * tileWidth;
-	u32 textureHeight = tilesetSizeSqrt * tileHeight;
-	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+	//Recreate index cache
+	CacheTileIndices();
 
-	u8* data = new u8[textureSize];
-	ion::memory::MemSet(data, 0, textureSize);
+	//Redraw map
+	PaintWholeMap();
+}
 
-	u32 i = 0;
-
-	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++i)
+void MapPanel::CreateCanvas()
+{
+	if(m_project)
 	{
-		const Tile& tile = it->second;
-		PaletteId paletteId = tile.GetPaletteId();
-		Palette* palette = m_project->GetPalette(paletteId);
+		//Create rendering primitive
+		if(m_primitive)
+			delete m_primitive;
 
-		u32 x = i % tilesetSizeSqrt;
-		u32 y = i / tilesetSizeSqrt;
+		int mapWidth = m_project->GetMap().GetWidth();
+		int mapHeight = m_project->GetMap().GetHeight();
+		m_primitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2(((float)mapWidth * 8.0f) / 2.0f, ((float)mapHeight * 8.0f) / 2.0f), mapWidth, mapHeight, true);
+	}
+}
 
-		for(int pixelX = 0; pixelX < 8; pixelX++)
+void MapPanel::CreateTilesetTexture()
+{
+	if(m_project)
+	{
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+
+		const Tileset& tileset = m_project->GetMap().GetTileset();
+		u32 numTiles = tileset.GetCount();
+		u32 bytesPerPixel = 3;
+		u32 tilesetSizeSqrt = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles));
+		u32 textureWidth = tilesetSizeSqrt * tileWidth;
+		u32 textureHeight = tilesetSizeSqrt * tileHeight;
+		u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+
+		u8* data = new u8[textureSize];
+		ion::memory::MemSet(data, 0, textureSize);
+
+		u32 tileIndex = 0;
+
+		for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
 		{
+			const Tile& tile = it->second;
+			PaletteId paletteId = tile.GetPaletteId();
+			Palette* palette = m_project->GetPalette(paletteId);
+
+			u32 x = tileIndex % tilesetSizeSqrt;
+			u32 y = tileIndex / tilesetSizeSqrt;
+
 			for(int pixelY = 0; pixelY < 8; pixelY++)
 			{
-				const Colour& colour = palette->GetColour(tile.GetPixelColour(pixelX, pixelY));
+				for(int pixelX = 0; pixelX < 8; pixelX++)
+				{
+					//Invert Y for OpenGL
+					int pixelY_OGL = tileHeight - 1 - pixelY;
+					const Colour& colour = palette->GetColour(tile.GetPixelColour(pixelX, pixelY_OGL));
 
-				int destPixelX = (x * tileWidth) + pixelX;
-				int destPixelY = (y * tileHeight) + pixelY;
-				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-				u32 dataOffset = pixelIdx * bytesPerPixel;
-				ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
-				data[dataOffset] = colour.r;
-				data[dataOffset + 1] = colour.g;
-				data[dataOffset + 2] = colour.b;
+					int destPixelX = (x * tileWidth) + pixelX;
+					int destPixelY = (y * tileHeight) + pixelY;
+					u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+					u32 dataOffset = pixelIdx * bytesPerPixel;
+					ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+					data[dataOffset] = colour.r;
+					data[dataOffset + 1] = colour.g;
+					data[dataOffset + 2] = colour.b;
+				}
+			}
+		}
+
+		m_tilesetTexture->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
+		m_tilesetTexture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+		m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+		m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
+
+		delete data;
+	}
+}
+
+void MapPanel::PaintWholeMap()
+{
+	if(m_project)
+	{
+		//Map texture coords to tileset
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+
+		const Tileset& tileset = m_project->GetMap().GetTileset();
+		u32 numTiles = tileset.GetCount();
+		u32 tilesetSizeSqrt = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles));
+
+		ion::render::TexCoord coords[4];
+		float cellSizeTexSpaceSq(1.0f / (float)tilesetSizeSqrt);
+
+		int mapWidth = m_project->GetMap().GetWidth();
+		int mapHeight = m_project->GetMap().GetHeight();
+
+		for(int mapY = 0; mapY < mapHeight; mapY++)
+		{
+			for(int mapX = 0; mapX < mapWidth; mapX++)
+			{
+				//Invert Y for OpenGL
+				int mapY_OGL = mapHeight - 1 - mapY;
+
+				//Map tile ID to index
+				TileId tileId = m_project->GetMap().GetTile(mapX, mapY_OGL);
+				std::map<TileId, u32>::iterator it = m_tileIndexMap.find(tileId);
+				ion::debug::Assert(it != m_tileIndexMap.end(), "TileId not found in tileset");
+				u32 tileIndex = it->second;
+				int tilesetX = (tileIndex % tilesetSizeSqrt);
+				int tilesetY = (tileIndex / tilesetSizeSqrt);
+				ion::Vector2 textureBottomLeft(cellSizeTexSpaceSq * tilesetX, cellSizeTexSpaceSq * tilesetY);
+
+				//Top left
+				coords[0].x = textureBottomLeft.x;
+				coords[0].y = textureBottomLeft.y + cellSizeTexSpaceSq;
+				//Bottom left
+				coords[1].x = textureBottomLeft.x;
+				coords[1].y = textureBottomLeft.y;
+				//Bottom right
+				coords[2].x = textureBottomLeft.x + cellSizeTexSpaceSq;
+				coords[2].y = textureBottomLeft.y;
+				//Top right
+				coords[3].x = textureBottomLeft.x + cellSizeTexSpaceSq;
+				coords[3].y = textureBottomLeft.y + cellSizeTexSpaceSq;
+
+				m_primitive->SetCellTexCoords((mapY * mapWidth) + mapX, coords);
 			}
 		}
 	}
+}
 
-	m_tilesetTexture->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
-	m_tilesetTexture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
+void MapPanel::CacheTileIndices()
+{
+	m_tileIndexMap.clear();
 
-	//Map texture coords to tileset
-	for(int x = 0; x < mapWidth; x++)
+	if(m_project)
 	{
-		for(int y = 0; y < mapHeight; y++)
+		const Tileset& tileset = m_project->GetMap().GetTileset();
+		u32 tileIndex = 0;
+
+		for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
 		{
-			int mapCellIndex = (y * mapWidth) + x;
-			TileId tileId = m_project->GetMap().GetTile(x, y);
-			int tileX = (tileId % tilesetSizeSqrt);
-			int tileY = (tileId / tilesetSizeSqrt);
-
-			ion::render::TexCoord coords[4];
-			ion::Vector2 cellSizeTextureSpace((1.0f / (float)mapWidth), (1.0f / (float)mapHeight));
-
-			//Top left
-			coords[0].x = (cellSizeTextureSpace.x * tileX);
-			coords[0].y = (cellSizeTextureSpace.y * tileY) + cellSizeTextureSpace.y;
-			//Bottom left
-			coords[1].x = (cellSizeTextureSpace.x * tileX);
-			coords[1].y = (cellSizeTextureSpace.y * tileY);
-			//Bottom right
-			coords[2].x = (cellSizeTextureSpace.x * tileX) + cellSizeTextureSpace.x;
-			coords[2].y = (cellSizeTextureSpace.y * tileY);
-			//Top right
-			coords[3].x = (cellSizeTextureSpace.x * tileX) + cellSizeTextureSpace.x;
-			coords[3].y = (cellSizeTextureSpace.y * tileY) + cellSizeTextureSpace.y;
-
-			m_primitive->SetCellTexCoords(mapCellIndex, coords);
+			//Map ID to index
+			m_tileIndexMap.insert(std::make_pair(it->first, tileIndex));
 		}
 	}
-
-	delete data;
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event)
@@ -212,14 +276,14 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 			{
 				//Paint
-				if(m_project->GetPaintTile())
-					PaintTile(mousePosMapSpace, m_project->GetPaintTile());
+				//if(m_project->GetPaintTile())
+				//	PaintTile(mousePosMapSpace, m_project->GetPaintTile());
 			}
 			else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
 			{
 				//Erase
-				if(m_project->GetEraseTile())
-					PaintTile(mousePosMapSpace, m_project->GetEraseTile());
+				//if(m_project->GetEraseTile())
+				//	PaintTile(mousePosMapSpace, m_project->GetEraseTile());
 			}
 		}
 
@@ -241,7 +305,13 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 
 			//Zoom camera
 			int wheelDelta = event.GetWheelRotation();
-			const float zoomSpeed = 1.0f;
+			float zoomSpeed = 1.0f;
+
+			//Reduce speed for <1.0f
+			if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
+			{
+				zoomSpeed = 0.2f;
+			}
 
 			//One notch at a time
 			if(wheelDelta > 0)
@@ -250,8 +320,8 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 				m_cameraZoom -= zoomSpeed;
 
 			//Clamp
-			if(m_cameraZoom < 1.0f)
-				m_cameraZoom = 1.0f;
+			if(m_cameraZoom < 0.2f)
+				m_cameraZoom = 0.2f;
 			else if(m_cameraZoom > 10.0f)
 				m_cameraZoom = 10.0f;
 
@@ -289,42 +359,10 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 	//End rendering
 	m_renderer->SwapBuffers();
 	m_renderer->EndFrame();
-	return;
 
-	//Source context
-	wxMemoryDC sourceContext(m_canvas);
-
+	/*
 	//Double buffered dest context
 	wxAutoBufferedPaintDC destContext(this);
-
-	//Update all invalidated regions
-	for(wxRegionIterator it = GetUpdateRegion(); it; it++)
-	{
-		//Get invalidated rect
-		wxRect destRect(it.GetRect());
-
-		//Clear rect
-		destContext.SetBrush(*wxLIGHT_GREY_BRUSH);
-		destContext.DrawRectangle(destRect);
-
-		//Transform panned/zoomed dest rect back to orignal source rect
-		wxRect sourceRect(destRect);
-		sourceRect.x -= m_cameraPos.x;
-		sourceRect.y -= m_cameraPos.y;
-		sourceRect.x /= m_cameraZoom;
-		sourceRect.y /= m_cameraZoom;
-		sourceRect.width /= m_cameraZoom;
-		sourceRect.height /= m_cameraZoom;
-
-		//Adjust dest rect for rounding error
-		destRect.x -= (int)((float)destRect.x - (((float)sourceRect.x * m_cameraZoom) + m_cameraPos.x));
-		destRect.y -= (int)((float)destRect.y - (((float)sourceRect.y * m_cameraZoom) + m_cameraPos.y));
-		destRect.width -= (int)((float)destRect.width - ((float)sourceRect.width * m_cameraZoom));
-		destRect.height -= (int)((float)destRect.height - ((float)sourceRect.height * m_cameraZoom));
-		
-		//Copy rect from canvas
-		destContext.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &sourceContext, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
-	}
 
 	//Draw grid
 	if(m_project)
@@ -354,6 +392,7 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 			}
 		}
 	}
+	*/
 }
 
 void MapPanel::OnErase(wxEraseEvent& event)
@@ -373,13 +412,25 @@ void MapPanel::OnResize(wxSizeEvent& event)
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	if(m_project && m_project->MapIsInvalidated())
+	if(m_project)
 	{
-		//Full refresh, resize canvas and redraw map
-		m_canvas = wxBitmap(m_project->GetMap().GetWidth() * 8, m_project->GetMap().GetHeight() * 8);
-		wxMemoryDC dc(m_canvas);
-		PaintMapToDc(dc);
-		m_project->InvalidateMap(false);
+		//If map invalidated
+		if(m_project->MapIsInvalidated())
+		{
+			//Recreate canvas
+			CreateCanvas();
+
+			//Recreate tileset texture
+			CreateTilesetTexture();
+
+			//Recreate index cache
+			CacheTileIndices();
+
+			//Redraw map
+			PaintWholeMap();
+
+			m_project->InvalidateMap(false);
+		}
 	}
 
 	wxGLCanvas::Refresh(eraseBackground, rect);
@@ -392,60 +443,5 @@ void MapPanel::CentreCamera()
 		wxRect clientRect = GetClientRect();
 		//m_cameraPos.x = (clientRect.width / 2.0f) - ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
 		//m_cameraPos.y = (clientRect.height / 2.0f) - ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
-	}
-}
-
-void MapPanel::PaintTile(ion::Vector2 mousePos, TileId tileId)
-{
-	if(m_project)
-	{
-		int x = (int)floor(mousePos.x / 8.0f);
-		int y = (int)floor(mousePos.y / 8.0f);
-
-		//Set new tile in map
-		m_project->GetMap().SetTile(x, y, tileId);
-
-		//Paint tile to canvas dc
-		if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
-		{
-			u32 tileFlags = m_project->GetMap().GetTileFlags(x, y);
-
-			if(const Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
-			{
-				wxMemoryDC dc(m_canvas);
-				TileRenderer::PaintTileToDc(x, y, *tile, *palette, tileFlags, dc);
-			}
-		}
-		
-		//Invalidate screen rect
-		wxRect refreshRect(	((x * 8) * m_cameraZoom) + m_cameraPos.x,
-							((y * 8) * m_cameraZoom) + m_cameraPos.y,
-							8 * m_cameraZoom,
-							8 * m_cameraZoom);
-
-		RefreshRect(refreshRect);
-	}
-}
-
-void MapPanel::PaintMapToDc(wxMemoryDC& dc)
-{
-	if(m_project)
-	{
-		for(int x = 0; x < m_project->GetMap().GetWidth(); x++)
-		{
-			for(int y = 0; y < m_project->GetMap().GetHeight(); y++)
-			{
-				TileId tileId = m_project->GetMap().GetTile(x, y);
-				if(const Tile* tile = m_project->GetMap().GetTileset().GetTile(tileId))
-				{
-					u32 tileFlags = m_project->GetMap().GetTileFlags(x, y);
-
-					if(const Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
-					{
-						TileRenderer::PaintTileToDc(x, y, *tile, *palette, tileFlags, dc);
-					}
-				}
-			}
-		}
 	}
 }

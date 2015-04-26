@@ -41,11 +41,17 @@ public:
 	virtual void Refresh(bool eraseBackground=true, const wxRect *rect=NULL);
 
 private:
-	//Paint tile to canvas
-	void PaintTile(ion::Vector2 mousePos, TileId tile);
+	//Create canvas
+	void CreateCanvas();
 
-	//Paint whole map to dc
-	void PaintMapToDc(wxMemoryDC& dc);
+	//Create and redraw tileset texture
+	void CreateTilesetTexture();
+
+	//Create TileID to index cache
+	void CacheTileIndices();
+
+	//Paint whole map to canvas
+	void PaintWholeMap();
 
 	//Centre camera on canvas
 	void CentreCamera();
@@ -55,9 +61,6 @@ private:
 
 	//Main project
 	Project* m_project;
-
-	//Local drawing canvas
-	wxBitmap m_canvas;
 
 	//OpenGL context
 	wxGLContext* m_context;
@@ -79,6 +82,9 @@ private:
 	//Tileset texture
 	ion::render::Texture* m_tilesetTexture;
 	ion::io::ResourceHandle<ion::render::Texture> m_tilesetTextureHndl;
+
+	//Map tile IDs to indices
+	std::map<TileId, u32> m_tileIndexMap;
 
 	//Camera
 	ion::Vector2 m_cameraPos;

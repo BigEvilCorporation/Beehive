@@ -400,6 +400,9 @@ namespace ion
 				int numObjects = 0;
 				Serialise(numObjects);
 
+				//Clear map
+				objects.clear();
+
 				//Serialise all objects and add to map
 				for(int i = 0; i < numObjects; i++)
 				{

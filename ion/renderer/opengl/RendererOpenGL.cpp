@@ -518,7 +518,7 @@ namespace ion
 			}
 
 			//Draw
-			glDrawElements(drawPattern, indexBuffer.GetSize(), GL_UNSIGNED_SHORT, indexBuffer.GetAddress());
+			glDrawElements(drawPattern, indexBuffer.GetSize(), GL_UNSIGNED_INT, indexBuffer.GetAddress());
 
 			//Disable client states
 			glDisableClientState(GL_VERTEX_ARRAY);

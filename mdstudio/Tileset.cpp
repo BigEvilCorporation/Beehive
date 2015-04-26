@@ -20,6 +20,8 @@ void Tileset::Clear()
 TileId Tileset::AddTile()
 {
 	m_tiles.insert(std::make_pair(m_nextFreeId, Tile()));
+	m_tiles.begin()->second.CalculateColourHash();
+	m_tiles.begin()->second.CalculateCollisionHash();
 	return m_nextFreeId++;
 }
 

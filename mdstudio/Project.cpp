@@ -13,7 +13,13 @@
 
 Project::Project()
 {
-	Clear();
+	m_paintTile = 0;
+	m_eraseTile = 0;
+	m_mapInvalidated = true;
+	m_tilesInvalidated = true;
+	m_name = "untitled";
+	m_palettes.resize(numPalettes);
+	m_palettes[0].AddColour(Colour(255, 255, 255));
 }
 
 void Project::Clear()
