@@ -25,7 +25,7 @@ MainWindow::MainWindow(ion::io::ResourceManager& resourceManager)
 {
 	m_auiManager.SetManagedWindow(m_dockArea);
 	m_project = NULL;
-	SetStatusText("Big Evil Editor v0.1");
+	SetStatusText("BEEhive v0.1");
 }
 
 MainWindow::~MainWindow()

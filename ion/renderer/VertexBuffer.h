@@ -48,7 +48,7 @@ namespace ion
 
 			Pattern GetPattern() const { return mPattern; }
 			int GetNumVerts() const { return mNumVertices; }
-			int GetStride() const;
+			int GetStrideBytes() const;
 
 			int GetVertexSize() const { return sPositionSize; }
 			int GetNormalSize() const { return sNormalSize; }

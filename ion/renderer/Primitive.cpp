@@ -35,13 +35,13 @@ namespace ion
 		{
 			if(axis == xy)
 			{
-				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y - halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(0.0f, 1.0f));
-				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y + halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(0.0f, 0.0f));
-				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y + halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(1.0f, 0.0f));
-				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y - halfExtents.y, offset.z), Vector3(0.0f, 0.0f, -1.0f), TexCoord(1.0f, 1.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y + halfExtents.y, 0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(0.0f, 1.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y - halfExtents.y, 0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(1.0f, 1.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y - halfExtents.y, 0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(1.0f, 0.0f));
+				mVertexBuffer.AddVertex(Vector3(offset.x + halfExtents.x, offset.y + halfExtents.y, 0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(0.0f, 0.0f));
 
-				mIndexBuffer.Add(2, 1, 0);
-				mIndexBuffer.Add(3, 2, 0);
+				mIndexBuffer.Add(0, 1, 2);
+				mIndexBuffer.Add(0, 2, 3);
 			}
 			else if(axis == xz)
 			{
@@ -56,6 +56,50 @@ namespace ion
 			else if(axis == yz)
 			{
 
+			}
+		}
+
+		Grid::Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells, bool uniqueVerts)
+			: Primitive(VertexBuffer::Triangles)
+		{
+			Vector2 cellSize((halfExtents.x * 2.0f) / (float)widthCells, (halfExtents.y * 2.0f) / (float)heightCells);
+
+			if(axis == xy)
+			{
+				int vertexCount = 0;
+				for(int x = 0; x < widthCells; x++)
+				{
+					for(int y = 0; y < heightCells; y++)
+					{
+						if(uniqueVerts)
+						{
+							//Create quad per cell
+							Vector2 cellPos((cellSize.x * x) - halfExtents.x, (cellSize.y * y) - halfExtents.y);
+							mVertexBuffer.AddVertex(Vector3(             cellPos.x, cellPos.y + cellSize.y, 0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(0.0f, 1.0f));
+							mVertexBuffer.AddVertex(Vector3(             cellPos.x, cellPos.y,              0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(1.0f, 1.0f));
+							mVertexBuffer.AddVertex(Vector3(cellPos.x + cellSize.x, cellPos.y,              0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(1.0f, 0.0f));
+							mVertexBuffer.AddVertex(Vector3(cellPos.x + cellSize.x, cellPos.y + cellSize.y, 0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(0.0f, 0.0f));
+
+							mIndexBuffer.Add(vertexCount, vertexCount + 1, vertexCount+2);
+							mIndexBuffer.Add(vertexCount, vertexCount + 2, vertexCount+3);
+
+							vertexCount += 4;
+						}
+						else
+						{
+							//Shared verts
+						}
+					}
+				}
+			}
+		}
+
+		void Grid::SetCellTexCoords(int cellIndex, TexCoord coords[4])
+		{
+			for(int i = 0; i < 4; i++)
+			{
+				Vertex pos = mVertexBuffer.GetVertex((cellIndex * 4) + i);
+				mVertexBuffer.SetVertex((cellIndex * 4) + i, pos, Vector3(0.0f, 0.0f, 1.0f), coords[i]);
 			}
 		}
 

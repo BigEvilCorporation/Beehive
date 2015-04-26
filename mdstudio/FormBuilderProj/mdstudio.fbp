@@ -47,7 +47,7 @@
             <property name="size">720,489</property>
             <property name="style">wxDEFAULT_FRAME_STYLE|wxMAXIMIZE</property>
             <property name="subclass">; </property>
-            <property name="title">BEE v0.1</property>
+            <property name="title">BEEhive v0.1</property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
             <property name="window_name"></property>

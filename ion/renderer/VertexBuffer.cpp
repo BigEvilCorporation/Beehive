@@ -22,7 +22,7 @@ namespace ion
 			mBuffer.clear();
 		}
 
-		int VertexBuffer::GetStride() const
+		int VertexBuffer::GetStrideBytes() const
 		{
 			return (sPositionSize + sNormalSize + sTexCoordSize) * sizeof(float);
 		}
@@ -53,7 +53,7 @@ namespace ion
 
 		void VertexBuffer::Reserve(int size)
 		{
-			int stride = GetStride();
+			int stride = GetStrideBytes();
 			mBuffer.resize(size * stride);
 			mNumVertices = size;
 		}
@@ -62,26 +62,28 @@ namespace ion
 		{
 			debug::Assert(vertexIdx >= 0 && vertexIdx < mNumVertices, "Bad vertex id");
 
-			int stride = GetStride();
+			int stride = GetStrideBytes() / sizeof(float);
+			int floatIdx = stride * vertexIdx;
 
-			mBuffer[stride*vertexIdx  ] = (position.x);
-			mBuffer[stride*vertexIdx+1] = (position.y);
-			mBuffer[stride*vertexIdx+2] = (position.z);
+			mBuffer[floatIdx  ] = (position.x);
+			mBuffer[floatIdx+1] = (position.y);
+			mBuffer[floatIdx+2] = (position.z);
 
-			mBuffer[stride*vertexIdx+3] = (normal.x);
-			mBuffer[stride*vertexIdx+4] = (normal.y);
-			mBuffer[stride*vertexIdx+5] = (normal.z);
+			mBuffer[floatIdx+3] = (normal.x);
+			mBuffer[floatIdx+4] = (normal.y);
+			mBuffer[floatIdx+5] = (normal.z);
 
-			mBuffer[stride*vertexIdx+6] = (texCoord.x);
-			mBuffer[stride*vertexIdx+7] = (texCoord.y);
+			mBuffer[floatIdx+6] = (texCoord.x);
+			mBuffer[floatIdx+7] = (texCoord.y);
 		}
 
 		Vertex VertexBuffer::GetVertex(int index) const
 		{
-			index *= sPositionSize;
+			int stride = GetStrideBytes() / sizeof(float);
+			int floatIdx = stride * index;
 
 			if(index >= 0 && index < GetNumVerts())
-				return Vertex(mBuffer[index], mBuffer[index + 1], mBuffer[index + 2]);
+				return Vertex(mBuffer[floatIdx], mBuffer[floatIdx + 1], mBuffer[floatIdx + 2]);
 			else
 				return Vertex();
 		}

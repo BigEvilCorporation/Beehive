@@ -300,7 +300,7 @@ namespace ion
 				break;
 
 			case Ortho2DAbsolute:
-				glOrtho(0, (float)width, 0, (float)height, -1.0, 1.0);
+				glOrtho(0.0, m_viewportWidth, 0.0, m_viewportHeight, -1.0, 1.0);
 				break;
 			}
 
@@ -447,9 +447,9 @@ namespace ion
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 			//Set element pointers
-			glVertexPointer(vertexBuffer.GetVertexSize(), GL_FLOAT, vertexBuffer.GetStride(), vertexBuffer.GetVertexBuffer());
-			glNormalPointer(GL_FLOAT, vertexBuffer.GetStride(), vertexBuffer.GetNormalBuffer());
-			glTexCoordPointer(vertexBuffer.GetTexCoordSize(), GL_FLOAT, vertexBuffer.GetStride(), vertexBuffer.GetTexCoordBuffer());
+			glVertexPointer(vertexBuffer.GetVertexSize(), GL_FLOAT, vertexBuffer.GetStrideBytes(), vertexBuffer.GetVertexBuffer());
+			glNormalPointer(GL_FLOAT, vertexBuffer.GetStrideBytes(), vertexBuffer.GetNormalBuffer());
+			glTexCoordPointer(vertexBuffer.GetTexCoordSize(), GL_FLOAT, vertexBuffer.GetStrideBytes(), vertexBuffer.GetTexCoordBuffer());
 
 			//Determine pattern type
 			int drawPattern = 0;
@@ -495,9 +495,9 @@ namespace ion
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 			//Set element pointers
-			glVertexPointer(vertexBuffer.GetVertexSize(), GL_FLOAT, vertexBuffer.GetStride(), vertexBuffer.GetVertexBuffer());
-			glNormalPointer(GL_FLOAT, vertexBuffer.GetStride(), vertexBuffer.GetNormalBuffer());
-			glTexCoordPointer(vertexBuffer.GetTexCoordSize(), GL_FLOAT, vertexBuffer.GetStride(), vertexBuffer.GetTexCoordBuffer());
+			glVertexPointer(vertexBuffer.GetVertexSize(), GL_FLOAT, vertexBuffer.GetStrideBytes(), vertexBuffer.GetVertexBuffer());
+			glNormalPointer(GL_FLOAT, vertexBuffer.GetStrideBytes(), vertexBuffer.GetNormalBuffer());
+			glTexCoordPointer(vertexBuffer.GetTexCoordSize(), GL_FLOAT, vertexBuffer.GetStrideBytes(), vertexBuffer.GetTexCoordBuffer());
 
 			//Determine pattern type
 			int drawPattern = 0;

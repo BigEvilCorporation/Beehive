@@ -18,6 +18,8 @@ namespace ion
 		public:
 			Camera();
 			~Camera();
+
+			void SetZoom(const Vector3& zoom);
 		};
 	}
 }
