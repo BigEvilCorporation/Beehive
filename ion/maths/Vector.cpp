@@ -35,9 +35,19 @@ namespace ion
 		return Vector2(x * Scalar, y * Scalar);
 	}
 
+	Vector2 Vector2::operator /(float Scalar) const
+	{
+		return Vector2(x / Scalar, y / Scalar);
+	}
+
 	Vector2 Vector2::operator *(const Vector2 &Vector) const
 	{
 		return Vector2(x * Vector.x, y * Vector.y);
+	}
+
+	Vector2 Vector2::operator /(const Vector2 &Vector) const
+	{
+		return Vector2(x / Vector.x, y / Vector.y);
 	}
 
 	Vector2 Vector2::operator +(const Vector2 &Vector) const

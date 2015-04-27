@@ -25,7 +25,9 @@ namespace ion
 		float operator [](int index) const;
 
 		Vector2 operator *(float Scalar) const;
+		Vector2 operator /(float Scalar) const;
 		Vector2 operator *(const Vector2 &Vector) const;
+		Vector2 operator /(const Vector2 &Vector) const;
 		Vector2 operator +(const Vector2 &Vector) const;
 		Vector2 operator -(const Vector2 &Vector) const;
 
