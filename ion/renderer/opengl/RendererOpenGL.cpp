@@ -437,6 +437,28 @@ namespace ion
 			UnlockGLContext();
 		}
 
+		void RendererOpenGL::SetDepthTest(DepthTest depthTest)
+		{
+			if(depthTest == Disabled)
+			{
+				glDisable(GL_DEPTH_TEST);
+			}
+			else
+			{
+				glEnable(GL_DEPTH_TEST);
+
+				switch(depthTest)
+				{
+				case Always:
+					glDepthFunc(GL_ALWAYS);
+					break;
+				case LessEqual:
+					glDepthFunc(GL_LEQUAL);
+					break;
+				}
+			}
+		}
+
 		void RendererOpenGL::DrawVertexBuffer(const VertexBuffer& vertexBuffer)
 		{
 			LockGLContext();
@@ -457,6 +479,10 @@ namespace ion
 
 			switch(vertexBuffer.GetPattern())
 			{
+			case VertexBuffer::Lines:
+				drawPattern = GL_LINES;
+				break;
+
 			case VertexBuffer::Triangles:
 				drawPattern = GL_TRIANGLES;
 				break;

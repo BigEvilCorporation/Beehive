@@ -14,10 +14,14 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	, m_resourceManager(resourceManager)
 {
 	m_project = NULL;
+	m_mapPrimitive = NULL;
+	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;
 	m_cameraPanSpeed = 1.0f;
 	m_tilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
+	m_gridSize = 1;
+	m_snapToGrid = true;
 
 	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
@@ -48,6 +52,9 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	//Set 2D orthographic mode
 	m_renderer->SetPerspectiveMode(ion::render::Renderer::Ortho2DAbsolute);
 
+	//No depth test (stops grid cells Z fighting)
+	m_renderer->SetDepthTest(ion::render::Renderer::Always);
+
 	//Create camera
 	m_camera = new ion::render::Camera();
 	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
@@ -67,24 +74,36 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	}
 
 	//Create tileset texture
-	m_tilesetTexture = ion::render::Texture::Create();
-	m_tilesetTextureHndl = m_resourceManager.AddResource("tilesetTexture", *m_tilesetTexture);
+	m_tilesetTextureHndl = m_resourceManager.AddResource("tilesetTexture", *ion::render::Texture::Create());
 
-	//Create default material
-	m_material = new ion::render::Material();
-	m_material->AddDiffuseMap(m_tilesetTextureHndl);
-	m_material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_material->SetVertexShader(m_vertexShader);
-	m_material->SetPixelShader(m_pixelShader);
+	//Create map material
+	m_mapMaterial = new ion::render::Material();
+	m_mapMaterial->AddDiffuseMap(m_tilesetTextureHndl);
+	m_mapMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_mapMaterial->SetVertexShader(m_vertexShader);
+	m_mapMaterial->SetPixelShader(m_pixelShader);
 
-	//Create rendering primitive
-	m_primitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2(100.0f, 100.0f), 64, 64, true);
+	//Create grid material
+	m_gridMaterial = new ion::render::Material();
+	m_gridMaterial->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 0.0f));
+	m_gridMaterial->SetVertexShader(m_vertexShader);
+	m_gridMaterial->SetPixelShader(m_pixelShader);
 }
 
 MapPanel::~MapPanel()
 {
-	delete m_renderer;
+	delete m_mapMaterial;
+	delete m_gridMaterial;
+	m_tilesetTextureHndl.Clear();
+	delete m_camera;
 	delete m_context;
+	delete m_renderer;
+
+	if(m_mapPrimitive)
+		delete m_mapPrimitive;
+
+	if(m_gridPrimitive)
+		delete m_gridPrimitive;
 }
 
 void MapPanel::SetProject(Project* project)
@@ -95,8 +114,15 @@ void MapPanel::SetProject(Project* project)
 	m_cameraZoom = 1.0f;
 	m_camera->SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
 
+	//Reset grid
+	m_gridSize = 1;
+	m_snapToGrid = true;
+
 	//Create canvas
 	CreateCanvas();
+
+	//Create grid
+	CreateGrid();
 
 	//Centre camera on canvas
 	CentreCamera();
@@ -109,6 +135,9 @@ void MapPanel::SetProject(Project* project)
 
 	//Redraw map
 	PaintWholeMap();
+
+	//Refresh panel
+	Refresh();
 }
 
 void MapPanel::CreateCanvas()
@@ -116,12 +145,25 @@ void MapPanel::CreateCanvas()
 	if(m_project)
 	{
 		//Create rendering primitive
-		if(m_primitive)
-			delete m_primitive;
+		if(m_mapPrimitive)
+			delete m_mapPrimitive;
 
 		int mapWidth = m_project->GetMap().GetWidth();
 		int mapHeight = m_project->GetMap().GetHeight();
-		m_primitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)mapWidth * 4.0f, (float)mapHeight * 4.0f), mapWidth, mapHeight, true);
+		m_mapPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)mapWidth * 4.0f, (float)mapHeight * 4.0f), mapWidth, mapHeight, true);
+	}
+}
+
+void MapPanel::CreateGrid()
+{
+	if(m_project)
+	{
+		if(m_gridPrimitive)
+			delete m_gridPrimitive;
+
+		int mapWidth = m_project->GetMap().GetWidth();
+		int mapHeight = m_project->GetMap().GetHeight();
+		m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)mapWidth * 4.0f, (float)mapHeight * 4.0f), mapWidth / m_gridSize, mapHeight / m_gridSize);
 	}
 }
 
@@ -175,10 +217,10 @@ void MapPanel::CreateTilesetTexture()
 			}
 		}
 
-		m_tilesetTexture->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
-		m_tilesetTexture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-		m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-		m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
+		m_tilesetTextureHndl->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
+		m_tilesetTextureHndl->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+		m_tilesetTextureHndl->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+		m_tilesetTextureHndl->SetWrapping(ion::render::Texture::eWrapClamp);
 
 		delete data;
 	}
@@ -237,7 +279,7 @@ void MapPanel::PaintTile(TileId tileId, int x, int y)
 		coords[3].x = textureBottomLeft.x + m_cellSizeTexSpaceSq;
 		coords[3].y = textureBottomLeft.y + m_cellSizeTexSpaceSq;
 
-		m_primitive->SetCellTexCoords((y * mapWidth) + x, coords);
+		m_mapPrimitive->SetCellTexCoords((y * mapWidth) + x, coords);
 	}
 }
 
@@ -280,7 +322,7 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		//Centre of map quad is 0,0
 		ion::Vector2 mousePos(mousePanelPosWx.x, mousePanelPosWx.y);
 		ion::Vector2 viewportSize(panelSizeWx.x, panelSizeWx.y);
-		ion::Vector2 cameraPos(m_cameraPos.x * m_cameraZoom, m_cameraPos.y * m_cameraZoom);
+		ion::Vector2 cameraPos(m_camera->GetPosition().x * m_cameraZoom, m_camera->GetPosition().y * m_cameraZoom);
 		ion::Vector2 mapSize(mapWidth * tileWidth * m_cameraZoom, mapHeight * tileHeight * m_cameraZoom);
 		ion::Vector2 mousePosMapSpace;
 		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2 - cameraPos.x - mousePos.x)) / m_cameraZoom;
@@ -290,7 +332,7 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		if(		mousePosMapSpace.x >= 0.0f
 			&&	mousePosMapSpace.y >= 0.0f
 			&&	mousePosMapSpace.x < (mapWidth * tileWidth)
-			&& mousePosMapSpace.y < (mapHeight * tileHeight))
+			&&	mousePosMapSpace.y < (mapHeight * tileHeight))
 		{
 			//Invert Y for OpenGL
 			int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
@@ -325,12 +367,12 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 		{
 			//Pan camera
-			m_cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
-			m_cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
+			ion::Vector3 cameraPos = m_camera->GetPosition();
+			cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
+			cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
+			m_camera->SetPosition(cameraPos);
 
-			m_camera->SetPosition(ion::Vector3(m_cameraPos.x, m_cameraPos.y, 0.0f));
-
-			//Invalidate whole frame
+			//Invalidate rect
 			Refresh();
 		}
 		else if(event.GetWheelRotation() != 0)
@@ -366,11 +408,12 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 			wxSize panelSize = GetClientSize();
 			ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
 			ion::Vector2 newViewportSize((float)panelSize.x / m_cameraZoom, (float)panelSize.y / m_cameraZoom);
-			m_cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
-			m_cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
-			m_camera->SetPosition(ion::Vector3(m_cameraPos.x, m_cameraPos.y, 0.0f));
+			ion::Vector3 cameraPos = m_camera->GetPosition();
+			cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
+			cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
+			m_camera->SetPosition(cameraPos);
 
-			//Invalidate whole frame
+			//Invalidate rect
 			Refresh();
 		}
 	}
@@ -385,48 +428,24 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 	m_renderer->ClearColour();
 	m_renderer->ClearDepth();
 
-	//Draw primitive
-	m_material->Bind(ion::Matrix4(), m_camera->GetTransform().GetInverse(), m_renderer->GetProjectionMatrix());
-	m_renderer->DrawVertexBuffer(m_primitive->GetVertexBuffer(), m_primitive->GetIndexBuffer());
-	m_material->Unbind();
+	//Draw primitives
+	if(m_mapPrimitive)
+	{
+		m_mapMaterial->Bind(ion::Matrix4(), m_camera->GetTransform().GetInverse(), m_renderer->GetProjectionMatrix());
+		m_renderer->DrawVertexBuffer(m_mapPrimitive->GetVertexBuffer(), m_mapPrimitive->GetIndexBuffer());
+		m_mapMaterial->Unbind();
+	}
+
+	if(m_gridPrimitive)
+	{
+		m_gridMaterial->Bind(ion::Matrix4(), m_camera->GetTransform().GetInverse(), m_renderer->GetProjectionMatrix());
+		m_renderer->DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
+		m_gridMaterial->Unbind();
+	}
 
 	//End rendering
 	m_renderer->SwapBuffers();
 	m_renderer->EndFrame();
-
-	/*
-	//Double buffered dest context
-	wxAutoBufferedPaintDC destContext(this);
-
-	//Draw grid
-	if(m_project)
-	{
-		destContext.SetBrush(*wxBLACK_BRUSH);
-
-		int mapWidth = m_project->GetMap().GetWidth();
-		int mapHeight = m_project->GetMap().GetHeight();
-
-		for(int x = 1; x < mapWidth; x++)
-		{
-			float lineHeight = (float)mapHeight * (8.0f * m_cameraZoom);
-			float lineX = ((x * 8) * m_cameraZoom) + m_cameraPos.x;
-
-			wxPoint pointY1(lineX, m_cameraPos.y);
-			wxPoint pointY2(lineX, m_cameraPos.y + lineHeight);
-			destContext.DrawLine(pointY1, pointY2);
-
-			for(int y = 1; y < mapHeight; y++)
-			{
-				float lineWidth = (float)mapWidth * (8.0f * m_cameraZoom);
-				float lineY = ((y * 8) * m_cameraZoom) + m_cameraPos.y;
-
-				wxPoint pointX1(m_cameraPos.x, lineY);
-				wxPoint pointX2(m_cameraPos.x + lineWidth, lineY);
-				destContext.DrawLine(pointX1, pointX2);
-			}
-		}
-	}
-	*/
 }
 
 void MapPanel::OnErase(wxEraseEvent& event)
@@ -436,11 +455,10 @@ void MapPanel::OnErase(wxEraseEvent& event)
 
 void MapPanel::OnResize(wxSizeEvent& event)
 {
-	CentreCamera();
-
 	wxSize panelSize = GetClientSize();
 	m_renderer->OnResize(panelSize.x, panelSize.y);
 
+	CentreCamera();
 	Refresh();
 }
 
@@ -453,6 +471,9 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		{
 			//Recreate canvas
 			CreateCanvas();
+
+			//Recreate grid
+			CreateGrid();
 
 			//Recreate tileset texture
 			CreateTilesetTexture();
@@ -472,10 +493,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 void MapPanel::CentreCamera()
 {
-	if(m_project)
-	{
-		wxRect clientRect = GetClientRect();
-		//m_cameraPos.x = (clientRect.width / 2.0f) - ((m_project->GetMap().GetWidth() * 8.0f) / 2.0f);
-		//m_cameraPos.y = (clientRect.height / 2.0f) - ((m_project->GetMap().GetHeight() * 8.0f) / 2.0f);
-	}
+	wxRect clientRect = GetClientRect();
+	ion::Vector3 cameraPos(-(clientRect.width / 2.0f), -(clientRect.height / 2.0f), 0.0f);
+	m_camera->SetPosition(cameraPos);
 }

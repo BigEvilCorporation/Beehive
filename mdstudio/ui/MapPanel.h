@@ -44,6 +44,9 @@ private:
 	//Create canvas
 	void CreateCanvas();
 
+	//Create grid
+	void CreateGrid();
+
 	//Create and redraw tileset texture
 	void CreateTilesetTexture();
 
@@ -73,17 +76,20 @@ private:
 
 	//Camera
 	ion::render::Camera* m_camera;
+	float m_cameraZoom;
+	float m_cameraPanSpeed;
 
-	//Rendering material and shaders
+	//Rendering materials and shaders
 	ion::io::ResourceHandle<ion::render::Shader> m_vertexShader;
 	ion::io::ResourceHandle<ion::render::Shader> m_pixelShader;
-	ion::render::Material* m_material;
+	ion::render::Material* m_mapMaterial;
+	ion::render::Material* m_gridMaterial;
 
-	//Rendering primitive
-	ion::render::Grid* m_primitive;
+	//Rendering primitives
+	ion::render::Chessboard* m_mapPrimitive;
+	ion::render::Grid* m_gridPrimitive;
 
 	//Tileset texture
-	ion::render::Texture* m_tilesetTexture;
 	ion::io::ResourceHandle<ion::render::Texture> m_tilesetTextureHndl;
 
 	//Map tile IDs to indices
@@ -95,10 +101,9 @@ private:
 	//Tileset texture cell size sq
 	float m_cellSizeTexSpaceSq;
 
-	//Camera
-	ion::Vector2 m_cameraPos;
-	float m_cameraZoom;
-	float m_cameraPanSpeed;
+	//Grid
+	int m_gridSize;
+	bool m_snapToGrid;
 
 	//For mouse delta
 	ion::Vector2 m_mousePrevPos;

@@ -65,6 +65,7 @@ namespace ion
 			virtual void SetPerspectiveMode(PerspectiveMode perspectiveMode);
 			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType);
 			virtual void SetFaceCulling(CullingMode cullingMode);
+			virtual void SetDepthTest(DepthTest depthTest);
 
 			//Vertex buffer drawing
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer);
