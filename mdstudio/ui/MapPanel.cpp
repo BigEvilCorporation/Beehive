@@ -262,30 +262,39 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 {
 	if(m_project)
 	{
-		//Get mouse delta
-		ion::Vector2 mousePos(event.GetX(), event.GetY());
-		ion::Vector2 mouseDelta = m_mousePrevPos - mousePos;
-		m_mousePrevPos = mousePos;
+		const int mapWidth = m_project->GetMap().GetWidth();
+		const int mapHeight = m_project->GetMap().GetHeight();
+		const int tileWidth = 8;
+		const int tileHeight = 8;
 
-		//Get mouse position in canvas and map space
+		//Get mouse delta
+		ion::Vector2 mousePosScreenSpace(event.GetX(), event.GetY());
+		ion::Vector2 mouseDelta = m_mousePrevPos - mousePosScreenSpace;
+		m_mousePrevPos = mousePosScreenSpace;
+
+		//Get mouse position in panel space
 		wxClientDC clientDc(this);
-		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
+		wxPoint mousePanelPosWx = event.GetLogicalPosition(clientDc);
+		wxSize panelSizeWx = GetClientSize();
 
 		//Centre of map quad is 0,0
-		ion::Vector2 cameraPosMapSpace((float)((m_project->GetMap().GetWidth() * 4) / m_cameraZoom) + m_cameraPos.x, (float)((m_project->GetMap().GetHeight() * 4) / m_cameraZoom) + m_cameraPos.y);
-
-		ion::Vector2 mousePosPanelSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
-		ion::Vector2 mousePosMapSpace((mousePosPanelSpace.x - cameraPosMapSpace.x) / m_cameraZoom,
-			(mousePosPanelSpace.y - cameraPosMapSpace.y) / m_cameraZoom);
+		ion::Vector2 mousePos(mousePanelPosWx.x, mousePanelPosWx.y);
+		ion::Vector2 viewportSize(panelSizeWx.x, panelSizeWx.y);
+		ion::Vector2 cameraPos(m_cameraPos.x * m_cameraZoom, m_cameraPos.y * m_cameraZoom);
+		ion::Vector2 mapSize(mapWidth * tileWidth * m_cameraZoom, mapHeight * tileHeight * m_cameraZoom);
+		ion::Vector2 mousePosMapSpace;
+		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2 - cameraPos.x - mousePos.x)) / m_cameraZoom;
+		mousePosMapSpace.y = (mapSize.y - (mapSize.y / 2.0f - cameraPos.y - (viewportSize.y - mousePos.y))) / m_cameraZoom;
 
 		//Panting/erasing
 		if(		mousePosMapSpace.x >= 0.0f
 			&&	mousePosMapSpace.y >= 0.0f
-			&&	mousePosMapSpace.x < (m_project->GetMap().GetWidth() * 8)
-			&&	mousePosMapSpace.y < (m_project->GetMap().GetHeight() * 8))
+			&&	mousePosMapSpace.x < (mapWidth * tileWidth)
+			&& mousePosMapSpace.y < (mapHeight * tileHeight))
 		{
-			int x = (int)floor(mousePosMapSpace.x / 8.0f);
-			int y = (int)floor(mousePosMapSpace.y / 8.0f);
+			//Invert Y for OpenGL
+			int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
+			int y = mapHeight - 1 - (int)floor(mousePosMapSpace.y / (float)tileHeight);
 
 			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 			{
@@ -295,12 +304,7 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 					PaintTile(m_project->GetPaintTile(), x, y);
 
 					//Invalidate rect
-					wxRect refreshRect(((x * 8) * m_cameraZoom) + m_cameraPos.x,
-						((y * 8) * m_cameraZoom) + m_cameraPos.y,
-						8 * m_cameraZoom,
-						8 * m_cameraZoom);
-
-					RefreshRect(refreshRect);
+					Refresh();
 				}
 
 			}
@@ -312,12 +316,7 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 					PaintTile(m_project->GetEraseTile(), x, y);
 
 					//Invalidate rect
-					wxRect refreshRect(((x * 8) * m_cameraZoom) + m_cameraPos.x,
-						((y * 8) * m_cameraZoom) + m_cameraPos.y,
-						8 * m_cameraZoom,
-						8 * m_cameraZoom);
-
-					RefreshRect(refreshRect);
+					Refresh();
 				}
 			}
 		}
