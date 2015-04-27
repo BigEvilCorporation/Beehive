@@ -59,7 +59,29 @@ namespace ion
 			}
 		}
 
-		Grid::Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells, bool uniqueVerts)
+		Grid::Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells)
+			: Primitive(VertexBuffer::Lines)
+		{
+			Vector2 cellSize((halfExtents.x * 2.0f) / (float)widthCells, (halfExtents.y * 2.0f) / (float)heightCells);
+			Vector2 gridSize(halfExtents * 2.0f);
+
+			if(axis == xy)
+			{
+				for(int x = 0; x < widthCells+1; x++)
+				{
+					mVertexBuffer.AddVertex(Vector3((cellSize.x * x) - halfExtents.x, -halfExtents.y, 0.0f), Vector3(), TexCoord());
+					mVertexBuffer.AddVertex(Vector3((cellSize.x * x) - halfExtents.x, gridSize.y - halfExtents.y, 0.0f), Vector3(), TexCoord());
+				}
+
+				for(int y = 0; y < heightCells+1; y++)
+				{
+					mVertexBuffer.AddVertex(Vector3(-halfExtents.x,				(cellSize.y * y) - halfExtents.y, 0.0f), Vector3(), TexCoord());
+					mVertexBuffer.AddVertex(Vector3(gridSize.x - halfExtents.x,	(cellSize.y * y) - halfExtents.y, 0.0f), Vector3(), TexCoord());
+				}
+			}
+		}
+
+		Chessboard::Chessboard(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells, bool uniqueVerts)
 			: Primitive(VertexBuffer::Triangles)
 		{
 			Vector2 cellSize((halfExtents.x * 2.0f) / (float)widthCells, (halfExtents.y * 2.0f) / (float)heightCells);
@@ -94,7 +116,7 @@ namespace ion
 			}
 		}
 
-		void Grid::SetCellTexCoords(int cellIndex, TexCoord coords[4])
+		void Chessboard::SetCellTexCoords(int cellIndex, TexCoord coords[4])
 		{
 			for(int i = 0; i < 4; i++)
 			{

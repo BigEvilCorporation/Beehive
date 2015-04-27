@@ -39,6 +39,9 @@ namespace ion
 			//Render perspectives
 			enum PerspectiveMode { Perspective3D, Ortho2DNormalised, Ortho2DAbsolute };
 
+			//Depth test type
+			enum DepthTest { Disabled, Always, LessEqual };
+
 			//Render vertex pattern type
 			enum VertexPattern { Triangles, Quads };
 
@@ -73,6 +76,7 @@ namespace ion
 			virtual void SetPerspectiveMode(PerspectiveMode perspectiveMode) = 0;
 			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType) = 0;
 			virtual void SetFaceCulling(CullingMode cullingMode) = 0;
+			virtual void SetDepthTest(DepthTest depthTest) = 0;
 
 			//Vertex buffer drawing
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer) = 0;

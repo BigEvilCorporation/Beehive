@@ -23,17 +23,19 @@ namespace ion
 			Entity();
 			virtual ~Entity();
 
-			virtual const Matrix4& GetTransform() const;
+			const Matrix4& GetTransform() const;
 
-			virtual void SetTransform(const Matrix4& matrix);
-			virtual void SetPosition(const Vector3& position);
-			virtual void SetOrientation(const Quaternion& orientation);
-			virtual void SetLookAt(const Vector3& position);
+			Vector3 GetPosition() const;
 
-			virtual void Move(const Vector3& moveVector);
-			virtual void Pitch(float pitch, TransformSpace transformSpace = Local);
-			virtual void Yaw(float yaw, TransformSpace transformSpace = Local);
-			virtual void Roll(float roll, TransformSpace transformSpace = Local);
+			void SetTransform(const Matrix4& matrix);
+			void SetPosition(const Vector3& position);
+			void SetOrientation(const Quaternion& orientation);
+			void SetLookAt(const Vector3& position);
+
+			void Move(const Vector3& moveVector);
+			void Pitch(float pitch, TransformSpace transformSpace = Local);
+			void Yaw(float yaw, TransformSpace transformSpace = Local);
+			void Roll(float roll, TransformSpace transformSpace = Local);
 
 		private:
 			Matrix4 mMatrix;

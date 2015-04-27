@@ -27,6 +27,11 @@ namespace ion
 			return mMatrix;
 		}
 
+		Vector3 Entity::GetPosition() const
+		{
+			return mMatrix.GetTranslation();
+		}
+
 		void Entity::SetTransform(const Matrix4& transform)
 		{
 			mMatrix = transform;

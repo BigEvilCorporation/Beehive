@@ -50,7 +50,14 @@ namespace ion
 		{
 		public:
 			enum Axis { xy, xz, yz };
-			Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells, bool uniqueVerts);
+			Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells);
+		};
+
+		class Chessboard : public Primitive
+		{
+		public:
+			enum Axis { xy, xz, yz };
+			Chessboard(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells, bool uniqueVerts);
 			void SetCellTexCoords(int cellIndex, TexCoord coords[4]);
 		};
 
