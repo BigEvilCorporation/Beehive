@@ -53,6 +53,14 @@ public:
 	void SetEraseTile(TileId tile);
 	TileId GetEraseTile() const;
 
+	//Grid
+	int GetGridSize() const { return m_gridSize; }
+	void SetGridSize(int gridSize) { m_gridSize = gridSize; }
+	bool GetShowGrid() const { return m_showGrid; }
+	void SetShowGrid(bool show) { m_showGrid = show; }
+	bool GetGridSnap() const { return m_snapToGrid; }
+	void SetGridSnap(bool snap) { m_snapToGrid = snap; }
+
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
@@ -95,6 +103,11 @@ private:
 
 	//Tile used for erasing
 	TileId m_eraseTile;
+
+	//Grid
+	int m_gridSize;
+	bool m_showGrid;
+	bool m_snapToGrid;
 
 	//Map needs redraw
 	bool m_mapInvalidated;

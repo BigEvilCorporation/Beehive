@@ -37,10 +37,12 @@
 #define wxID_BTN_PROJ_SAVEAS 1003
 #define wxID_BTN_PROJ_SAVE 1004
 #define wxID_BTN_PROJ_EXPORT 1005
-#define wxID_BTN_TILES_IMPORT 1006
-#define wxID_BTN_TOOLS_MAPEDIT 1007
-#define wxID_BTN_TOOLS_TILES 1008
-#define wxID_BTN_TOOLS_PALETTES 1009
+#define wxID_BTN_GRID_SHOW 1006
+#define wxID_BTN_GRID_SNAP 1007
+#define wxID_BTN_TOOLS_MAPEDIT 1008
+#define wxID_BTN_TOOLS_TILES 1009
+#define wxID_BTN_TOOLS_PALETTES 1010
+#define wxID_BTN_TILES_IMPORT 1011
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -54,24 +56,22 @@ class MainWindowBase : public wxFrame
 		wxRibbonPage* m_ribbonPageProject;
 		wxRibbonPanel* m_ribbonPanelProject;
 		wxRibbonButtonBar* m_ribbonButtonBarProject;
-		wxRibbonPage* m_ribbonPageTiles;
-		wxRibbonPanel* m_ribbonPanelTiles;
-		wxRibbonButtonBar* m_ribbonButtonBarTiles;
-		wxRibbonPage* m_ribbonPageStamps;
-		wxRibbonPanel* m_ribbonPanelStamps;
-		wxRibbonButtonBar* m_ribbonButtonBarStamps;
-		wxRibbonPage* m_ribbonPageMap;
-		wxRibbonPanel* m_ribbonPanelMap;
-		wxRibbonButtonBar* m_ribbonButtonBarMap;
-		wxRibbonPage* m_ribbonPagePalettes;
-		wxRibbonPanel* m_ribbonPanelPalettes;
-		wxRibbonButtonBar* m_ribbonButtonBarPal;
-		wxRibbonPage* m_ribbonPageCollision;
-		wxRibbonPanel* m_ribbonPanelCollision;
-		wxRibbonButtonBar* m_ribbonButtonBarCollision;
+		wxRibbonPage* m_ribbonPageView;
+		wxRibbonPanel* m_ribbonPanelView;
+		wxRibbonButtonBar* m_ribbonButtonBarGrid;
 		wxRibbonPage* m_ribbonPageTools;
 		wxRibbonPanel* m_ribbonPanelTools;
 		wxRibbonButtonBar* m_ribbonButtonBarTools;
+		wxRibbonPanel* m_ribbonPanelMap;
+		wxRibbonButtonBar* m_ribbonButtonBarMap;
+		wxRibbonPanel* m_ribbonPanelTiles;
+		wxRibbonButtonBar* m_ribbonButtonBarTiles;
+		wxRibbonPanel* m_ribbonPanelPalettes;
+		wxRibbonButtonBar* m_ribbonButtonBarPalettes;
+		wxRibbonPanel* m_ribbonPanelStamps;
+		wxRibbonButtonBar* m_ribbonButtonBarStamps;
+		wxRibbonPanel* m_ribbonPanelCollision;
+		wxRibbonButtonBar* m_ribbonButtonBarCollision;
 		wxPanel* m_dockArea;
 		wxStatusBar* m_statusBar;
 		
@@ -81,12 +81,14 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnProjSaveAs( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjSave( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjExport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnGridShow( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnGridSnap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	
 	public:

@@ -20,8 +20,6 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_cameraPanSpeed = 1.0f;
 	m_tilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
-	m_gridSize = 1;
-	m_snapToGrid = true;
 	m_lastMouseHoverTileX = -1;
 	m_lastMouseHoverTileY = -1;
 
@@ -98,6 +96,8 @@ MapPanel::~MapPanel()
 	delete m_gridMaterial;
 	delete m_previewPrimitive;
 	m_tilesetTextureHndl.Clear();
+	m_vertexShader.Clear();
+	m_pixelShader.Clear();
 	delete m_camera;
 
 	if(m_mapPrimitive)
@@ -105,6 +105,12 @@ MapPanel::~MapPanel()
 
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
+
+	//Hack: wait for resources
+	while(m_resourceManager.GetNumResourcesWaiting() > 0)
+	{
+		wxSleep(1);
+	}
 
 	delete m_context;
 	delete m_renderer;
@@ -117,10 +123,6 @@ void MapPanel::SetProject(Project* project)
 	//Reset zoom
 	m_cameraZoom = 1.0f;
 	m_camera->SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
-
-	//Reset grid
-	m_gridSize = 1;
-	m_snapToGrid = true;
 
 	//Create canvas
 	CreateCanvas();
@@ -167,7 +169,7 @@ void MapPanel::CreateGrid()
 
 		int mapWidth = m_project->GetMap().GetWidth();
 		int mapHeight = m_project->GetMap().GetHeight();
-		m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)mapWidth * 4.0f, (float)mapHeight * 4.0f), mapWidth / m_gridSize, mapHeight / m_gridSize);
+		m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)mapWidth * 4.0f, (float)mapHeight * 4.0f), mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
 	}
 }
 
@@ -462,63 +464,64 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 	m_renderer->ClearColour();
 	m_renderer->ClearDepth();
 
-	ion::Matrix4 cameraInverseMtx = m_camera->GetTransform().GetInverse();
-	ion::Matrix4 projectionMtx = m_renderer->GetProjectionMatrix();
-	
-	//Z order
-	const float zOffset = 0.0001f;
-	float z = 0.0f;
-
-	//Draw map
-	if(m_mapPrimitive)
+	if(m_project)
 	{
+		ion::Matrix4 cameraInverseMtx = m_camera->GetTransform().GetInverse();
+		ion::Matrix4 projectionMtx = m_renderer->GetProjectionMatrix();
+
+		//Z order
+		const float zOffset = 0.0001f;
+		float z = 0.0f;
+
 		//No depth test (stops grid cells Z fighting)
 		m_renderer->SetDepthTest(ion::render::Renderer::Always);
 
+		//Draw map
 		m_mapMaterial->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 		m_renderer->DrawVertexBuffer(m_mapPrimitive->GetVertexBuffer(), m_mapPrimitive->GetIndexBuffer());
 		m_mapMaterial->Unbind();
 
 		m_renderer->SetDepthTest(ion::render::Renderer::LessEqual);
-	}
 
-	z += zOffset;
+		z += zOffset;
 
-	//Draw preview tile
-	if(m_project && m_project->GetPaintTile() && m_lastMouseHoverTileX >= 0 && m_lastMouseHoverTileY >= 0)
-	{
-		const int mapWidth = m_project->GetMap().GetWidth();
-		const int mapHeight = m_project->GetMap().GetHeight();
-		const int tileWidth = 8;
-		const int tileHeight = 8;
-		const int quadHalfExtentsX = 4;
-		const int quadHalfExtentsY = 4;
+		//Draw preview tile
+		if(m_project->GetPaintTile() && m_lastMouseHoverTileX >= 0 && m_lastMouseHoverTileY >= 0)
+		{
+			const int mapWidth = m_project->GetMap().GetWidth();
+			const int mapHeight = m_project->GetMap().GetHeight();
+			const int tileWidth = 8;
+			const int tileHeight = 8;
+			const int quadHalfExtentsX = 4;
+			const int quadHalfExtentsY = 4;
 
-		//Set preview quad texture coords
-		ion::render::TexCoord coords[4];
-		GetTileTexCoords(m_project->GetPaintTile(), coords);
-		m_previewPrimitive->SetTexCoords(coords);
-		
-		ion::Matrix4 previewQuadMtx;
-		ion::Vector3 previewQuadPos(((m_lastMouseHoverTileX - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
-									((m_lastMouseHoverTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
-		previewQuadMtx.SetTranslation(previewQuadPos);
+			//Set preview quad texture coords
+			ion::render::TexCoord coords[4];
+			GetTileTexCoords(m_project->GetPaintTile(), coords);
+			m_previewPrimitive->SetTexCoords(coords);
 
-		m_mapMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
-		m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
-		m_mapMaterial->Unbind();
-	}
+			ion::Matrix4 previewQuadMtx;
+			ion::Vector3 previewQuadPos(((m_lastMouseHoverTileX - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
+				((m_lastMouseHoverTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
+			previewQuadMtx.SetTranslation(previewQuadPos);
 
-	z += zOffset;
+			m_mapMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
+			m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
+			m_mapMaterial->Unbind();
+		}
 
-	//Draw grid
-	if(m_gridPrimitive)
-	{
-		ion::Matrix4 gridMtx;
-		gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
-		m_gridMaterial->Bind(gridMtx, cameraInverseMtx, projectionMtx);
-		m_renderer->DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
-		m_gridMaterial->Unbind();
+		z += zOffset;
+
+		if(m_project->GetShowGrid())
+		{
+			//Draw grid
+			ion::Matrix4 gridMtx;
+			gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
+			gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
+			m_gridMaterial->Bind(gridMtx, cameraInverseMtx, projectionMtx);
+			m_renderer->DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
+			m_gridMaterial->Unbind();
+		}
 	}
 
 	//End rendering

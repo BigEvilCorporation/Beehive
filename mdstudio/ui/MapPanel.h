@@ -108,10 +108,6 @@ private:
 	//Tileset texture cell size sq
 	float m_cellSizeTexSpaceSq;
 
-	//Grid
-	int m_gridSize;
-	bool m_snapToGrid;
-
 	//For preview tile
 	int m_lastMouseHoverTileX;
 	int m_lastMouseHoverTileY;

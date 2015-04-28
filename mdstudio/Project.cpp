@@ -18,6 +18,9 @@ Project::Project()
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
 	m_name = "untitled";
+	m_gridSize = 1;
+	m_showGrid = true;
+	m_snapToGrid = false;
 	m_palettes.resize(numPalettes);
 	m_palettes[0].AddColour(Colour(255, 255, 255));
 }
