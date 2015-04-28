@@ -42,18 +42,30 @@ void MainWindow::SetProject(Project* project)
 		ShowPanelPalettes();
 		ShowPanelTiles();
 		ShowPanelMap();
+
+		//Sync settings widgets states
+		SyncSettingsWidgets();
 	}
 	else
 	{
 		//Project closed, close panels
 		if(m_tilesPanel)
+		{
+			m_auiManager.DetachPane(m_tilesPanel);
 			delete m_tilesPanel;
+		}
 
 		if(m_palettesPanel)
+		{
+			m_auiManager.DetachPane(m_palettesPanel);
 			delete m_palettesPanel;
+		}
 
 		if(m_mapPanel)
+		{
+			m_auiManager.DetachPane(m_mapPanel);
 			delete m_mapPanel;
+		}
 
 		m_project = NULL;
 	}
@@ -140,6 +152,15 @@ void MainWindow::ShowPanelMap()
 	}
 }
 
+void MainWindow::SyncSettingsWidgets()
+{
+	if(m_project)
+	{
+		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SHOW, m_project->GetShowGrid());
+		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SNAP, m_project->GetGridSnap());
+	}
+}
+
 void MainWindow::RefreshAll()
 {
 	m_auiManager.Update();
@@ -174,22 +195,11 @@ void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 		{
 			//Destroy old project
 			delete m_project;
+			SetProject(NULL);
 
 			//Set new project
-			m_project = project;
+			SetProject(project);
 			
-			if(m_palettesPanel)
-				m_palettesPanel->SetProject(project);
-
-			if(m_tilesPanel)
-				m_tilesPanel->SetProject(project);
-
-			if(m_mapPanel)
-				m_mapPanel->SetProject(project);
-
-			//Refresh whole application
-			RefreshAll();
-
 			SetStatusText("Load complete");
 		}
 		else
@@ -310,4 +320,20 @@ void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )
 void MainWindow::OnBtnToolsPalettes( wxRibbonButtonBarEvent& event )
 {
 	ShowPanelPalettes();
+}
+
+void MainWindow::OnBtnGridShow(wxCommandEvent& event)
+{
+	if(m_project)
+	{
+		m_project->SetShowGrid(!m_project->GetShowGrid());
+	}
+}
+
+void MainWindow::OnBtnGridSnap(wxCommandEvent& event)
+{
+	if(m_project)
+	{
+		m_project->SetGridSnap(!m_project->GetGridSnap());
+	}
 }

@@ -33,11 +33,17 @@ namespace ion
 
 				sCgContext = cgCreateContext();
 
+				CheckCgError();
+
 				//Case sensitive semantics
 				cgSetSemanticCasePolicy(CG_UNCHANGED_CASE_POLICY);
 
+				CheckCgError();
+
 				//Set managed texture params (automatically binds/unbinds textures)
 				cgGLSetManageTextureParameters(sCgContext, true);
+
+				CheckCgError();
 
 				RendererOpenGL::UnlockGLContext();
 			}
@@ -100,6 +106,7 @@ namespace ion
 			{
 				RendererOpenGL::LockGLContext();
 				cgDestroyProgram(mCgProgram);
+				ShaderManagerCgGL::CheckCgError();
 				RendererOpenGL::UnlockGLContext();
 			}
 		}
@@ -135,7 +142,11 @@ namespace ion
 					mCgProfile = cgGLGetLatestProfile(CG_GL_FRAGMENT);
 				}
 
+				ShaderManagerCgGL::CheckCgError();
+
 				cgGLSetOptimalOptions(mCgProfile);
+
+				ShaderManagerCgGL::CheckCgError();
 
 				//Compile program
 				mCgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, mCgProfile, mEntryPoint.c_str(), NULL);
@@ -159,10 +170,12 @@ namespace ion
 			if(!mCgProgramLoaded)
 			{
 				cgGLLoadProgram(mCgProgram);
+				ShaderManagerCgGL::CheckCgError();
 				mCgProgramLoaded = true;
 			}
 
 			cgGLEnableProfile(mCgProfile);
+			ShaderManagerCgGL::CheckCgError();
 			cgGLBindProgram(mCgProgram);
 			ShaderManagerCgGL::CheckCgError();
 
@@ -173,6 +186,7 @@ namespace ion
 		{
 			RendererOpenGL::LockGLContext();
 			cgGLUnbindProgram(mCgProfile);
+			ShaderManagerCgGL::CheckCgError();
 			cgGLDisableProfile(mCgProfile);
 			ShaderManagerCgGL::CheckCgError();
 			RendererOpenGL::UnlockGLContext();

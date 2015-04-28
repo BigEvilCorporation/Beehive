@@ -30,6 +30,7 @@ public:
 	void ShowPanelTiles();
 	void ShowPanelMap();
 
+	void SyncSettingsWidgets();
 	void RefreshAll();
 
 protected:
@@ -44,6 +45,8 @@ protected:
 	virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event );
 	virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 	virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event );
+	virtual void OnBtnGridShow(wxCommandEvent& event);
+	virtual void OnBtnGridSnap(wxCommandEvent& event);
 
 private:
 	ion::io::ResourceManager& m_resourceManager;
