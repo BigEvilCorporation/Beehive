@@ -1,0 +1,39 @@
+
+//Samplers
+sampler2D gDiffuseTexture;
+
+//Diffuse
+float4 gDiffuseColour = float4(1.0f, 1.0f, 1.0f, 1.0f);
+
+//Matrices
+float4x4 gWorldViewProjectionMatrix;
+
+struct InputV
+{
+	float4 mPosition	: POSITION;
+	float2 mTexCoord	: TEXCOORD0;
+	float4 mColour		: COLOR;
+};
+
+struct OutputV
+{
+	float4 mPosition	: POSITION;
+	float2 mTexCoord	: TEXCOORD0;
+	float4 mColour		: COLOR;
+};
+
+OutputV VertexProgram(InputV input)
+{
+	OutputV output;
+
+	output.mPosition = mul(gWorldViewProjectionMatrix, input.mPosition);
+	output.mTexCoord = input.mTexCoord;
+	output.mColour = gDiffuseColour;
+
+	return output;
+}
+
+float4 FragmentProgram(OutputV input) : COLOR
+{
+	return (input.mColour * tex2D(gDiffuseTexture, input.mTexCoord));
+};

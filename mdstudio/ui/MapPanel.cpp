@@ -22,6 +22,8 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_cellSizeTexSpaceSq = 1.0f;
 	m_gridSize = 1;
 	m_snapToGrid = true;
+	m_lastMouseHoverTileX = -1;
+	m_lastMouseHoverTileY = -1;
 
 	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
@@ -52,9 +54,6 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	//Set 2D orthographic mode
 	m_renderer->SetPerspectiveMode(ion::render::Renderer::Ortho2DAbsolute);
 
-	//No depth test (stops grid cells Z fighting)
-	m_renderer->SetDepthTest(ion::render::Renderer::Always);
-
 	//Create camera
 	m_camera = new ion::render::Camera();
 	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
@@ -63,8 +62,8 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_renderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
 
 	//Load shaders
-	m_vertexShader = m_resourceManager.GetResource<ion::render::Shader>("default_v.ion.shader");
-	m_pixelShader = m_resourceManager.GetResource<ion::render::Shader>("default_p.ion.shader");
+	m_vertexShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_v.ion.shader");
+	m_pixelShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_p.ion.shader");
 
 	//Hack: wait for resources
 	//TODO: SetVertexShader() fetches param handles, only succeeds if finished loading
@@ -88,22 +87,27 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_gridMaterial->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 0.0f));
 	m_gridMaterial->SetVertexShader(m_vertexShader);
 	m_gridMaterial->SetPixelShader(m_pixelShader);
+
+	//Create preview quad
+	m_previewPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f), ion::Vector3());
 }
 
 MapPanel::~MapPanel()
 {
 	delete m_mapMaterial;
 	delete m_gridMaterial;
+	delete m_previewPrimitive;
 	m_tilesetTextureHndl.Clear();
 	delete m_camera;
-	delete m_context;
-	delete m_renderer;
 
 	if(m_mapPrimitive)
 		delete m_mapPrimitive;
 
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
+
+	delete m_context;
+	delete m_renderer;
 }
 
 void MapPanel::SetProject(Project* project)
@@ -237,12 +241,48 @@ void MapPanel::PaintWholeMap()
 		{
 			for(int x = 0; x < mapWidth; x++)
 			{
-				//Paint tile
+				//Get tile
 				TileId tileId = m_project->GetMap().GetTile(x, y);
-				PaintTile(tileId, x, y);
+
+				//Invert Y for OpenGL
+				int yInv = mapHeight - 1 - y;
+
+				//Paint tile
+				PaintTile(tileId, x, yInv);
 			}
 		}
 	}
+}
+
+int MapPanel::GetTileIndex(TileId tileId) const
+{
+	std::map<TileId, u32>::const_iterator it = m_tileIndexMap.find(tileId);
+	ion::debug::Assert(it != m_tileIndexMap.end(), "TileId not found in tileset");
+	return it->second;
+}
+
+void MapPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4]) const
+{
+	//Map tile ID to index
+	u32 tileIndex = GetTileIndex(tileId);
+
+	//Map tile to X/Y on tileset texture
+	int tilesetX = (tileIndex % m_tilesetSizeSq);
+	int tilesetY = (tileIndex / m_tilesetSizeSq);
+	ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
+
+	//Top left
+	texCoords[0].x = textureBottomLeft.x;
+	texCoords[0].y = textureBottomLeft.y + m_cellSizeTexSpaceSq;
+	//Bottom left
+	texCoords[1].x = textureBottomLeft.x;
+	texCoords[1].y = textureBottomLeft.y;
+	//Bottom right
+	texCoords[2].x = textureBottomLeft.x + m_cellSizeTexSpaceSq;
+	texCoords[2].y = textureBottomLeft.y;
+	//Top right
+	texCoords[3].x = textureBottomLeft.x + m_cellSizeTexSpaceSq;
+	texCoords[3].y = textureBottomLeft.y + m_cellSizeTexSpaceSq;
 }
 
 void MapPanel::PaintTile(TileId tileId, int x, int y)
@@ -252,34 +292,10 @@ void MapPanel::PaintTile(TileId tileId, int x, int y)
 		int mapWidth = m_project->GetMap().GetWidth();
 		int mapHeight = m_project->GetMap().GetHeight();
 
-		//Invert Y for OpenGL
-		y = mapHeight - 1 - y;
-
-		//Map tile ID to index
-		std::map<TileId, u32>::iterator it = m_tileIndexMap.find(tileId);
-		ion::debug::Assert(it != m_tileIndexMap.end(), "TileId not found in tileset");
-		u32 tileIndex = it->second;
-		int tilesetX = (tileIndex % m_tilesetSizeSq);
-		int tilesetY = (tileIndex / m_tilesetSizeSq);
-		ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
-
 		//Set texture coords for cell
 		ion::render::TexCoord coords[4];
-
-		//Top left
-		coords[0].x = textureBottomLeft.x;
-		coords[0].y = textureBottomLeft.y + m_cellSizeTexSpaceSq;
-		//Bottom left
-		coords[1].x = textureBottomLeft.x;
-		coords[1].y = textureBottomLeft.y;
-		//Bottom right
-		coords[2].x = textureBottomLeft.x + m_cellSizeTexSpaceSq;
-		coords[2].y = textureBottomLeft.y;
-		//Top right
-		coords[3].x = textureBottomLeft.x + m_cellSizeTexSpaceSq;
-		coords[3].y = textureBottomLeft.y + m_cellSizeTexSpaceSq;
-
-		m_mapPrimitive->SetCellTexCoords((y * mapWidth) + x, coords);
+		GetTileTexCoords(tileId, coords);
+		m_mapPrimitive->SetTexCoords((y * mapWidth) + x, coords);
 	}
 }
 
@@ -320,23 +336,22 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		wxSize panelSizeWx = GetClientSize();
 
 		//Centre of map quad is 0,0
-		ion::Vector2 mousePos(mousePanelPosWx.x, mousePanelPosWx.y);
+		ion::Vector2 mousePos(mousePanelPosWx.x, panelSizeWx.y - mousePanelPosWx.y);
 		ion::Vector2 viewportSize(panelSizeWx.x, panelSizeWx.y);
 		ion::Vector2 cameraPos(m_camera->GetPosition().x * m_cameraZoom, m_camera->GetPosition().y * m_cameraZoom);
 		ion::Vector2 mapSize(mapWidth * tileWidth * m_cameraZoom, mapHeight * tileHeight * m_cameraZoom);
 		ion::Vector2 mousePosMapSpace;
-		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2 - cameraPos.x - mousePos.x)) / m_cameraZoom;
-		mousePosMapSpace.y = (mapSize.y - (mapSize.y / 2.0f - cameraPos.y - (viewportSize.y - mousePos.y))) / m_cameraZoom;
+		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
+		mousePosMapSpace.y = (mapSize.y - (mapSize.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
 
 		//Panting/erasing
-		if(		mousePosMapSpace.x >= 0.0f
+		if(mousePosMapSpace.x >= 0.0f
 			&&	mousePosMapSpace.y >= 0.0f
 			&&	mousePosMapSpace.x < (mapWidth * tileWidth)
-			&&	mousePosMapSpace.y < (mapHeight * tileHeight))
+			&& mousePosMapSpace.y < (mapHeight * tileHeight))
 		{
-			//Invert Y for OpenGL
 			int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
-			int y = mapHeight - 1 - (int)floor(mousePosMapSpace.y / (float)tileHeight);
+			int y = (int)floor(mousePosMapSpace.y / (float)tileHeight);
 
 			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 			{
@@ -361,12 +376,31 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 					Refresh();
 				}
 			}
+
+			if(m_project->GetPaintTile())
+			{
+				if(m_lastMouseHoverTileX != x || m_lastMouseHoverTileY != y)
+				{
+					//Preview tile pos changed, rRedraw
+					Refresh();
+				}
+
+				//Update preview tile pos
+				m_lastMouseHoverTileX = x;
+				m_lastMouseHoverTileY = y;
+			}
+		}
+		else
+		{
+			//Out of map range, invalidate preview tile pos
+			m_lastMouseHoverTileX = -1;
+			m_lastMouseHoverTileY = -1;
 		}
 
 		//Camera pan/zoom
 		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 		{
-			//Pan camera
+			//Pan camera (invert Y for OpenGL)
 			ion::Vector3 cameraPos = m_camera->GetPosition();
 			cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
 			cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
@@ -428,17 +462,61 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 	m_renderer->ClearColour();
 	m_renderer->ClearDepth();
 
-	//Draw primitives
+	ion::Matrix4 cameraInverseMtx = m_camera->GetTransform().GetInverse();
+	ion::Matrix4 projectionMtx = m_renderer->GetProjectionMatrix();
+	
+	//Z order
+	const float zOffset = 0.0001f;
+	float z = 0.0f;
+
+	//Draw map
 	if(m_mapPrimitive)
 	{
-		m_mapMaterial->Bind(ion::Matrix4(), m_camera->GetTransform().GetInverse(), m_renderer->GetProjectionMatrix());
+		//No depth test (stops grid cells Z fighting)
+		m_renderer->SetDepthTest(ion::render::Renderer::Always);
+
+		m_mapMaterial->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 		m_renderer->DrawVertexBuffer(m_mapPrimitive->GetVertexBuffer(), m_mapPrimitive->GetIndexBuffer());
+		m_mapMaterial->Unbind();
+
+		m_renderer->SetDepthTest(ion::render::Renderer::LessEqual);
+	}
+
+	z += zOffset;
+
+	//Draw preview tile
+	if(m_project && m_project->GetPaintTile() && m_lastMouseHoverTileX >= 0 && m_lastMouseHoverTileY >= 0)
+	{
+		const int mapWidth = m_project->GetMap().GetWidth();
+		const int mapHeight = m_project->GetMap().GetHeight();
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+		const int quadHalfExtentsX = 4;
+		const int quadHalfExtentsY = 4;
+
+		//Set preview quad texture coords
+		ion::render::TexCoord coords[4];
+		GetTileTexCoords(m_project->GetPaintTile(), coords);
+		m_previewPrimitive->SetTexCoords(coords);
+		
+		ion::Matrix4 previewQuadMtx;
+		ion::Vector3 previewQuadPos(((m_lastMouseHoverTileX - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
+									((m_lastMouseHoverTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
+		previewQuadMtx.SetTranslation(previewQuadPos);
+
+		m_mapMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
+		m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
 		m_mapMaterial->Unbind();
 	}
 
+	z += zOffset;
+
+	//Draw grid
 	if(m_gridPrimitive)
 	{
-		m_gridMaterial->Bind(ion::Matrix4(), m_camera->GetTransform().GetInverse(), m_renderer->GetProjectionMatrix());
+		ion::Matrix4 gridMtx;
+		gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
+		m_gridMaterial->Bind(gridMtx, cameraInverseMtx, projectionMtx);
 		m_renderer->DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
 		m_gridMaterial->Unbind();
 	}

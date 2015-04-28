@@ -59,6 +59,15 @@ namespace ion
 			}
 		}
 
+		void Quad::SetTexCoords(TexCoord coords[4])
+		{
+			for(int i = 0; i < 4; i++)
+			{
+				Vertex pos = mVertexBuffer.GetVertex(i);
+				mVertexBuffer.SetVertex(i, pos, Vector3(0.0f, 0.0f, 1.0f), coords[i]);
+			}
+		}
+
 		Grid::Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells)
 			: Primitive(VertexBuffer::Lines)
 		{
@@ -116,7 +125,7 @@ namespace ion
 			}
 		}
 
-		void Chessboard::SetCellTexCoords(int cellIndex, TexCoord coords[4])
+		void Chessboard::SetTexCoords(int cellIndex, TexCoord coords[4])
 		{
 			for(int i = 0; i < 4; i++)
 			{
