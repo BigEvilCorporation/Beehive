@@ -59,6 +59,12 @@ private:
 	//Paint single tile to canvas
 	void PaintTile(TileId tileId, int x, int y);
 
+	//Get tile index into tileset
+	int GetTileIndex(TileId tileId) const;
+
+	//Get tileset UV coords for tile
+	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4]) const;
+
 	//Centre camera on canvas
 	void CentreCamera();
 
@@ -88,6 +94,7 @@ private:
 	//Rendering primitives
 	ion::render::Chessboard* m_mapPrimitive;
 	ion::render::Grid* m_gridPrimitive;
+	ion::render::Quad* m_previewPrimitive;
 
 	//Tileset texture
 	ion::io::ResourceHandle<ion::render::Texture> m_tilesetTextureHndl;
@@ -104,6 +111,10 @@ private:
 	//Grid
 	int m_gridSize;
 	bool m_snapToGrid;
+
+	//For preview tile
+	int m_lastMouseHoverTileX;
+	int m_lastMouseHoverTileY;
 
 	//For mouse delta
 	ion::Vector2 m_mousePrevPos;

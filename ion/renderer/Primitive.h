@@ -44,6 +44,7 @@ namespace ion
 		public:
 			enum Axis { xy, xz, yz };
 			Quad(Axis axis, const Vector2& halfExtents, const Vector3& offset = Vector3());
+			void SetTexCoords(TexCoord coords[4]);
 		};
 
 		class Grid : public Primitive
@@ -58,7 +59,7 @@ namespace ion
 		public:
 			enum Axis { xy, xz, yz };
 			Chessboard(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells, bool uniqueVerts);
-			void SetCellTexCoords(int cellIndex, TexCoord coords[4]);
+			void SetTexCoords(int cellIndex, TexCoord coords[4]);
 		};
 
 		class Box : public Primitive
