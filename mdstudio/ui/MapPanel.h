@@ -26,6 +26,23 @@
 class MapPanel : public wxGLCanvas
 {
 public:
+	enum Tool
+	{
+		eToolSelect,
+		eToolPaint,
+		eToolPicker,
+		eToolFlipX,
+		eToolFlipY,
+		eToolFill
+	};
+
+	enum MouseButtons
+	{
+		eMouseLeft		= 1<<0,
+		eMouseMiddle	= 1<<1,
+		eMouseRight		= 1<<2
+	};
+
 	MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~MapPanel();
 
@@ -38,6 +55,9 @@ public:
 
 	//Set current project
 	void SetProject(Project* project);
+
+	//Set current tool
+	void SetTool(Tool tool);
 
 	virtual void Refresh(bool eraseBackground=true, const wxRect *rect=NULL);
 
@@ -68,6 +88,10 @@ private:
 
 	//Centre camera on canvas
 	void CentreCamera();
+
+	//Tools
+	void HandleToolMouseMove(Tool tool, ion::Vector2 mouseDelta, int x, int y);
+	void HandleToolMouseClick(Tool tool, int buttonBits, int x, int y);
 
 	//Resource manager
 	ion::io::ResourceManager& m_resourceManager;
@@ -108,6 +132,9 @@ private:
 
 	//Tileset texture cell size sq
 	float m_cellSizeTexSpaceSq;
+
+	//Current tool
+	Tool m_currentTool;
 
 	//For preview tile
 	int m_lastMouseHoverTileX;

@@ -42,6 +42,7 @@ void MainWindow::SetProject(Project* project)
 		ShowPanelPalettes();
 		ShowPanelTiles();
 		ShowPanelMap();
+		ShowPanelToolbox();
 
 		//Sync settings widgets states
 		SyncSettingsWidgets();
@@ -67,6 +68,12 @@ void MainWindow::SetProject(Project* project)
 			delete m_mapPanel;
 		}
 
+		if(m_toolboxPanel)
+		{
+			m_auiManager.DetachPane(m_toolboxPanel);
+			delete m_toolboxPanel;
+		}
+
 		m_project = NULL;
 	}
 
@@ -83,8 +90,8 @@ void MainWindow::ShowPanelPalettes()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(200, 100);
-			paneInfo.Left();
+			paneInfo.BestSize(300, 100);
+			paneInfo.Right();
 			paneInfo.Caption("Palettes");
 			paneInfo.CaptionVisible(true);
 
@@ -109,8 +116,8 @@ void MainWindow::ShowPanelTiles()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(200, 100);
-			paneInfo.Left();
+			paneInfo.BestSize(300, 500);
+			paneInfo.Right();
 			paneInfo.Caption("Tiles");
 			paneInfo.CaptionVisible(true);
 			
@@ -149,6 +156,36 @@ void MainWindow::ShowPanelMap()
 		{
 			m_mapPanel->Show();
 		}
+	}
+}
+
+void MainWindow::ShowPanelToolbox()
+{
+	if(!m_toolboxPanel)
+	{
+		wxAuiPaneInfo paneInfo;
+		paneInfo.Dockable(true);
+		paneInfo.DockFixed(false);
+		paneInfo.BestSize(100, 200);
+		paneInfo.Left();
+		paneInfo.Caption("Toolbox");
+		paneInfo.CaptionVisible(true);
+
+		m_toolboxPanel = new MapToolbox(m_dockArea, NewControlId());
+		m_auiManager.AddPane(m_toolboxPanel, paneInfo);
+
+		//Subscribe to toolbox buttons
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECT);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINT);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PICKER);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPX);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
+	}
+
+	if(!m_toolboxPanel->IsShown())
+	{
+		m_toolboxPanel->Show();
 	}
 }
 
@@ -309,7 +346,7 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 
 void MainWindow::OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event )
 {
-
+	ShowPanelToolbox();
 }
 
 void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )
@@ -335,5 +372,33 @@ void MainWindow::OnBtnGridSnap(wxCommandEvent& event)
 	if(m_project)
 	{
 		m_project->SetGridSnap(!m_project->GetGridSnap());
+	}
+}
+
+void MainWindow::OnBtnTool(wxCommandEvent& event)
+{
+	if(m_mapPanel)
+	{
+		switch(event.GetId())
+		{
+		case wxID_TOOL_SELECT:
+			m_mapPanel->SetTool(MapPanel::eToolSelect);
+			break;
+		case wxID_TOOL_PAINT:
+			m_mapPanel->SetTool(MapPanel::eToolPaint);
+			break;
+		case wxID_TOOL_PICKER:
+			m_mapPanel->SetTool(MapPanel::eToolPicker);
+			break;
+		case wxID_TOOL_FLIPX:
+			m_mapPanel->SetTool(MapPanel::eToolFlipX);
+			break;
+		case wxID_TOOL_FLIPY:
+			m_mapPanel->SetTool(MapPanel::eToolFlipY);
+			break;
+		case wxID_TOOL_FILL:
+			m_mapPanel->SetTool(MapPanel::eToolFill);
+			break;
+		}
 	}
 }
