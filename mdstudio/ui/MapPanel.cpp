@@ -21,11 +21,15 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_cameraPanSpeed = 1.0f;
 	m_tilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
-	m_lastMouseHoverTileX = -1;
-	m_lastMouseHoverTileY = -1;
-	m_keyHeldFlipX = false;
-	m_keyHeldFlipY = false;
+	m_previewTile = InvalidTileId;
+	m_previewTileX = -1;
+	m_previewTileY = -1;
+	m_previewTileFlipX = false;
+	m_previewTileFlipY = false;
+	m_prevMouseOverTileX = 0;
+	m_prevMouseOverTileY = 0;
 	m_panelSize = size;
+	m_prevMouseBits = 0;
 
 	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
@@ -157,6 +161,21 @@ void MapPanel::SetProject(Project* project)
 void MapPanel::SetTool(Tool tool)
 {
 	m_currentTool = tool;
+
+	//Invalidate preview tile
+	m_previewTile = InvalidTileId;
+	m_previewTileFlipX = false;
+	m_previewTileFlipY = false;
+
+	if(m_project)
+	{
+		switch(tool)
+		{
+		case eToolPaint:
+			m_previewTile = m_project->GetPaintTile();
+			break;
+		}
+	}
 }
 
 void MapPanel::CreateCanvas()
@@ -264,8 +283,8 @@ void MapPanel::PaintWholeMap()
 
 				//Get V/H flip
 				u32 tileFlags = m_project->GetMap().GetTileFlags(x, y);
-				bool flipX = tileFlags & Map::eFlipX;
-				bool flipY = tileFlags & Map::eFlipY;
+				bool flipX = (tileFlags & Map::eFlipX) != 0;
+				bool flipY = (tileFlags & Map::eFlipY) != 0;
 
 				//Paint tile
 				PaintTile(tileId, x, yInv, flipX, flipY);
@@ -369,50 +388,32 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
 		mousePosMapSpace.y = (mapSize.y - (mapSize.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
 
-		//Painting/erasing/flipping/selecting
-		if(mousePosMapSpace.x >= 0.0f
-			&&	mousePosMapSpace.y >= 0.0f
-			&&	mousePosMapSpace.x < (mapWidth * tileWidth)
-			&& mousePosMapSpace.y < (mapHeight * tileHeight))
+		//Get tile x/y
+		int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
+		int y_inv = (int)floor(mousePosMapSpace.y / (float)tileHeight);
+
+		//Invert for OpenGL
+		int y = (mapHeight - 1 - y_inv);
+
+		//Get button bits
+		int buttonBits = 0;
+		if(event.LeftIsDown())
+			buttonBits |= eMouseLeft;
+		if(event.MiddleDown())
+			buttonBits |= eMouseMiddle;
+		if(event.RightDown())
+			buttonBits |= eMouseRight;
+
+		if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTileX) || (y != m_prevMouseOverTileY))
 		{
-			int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
-			int y_inv = (int)floor(mousePosMapSpace.y / (float)tileHeight);
+			//Mouse button clicked or changed grid pos
+			HandleMouseTileEvent(m_currentTool, mouseDelta, buttonBits, x, y);
 
-			//Invert for OpenGL
-			int y = (mapHeight - 1 - y_inv);
-
-			//Get button bits
-			int buttonBits = 0;
-			if(event.LeftIsDown())
-				buttonBits |= eMouseLeft;
-			if(event.MiddleDown())
-				buttonBits |= eMouseMiddle;
-			if(event.RightDown())
-				buttonBits |= eMouseRight;
-
-			//Handle mouse move/click
-			HandleToolMouseMove(m_currentTool, mouseDelta, x, y);
-			HandleToolMouseClick(m_currentTool, buttonBits, x, y);
-
-			if(m_project->GetPaintTile())
-			{
-				if(m_lastMouseHoverTileX != x || m_lastMouseHoverTileY != y)
-				{
-					//Preview tile pos changed, rRedraw
-					Refresh();
-				}
-
-				//Update preview tile pos
-				m_lastMouseHoverTileX = x;
-				m_lastMouseHoverTileY = y;
-			}
+			m_prevMouseOverTileX = x;
+			m_prevMouseOverTileY = y;
 		}
-		else
-		{
-			//Out of map range, invalidate preview tile pos
-			m_lastMouseHoverTileX = -1;
-			m_lastMouseHoverTileY = -1;
-		}
+
+		m_prevMouseBits = buttonBits;
 
 		//Camera pan/zoom
 		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
@@ -474,18 +475,21 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 
 void MapPanel::OnKeyboard(wxKeyEvent& event)
 {
-	if(m_keyHeldFlipX != event.ShiftDown())
+	if(m_currentTool == eToolPaint)
 	{
-		//SHIFT held, set H flip and refresh preview tile
-		m_keyHeldFlipX = event.ShiftDown();
-		Refresh();
-	}
+		if(m_previewTileFlipX != event.ShiftDown())
+		{
+			//SHIFT held, set H flip and refresh preview tile
+			m_previewTileFlipX = event.ShiftDown();
+			Refresh();
+		}
 
-	if(m_keyHeldFlipY != event.ControlDown())
-	{
-		//CTRL held, set V flip and refresh preview tile
-		m_keyHeldFlipY = event.ControlDown();
-		Refresh();
+		if(m_previewTileFlipY != event.ControlDown())
+		{
+			//CTRL held, set V flip and refresh preview tile
+			m_previewTileFlipY = event.ControlDown();
+			Refresh();
+		}
 	}
 }
 
@@ -518,7 +522,7 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 		z += zOffset;
 
 		//Draw preview tile
-		if(m_currentTool == eToolPaint && m_project->GetPaintTile() && m_lastMouseHoverTileX >= 0 && m_lastMouseHoverTileY >= 0)
+		if(m_previewTile)
 		{
 			const int mapWidth = m_project->GetMap().GetWidth();
 			const int mapHeight = m_project->GetMap().GetHeight();
@@ -529,12 +533,12 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
 			//Set preview quad texture coords
 			ion::render::TexCoord coords[4];
-			GetTileTexCoords(m_project->GetPaintTile(), coords, m_keyHeldFlipX, m_keyHeldFlipY);
+			GetTileTexCoords(m_previewTile, coords, m_previewTileFlipX, m_previewTileFlipY);
 			m_previewPrimitive->SetTexCoords(coords);
 
 			ion::Matrix4 previewQuadMtx;
-			ion::Vector3 previewQuadPos(((m_lastMouseHoverTileX - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
-										((mapHeight - 1 - m_lastMouseHoverTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
+			ion::Vector3 previewQuadPos(((m_previewTileX - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
+										((mapHeight - 1 - m_previewTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 			previewQuadMtx.SetTranslation(previewQuadPos);
 
 			m_mapMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
@@ -617,12 +621,7 @@ void MapPanel::CentreCamera()
 	m_camera->SetPosition(cameraPos);
 }
 
-void MapPanel::HandleToolMouseMove(Tool tool, ion::Vector2 mouseDelta, int x, int y)
-{
-	
-}
-
-void MapPanel::HandleToolMouseClick(Tool tool, int buttonBits, int x, int y)
+void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int buttonBits, int x, int y)
 {
 	Map& map = m_project->GetMap();
 	Tileset& tileset = m_project->GetMap().GetTileset();
@@ -633,50 +632,123 @@ void MapPanel::HandleToolMouseClick(Tool tool, int buttonBits, int x, int y)
 	//Invert for OpenGL
 	int y_inv = (mapHeight - 1 - y);
 
-	switch(tool)
+	//Check in map range
+	if((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight))
 	{
-		case eToolPaint:
+		switch(tool)
 		{
-			//Get tile ID to paint
-			TileId tileId = InvalidTileId;
-			if(buttonBits & eMouseLeft)
-				tileId = m_project->GetPaintTile();
-			else if(buttonBits & eMouseRight)
-				tileId = m_project->GetEraseTile();
-
-			if(tileId != InvalidTileId)
+			case eToolPaint:
 			{
-				//Set on map
-				map.SetTile(x, y, tileId);
+				//Update paint preview tile
+				m_previewTile = m_project->GetPaintTile();
 
-				//Set V/H flip flags
-				u32 tileFlags = 0;
-				if(m_keyHeldFlipX)
-					tileFlags |= Map::eFlipX;
-				if(m_keyHeldFlipY)
-					tileFlags |= Map::eFlipY;
+				//If clicking/dragging, paint tile
+				if(buttonBits)
+				{
+					//Get tile ID to paint
+					TileId tileId = InvalidTileId;
+					if(buttonBits & eMouseLeft)
+						tileId = m_project->GetPaintTile();
+					else if(buttonBits & eMouseRight)
+						tileId = m_project->GetEraseTile();
 
-				//Invert Y from OpenGL back to map space
-				map.SetTileFlags(x, y, tileFlags);
+					if(tileId != InvalidTileId)
+					{
+						//Set on map
+						map.SetTile(x, y, tileId);
 
-				//Paint to canvas
-				PaintTile(tileId, x, y_inv, m_keyHeldFlipX, m_keyHeldFlipY);
+						//Set V/H flip flags
+						u32 tileFlags = 0;
+						if(m_previewTileFlipX)
+							tileFlags |= Map::eFlipX;
+						if(m_previewTileFlipY)
+							tileFlags |= Map::eFlipY;
 
-				//Invalidate rect
-				Refresh();
+						//Invert Y from OpenGL back to map space
+						map.SetTileFlags(x, y, tileFlags);
+
+						//Paint to canvas
+						PaintTile(tileId, x, y_inv, m_previewTileFlipX, m_previewTileFlipY);
+					}
+				}
+				break;
 			}
-			break;
+
+			case eToolPicker:
+			{
+				if(buttonBits & eMouseLeft)
+				{
+					//Pick tile
+					TileId tile = map.GetTile(x, y);
+
+					//Set as paint tile
+					m_project->SetPaintTile(tile);
+
+					//Set as preview tile
+					m_previewTile = tile;
+
+					//Set paint tool
+					SetTool(eToolPaint);
+				}
+
+				//TODO: Update tileset panel selection + toolbox button state
+				break;
+			}
+
+			case eToolFlipX:
+			{
+				//Flip preview opposite of current tile
+				m_previewTile = map.GetTile(x, y);
+				m_previewTileFlipX = (map.GetTileFlags(x, y) & Map::eFlipX) == 0;
+
+				if(buttonBits & eMouseLeft)
+				{
+					//Flip tile X
+					u32 tileFlags = map.GetTileFlags(x, y);
+					tileFlags ^= Map::eFlipX;
+					map.SetTileFlags(x, y, tileFlags);
+
+					//Redraw on canvas
+					TileId tileId = map.GetTile(x, y);
+					PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+					Refresh();
+				}
+
+				break;
+			}
+
+			case eToolFlipY:
+			{
+				//Flip preview opposite of current tile
+				m_previewTile = map.GetTile(x, y);
+				m_previewTileFlipY = (map.GetTileFlags(x, y) & Map::eFlipY) == 0;
+
+				if(buttonBits & eMouseLeft)
+				{
+					//Flip tile Y
+					u32 tileFlags = map.GetTileFlags(x, y);
+					tileFlags ^= Map::eFlipY;
+					map.SetTileFlags(x, y, tileFlags);
+
+					//Redraw on canvas
+					TileId tileId = map.GetTile(x, y);
+					PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+					Refresh();
+				}
+				break;
+			}
 		}
 
-		case eToolPicker:
-		{
-			if(buttonBits & eMouseLeft)
-				m_project->SetPaintTile(map.GetTile(x, y));
-			else if(buttonBits & eMouseRight)
-				m_project->SetEraseTile(map.GetTile(x, y));
-
-			//TODO: Update tileset panel selection
-			break;
-		}
+		//Update preview tile pos
+		m_previewTileX = x;
+		m_previewTileY = y;
 	}
+	else
+	{
+		//Mouse of of map range, invalidate preview tile
+		m_previewTile = InvalidTileId;
+	}
+
+	//Refresh
+	Refresh();
 }
