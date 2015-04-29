@@ -339,7 +339,8 @@ namespace ion
 				int numObjects = 0;
 				Serialise(numObjects);
 
-				//Resize vector to construct elements
+				//Clear and reserve vector
+				objects.clear();
 				objects.resize(numObjects);
 
 				//Serialise all objects
