@@ -89,9 +89,11 @@ private:
 	//Centre camera on canvas
 	void CentreCamera();
 
-	//Tools
-	void HandleToolMouseMove(Tool tool, ion::Vector2 mouseDelta, int x, int y);
-	void HandleToolMouseClick(Tool tool, int buttonBits, int x, int y);
+	//Mouse out of map range
+	void MouseOutOfRange();
+
+	//Mouse click or changed tile
+	void HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int buttonBits, int x, int y);
 
 	//Resource manager
 	ion::io::ResourceManager& m_resourceManager;
@@ -136,16 +138,18 @@ private:
 	//Current tool
 	Tool m_currentTool;
 
-	//For preview tile
-	int m_lastMouseHoverTileX;
-	int m_lastMouseHoverTileY;
-
-	//Held keys to place tile V/H flipped
-	bool m_keyHeldFlipX;
-	bool m_keyHeldFlipY;
+	//Current preview tile
+	TileId m_previewTile;
+	int m_previewTileX;
+	int m_previewTileY;
+	bool m_previewTileFlipX;
+	bool m_previewTileFlipY;
 
 	//For mouse delta
 	ion::Vector2 m_mousePrevPos;
+	int m_prevMouseBits;
+	int m_prevMouseOverTileX;
+	int m_prevMouseOverTileY;
 
 	//Prev panel size (for filtering resize events)
 	wxSize m_panelSize;
