@@ -14,6 +14,7 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	, m_resourceManager(resourceManager)
 {
 	m_project = NULL;
+	m_currentTool = eToolPaint;
 	m_mapPrimitive = NULL;
 	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;
@@ -151,6 +152,11 @@ void MapPanel::SetProject(Project* project)
 
 	//Refresh panel
 	Refresh();
+}
+
+void MapPanel::SetTool(Tool tool)
+{
+	m_currentTool = tool;
 }
 
 void MapPanel::CreateCanvas()
@@ -363,43 +369,30 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
 		mousePosMapSpace.y = (mapSize.y - (mapSize.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
 
-		//Panting/erasing
+		//Painting/erasing/flipping/selecting
 		if(mousePosMapSpace.x >= 0.0f
 			&&	mousePosMapSpace.y >= 0.0f
 			&&	mousePosMapSpace.x < (mapWidth * tileWidth)
 			&& mousePosMapSpace.y < (mapHeight * tileHeight))
 		{
 			int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
-			int y = (int)floor(mousePosMapSpace.y / (float)tileHeight);
+			int y_inv = (int)floor(mousePosMapSpace.y / (float)tileHeight);
 
-			//Get tile ID to paint
-			TileId tileId = InvalidTileId;
-			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
-				tileId = m_project->GetPaintTile();
-			else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
-				tileId = m_project->GetEraseTile();
+			//Invert for OpenGL
+			int y = (mapHeight - 1 - y_inv);
 
-			if(tileId != InvalidTileId)
-			{
-				//Set on map
-				m_project->GetMap().SetTile(x, mapHeight - 1 - y, m_project->GetPaintTile());
+			//Get button bits
+			int buttonBits = 0;
+			if(event.LeftIsDown())
+				buttonBits |= eMouseLeft;
+			if(event.MiddleDown())
+				buttonBits |= eMouseMiddle;
+			if(event.RightDown())
+				buttonBits |= eMouseRight;
 
-				//Set V/H flip flags
-				u32 tileFlags = 0;
-				if(m_keyHeldFlipX)
-					tileFlags |= Map::eFlipX;
-				if(m_keyHeldFlipY)
-					tileFlags |= Map::eFlipY;
-
-				//Invert Y from OpenGL back to map space
-				m_project->GetMap().SetTileFlags(x, mapHeight - 1 - y, tileFlags);
-
-				//Paint to canvas
-				PaintTile(m_project->GetPaintTile(), x, y, m_keyHeldFlipX, m_keyHeldFlipY);
-
-				//Invalidate rect
-				Refresh();
-			}
+			//Handle mouse move/click
+			HandleToolMouseMove(m_currentTool, mouseDelta, x, y);
+			HandleToolMouseClick(m_currentTool, buttonBits, x, y);
 
 			if(m_project->GetPaintTile())
 			{
@@ -525,7 +518,7 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 		z += zOffset;
 
 		//Draw preview tile
-		if(m_project->GetPaintTile() && m_lastMouseHoverTileX >= 0 && m_lastMouseHoverTileY >= 0)
+		if(m_currentTool == eToolPaint && m_project->GetPaintTile() && m_lastMouseHoverTileX >= 0 && m_lastMouseHoverTileY >= 0)
 		{
 			const int mapWidth = m_project->GetMap().GetWidth();
 			const int mapHeight = m_project->GetMap().GetHeight();
@@ -541,7 +534,7 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
 			ion::Matrix4 previewQuadMtx;
 			ion::Vector3 previewQuadPos(((m_lastMouseHoverTileX - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
-				((m_lastMouseHoverTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
+										((mapHeight - 1 - m_lastMouseHoverTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 			previewQuadMtx.SetTranslation(previewQuadPos);
 
 			m_mapMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
@@ -622,4 +615,68 @@ void MapPanel::CentreCamera()
 	wxRect clientRect = GetClientRect();
 	ion::Vector3 cameraPos(-(clientRect.width / 2.0f), -(clientRect.height / 2.0f), 0.0f);
 	m_camera->SetPosition(cameraPos);
+}
+
+void MapPanel::HandleToolMouseMove(Tool tool, ion::Vector2 mouseDelta, int x, int y)
+{
+	
+}
+
+void MapPanel::HandleToolMouseClick(Tool tool, int buttonBits, int x, int y)
+{
+	Map& map = m_project->GetMap();
+	Tileset& tileset = m_project->GetMap().GetTileset();
+
+	const int mapWidth = map.GetWidth();
+	const int mapHeight = map.GetHeight();
+
+	//Invert for OpenGL
+	int y_inv = (mapHeight - 1 - y);
+
+	switch(tool)
+	{
+		case eToolPaint:
+		{
+			//Get tile ID to paint
+			TileId tileId = InvalidTileId;
+			if(buttonBits & eMouseLeft)
+				tileId = m_project->GetPaintTile();
+			else if(buttonBits & eMouseRight)
+				tileId = m_project->GetEraseTile();
+
+			if(tileId != InvalidTileId)
+			{
+				//Set on map
+				map.SetTile(x, y, tileId);
+
+				//Set V/H flip flags
+				u32 tileFlags = 0;
+				if(m_keyHeldFlipX)
+					tileFlags |= Map::eFlipX;
+				if(m_keyHeldFlipY)
+					tileFlags |= Map::eFlipY;
+
+				//Invert Y from OpenGL back to map space
+				map.SetTileFlags(x, y, tileFlags);
+
+				//Paint to canvas
+				PaintTile(tileId, x, y_inv, m_keyHeldFlipX, m_keyHeldFlipY);
+
+				//Invalidate rect
+				Refresh();
+			}
+			break;
+		}
+
+		case eToolPicker:
+		{
+			if(buttonBits & eMouseLeft)
+				m_project->SetPaintTile(map.GetTile(x, y));
+			else if(buttonBits & eMouseRight)
+				m_project->SetEraseTile(map.GetTile(x, y));
+
+			//TODO: Update tileset panel selection
+			break;
+		}
+	}
 }

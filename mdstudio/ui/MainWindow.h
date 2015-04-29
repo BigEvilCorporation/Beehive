@@ -29,6 +29,7 @@ public:
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelMap();
+	void ShowPanelToolbox();
 
 	void SyncSettingsWidgets();
 	void RefreshAll();
@@ -48,6 +49,8 @@ protected:
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 
+	void OnBtnTool(wxCommandEvent& event);
+
 private:
 	ion::io::ResourceManager& m_resourceManager;
 
@@ -56,6 +59,7 @@ private:
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<TilesPanel> m_tilesPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
+	wxWeakRef<MapToolbox> m_toolboxPanel;
 
 	Project* m_project;
 };

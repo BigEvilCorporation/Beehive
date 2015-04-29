@@ -114,3 +114,49 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
 	
 }
+
+MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	wxFlexGridSizer* fgSizer1;
+	fgSizer1 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer1->SetFlexibleDirection( wxBOTH );
+	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_toolSelect = new wxBitmapButton( this, wxID_TOOL_SELECT, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolSelect->SetToolTip( wxT("Select Tile(s)") );
+	
+	fgSizer1->Add( m_toolSelect, 0, wxALL, 5 );
+	
+	m_toolPaint = new wxBitmapButton( this, wxID_TOOL_PAINT, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaint->SetToolTip( wxT("Paint Tile") );
+	
+	fgSizer1->Add( m_toolPaint, 0, wxALL, 5 );
+	
+	m_toolPicker = new wxBitmapButton( this, wxID_TOOL_PICKER, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPicker->SetToolTip( wxT("Pick Tile") );
+	
+	fgSizer1->Add( m_toolPicker, 0, wxALL, 5 );
+	
+	m_toolFlipX = new wxBitmapButton( this, wxID_TOOL_FLIPX, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolFlipX->SetToolTip( wxT("Flip Horizontal") );
+	
+	fgSizer1->Add( m_toolFlipX, 0, wxALL, 5 );
+	
+	m_toolFlipY = new wxBitmapButton( this, wxID_TOOL_FLIPY, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolFlipY->SetToolTip( wxT("Flip Vertical") );
+	
+	fgSizer1->Add( m_toolFlipY, 0, wxALL, 5 );
+	
+	m_toolFill = new wxBitmapButton( this, wxID_TOOL_FILL, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolFill->SetToolTip( wxT("Fill Selection") );
+	
+	fgSizer1->Add( m_toolFill, 0, wxALL, 5 );
+	
+	
+	this->SetSizer( fgSizer1 );
+	this->Layout();
+}
+
+MapToolbox::~MapToolbox()
+{
+}

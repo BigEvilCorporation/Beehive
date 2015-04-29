@@ -28,6 +28,8 @@
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
+#include <wx/bmpbuttn.h>
+#include <wx/button.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -43,6 +45,12 @@
 #define wxID_BTN_TOOLS_TILES 1009
 #define wxID_BTN_TOOLS_PALETTES 1010
 #define wxID_BTN_TILES_IMPORT 1011
+#define wxID_TOOL_SELECT 1012
+#define wxID_TOOL_PAINT 1013
+#define wxID_TOOL_PICKER 1014
+#define wxID_TOOL_FLIPX 1015
+#define wxID_TOOL_FLIPY 1016
+#define wxID_TOOL_FILL 1017
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -96,6 +104,28 @@ class MainWindowBase : public wxFrame
 		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 720,489 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MapToolbox
+///////////////////////////////////////////////////////////////////////////////
+class MapToolbox : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxBitmapButton* m_toolSelect;
+		wxBitmapButton* m_toolPaint;
+		wxBitmapButton* m_toolPicker;
+		wxBitmapButton* m_toolFlipX;
+		wxBitmapButton* m_toolFlipY;
+		wxBitmapButton* m_toolFill;
+	
+	public:
+		
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL ); 
+		~MapToolbox();
 	
 };
 
