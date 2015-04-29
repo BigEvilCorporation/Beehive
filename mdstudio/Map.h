@@ -50,7 +50,7 @@ private:
 
 	struct TileDesc
 	{
-		TileDesc() { m_id = 0; m_flags = eFlipX; }
+		TileDesc() { m_id = 0; m_flags = 0; }
 
 		void Serialise(ion::io::Archive& archive)
 		{

@@ -34,8 +34,9 @@ namespace ion
 			//Get resource handle
 			template <class T> ResourceHandle<T> GetResource(const std::string& filename);
 
-			//Manually add resource
+			//Manually add/remove resource
 			template <class T> ResourceHandle<T> AddResource(const std::string& filename, T& resourceObject);
+			void RemoveResource(const std::string& filename);
 
 			//Get number of resources in thread queue
 			u32 GetNumResourcesWaiting() const;

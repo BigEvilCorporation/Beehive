@@ -31,6 +31,7 @@ public:
 
 	//Events
 	void OnMouse(wxMouseEvent& event);
+	void OnKeyboard(wxKeyEvent& event);
 	void OnPaint(wxPaintEvent& event);
 	void OnErase(wxEraseEvent& event);
 	void OnResize(wxSizeEvent& event);
@@ -57,13 +58,13 @@ private:
 	void PaintWholeMap();
 
 	//Paint single tile to canvas
-	void PaintTile(TileId tileId, int x, int y);
+	void PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY);
 
 	//Get tile index into tileset
 	int GetTileIndex(TileId tileId) const;
 
 	//Get tileset UV coords for tile
-	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4]) const;
+	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], bool flipX, bool flipY) const;
 
 	//Centre camera on canvas
 	void CentreCamera();
@@ -112,6 +113,13 @@ private:
 	int m_lastMouseHoverTileX;
 	int m_lastMouseHoverTileY;
 
+	//Held keys to place tile V/H flipped
+	bool m_keyHeldFlipX;
+	bool m_keyHeldFlipY;
+
 	//For mouse delta
 	ion::Vector2 m_mousePrevPos;
+
+	//Prev panel size (for filtering resize events)
+	wxSize m_panelSize;
 };

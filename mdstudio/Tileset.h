@@ -14,6 +14,7 @@
 
 typedef u32 TileId;
 typedef std::map<TileId, Tile> TTileMap;
+static const TileId InvalidTileId = 0;
 
 class Tileset
 {

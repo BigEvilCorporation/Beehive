@@ -22,6 +22,17 @@ namespace ion
 			delete mWorkerThread;
 		}
 
+		void ResourceManager::RemoveResource(const std::string& filename)
+		{
+			std::map<std::string, Resource*>::iterator it = mResourceMap.find(filename);
+
+			if(it != mResourceMap.end())
+			{
+				ion::debug::Assert(it->second->GetResourceCount() == 0, "ResourceManager::RemoveResource() - Resource is still referenced");
+				mResourceMap.erase(it);
+			}
+		}
+
 		u32 ResourceManager::GetNumResourcesWaiting() const
 		{
 			return mWorkerThread->GetNumJobsInQueue();

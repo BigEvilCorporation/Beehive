@@ -22,6 +22,9 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_cellSizeTexSpaceSq = 1.0f;
 	m_lastMouseHoverTileX = -1;
 	m_lastMouseHoverTileY = -1;
+	m_keyHeldFlipX = false;
+	m_keyHeldFlipY = false;
+	m_panelSize = size;
 
 	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
@@ -31,6 +34,8 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	Bind(wxEVT_RIGHT_UP,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_MOTION,			&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_MOUSEWHEEL,		&MapPanel::OnMouse, this, GetId());
+	Bind(wxEVT_KEY_DOWN,		&MapPanel::OnKeyboard, this, GetId());
+	Bind(wxEVT_KEY_UP,			&MapPanel::OnKeyboard, this, GetId());
 	Bind(wxEVT_PAINT,			&MapPanel::OnPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND,&MapPanel::OnErase, this, GetId());
 	Bind(wxEVT_SIZE,			&MapPanel::OnResize, this, GetId());
@@ -111,6 +116,8 @@ MapPanel::~MapPanel()
 	{
 		wxSleep(1);
 	}
+
+	m_resourceManager.RemoveResource("tilesetTexture");
 
 	delete m_context;
 	delete m_renderer;
@@ -249,8 +256,13 @@ void MapPanel::PaintWholeMap()
 				//Invert Y for OpenGL
 				int yInv = mapHeight - 1 - y;
 
+				//Get V/H flip
+				u32 tileFlags = m_project->GetMap().GetTileFlags(x, y);
+				bool flipX = tileFlags & Map::eFlipX;
+				bool flipY = tileFlags & Map::eFlipY;
+
 				//Paint tile
-				PaintTile(tileId, x, yInv);
+				PaintTile(tileId, x, yInv, flipX, flipY);
 			}
 		}
 	}
@@ -263,7 +275,7 @@ int MapPanel::GetTileIndex(TileId tileId) const
 	return it->second;
 }
 
-void MapPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4]) const
+void MapPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], bool flipX, bool flipY) const
 {
 	//Map tile ID to index
 	u32 tileIndex = GetTileIndex(tileId);
@@ -273,21 +285,26 @@ void MapPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4
 	int tilesetY = (tileIndex / m_tilesetSizeSq);
 	ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
 
+	float top = flipY ? (textureBottomLeft.y) : (textureBottomLeft.y + m_cellSizeTexSpaceSq);
+	float left = flipX ? (textureBottomLeft.x + m_cellSizeTexSpaceSq) : (textureBottomLeft.x);
+	float bottom = flipY ? (textureBottomLeft.y + m_cellSizeTexSpaceSq) : (textureBottomLeft.y);
+	float right = flipX ? (textureBottomLeft.x) : (textureBottomLeft.x + m_cellSizeTexSpaceSq);
+
 	//Top left
-	texCoords[0].x = textureBottomLeft.x;
-	texCoords[0].y = textureBottomLeft.y + m_cellSizeTexSpaceSq;
+	texCoords[0].x = left;
+	texCoords[0].y = top;
 	//Bottom left
-	texCoords[1].x = textureBottomLeft.x;
-	texCoords[1].y = textureBottomLeft.y;
+	texCoords[1].x = left;
+	texCoords[1].y = bottom;
 	//Bottom right
-	texCoords[2].x = textureBottomLeft.x + m_cellSizeTexSpaceSq;
-	texCoords[2].y = textureBottomLeft.y;
+	texCoords[2].x = right;
+	texCoords[2].y = bottom;
 	//Top right
-	texCoords[3].x = textureBottomLeft.x + m_cellSizeTexSpaceSq;
-	texCoords[3].y = textureBottomLeft.y + m_cellSizeTexSpaceSq;
+	texCoords[3].x = right;
+	texCoords[3].y = top;
 }
 
-void MapPanel::PaintTile(TileId tileId, int x, int y)
+void MapPanel::PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY)
 {
 	if(m_project)
 	{
@@ -296,7 +313,7 @@ void MapPanel::PaintTile(TileId tileId, int x, int y)
 
 		//Set texture coords for cell
 		ion::render::TexCoord coords[4];
-		GetTileTexCoords(tileId, coords);
+		GetTileTexCoords(tileId, coords, flipX, flipY);
 		m_mapPrimitive->SetTexCoords((y * mapWidth) + x, coords);
 	}
 }
@@ -355,28 +372,33 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 			int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
 			int y = (int)floor(mousePosMapSpace.y / (float)tileHeight);
 
+			//Get tile ID to paint
+			TileId tileId = InvalidTileId;
 			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
-			{
-				if(m_project->GetPaintTile())
-				{
-					//Paint
-					PaintTile(m_project->GetPaintTile(), x, y);
-
-					//Invalidate rect
-					Refresh();
-				}
-
-			}
+				tileId = m_project->GetPaintTile();
 			else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
-			{
-				if(m_project->GetEraseTile())
-				{
-					//Erase
-					PaintTile(m_project->GetEraseTile(), x, y);
+				tileId = m_project->GetEraseTile();
 
-					//Invalidate rect
-					Refresh();
-				}
+			if(tileId != InvalidTileId)
+			{
+				//Set on map
+				m_project->GetMap().SetTile(x, mapHeight - 1 - y, m_project->GetPaintTile());
+
+				//Set V/H flip flags
+				u32 tileFlags = 0;
+				if(m_keyHeldFlipX)
+					tileFlags |= Map::eFlipX;
+				if(m_keyHeldFlipY)
+					tileFlags |= Map::eFlipY;
+
+				//Invert Y from OpenGL back to map space
+				m_project->GetMap().SetTileFlags(x, mapHeight - 1 - y, tileFlags);
+
+				//Paint to canvas
+				PaintTile(m_project->GetPaintTile(), x, y, m_keyHeldFlipX, m_keyHeldFlipY);
+
+				//Invalidate rect
+				Refresh();
 			}
 
 			if(m_project->GetPaintTile())
@@ -457,6 +479,23 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 	event.Skip();
 }
 
+void MapPanel::OnKeyboard(wxKeyEvent& event)
+{
+	if(m_keyHeldFlipX != event.ShiftDown())
+	{
+		//SHIFT held, set H flip and refresh preview tile
+		m_keyHeldFlipX = event.ShiftDown();
+		Refresh();
+	}
+
+	if(m_keyHeldFlipY != event.ControlDown())
+	{
+		//CTRL held, set V flip and refresh preview tile
+		m_keyHeldFlipY = event.ControlDown();
+		Refresh();
+	}
+}
+
 void MapPanel::OnPaint(wxPaintEvent& event)
 {
 	//Begin rendering
@@ -497,7 +536,7 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
 			//Set preview quad texture coords
 			ion::render::TexCoord coords[4];
-			GetTileTexCoords(m_project->GetPaintTile(), coords);
+			GetTileTexCoords(m_project->GetPaintTile(), coords, m_keyHeldFlipX, m_keyHeldFlipY);
 			m_previewPrimitive->SetTexCoords(coords);
 
 			ion::Matrix4 previewQuadMtx;
@@ -537,9 +576,15 @@ void MapPanel::OnErase(wxEraseEvent& event)
 void MapPanel::OnResize(wxSizeEvent& event)
 {
 	wxSize panelSize = GetClientSize();
-	m_renderer->OnResize(panelSize.x, panelSize.y);
 
-	CentreCamera();
+	//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
+	if(m_panelSize.x != panelSize.x || m_panelSize.y != panelSize.y)
+	{
+		m_panelSize = panelSize;
+		m_renderer->OnResize(panelSize.x, panelSize.y);
+		CentreCamera();
+	}
+
 	Refresh();
 }
 
