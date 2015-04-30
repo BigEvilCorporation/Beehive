@@ -22,12 +22,13 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_tilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
 	m_previewTile = InvalidTileId;
-	m_previewTileX = -1;
-	m_previewTileY = -1;
 	m_previewTileFlipX = false;
 	m_previewTileFlipY = false;
-	m_prevMouseOverTileX = 0;
-	m_prevMouseOverTileY = 0;
+	m_multipleSelection = false;
+	m_boxSelectStart.x = -1;
+	m_boxSelectStart.y = -1;
+	m_boxSelectEnd.x = -1;
+	m_boxSelectEnd.y = -1;
 	m_panelSize = size;
 	m_prevMouseBits = 0;
 
@@ -160,22 +161,59 @@ void MapPanel::SetProject(Project* project)
 
 void MapPanel::SetTool(Tool tool)
 {
-	m_currentTool = tool;
+	if(m_project)
+	{
+		switch(tool)
+		{
+		case eToolFill:
+			//If previous tool was 'select', fill selection and leave previous tool data
+			//TODO: Should this really be a tool? Doesn't follow the same rules as the others
+			//(it's a single action, rather than a state which requires interaction from the user via the map)
+			if(m_currentTool == eToolSelect)
+			{
+				if(m_project->GetPaintTile() != InvalidTileId)
+				{
+					//Fill selection
+					FillTiles(m_project->GetPaintTile(), m_selectedTiles);
 
+					//Refresh
+					Refresh();
+				}
+
+				//Set back to select tool, leave tool data intact
+				tool = eToolSelect;
+			}
+			else
+			{
+				ResetToolData();
+			}
+		case eToolPaint:
+			m_previewTile = m_project->GetPaintTile();
+			ResetToolData();
+			break;
+
+		default:
+			ResetToolData();
+		}
+	}
+
+	m_currentTool = tool;
+}
+
+void MapPanel::ResetToolData()
+{
 	//Invalidate preview tile
 	m_previewTile = InvalidTileId;
 	m_previewTileFlipX = false;
 	m_previewTileFlipY = false;
 
-	if(m_project)
-	{
-		switch(tool)
-		{
-		case eToolPaint:
-			m_previewTile = m_project->GetPaintTile();
-			break;
-		}
-	}
+	//Invalidate box/multiple selection
+	m_selectedTiles.clear();
+	m_multipleSelection = false;
+	m_boxSelectStart.x = -1;
+	m_boxSelectStart.y = -1;
+	m_boxSelectEnd.x = -1;
+	m_boxSelectEnd.y = -1;
 }
 
 void MapPanel::CreateCanvas()
@@ -343,6 +381,61 @@ void MapPanel::PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY)
 	}
 }
 
+void MapPanel::FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2)
+{
+	if(m_project)
+	{
+		Map& map = m_project->GetMap();
+		const int mapHeight = map.GetHeight();
+
+		//Sanitise ordering before looping
+		int top = min(boxCorner1.y, boxCorner2.y);
+		int left = min(boxCorner1.x, boxCorner2.x);
+		int bottom = max(boxCorner1.y, boxCorner2.y);
+		int right = max(boxCorner1.x, boxCorner2.x);
+
+		for(int x = left; x <= right; x++)
+		{
+			for(int y = top; y <= bottom; y++)
+			{
+				//Set tile on map
+				map.SetTile(x, y, tileId);
+
+				//Invert for OpenGL
+				int y_inv = mapHeight - 1 - y;
+
+				//Paint tile to canvas
+				PaintTile(tileId, x, y_inv, false, false);
+			}
+		}
+	}
+
+}
+
+void MapPanel::FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection)
+{
+	if(m_project)
+	{
+		Map& map = m_project->GetMap();
+		const int mapHeight = map.GetHeight();
+
+		for(int i = 0; i < selection.size(); i++)
+		{
+			int x = selection[i].x;
+			int y = selection[i].y;
+
+			//Set tile on map
+			map.SetTile(x, y, tileId);
+
+			//Invert for OpenGL
+			int y_inv = mapHeight - 1 - y;
+
+			//Paint tile to canvas
+			PaintTile(tileId, x, y_inv, false, false);
+		}
+	}
+}
+
 void MapPanel::CacheTileIndices()
 {
 	m_tileIndexMap.clear();
@@ -404,13 +497,13 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 		if(event.RightDown())
 			buttonBits |= eMouseRight;
 
-		if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTileX) || (y != m_prevMouseOverTileY))
+		if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))
 		{
 			//Mouse button clicked or changed grid pos
 			HandleMouseTileEvent(m_currentTool, mouseDelta, buttonBits, x, y);
 
-			m_prevMouseOverTileX = x;
-			m_prevMouseOverTileY = y;
+			m_prevMouseOverTilePos.x = x;
+			m_prevMouseOverTilePos.y = y;
 		}
 
 		m_prevMouseBits = buttonBits;
@@ -491,6 +584,12 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 			Refresh();
 		}
 	}
+
+	if(m_currentTool == eToolSelect)
+	{
+		//Store CTRL held state for multiple selection
+		m_multipleSelection = event.ControlDown();
+	}
 }
 
 void MapPanel::OnPaint(wxPaintEvent& event)
@@ -537,8 +636,8 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 			m_previewPrimitive->SetTexCoords(coords);
 
 			ion::Matrix4 previewQuadMtx;
-			ion::Vector3 previewQuadPos(((m_previewTileX - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
-										((mapHeight - 1 - m_previewTileY - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
+			ion::Vector3 previewQuadPos(((m_previewTilePos.x - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
+										((mapHeight - 1 - m_previewTilePos.y - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 			previewQuadMtx.SetTranslation(previewQuadPos);
 
 			m_mapMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
@@ -674,6 +773,51 @@ void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int butt
 				break;
 			}
 
+			case eToolSelect:
+			{
+				if(buttonBits & eMouseLeft)
+				{
+					if(!(m_prevMouseBits & eMouseLeft))
+					{
+						//Left click
+						if(!m_multipleSelection)
+						{
+							//CTRL not held, clear selection and set box start
+							m_selectedTiles.clear();
+							m_boxSelectStart.x = x;
+							m_boxSelectStart.y = y;
+						}
+
+						//Add tile at cursor to selection
+						m_selectedTiles.push_back(ion::Vector2i(x, y));
+					}
+					else
+					{
+						//Still dragging, set box end
+						m_boxSelectEnd.x = x;
+						m_boxSelectEnd.y = y;
+
+						//Add all tiles in box
+						m_selectedTiles.clear();
+
+						//Sanitise loop order
+						int top = min(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
+						int bottom = max(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int right = max(m_boxSelectStart.x, m_boxSelectEnd.x);
+
+						for(int tileX = left; tileX <= right; tileX++)
+						{
+							for(int tileY = top; tileY <= bottom; tileY++)
+							{
+								m_selectedTiles.push_back(ion::Vector2i(tileX, tileY));
+							}
+						}
+					}
+				}
+				break;
+			}
+
 			case eToolPicker:
 			{
 				if(buttonBits & eMouseLeft)
@@ -740,8 +884,8 @@ void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int butt
 		}
 
 		//Update preview tile pos
-		m_previewTileX = x;
-		m_previewTileY = y;
+		m_previewTilePos.x = x;
+		m_previewTilePos.y = y;
 	}
 	else
 	{

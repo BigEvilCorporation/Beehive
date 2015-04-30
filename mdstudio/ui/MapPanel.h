@@ -80,6 +80,10 @@ private:
 	//Paint single tile to canvas
 	void PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY);
 
+	//Fill selection with single tile
+	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
+	void FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection);
+
 	//Get tile index into tileset
 	int GetTileIndex(TileId tileId) const;
 
@@ -89,8 +93,8 @@ private:
 	//Centre camera on canvas
 	void CentreCamera();
 
-	//Mouse out of map range
-	void MouseOutOfRange();
+	//Clear all tool data
+	void ResetToolData();
 
 	//Mouse click or changed tile
 	void HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int buttonBits, int x, int y);
@@ -140,17 +144,25 @@ private:
 
 	//Current preview tile
 	TileId m_previewTile;
-	int m_previewTileX;
-	int m_previewTileY;
+	ion::Vector2i m_previewTilePos;
 	bool m_previewTileFlipX;
 	bool m_previewTileFlipY;
 
 	//For mouse delta
 	ion::Vector2 m_mousePrevPos;
+	ion::Vector2i m_prevMouseOverTilePos;
 	int m_prevMouseBits;
-	int m_prevMouseOverTileX;
-	int m_prevMouseOverTileY;
 
 	//Prev panel size (for filtering resize events)
 	wxSize m_panelSize;
+
+	//Selection
+	std::vector<ion::Vector2i> m_selectedTiles;
+
+	//Multiple (CTRL) selection
+	bool m_multipleSelection;
+
+	//Box selection
+	ion::Vector2i m_boxSelectStart;
+	ion::Vector2i m_boxSelectEnd;
 };
