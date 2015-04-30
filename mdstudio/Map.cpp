@@ -60,6 +60,7 @@ void Map::SetTile(int x, int y, TileId tile)
 	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
 	m_tiles[tileIdx].m_id = tile;
+	m_tiles[tileIdx].m_flags = 0;
 }
 
 TileId Map::GetTile(int x, int y) const
