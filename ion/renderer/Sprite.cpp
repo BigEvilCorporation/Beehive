@@ -19,7 +19,7 @@ namespace ion
 			mSpriteSheetGridSizeX = spriteSheetGridSizeX;
 			mSpriteSheetGridSizeY = spriteSheetGridSizeY;
 			mCurrentFrame = 0;
-			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f), Vector3());
+			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
 
 			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
 			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
@@ -34,7 +34,7 @@ namespace ion
 			mSpriteSheetGridSizeX = spriteSheetGridSizeX;
 			mSpriteSheetGridSizeY = spriteSheetGridSizeY;
 			mCurrentFrame = 0;
-			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f), Vector3());
+			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
 
 			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
 			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");

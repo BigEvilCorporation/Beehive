@@ -127,6 +127,10 @@ private:
 	ion::render::Grid* m_gridPrimitive;
 	ion::render::Quad* m_previewPrimitive;
 
+	//Rendering colours
+	ion::Colour m_previewColour;
+	ion::Colour m_boxSelectColour;
+
 	//Tileset texture
 	ion::io::ResourceHandle<ion::render::Texture> m_tilesetTextureHndl;
 

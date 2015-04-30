@@ -43,7 +43,7 @@ namespace ion
 		{
 		public:
 			enum Axis { xy, xz, yz };
-			Quad(Axis axis, const Vector2& halfExtents, const Vector3& offset = Vector3());
+			Quad(Axis axis, const Vector2& halfExtents);
 			void SetTexCoords(TexCoord coords[4]);
 		};
 
