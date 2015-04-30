@@ -32,6 +32,10 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_panelSize = size;
 	m_prevMouseBits = 0;
 
+	//Colours
+	m_previewColour = ion::Colour(1.0f, 1.0f, 1.0f, 1.0f);
+	m_boxSelectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.5f);
+
 	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_MIDDLE_DOWN,		&MapPanel::OnMouse, this, GetId());
@@ -98,7 +102,7 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_gridMaterial->SetPixelShader(m_pixelShader);
 
 	//Create preview quad
-	m_previewPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f), ion::Vector3());
+	m_previewPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
 }
 
 MapPanel::~MapPanel()
@@ -187,6 +191,8 @@ void MapPanel::SetTool(Tool tool)
 			{
 				ResetToolData();
 			}
+			break;
+
 		case eToolPaint:
 			m_previewTile = m_project->GetPaintTile();
 			ResetToolData();
@@ -601,6 +607,14 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
 	if(m_project)
 	{
+		const Map& map = m_project->GetMap();
+		const int mapWidth = map.GetWidth();
+		const int mapHeight = map.GetHeight();
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+		const int quadHalfExtentsX = 4;
+		const int quadHalfExtentsY = 4;
+
 		ion::Matrix4 cameraInverseMtx = m_camera->GetTransform().GetInverse();
 		ion::Matrix4 projectionMtx = m_renderer->GetProjectionMatrix();
 
@@ -610,6 +624,9 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
 		//No depth test (stops grid cells Z fighting)
 		m_renderer->SetDepthTest(ion::render::Renderer::Always);
+
+		//Reset diffuse colour
+		m_mapMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 		//Draw map
 		m_mapMaterial->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
@@ -623,13 +640,6 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 		//Draw preview tile
 		if(m_previewTile)
 		{
-			const int mapWidth = m_project->GetMap().GetWidth();
-			const int mapHeight = m_project->GetMap().GetHeight();
-			const int tileWidth = 8;
-			const int tileHeight = 8;
-			const int quadHalfExtentsX = 4;
-			const int quadHalfExtentsY = 4;
-
 			//Set preview quad texture coords
 			ion::render::TexCoord coords[4];
 			GetTileTexCoords(m_previewTile, coords, m_previewTileFlipX, m_previewTileFlipY);
@@ -640,9 +650,43 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 										((mapHeight - 1 - m_previewTilePos.y - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 			previewQuadMtx.SetTranslation(previewQuadPos);
 
+			m_mapMaterial->SetDiffuseColour(m_previewColour);
 			m_mapMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
 			m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
 			m_mapMaterial->Unbind();
+		}
+
+		z += zOffset;
+
+		if(m_selectedTiles.size() > 0)
+		{
+			//Draw selection
+			m_mapMaterial->SetDiffuseColour(m_boxSelectColour);
+
+			ion::Matrix4 selectionMtx;
+			ion::render::TexCoord coords[4];
+
+			for(int i = 0; i < m_selectedTiles.size(); i++)
+			{
+				int x = m_selectedTiles[i].x;
+				int y = m_selectedTiles[i].y;
+
+				//Get tile ID under selection box
+				TileId tileId = map.GetTile(x, y);
+				u32 tileFlags = map.GetTileFlags(x, y);
+
+				//Set texture coords of tile
+				GetTileTexCoords(tileId, coords, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+				m_previewPrimitive->SetTexCoords(coords);
+
+				ion::Vector3 selectedQuadPos(((x - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
+											((mapHeight - 1 - y - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
+
+				selectionMtx.SetTranslation(selectedQuadPos);
+				m_mapMaterial->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
+				m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
+				m_mapMaterial->Unbind();
+			}
 		}
 
 		z += zOffset;
@@ -814,6 +858,9 @@ void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int butt
 							}
 						}
 					}
+
+					//Refresh to draw box selection
+					Refresh();
 				}
 				break;
 			}

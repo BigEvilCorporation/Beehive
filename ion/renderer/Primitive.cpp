@@ -30,9 +30,11 @@ namespace ion
 
 		}
 
-		Quad::Quad(Axis axis, const Vector2& halfExtents, const Vector3& offset)
+		Quad::Quad(Axis axis, const Vector2& halfExtents)
 			: Primitive(VertexBuffer::Triangles)
 		{
+			Vector3 offset(0.0f, 0.0f, 0.0f);
+
 			if(axis == xy)
 			{
 				mVertexBuffer.AddVertex(Vector3(offset.x - halfExtents.x, offset.y + halfExtents.y, 0.0f), Vector3(0.0f, 0.0f, 1.0f), TexCoord(0.0f, 1.0f));
