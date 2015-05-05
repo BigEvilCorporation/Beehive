@@ -658,35 +658,65 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
 		z += zOffset;
 
-		if(m_selectedTiles.size() > 0)
+		if(m_boxSelectStart.x >= 0 && m_boxSelectEnd.x >= 0)
 		{
-			//Draw selection
+			//Draw overlay over box selection
+			m_mapMaterial->SetDiffuseColour(m_boxSelectColour);
+
+			//Invert Y for OpenGL
+			float bottom = min(mapHeight - 1 - m_boxSelectStart.y, mapHeight - 1 - m_boxSelectEnd.y);
+			float left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
+
+			ion::Matrix4 boxMtx;
+			ion::Vector3 boxScale((float)abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1.0f, (float)abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1.0f, 0.0f);
+			ion::Vector3 boxPos(floor((left - (mapWidth / 2.0f) + (boxScale.x / 2.0f)) * tileWidth),
+								floor((bottom - (mapHeight / 2.0f) + (boxScale.y / 2.0f)) * tileHeight), z);
+
+			boxMtx.SetTranslation(boxPos);
+			boxMtx.SetScale(boxScale);
+
+			m_mapMaterial->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+			m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
+			m_mapMaterial->Unbind();
+		}
+		else if(m_selectedTiles.size() > 0)
+		{
+			//Draw overlay over selected tiles
 			m_mapMaterial->SetDiffuseColour(m_boxSelectColour);
 
 			ion::Matrix4 selectionMtx;
+			ion::Matrix4 worldViewProjMtx;
 			ion::render::TexCoord coords[4];
+
+			ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = m_vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
+
+			m_mapMaterial->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
 
 			for(int i = 0; i < m_selectedTiles.size(); i++)
 			{
 				int x = m_selectedTiles[i].x;
 				int y = m_selectedTiles[i].y;
+				int y_inv = mapHeight - 1 - y;
 
-				//Get tile ID under selection box
+				//Get tile ID under selection
 				TileId tileId = map.GetTile(x, y);
 				u32 tileFlags = map.GetTileFlags(x, y);
 
 				//Set texture coords of tile
 				GetTileTexCoords(tileId, coords, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
 				m_previewPrimitive->SetTexCoords(coords);
-
+				
 				ion::Vector3 selectedQuadPos(((x - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
-											((mapHeight - 1 - y - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
+											((y_inv - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 
 				selectionMtx.SetTranslation(selectedQuadPos);
-				m_mapMaterial->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
+				worldViewProjMtx = selectionMtx * cameraInverseMtx * projectionMtx;
+				worldViewProjParamV.SetValue(worldViewProjMtx);
+
 				m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
-				m_mapMaterial->Unbind();
 			}
+
+			m_mapMaterial->Unbind();
 		}
 
 		z += zOffset;
@@ -823,25 +853,38 @@ void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int butt
 				{
 					if(!(m_prevMouseBits & eMouseLeft))
 					{
-						//Left click
+						//Single left-click, pick tiles one by one
+						if(m_boxSelectEnd.x > 0 && m_boxSelectEnd.y > 0)
+						{
+							//Previous selection was box selection, clear it
+							m_selectedTiles.clear();
+
+							//Reset box end
+							m_boxSelectEnd.x = -1;
+							m_boxSelectEnd.y = -1;
+						}
+
+						//If CTRL not held
 						if(!m_multipleSelection)
 						{
-							//CTRL not held, clear selection and set box start
+							//Clear selection, start again
 							m_selectedTiles.clear();
+
+							//Start box selection, in case next event is dragging
 							m_boxSelectStart.x = x;
 							m_boxSelectStart.y = y;
 						}
 
-						//Add tile at cursor to selection
+						//Single click - add tile at cursor to selection
 						m_selectedTiles.push_back(ion::Vector2i(x, y));
 					}
-					else
+					else if(!m_multipleSelection)
 					{
-						//Still dragging, set box end
+						//Dragging, set box end
 						m_boxSelectEnd.x = x;
 						m_boxSelectEnd.y = y;
 
-						//Add all tiles in box
+						//Clear current selection
 						m_selectedTiles.clear();
 
 						//Sanitise loop order
@@ -850,6 +893,7 @@ void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int butt
 						int bottom = max(m_boxSelectStart.y, m_boxSelectEnd.y);
 						int right = max(m_boxSelectStart.x, m_boxSelectEnd.x);
 
+						//Add all tiles in box
 						for(int tileX = left; tileX <= right; tileX++)
 						{
 							for(int tileY = top; tileY <= bottom; tileY++)
