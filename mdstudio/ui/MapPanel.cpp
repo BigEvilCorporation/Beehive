@@ -34,7 +34,7 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 
 	//Colours
 	m_previewColour = ion::Colour(1.0f, 1.0f, 1.0f, 1.0f);
-	m_boxSelectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.5f);
+	m_boxSelectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
 
 	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
@@ -75,8 +75,10 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_renderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
 
 	//Load shaders
-	m_vertexShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_v.ion.shader");
-	m_pixelShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_p.ion.shader");
+	m_mapVertexShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_v.ion.shader");
+	m_mapPixelShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_p.ion.shader");
+	m_selectionVertexShader = m_resourceManager.GetResource<ion::render::Shader>("flat_v.ion.shader");
+	m_selectionPixelShader = m_resourceManager.GetResource<ion::render::Shader>("flat_p.ion.shader");
 
 	//Hack: wait for resources
 	//TODO: SetVertexShader() fetches param handles, only succeeds if finished loading
@@ -92,14 +94,20 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_mapMaterial = new ion::render::Material();
 	m_mapMaterial->AddDiffuseMap(m_tilesetTextureHndl);
 	m_mapMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_mapMaterial->SetVertexShader(m_vertexShader);
-	m_mapMaterial->SetPixelShader(m_pixelShader);
+	m_mapMaterial->SetVertexShader(m_mapVertexShader);
+	m_mapMaterial->SetPixelShader(m_mapPixelShader);
 
 	//Create grid material
 	m_gridMaterial = new ion::render::Material();
 	m_gridMaterial->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 0.0f));
-	m_gridMaterial->SetVertexShader(m_vertexShader);
-	m_gridMaterial->SetPixelShader(m_pixelShader);
+	m_gridMaterial->SetVertexShader(m_selectionVertexShader);
+	m_gridMaterial->SetPixelShader(m_mapPixelShader);
+
+	//Create selection material
+	m_selectionMaterial = new ion::render::Material();
+	m_selectionMaterial->SetDiffuseColour(m_boxSelectColour);
+	m_selectionMaterial->SetVertexShader(m_selectionVertexShader);
+	m_selectionMaterial->SetPixelShader(m_selectionPixelShader);
 
 	//Create preview quad
 	m_previewPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
@@ -109,10 +117,13 @@ MapPanel::~MapPanel()
 {
 	delete m_mapMaterial;
 	delete m_gridMaterial;
+	delete m_selectionMaterial;
 	delete m_previewPrimitive;
 	m_tilesetTextureHndl.Clear();
-	m_vertexShader.Clear();
-	m_pixelShader.Clear();
+	m_mapVertexShader.Clear();
+	m_mapPixelShader.Clear();
+	m_selectionVertexShader.Clear();
+	m_selectionPixelShader.Clear();
 	delete m_camera;
 
 	if(m_mapPrimitive)
@@ -625,9 +636,6 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 		//No depth test (stops grid cells Z fighting)
 		m_renderer->SetDepthTest(ion::render::Renderer::Always);
 
-		//Reset diffuse colour
-		m_mapMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-
 		//Draw map
 		m_mapMaterial->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 		m_renderer->DrawVertexBuffer(m_mapPrimitive->GetVertexBuffer(), m_mapPrimitive->GetIndexBuffer());
@@ -661,9 +669,6 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 		if(m_boxSelectStart.x >= 0 && m_boxSelectEnd.x >= 0)
 		{
 			//Draw overlay over box selection
-			m_mapMaterial->SetDiffuseColour(m_boxSelectColour);
-
-			//Invert Y for OpenGL
 			float bottom = min(mapHeight - 1 - m_boxSelectStart.y, mapHeight - 1 - m_boxSelectEnd.y);
 			float left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
 
@@ -675,22 +680,21 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 			boxMtx.SetTranslation(boxPos);
 			boxMtx.SetScale(boxScale);
 
-			m_mapMaterial->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+			m_renderer->SetAlphaBlending(ion::render::Renderer::Translucent);
+			m_selectionMaterial->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 			m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
-			m_mapMaterial->Unbind();
+			m_selectionMaterial->Unbind();
+			m_renderer->SetAlphaBlending(ion::render::Renderer::NoBlend);
 		}
 		else if(m_selectedTiles.size() > 0)
 		{
 			//Draw overlay over selected tiles
-			m_mapMaterial->SetDiffuseColour(m_boxSelectColour);
-
 			ion::Matrix4 selectionMtx;
 			ion::Matrix4 worldViewProjMtx;
-			ion::render::TexCoord coords[4];
+			ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = m_selectionVertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
 
-			ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = m_vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
-
-			m_mapMaterial->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
+			m_renderer->SetAlphaBlending(ion::render::Renderer::Translucent);
+			m_selectionMaterial->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
 
 			for(int i = 0; i < m_selectedTiles.size(); i++)
 			{
@@ -698,14 +702,6 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 				int y = m_selectedTiles[i].y;
 				int y_inv = mapHeight - 1 - y;
 
-				//Get tile ID under selection
-				TileId tileId = map.GetTile(x, y);
-				u32 tileFlags = map.GetTileFlags(x, y);
-
-				//Set texture coords of tile
-				GetTileTexCoords(tileId, coords, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
-				m_previewPrimitive->SetTexCoords(coords);
-				
 				ion::Vector3 selectedQuadPos(((x - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
 											((y_inv - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 
@@ -716,7 +712,8 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 				m_renderer->DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
 			}
 
-			m_mapMaterial->Unbind();
+			m_selectionMaterial->Unbind();
+			m_renderer->SetAlphaBlending(ion::render::Renderer::NoBlend);
 		}
 
 		z += zOffset;
