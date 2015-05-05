@@ -45,15 +45,19 @@ namespace ion
 			{
 			public:
 				ParamHndl();
+				ParamHndl(const ParamHndl<T>& rhs);
+				ParamHndl(ShaderParamDelegate* paramDelegate);
+				~ParamHndl();
 
 				bool IsValid() const;
-
 				void SetValue(const T& value);
+				ParamHndl& operator = (const ParamHndl<T>& rhs);
 
-			protected:
-				ShaderParamDelegate* mParamDelegate;
+			private:
+				void Reference();
+				void Release();
 
-				friend class Shader;
+				ShaderParamDelegate* m_paramDelegate;
 			};
 
 			static Shader* Create();
@@ -78,6 +82,8 @@ namespace ion
 			class ShaderParamDelegate
 			{
 			public:
+				ShaderParamDelegate() : m_refCount(0) {}
+
 				virtual void Set(const int& value) = 0;
 				virtual void Set(const float& value) = 0;
 				virtual void Set(const Vector2& value) = 0;
@@ -85,6 +91,9 @@ namespace ion
 				virtual void Set(const Colour& value) = 0;
 				virtual void Set(const Matrix4& value) = 0;
 				virtual void Set(const Texture& value) = 0;
+			protected:
+				u32 m_refCount;
+				friend class Shader;
 			};
 
 			Shader();
@@ -98,27 +107,70 @@ namespace ion
 
 		template <typename T> Shader::ParamHndl<T> Shader::CreateParamHndl(const std::string& name)
 		{
-			ParamHndl<T> handle;
-			handle.mParamDelegate = CreateShaderParamDelegate(name);
-			return handle;
+			return ParamHndl<T>(CreateShaderParamDelegate(name));
 		}
 
 		template <typename T> Shader::ParamHndl<T>::ParamHndl()
 		{
-			mParamDelegate = NULL;
+			m_paramDelegate = NULL;
+		}
+
+		template <typename T> Shader::ParamHndl<T>::ParamHndl(const ParamHndl<T>& rhs)
+		{
+			m_paramDelegate = rhs.m_paramDelegate;
+			Reference();
+		}
+
+		template <typename T> Shader::ParamHndl<T>::ParamHndl(ShaderParamDelegate* paramDelegate)
+		{
+			m_paramDelegate = paramDelegate;
+			Reference();
+		}
+		
+		template <typename T> Shader::ParamHndl<T>::~ParamHndl()
+		{
+			Release();
+		}
+
+		template <typename T> void Shader::ParamHndl<T>::Reference()
+		{
+			if(m_paramDelegate)
+				m_paramDelegate->m_refCount++;
+		}
+
+		template <typename T> void Shader::ParamHndl<T>::Release()
+		{
+			if(m_paramDelegate)
+			{
+				ion::debug::Assert(m_paramDelegate->m_refCount > 0, "Bad ref count");
+				m_paramDelegate->m_refCount--;
+				if(!m_paramDelegate->m_refCount)
+				{
+					delete m_paramDelegate;
+					m_paramDelegate = NULL;
+				}
+			}
 		}
 
 		template <typename T> bool Shader::ParamHndl<T>::IsValid() const
 		{
-			return mParamDelegate != NULL;
+			return m_paramDelegate != NULL;
 		}
 
 		template <typename T> void Shader::ParamHndl<T>::SetValue(const T& value)
 		{
 			if(IsValid())
 			{
-				mParamDelegate->Set(value);
+				m_paramDelegate->Set(value);
 			}
+		}
+
+		template <typename T> Shader::ParamHndl<T>& Shader::ParamHndl<T>::operator = (const ParamHndl& rhs)
+		{
+			Release();
+			m_paramDelegate = rhs.m_paramDelegate;
+			Reference();
+			return *this;
 		}
 	}
 }
