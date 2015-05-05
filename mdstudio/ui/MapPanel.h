@@ -117,10 +117,13 @@ private:
 	float m_cameraPanSpeed;
 
 	//Rendering materials and shaders
-	ion::io::ResourceHandle<ion::render::Shader> m_vertexShader;
-	ion::io::ResourceHandle<ion::render::Shader> m_pixelShader;
+	ion::io::ResourceHandle<ion::render::Shader> m_mapVertexShader;
+	ion::io::ResourceHandle<ion::render::Shader> m_mapPixelShader;
+	ion::io::ResourceHandle<ion::render::Shader> m_selectionVertexShader;
+	ion::io::ResourceHandle<ion::render::Shader> m_selectionPixelShader;
 	ion::render::Material* m_mapMaterial;
 	ion::render::Material* m_gridMaterial;
+	ion::render::Material* m_selectionMaterial;
 
 	//Rendering primitives
 	ion::render::Chessboard* m_mapPrimitive;
