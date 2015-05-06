@@ -20,6 +20,8 @@
 #include <wx/dcclient.h>
 #include <wx/dcbuffer.h>
 
+#include <stdint.h>
+
 #include "UIBase.h"
 #include "../Project.h"
 
@@ -33,7 +35,8 @@ public:
 		eToolPicker,
 		eToolFlipX,
 		eToolFlipY,
-		eToolFill
+		eToolFill,
+		eToolClone
 	};
 
 	enum MouseButtons
@@ -84,6 +87,9 @@ private:
 	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
 	void FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection);
 
+	//Find bounds from selected tile coords
+	void FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, int& top, int& right, int& bottom) const;
+
 	//Get tile index into tileset
 	int GetTileIndex(TileId tileId) const;
 
@@ -129,9 +135,11 @@ private:
 	ion::render::Chessboard* m_mapPrimitive;
 	ion::render::Grid* m_gridPrimitive;
 	ion::render::Quad* m_previewPrimitive;
+	ion::render::Chessboard* m_clonePreviewPrimitive;
 
 	//Rendering colours
 	ion::Colour m_previewColour;
+	ion::Colour m_clonePreviewColour;
 	ion::Colour m_boxSelectColour;
 
 	//Tileset texture
@@ -146,15 +154,6 @@ private:
 	//Tileset texture cell size sq
 	float m_cellSizeTexSpaceSq;
 
-	//Current tool
-	Tool m_currentTool;
-
-	//Current preview tile
-	TileId m_previewTile;
-	ion::Vector2i m_previewTilePos;
-	bool m_previewTileFlipX;
-	bool m_previewTileFlipY;
-
 	//For mouse delta
 	ion::Vector2 m_mousePrevPos;
 	ion::Vector2i m_prevMouseOverTilePos;
@@ -163,7 +162,14 @@ private:
 	//Prev panel size (for filtering resize events)
 	wxSize m_panelSize;
 
-	//Selection
+	//Current tool
+	Tool m_currentTool;
+
+	///////////////////////////////////////////////////
+	// SELECT tool
+	///////////////////////////////////////////////////
+
+	//Selected tiles
 	std::vector<ion::Vector2i> m_selectedTiles;
 
 	//Multiple (CTRL) selection
@@ -172,4 +178,22 @@ private:
 	//Box selection
 	ion::Vector2i m_boxSelectStart;
 	ion::Vector2i m_boxSelectEnd;
+
+	///////////////////////////////////////////////////
+	// PAINT tool
+	///////////////////////////////////////////////////
+
+	//Current preview tile
+	TileId m_previewTile;
+	ion::Vector2i m_previewTilePos;
+	bool m_previewTileFlipX;
+	bool m_previewTileFlipY;
+
+	///////////////////////////////////////////////////
+	// CLONE tool
+	///////////////////////////////////////////////////
+
+	//Clipboard stamp
+	Stamp* m_clipboard;
+	ion::Vector2i m_clonePastePos;
 };

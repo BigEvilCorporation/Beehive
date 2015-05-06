@@ -152,6 +152,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolFill, 0, wxALL, 5 );
 	
+	m_toolClone = new wxBitmapButton( this, wxID_TOOL_CLONE, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolClone->SetToolTip( wxT("Clone Selection") );
+	
+	fgSizer1->Add( m_toolClone, 0, wxALL, 5 );
+	
 	
 	this->SetSizer( fgSizer1 );
 	this->Layout();
