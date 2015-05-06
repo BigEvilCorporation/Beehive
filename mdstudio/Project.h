@@ -12,6 +12,7 @@
 
 #include "Map.h"
 #include "Palette.h"
+#include "Stamp.h"
 #include "Tile.h"
 
 class Project

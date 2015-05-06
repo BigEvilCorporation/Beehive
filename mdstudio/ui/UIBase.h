@@ -51,6 +51,7 @@
 #define wxID_TOOL_FLIPX 1015
 #define wxID_TOOL_FLIPY 1016
 #define wxID_TOOL_FILL 1017
+#define wxID_TOOL_CLONE 1018
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -121,6 +122,7 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolFlipX;
 		wxBitmapButton* m_toolFlipY;
 		wxBitmapButton* m_toolFill;
+		wxBitmapButton* m_toolClone;
 	
 	public:
 		

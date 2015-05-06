@@ -181,6 +181,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPX);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
 	}
 
 	if(!m_toolboxPanel->IsShown())
@@ -398,6 +399,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_FILL:
 			m_mapPanel->SetTool(MapPanel::eToolFill);
+			break;
+		case wxID_TOOL_CLONE:
+			m_mapPanel->SetTool(MapPanel::eToolClone);
 			break;
 		}
 	}

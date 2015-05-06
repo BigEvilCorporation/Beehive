@@ -17,14 +17,16 @@ local SRC =
 	BMPReader.h
 	Map.cpp
 	Map.h
-	Tile.cpp
-	Tile.h
-	Tileset.cpp
-	Tileset.h
 	Palette.cpp
 	Palette.h
 	Project.cpp
 	Project.h
+	Stamp.cpp
+	Stamp.h
+	Tile.cpp
+	Tile.h
+	Tileset.cpp
+	Tileset.h
 
 	ui/MainWindow.cpp
 	ui/MainWindow.h

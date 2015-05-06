@@ -21,20 +21,17 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_cameraPanSpeed = 1.0f;
 	m_tilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
-	m_previewTile = InvalidTileId;
-	m_previewTileFlipX = false;
-	m_previewTileFlipY = false;
-	m_multipleSelection = false;
-	m_boxSelectStart.x = -1;
-	m_boxSelectStart.y = -1;
-	m_boxSelectEnd.x = -1;
-	m_boxSelectEnd.y = -1;
 	m_panelSize = size;
 	m_prevMouseBits = 0;
+	m_clipboard = NULL;
+	m_clonePreviewPrimitive = NULL;
+
+	ResetToolData();
 
 	//Colours
 	m_previewColour = ion::Colour(1.0f, 1.0f, 1.0f, 1.0f);
 	m_boxSelectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
+	m_clonePreviewColour = ion::Colour(0.7f, 0.7f, 0.7f, 1.0f);
 
 	Bind(wxEVT_LEFT_DOWN,		&MapPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&MapPanel::OnMouse, this, GetId());
@@ -115,6 +112,8 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 
 MapPanel::~MapPanel()
 {
+	ResetToolData();
+
 	delete m_mapMaterial;
 	delete m_gridMaterial;
 	delete m_selectionMaterial;
@@ -178,6 +177,8 @@ void MapPanel::SetTool(Tool tool)
 {
 	if(m_project)
 	{
+		Map& map = m_project->GetMap();
+
 		switch(tool)
 		{
 		case eToolFill:
@@ -209,6 +210,57 @@ void MapPanel::SetTool(Tool tool)
 			ResetToolData();
 			break;
 
+		case eToolClone:
+			//Must previously have been in Select mode
+			if(m_currentTool == eToolSelect)
+			{
+				//and have data to work with
+				if(m_selectedTiles.size() > 0)
+				{
+					//Get min/max width/height
+					int left, top, right, bottom;
+					FindBounds(m_selectedTiles, left, top, right, bottom);
+					int width = abs(right - left) + 1;
+					int height = abs(bottom - top) + 1;
+
+					//Create preview primitive
+					if(m_clonePreviewPrimitive)
+						delete m_clonePreviewPrimitive;
+
+					m_clonePreviewPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2(width * 4.0f, height * 4.0f), width, height, true);
+
+					//Create temp stamp
+					if(m_clipboard)
+						delete m_clipboard;
+
+					m_clipboard = new Stamp(width, height);
+
+					//Populate stamp, set primitive UV coords
+					ion::render::TexCoord coords[4];
+
+					for(int i = 0; i < m_selectedTiles.size(); i++)
+					{
+						int mapX = m_selectedTiles[i].x;
+						int mapY = m_selectedTiles[i].y;
+						int stampX = mapX - left;
+						int stampY = mapY - top;
+						int y_inv = height - 1 - stampY;
+						TileId tileId = map.GetTile(mapX, mapY);
+						u32 tileFlags = map.GetTileFlags(mapX, mapY);
+						m_clipboard->SetTile(stampX, stampY, tileId);
+						m_clipboard->SetTileFlags(stampX, stampY, tileFlags);
+						GetTileTexCoords(tileId, coords, (tileFlags & Map::eFlipX)!=0, (tileFlags & Map::eFlipY)!=0);
+						m_clonePreviewPrimitive->SetTexCoords((y_inv * width) + stampX, coords);
+					}
+				}
+			}
+			else
+			{
+				ResetToolData();
+			}
+
+			break;
+
 		default:
 			ResetToolData();
 		}
@@ -231,6 +283,19 @@ void MapPanel::ResetToolData()
 	m_boxSelectStart.y = -1;
 	m_boxSelectEnd.x = -1;
 	m_boxSelectEnd.y = -1;
+
+	//Delete clipboard stamp
+	if(m_clipboard)
+	{
+		delete m_clipboard;
+		m_clipboard = NULL;
+	}
+
+	if(m_clonePreviewPrimitive)
+	{
+		delete m_clonePreviewPrimitive;
+		m_clonePreviewPrimitive = NULL;
+	}
 }
 
 void MapPanel::CreateCanvas()
@@ -426,7 +491,6 @@ void MapPanel::FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const i
 			}
 		}
 	}
-
 }
 
 void MapPanel::FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection)
@@ -450,6 +514,29 @@ void MapPanel::FillTiles(TileId tileId, const std::vector<ion::Vector2i>& select
 			//Paint tile to canvas
 			PaintTile(tileId, x, y_inv, false, false);
 		}
+	}
+}
+
+void MapPanel::FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, int& top, int& right, int& bottom) const
+{
+	left = INT_MAX;
+	top = INT_MAX;
+	right = 0;
+	bottom = 0;
+
+	for(int i = 0; i < tiles.size(); i++)
+	{
+		int x = tiles[i].x;
+		int y = tiles[i].y;
+
+		if(x < left)
+			left = x;
+		if(x > right)
+			right = x;
+		if(y < top)
+			top = y;
+		if(y > bottom)
+			bottom = y;
 	}
 }
 
@@ -718,6 +805,34 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
 		z += zOffset;
 
+		if(m_clipboard && m_clonePreviewPrimitive)
+		{
+			//Draw clipboard tiles
+			float x = m_clonePastePos.x;
+			float y_inv = mapHeight - 1 - m_clonePastePos.y;
+			float width = m_clipboard->GetWidth();
+			float height_inv = -m_clipboard->GetHeight();
+
+			ion::Matrix4 clonePreviewMtx;
+			ion::Vector3 clonePreviewPos(	floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
+											floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
+			clonePreviewMtx.SetTranslation(clonePreviewPos);
+
+			m_renderer->SetAlphaBlending(ion::render::Renderer::Translucent);
+			m_renderer->SetDepthTest(ion::render::Renderer::Always);
+
+			m_mapMaterial->SetDiffuseColour(m_clonePreviewColour);
+			m_mapMaterial->Bind(clonePreviewMtx, cameraInverseMtx, projectionMtx);
+			m_renderer->DrawVertexBuffer(m_clonePreviewPrimitive->GetVertexBuffer(), m_clonePreviewPrimitive->GetIndexBuffer());
+			m_mapMaterial->Unbind();
+			m_mapMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+
+			m_renderer->SetDepthTest(ion::render::Renderer::LessEqual);
+			m_renderer->SetAlphaBlending(ion::render::Renderer::NoBlend);
+		}
+
+		z += zOffset;
+
 		if(m_project->GetShowGrid())
 		{
 			//Draw grid
@@ -968,6 +1083,27 @@ void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int butt
 					Refresh();
 				}
 				break;
+			}
+
+			case eToolClone:
+			{
+				//Update paste pos
+				m_clonePastePos.x = x;
+				m_clonePastePos.y = y;
+
+				//Clamp to stamp size
+				if(m_clonePastePos.x + m_clipboard->GetWidth() > mapWidth)
+					m_clonePastePos.x = mapWidth - m_clipboard->GetWidth();
+				if(m_clonePastePos.y + m_clipboard->GetHeight() > mapHeight)
+					m_clonePastePos.y = mapHeight - m_clipboard->GetHeight();
+
+				//Redraw
+				Refresh();
+
+				if(buttonBits & eMouseLeft)
+				{
+					//Place stamp
+				}
 			}
 		}
 
