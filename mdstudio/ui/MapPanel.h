@@ -83,6 +83,9 @@ private:
 	//Paint single tile to canvas
 	void PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY);
 
+	//Paint stamp to canvas
+	void PaintStamp(const Stamp& stamp, int x, int y);
+
 	//Fill selection with single tile
 	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
 	void FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection);

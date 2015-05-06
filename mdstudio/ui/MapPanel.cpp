@@ -463,6 +463,34 @@ void MapPanel::PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY)
 	}
 }
 
+void MapPanel::PaintStamp(const Stamp& stamp, int x, int y)
+{
+	if(m_project)
+	{
+		for(int stampX = 0; stampX < stamp.GetWidth(); stampX++)
+		{
+			for(int stampY = 0; stampY < stamp.GetHeight(); stampY++)
+			{
+				TileId tileId = stamp.GetTile(stampX, stampY);
+				if(tileId != InvalidTileId)
+				{
+					u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
+					int mapX = stampX + x;
+					int mapY = stampY + y;
+					int y_inv = m_project->GetMap().GetHeight() - 1 - mapY;
+
+					//Place on map
+					m_project->GetMap().SetTile(mapX, mapY, tileId);
+					m_project->GetMap().SetTileFlags(mapX, mapY, tileFlags);
+
+					//Paint on canvas
+					PaintTile(tileId, mapX, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+				}
+			}
+		}
+	}
+}
+
 void MapPanel::FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2)
 {
 	if(m_project)
@@ -672,6 +700,13 @@ void MapPanel::OnMouse(wxMouseEvent& event)
 
 void MapPanel::OnKeyboard(wxKeyEvent& event)
 {
+	if(event.GetKeyCode() == WXK_ESCAPE)
+	{
+		ResetToolData();
+		m_currentTool = eToolSelect;
+		Refresh();
+	}
+
 	if(m_currentTool == eToolPaint)
 	{
 		if(m_previewTileFlipX != event.ShiftDown())
@@ -1100,9 +1135,10 @@ void MapPanel::HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int butt
 				//Redraw
 				Refresh();
 
-				if(buttonBits & eMouseLeft)
+				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
 					//Place stamp
+					PaintStamp(*m_clipboard, m_clonePastePos.x, m_clonePastePos.y);
 				}
 			}
 		}
