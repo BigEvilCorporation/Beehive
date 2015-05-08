@@ -6,26 +6,9 @@
 
 #pragma once
 
-#include <ion/maths/Vector.h>
-#include <ion/io/ResourceManager.h>
-#include <ion/renderer/Renderer.h>
-#include <ion/renderer/Camera.h>
-#include <ion/renderer/Primitive.h>
-#include <ion/renderer/Material.h>
+#include "ViewPanel.h"
 
-#include <wx/event.h>
-#include <wx/panel.h>
-#include "wx/glcanvas.h"
-#include <wx/dc.h>
-#include <wx/dcclient.h>
-#include <wx/dcbuffer.h>
-
-#include <stdint.h>
-
-#include "UIBase.h"
-#include "../Project.h"
-
-class MapPanel : public wxGLCanvas
+class MapPanel : public ViewPanel
 {
 public:
 	enum Tool
@@ -50,11 +33,10 @@ public:
 	virtual ~MapPanel();
 
 	//Events
-	void OnMouse(wxMouseEvent& event);
-	void OnKeyboard(wxKeyEvent& event);
-	void OnPaint(wxPaintEvent& event);
-	void OnErase(wxEraseEvent& event);
-	void OnResize(wxSizeEvent& event);
+	virtual void OnMouse(wxMouseEvent& event);
+	virtual void OnKeyboard(wxKeyEvent& event);
+	virtual void OnErase(wxEraseEvent& event);
+	virtual void OnResize(wxSizeEvent& event);
 
 	//Set current project
 	void SetProject(Project* project);
@@ -62,81 +44,24 @@ public:
 	//Set current tool
 	void SetTool(Tool tool);
 
-	virtual void Refresh(bool eraseBackground=true, const wxRect *rect=NULL);
-
 private:
-	//Create canvas
-	void CreateCanvas();
-
-	//Create grid
-	void CreateGrid();
-
-	//Create and redraw tileset texture
-	void CreateTilesetTexture();
-
-	//Create TileID to index cache
-	void CacheTileIndices();
-
-	//Paint whole map to canvas
-	void PaintWholeMap();
-
-	//Paint single tile to canvas
-	void PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY);
-
-	//Paint stamp to canvas
-	void PaintStamp(const Stamp& stamp, int x, int y);
-
-	//Fill selection with single tile
-	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
-	void FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection);
-
-	//Find bounds from selected tile coords
-	void FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, int& top, int& right, int& bottom) const;
-
-	//Get tile index into tileset
-	int GetTileIndex(TileId tileId) const;
-
-	//Get tileset UV coords for tile
-	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], bool flipX, bool flipY) const;
-
-	//Centre camera on canvas
-	void CentreCamera();
 
 	//Clear all tool data
 	void ResetToolData();
 
 	//Mouse click or changed tile
-	void HandleMouseTileEvent(Tool tool, ion::Vector2 mouseDelta, int buttonBits, int x, int y);
+	virtual void HandleMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y);
 
-	//Resource manager
-	ion::io::ResourceManager& m_resourceManager;
-
-	//Main project
-	Project* m_project;
-
-	//OpenGL context
-	wxGLContext* m_context;
-
-	//Renderer
-	ion::render::Renderer* m_renderer;
-
-	//Camera
-	ion::render::Camera* m_camera;
-	float m_cameraZoom;
-	float m_cameraPanSpeed;
+	virtual void RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
 	//Rendering materials and shaders
-	ion::io::ResourceHandle<ion::render::Shader> m_mapVertexShader;
-	ion::io::ResourceHandle<ion::render::Shader> m_mapPixelShader;
 	ion::io::ResourceHandle<ion::render::Shader> m_selectionVertexShader;
 	ion::io::ResourceHandle<ion::render::Shader> m_selectionPixelShader;
-	ion::render::Material* m_mapMaterial;
-	ion::render::Material* m_gridMaterial;
 	ion::render::Material* m_selectionMaterial;
 
 	//Rendering primitives
-	ion::render::Chessboard* m_mapPrimitive;
-	ion::render::Grid* m_gridPrimitive;
+	//ion::render::Chessboard* m_mapPrimitive;
+	//ion::render::Grid* m_gridPrimitive;
 	ion::render::Quad* m_previewPrimitive;
 	ion::render::Chessboard* m_clonePreviewPrimitive;
 
@@ -144,26 +69,6 @@ private:
 	ion::Colour m_previewColour;
 	ion::Colour m_clonePreviewColour;
 	ion::Colour m_boxSelectColour;
-
-	//Tileset texture
-	ion::io::ResourceHandle<ion::render::Texture> m_tilesetTextureHndl;
-
-	//Map tile IDs to indices
-	std::map<TileId, u32> m_tileIndexMap;
-
-	//Tileset size sq
-	u32 m_tilesetSizeSq;
-
-	//Tileset texture cell size sq
-	float m_cellSizeTexSpaceSq;
-
-	//For mouse delta
-	ion::Vector2 m_mousePrevPos;
-	ion::Vector2i m_prevMouseOverTilePos;
-	int m_prevMouseBits;
-
-	//Prev panel size (for filtering resize events)
-	wxSize m_panelSize;
 
 	//Current tool
 	Tool m_currentTool;

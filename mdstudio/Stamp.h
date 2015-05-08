@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
+#pragma once
+
 #include "Tile.h"
 #include "Tileset.h"
 
@@ -15,11 +23,17 @@ public:
 	void SetTileFlags(int x, int y, u32 flags);
 	u32 GetTileFlags(int x, int y) const;
 
+	void SetName(const std::string& name);
+	const std::string& GetName() const;
+	u32 GetNameHash() const;
+
 	void Serialise(ion::io::Archive& archive);
 
 private:
 	int m_width;
 	int m_height;
+	std::string m_name;
+	u32 m_nameHash;
 
 	struct TileDesc
 	{
