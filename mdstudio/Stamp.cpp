@@ -1,9 +1,18 @@
+///////////////////////////////////////////////////////
+// MD Studio: A complete SEGA Mega Drive content tool
+//
+// (c) 2015 Matt Phillips, Big Evil Corporation
+///////////////////////////////////////////////////////
+
 #include "Stamp.h"
+
+#include <core/cryptography/Hash.h>
 
 Stamp::Stamp(int width, int height)
 {
 	m_width = width;
 	m_height = height;
+	m_nameHash = 0;
 
 	int size = width * height;
 	m_tiles.resize(size);
@@ -53,9 +62,27 @@ u32 Stamp::GetTileFlags(int x, int y) const
 	return m_tiles[tileIdx].m_flags;
 }
 
+void Stamp::SetName(const std::string& name)
+{
+	m_name = name;
+	m_nameHash = ion::Hash(name.c_str());
+}
+
+const std::string& Stamp::GetName() const
+{
+	return m_name;
+}
+
+u32 Stamp::GetNameHash() const
+{
+	return m_nameHash;
+}
+
 void Stamp::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_width);
 	archive.Serialise(m_height);
+	archive.Serialise(m_name);
+	archive.Serialise(m_nameHash);
 	archive.Serialise(m_tiles);
 }

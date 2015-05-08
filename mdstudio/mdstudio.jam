@@ -32,6 +32,8 @@ local SRC =
 	ui/MainWindow.h
 	ui/MapPanel.cpp
 	ui/MapPanel.h
+	ui/ViewPanel.cpp
+	ui/ViewPanel.h
 	ui/TileRendering.cpp
 	ui/TileRendering.h
 	ui/TilesPanel.cpp
