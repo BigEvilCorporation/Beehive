@@ -449,8 +449,8 @@ void MapPanel::HandleMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int
 						if(tileId != InvalidTileId)
 						{
 							u32 tileFlags = m_clipboard->GetTileFlags(stampX, stampY);
-							int mapX = stampX + x;
-							int mapY = stampY + y;
+							int mapX = stampX + m_clonePastePos.x;
+							int mapY = stampY + m_clonePastePos.y;
 							int y_inv = m_project->GetMap().GetHeight() - 1 - mapY;
 
 							//Place on map - TODO: Map::PlaceStamp()
