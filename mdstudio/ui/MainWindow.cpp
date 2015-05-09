@@ -386,7 +386,7 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			m_mapPanel->SetTool(MapPanel::eToolSelect);
 			break;
 		case wxID_TOOL_PAINT:
-			m_mapPanel->SetTool(MapPanel::eToolPaint);
+			m_mapPanel->SetTool(MapPanel::eToolPaintTile);
 			break;
 		case wxID_TOOL_PICKER:
 			m_mapPanel->SetTool(MapPanel::eToolPicker);

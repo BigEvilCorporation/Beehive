@@ -10,6 +10,7 @@
 #include <sstream>
 #include <io/Archive.h>
 #include "Tileset.h"
+#include "Stamp.h"
 
 class Map
 {
@@ -32,11 +33,17 @@ public:
 	int GetHeight() const;
 
 	void Resize(int w, int h);
+
+	//Set tile on map
 	void SetTile(int x, int y, TileId tile);
 	TileId GetTile(int x, int y) const;
 
+	//Set tile flags
 	void SetTileFlags(int x, int y, u32 flags);
 	u32 GetTileFlags(int x, int y) const;
+
+	//Draw stamp on map
+	void DrawStamp(int x, int y, const Stamp& stamp);
 
 	const Tileset& GetTileset() const;
 	Tileset& GetTileset();
