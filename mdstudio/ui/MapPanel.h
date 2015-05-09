@@ -14,12 +14,13 @@ public:
 	enum Tool
 	{
 		eToolSelect,
-		eToolPaint,
+		eToolPaintTile,
+		eToolPaintStamp,
+		eToolClone,
+		eToolFill,
 		eToolPicker,
 		eToolFlipX,
-		eToolFlipY,
-		eToolFill,
-		eToolClone
+		eToolFlipY
 	};
 
 	enum MouseButtons
@@ -88,7 +89,7 @@ private:
 	ion::Vector2i m_boxSelectEnd;
 
 	///////////////////////////////////////////////////
-	// PAINT tool
+	// PAINT TILE tool
 	///////////////////////////////////////////////////
 
 	//Current preview tile
@@ -98,10 +99,10 @@ private:
 	bool m_previewTileFlipY;
 
 	///////////////////////////////////////////////////
-	// CLONE tool
+	// PAINT STAMP tool
 	///////////////////////////////////////////////////
 
-	//Clipboard stamp
-	Stamp* m_clipboard;
-	ion::Vector2i m_clonePastePos;
+	//Current stamp
+	Stamp* m_currentStamp;
+	ion::Vector2i m_stampPastePos;
 };

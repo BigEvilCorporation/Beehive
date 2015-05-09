@@ -84,6 +84,29 @@ u32 Map::GetTileFlags(int x, int y) const
 	return m_tiles[tileIdx].m_flags;
 }
 
+void Map::DrawStamp(int x, int y, const Stamp& stamp)
+{
+	for(int stampX = 0; stampX < stamp.GetWidth(); stampX++)
+	{
+		for(int stampY = 0; stampY < stamp.GetHeight(); stampY++)
+		{
+			TileId tileId = stamp.GetTile(stampX, stampY);
+			if(tileId != InvalidTileId)
+			{
+				u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
+				int mapX = stampX + x;
+				int mapY = stampY + y;
+
+				//Copy tile
+				SetTile(mapX, mapY, tileId);
+
+				//Copy flags
+				SetTileFlags(mapX, mapY, tileFlags);
+			}
+		}
+	}
+}
+
 const Tileset& Map::GetTileset() const
 {
 	return m_tileset;
