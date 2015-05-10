@@ -40,7 +40,7 @@ public:
 	virtual void OnResize(wxSizeEvent& event);
 
 	//Set current project
-	void SetProject(Project* project);
+	virtual void SetProject(Project* project);
 
 	//Set current tool
 	void SetTool(Tool tool);

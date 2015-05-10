@@ -14,6 +14,7 @@
 
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
+#include "StampsPanel.h"
 #include "MapPanel.h"
 
 #include "../Project.h"
@@ -28,6 +29,7 @@ public:
 
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
+	void ShowPanelStamps();
 	void ShowPanelMap();
 	void ShowPanelToolbox();
 
@@ -56,6 +58,7 @@ private:
 
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<TilesPanel> m_tilesPanel;
+	wxWeakRef<StampsPanel> m_stampsPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<MapToolbox> m_toolboxPanel;
 

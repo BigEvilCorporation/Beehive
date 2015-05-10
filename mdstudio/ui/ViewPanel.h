@@ -40,7 +40,7 @@ public:
 	virtual ~ViewPanel();
 
 	//Set current project
-	void SetProject(Project* project);
+	virtual void SetProject(Project* project);
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 

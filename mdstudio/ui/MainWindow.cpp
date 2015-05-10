@@ -56,10 +56,11 @@ void MainWindow::SetProject(Project* project)
 		m_project = project;
 
 		//New project, open default panels
+		ShowPanelToolbox();
 		ShowPanelPalettes();
 		ShowPanelTiles();
+		ShowPanelStamps();
 		ShowPanelMap();
-		ShowPanelToolbox();
 
 		//Sync settings widgets states
 		SyncSettingsWidgets();
@@ -91,6 +92,12 @@ void MainWindow::SetProject(Project* project)
 			delete m_toolboxPanel;
 		}
 
+		if(m_stampsPanel)
+		{
+			m_auiManager.DetachPane(m_stampsPanel);
+			delete m_stampsPanel;
+		}
+
 		m_project = NULL;
 	}
 
@@ -108,7 +115,7 @@ void MainWindow::ShowPanelPalettes()
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
 			paneInfo.BestSize(300, 100);
-			paneInfo.Right();
+			paneInfo.Left();
 			paneInfo.Caption("Palettes");
 			paneInfo.CaptionVisible(true);
 
@@ -146,6 +153,32 @@ void MainWindow::ShowPanelTiles()
 		if(!m_tilesPanel->IsShown())
 		{
 			m_tilesPanel->Show();
+		}
+	}
+}
+
+void MainWindow::ShowPanelStamps()
+{
+	if(m_project)
+	{
+		if(!m_stampsPanel)
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Right();
+			paneInfo.Caption("Stamps");
+			paneInfo.CaptionVisible(true);
+
+			m_stampsPanel = new StampsPanel(*m_renderer, m_context, m_dockArea, NewControlId());
+			m_stampsPanel->SetProject(m_project);
+			m_auiManager.AddPane(m_stampsPanel, paneInfo);
+		}
+
+		if(!m_stampsPanel->IsShown())
+		{
+			m_stampsPanel->Show();
 		}
 	}
 }
