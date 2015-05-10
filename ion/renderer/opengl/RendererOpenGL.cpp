@@ -7,10 +7,14 @@
 
 #include "core/debug/Debug.h"
 #include "renderer/colour.h"
+#include "renderer/Viewport.h"
 #include "renderer/VertexBuffer.h"
 #include "renderer/IndexBuffer.h"
 #include "renderer/Shader.h"
 #include "renderer/opengl/RendererOpenGL.h"
+#include "renderer/opengl/ShaderCgGL.h"
+
+#include <Windows.h>
 
 namespace ion
 {
@@ -30,86 +34,33 @@ namespace ion
 		PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffersEXT;
 		PFNGLDRAWBUFFERSPROC glDrawBuffers;
 
-		HGLRC RendererOpenGL::sOpenGLContext = 0;
-		HDC RendererOpenGL::sDrawContext = 0;
-		thread::CriticalSection RendererOpenGL::sGLContextCriticalSection;
-		u32 RendererOpenGL::sGLContextLockStack = 0;
-
-		Renderer* Renderer::Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
+		Renderer* Renderer::Create(DeviceContext globalDC)
 		{
-			return new RendererOpenGL(windowTitle, windowWidth, windowHeight, fullscreen);
+			return new RendererOpenGL(globalDC);
 		}
 
-		Renderer* Renderer::Create(HWND window, int windowWidth, int windowHeight)
+		RendererOpenGL::RendererOpenGL(DeviceContext globalDC)
 		{
-			return new RendererOpenGL(window, windowWidth, windowHeight);
-		}
+			m_currentDC = NULL;
+			m_contextLockStack = 0;
 
-		Renderer* Renderer::Create(HWND window, HGLRC context, int windowWidth, int windowHeight)
-		{
-			return new RendererOpenGL(window, windowWidth, windowHeight);
-		}
-
-		RendererOpenGL::RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
-			: Renderer(windowTitle, windowWidth, windowHeight, fullscreen)
-			, m_perspectiveMode(Perspective3D)
-		{
-			//Create window
-			CreateWindow(windowTitle, windowWidth, windowHeight, fullscreen);
+			//Using existing global DC
+			m_globalDC = globalDC;
 
 			//Create OpenGL context
-			CreateContext();
+			CreateContext(globalDC);
 
 			//Init context
-			InitContext(windowWidth, windowHeight);
-		}
-
-		RendererOpenGL::RendererOpenGL(HWND window, int windowWidth, int windowHeight)
-			: Renderer("", windowWidth, windowHeight, false)
-			, m_perspectiveMode(Perspective3D)
-		{
-			mWindow = NULL;
-
-			//Get window draw context
-			sDrawContext = GetWindowDC(window);
-
-			//Create OpenGL context
-			CreateContext();
-
-			//Init context
-			InitContext(windowWidth, windowHeight);
-		}
-
-		RendererOpenGL::RendererOpenGL(HWND window, HGLRC context, int windowWidth, int windowHeight)
-			: Renderer("", windowWidth, windowHeight, false)
-			, m_perspectiveMode(Perspective3D)
-		{
-			mWindow = NULL;
-
-			//Get window draw context
-			sDrawContext = GetWindowDC(window);
-
-			//Using existing OpenGL context
-			sOpenGLContext = context;
-
-			//Init context
-			InitContext(windowWidth, windowHeight);
+			InitContext(globalDC);
 		}
 
 		RendererOpenGL::~RendererOpenGL()
 		{
 			delete mShaderManager;
-			delete mWindow;
 		}
 
-		void RendererOpenGL::CreateWindow(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
+		void RendererOpenGL::BindDC(DeviceContext deviceContext)
 		{
-			//Create window
-			mWindow = new WindowWin32(windowTitle, windowWidth, windowHeight, fullscreen);
-
-			//Get draw context
-			sDrawContext = mWindow->GetDrawContext();
-
 			//Create pixel format descriptor
 			PIXELFORMATDESCRIPTOR pixelFormatDesc = { 0 };
 			pixelFormatDesc.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -122,37 +73,33 @@ namespace ion
 			pixelFormatDesc.iLayerType = PFD_MAIN_PLANE;
 
 			//Check pixel format
-			int pixelFormat = ChoosePixelFormat(sDrawContext, &pixelFormatDesc);
+			int pixelFormat = ChoosePixelFormat(deviceContext, &pixelFormatDesc);
 			if(!pixelFormat)
 			{
 				debug::Error("Invalid pixel format");
 			}
 
 			//Set pixel format
-			if(!SetPixelFormat(sDrawContext, pixelFormat, &pixelFormatDesc))
+			if(!SetPixelFormat(deviceContext, pixelFormat, &pixelFormatDesc))
 			{
 				debug::Error("Could not set pixel format");
 			}
 		}
 
-		void RendererOpenGL::CreateContext()
+		void RendererOpenGL::CreateContext(DeviceContext deviceContext)
 		{
 			//Create OpenGL context
-			sOpenGLContext = wglCreateContext(sDrawContext);
-			if(!sOpenGLContext)
+			m_openGLContext = wglCreateContext(deviceContext);
+			if(!m_openGLContext)
 			{
 				debug::Error("Could not create OpenGL context");
 			}
 		}
 
-		void RendererOpenGL::InitContext(int viewportWidth, int viewportHeight)
+		void RendererOpenGL::InitContext(DeviceContext deviceContext)
 		{
-			//Set as current context
-			wglMakeCurrent(sDrawContext, sOpenGLContext);
-			
-			//Set viewport width/height
-			m_viewportWidth = viewportWidth;
-			m_viewportHeight = viewportHeight;
+			//Lock context
+			LockGLContext(deviceContext);
 
 			//Get version
 			const char* version = (const char*)glGetString(GL_VERSION);
@@ -191,9 +138,6 @@ namespace ion
 			//Set default blending mode
 			glBlendFunc(GL_ONE, GL_ONE);
 
-			//Call resize to setup viewport
-			OnResize(viewportWidth, viewportHeight);
-
 			//Check for OpenGL errors
 			if(!CheckGLError())
 			{
@@ -206,74 +150,20 @@ namespace ion
 
 			//Create shader manager
 			mShaderManager = ShaderManager::Create();
-		}
 
-		Window* RendererOpenGL::GetWindow() const
-		{
-			return mWindow;
-		}
-
-		void RendererOpenGL::LockGLContext()
-		{
-			sGLContextCriticalSection.Begin();
-
-			if(sGLContextLockStack == 0)
-			{
-				wglMakeCurrent(sDrawContext, sOpenGLContext);
-			}
-
-			sGLContextLockStack++;
-		}
-
-		void RendererOpenGL::UnlockGLContext()
-		{
-			debug::Assert(sGLContextLockStack > 0, "Bad OpenGL context lock count");
-			sGLContextLockStack--;
-			if(!sGLContextLockStack)
-			{
-				wglMakeCurrent(sDrawContext, NULL);
-			}
-
-			sGLContextCriticalSection.End();
-		}
-
-		bool RendererOpenGL::CheckGLError()
-		{
-			LockGLContext();
-			GLenum error = glGetError();
+			//Unlock context (binds global DC)
 			UnlockGLContext();
-
-			if(error != GL_NO_ERROR)
-			{
-				debug::Error("OpenGL error");
-			}
-
-			return error == GL_NO_ERROR;
 		}
 
-		bool RendererOpenGL::Update(float deltaTime)
+		void RendererOpenGL::SetupViewport(const Viewport& viewport)
 		{
-			return mWindow->Update();
-		}
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
-		void RendererOpenGL::OnResize(int width, int height)
-		{
-			LockGLContext();
+			int width = viewport.GetWidth();
+			int height = viewport.GetHeight();
 
-			//Make sure height is at least 1
-			if(height == 0)
-			{
-				height = 1;
-			}
-
-			//Resize window
-			if(mWindow)
-			{
-				mWindow->Resize(width, height);
-			}
-
-			m_viewportWidth = width;
-			m_viewportHeight = height;
+			//Make sure width/height is at least 1
+			debug::Assert(width > 0 && height > 0, "RendererOpenGL::SetupViewport() - Bad width/height");
 
 			//Set the viewport
 			glViewport(0, 0, width, height);
@@ -288,19 +178,19 @@ namespace ion
 			float aspectRatio = (float)width / (float)height;
 
 			//Set perspective mode
-			switch(m_perspectiveMode)
+			switch(viewport.GetPerspectiveMode())
 			{
-			case Perspective3D:
+			case Viewport::Perspective3D:
 				//TODO: Expose FOV and near/far
 				gluPerspective(45.0f, aspectRatio, 0.1f, 10000.0f);
 				break;
 
-			case Ortho2DNormalised:
+			case Viewport::Ortho2DNormalised:
 				glOrtho(0.0, 1.0f, 0.0, 1.0f, -1.0, 1.0);
 				break;
 
-			case Ortho2DAbsolute:
-				glOrtho(0.0, m_viewportWidth, 0.0, m_viewportHeight, -1.0, 1.0);
+			case Viewport::Ortho2DAbsolute:
+				glOrtho(0.0, width, 0.0, height, -1.0, 1.0);
 				break;
 			}
 
@@ -310,30 +200,97 @@ namespace ion
 			//Reset the modelview matrix
 			glLoadIdentity();
 
-			UnlockGLContext();
+			//Set clear colour
+			const Colour& clearColour = viewport.GetClearColour();
+			glClearColor(clearColour.r, clearColour.g, clearColour.b, clearColour.a);
+		}
+
+		void RendererOpenGL::LockGLContext(HDC deviceContext)
+		{
+			//m_contextCriticalSection.Begin();
+
+			if(m_contextLockStack == 0)
+			{
+				//Unbind global DC
+				wglMakeCurrent(m_globalDC, NULL);
+
+				//Make context current
+				wglMakeCurrent(deviceContext, m_openGLContext);
+
+				//Set current DC
+				m_currentDC = deviceContext;
+			}
+			else
+			{
+				//Cannot switch DC if locked
+				if(deviceContext != m_currentDC)
+				{
+					debug::Assert(m_contextLockStack == 0, "RendererOpenGL::LockGLContext() - Cannot change device context when locked");
+				}
+			}
+
+			m_contextLockStack++;
+		}
+
+		void RendererOpenGL::UnlockGLContext()
+		{
+			debug::Assert(m_contextLockStack > 0, "Bad OpenGL context lock count");
+
+			m_contextLockStack--;
+			if(!m_contextLockStack)
+			{
+				//Unbind current DC
+				wglMakeCurrent(m_currentDC, NULL);
+				m_currentDC = NULL;
+
+				//Bind global DC
+				wglMakeCurrent(m_globalDC, m_openGLContext);
+			}
+
+			//m_contextCriticalSection.End();
+		}
+
+		bool RendererOpenGL::CheckGLError()
+		{
+			GLenum error = glGetError();
+
+			if(error != GL_NO_ERROR)
+			{
+				debug::Error("OpenGL error");
+			}
+
+			return error == GL_NO_ERROR;
+		}
+
+		bool RendererOpenGL::Update(float deltaTime)
+		{
+			return true;
+		}
+
+		void RendererOpenGL::OnResize(int width, int height)
+		{
+
 		}
 
 		void RendererOpenGL::SetMatrix(const Matrix4& matrix)
 		{
-			LockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 			glLoadMatrixf(matrix.GetAsFloatArray());
-			UnlockGLContext();
 		}
 
 		Matrix4 RendererOpenGL::GetProjectionMatrix()
 		{
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
+
 			float matrix[16] = { 0.0f };
-
-			LockGLContext();
 			glGetFloatv(GL_PROJECTION_MATRIX, matrix);
-			UnlockGLContext();
-
 			return Matrix4(matrix);
 		}
 
-		void RendererOpenGL::BeginFrame()
+		void RendererOpenGL::BeginFrame(const Viewport& viewport, const DeviceContext& deviceContext)
 		{
-			LockGLContext();
+			LockGLContext(deviceContext);
+			SetupViewport(viewport);
 		}
 
 		void RendererOpenGL::EndFrame()
@@ -343,49 +300,29 @@ namespace ion
 
 		void RendererOpenGL::SwapBuffers()
 		{
-			LockGLContext();
-			::SwapBuffers(sDrawContext);
-			UnlockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
+			::SwapBuffers(m_currentDC);
 		}
 
 		void RendererOpenGL::ClearColour()
 		{
-			LockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
 			//Clear colour buffer
 			glClear(GL_COLOR_BUFFER_BIT);
-
-			UnlockGLContext();
 		}
 
 		void RendererOpenGL::ClearDepth()
 		{
-			LockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
 			//Clear depth buffer
 			glClear(GL_DEPTH_BUFFER_BIT);
-
-			UnlockGLContext();
-		}
-
-		void RendererOpenGL::SetClearColour(const Colour& colour)
-		{
-			LockGLContext();
-
-			glClearColor(colour.r, colour.g, colour.b, colour.a);
-
-			UnlockGLContext();
-		}
-
-		void RendererOpenGL::SetPerspectiveMode(PerspectiveMode perspectiveMode)
-		{
-			m_perspectiveMode = perspectiveMode;
-			OnResize(m_viewportWidth, m_viewportHeight);
 		}
 
 		void RendererOpenGL::SetAlphaBlending(AlphaBlendType alphaBlendType)
 		{
-			LockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
 			switch(alphaBlendType)
 			{
@@ -406,13 +343,11 @@ namespace ion
 			default:
 				break;
 			}
-
-			UnlockGLContext();
 		}
 
 		void RendererOpenGL::SetFaceCulling(CullingMode cullingMode)
 		{
-			LockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
 			switch(cullingMode)
 			{
@@ -433,12 +368,12 @@ namespace ion
 			default:
 				break;
 			}
-
-			UnlockGLContext();
 		}
 
 		void RendererOpenGL::SetDepthTest(DepthTest depthTest)
 		{
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
+
 			if(depthTest == Disabled)
 			{
 				glDisable(GL_DEPTH_TEST);
@@ -461,7 +396,7 @@ namespace ion
 
 		void RendererOpenGL::DrawVertexBuffer(const VertexBuffer& vertexBuffer)
 		{
-			LockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
 			//Enable client states
 			glEnableClientState(GL_VERTEX_ARRAY);
@@ -507,13 +442,11 @@ namespace ion
 			{
 				debug::Error("Could not draw vertex buffer");
 			}
-
-			UnlockGLContext();
 		}
 
 		void RendererOpenGL::DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
 		{
-			LockGLContext();
+			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
 			//Enable client states
 			glEnableClientState(GL_VERTEX_ARRAY);
@@ -552,8 +485,6 @@ namespace ion
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 			CheckGLError();
-
-			UnlockGLContext();
 		}
 	}
 }

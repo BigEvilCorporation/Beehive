@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
@@ -17,13 +17,13 @@
 
 #include "Project.h"
 
-class MDStudioWxApp;
+class BeehiveWxApp;
 
-class MDStudio : public ion::framework::Application
+class Beehive : public ion::framework::Application
 {
 public:
-	MDStudio();
-	virtual ~MDStudio();
+	Beehive();
+	virtual ~Beehive();
 
 	virtual bool Initialise();
 	virtual void Shutdown();
@@ -31,9 +31,6 @@ public:
 	virtual void Render();
 
 private:
-	MDStudioWxApp* m_wxApp;
+	BeehiveWxApp* m_wxApp;
 	Project* m_project;
-
-	//Resource manager
-	ion::io::ResourceManager* m_resourceManager;
 };

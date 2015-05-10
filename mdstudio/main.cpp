@@ -1,15 +1,15 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
 
-#include "MDStudio.h"
+#include "Beehive.h"
 #include "core/time/Time.h"
 
 int main(char** args, int numargs)
 {
-	MDStudio app;
+	Beehive app;
 	
 	if(app.Initialise())
 	{

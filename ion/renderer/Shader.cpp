@@ -36,7 +36,10 @@ namespace ion
 
 			if(archive.GetDirection() == io::Archive::In)
 			{
-				Load(archive.GetResourceManager()->GetResourceDirectory<Shader>());
+				if(archive.GetResourceManager())
+				{
+					Load(archive.GetResourceManager()->GetResourceDirectory<Shader>());
+				}
 			}
 		}
 	}

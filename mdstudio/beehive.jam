@@ -1,17 +1,17 @@
 SubDir bigevilcorp mdstudio ;
 
-ApplyIonDefines MDStudio ;
-ApplyIonIncludes MDStudio ;
-ApplyIonCore MDStudio ;
-ApplyIonIo MDStudio ;
-ApplyIonRenderer MDStudio : opengl ;
+ApplyIonDefines beehive ;
+ApplyIonIncludes beehive ;
+ApplyIonCore beehive ;
+ApplyIonIo beehive ;
+ApplyIonRenderer beehive : opengl ;
 
-ApplyWxSDK MDStudio ;
+ApplyWxSDK beehive ;
 
 local SRC = 
 	main.cpp
-	MDStudio.cpp
-	MDStudio.h
+	beehive.cpp
+	beehive.h
 
 	BMPReader.cpp
 	BMPReader.h
@@ -46,6 +46,6 @@ local SRC =
 	ui/WxApp.h
 	;
 
-AutoSourceGroup MDStudio : $(SRC) ;
-C.RuntimeType MDStudio : static ;
-C.Application MDStudio : $(SRC) ;
+AutoSourceGroup beehive : $(SRC) ;
+C.RuntimeType beehive : static ;
+C.Application beehive : $(SRC) ;

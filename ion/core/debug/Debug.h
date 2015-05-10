@@ -12,6 +12,7 @@ namespace ion
 	namespace debug
 	{
 		void Log(const char* message);
+		void Flush();
 		void Error(const char* message);
 		void Assert(bool condition, const char* message);
 		void Break();

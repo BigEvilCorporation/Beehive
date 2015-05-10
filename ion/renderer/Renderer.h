@@ -10,6 +10,7 @@
 #include "maths/Matrix.h"
 #include "maths/Vector.h"
 #include "renderer/Window.h"
+#include "renderer/Viewport.h"
 
 #include <string>
 
@@ -27,6 +28,9 @@ namespace ion
 		class Texture;
 		class ShaderManager;
 
+		typedef HWND WindowHandle;
+		typedef HDC DeviceContext;
+
 		class Renderer
 		{
 		public:
@@ -36,23 +40,15 @@ namespace ion
 			//Culling modes
 			enum CullingMode { NoCull, Clockwise, CounterClockwise };
 
-			//Render perspectives
-			enum PerspectiveMode { Perspective3D, Ortho2DNormalised, Ortho2DAbsolute };
-
 			//Depth test type
 			enum DepthTest { Disabled, Always, LessEqual };
 
 			//Render vertex pattern type
 			enum VertexPattern { Triangles, Quads };
 
-			static Renderer* Create(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
-			static Renderer* Create(HWND window, int windowWidth, int windowHeight);
-			static Renderer* Create(HWND window, HGLRC context, int windowWidth, int windowHeight);
+			static Renderer* Create(DeviceContext globalDC);
 
 			virtual ~Renderer();
-
-			//Get window
-			virtual Window* GetWindow() const = 0;
 
 			//Update renderer
 			virtual bool Update(float deltaTime) = 0;
@@ -65,15 +61,13 @@ namespace ion
 			virtual Matrix4 GetProjectionMatrix() = 0;
 
 			//Rendering - general
-			virtual void BeginFrame() = 0;
+			virtual void BeginFrame(const Viewport& viewport, const DeviceContext& deviceContext) = 0;
 			virtual void EndFrame() = 0;
 			virtual void SwapBuffers() = 0;
 			virtual void ClearColour() = 0;
 			virtual void ClearDepth() = 0;
-			virtual void SetClearColour(const Colour& colour) = 0;
 
 			//Render states
-			virtual void SetPerspectiveMode(PerspectiveMode perspectiveMode) = 0;
 			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType) = 0;
 			virtual void SetFaceCulling(CullingMode cullingMode) = 0;
 			virtual void SetDepthTest(DepthTest depthTest) = 0;
@@ -83,7 +77,7 @@ namespace ion
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer) = 0;
 
 		protected:
-			Renderer(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
+			Renderer();
 
 			ShaderManager* mShaderManager;
 		};

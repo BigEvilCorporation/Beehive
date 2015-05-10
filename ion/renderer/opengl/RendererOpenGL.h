@@ -9,21 +9,13 @@
 
 #include "core/thread/CriticalSection.h"
 #include "renderer/Renderer.h"
-#include "renderer/win32/WindowWin32.h"
 
 #include <windows.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glext.h>
-
-//Undefine Windows macro clashes
-#ifdef CreateWindow
-#undef CreateWindow
-#endif
-
-#ifdef CreateWindowA
-#undef CreateWindowA
-#endif
+#include <GL/wglext.h>
 
 namespace ion
 {
@@ -32,19 +24,10 @@ namespace ion
 		class RendererOpenGL : public Renderer
 		{
 		public:
-			//Create with window
-			RendererOpenGL(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
-
-			//Create context and viewport only
-			RendererOpenGL(HWND window, int windowWidth, int windowHeight);
-
-			//Create from existing context
-			RendererOpenGL(HWND window, HGLRC context, int windowWidth, int windowHeight);
+			//Create from existing DC
+			RendererOpenGL(DeviceContext deviceContext);
 
 			virtual ~RendererOpenGL();
-
-			//Get window
-			virtual Window* GetWindow() const;
 
 			virtual bool Update(float deltaTime);
 			virtual void OnResize(int width, int height);
@@ -54,15 +37,13 @@ namespace ion
 			virtual Matrix4 GetProjectionMatrix();
 
 			//Rendering - general
-			virtual void BeginFrame();
+			virtual void BeginFrame(const Viewport& viewport, const DeviceContext& deviceContext);
 			virtual void EndFrame();
 			virtual void SwapBuffers();
 			virtual void ClearColour();
 			virtual void ClearDepth();
-			virtual void SetClearColour(const Colour& colour);
 
 			//Render states
-			virtual void SetPerspectiveMode(PerspectiveMode perspectiveMode);
 			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType);
 			virtual void SetFaceCulling(CullingMode cullingMode);
 			virtual void SetDepthTest(DepthTest depthTest);
@@ -71,37 +52,31 @@ namespace ion
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer);
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
 
-			//OpenGL context thread safety
-			static void LockGLContext();
-			static void UnlockGLContext();
+		protected:
+			//Setup
+			void BindDC(DeviceContext deviceContext);
+			void CreateContext(DeviceContext deviceContext);
+			void InitContext(DeviceContext deviceContext);
+			void SetupViewport(const Viewport& viewport);
+
+			//Lock/unlock context for device context
+			void LockGLContext(DeviceContext deviceContext);
+			void UnlockGLContext();
 
 			//Check for OpenGL errors
 			static bool CheckGLError();
 
-		protected:
+			//OpenGL context
+			HGLRC m_openGLContext;
 
-			void CreateWindow(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen);
-			void CreateContext();
-			void InitContext(int windowWidth, int windowHeight);
+			//DC for gobal (non-rendering) context
+			DeviceContext m_globalDC;
 
-			//Window
-			WindowWin32* mWindow;
+			//DC for current locked context
+			DeviceContext m_currentDC;
 
-			//Viewport
-			u32 m_viewportWidth;
-			u32 m_viewportHeight;
-
-			//State
-			PerspectiveMode m_perspectiveMode;
-
-			//Main OpenGL context
-			static HGLRC sOpenGLContext;
-
-			//Window DC
-			static HDC sDrawContext;
-
-			static thread::CriticalSection sGLContextCriticalSection;
-			static u32 sGLContextLockStack;
+			thread::CriticalSection m_contextCriticalSection;
+			u32 m_contextLockStack;
 		};
 	}
 }

@@ -8,7 +8,8 @@
 #pragma once
 
 #include "core/debug/Debug.h"
-#include "io/file.h"
+#include "io/File.h"
+#include "io/Archive.h"
 #include "renderer/opengl/ShaderCgGL.h"
 #include "renderer/opengl/TextureOpenGL.h"
 #include "renderer/opengl/RendererOpenGL.h"
@@ -19,6 +20,8 @@ namespace ion
 	{
 		CGcontext ShaderManagerCgGL::sCgContext = 0;
 		int ShaderManagerCgGL::sContextRefCount = 0;
+		CGprofile ShaderManagerCgGL::sCgProfileVertex;
+		CGprofile ShaderManagerCgGL::sCgProfilePixel;
 
 		ShaderManager* ShaderManager::Create()
 		{
@@ -29,23 +32,24 @@ namespace ion
 		{
 			if(!sContextRefCount)
 			{
-				RendererOpenGL::LockGLContext();
+				//Set error handler
+				cgSetErrorHandler(ErrorCallback, NULL);
 
 				sCgContext = cgCreateContext();
-
-				CheckCgError();
 
 				//Case sensitive semantics
 				cgSetSemanticCasePolicy(CG_UNCHANGED_CASE_POLICY);
 
-				CheckCgError();
-
 				//Set managed texture params (automatically binds/unbinds textures)
 				cgGLSetManageTextureParameters(sCgContext, true);
 
-				CheckCgError();
+				//Get profiles for current GL context
+				sCgProfileVertex = cgGLGetLatestProfile(CG_GL_VERTEX);
+				sCgProfilePixel = cgGLGetLatestProfile(CG_GL_FRAGMENT);
 
-				RendererOpenGL::UnlockGLContext();
+				//Set optimal options for current GL context
+				cgGLSetOptimalOptions(sCgProfileVertex);
+				cgGLSetOptimalOptions(sCgProfilePixel);
 			}
 
 			sContextRefCount++;
@@ -61,27 +65,17 @@ namespace ion
 			}
 		}
 
-		bool ShaderManagerCgGL::CheckCgError()
+		void ShaderManagerCgGL::ErrorCallback(CGcontext context, CGerror error, void* appdata)
 		{
-			RendererOpenGL::LockGLContext();
-			CGerror error = cgGetError();
+			std::string errorStr = cgGetErrorString(error);
 
-			if(error)
+			if(error == CG_COMPILER_ERROR)
 			{
-				std::string errorStr = cgGetErrorString(error);
-
-				if(error == CG_COMPILER_ERROR)
-				{
-					errorStr += " : ";
-					errorStr += cgGetLastListing(sCgContext);
-				}
-
-				debug::Error(errorStr.c_str());
+				errorStr += " : ";
+				errorStr += cgGetLastListing(sCgContext);
 			}
 
-			RendererOpenGL::UnlockGLContext();
-
-			return error == CG_NO_ERROR;
+			debug::Error(errorStr.c_str());
 		}
 
 		Shader* Shader::Create()
@@ -104,92 +98,86 @@ namespace ion
 		{
 			if(mCgProgram)
 			{
-				RendererOpenGL::LockGLContext();
 				cgDestroyProgram(mCgProgram);
-				ShaderManagerCgGL::CheckCgError();
-				RendererOpenGL::UnlockGLContext();
 			}
 		}
 
-		bool ShaderCgGL::Load(const std::string& shaderDirectory)
+		bool ShaderCgGL::Load(const std::string& filename)
 		{
-			//Open file
-			std::string path = shaderDirectory + "/programs/" + mProgramFilename;
-			io::File file(path, io::File::OpenRead);
-
-			bool result = false;
-
-			if(file.IsOpen())
+			//Open shader file
+			io::File shaderFile(filename, io::File::OpenRead);
+			if(shaderFile.IsOpen())
 			{
-				//Load file contents
-				u64 fileSize = file.GetSize();
-				char* programText = new char[(int)fileSize + 1];
-				file.Read(programText, fileSize);
-				programText[fileSize] = 0;
+				//Serialise
+				io::Archive archiveIn(shaderFile, io::Archive::In, NULL);
+				archiveIn.Serialise(*this);
 
-				//Done with file
-				file.Close();
+				//Done with shader file
+				shaderFile.Close();
 
-				//OpenGL thread safety
-				RendererOpenGL::LockGLContext();
+				//Load program file
+				std::string shaderDirectory = filename.substr(0, filename.find_first_of('/'));
+				std::string programFilename = shaderDirectory + "/programs/" + mProgramFilename;
+				io::File programFile(programFilename, io::File::OpenRead);
 
-				if(mProgramType == Vertex)
+				if(programFile.IsOpen())
 				{
-					mCgProfile = cgGLGetLatestProfile(CG_GL_VERTEX);
+					//Load file contents
+					u64 fileSize = programFile.GetSize();
+					char* programText = new char[(int)fileSize + 1];
+					programFile.Read(programText, fileSize);
+					programText[fileSize] = 0;
+
+					//Done with file
+					programFile.Close();
+
+					CGprofile cgProfile;
+					if(mProgramType == Vertex)
+						cgProfile = ShaderManagerCgGL::sCgProfileVertex;
+					else if(mProgramType == Fragment)
+						cgProfile = ShaderManagerCgGL::sCgProfilePixel;
+
+					//Compile program
+					mCgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, cgProfile, mEntryPoint.c_str(), NULL);
+
+					//Done with file text
+					delete programText;
+
+					return true;
 				}
-				else if (mProgramType == Fragment)
-				{
-					mCgProfile = cgGLGetLatestProfile(CG_GL_FRAGMENT);
-				}
-
-				ShaderManagerCgGL::CheckCgError();
-
-				cgGLSetOptimalOptions(mCgProfile);
-
-				ShaderManagerCgGL::CheckCgError();
-
-				//Compile program
-				mCgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, mCgProfile, mEntryPoint.c_str(), NULL);
-
-				result = ShaderManagerCgGL::CheckCgError();
-
-				//OpenGL thread safety
-				RendererOpenGL::UnlockGLContext();
-
-				//Done with file text
-				delete programText;
 			}
 
-			return result;
+			return false;
 		}
 
 		void ShaderCgGL::Bind()
 		{
-			RendererOpenGL::LockGLContext();
+			CGprofile cgProfile;
+			if(mProgramType == Vertex)
+				cgProfile = ShaderManagerCgGL::sCgProfileVertex;
+			else if(mProgramType == Fragment)
+				cgProfile = ShaderManagerCgGL::sCgProfilePixel;
 
 			if(!mCgProgramLoaded)
 			{
 				cgGLLoadProgram(mCgProgram);
-				ShaderManagerCgGL::CheckCgError();
 				mCgProgramLoaded = true;
 			}
 
-			cgGLEnableProfile(mCgProfile);
-			ShaderManagerCgGL::CheckCgError();
+			cgGLEnableProfile(cgProfile);
 			cgGLBindProgram(mCgProgram);
-			ShaderManagerCgGL::CheckCgError();
-
-			RendererOpenGL::UnlockGLContext();
 		}
 
 		void ShaderCgGL::Unbind()
 		{
-			RendererOpenGL::LockGLContext();
-			cgGLUnbindProgram(mCgProfile);
-			ShaderManagerCgGL::CheckCgError();
-			cgGLDisableProfile(mCgProfile);
-			ShaderManagerCgGL::CheckCgError();
-			RendererOpenGL::UnlockGLContext();
+			CGprofile cgProfile;
+			if(mProgramType == Vertex)
+				cgProfile = ShaderManagerCgGL::sCgProfileVertex;
+			else if(mProgramType == Fragment)
+				cgProfile = ShaderManagerCgGL::sCgProfilePixel;
+
+			cgGLUnbindProgram(cgProfile);
+			cgGLDisableProfile(cgProfile);
 		}
 
 		Shader::ShaderParamDelegate* ShaderCgGL::CreateShaderParamDelegate(const std::string& paramName)
@@ -213,43 +201,36 @@ namespace ion
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const int& value)
 		{
 			cgGLSetParameter1f(mCgParam, (float)value);
-			ShaderManagerCgGL::CheckCgError();
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const float& value)
 		{
 			cgGLSetParameter1f(mCgParam, value);
-			ShaderManagerCgGL::CheckCgError();
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Vector2& value)
 		{
 			cgGLSetParameter2fv(mCgParam, (float*)&value);
-			ShaderManagerCgGL::CheckCgError();
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Vector3& value)
 		{
 			cgGLSetParameter3fv(mCgParam, (float*)&value);
-			ShaderManagerCgGL::CheckCgError();
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Colour& value)
 		{
 			cgGLSetParameter4fv(mCgParam, (float*)&value);
-			ShaderManagerCgGL::CheckCgError();
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Matrix4& value)
 		{
 			cgSetMatrixParameterfc(mCgParam, (float*)&value);
-			ShaderManagerCgGL::CheckCgError();
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Texture& value)
 		{
 			cgGLSetTextureParameter(mCgParam, ((TextureOpenGL&)value).GetTextureId());
-			ShaderManagerCgGL::CheckCgError();
 		}
 	}
 }

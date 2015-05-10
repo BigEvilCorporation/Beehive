@@ -76,9 +76,6 @@ namespace ion
 
 		bool TextureOpenGL::Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data)
 		{
-			//GL thread safety
-			RendererOpenGL::LockGLContext();
-
 			//Destroy existing texture
 			if(mGLTextureId)
 			{
@@ -112,9 +109,6 @@ namespace ion
 			mWidth = width;
 			mHeight = height;
 
-			//GL thread safety
-			RendererOpenGL::UnlockGLContext();
-
 			return mGLTextureId != 0;
 		}
 
@@ -136,7 +130,6 @@ namespace ion
 
 		void TextureOpenGL::SetMinifyFilter(Filter filter)
 		{
-			RendererOpenGL::LockGLContext();
 			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
 
 			int filterMode = 0;
@@ -157,12 +150,10 @@ namespace ion
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMode);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			RendererOpenGL::UnlockGLContext();
 		}
 
 		void TextureOpenGL::SetMagnifyFilter(Filter filter)
 		{
-			RendererOpenGL::LockGLContext();
 			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
 
 			int filterMode = 0;
@@ -183,12 +174,10 @@ namespace ion
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMode);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			RendererOpenGL::UnlockGLContext();
 		}
 
 		void TextureOpenGL::SetWrapping(Wrapping wrapping)
 		{
-			RendererOpenGL::LockGLContext();
 			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
 
 			int wrapMode = 0;
@@ -210,7 +199,6 @@ namespace ion
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			RendererOpenGL::UnlockGLContext();
 		}
 
 		int TextureOpenGL::GetOpenGLMode(Format format, BitsPerPixel bitsPerPixel)

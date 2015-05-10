@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
@@ -19,17 +19,34 @@
 #include "TilesPanel.h"
 #include "MapPanel.h"
 
-MainWindow::MainWindow(ion::io::ResourceManager& resourceManager)
+MainWindow::MainWindow()
 	: MainWindowBase(NULL)
-	, m_resourceManager(resourceManager)
 {
 	m_auiManager.SetManagedWindow(m_dockArea);
 	m_project = NULL;
 	SetStatusText("BEEhive v0.1");
+
+	//Create blank OpenGL panel to create global DC
+	wxGLCanvas* m_blankCanvas = new wxGLCanvas(this, wxID_ANY, NULL);
+
+	//Get GL context
+	m_context = m_blankCanvas->GetContext();
+
+	//Create renderer (from global DC
+	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
 }
 
 MainWindow::~MainWindow()
 {
+	//Close project and panels
+	SetProject(NULL);
+
+	//Delete blank panel
+	delete m_blankCanvas;
+
+	//Delete renderer and OpenGL context
+	delete m_renderer;
+	delete m_context;
 }
 
 void MainWindow::SetProject(Project* project)
@@ -147,7 +164,7 @@ void MainWindow::ShowPanelMap()
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
 
-			m_mapPanel = new MapPanel(m_resourceManager, m_dockArea, NewControlId());
+			m_mapPanel = new MapPanel(*m_renderer, m_context, m_dockArea, NewControlId());
 			m_mapPanel->SetProject(m_project);
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
 		}

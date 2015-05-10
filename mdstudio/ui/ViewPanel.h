@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
@@ -8,8 +8,8 @@
 
 #include <ion/core/memory/Memory.h>
 #include <ion/maths/Vector.h>
-#include <ion/io/ResourceManager.h>
 #include <ion/renderer/Renderer.h>
+#include <ion/renderer/Viewport.h>
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Primitive.h>
 #include <ion/renderer/Material.h>
@@ -36,7 +36,7 @@ public:
 		eMouseRight = 1 << 2
 	};
 
-	ViewPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	ViewPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~ViewPanel();
 
 	//Set current project
@@ -86,21 +86,18 @@ protected:
 	//Rendering
 	void RenderMap(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
-
-	//Resource manager
-	ion::io::ResourceManager& m_resourceManager;
-
+	
 	//Main project
 	Project* m_project;
 
-	//OpenGL context
-	wxGLContext* m_context;
-
 	//Renderer
-	ion::render::Renderer* m_renderer;
+	ion::render::Renderer& m_renderer;
+
+	//Viewport
+	ion::render::Viewport m_viewport;
 
 	//Camera
-	ion::render::Camera* m_camera;
+	ion::render::Camera m_camera;
 	float m_cameraZoom;
 	float m_cameraPanSpeed;
 
@@ -110,8 +107,8 @@ protected:
 	int m_prevMouseBits;
 
 	//Rendering materials and shaders
-	ion::io::ResourceHandle<ion::render::Shader> m_vertexShader;
-	ion::io::ResourceHandle<ion::render::Shader> m_pixelShader;
+	ion::render::Shader* m_vertexShader;
+	ion::render::Shader* m_pixelShader;
 	ion::render::Material* m_material;
 	ion::render::Material* m_gridMaterial;
 
@@ -120,7 +117,7 @@ protected:
 	ion::render::Grid* m_gridPrimitive;
 
 	//Tileset texture
-	ion::io::ResourceHandle<ion::render::Texture> m_tilesetTextureHndl;
+	ion::render::Texture* m_tilesetTexture;
 
 	//Map tile IDs to indices
 	std::map<TileId, u32> m_tileIndexMap;

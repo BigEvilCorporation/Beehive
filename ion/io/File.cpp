@@ -59,6 +59,13 @@ namespace ion
 			mStream.open(filename.c_str(), mode);
 			mOpen = mStream.is_open();
 			mOpenMode = openMode;
+			mFilename = filename;
+
+			if(mOpen)
+			{
+				//Cache size
+				GetSize();
+			}
 
 			return mOpen;
 		}
