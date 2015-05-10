@@ -15,6 +15,8 @@
 #include "Stamp.h"
 #include "Tile.h"
 
+typedef std::map<StampId, Stamp> TStampMap;
+
 class Project
 {
 public:
@@ -46,6 +48,15 @@ public:
 	//Get palette
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
 
+	//Stamps
+	StampId AddStamp(int width, int height);
+	void RemoveStamp(StampId stampId);
+	Stamp* GetStamp(StampId stampId);
+	const Stamp* GetStamp(StampId stampId) const;
+	const TStampMap::const_iterator StampsBegin() const;
+	const TStampMap::const_iterator StampsEnd() const;
+	int GetStampCount() const;
+
 	//Set current tile used for painting
 	void SetPaintTile(TileId tile);
 	TileId GetPaintTile() const;
@@ -64,8 +75,10 @@ public:
 
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
+	void InvalidateStamps(bool invalidate) { m_stampsInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
 	bool TilesAreInvalidated() const { return m_tilesInvalidated; }
+	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
 	//Import bitmap
 	bool ImportBitmap(const std::string& filename, u8 importFlags = (BMPImportFlags)(0));
@@ -99,6 +112,10 @@ private:
 	static const int numPalettes = 4;
 	std::vector<Palette> m_palettes;
 
+	//Stamps
+	TStampMap m_stamps;
+	StampId m_nextFreeStampId;
+
 	//Tile used for painting
 	TileId m_paintTile;
 
@@ -113,4 +130,5 @@ private:
 	//Map needs redraw
 	bool m_mapInvalidated;
 	bool m_tilesInvalidated;
+	bool m_stampsInvalidated;
 };

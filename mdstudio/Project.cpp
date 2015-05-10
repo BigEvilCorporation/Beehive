@@ -17,12 +17,14 @@ Project::Project()
 	m_eraseTile = 0;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
+	m_stampsInvalidated = true;
 	m_name = "untitled";
 	m_gridSize = 1;
 	m_showGrid = true;
 	m_snapToGrid = false;
 	m_palettes.resize(numPalettes);
 	m_palettes[0].AddColour(Colour(255, 255, 255));
+	m_nextFreeStampId = 1;
 }
 
 void Project::Clear()
@@ -41,6 +43,8 @@ void Project::Clear()
 
 	m_palettes[0].AddColour(Colour(255, 255, 255));
 	m_map.Clear();
+	m_stamps.clear();
+	m_nextFreeStampId = 1;
 }
 
 bool Project::Load(const std::string& filename)
@@ -80,6 +84,68 @@ void Project::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_palettes);
 	archive.Serialise(m_map);
+	archive.Serialise(m_stamps);
+	archive.Serialise(m_nextFreeStampId);
+}
+
+StampId Project::AddStamp(int width, int height)
+{
+	StampId id = m_nextFreeStampId++;
+	m_stamps.insert(std::make_pair(id, Stamp(id, width, height)));
+	InvalidateStamps(true);
+	return id;
+}
+
+void Project::RemoveStamp(StampId stampId)
+{
+	TStampMap::iterator it = m_stamps.find(stampId);
+	if(it != m_stamps.end())
+	{
+		m_stamps.erase(it);
+	}
+
+	InvalidateStamps(true);
+}
+
+Stamp* Project::GetStamp(StampId stampId)
+{
+	Stamp* stamp = NULL;
+
+	TStampMap::iterator it = m_stamps.find(stampId);
+	if(it != m_stamps.end())
+	{
+		stamp = &it->second;
+	}
+
+	return stamp;
+}
+
+const Stamp* Project::GetStamp(StampId stampId) const
+{
+	const Stamp* stamp = NULL;
+
+	TStampMap::const_iterator it = m_stamps.find(stampId);
+	if(it != m_stamps.end())
+	{
+		stamp = &it->second;
+	}
+
+	return stamp;
+}
+
+const TStampMap::const_iterator Project::StampsBegin() const
+{
+	return m_stamps.begin();
+}
+
+const TStampMap::const_iterator Project::StampsEnd() const
+{
+	return m_stamps.end();
+}
+
+int Project::GetStampCount() const
+{
+	return m_stamps.size();
 }
 
 void Project::SetPaintTile(TileId tile)

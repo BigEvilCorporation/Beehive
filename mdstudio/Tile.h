@@ -11,6 +11,9 @@
 
 #include "Palette.h"
 
+typedef u32 TileId;
+static const TileId InvalidTileId = 0;
+
 struct Pixel
 {
 	u8 colourIdx;

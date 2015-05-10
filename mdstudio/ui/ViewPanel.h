@@ -48,18 +48,25 @@ protected:
 	//Event callbacks
 	virtual void OnMouse(wxMouseEvent& event);
 	virtual void OnKeyboard(wxKeyEvent& event);
-	virtual void OnPaint(wxPaintEvent& event);
-	virtual void OnErase(wxEraseEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
-	//Mouse click or changed tile
-	virtual void HandleMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y) {}
+	//Mouse click or changed tile callback
+	virtual void OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y) {}
 
-	//Render to canvas callback (between map and grid)
-	virtual void RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset) {}
+	//Render callback
+	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset) {}
 
-	//Paint whole map to canvas
-	void PaintMap(const Map& map);
+	//Create canvas
+	void CreateCanvas(int width, int height);
+
+	//Create grid
+	void CreateGrid(int width, int height, int cellsX, int cellsY);
+
+	//Create and redraw tileset texture
+	void CreateTilesetTexture(const Tileset& tileset);
+
+	//Create TileID to index cache
+	void CacheTileIndices();
 
 	//Paint single tile to canvas
 	void PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY);
@@ -84,7 +91,7 @@ protected:
 	void CentreCamera();
 
 	//Rendering
-	void RenderMap(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	
 	//Main project
@@ -109,11 +116,11 @@ protected:
 	//Rendering materials and shaders
 	ion::render::Shader* m_vertexShader;
 	ion::render::Shader* m_pixelShader;
-	ion::render::Material* m_material;
+	ion::render::Material* m_canvasMaterial;
 	ion::render::Material* m_gridMaterial;
 
 	//Rendering primitives
-	ion::render::Chessboard* m_primitive;
+	ion::render::Chessboard* m_canvasPrimitive;
 	ion::render::Grid* m_gridPrimitive;
 
 	//Tileset texture
@@ -121,6 +128,9 @@ protected:
 
 	//Map tile IDs to indices
 	std::map<TileId, u32> m_tileIndexMap;
+
+	//Canvas size (tiles)
+	ion::Vector2i m_canvasSize;
 
 	//Tileset size sq
 	u32 m_tilesetSizeSq;
@@ -132,17 +142,6 @@ protected:
 	wxSize m_panelSize;
 
 private:
-	//Create canvas
-	void CreateCanvas(int width, int height);
-
-	//Create grid
-	void CreateGrid(int width, int height, int cellsX, int cellsY);
-
-	//Create and redraw tileset texture
-	void CreateTilesetTexture(const Tileset& tileset);
-
-	//Create TileID to index cache
-	void CacheTileIndices();
 
 	//Event handlers
 	void EventHandlerMouse(wxMouseEvent& event);

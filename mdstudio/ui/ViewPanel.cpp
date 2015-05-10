@@ -6,7 +6,7 @@ ViewPanel::ViewPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wx
 	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
 {
 	m_project = NULL;
-	m_primitive = NULL;
+	m_canvasPrimitive = NULL;
 	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;
 	m_cameraPanSpeed = 1.0f;
@@ -37,11 +37,11 @@ ViewPanel::ViewPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wx
 	m_tilesetTexture = ion::render::Texture::Create();
 
 	//Create map material
-	m_material = new ion::render::Material();
-	m_material->AddDiffuseMap(m_tilesetTexture);
-	m_material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_material->SetVertexShader(m_vertexShader);
-	m_material->SetPixelShader(m_pixelShader);
+	m_canvasMaterial = new ion::render::Material();
+	m_canvasMaterial->AddDiffuseMap(m_tilesetTexture);
+	m_canvasMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_canvasMaterial->SetVertexShader(m_vertexShader);
+	m_canvasMaterial->SetPixelShader(m_pixelShader);
 
 	//Create grid material
 	m_gridMaterial = new ion::render::Material();
@@ -67,14 +67,14 @@ ViewPanel::ViewPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wx
 
 ViewPanel::~ViewPanel()
 {
-	delete m_material;
+	delete m_canvasMaterial;
 	delete m_gridMaterial;
 	delete m_tilesetTexture;
 	delete m_vertexShader;
 	delete m_pixelShader;
 
-	if(m_primitive)
-		delete m_primitive;
+	if(m_canvasPrimitive)
+		delete m_canvasPrimitive;
 
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
@@ -83,52 +83,66 @@ ViewPanel::~ViewPanel()
 void ViewPanel::EventHandlerMouse(wxMouseEvent& event)
 {
 	OnMouse(event);
+	event.Skip();
 }
 
 void ViewPanel::EventHandlerKeyboard(wxKeyEvent& event)
 {
 	OnKeyboard(event);
+	event.Skip();
 }
 
 void ViewPanel::EventHandlerPaint(wxPaintEvent& event)
 {
-	OnPaint(event);
+	//Begin rendering to current viewport
+	m_renderer.BeginFrame(m_viewport, GetHDC());
+	m_renderer.ClearColour();
+	m_renderer.ClearDepth();
+
+	if(m_project)
+	{
+		ion::Matrix4 cameraInverseMtx = m_camera.GetTransform().GetInverse();
+		ion::Matrix4 projectionMtx = m_renderer.GetProjectionMatrix();
+
+		//Z order
+		const float zOffset = 0.0001f;
+		float z = 0.0f;
+
+		//Render callback
+		OnRender(m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
+	}
+
+	//End rendering
+	m_renderer.SwapBuffers();
+	m_renderer.EndFrame();
+
+	event.Skip();
 }
 
 void ViewPanel::EventHandlerErase(wxEraseEvent& event)
 {
-	OnErase(event);
+	//Ignore event
 }
 
 void ViewPanel::EventHandlerResize(wxSizeEvent& event)
 {
 	OnResize(event);
+	event.Skip();
 }
 
 void ViewPanel::SetProject(Project* project)
 {
 	m_project = project;
 
-	Map& map = project->GetMap();
-	Tileset& tileset = map.GetTileset();
-	int mapWidth = map.GetWidth();
-	int mapHeight = map.GetHeight();
-
 	//Reset zoom
 	m_cameraZoom = 1.0f;
 	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
-
-	//Create canvas
-	CreateCanvas(mapWidth, mapHeight);
-
-	//Create grid
-	CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
 
 	//Centre camera on canvas
 	CentreCamera();
 
 	//Recreate tileset texture
-	CreateTilesetTexture(tileset);
+	CreateTilesetTexture(project->GetMap().GetTileset());
 
 	//Recreate index cache
 	CacheTileIndices();
@@ -137,13 +151,20 @@ void ViewPanel::SetProject(Project* project)
 	Refresh();
 }
 
+void ViewPanel::Refresh(bool eraseBackground, const wxRect *rect)
+{
+	wxGLCanvas::Refresh(eraseBackground, rect);
+}
+
 void ViewPanel::CreateCanvas(int width, int height)
 {
 	//Create rendering primitive
-	if(m_primitive)
-		delete m_primitive;
+	if(m_canvasPrimitive)
+		delete m_canvasPrimitive;
 
-	m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
+	m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
+	m_canvasSize.x = width;
+	m_canvasSize.y = height;
 }
 
 void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
@@ -247,43 +268,14 @@ void ViewPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[
 	texCoords[3].y = top;
 }
 
-void ViewPanel::PaintMap(const Map& map)
-{
-	int mapWidth = map.GetWidth();
-	int mapHeight = map.GetHeight();
-
-	for(int y = 0; y < mapHeight; y++)
-	{
-		for(int x = 0; x < mapWidth; x++)
-		{
-			//Get tile
-			TileId tileId = map.GetTile(x, y);
-
-			//Invert Y for OpenGL
-			int yInv = mapHeight - 1 - y;
-
-			//Get V/H flip
-			u32 tileFlags = map.GetTileFlags(x, y);
-			bool flipX = (tileFlags & Map::eFlipX) != 0;
-			bool flipY = (tileFlags & Map::eFlipY) != 0;
-
-			//Paint tile
-			PaintTile(tileId, x, yInv, flipX, flipY);
-		}
-	}
-}
-
 void ViewPanel::PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY)
 {
 	if(m_project)
 	{
-		int mapWidth = m_project->GetMap().GetWidth();
-		int mapHeight = m_project->GetMap().GetHeight();
-
 		//Set texture coords for cell
 		ion::render::TexCoord coords[4];
 		GetTileTexCoords(tileId, coords, flipX, flipY);
-		m_primitive->SetTexCoords((y * mapWidth) + x, coords);
+		m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 	}
 }
 
@@ -299,12 +291,12 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y)
 				if(tileId != InvalidTileId)
 				{
 					u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
-					int mapX = stampX + x;
-					int mapY = stampY + y;
-					int y_inv = m_project->GetMap().GetHeight() - 1 - mapY;
+					int canvasX = stampX + x;
+					int canvasY = stampY + y;
+					int y_inv = m_canvasSize.y - 1 - canvasY;
 
 					//Paint on canvas
-					PaintTile(tileId, mapX, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+					PaintTile(tileId, canvasX, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
 				}
 			}
 		}
@@ -452,7 +444,7 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 		if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))
 		{
 			//Mouse button clicked or changed grid pos
-			HandleMouseTileEvent(mouseDelta, buttonBits, x, y);
+			OnMouseTileEvent(mouseDelta, buttonBits, x, y);
 
 			m_prevMouseOverTilePos.x = x;
 			m_prevMouseOverTilePos.y = y;
@@ -514,67 +506,22 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 			Refresh();
 		}
 	}
-
-	event.Skip();
 }
 
 void ViewPanel::OnKeyboard(wxKeyEvent& event)
 {
-	event.Skip();
+
 }
 
-void ViewPanel::OnPaint(wxPaintEvent& event)
-{
-	//Begin rendering to current viewport
-	m_renderer.BeginFrame(m_viewport, GetHDC());
-	m_renderer.ClearColour();
-	m_renderer.ClearDepth();
-
-	if(m_project)
-	{
-		const Map& map = m_project->GetMap();
-		const int mapWidth = map.GetWidth();
-		const int mapHeight = map.GetHeight();
-		const int tileWidth = 8;
-		const int tileHeight = 8;
-		const int quadHalfExtentsX = 4;
-		const int quadHalfExtentsY = 4;
-
-		ion::Matrix4 cameraInverseMtx = m_camera.GetTransform().GetInverse();
-		ion::Matrix4 projectionMtx = m_renderer.GetProjectionMatrix();
-
-		//Z order
-		const float zOffset = 0.0001f;
-		float z = 0.0f;
-
-		RenderMap(m_renderer, cameraInverseMtx, projectionMtx, z);
-
-		z += zOffset;
-
-		RenderCanvas(m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
-
-		z += zOffset;
-
-		if(m_project->GetShowGrid())
-		{
-			RenderGrid(m_renderer, cameraInverseMtx, projectionMtx, z);
-		}
-	}
-
-	//End rendering
-	m_renderer.SwapBuffers();
-	m_renderer.EndFrame();
-}
-
-void ViewPanel::RenderMap(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//No depth test (stops grid cells Z fighting)
 	renderer.SetDepthTest(ion::render::Renderer::Always);
 
 	//Draw map
-	m_material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
-	renderer.DrawVertexBuffer(m_primitive->GetVertexBuffer(), m_primitive->GetIndexBuffer());
-	m_material->Unbind();
+	m_canvasMaterial->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
+	m_canvasMaterial->Unbind();
 
 	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 }
@@ -590,11 +537,6 @@ void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& 
 	m_gridMaterial->Unbind();
 }
 
-void ViewPanel::OnErase(wxEraseEvent& event)
-{
-	//Ignore event
-}
-
 void ViewPanel::OnResize(wxSizeEvent& event)
 {
 	wxSize panelSize = GetClientSize();
@@ -608,40 +550,6 @@ void ViewPanel::OnResize(wxSizeEvent& event)
 	}
 
 	Refresh();
-}
-
-void ViewPanel::Refresh(bool eraseBackground, const wxRect *rect)
-{
-	if(m_project)
-	{
-		//If map invalidated
-		if(m_project->MapIsInvalidated())
-		{
-			Map& map = m_project->GetMap();
-			Tileset& tileset = map.GetTileset();
-			int mapWidth = map.GetWidth();
-			int mapHeight = map.GetHeight();
-
-			//Recreate canvas
-			CreateCanvas(mapWidth, mapHeight);
-
-			//Recreate grid
-			CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
-
-			//Recreate tileset texture
-			CreateTilesetTexture(tileset);
-
-			//Recreate index cache
-			CacheTileIndices();
-
-			//Redraw map
-			PaintMap(map);
-
-			m_project->InvalidateMap(false);
-		}
-	}
-
-	wxGLCanvas::Refresh(eraseBackground, rect);
 }
 
 void ViewPanel::CentreCamera()

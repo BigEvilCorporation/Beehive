@@ -157,6 +157,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolClone, 0, wxALL, 5 );
 	
+	m_toolCreateStamp = new wxBitmapButton( this, wxID_TOOL_CREATESTAMP, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolCreateStamp->SetToolTip( wxT("Create stamp from selection") );
+	
+	fgSizer1->Add( m_toolCreateStamp, 0, wxALL, 5 );
+	
 	
 	this->SetSizer( fgSizer1 );
 	this->Layout();

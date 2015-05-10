@@ -13,7 +13,7 @@ MapPanel::MapPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWi
 	
 	m_currentTool = eToolPaintTile;
 	m_currentStamp = NULL;
-	m_clonePreviewPrimitive = NULL;
+	m_stampPreviewPrimitive = NULL;
 
 	ResetToolData();
 
@@ -53,145 +53,6 @@ MapPanel::~MapPanel()
 	delete m_previewPrimitive;
 	delete m_selectionVertexShader;
 	delete m_selectionPixelShader;
-}
-
-void MapPanel::SetProject(Project* project)
-{
-	ViewPanel::SetProject(project);
-
-	//Redraw map
-	PaintMap(m_project->GetMap());
-
-	//Refresh panel
-	Refresh();
-}
-
-void MapPanel::SetTool(Tool tool)
-{
-	if(m_project)
-	{
-		Map& map = m_project->GetMap();
-
-		switch(tool)
-		{
-		case eToolFill:
-			//If previous tool was 'select', fill selection and leave previous tool data
-			//TODO: Should this really be a tool? Doesn't follow the same rules as the others
-			//(it's a single action, rather than a state which requires interaction from the user via the map)
-			if(m_currentTool == eToolSelect)
-			{
-				if(m_project->GetPaintTile() != InvalidTileId)
-				{
-					//Fill selection
-					FillTiles(m_project->GetPaintTile(), m_selectedTiles);
-
-					//Refresh
-					Refresh();
-				}
-
-				//Set back to select tool, leave tool data intact
-				tool = eToolSelect;
-			}
-			else
-			{
-				ResetToolData();
-			}
-			break;
-
-		case eToolPaintTile:
-			m_previewTile = m_project->GetPaintTile();
-			ResetToolData();
-			break;
-
-		case eToolClone:
-			//Must previously have been in Select mode
-			if(m_currentTool == eToolSelect)
-			{
-				//and have data to work with
-				if(m_selectedTiles.size() > 0)
-				{
-					//Get min/max width/height
-					int left, top, right, bottom;
-					FindBounds(m_selectedTiles, left, top, right, bottom);
-					int width = abs(right - left) + 1;
-					int height = abs(bottom - top) + 1;
-
-					//Create preview primitive
-					if(m_clonePreviewPrimitive)
-						delete m_clonePreviewPrimitive;
-
-					m_clonePreviewPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2(width * 4.0f, height * 4.0f), width, height, true);
-
-					//Create temp stamp
-					if(m_currentStamp)
-						delete m_currentStamp;
-
-					m_currentStamp = new Stamp(width, height);
-
-					//Populate stamp, set primitive UV coords
-					ion::render::TexCoord coords[4];
-
-					for(int i = 0; i < m_selectedTiles.size(); i++)
-					{
-						int mapX = m_selectedTiles[i].x;
-						int mapY = m_selectedTiles[i].y;
-						int stampX = mapX - left;
-						int stampY = mapY - top;
-						int y_inv = height - 1 - stampY;
-						TileId tileId = map.GetTile(mapX, mapY);
-						u32 tileFlags = map.GetTileFlags(mapX, mapY);
-						m_currentStamp->SetTile(stampX, stampY, tileId);
-						m_currentStamp->SetTileFlags(stampX, stampY, tileFlags);
-						GetTileTexCoords(tileId, coords, (tileFlags & Map::eFlipX)!=0, (tileFlags & Map::eFlipY)!=0);
-						m_clonePreviewPrimitive->SetTexCoords((y_inv * width) + stampX, coords);
-					}
-
-					//Set paste tool
-					tool = eToolPaintStamp;
-				}
-			}
-			else
-			{
-				ResetToolData();
-			}
-
-			break;
-
-		default:
-			ResetToolData();
-		}
-	}
-
-	m_currentTool = tool;
-}
-
-void MapPanel::ResetToolData()
-{
-	//Invalidate preview tile
-	m_previewTile = InvalidTileId;
-	m_previewTileFlipX = false;
-	m_previewTileFlipY = false;
-
-	//Invalidate box/multiple selection
-	m_selectedTiles.clear();
-	m_multipleSelection = false;
-	m_boxSelectStart.x = -1;
-	m_boxSelectStart.y = -1;
-	m_boxSelectEnd.x = -1;
-	m_boxSelectEnd.y = -1;
-
-	//Delete clipboard stamp
-	if(m_currentStamp)
-	{
-		delete m_currentStamp;
-		m_currentStamp = NULL;
-	}
-
-	if(m_clonePreviewPrimitive)
-	{
-		delete m_clonePreviewPrimitive;
-		m_clonePreviewPrimitive = NULL;
-	}
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event)
@@ -234,17 +95,12 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 	ViewPanel::OnKeyboard(event);
 }
 
-void MapPanel::OnErase(wxEraseEvent& event)
-{
-	ViewPanel::OnErase(event);
-}
-
 void MapPanel::OnResize(wxSizeEvent& event)
 {
 	ViewPanel::OnResize(event);
 }
 
-void MapPanel::HandleMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
 {
 	Map& map = m_project->GetMap();
 	Tileset& tileset = m_project->GetMap().GetTileset();
@@ -260,193 +116,193 @@ void MapPanel::HandleMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int
 	{
 		switch(m_currentTool)
 		{
-			case eToolPaintTile:
+		case eToolPaintTile:
+		{
+			//Update paint preview tile
+			m_previewTile = m_project->GetPaintTile();
+
+			//If clicking/dragging, paint tile
+			if(buttonBits)
 			{
-				//Update paint preview tile
-				m_previewTile = m_project->GetPaintTile();
-
-				//If clicking/dragging, paint tile
-				if(buttonBits)
-				{
-					//Get tile ID to paint
-					TileId tileId = InvalidTileId;
-					if(buttonBits & eMouseLeft)
-						tileId = m_project->GetPaintTile();
-					else if(buttonBits & eMouseRight)
-						tileId = m_project->GetEraseTile();
-
-					if(tileId != InvalidTileId)
-					{
-						//Set on map
-						map.SetTile(x, y, tileId);
-
-						//Set V/H flip flags
-						u32 tileFlags = 0;
-						if(m_previewTileFlipX)
-							tileFlags |= Map::eFlipX;
-						if(m_previewTileFlipY)
-							tileFlags |= Map::eFlipY;
-
-						//Invert Y from OpenGL back to map space
-						map.SetTileFlags(x, y, tileFlags);
-
-						//Paint to canvas
-						PaintTile(tileId, x, y_inv, m_previewTileFlipX, m_previewTileFlipY);
-					}
-				}
-				break;
-			}
-
-			case eToolSelect:
-			{
+				//Get tile ID to paint
+				TileId tileId = InvalidTileId;
 				if(buttonBits & eMouseLeft)
+					tileId = m_project->GetPaintTile();
+				else if(buttonBits & eMouseRight)
+					tileId = m_project->GetEraseTile();
+
+				if(tileId != InvalidTileId)
 				{
-					if(!(m_prevMouseBits & eMouseLeft))
+					//Set on map
+					map.SetTile(x, y, tileId);
+
+					//Set V/H flip flags
+					u32 tileFlags = 0;
+					if(m_previewTileFlipX)
+						tileFlags |= Map::eFlipX;
+					if(m_previewTileFlipY)
+						tileFlags |= Map::eFlipY;
+
+					//Invert Y from OpenGL back to map space
+					map.SetTileFlags(x, y, tileFlags);
+
+					//Paint to canvas
+					PaintTile(tileId, x, y_inv, m_previewTileFlipX, m_previewTileFlipY);
+				}
+			}
+			break;
+		}
+
+		case eToolSelect:
+		{
+			if(buttonBits & eMouseLeft)
+			{
+				if(!(m_prevMouseBits & eMouseLeft))
+				{
+					//Single left-click, pick tiles one by one
+					if(m_boxSelectEnd.x > 0 && m_boxSelectEnd.y > 0)
 					{
-						//Single left-click, pick tiles one by one
-						if(m_boxSelectEnd.x > 0 && m_boxSelectEnd.y > 0)
-						{
-							//Previous selection was box selection, clear it
-							m_selectedTiles.clear();
-
-							//Reset box end
-							m_boxSelectEnd.x = -1;
-							m_boxSelectEnd.y = -1;
-						}
-
-						//If CTRL not held
-						if(!m_multipleSelection)
-						{
-							//Clear selection, start again
-							m_selectedTiles.clear();
-
-							//Start box selection, in case next event is dragging
-							m_boxSelectStart.x = x;
-							m_boxSelectStart.y = y;
-						}
-
-						//Single click - add tile at cursor to selection
-						m_selectedTiles.push_back(ion::Vector2i(x, y));
-					}
-					else if(!m_multipleSelection)
-					{
-						//Dragging, set box end
-						m_boxSelectEnd.x = x;
-						m_boxSelectEnd.y = y;
-
-						//Clear current selection
+						//Previous selection was box selection, clear it
 						m_selectedTiles.clear();
 
-						//Sanitise loop order
-						int top = min(m_boxSelectStart.y, m_boxSelectEnd.y);
-						int left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
-						int bottom = max(m_boxSelectStart.y, m_boxSelectEnd.y);
-						int right = max(m_boxSelectStart.x, m_boxSelectEnd.x);
-
-						//Add all tiles in box
-						for(int tileX = left; tileX <= right; tileX++)
-						{
-							for(int tileY = top; tileY <= bottom; tileY++)
-							{
-								m_selectedTiles.push_back(ion::Vector2i(tileX, tileY));
-							}
-						}
+						//Reset box end
+						m_boxSelectEnd.x = -1;
+						m_boxSelectEnd.y = -1;
 					}
 
-					//Refresh to draw box selection
-					Refresh();
-				}
-				break;
-			}
+					//If CTRL not held
+					if(!m_multipleSelection)
+					{
+						//Clear selection, start again
+						m_selectedTiles.clear();
 
-			case eToolPicker:
-			{
-				if(buttonBits & eMouseLeft)
+						//Start box selection, in case next event is dragging
+						m_boxSelectStart.x = x;
+						m_boxSelectStart.y = y;
+					}
+
+					//Single click - add tile at cursor to selection
+					m_selectedTiles.push_back(ion::Vector2i(x, y));
+				}
+				else if(!m_multipleSelection)
 				{
-					//Pick tile
-					TileId tile = map.GetTile(x, y);
+					//Dragging, set box end
+					m_boxSelectEnd.x = x;
+					m_boxSelectEnd.y = y;
 
-					//Set as paint tile
-					m_project->SetPaintTile(tile);
+					//Clear current selection
+					m_selectedTiles.clear();
 
-					//Set as preview tile
-					m_previewTile = tile;
+					//Sanitise loop order
+					int top = min(m_boxSelectStart.y, m_boxSelectEnd.y);
+					int left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
+					int bottom = max(m_boxSelectStart.y, m_boxSelectEnd.y);
+					int right = max(m_boxSelectStart.x, m_boxSelectEnd.x);
 
-					//Set paint tool
-					SetTool(eToolPaintTile);
+					//Add all tiles in box
+					for(int tileX = left; tileX <= right; tileX++)
+					{
+						for(int tileY = top; tileY <= bottom; tileY++)
+						{
+							m_selectedTiles.push_back(ion::Vector2i(tileX, tileY));
+						}
+					}
 				}
 
-				//TODO: Update tileset panel selection + toolbox button state
-				break;
-			}
-
-			case eToolFlipX:
-			{
-				//Flip preview opposite of current tile
-				m_previewTile = map.GetTile(x, y);
-				m_previewTileFlipX = (map.GetTileFlags(x, y) & Map::eFlipX) == 0;
-
-				if(buttonBits & eMouseLeft)
-				{
-					//Flip tile X
-					u32 tileFlags = map.GetTileFlags(x, y);
-					tileFlags ^= Map::eFlipX;
-					map.SetTileFlags(x, y, tileFlags);
-
-					//Redraw on canvas
-					TileId tileId = map.GetTile(x, y);
-					PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
-					Refresh();
-				}
-
-				break;
-			}
-
-			case eToolFlipY:
-			{
-				//Flip preview opposite of current tile
-				m_previewTile = map.GetTile(x, y);
-				m_previewTileFlipY = (map.GetTileFlags(x, y) & Map::eFlipY) == 0;
-
-				if(buttonBits & eMouseLeft)
-				{
-					//Flip tile Y
-					u32 tileFlags = map.GetTileFlags(x, y);
-					tileFlags ^= Map::eFlipY;
-					map.SetTileFlags(x, y, tileFlags);
-
-					//Redraw on canvas
-					TileId tileId = map.GetTile(x, y);
-					PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
-					Refresh();
-				}
-				break;
-			}
-
-			case eToolPaintStamp:
-			{
-				//Update paste pos
-				m_stampPastePos.x = x;
-				m_stampPastePos.y = y;
-
-				//Clamp to stamp size
-				if(m_stampPastePos.x + m_currentStamp->GetWidth() > mapWidth)
-					m_stampPastePos.x = mapWidth - m_currentStamp->GetWidth();
-				if(m_stampPastePos.y + m_currentStamp->GetHeight() > mapHeight)
-					m_stampPastePos.y = mapHeight - m_currentStamp->GetHeight();
-
-				//Redraw
+				//Refresh to draw box selection
 				Refresh();
-
-				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
-				{
-					//Draw on map
-					map.DrawStamp(m_stampPastePos.x, m_stampPastePos.y, *m_currentStamp);
-
-					//Paint on canvas
-					PaintStamp(*m_currentStamp, m_stampPastePos.x, m_stampPastePos.y);
-				}
 			}
+			break;
+		}
+
+		case eToolPicker:
+		{
+			if(buttonBits & eMouseLeft)
+			{
+				//Pick tile
+				TileId tile = map.GetTile(x, y);
+
+				//Set as paint tile
+				m_project->SetPaintTile(tile);
+
+				//Set as preview tile
+				m_previewTile = tile;
+
+				//Set paint tool
+				SetTool(eToolPaintTile);
+			}
+
+			//TODO: Update tileset panel selection + toolbox button state
+			break;
+		}
+
+		case eToolFlipX:
+		{
+			//Flip preview opposite of current tile
+			m_previewTile = map.GetTile(x, y);
+			m_previewTileFlipX = (map.GetTileFlags(x, y) & Map::eFlipX) == 0;
+
+			if(buttonBits & eMouseLeft)
+			{
+				//Flip tile X
+				u32 tileFlags = map.GetTileFlags(x, y);
+				tileFlags ^= Map::eFlipX;
+				map.SetTileFlags(x, y, tileFlags);
+
+				//Redraw on canvas
+				TileId tileId = map.GetTile(x, y);
+				PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+				Refresh();
+			}
+
+			break;
+		}
+
+		case eToolFlipY:
+		{
+			//Flip preview opposite of current tile
+			m_previewTile = map.GetTile(x, y);
+			m_previewTileFlipY = (map.GetTileFlags(x, y) & Map::eFlipY) == 0;
+
+			if(buttonBits & eMouseLeft)
+			{
+				//Flip tile Y
+				u32 tileFlags = map.GetTileFlags(x, y);
+				tileFlags ^= Map::eFlipY;
+				map.SetTileFlags(x, y, tileFlags);
+
+				//Redraw on canvas
+				TileId tileId = map.GetTile(x, y);
+				PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+				Refresh();
+			}
+			break;
+		}
+
+		case eToolPaintStamp:
+		{
+			//Update paste pos
+			m_stampPastePos.x = x;
+			m_stampPastePos.y = y;
+
+			//Clamp to stamp size
+			if(m_stampPastePos.x + m_currentStamp->GetWidth() > mapWidth)
+				m_stampPastePos.x = mapWidth - m_currentStamp->GetWidth();
+			if(m_stampPastePos.y + m_currentStamp->GetHeight() > mapHeight)
+				m_stampPastePos.y = mapHeight - m_currentStamp->GetHeight();
+
+			//Redraw
+			Refresh();
+
+			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+			{
+				//Draw on map
+				map.DrawStamp(m_stampPastePos.x, m_stampPastePos.y, *m_currentStamp);
+
+				//Paint on canvas
+				PaintStamp(*m_currentStamp, m_stampPastePos.x, m_stampPastePos.y);
+			}
+		}
 		}
 
 		//Update preview tile pos
@@ -463,19 +319,250 @@ void MapPanel::HandleMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int
 	Refresh();
 }
 
-void MapPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
+void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
-	const Map& map = m_project->GetMap();
-	const int mapWidth = map.GetWidth();
-	const int mapHeight = map.GetHeight();
-	const int tileWidth = 8;
-	const int tileHeight = 8;
-	const int quadHalfExtentsX = 4;
-	const int quadHalfExtentsY = 4;
+	//Render map
+	RenderCanvas(renderer, cameraInverseMtx, projectionMtx, z);
 
-	//Draw preview tile
+	z += zOffset;
+
+	//Render paint preview tile
+	RenderPaintPreview(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
+	//Render selected tiles
+	RenderSelection(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
+	//Render stamp preview tiles
+	RenderStampPreview(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
+	//Render grid
+	if(m_project->GetShowGrid())
+	{
+		RenderGrid(m_renderer, cameraInverseMtx, projectionMtx, z);
+	}
+}
+
+void MapPanel::SetProject(Project* project)
+{
+	//Creates tileset texture
+	ViewPanel::SetProject(project);
+
+	Map& map = project->GetMap();
+	Tileset& tileset = map.GetTileset();
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
+	//Create canvas
+	CreateCanvas(mapWidth, mapHeight);
+
+	//Create grid
+	CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
+
+	//Redraw map
+	PaintMap(m_project->GetMap());
+}
+
+void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
+{
+	if(m_project)
+	{
+		//If map invalidated
+		if(m_project->MapIsInvalidated())
+		{
+			Map& map = m_project->GetMap();
+			Tileset& tileset = map.GetTileset();
+			int mapWidth = map.GetWidth();
+			int mapHeight = map.GetHeight();
+
+			//Recreate canvas
+			CreateCanvas(mapWidth, mapHeight);
+
+			//Recreate grid
+			CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
+
+			//Recreate tileset texture
+			CreateTilesetTexture(tileset);
+
+			//Recreate index cache
+			CacheTileIndices();
+
+			//Redraw map
+			PaintMap(map);
+
+			m_project->InvalidateMap(false);
+		}
+	}
+
+	ViewPanel::Refresh(eraseBackground, rect);
+}
+
+void MapPanel::SetTool(Tool tool)
+{
+	if(m_project)
+	{
+		Map& map = m_project->GetMap();
+
+		switch(tool)
+		{
+		case eToolFill:
+			//If previous tool was 'select', fill selection and leave previous tool data
+			//TODO: Should this really be a tool? Doesn't follow the same rules as the others
+			//(it's a single action, rather than a state which requires interaction from the user via the map)
+			if(m_currentTool == eToolSelect)
+			{
+				if(m_project->GetPaintTile() != InvalidTileId)
+				{
+					//Fill selection
+					FillTiles(m_project->GetPaintTile(), m_selectedTiles);
+
+					//Refresh
+					Refresh();
+				}
+
+				//Set back to select tool, leave tool data intact
+				tool = eToolSelect;
+			}
+			else
+			{
+				ResetToolData();
+			}
+			break;
+
+		case eToolPaintTile:
+			m_previewTile = m_project->GetPaintTile();
+			ResetToolData();
+			break;
+
+		case eToolClone:
+		case eToolCreateStamp:
+			//Must previously have been in Select mode
+			if(m_currentTool == eToolSelect)
+			{
+				//and have data to work with
+				if(m_selectedTiles.size() > 0)
+				{
+					//Get min/max width/height
+					int left, top, right, bottom;
+					FindBounds(m_selectedTiles, left, top, right, bottom);
+					int width = abs(right - left) + 1;
+					int height = abs(bottom - top) + 1;
+
+					Stamp* stamp = NULL;
+
+					if(tool == eToolClone)
+					{
+						//Cloning - create temp stamp
+						stamp = new Stamp(InvalidStampId, width, height);
+
+						//TODO: Move to eToolPaintStamp
+						//Create preview primitive
+						if(m_stampPreviewPrimitive)
+							delete m_stampPreviewPrimitive;
+
+						m_stampPreviewPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2(width * 4.0f, height * 4.0f), width, height, true);
+					}
+					else if(tool == eToolCreateStamp)
+					{
+						//Creating - create real stamp
+						StampId stampId = m_project->AddStamp(width, height);
+						stamp = m_project->GetStamp(stampId);
+					}
+
+					//Populate stamp, set primitive UV coords
+					ion::render::TexCoord coords[4];
+
+					for(int i = 0; i < m_selectedTiles.size(); i++)
+					{
+						int mapX = m_selectedTiles[i].x;
+						int mapY = m_selectedTiles[i].y;
+						int stampX = mapX - left;
+						int stampY = mapY - top;
+						int y_inv = height - 1 - stampY;
+						TileId tileId = map.GetTile(mapX, mapY);
+						u32 tileFlags = map.GetTileFlags(mapX, mapY);
+						stamp->SetTile(stampX, stampY, tileId);
+						stamp->SetTileFlags(stampX, stampY, tileFlags);
+						
+						if(tool == eToolClone)
+						{
+							//TODO: Move to eToolPaintStamp
+							GetTileTexCoords(tileId, coords, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+							m_stampPreviewPrimitive->SetTexCoords((y_inv * width) + stampX, coords);
+						}
+					}
+
+					if(tool == eToolClone)
+					{
+						//Cloning - switch straight to paste tool
+						if(m_currentStamp)
+							delete m_currentStamp;
+						m_currentStamp = stamp;
+						tool = eToolPaintStamp;
+					}
+				}
+			}
+			else
+			{
+				ResetToolData();
+			}
+
+			break;
+
+		default:
+			ResetToolData();
+		}
+	}
+
+	m_currentTool = tool;
+}
+
+void MapPanel::ResetToolData()
+{
+	//Invalidate preview tile
+	m_previewTile = InvalidTileId;
+	m_previewTileFlipX = false;
+	m_previewTileFlipY = false;
+
+	//Invalidate box/multiple selection
+	m_selectedTiles.clear();
+	m_multipleSelection = false;
+	m_boxSelectStart.x = -1;
+	m_boxSelectStart.y = -1;
+	m_boxSelectEnd.x = -1;
+	m_boxSelectEnd.y = -1;
+
+	//Delete clipboard stamp
+	if(m_currentStamp)
+	{
+		delete m_currentStamp;
+		m_currentStamp = NULL;
+	}
+
+	if(m_stampPreviewPrimitive)
+	{
+		delete m_stampPreviewPrimitive;
+		m_stampPreviewPrimitive = NULL;
+	}
+}
+
+void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
 	if(m_previewTile)
 	{
+		const Map& map = m_project->GetMap();
+		const int mapWidth = map.GetWidth();
+		const int mapHeight = map.GetHeight();
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+		const int quadHalfExtentsX = 4;
+		const int quadHalfExtentsY = 4;
+
 		//Set preview quad texture coords
 		ion::render::TexCoord coords[4];
 		GetTileTexCoords(m_previewTile, coords, m_previewTileFlipX, m_previewTileFlipY);
@@ -486,13 +573,22 @@ void MapPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4&
 			((mapHeight - 1 - m_previewTilePos.y - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 		previewQuadMtx.SetTranslation(previewQuadPos);
 
-		m_material->SetDiffuseColour(m_previewColour);
-		m_material->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
+		m_canvasMaterial->SetDiffuseColour(m_previewColour);
+		m_canvasMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
-		m_material->Unbind();
+		m_canvasMaterial->Unbind();
 	}
+}
 
-	z += zOffset;
+void MapPanel::RenderSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	const Map& map = m_project->GetMap();
+	const int mapWidth = map.GetWidth();
+	const int mapHeight = map.GetHeight();
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+	const int quadHalfExtentsX = 4;
+	const int quadHalfExtentsY = 4;
 
 	if(m_boxSelectStart.x >= 0 && m_boxSelectEnd.x >= 0)
 	{
@@ -543,11 +639,18 @@ void MapPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4&
 		m_selectionMaterial->Unbind();
 		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 	}
+}
 
-	z += zOffset;
-
-	if(m_currentStamp && m_clonePreviewPrimitive)
+void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	if(m_currentStamp && m_stampPreviewPrimitive)
 	{
+		const Map& map = m_project->GetMap();
+		const int mapWidth = map.GetWidth();
+		const int mapHeight = map.GetHeight();
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+
 		//Draw clipboard tiles
 		float x = m_stampPastePos.x;
 		float y_inv = mapHeight - 1 - m_stampPastePos.y;
@@ -562,13 +665,39 @@ void MapPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4&
 		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 		renderer.SetDepthTest(ion::render::Renderer::Always);
 
-		m_material->SetDiffuseColour(m_clonePreviewColour);
-		m_material->Bind(clonePreviewMtx, cameraInverseMtx, projectionMtx);
-		renderer.DrawVertexBuffer(m_clonePreviewPrimitive->GetVertexBuffer(), m_clonePreviewPrimitive->GetIndexBuffer());
-		m_material->Unbind();
-		m_material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+		m_canvasMaterial->SetDiffuseColour(m_clonePreviewColour);
+		m_canvasMaterial->Bind(clonePreviewMtx, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_stampPreviewPrimitive->GetVertexBuffer(), m_stampPreviewPrimitive->GetIndexBuffer());
+		m_canvasMaterial->Unbind();
+		m_canvasMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 		renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	}
+}
+
+void MapPanel::PaintMap(const Map& map)
+{
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
+	for(int y = 0; y < mapHeight; y++)
+	{
+		for(int x = 0; x < mapWidth; x++)
+		{
+			//Get tile
+			TileId tileId = map.GetTile(x, y);
+
+			//Invert Y for OpenGL
+			int yInv = mapHeight - 1 - y;
+
+			//Get V/H flip
+			u32 tileFlags = map.GetTileFlags(x, y);
+			bool flipX = (tileFlags & Map::eFlipX) != 0;
+			bool flipY = (tileFlags & Map::eFlipY) != 0;
+
+			//Paint tile
+			PaintTile(tileId, x, yInv, flipX, flipY);
+		}
 	}
 }
