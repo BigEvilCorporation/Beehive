@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
@@ -8,7 +8,7 @@
 
 #include <wx/aui/aui.h>
 
-#include <ion/io/ResourceManager.h>
+#include <ion/renderer/Renderer.h>
 
 #include "UIBase.h"
 
@@ -21,7 +21,7 @@
 class MainWindow : public MainWindowBase
 {
 public:
-	MainWindow(ion::io::ResourceManager& resourceManager);
+	MainWindow();
 	virtual ~MainWindow();
 
 	void SetProject(Project* project);
@@ -52,8 +52,6 @@ protected:
 	void OnBtnTool(wxCommandEvent& event);
 
 private:
-	ion::io::ResourceManager& m_resourceManager;
-
 	wxAuiManager m_auiManager;
 
 	wxWeakRef<PalettesPanel> m_palettesPanel;
@@ -62,4 +60,13 @@ private:
 	wxWeakRef<MapToolbox> m_toolboxPanel;
 
 	Project* m_project;
+
+	//Renderer
+	ion::render::Renderer* m_renderer;
+
+	//OpenGL context
+	wxGLContext* m_context;
+
+	//Blank canvas for creating gobal DC
+	wxGLCanvas* m_blankCanvas;
 };

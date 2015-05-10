@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
@@ -7,8 +7,8 @@
 #include "MapPanel.h"
 #include "TileRendering.h"
 
-MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(resourceManager, parent, winid, pos, size, style, name)
+MapPanel::MapPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(renderer, glContext, parent, winid, pos, size, style, name)
 {
 	
 	m_currentTool = eToolPaintTile;
@@ -23,14 +23,16 @@ MapPanel::MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, 
 	m_clonePreviewColour = ion::Colour(0.7f, 0.7f, 0.7f, 1.0f);
 
 	//Load shaders
-	m_selectionVertexShader = m_resourceManager.GetResource<ion::render::Shader>("flat_v.ion.shader");
-	m_selectionPixelShader = m_resourceManager.GetResource<ion::render::Shader>("flat_p.ion.shader");
-
-	//Hack: wait for resources
-	//TODO: SetVertexShader() fetches param handles, only succeeds if finished loading
-	while(m_resourceManager.GetNumResourcesWaiting() > 0)
+	m_selectionVertexShader = ion::render::Shader::Create();
+	if(!m_selectionVertexShader->Load("shaders/flat_v.ion.shader"))
 	{
-		wxSleep(1);
+		ion::debug::Error("Error loading vertex shader");
+	}
+
+	m_selectionPixelShader = ion::render::Shader::Create();
+	if(!m_selectionPixelShader->Load("shaders/flat_p.ion.shader"))
+	{
+		ion::debug::Error("Error loading pixel shader");
 	}
 
 	//Create selection material
@@ -49,14 +51,8 @@ MapPanel::~MapPanel()
 
 	delete m_selectionMaterial;
 	delete m_previewPrimitive;
-	m_selectionVertexShader.Clear();
-	m_selectionPixelShader.Clear();
-
-	//Hack: wait for resources
-	while(m_resourceManager.GetNumResourcesWaiting() > 0)
-	{
-		wxSleep(1);
-	}
+	delete m_selectionVertexShader;
+	delete m_selectionPixelShader;
 }
 
 void MapPanel::SetProject(Project* project)

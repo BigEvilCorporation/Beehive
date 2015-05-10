@@ -1,8 +1,9 @@
 #include "ViewPanel.h"
 
-ViewPanel::ViewPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: wxGLCanvas(parent, winid, NULL, pos, size, style, name, wxNullPalette)
-	, m_resourceManager(resourceManager)
+ViewPanel::ViewPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: wxGLCanvas(parent, glContext, winid, pos, size, style, name, NULL, wxNullPalette)
+	, m_renderer(renderer)
+	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
 {
 	m_project = NULL;
 	m_primitive = NULL;
@@ -16,45 +17,28 @@ ViewPanel::ViewPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 
-	//Create wx compatible OpenGL context
-	m_context = new wxGLContext(this);
-
-	//Set context
-	SetCurrent(*m_context);
-
-	//Get panel window handle
-	HWND windowHandle = (HWND)GetHWND();
-
-	//Create renderer (no panel size yet, init with a default)
-	m_renderer = ion::render::Renderer::Create(windowHandle, m_context->GetGLRC(), 320, 240);
-
-	//Set 2D orthographic mode
-	m_renderer->SetPerspectiveMode(ion::render::Renderer::Ortho2DAbsolute);
-
-	//Create camera
-	m_camera = new ion::render::Camera();
-	m_camera->SetPosition(ion::Vector3(0.0f, 0.0f, 0.0f));
-
-	//Set scene clear colour
-	m_renderer->SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
+	//Set viewport clear colour
+	m_viewport.SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
 
 	//Load shaders
-	m_vertexShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_v.ion.shader");
-	m_pixelShader = m_resourceManager.GetResource<ion::render::Shader>("flattextured_p.ion.shader");
-
-	//Hack: wait for resources
-	//TODO: SetVertexShader() fetches param handles, only succeeds if finished loading
-	while(m_resourceManager.GetNumResourcesWaiting() > 0)
+	m_vertexShader = ion::render::Shader::Create();
+	if(!m_vertexShader->Load("shaders/flattextured_v.ion.shader"))
 	{
-		wxSleep(1);
+		ion::debug::Error("Error loading vertex shader");
+	}
+
+	m_pixelShader = ion::render::Shader::Create();
+	if(!m_pixelShader->Load("shaders/flattextured_p.ion.shader"))
+	{
+		ion::debug::Error("Error loading pixel shader");
 	}
 
 	//Create tileset texture
-	m_tilesetTextureHndl = m_resourceManager.AddResource("tilesetTexture", *ion::render::Texture::Create());
+	m_tilesetTexture = ion::render::Texture::Create();
 
 	//Create map material
 	m_material = new ion::render::Material();
-	m_material->AddDiffuseMap(m_tilesetTextureHndl);
+	m_material->AddDiffuseMap(m_tilesetTexture);
 	m_material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 	m_material->SetVertexShader(m_vertexShader);
 	m_material->SetPixelShader(m_pixelShader);
@@ -85,28 +69,15 @@ ViewPanel::~ViewPanel()
 {
 	delete m_material;
 	delete m_gridMaterial;
-	delete m_camera;
-
-	m_tilesetTextureHndl.Clear();
-	m_vertexShader.Clear();
-	m_pixelShader.Clear();
+	delete m_tilesetTexture;
+	delete m_vertexShader;
+	delete m_pixelShader;
 
 	if(m_primitive)
 		delete m_primitive;
 
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
-
-	//Hack: wait for resources
-	while(m_resourceManager.GetNumResourcesWaiting() > 0)
-	{
-		wxSleep(1);
-	}
-
-	m_resourceManager.RemoveResource("tilesetTexture");
-
-	delete m_context;
-	delete m_renderer;
 }
 
 void ViewPanel::EventHandlerMouse(wxMouseEvent& event)
@@ -145,7 +116,7 @@ void ViewPanel::SetProject(Project* project)
 
 	//Reset zoom
 	m_cameraZoom = 1.0f;
-	m_camera->SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
 
 	//Create canvas
 	CreateCanvas(mapWidth, mapHeight);
@@ -232,10 +203,10 @@ void ViewPanel::CreateTilesetTexture(const Tileset& tileset)
 		}
 	}
 
-	m_tilesetTextureHndl->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
-	m_tilesetTextureHndl->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTextureHndl->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTextureHndl->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_tilesetTexture->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
+	m_tilesetTexture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
 
 	delete data;
 }
@@ -456,7 +427,7 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 		//Centre of map quad is 0,0
 		ion::Vector2 mousePos(mousePanelPosWx.x, panelSizeWx.y - mousePanelPosWx.y);
 		ion::Vector2 viewportSize(panelSizeWx.x, panelSizeWx.y);
-		ion::Vector2 cameraPos(m_camera->GetPosition().x * m_cameraZoom, m_camera->GetPosition().y * m_cameraZoom);
+		ion::Vector2 cameraPos(m_camera.GetPosition().x * m_cameraZoom, m_camera.GetPosition().y * m_cameraZoom);
 		ion::Vector2 mapSize(mapWidth * tileWidth * m_cameraZoom, mapHeight * tileHeight * m_cameraZoom);
 		ion::Vector2 mousePosMapSpace;
 		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
@@ -493,10 +464,10 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 		{
 			//Pan camera (invert Y for OpenGL)
-			ion::Vector3 cameraPos = m_camera->GetPosition();
+			ion::Vector3 cameraPos = m_camera.GetPosition();
 			cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
 			cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
-			m_camera->SetPosition(cameraPos);
+			m_camera.SetPosition(cameraPos);
 
 			//Invalidate rect
 			Refresh();
@@ -528,16 +499,16 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 				m_cameraZoom = 10.0f;
 
 			//Set camera zoom
-			m_camera->SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+			m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
 
 			//Compensate camera pos
 			wxSize panelSize = GetClientSize();
 			ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
 			ion::Vector2 newViewportSize((float)panelSize.x / m_cameraZoom, (float)panelSize.y / m_cameraZoom);
-			ion::Vector3 cameraPos = m_camera->GetPosition();
+			ion::Vector3 cameraPos = m_camera.GetPosition();
 			cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
 			cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
-			m_camera->SetPosition(cameraPos);
+			m_camera.SetPosition(cameraPos);
 
 			//Invalidate rect
 			Refresh();
@@ -554,10 +525,10 @@ void ViewPanel::OnKeyboard(wxKeyEvent& event)
 
 void ViewPanel::OnPaint(wxPaintEvent& event)
 {
-	//Begin rendering
-	m_renderer->BeginFrame();
-	m_renderer->ClearColour();
-	m_renderer->ClearDepth();
+	//Begin rendering to current viewport
+	m_renderer.BeginFrame(m_viewport, GetHDC());
+	m_renderer.ClearColour();
+	m_renderer.ClearDepth();
 
 	if(m_project)
 	{
@@ -569,30 +540,30 @@ void ViewPanel::OnPaint(wxPaintEvent& event)
 		const int quadHalfExtentsX = 4;
 		const int quadHalfExtentsY = 4;
 
-		ion::Matrix4 cameraInverseMtx = m_camera->GetTransform().GetInverse();
-		ion::Matrix4 projectionMtx = m_renderer->GetProjectionMatrix();
+		ion::Matrix4 cameraInverseMtx = m_camera.GetTransform().GetInverse();
+		ion::Matrix4 projectionMtx = m_renderer.GetProjectionMatrix();
 
 		//Z order
 		const float zOffset = 0.0001f;
 		float z = 0.0f;
 
-		RenderMap(*m_renderer, cameraInverseMtx, projectionMtx, z);
+		RenderMap(m_renderer, cameraInverseMtx, projectionMtx, z);
 
 		z += zOffset;
 
-		RenderCanvas(*m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
+		RenderCanvas(m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
 
 		z += zOffset;
 
 		if(m_project->GetShowGrid())
 		{
-			RenderGrid(*m_renderer, cameraInverseMtx, projectionMtx, z);
+			RenderGrid(m_renderer, cameraInverseMtx, projectionMtx, z);
 		}
 	}
 
 	//End rendering
-	m_renderer->SwapBuffers();
-	m_renderer->EndFrame();
+	m_renderer.SwapBuffers();
+	m_renderer.EndFrame();
 }
 
 void ViewPanel::RenderMap(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -632,7 +603,7 @@ void ViewPanel::OnResize(wxSizeEvent& event)
 	if(m_panelSize.x != panelSize.x || m_panelSize.y != panelSize.y)
 	{
 		m_panelSize = panelSize;
-		m_renderer->OnResize(panelSize.x, panelSize.y);
+		m_viewport.Resize(panelSize.x, panelSize.y);
 		CentreCamera();
 	}
 
@@ -677,5 +648,5 @@ void ViewPanel::CentreCamera()
 {
 	wxRect clientRect = GetClientRect();
 	ion::Vector3 cameraPos(-(clientRect.width / 2.0f), -(clientRect.height / 2.0f), 0.0f);
-	m_camera->SetPosition(cameraPos);
+	m_camera.SetPosition(cameraPos);
 }

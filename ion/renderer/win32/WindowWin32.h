@@ -26,6 +26,7 @@ namespace ion
 			virtual void SetTitle(const std::string& title);
 
 			HDC GetDrawContext() const { return mDrawContext; }
+			HWND GetWindowHandle() const { return mWindowHandle; }
 
 		protected:
 			static LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

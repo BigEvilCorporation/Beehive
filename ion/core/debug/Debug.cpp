@@ -18,9 +18,15 @@ namespace ion
 			std::cout << message << "\n";
 		}
 
+		void Flush()
+		{
+			std::cout << std::flush;
+		}
+
 		void Error(const char* message)
 		{
 			Log(message);
+			Flush();
 			Break();
 		}
 

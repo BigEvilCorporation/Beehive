@@ -18,7 +18,7 @@ namespace ion
 {
 	namespace render
 	{
-		Renderer::Renderer(const std::string& windowTitle, int windowWidth, int windowHeight, bool fullscreen)
+		Renderer::Renderer()
 		{
 			mShaderManager = NULL;
 		}

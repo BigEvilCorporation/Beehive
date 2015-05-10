@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ public:
 		eMouseRight		= 1<<2
 	};
 
-	MapPanel(ion::io::ResourceManager& resourceManager, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	MapPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~MapPanel();
 
 	//Events
@@ -56,13 +56,11 @@ private:
 	virtual void RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
 	//Rendering materials and shaders
-	ion::io::ResourceHandle<ion::render::Shader> m_selectionVertexShader;
-	ion::io::ResourceHandle<ion::render::Shader> m_selectionPixelShader;
+	ion::render::Shader* m_selectionVertexShader;
+	ion::render::Shader* m_selectionPixelShader;
 	ion::render::Material* m_selectionMaterial;
 
 	//Rendering primitives
-	//ion::render::Chessboard* m_mapPrimitive;
-	//ion::render::Grid* m_gridPrimitive;
 	ion::render::Quad* m_previewPrimitive;
 	ion::render::Chessboard* m_clonePreviewPrimitive;
 

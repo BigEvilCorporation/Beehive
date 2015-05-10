@@ -2,31 +2,23 @@
 // File:		Viewport.cpp
 // Date:		3rd August 2011
 // Authors:		Matt Phillips
-// Description:	Ogre viewport wrapper
+// Description:	Rendering viewport
 ///////////////////////////////////////////////////
 
-#include "core/Colour.h"
-#include "renderer/Viewport.h"
-#include "renderer/Renderer.h"
-#include "renderer/Camera.h"
-#include "renderer/Factory.h"
+#include "Viewport.h"
+#include "core/debug/Debug.h"
 
 namespace ion
 {
-	namespace renderer
+	namespace render
 	{
-		Viewport* Viewport::Create(Renderer& renderer, Camera& camera, int zOrder)
+		Viewport::Viewport(int width, int height, PerspectiveMode perspectiveMode)
 		{
-			return new ViewportImpl(renderer, camera, zOrder);
-		}
-
-		void Viewport::Release(Viewport* viewport)
-		{
-			delete viewport;
-		}
-
-		Viewport::Viewport(Renderer& renderer, Camera& camera, int zOrder)
-		{
+			debug::Assert(width > 0 && height > 0, "Viewport::Viewport() - Bad width/height");
+			m_width = width;
+			m_height = height;
+			m_perspectiveMode = perspectiveMode;
+			m_clearColour = Colour(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		Viewport::~Viewport()
@@ -36,17 +28,39 @@ namespace ion
 
 		int Viewport::GetWidth() const
 		{
-			return mWidth;
+			return m_width;
 		}
 
 		int Viewport::GetHeight() const
 		{
-			return mHeight;
+			return m_height;
 		}
 
-		void Viewport::SetBackgroundColour(const Colour& colour)
+		void Viewport::Resize(int width, int height)
 		{
-			mBackgroundColour = colour;
+			debug::Assert(width > 0 && height > 0, "Viewport::Resize() - Bad width/height");
+			m_width = width;
+			m_height = height;
+		}
+
+		void Viewport::SetPerspectiveMode(PerspectiveMode perspectiveMode)
+		{
+			m_perspectiveMode = perspectiveMode;
+		}
+
+		void Viewport::SetClearColour(const Colour& colour)
+		{
+			m_clearColour = colour;
+		}
+
+		Viewport::PerspectiveMode Viewport::GetPerspectiveMode() const
+		{
+			return m_perspectiveMode;
+		}
+
+		const Colour& Viewport::GetClearColour() const
+		{
+			return m_clearColour;
 		}
 	}
 }

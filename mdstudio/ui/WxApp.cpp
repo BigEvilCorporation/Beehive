@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////
-// MD Studio: A complete SEGA Mega Drive content tool
+// Beehive: A complete SEGA Mega Drive content tool
 //
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
@@ -11,22 +11,19 @@ wxAppConsole *wxCreateApp()
 {
 	ion::debug::Error("Not supported");
 	return NULL;
-	//wxAppConsole::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, "MDStudio");
-	//return new MDStudioWxApp;
 }
 
-MDStudioWxApp::MDStudioWxApp(ion::io::ResourceManager& resourceManager)
-	: m_resourceManager(resourceManager)
+BeehiveWxApp::BeehiveWxApp()
 {
 }
 
-MDStudioWxApp::~MDStudioWxApp()
+BeehiveWxApp::~BeehiveWxApp()
 {
 }
 
-bool MDStudioWxApp::OnInit()
+bool BeehiveWxApp::OnInit()
 {
-	m_mainWindow = new MainWindow(m_resourceManager);
+	m_mainWindow = new MainWindow();
 	SetTopWindow(m_mainWindow);
     m_mainWindow->Show(true);
 

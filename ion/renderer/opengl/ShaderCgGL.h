@@ -27,10 +27,14 @@ namespace ion
 			ShaderManagerCgGL();
 			virtual ~ShaderManagerCgGL();
 
-			static bool CheckCgError();
-
 			static CGcontext sCgContext;
 			static int sContextRefCount;
+
+			static CGprofile sCgProfileVertex;
+			static CGprofile sCgProfilePixel;
+
+		private:
+			static void ErrorCallback(CGcontext context, CGerror error, void* appdata);
 		};
 
 		class ShaderCgGL : public Shader
@@ -38,6 +42,8 @@ namespace ion
 		public:
 			ShaderCgGL();
 			virtual ~ShaderCgGL();
+
+			virtual bool Load(const std::string& filename);
 
 			//Bind/unbind
 			virtual void Bind();
@@ -61,11 +67,9 @@ namespace ion
 				CGparameter mCgParam;
 			};
 
-			virtual bool Load(const std::string& shaderDirectory);
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName);
 
 			CGprogram mCgProgram;
-			CGprofile mCgProfile;
 			bool mCgProgramLoaded;
 		};
 	}

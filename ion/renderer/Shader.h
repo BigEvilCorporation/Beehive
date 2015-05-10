@@ -63,6 +63,9 @@ namespace ion
 			static Shader* Create();
 			virtual ~Shader();
 
+			//Load from file
+			virtual bool Load(const std::string& filename) = 0;
+
 			//Set entry point, program type and program filename
 			void SetProgram(const std::string programFilename, const std::string& entryPoint, ProgramType programtype);
 
@@ -97,7 +100,6 @@ namespace ion
 			};
 
 			Shader();
-			virtual bool Load(const std::string& shaderDirectory) = 0;
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName) = 0;
 
 			std::string mProgramFilename;

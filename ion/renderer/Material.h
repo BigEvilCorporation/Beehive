@@ -64,8 +64,8 @@ namespace ion
 			void Unbind();
 
 			//Shaders
-			void SetVertexShader(const io::ResourceHandle<Shader>& shader);
-			void SetPixelShader(const io::ResourceHandle<Shader>& shader);
+			void SetVertexShader(Shader* vertexShader);
+			void SetPixelShader(Shader* pixelShader);
 
 			//Colour
 			void SetAmbientColour(const Colour& ambient);
@@ -79,15 +79,15 @@ namespace ion
 			const Colour& GetEmissiveColour() const;
 
 			//Texture maps
-			void AddDiffuseMap(const io::ResourceHandle<Texture>& diffuse);
-			void SetNormalMap(const io::ResourceHandle<Texture>& normal);
-			void SetSpecularMap(const io::ResourceHandle<Texture>& specular);
-			void SetOpacityMap(const io::ResourceHandle<Texture>& opacity);
+			void AddDiffuseMap(Texture* diffuse);
+			void SetNormalMap(Texture* normal);
+			void SetSpecularMap(Texture* specular);
+			void SetOpacityMap(Texture* opacity);
 
-			const io::ResourceHandle<Texture>* GetDiffuseMap(int diffuseMapIdx) const;
-			const io::ResourceHandle<Texture>& GetNormalMap() const;
-			const io::ResourceHandle<Texture>& GetSpecularMap() const;
-			const io::ResourceHandle<Texture>& GetOpacityMap() const;
+			Texture* GetDiffuseMap(int diffuseMapIdx) const;
+			Texture* GetNormalMap() const;
+			Texture* GetSpecularMap() const;
+			Texture* GetOpacityMap() const;
 
 			int GetNumDiffuseMaps() const;
 
@@ -122,13 +122,13 @@ namespace ion
 			Colour mSpecularColour;
 			Colour mEmissiveColour;
 
-			std::vector<io::ResourceHandle<Texture>> mDiffuseMaps;
-			io::ResourceHandle<Texture> mNormalMap;
-			io::ResourceHandle<Texture> mSpecularMap;
-			io::ResourceHandle<Texture> mOpacityMap;
+			std::vector<Texture*> mDiffuseMaps;
+			Texture* mNormalMap;
+			Texture* mSpecularMap;
+			Texture* mOpacityMap;
 
-			io::ResourceHandle<Shader> mVertexShader;
-			io::ResourceHandle<Shader> mPixelShader;
+			Shader* mVertexShader;
+			Shader* mPixelShader;
 
 			struct ShaderParams
 			{
