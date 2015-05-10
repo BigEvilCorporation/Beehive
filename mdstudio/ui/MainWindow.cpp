@@ -41,9 +41,6 @@ MainWindow::~MainWindow()
 	//Close project and panels
 	SetProject(NULL);
 
-	//Delete blank panel
-	delete m_blankCanvas;
-
 	//Delete renderer and OpenGL context
 	delete m_renderer;
 	delete m_context;
@@ -232,6 +229,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 	}
 
 	if(!m_toolboxPanel->IsShown())
@@ -452,6 +450,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_CLONE:
 			m_mapPanel->SetTool(MapPanel::eToolClone);
+			break;
+		case wxID_TOOL_CREATESTAMP:
+			m_mapPanel->SetTool(MapPanel::eToolCreateStamp);
 			break;
 		}
 	}

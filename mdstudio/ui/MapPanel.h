@@ -17,6 +17,7 @@ public:
 		eToolPaintTile,
 		eToolPaintStamp,
 		eToolClone,
+		eToolCreateStamp,
 		eToolFill,
 		eToolPicker,
 		eToolFlipX,
@@ -36,7 +37,6 @@ public:
 	//Events
 	virtual void OnMouse(wxMouseEvent& event);
 	virtual void OnKeyboard(wxKeyEvent& event);
-	virtual void OnErase(wxEraseEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
 	//Set current project
@@ -45,15 +45,28 @@ public:
 	//Set current tool
 	void SetTool(Tool tool);
 
+	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
+
+protected:
+
+	//Mouse click or changed tile callback
+	virtual void OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y);
+
+	//Render callback
+	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
+
 private:
+
+	//Rendering
+	void RenderPaintPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderStampPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+
+	//Paint whole map to canvas
+	void PaintMap(const Map& map);
 
 	//Clear all tool data
 	void ResetToolData();
-
-	//Mouse click or changed tile
-	virtual void HandleMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y);
-
-	virtual void RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
 	//Rendering materials and shaders
 	ion::render::Shader* m_selectionVertexShader;
@@ -62,7 +75,7 @@ private:
 
 	//Rendering primitives
 	ion::render::Quad* m_previewPrimitive;
-	ion::render::Chessboard* m_clonePreviewPrimitive;
+	ion::render::Chessboard* m_stampPreviewPrimitive;
 
 	//Rendering colours
 	ion::Colour m_previewColour;

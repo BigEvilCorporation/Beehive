@@ -8,8 +8,17 @@
 
 #include <core/cryptography/Hash.h>
 
-Stamp::Stamp(int width, int height)
+Stamp::Stamp()
 {
+	m_id = InvalidStampId;
+	m_width = 0;
+	m_height = 0;
+	m_nameHash = 0;
+}
+
+Stamp::Stamp(StampId stampId, int width, int height)
+{
+	m_id = stampId;
 	m_width = width;
 	m_height = height;
 	m_nameHash = 0;
@@ -21,6 +30,11 @@ Stamp::Stamp(int width, int height)
 	{
 		m_tiles[i].m_id = InvalidTileId;
 	}
+}
+
+StampId Stamp::GetId() const
+{
+	return m_id;
 }
 
 int Stamp::GetWidth() const

@@ -71,5 +71,5 @@ private:
 	wxGLContext* m_context;
 
 	//Blank canvas for creating gobal DC
-	wxGLCanvas* m_blankCanvas;
+	wxWeakRef<wxGLCanvas> m_blankCanvas;
 };

@@ -9,11 +9,16 @@
 #include "Tile.h"
 #include "Tileset.h"
 
+typedef u32 StampId;
+static const StampId InvalidStampId = 0;
+
 class Stamp
 {
 public:
-	Stamp(int width, int height);
+	Stamp();
+	Stamp(StampId stampId, int width, int height);
 
+	StampId GetId() const;
 	int GetWidth() const;
 	int GetHeight() const;
 
@@ -30,6 +35,7 @@ public:
 	void Serialise(ion::io::Archive& archive);
 
 private:
+	StampId m_id;
 	int m_width;
 	int m_height;
 	std::string m_name;
