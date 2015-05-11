@@ -65,6 +65,10 @@ public:
 	void SetEraseTile(TileId tile);
 	TileId GetEraseTile() const;
 
+	//Set current stamp used for painting
+	void SetPaintStamp(StampId stamp);
+	StampId GetPaintStamp() const;
+
 	//Grid
 	int GetGridSize() const { return m_gridSize; }
 	void SetGridSize(int gridSize) { m_gridSize = gridSize; }
@@ -118,6 +122,9 @@ private:
 
 	//Tile used for painting
 	TileId m_paintTile;
+
+	//Stamp used for painting
+	StampId m_paintStamp;
 
 	//Tile used for erasing
 	TileId m_eraseTile;

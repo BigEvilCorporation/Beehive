@@ -241,31 +241,52 @@ int ViewPanel::GetTileIndex(TileId tileId) const
 
 void ViewPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], bool flipX, bool flipY) const
 {
-	//Map tile ID to index
-	u32 tileIndex = GetTileIndex(tileId);
+	if(tileId == InvalidTileId)
+	{
+		//Invalid tile, use top-left pixel
+		float onePixelTexSpace = m_cellSizeTexSpaceSq / 8.0f;
 
-	//Map tile to X/Y on tileset texture
-	int tilesetX = (tileIndex % m_tilesetSizeSq);
-	int tilesetY = (tileIndex / m_tilesetSizeSq);
-	ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
+		//Top left
+		texCoords[0].x = 0.0f;
+		texCoords[0].y = 0.0f;
+		//Bottom left
+		texCoords[1].x = 0.0f;
+		texCoords[1].y = onePixelTexSpace;
+		//Bottom right
+		texCoords[2].x = onePixelTexSpace;
+		texCoords[2].y = onePixelTexSpace;
+		//Top right
+		texCoords[3].x = onePixelTexSpace;
+		texCoords[3].y = 0.0f;
+	}
+	else
+	{
+		//Map tile ID to index
+		u32 tileIndex = GetTileIndex(tileId);
 
-	float top = flipY ? (textureBottomLeft.y) : (textureBottomLeft.y + m_cellSizeTexSpaceSq);
-	float left = flipX ? (textureBottomLeft.x + m_cellSizeTexSpaceSq) : (textureBottomLeft.x);
-	float bottom = flipY ? (textureBottomLeft.y + m_cellSizeTexSpaceSq) : (textureBottomLeft.y);
-	float right = flipX ? (textureBottomLeft.x) : (textureBottomLeft.x + m_cellSizeTexSpaceSq);
+		//Map tile to X/Y on tileset texture
+		int tilesetX = (tileIndex % m_tilesetSizeSq);
+		int tilesetY = (tileIndex / m_tilesetSizeSq);
+		ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
 
-	//Top left
-	texCoords[0].x = left;
-	texCoords[0].y = top;
-	//Bottom left
-	texCoords[1].x = left;
-	texCoords[1].y = bottom;
-	//Bottom right
-	texCoords[2].x = right;
-	texCoords[2].y = bottom;
-	//Top right
-	texCoords[3].x = right;
-	texCoords[3].y = top;
+		float top = flipY ? (textureBottomLeft.y) : (textureBottomLeft.y + m_cellSizeTexSpaceSq);
+		float left = flipX ? (textureBottomLeft.x + m_cellSizeTexSpaceSq) : (textureBottomLeft.x);
+		float bottom = flipY ? (textureBottomLeft.y + m_cellSizeTexSpaceSq) : (textureBottomLeft.y);
+		float right = flipX ? (textureBottomLeft.x) : (textureBottomLeft.x + m_cellSizeTexSpaceSq);
+
+		//Top left
+		texCoords[0].x = left;
+		texCoords[0].y = top;
+		//Bottom left
+		texCoords[1].x = left;
+		texCoords[1].y = bottom;
+		//Bottom right
+		texCoords[2].x = right;
+		texCoords[2].y = bottom;
+		//Top right
+		texCoords[3].x = right;
+		texCoords[3].y = top;
+	}
 }
 
 void ViewPanel::PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY)
@@ -288,16 +309,13 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y)
 			for(int stampY = 0; stampY < stamp.GetHeight(); stampY++)
 			{
 				TileId tileId = stamp.GetTile(stampX, stampY);
-				if(tileId != InvalidTileId)
-				{
-					u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
-					int canvasX = stampX + x;
-					int canvasY = stampY + y;
-					int y_inv = m_canvasSize.y - 1 - canvasY;
+				u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
+				int canvasX = stampX + x;
+				int canvasY = stampY + y;
+				int y_inv = m_canvasSize.y - 1 - canvasY;
 
-					//Paint on canvas
-					PaintTile(tileId, canvasX, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
-				}
+				//Paint on canvas
+				PaintTile(tileId, canvasX, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
 			}
 		}
 	}
@@ -305,55 +323,37 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y)
 
 void ViewPanel::FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2)
 {
-	if(m_project)
+	//Sanitise ordering before looping
+	int top = min(boxCorner1.y, boxCorner2.y);
+	int left = min(boxCorner1.x, boxCorner2.x);
+	int bottom = max(boxCorner1.y, boxCorner2.y);
+	int right = max(boxCorner1.x, boxCorner2.x);
+
+	for(int x = left; x <= right; x++)
 	{
-		Map& map = m_project->GetMap();
-		const int mapHeight = map.GetHeight();
-
-		//Sanitise ordering before looping
-		int top = min(boxCorner1.y, boxCorner2.y);
-		int left = min(boxCorner1.x, boxCorner2.x);
-		int bottom = max(boxCorner1.y, boxCorner2.y);
-		int right = max(boxCorner1.x, boxCorner2.x);
-
-		for(int x = left; x <= right; x++)
+		for(int y = top; y <= bottom; y++)
 		{
-			for(int y = top; y <= bottom; y++)
-			{
-				//Set tile on map
-				map.SetTile(x, y, tileId);
+			//Invert for OpenGL
+			int y_inv = m_canvasSize.y - 1 - y;
 
-				//Invert for OpenGL
-				int y_inv = mapHeight - 1 - y;
-
-				//Paint tile to canvas
-				PaintTile(tileId, x, y_inv, false, false);
-			}
+			//Paint tile to canvas
+			PaintTile(tileId, x, y_inv, false, false);
 		}
 	}
 }
 
 void ViewPanel::FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection)
 {
-	if(m_project)
+	for(int i = 0; i < selection.size(); i++)
 	{
-		Map& map = m_project->GetMap();
-		const int mapHeight = map.GetHeight();
+		int x = selection[i].x;
+		int y = selection[i].y;
 
-		for(int i = 0; i < selection.size(); i++)
-		{
-			int x = selection[i].x;
-			int y = selection[i].y;
+		//Invert for OpenGL
+		int y_inv = m_canvasSize.y - 1 - y;
 
-			//Set tile on map
-			map.SetTile(x, y, tileId);
-
-			//Invert for OpenGL
-			int y_inv = mapHeight - 1 - y;
-
-			//Paint tile to canvas
-			PaintTile(tileId, x, y_inv, false, false);
-		}
+		//Paint tile to canvas
+		PaintTile(tileId, x, y_inv, false, false);
 	}
 }
 
@@ -401,8 +401,6 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 {
 	if(m_project)
 	{
-		const int mapWidth = m_project->GetMap().GetWidth();
-		const int mapHeight = m_project->GetMap().GetHeight();
 		const int tileWidth = 8;
 		const int tileHeight = 8;
 
@@ -420,17 +418,17 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 		ion::Vector2 mousePos(mousePanelPosWx.x, panelSizeWx.y - mousePanelPosWx.y);
 		ion::Vector2 viewportSize(panelSizeWx.x, panelSizeWx.y);
 		ion::Vector2 cameraPos(m_camera.GetPosition().x * m_cameraZoom, m_camera.GetPosition().y * m_cameraZoom);
-		ion::Vector2 mapSize(mapWidth * tileWidth * m_cameraZoom, mapHeight * tileHeight * m_cameraZoom);
-		ion::Vector2 mousePosMapSpace;
-		mousePosMapSpace.x = (mapSize.x - (mapSize.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
-		mousePosMapSpace.y = (mapSize.y - (mapSize.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
+		ion::Vector2 canvasSizePixels(m_canvasSize.x * tileWidth * m_cameraZoom, m_canvasSize.y * tileHeight * m_cameraZoom);
+		ion::Vector2 mousePosCanvasSpace;
+		mousePosCanvasSpace.x = (canvasSizePixels.x - (canvasSizePixels.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
+		mousePosCanvasSpace.y = (canvasSizePixels.y - (canvasSizePixels.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
 
 		//Get tile x/y
-		int x = (int)floor(mousePosMapSpace.x / (float)tileWidth);
-		int y_inv = (int)floor(mousePosMapSpace.y / (float)tileHeight);
+		int x = (int)floor(mousePosCanvasSpace.x / (float)tileWidth);
+		int y_inv = (int)floor(mousePosCanvasSpace.y / (float)tileHeight);
 
 		//Invert for OpenGL
-		int y = (mapHeight - 1 - y_inv);
+		int y = (m_canvasSize.y - 1 - y_inv);
 
 		//Get button bits
 		int buttonBits = 0;

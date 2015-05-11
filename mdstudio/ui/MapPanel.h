@@ -113,7 +113,12 @@ private:
 	// PAINT STAMP tool
 	///////////////////////////////////////////////////
 
-	//Current stamp
+	//Current paste stamp
 	Stamp* m_currentStamp;
+
+	//Temp cloning stamp
+	Stamp* m_tempStamp;
+
+	//Paste pos
 	ion::Vector2i m_stampPastePos;
 };

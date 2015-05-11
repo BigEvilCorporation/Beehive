@@ -13,8 +13,9 @@
 
 Project::Project()
 {
-	m_paintTile = 0;
-	m_eraseTile = 0;
+	m_paintTile = InvalidTileId;
+	m_eraseTile = InvalidTileId;
+	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
 	m_stampsInvalidated = true;
@@ -166,6 +167,16 @@ void Project::SetEraseTile(TileId tile)
 TileId Project::GetEraseTile() const
 {
 	return m_eraseTile;
+}
+
+void Project::SetPaintStamp(StampId stamp)
+{
+	m_paintStamp = stamp;
+}
+
+StampId Project::GetPaintStamp() const
+{
+	return m_paintStamp;
 }
 
 bool Project::FindPalette(Colour* pixels, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const

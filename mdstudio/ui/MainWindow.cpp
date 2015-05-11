@@ -224,6 +224,7 @@ void MainWindow::ShowPanelToolbox()
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECT);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINT);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PICKER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPX);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
@@ -435,6 +436,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_PAINT:
 			m_mapPanel->SetTool(MapPanel::eToolPaintTile);
+			break;
+		case wxID_TOOL_STAMP:
+			m_mapPanel->SetTool(MapPanel::eToolPaintStamp);
 			break;
 		case wxID_TOOL_PICKER:
 			m_mapPanel->SetTool(MapPanel::eToolPicker);
