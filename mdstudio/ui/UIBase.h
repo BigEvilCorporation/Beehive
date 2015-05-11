@@ -47,12 +47,13 @@
 #define wxID_BTN_TILES_IMPORT 1011
 #define wxID_TOOL_SELECT 1012
 #define wxID_TOOL_PAINT 1013
-#define wxID_TOOL_PICKER 1014
-#define wxID_TOOL_FLIPX 1015
-#define wxID_TOOL_FLIPY 1016
-#define wxID_TOOL_FILL 1017
-#define wxID_TOOL_CLONE 1018
-#define wxID_TOOL_CREATESTAMP 1019
+#define wxID_TOOL_STAMP 1014
+#define wxID_TOOL_PICKER 1015
+#define wxID_TOOL_FLIPX 1016
+#define wxID_TOOL_FLIPY 1017
+#define wxID_TOOL_FILL 1018
+#define wxID_TOOL_CLONE 1019
+#define wxID_TOOL_CREATESTAMP 1020
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -119,6 +120,7 @@ class MapToolbox : public wxPanel
 	protected:
 		wxBitmapButton* m_toolSelect;
 		wxBitmapButton* m_toolPaint;
+		wxBitmapButton* m_toolStamp;
 		wxBitmapButton* m_toolPicker;
 		wxBitmapButton* m_toolFlipX;
 		wxBitmapButton* m_toolFlipY;

@@ -39,6 +39,35 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 void StampsPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
 {
 	ViewPanel::OnMouseTileEvent(mouseDelta, buttonBits, x, y);
+
+	if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+	{
+		//TODO: Per-tile stamp map
+		StampId selectedStamp = InvalidStampId;
+
+		//Brute force search for stamp ID
+		ion::Vector2i mousePos(x, y);
+
+		for(int i = 0; i < m_stampPosMap.size() && !selectedStamp; i++)
+		{
+			StampId stampId = m_stampPosMap[i].first;
+			if(Stamp* stamp = m_project->GetStamp(stampId))
+			{
+				const ion::Vector2i& stampTopLeft = m_stampPosMap[i].second;
+				const ion::Vector2i& stampBottomRight = stampTopLeft + ion::Vector2i(stamp->GetWidth(), stamp->GetHeight());
+				if(mousePos.x >= stampTopLeft.x && mousePos.y >= stampTopLeft.y
+					&& mousePos.x <= stampBottomRight.x && mousePos.y <= stampBottomRight.y)
+				{
+					selectedStamp = stampId;
+				}
+			}
+		}
+
+		if(selectedStamp)
+		{
+			m_project->SetPaintStamp(selectedStamp);
+		}
+	}
 }
 
 void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
@@ -66,6 +95,9 @@ void StampsPanel::SetProject(Project* project)
 	//Recreate canvas
 	CreateCanvas(m_canvasWidth, m_canvasHeight);
 
+	//Fill with invalid tile
+	FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasWidth - 1, m_canvasHeight - 1));
+
 	//Recreate grid
 	CreateGrid(m_canvasWidth, m_canvasHeight, m_canvasWidth / m_project->GetGridSize(), m_canvasHeight / m_project->GetGridSize());
 }
@@ -82,6 +114,9 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			//Recreate canvas
 			CreateCanvas(m_canvasWidth, m_canvasHeight);
+
+			//Fill with invalid tile
+			FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasWidth - 1, m_canvasHeight - 1));
 
 			//Recreate grid
 			CreateGrid(m_canvasWidth, m_canvasHeight, m_canvasWidth / m_project->GetGridSize(), m_canvasHeight / m_project->GetGridSize());
@@ -104,13 +139,23 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 void StampsPanel::ArrangeStamps(int canvasWidth)
 {
+	m_canvasWidth = 1;
 	m_canvasHeight = 1;
 	m_stampPosMap.clear();
 
 	if(m_project)
 	{
+		//Find widest stamp first
+		for(TStampMap::const_iterator it = m_project->StampsBegin(), end = m_project->StampsEnd(); it != end; ++it)
+		{
+			//If wider than provided canvas width, grow canvas
+			canvasWidth = max(canvasWidth, it->second.GetWidth());
+		}
+
+		m_canvasWidth = canvasWidth;
+
 		ion::Vector2i currPos;
-		int maxRowHeight = 0;
+		int rowHeight = 1;
 
 		for(TStampMap::const_iterator it = m_project->StampsBegin(), end = m_project->StampsEnd(); it != end; ++it)
 		{
@@ -118,32 +163,38 @@ void StampsPanel::ArrangeStamps(int canvasWidth)
 			ion::Vector2i stampSize(stamp.GetWidth(), stamp.GetHeight());
 			ion::Vector2i stampPos;
 
-			//Grow canvas height
-			m_canvasHeight = max(currPos.y + stampSize.y, 1);
-
 			if(currPos.x + stampSize.x > canvasWidth)
 			{
 				//Can't fit on this line, advance Y by tallest stamp on current row
-				currPos.y += maxRowHeight;
+				currPos.y += rowHeight;
 
 				//Reset column
-				currPos.x = 0;
+				currPos.x = stampSize.x;
 
-				stampPos = currPos;
+				//Reset current row height
+				rowHeight = stampSize.y;
+
+				//Set stamp pos
+				stampPos.x = 0;
+				stampPos.y = currPos.y;
 			}
 			else
 			{
+				//Set stamp pos
 				stampPos = currPos;
 
 				//Next column
 				currPos.x += stampSize.x;
 			}
 
+			//Record tallest stamp on current row
+			rowHeight = max(rowHeight, stampSize.y);
+
+			//If Y pos + height extends beyond canvas height, grow canvas
+			m_canvasHeight = max(m_canvasHeight, currPos.y + rowHeight);
+
 			//Add stamp to position map
 			m_stampPosMap.push_back(std::make_pair(stamp.GetId(), stampPos));
-
-			//Record tallest stamp on current row
-			maxRowHeight = max(maxRowHeight, stampSize.y);
 		}
 	}
 

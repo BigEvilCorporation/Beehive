@@ -132,6 +132,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolPaint, 0, wxALL, 5 );
 	
+	m_toolStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolStamp->SetToolTip( wxT("Paint Stamp") );
+	
+	fgSizer1->Add( m_toolStamp, 0, wxALL, 5 );
+	
 	m_toolPicker = new wxBitmapButton( this, wxID_TOOL_PICKER, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolPicker->SetToolTip( wxT("Pick Tile") );
 	
