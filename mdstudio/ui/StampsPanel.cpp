@@ -185,7 +185,7 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project->GetGridSize(), m_canvasSize.y / m_project->GetGridSize());
 
 			//Recreate tileset texture
-			CreateTilesetTexture(m_project->GetMap().GetTileset());
+			CreateTilesetTexture(m_project->GetTileset());
 
 			//Recreate index cache
 			CacheTileIndices();
@@ -271,6 +271,7 @@ void StampsPanel::PaintStamps()
 	for(int i = 0; i < m_stampPosMap.size(); i++)
 	{
 		Stamp* stamp = m_project->GetStamp(m_stampPosMap[i].first);
+		ion::debug::Assert(stamp, "Invalid stamp");
 		PaintStamp(*stamp, m_stampPosMap[i].second.x, m_stampPosMap[i].second.y);
 	}
 }

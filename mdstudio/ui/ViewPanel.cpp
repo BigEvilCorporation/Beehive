@@ -143,7 +143,7 @@ void ViewPanel::SetProject(Project* project)
 	CentreCamera();
 
 	//Recreate tileset texture
-	CreateTilesetTexture(project->GetMap().GetTileset());
+	CreateTilesetTexture(project->GetTileset());
 
 	//Recreate index cache
 	CacheTileIndices();
@@ -387,7 +387,7 @@ void ViewPanel::CacheTileIndices()
 
 	if(m_project)
 	{
-		const Tileset& tileset = m_project->GetMap().GetTileset();
+		const Tileset& tileset = m_project->GetTileset();
 		u32 tileIndex = 0;
 
 		for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)

@@ -19,6 +19,8 @@
 
 #include "../Project.h"
 
+wxDECLARE_SCOPED_PTR(Project, ProjectPtr)
+
 class MainWindow : public MainWindowBase
 {
 public:
@@ -33,8 +35,6 @@ public:
 	MainWindow();
 	virtual ~MainWindow();
 
-	void SetProject(Project* project);
-
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
@@ -47,7 +47,7 @@ public:
 	void RefreshAll();
 
 protected:
-	virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjSave(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjSaveAs(wxRibbonButtonBarEvent& event);
@@ -58,12 +58,16 @@ protected:
 	virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event );
 	virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 	virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event );
+	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 
 	void OnBtnTool(wxCommandEvent& event);
 
 private:
+	void SetProject(Project* project);
+
 	wxAuiManager m_auiManager;
 
 	wxWeakRef<PalettesPanel> m_palettesPanel;
@@ -72,7 +76,7 @@ private:
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<MapToolbox> m_toolboxPanel;
 
-	Project* m_project;
+	ProjectPtr m_project;
 
 	//Renderer
 	ion::render::Renderer* m_renderer;

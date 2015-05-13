@@ -21,16 +21,12 @@ Beehive::~Beehive()
 
 bool Beehive::Initialise()
 {
-	//Create new project by default
-	m_project = new Project();
-
 	m_wxApp = new BeehiveWxApp();
 
 	wxApp::SetInstance(m_wxApp);
 	wxEntryStart(0, NULL);
 	wxTheApp->OnInit();
 	m_wxApp->GetMainWindow()->Maximize(true);
-	m_wxApp->GetMainWindow()->SetProject(m_project);
 	wxTheApp->OnRun();
 
 	return false;
@@ -40,8 +36,6 @@ void Beehive::Shutdown()
 {
 	wxTheApp->OnExit();
 	wxEntryCleanup();
-
-	delete m_project;
 }
 
 bool Beehive::Update(float deltaTime)
