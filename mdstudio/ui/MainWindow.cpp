@@ -168,7 +168,7 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
-			m_stampsPanel = new StampsPanel(*m_renderer, m_context, m_dockArea, NewControlId());
+			m_stampsPanel = new StampsPanel(this, *m_renderer, m_context, m_dockArea, NewControlId());
 			m_stampsPanel->SetProject(m_project);
 			m_auiManager.AddPane(m_stampsPanel, paneInfo);
 		}
@@ -194,7 +194,7 @@ void MainWindow::ShowPanelMap()
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
 
-			m_mapPanel = new MapPanel(*m_renderer, m_context, m_dockArea, NewControlId());
+			m_mapPanel = new MapPanel(this, *m_renderer, m_context, m_dockArea, NewControlId());
 			m_mapPanel->SetProject(m_project);
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
 		}
@@ -255,7 +255,7 @@ void MainWindow::RefreshAll()
 
 	if(m_project)
 	{
-		m_project->InvalidateTiles(true);
+		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
 	}
 
@@ -267,6 +267,32 @@ void MainWindow::RefreshAll()
 
 	if(m_mapPanel)
 		m_mapPanel->Refresh();
+
+	if(m_stampsPanel)
+		m_stampsPanel->Refresh();
+}
+
+void MainWindow::RefreshPanel(Panel panel)
+{
+	switch(panel)
+	{
+	case ePanelMap:
+		if(m_mapPanel)
+			m_mapPanel->Refresh();
+		break;
+	case ePanelStamps:
+		if(m_stampsPanel)
+			m_stampsPanel->Refresh();
+		break;
+	case ePanelTiles:
+		if(m_tilesPanel)
+			m_tilesPanel->Refresh();
+		break;
+	case ePanelPalettes:
+		if(m_palettesPanel)
+			m_palettesPanel->Refresh();
+		break;
+	}
 }
 
 void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)

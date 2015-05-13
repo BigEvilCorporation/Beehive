@@ -11,7 +11,7 @@
 class StampsPanel : public ViewPanel
 {
 public:
-	StampsPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	StampsPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~StampsPanel();
 
 	//Events
@@ -38,14 +38,31 @@ private:
 	void PaintStamps();
 
 	//Recalc all stamp positions and canvas size
-	void ArrangeStamps(int canvasWidth);
+	void ArrangeStamps();
 
-	//Fixed canvas width (tiles)
-	int m_canvasWidth;
-
-	//Dynamic canvas height (tiles)
-	int m_canvasHeight;
+	//Render selection box
+	void RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
 	//Stamp position map
 	std::vector< std::pair<StampId, ion::Vector2i> > m_stampPosMap;
+
+	//Current/hover stamp
+	StampId m_selectedStamp;
+	StampId m_hoverStamp;
+
+	//Current/hover stamp pos
+	ion::Vector2i m_selectedStampPos;
+	ion::Vector2i m_hoverStampPos;
+
+	//Rendering materials and shaders
+	ion::render::Shader* m_selectionVertexShader;
+	ion::render::Shader* m_selectionPixelShader;
+	ion::render::Material* m_selectionMaterial;
+
+	//Rendering primitives
+	ion::render::Quad* m_selectionPrimitive;
+
+	//Rendering colours
+	ion::Colour m_hoverColour;
+	ion::Colour m_selectColour;
 };
