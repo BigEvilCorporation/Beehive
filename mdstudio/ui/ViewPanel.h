@@ -26,6 +26,8 @@
 #include "UIBase.h"
 #include "../Project.h"
 
+class MainWindow;
+
 class ViewPanel : public wxGLCanvas
 {
 public:
@@ -36,7 +38,7 @@ public:
 		eMouseRight = 1 << 2
 	};
 
-	ViewPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~ViewPanel();
 
 	//Set current project
@@ -96,6 +98,9 @@ protected:
 	
 	//Main project
 	Project* m_project;
+
+	//Main window
+	MainWindow* m_mainWindow;
 
 	//Renderer
 	ion::render::Renderer& m_renderer;

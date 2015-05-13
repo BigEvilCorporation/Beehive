@@ -31,7 +31,7 @@ public:
 		eMouseRight		= 1<<2
 	};
 
-	MapPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~MapPanel();
 
 	//Events
@@ -64,6 +64,9 @@ private:
 
 	//Paint whole map to canvas
 	void PaintMap(const Map& map);
+
+	//Create stamp preview primitive
+	void CreateStampPreview(Stamp* stamp);
 
 	//Clear all tool data
 	void ResetToolData();
@@ -114,7 +117,7 @@ private:
 	///////////////////////////////////////////////////
 
 	//Current paste stamp
-	Stamp* m_currentStamp;
+	StampId m_currentStampId;
 
 	//Temp cloning stamp
 	Stamp* m_tempStamp;

@@ -1,11 +1,12 @@
 #include "ViewPanel.h"
 
-ViewPanel::ViewPanel(ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxGLCanvas(parent, glContext, winid, pos, size, style, name, NULL, wxNullPalette)
 	, m_renderer(renderer)
 	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
 {
 	m_project = NULL;
+	m_mainWindow = mainWindow;
 	m_canvasPrimitive = NULL;
 	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;

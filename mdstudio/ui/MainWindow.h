@@ -22,6 +22,14 @@
 class MainWindow : public MainWindowBase
 {
 public:
+	enum Panel
+	{
+		ePanelMap,
+		ePanelStamps,
+		ePanelTiles,
+		ePanelPalettes
+	};
+
 	MainWindow();
 	virtual ~MainWindow();
 
@@ -34,6 +42,8 @@ public:
 	void ShowPanelToolbox();
 
 	void SyncSettingsWidgets();
+
+	void RefreshPanel(Panel panel);
 	void RefreshAll();
 
 protected:
