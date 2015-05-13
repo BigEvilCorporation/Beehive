@@ -9,7 +9,6 @@
 #include <vector>
 #include <sstream>
 #include <io/Archive.h>
-#include "Tileset.h"
 #include "Stamp.h"
 
 class Map
@@ -45,9 +44,6 @@ public:
 	//Draw stamp on map
 	void DrawStamp(int x, int y, const Stamp& stamp);
 
-	const Tileset& GetTileset() const;
-	Tileset& GetTileset();
-
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
 
@@ -69,6 +65,5 @@ private:
 		u32 m_flags;
 	};
 
-	Tileset m_tileset;
 	std::vector<TileDesc> m_tiles;
 };

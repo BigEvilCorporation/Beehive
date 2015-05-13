@@ -105,7 +105,7 @@ void MapPanel::OnResize(wxSizeEvent& event)
 void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
 {
 	Map& map = m_project->GetMap();
-	Tileset& tileset = m_project->GetMap().GetTileset();
+	Tileset& tileset = m_project->GetTileset();
 
 	const int mapWidth = map.GetWidth();
 	const int mapHeight = map.GetHeight();
@@ -361,7 +361,7 @@ void MapPanel::SetProject(Project* project)
 	ViewPanel::SetProject(project);
 
 	Map& map = project->GetMap();
-	Tileset& tileset = map.GetTileset();
+	Tileset& tileset = project->GetTileset();
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
 
@@ -383,7 +383,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		if(m_project->MapIsInvalidated())
 		{
 			Map& map = m_project->GetMap();
-			Tileset& tileset = map.GetTileset();
+			Tileset& tileset = m_project->GetTileset();
 			int mapWidth = map.GetWidth();
 			int mapHeight = map.GetHeight();
 

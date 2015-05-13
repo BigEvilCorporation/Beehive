@@ -14,16 +14,17 @@
 #include <string>
 
 #include "MainWindow.h"
-
+#include "Dialogs.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "MapPanel.h"
+
+wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
 
 MainWindow::MainWindow()
 	: MainWindowBase(NULL)
 {
 	m_auiManager.SetManagedWindow(m_dockArea);
-	m_project = NULL;
 	SetStatusText("BEEhive v0.1");
 
 	//Create blank OpenGL panel to create global DC
@@ -34,6 +35,9 @@ MainWindow::MainWindow()
 
 	//Create renderer (from global DC
 	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
+
+	//Create default project
+	SetProject(new Project());
 }
 
 MainWindow::~MainWindow()
@@ -48,23 +52,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::SetProject(Project* project)
 {
-	if(project && project != m_project)
+	if(project != m_project.get())
 	{
-		m_project = project;
-
-		//New project, open default panels
-		ShowPanelToolbox();
-		ShowPanelPalettes();
-		ShowPanelTiles();
-		ShowPanelStamps();
-		ShowPanelMap();
-
-		//Sync settings widgets states
-		SyncSettingsWidgets();
-	}
-	else
-	{
-		//Project closed, close panels
+		//Changed project, close all panels
 		if(m_tilesPanel)
 		{
 			m_auiManager.DetachPane(m_tilesPanel);
@@ -95,16 +85,30 @@ void MainWindow::SetProject(Project* project)
 			delete m_stampsPanel;
 		}
 
-		m_project = NULL;
-	}
+		//Delete previous, set new
+		m_project.reset(project);
 
-	//Refresh whole window
-	RefreshAll();
+		if(project)
+		{
+			//New project, open default panels
+			ShowPanelToolbox();
+			ShowPanelPalettes();
+			ShowPanelTiles();
+			ShowPanelStamps();
+			ShowPanelMap();
+
+			//Sync settings widgets states
+			SyncSettingsWidgets();
+		}
+
+		//Refresh whole window
+		RefreshAll();
+	}
 }
 
 void MainWindow::ShowPanelPalettes()
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		if(!m_palettesPanel)
 		{
@@ -117,7 +121,7 @@ void MainWindow::ShowPanelPalettes()
 			paneInfo.CaptionVisible(true);
 
 			m_palettesPanel = new PalettesPanel(m_dockArea, NewControlId());
-			m_palettesPanel->SetProject(m_project);
+			m_palettesPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_palettesPanel, paneInfo);
 		}
 
@@ -130,7 +134,7 @@ void MainWindow::ShowPanelPalettes()
 
 void MainWindow::ShowPanelTiles()
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		if(!m_tilesPanel)
 		{
@@ -143,7 +147,7 @@ void MainWindow::ShowPanelTiles()
 			paneInfo.CaptionVisible(true);
 			
 			m_tilesPanel = new TilesPanel(m_dockArea, NewControlId(), wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxALWAYS_SHOW_SB);
-			m_tilesPanel->SetProject(m_project);
+			m_tilesPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
 		}
 
@@ -156,7 +160,7 @@ void MainWindow::ShowPanelTiles()
 
 void MainWindow::ShowPanelStamps()
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		if(!m_stampsPanel)
 		{
@@ -169,7 +173,7 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.CaptionVisible(true);
 
 			m_stampsPanel = new StampsPanel(this, *m_renderer, m_context, m_dockArea, NewControlId());
-			m_stampsPanel->SetProject(m_project);
+			m_stampsPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_stampsPanel, paneInfo);
 		}
 
@@ -182,7 +186,7 @@ void MainWindow::ShowPanelStamps()
 
 void MainWindow::ShowPanelMap()
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		if(!m_mapPanel)
 		{
@@ -195,7 +199,7 @@ void MainWindow::ShowPanelMap()
 			paneInfo.CaptionVisible(true);
 
 			m_mapPanel = new MapPanel(this, *m_renderer, m_context, m_dockArea, NewControlId());
-			m_mapPanel->SetProject(m_project);
+			m_mapPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
 		}
 
@@ -241,7 +245,7 @@ void MainWindow::ShowPanelToolbox()
 
 void MainWindow::SyncSettingsWidgets()
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SHOW, m_project->GetShowGrid());
 		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SNAP, m_project->GetGridSnap());
@@ -253,10 +257,11 @@ void MainWindow::RefreshAll()
 	m_auiManager.Update();
 	Refresh();
 
-	if(m_project)
+	if(m_project.get())
 	{
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
+		m_project->InvalidateStamps(true);
 	}
 
 	if(m_palettesPanel)
@@ -295,6 +300,14 @@ void MainWindow::RefreshPanel(Panel panel)
 	}
 }
 
+void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
+{
+	if(wxMessageBox("Unsaved changes will be lost, are you sure?", "New Project", wxOK | wxCANCEL) == wxOK)
+	{
+		SetProject(new Project());
+	}
+}
+
 void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 {
 	wxFileDialog dialogue(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -306,11 +319,7 @@ void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 
 		if(project->Load(dialogue.GetPath().c_str().AsChar()))
 		{
-			//Destroy old project
-			delete m_project;
-			SetProject(NULL);
-
-			//Set new project
+			//Set new project, deletes old
 			SetProject(project);
 			
 			SetStatusText("Load complete");
@@ -326,7 +335,7 @@ void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		const std::string& lastFilename = m_project->GetFilename();
 
@@ -355,7 +364,7 @@ void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnProjSaveAs(wxRibbonButtonBarEvent& event)
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		wxFileDialog dialogue(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		if(dialogue.ShowModal() == wxID_OK)
@@ -377,7 +386,7 @@ void MainWindow::OnBtnProjSaveAs(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		wxDirDialog dialogue(this, "Select export directory");
 		if(dialogue.ShowModal() == wxID_OK)
@@ -403,7 +412,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		wxFileDialog dialogue(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 		if(dialogue.ShowModal() == wxID_OK)
@@ -435,9 +444,72 @@ void MainWindow::OnBtnToolsPalettes( wxRibbonButtonBarEvent& event )
 	ShowPanelPalettes();
 }
 
+void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		m_project->GetMap().Clear();
+		m_project->InvalidateMap(true);
+		RefreshPanel(ePanelMap);
+	}
+}
+
+void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		Map& map = m_project->GetMap();
+
+		int originalWidth = map.GetWidth();
+		int originalHeight = map.GetHeight();
+
+		DialogMapSize dialog(this);
+		dialog.m_spinCtrlWidth->SetValue(originalWidth);
+		dialog.m_spinCtrlHeight->SetValue(originalHeight);
+
+		if(dialog.ShowModal() == wxID_OK)
+		{
+			int width = dialog.m_spinCtrlWidth->GetValue();
+			int height = dialog.m_spinCtrlHeight->GetValue();
+
+			if(width > 0 && width <= 10000 && height > 0 && height <= 10000)
+			{
+				//Resize map
+				map.Resize(width, height);
+
+				//Fill extra tiles with background tile
+				TileId backgroundTile = InvalidTileId;
+				if(m_project->GetTileset().GetCount() > 0)
+					backgroundTile = m_project->GetTileset().Begin()->first;
+
+				//Extra X
+				for(int y = 0; y < height; y++)
+				{
+					for(int x = originalWidth; x < width; x++)
+					{
+						map.SetTile(x, y, backgroundTile);
+					}
+				}
+
+				//Extra Y
+				for(int x = 0; x < width; x++)
+				{
+					for(int y = originalHeight; y < height; y++)
+					{
+						map.SetTile(x, y, backgroundTile);
+					}
+				}
+
+				m_project->InvalidateMap(true);
+				RefreshPanel(ePanelMap);
+			}
+		}
+	}
+}
+
 void MainWindow::OnBtnGridShow(wxCommandEvent& event)
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		m_project->SetShowGrid(!m_project->GetShowGrid());
 	}
@@ -445,7 +517,7 @@ void MainWindow::OnBtnGridShow(wxCommandEvent& event)
 
 void MainWindow::OnBtnGridSnap(wxCommandEvent& event)
 {
-	if(m_project)
+	if(m_project.get())
 	{
 		m_project->SetGridSnap(!m_project->GetGridSnap());
 	}

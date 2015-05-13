@@ -28,8 +28,11 @@
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
-#include <wx/bmpbuttn.h>
+#include <wx/stattext.h>
+#include <wx/spinctrl.h>
 #include <wx/button.h>
+#include <wx/dialog.h>
+#include <wx/bmpbuttn.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -44,16 +47,19 @@
 #define wxID_BTN_TOOLS_MAPEDIT 1008
 #define wxID_BTN_TOOLS_TILES 1009
 #define wxID_BTN_TOOLS_PALETTES 1010
-#define wxID_BTN_TILES_IMPORT 1011
-#define wxID_TOOL_SELECT 1012
-#define wxID_TOOL_PAINT 1013
-#define wxID_TOOL_STAMP 1014
-#define wxID_TOOL_PICKER 1015
-#define wxID_TOOL_FLIPX 1016
-#define wxID_TOOL_FLIPY 1017
-#define wxID_TOOL_FILL 1018
-#define wxID_TOOL_CLONE 1019
-#define wxID_TOOL_CREATESTAMP 1020
+#define wxID_BTN_MAP_CLEAR 1011
+#define wxID_BTN_MAP_RESIZE 1012
+#define wxID_BTN_TILES_IMPORT 1013
+#define wxID_BTN_CANCEL 1014
+#define wxID_TOOL_SELECT 1015
+#define wxID_TOOL_PAINT 1016
+#define wxID_TOOL_STAMP 1017
+#define wxID_TOOL_PICKER 1018
+#define wxID_TOOL_FLIPX 1019
+#define wxID_TOOL_FLIPY 1020
+#define wxID_TOOL_FILL 1021
+#define wxID_TOOL_CLONE 1022
+#define wxID_TOOL_CREATESTAMP 1023
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -98,6 +104,8 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnMapResize( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
@@ -107,6 +115,34 @@ class MainWindowBase : public wxFrame
 		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 720,489 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DialogMapSizeBase
+///////////////////////////////////////////////////////////////////////////////
+class DialogMapSizeBase : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_text1;
+		wxStaticText* m_text2;
+		wxStaticText* m_text3;
+		wxButton* m_buttonOk;
+		wxButton* m_buttonCancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		wxSpinCtrl* m_spinCtrlWidth;
+		wxSpinCtrl* m_spinCtrlHeight;
+		
+		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogMapSizeBase();
 	
 };
 

@@ -14,6 +14,7 @@
 #include "Palette.h"
 #include "Stamp.h"
 #include "Tile.h"
+#include "Tileset.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
 
@@ -42,8 +43,12 @@ public:
 	//Clear project (palettes, tiles, map)
 	void Clear();
 
-	//Get Genesis map
+	//Get map
 	Map& GetMap() { return m_map; }
+
+	//Get tileset
+	Tileset& GetTileset() { return m_tileset; }
+	const Tileset& GetTileset() const { return m_tileset; }
 
 	//Get palette
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
@@ -108,7 +113,10 @@ private:
 	//Filename
 	std::string m_filename;
 
-	//Genesis map
+	//Tileset
+	Tileset m_tileset;
+
+	//Map
 	Map m_map;
 
 	//Palettes

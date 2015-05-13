@@ -7,6 +7,8 @@
 #include "TilesPanel.h"
 #include "TileRendering.h"
 
+#include <algorithm>
+
 #include <maths/Vector.h>
 
 TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
@@ -57,15 +59,15 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 		wxSize clientSize = GetClientSize();
 		int selection = (y * m_numCols) + x;
 
-		if(selection < m_project->GetMap().GetTileset().GetCount())
+		if(selection < m_project->GetTileset().GetCount())
 		{
 			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 			{
 				TileId tileId = 0;
 
 				//TODO: Very slow, use indexed multimap
-				auto it = m_project->GetMap().GetTileset().Begin();
-				auto end = m_project->GetMap().GetTileset().End();
+				auto it = m_project->GetTileset().Begin();
+				auto end = m_project->GetTileset().End();
 				for(int i = 0; i <= selection && it != end; ++i, ++it)
 				{
 					tileId = it->first;
@@ -86,8 +88,8 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 				TileId tileId = 0;
 
 				//TODO: Very slow, use indexed multimap
-				auto it = m_project->GetMap().GetTileset().Begin();
-				auto end = m_project->GetMap().GetTileset().End();
+				auto it = m_project->GetTileset().Begin();
+				auto end = m_project->GetTileset().End();
 				for(int i = 0; i <= selection && it != end; ++i, ++it)
 				{
 					tileId = it->first;
@@ -212,7 +214,7 @@ void TilesPanel::InitPanel()
 	if(m_project)
 	{
 		//Update tile count
-		m_tileCount = m_project->GetMap().GetTileset().GetCount();
+		m_tileCount = m_project->GetTileset().GetCount();
 		m_numCols = ion::maths::Ceil(((float)GetClientSize().x / 8.0f) / m_zoom);
 		m_numRows = m_numCols > 0 ? ion::maths::Ceil((float)m_tileCount / (float)m_numCols) : 0;
 
@@ -227,7 +229,7 @@ void TilesPanel::InitPanel()
 		GetScrollHelper()->SetScrollRate(0, 1);
 
 		//Calc canvas size
-		int scrollPageHeight = max(pixelsPerScrollUnitY * m_numRows, 8 * m_zoom);
+		int scrollPageHeight = std::max(pixelsPerScrollUnitY * m_numRows, (int)(8.0f * m_zoom));
 		wxSize canvasSize(GetClientSize().x, scrollPageHeight);
 
 		//Set scroll page size
@@ -270,7 +272,7 @@ void TilesPanel::PaintAllToDc(wxMemoryDC& dc)
 		if(m_numCols > 0)
 		{
 			int i = 0;
-			for(auto it = m_project->GetMap().GetTileset().Begin(), end = m_project->GetMap().GetTileset().End(); it != end; ++it, ++i)
+			for(auto it = m_project->GetTileset().Begin(), end = m_project->GetTileset().End(); it != end; ++it, ++i)
 			{
 				int y = i / m_numCols;
 				int x = i % m_numCols;

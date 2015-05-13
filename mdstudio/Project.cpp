@@ -26,6 +26,18 @@ Project::Project()
 	m_palettes.resize(numPalettes);
 	m_palettes[0].AddColour(Colour(255, 255, 255));
 	m_nextFreeStampId = 1;
+
+	//Create initial background tile
+	TileId backgroundTile = m_tileset.AddTile();
+
+	//Fill background
+	for(int x = 0; x < m_map.GetWidth(); x++)
+	{
+		for(int y = 0; y < m_map.GetHeight(); y++)
+		{
+			m_map.SetTile(x, y, backgroundTile);
+		}
+	}
 }
 
 void Project::Clear()
@@ -44,6 +56,7 @@ void Project::Clear()
 
 	m_palettes[0].AddColour(Colour(255, 255, 255));
 	m_map.Clear();
+	m_tileset.Clear();
 	m_stamps.clear();
 	m_nextFreeStampId = 1;
 }
@@ -58,6 +71,7 @@ bool Project::Load(const std::string& filename)
 
 		InvalidateMap(true);
 		InvalidateTiles(true);
+		InvalidateStamps(true);
 
 		m_filename = filename;
 
@@ -84,6 +98,7 @@ bool Project::Save(const std::string& filename)
 void Project::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_palettes);
+	archive.Serialise(m_tileset);
 	archive.Serialise(m_map);
 	archive.Serialise(m_stamps);
 	archive.Serialise(m_nextFreeStampId);
@@ -399,7 +414,7 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 
 				//Find duplicate or create new
 				TileId tileId = 0;
-				TileId duplicateId = m_map.GetTileset().FindDuplicate(tile);
+				TileId duplicateId = m_tileset.FindDuplicate(tile);
 				if(duplicateId)
 				{
 					//Tile already exists
@@ -408,8 +423,8 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 				else
 				{
 					//Create new tile and copy
-					tileId = m_map.GetTileset().AddTile();
-					Tile* newTile = m_map.GetTileset().GetTile(tileId);
+					tileId = m_tileset.AddTile();
+					Tile* newTile = m_tileset.GetTile(tileId);
 					*newTile = tile;
 				}
 
@@ -465,8 +480,7 @@ bool Project::ExportTiles(const std::string& filename) const
 
 		for(int i = 0; i < numPalettes; i++)
 		{
-			const Tileset& tileset = m_map.GetTileset();
-			tileset.Export(stream);
+			m_tileset.Export(stream);
 			stream << std::endl;
 		}
 

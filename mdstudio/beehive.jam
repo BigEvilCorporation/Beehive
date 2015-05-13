@@ -28,6 +28,7 @@ local SRC =
 	Tileset.cpp
 	Tileset.h
 
+	ui/Dialogs.h
 	ui/MainWindow.cpp
 	ui/MainWindow.h
 	ui/MapPanel.cpp

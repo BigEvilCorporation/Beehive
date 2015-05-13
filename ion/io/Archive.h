@@ -65,6 +65,7 @@ namespace ion
 			template <> void Serialise<std::string>(std::string& string);
 
 			//Serialise STL containers
+			template <typename T1, typename T2> void Serialise(std::pair<T1, T2>& pair);
 			template <typename T> void Serialise(std::vector<T>& objects);
 			template <typename T> void Serialise(std::list<T>& objects);
 			template <typename KEY, typename T> void Serialise(std::map<KEY, T>& objects);
@@ -329,6 +330,12 @@ namespace ion
 				//Serialise out chars
 				mStream.Write(string.data(), numChars);
 			}
+		}
+
+		template <typename T1, typename T2> void Archive::Serialise(std::pair<T1, T2>& pair)
+		{
+			Serialise(pair.first);
+			Serialise(pair.second);
 		}
 
 		template <typename T> void Archive::Serialise(std::vector<T>& objects)

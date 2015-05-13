@@ -8,32 +8,27 @@
 
 Map::Map()
 {
+	m_width = 0;
+	m_height = 0;
 	Resize(defaultWidth, defaultHeight);
-
-	//Create one blank tile for background
-	TileId backgroundId = m_tileset.AddTile();
-
-	//Fill background
-	for(int i = 0; i < m_tiles.size(); i++)
-	{
-		m_tiles[i].m_id = backgroundId;
-	}
 }
 
 void Map::Clear()
 {
-	//Clear tileset
-	m_tileset.Clear();
-
 	//Clear tiles
-	m_tiles.clear();
+	for(int x = 0; x < m_width; x++)
+	{
+		for(int y = 0; y < m_height; y++)
+		{
+			SetTile(x, y, InvalidTileId);
+		}
+	}
 }
 
 void Map::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_width);
 	archive.Serialise(m_height);
-	archive.Serialise(m_tileset);
 	archive.Serialise(m_tiles);
 }
 
@@ -49,8 +44,26 @@ int Map::GetHeight() const
 
 void Map::Resize(int width, int height)
 {
+	//Create new tile array
+	std::vector<TileDesc> tiles;
+
+	//Set new size
 	int size = width * height;
-	m_tiles.resize(size);
+	tiles.resize(size);
+
+	//Copy tiles
+	for(int x = 0; x < min(width, m_width); x++)
+	{
+		for(int y = 0; y < min(height, m_height); y++)
+		{
+			int tileIdx = (y * width) + x;
+			tiles[tileIdx].m_id = GetTile(x, y);
+			tiles[tileIdx].m_flags = GetTileFlags(x, y);
+		}
+	}
+	
+	//Set new
+	m_tiles = tiles;
 	m_width = width;
 	m_height = height;
 }
@@ -105,16 +118,6 @@ void Map::DrawStamp(int x, int y, const Stamp& stamp)
 			}
 		}
 	}
-}
-
-const Tileset& Map::GetTileset() const
-{
-	return m_tileset;
-}
-
-Tileset& Map::GetTileset()
-{
-	return m_tileset;
 }
 
 void Map::Export(std::stringstream& stream) const
