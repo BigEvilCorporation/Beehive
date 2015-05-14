@@ -71,7 +71,7 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		Refresh();
 	}
 
-	if(m_currentTool == eToolPaintTile)
+	if(m_currentTool == eToolPaintTile || m_currentTool == eToolPaintStamp)
 	{
 		if(m_previewTileFlipX != event.ShiftDown())
 		{
@@ -149,7 +149,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 						map.SetTileFlags(x, y, tileFlags);
 
 						//Paint to canvas
-						PaintTile(tileId, x, y_inv, m_previewTileFlipX, m_previewTileFlipY);
+						PaintTile(tileId, x, y_inv, tileFlags);
 					}
 				}
 				break;
@@ -253,7 +253,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 
 					//Redraw on canvas
 					TileId tileId = map.GetTile(x, y);
-					PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+					PaintTile(tileId, x, y_inv, tileFlags);
 					Refresh();
 				}
 
@@ -275,7 +275,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 
 					//Redraw on canvas
 					TileId tileId = map.GetTile(x, y);
-					PaintTile(tileId, x, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+					PaintTile(tileId, x, y_inv, tileFlags);
 					Refresh();
 				}
 				break;
@@ -302,11 +302,13 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 
 					if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 					{
+						u32 flipFlags = (m_previewTileFlipX ? Map::eFlipX : 0) | (m_previewTileFlipY ? Map::eFlipY : 0);
+
 						//Draw on map
-						map.DrawStamp(m_stampPastePos.x, m_stampPastePos.y, *stamp);
+						map.DrawStamp(m_stampPastePos.x, m_stampPastePos.y, *stamp, flipFlags);
 
 						//Paint on canvas
-						PaintStamp(*stamp, m_stampPastePos.x, m_stampPastePos.y);
+						PaintStamp(*stamp, m_stampPastePos.x, m_stampPastePos.y, flipFlags);
 					}
 				}
 			}
@@ -599,7 +601,8 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 
 		//Set preview quad texture coords
 		ion::render::TexCoord coords[4];
-		GetTileTexCoords(m_previewTile, coords, m_previewTileFlipX, m_previewTileFlipY);
+		u32 flipFlags = (m_previewTileFlipX ? Map::eFlipX : 0) | (m_previewTileFlipY ? Map::eFlipY : 0);
+		GetTileTexCoords(m_previewTile, coords, flipFlags);
 		m_previewPrimitive->SetTexCoords(coords);
 
 		ion::Matrix4 previewQuadMtx;
@@ -695,11 +698,14 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 			float width = stamp->GetWidth();
 			float height_inv = -stamp->GetHeight();
 
+			ion::Vector3 clonePreviewScale(m_previewTileFlipX ? -1.0f : 1.0f, m_previewTileFlipY ? -1.0f : 1.0f, 1.0f);
 			ion::Matrix4 clonePreviewMtx;
 			ion::Vector3 clonePreviewPos(floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
 				floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
 			clonePreviewMtx.SetTranslation(clonePreviewPos);
+			clonePreviewMtx.SetScale(clonePreviewScale);
 
+			renderer.SetFaceCulling(ion::render::Renderer::NoCull);
 			renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 			renderer.SetDepthTest(ion::render::Renderer::Always);
 
@@ -711,6 +717,7 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 
 			renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 			renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+			renderer.SetFaceCulling(ion::render::Renderer::CounterClockwise);
 		}
 	}
 }
@@ -732,11 +739,9 @@ void MapPanel::PaintMap(const Map& map)
 
 			//Get V/H flip
 			u32 tileFlags = map.GetTileFlags(x, y);
-			bool flipX = (tileFlags & Map::eFlipX) != 0;
-			bool flipY = (tileFlags & Map::eFlipY) != 0;
 
 			//Paint tile
-			PaintTile(tileId, x, yInv, flipX, flipY);
+			PaintTile(tileId, x, yInv, tileFlags);
 		}
 	}
 }
@@ -759,7 +764,7 @@ void MapPanel::CreateStampPreview(Stamp* stamp)
 		{
 			TileId tileId = stamp->GetTile(x, y);
 			u32 tileFlags = stamp->GetTileFlags(x, y);
-			GetTileTexCoords(tileId, coords, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+			GetTileTexCoords(tileId, coords, tileFlags);
 			int y_inv = height - 1 - y;
 			m_stampPreviewPrimitive->SetTexCoords((y_inv * width) + x, coords);
 		}

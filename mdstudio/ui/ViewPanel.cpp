@@ -240,7 +240,7 @@ int ViewPanel::GetTileIndex(TileId tileId) const
 	return it->second;
 }
 
-void ViewPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], bool flipX, bool flipY) const
+void ViewPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const
 {
 	if(tileId == InvalidTileId)
 	{
@@ -270,6 +270,9 @@ void ViewPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[
 		int tilesetY = (tileIndex / m_tilesetSizeSq);
 		ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
 
+		bool flipX = (flipFlags & Map::eFlipX) != 0;
+		bool flipY = (flipFlags & Map::eFlipY) != 0;
+
 		float top = flipY ? (textureBottomLeft.y) : (textureBottomLeft.y + m_cellSizeTexSpaceSq);
 		float left = flipX ? (textureBottomLeft.x + m_cellSizeTexSpaceSq) : (textureBottomLeft.x);
 		float bottom = flipY ? (textureBottomLeft.y + m_cellSizeTexSpaceSq) : (textureBottomLeft.y);
@@ -290,33 +293,40 @@ void ViewPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[
 	}
 }
 
-void ViewPanel::PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY)
+void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 {
 	if(m_project)
 	{
 		//Set texture coords for cell
 		ion::render::TexCoord coords[4];
-		GetTileTexCoords(tileId, coords, flipX, flipY);
+		GetTileTexCoords(tileId, coords, flipFlags);
 		m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 	}
 }
 
-void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y)
+void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 {
 	if(m_project)
 	{
-		for(int stampX = 0; stampX < stamp.GetWidth(); stampX++)
+		int width = stamp.GetWidth();
+		int height = stamp.GetHeight();
+
+		for(int stampX = 0; stampX < width; stampX++)
 		{
-			for(int stampY = 0; stampY < stamp.GetHeight(); stampY++)
+			for(int stampY = 0; stampY < height; stampY++)
 			{
-				TileId tileId = stamp.GetTile(stampX, stampY);
+				int sourceX = (flipFlags & Map::eFlipX) ? (width - 1 - stampX) : stampX;
+				int sourceY = (flipFlags & Map::eFlipY) ? (height - 1 - stampY) : stampY;
+
+				TileId tileId = stamp.GetTile(sourceX, sourceY);
 				u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
+				tileFlags ^= flipFlags;
 				int canvasX = stampX + x;
 				int canvasY = stampY + y;
 				int y_inv = m_canvasSize.y - 1 - canvasY;
 
 				//Paint on canvas
-				PaintTile(tileId, canvasX, y_inv, (tileFlags & Map::eFlipX) != 0, (tileFlags & Map::eFlipY) != 0);
+				PaintTile(tileId, canvasX, y_inv, tileFlags);
 			}
 		}
 	}
@@ -338,7 +348,7 @@ void ViewPanel::FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const 
 			int y_inv = m_canvasSize.y - 1 - y;
 
 			//Paint tile to canvas
-			PaintTile(tileId, x, y_inv, false, false);
+			PaintTile(tileId, x, y_inv, 0);
 		}
 	}
 }
@@ -354,7 +364,7 @@ void ViewPanel::FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selec
 		int y_inv = m_canvasSize.y - 1 - y;
 
 		//Paint tile to canvas
-		PaintTile(tileId, x, y_inv, false, false);
+		PaintTile(tileId, x, y_inv, 0);
 	}
 }
 
@@ -402,6 +412,9 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 {
 	if(m_project)
 	{
+		//If a tool is active, ensure this window has keyboard focus (to catch SHIFT/CTRL keys)
+		SetFocus();
+
 		const int tileWidth = 8;
 		const int tileHeight = 8;
 

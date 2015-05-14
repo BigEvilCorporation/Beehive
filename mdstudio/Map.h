@@ -42,7 +42,7 @@ public:
 	u32 GetTileFlags(int x, int y) const;
 
 	//Draw stamp on map
-	void DrawStamp(int x, int y, const Stamp& stamp);
+	void DrawStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;

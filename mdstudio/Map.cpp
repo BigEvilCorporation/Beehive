@@ -97,16 +97,24 @@ u32 Map::GetTileFlags(int x, int y) const
 	return m_tiles[tileIdx].m_flags;
 }
 
-void Map::DrawStamp(int x, int y, const Stamp& stamp)
+void Map::DrawStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
 {
-	for(int stampX = 0; stampX < stamp.GetWidth(); stampX++)
+	int width = stamp.GetWidth();
+	int height = stamp.GetHeight();
+
+	for(int stampX = 0; stampX < width; stampX++)
 	{
-		for(int stampY = 0; stampY < stamp.GetHeight(); stampY++)
+		for(int stampY = 0; stampY < height; stampY++)
 		{
-			TileId tileId = stamp.GetTile(stampX, stampY);
+			int sourceX = (flipFlags & eFlipX) ? (width - 1 - stampX) : stampX;
+			int sourceY = (flipFlags & eFlipY) ? (height - 1 - stampY) : stampY;
+
+			TileId tileId = stamp.GetTile(sourceX, sourceY);
 			if(tileId != InvalidTileId)
 			{
 				u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
+				tileFlags ^= flipFlags;
+
 				int mapX = stampX + x;
 				int mapY = stampY + y;
 
