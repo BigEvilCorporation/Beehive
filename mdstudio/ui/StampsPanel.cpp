@@ -272,7 +272,7 @@ void StampsPanel::PaintStamps()
 	{
 		Stamp* stamp = m_project->GetStamp(m_stampPosMap[i].first);
 		ion::debug::Assert(stamp, "Invalid stamp");
-		PaintStamp(*stamp, m_stampPosMap[i].second.x, m_stampPosMap[i].second.y);
+		PaintStamp(*stamp, m_stampPosMap[i].second.x, m_stampPosMap[i].second.y, 0);
 	}
 }
 

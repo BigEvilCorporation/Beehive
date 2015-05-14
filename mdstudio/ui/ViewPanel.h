@@ -71,10 +71,10 @@ protected:
 	void CacheTileIndices();
 
 	//Paint single tile to canvas
-	void PaintTile(TileId tileId, int x, int y, bool flipX, bool flipY);
+	void PaintTile(TileId tileId, int x, int y, u32 flipFlags);
 
 	//Paint stamp to canvas
-	void PaintStamp(const Stamp& stamp, int x, int y);
+	void PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags);
 
 	//Fill selection with single tile
 	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
@@ -87,7 +87,7 @@ protected:
 	int GetTileIndex(TileId tileId) const;
 
 	//Get tileset UV coords for tile
-	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], bool flipX, bool flipY) const;
+	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
 
 	//Centre camera on canvas
 	void CentreCamera();
