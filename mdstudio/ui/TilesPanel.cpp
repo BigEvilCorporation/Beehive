@@ -241,8 +241,6 @@ void TilesPanel::InitPanel()
 		//Paint all tiles to canvas
 		wxMemoryDC dc(m_canvas);
 		PaintAllToDc(dc);
-
-		m_project->InvalidateTiles(false);
 	}
 }
 

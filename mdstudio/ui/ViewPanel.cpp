@@ -15,6 +15,8 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 	m_cellSizeTexSpaceSq = 1.0f;
 	m_panelSize = size;
 	m_prevMouseBits = 0;
+	m_enableZoom = true;
+	m_enablePan = true;
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 
@@ -467,55 +469,61 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 		//Camera pan/zoom
 		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 		{
-			//Pan camera (invert Y for OpenGL)
-			ion::Vector3 cameraPos = m_camera.GetPosition();
-			cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
-			cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
-			m_camera.SetPosition(cameraPos);
+			if(m_enablePan)
+			{
+				//Pan camera (invert Y for OpenGL)
+				ion::Vector3 cameraPos = m_camera.GetPosition();
+				cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
+				cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
+				m_camera.SetPosition(cameraPos);
 
-			//Invalidate rect
-			Refresh();
+				//Invalidate rect
+				Refresh();
+			}
 		}
 		else if(event.GetWheelRotation() != 0)
 		{
-			float prevZoom = m_cameraZoom;
-
-			//Zoom camera
-			int wheelDelta = event.GetWheelRotation();
-			float zoomSpeed = 1.0f;
-
-			//Reduce speed for <1.0f
-			if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
+			if(m_enableZoom)
 			{
-				zoomSpeed = 0.2f;
+				float prevZoom = m_cameraZoom;
+
+				//Zoom camera
+				int wheelDelta = event.GetWheelRotation();
+				float zoomSpeed = 1.0f;
+
+				//Reduce speed for <1.0f
+				if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
+				{
+					zoomSpeed = 0.2f;
+				}
+
+				//One notch at a time
+				if(wheelDelta > 0)
+					m_cameraZoom += zoomSpeed;
+				else if(wheelDelta < 0)
+					m_cameraZoom -= zoomSpeed;
+
+				//Clamp
+				if(m_cameraZoom < 0.2f)
+					m_cameraZoom = 0.2f;
+				else if(m_cameraZoom > 10.0f)
+					m_cameraZoom = 10.0f;
+
+				//Set camera zoom
+				m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+
+				//Compensate camera pos
+				wxSize panelSize = GetClientSize();
+				ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
+				ion::Vector2 newViewportSize((float)panelSize.x / m_cameraZoom, (float)panelSize.y / m_cameraZoom);
+				ion::Vector3 cameraPos = m_camera.GetPosition();
+				cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
+				cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
+				m_camera.SetPosition(cameraPos);
+
+				//Invalidate rect
+				Refresh();
 			}
-
-			//One notch at a time
-			if(wheelDelta > 0)
-				m_cameraZoom += zoomSpeed;
-			else if(wheelDelta < 0)
-				m_cameraZoom -= zoomSpeed;
-
-			//Clamp
-			if(m_cameraZoom < 0.2f)
-				m_cameraZoom = 0.2f;
-			else if(m_cameraZoom > 10.0f)
-				m_cameraZoom = 10.0f;
-
-			//Set camera zoom
-			m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
-
-			//Compensate camera pos
-			wxSize panelSize = GetClientSize();
-			ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
-			ion::Vector2 newViewportSize((float)panelSize.x / m_cameraZoom, (float)panelSize.y / m_cameraZoom);
-			ion::Vector3 cameraPos = m_camera.GetPosition();
-			cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
-			cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
-			m_camera.SetPosition(cameraPos);
-
-			//Invalidate rect
-			Refresh();
 		}
 	}
 }
@@ -553,12 +561,15 @@ void ViewPanel::OnResize(wxSizeEvent& event)
 {
 	wxSize panelSize = GetClientSize();
 
-	//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
-	if(m_panelSize.x != panelSize.x || m_panelSize.y != panelSize.y)
+	if(panelSize.x > 1 && panelSize.y > 1)
 	{
-		m_panelSize = panelSize;
-		m_viewport.Resize(panelSize.x, panelSize.y);
-		CentreCamera();
+		//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
+		if(m_panelSize.x != panelSize.x || m_panelSize.y != panelSize.y)
+		{
+			m_panelSize = panelSize;
+			m_viewport.Resize(panelSize.x, panelSize.y);
+			CentreCamera();
+		}
 	}
 
 	Refresh();

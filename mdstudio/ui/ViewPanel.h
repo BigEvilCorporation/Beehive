@@ -44,7 +44,12 @@ public:
 	//Set current project
 	virtual void SetProject(Project* project);
 
+	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
+
+	//Allow default zoom/pan behaviour
+	void EnableZoom(bool enabled) { m_enableZoom = enabled; }
+	void EnablePan(bool enabled) { m_enablePan = enabled; }
 
 protected:
 	//Event callbacks
@@ -154,4 +159,7 @@ private:
 	void EventHandlerPaint(wxPaintEvent& event);
 	void EventHandlerErase(wxEraseEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
+
+	bool m_enableZoom;
+	bool m_enablePan;
 };

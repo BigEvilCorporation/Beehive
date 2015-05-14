@@ -16,10 +16,19 @@
 #include "UIBase.h"
 #include "../Project.h"
 
+class MainWindow;
+
 class PalettesPanel : public wxPanel
 {
 public:
-	PalettesPanel(	wxWindow *parent,
+	enum Orientation
+	{
+		eHorizontal,
+		eVertical
+	};
+
+	PalettesPanel(	MainWindow* mainWindow,
+					wxWindow *parent,
 					wxWindowID id,
 					const wxPoint& pos = wxDefaultPosition,
 					const wxSize& size = wxDefaultSize,
@@ -31,8 +40,10 @@ public:
 	void OnMouse(wxMouseEvent& event);
 	void OnPaint(wxPaintEvent& event);
 	void OnErase(wxEraseEvent& event);
+	void OnResize(wxSizeEvent& event);
 
 private:
-	static const int colourRectSize = 32;
 	Project* m_project;
+	MainWindow* m_mainWindow;
+	Orientation m_orientation;
 };
