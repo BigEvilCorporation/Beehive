@@ -16,6 +16,8 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	m_currentStampId = InvalidStampId;
 	m_tempStamp = NULL;
 	m_stampPreviewPrimitive = NULL;
+	m_stampPastePos.x = -1;
+	m_stampPastePos.y = -1;
 
 	ResetToolData();
 
@@ -322,6 +324,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 	{
 		//Mouse of of map range, invalidate preview tile
 		m_previewTile = InvalidTileId;
+		m_stampPastePos.x = -1;
+		m_stampPastePos.y = -1;
 	}
 
 	//Refresh
@@ -403,8 +407,6 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			//Redraw map
 			PaintMap(map);
-
-			m_project->InvalidateMap(false);
 		}
 
 		//If current stamp invalidated
@@ -680,7 +682,7 @@ void MapPanel::RenderSelection(ion::render::Renderer& renderer, const ion::Matri
 
 void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	if(m_stampPreviewPrimitive)
+	if(m_stampPreviewPrimitive && m_stampPastePos.x >= 0 && m_stampPastePos.y >= 0)
 	{
 		//Draw temp cloning stamp, else draw current paint stamp
 		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_currentStampId);

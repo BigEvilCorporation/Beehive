@@ -20,6 +20,9 @@ typedef std::map<StampId, Stamp> TStampMap;
 
 class Project
 {
+	//TODO: Add/remove palettes
+	static const int numPalettes = 4;
+
 public:
 	enum BMPImportFlags
 	{
@@ -52,6 +55,7 @@ public:
 
 	//Get palette
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
+	int GetNumPalettes() const { return numPalettes; }
 
 	//Stamps
 	StampId AddStamp(int width, int height);
@@ -120,8 +124,6 @@ private:
 	Map m_map;
 
 	//Palettes
-	//TODO: Add/remove palettes
-	static const int numPalettes = 4;
 	std::vector<Palette> m_palettes;
 
 	//Stamps

@@ -13,6 +13,10 @@ StampsPanel::StampsPanel(MainWindow* mainWindow, ion::render::Renderer& renderer
 	m_selectedStamp = InvalidStampId;
 	m_hoverStamp = InvalidStampId;
 
+	//Custom zoom/pan handling
+	EnableZoom(false);
+	EnablePan(false);
+
 	//Colours
 	m_selectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
 	m_hoverColour = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
@@ -58,6 +62,26 @@ void StampsPanel::OnKeyboard(wxKeyEvent& event)
 void StampsPanel::OnResize(wxSizeEvent& event)
 {
 	ViewPanel::OnResize(event);
+
+	wxSize panelSize = event.GetSize();
+
+	if(panelSize.x > 8 && panelSize.y > 8)
+	{
+		//Rearrange stamps (calculates canvas size)
+		ArrangeStamps(ion::Vector2(panelSize.x, panelSize.y));
+
+		//Recreate canvas
+		CreateCanvas(m_canvasSize.x, m_canvasSize.y);
+
+		//Fill with invalid tile
+		FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasSize.x - 1, m_canvasSize.y - 1));
+
+		//Redraw stamps on canvas
+		PaintStamps();
+
+		//Recreate grid
+		CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project->GetGridSize(), m_canvasSize.y / m_project->GetGridSize());
+	}
 }
 
 void StampsPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
@@ -152,28 +176,31 @@ void StampsPanel::SetProject(Project* project)
 	//Creates tileset texture
 	ViewPanel::SetProject(project);
 
-	//Rearrange stamps (calculates canvas size)
-	ArrangeStamps();
-
-	//Recreate canvas
-	CreateCanvas(m_canvasSize.x, m_canvasSize.y);
-
-	//Fill with invalid tile
-	FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasSize.x - 1, m_canvasSize.y - 1));
-
-	//Recreate grid
-	CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project->GetGridSize(), m_canvasSize.y / m_project->GetGridSize());
+	//Refresh
+	Refresh();
 }
 
 void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(m_project)
 	{
+		//If tiles are invalidated
+		if(m_project->TilesAreInvalidated())
+		{
+			//Recreate tileset texture
+			CreateTilesetTexture(m_project->GetTileset());
+
+			//Recreate index cache
+			CacheTileIndices();
+		}
+
+		wxSize panelSize = GetClientSize();
+
 		//If stamps invalidated
-		if(m_project->StampsAreInvalidated())
+		if(m_project->StampsAreInvalidated() && panelSize.x > 8)
 		{
 			//Rearrange stamps (calculates canvas size)
-			ArrangeStamps();
+			ArrangeStamps(ion::Vector2(panelSize.x, panelSize.y));
 
 			//Recreate canvas
 			CreateCanvas(m_canvasSize.x, m_canvasSize.y);
@@ -184,26 +211,21 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			//Recreate grid
 			CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project->GetGridSize(), m_canvasSize.y / m_project->GetGridSize());
 
-			//Recreate tileset texture
-			CreateTilesetTexture(m_project->GetTileset());
-
-			//Recreate index cache
-			CacheTileIndices();
-
 			//Redraw stamps on canvas
 			PaintStamps();
-
-			m_project->InvalidateStamps(false);
 		}
 	}
 
 	ViewPanel::Refresh(eraseBackground, rect);
 }
 
-void StampsPanel::ArrangeStamps()
+void StampsPanel::ArrangeStamps(const ion::Vector2& panelSize)
 {
-	m_canvasSize.x = 1;
-	m_canvasSize.y = 1;
+	//Fit canvas to panel
+	m_canvasSize.x = ion::maths::Ceil(panelSize.x / 8.0f);
+	m_canvasSize.y = ion::maths::Ceil(panelSize.y / 8.0f);
+
+	//Clear stamp position map
 	m_stampPosMap.clear();
 
 	if(m_project)

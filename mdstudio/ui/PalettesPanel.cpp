@@ -5,10 +5,12 @@
 ///////////////////////////////////////////////////////
 
 #include "PalettesPanel.h"
+#include "MainWindow.h"
 #include <wx/App.h>
 #include <maths/Vector.h>
 
-PalettesPanel::PalettesPanel(	wxWindow *parent,
+PalettesPanel::PalettesPanel(	MainWindow* mainWindow,
+								wxWindow *parent,
 								wxWindowID id,
 								const wxPoint& pos,
 								const wxSize& size,
@@ -17,36 +19,15 @@ PalettesPanel::PalettesPanel(	wxWindow *parent,
 	: wxPanel(parent, id, pos, size, style, name)
 {
 	m_project = NULL;
+	m_mainWindow = mainWindow;
+	m_orientation = eVertical;
 
 	Bind(wxEVT_LEFT_DOWN,		&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_PAINT,			&PalettesPanel::OnPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND,&PalettesPanel::OnErase, this, GetId());
+	Bind(wxEVT_SIZE,			&PalettesPanel::OnResize, this, GetId());
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
-}
-
-namespace
-{
-	wxWindow* FindTop(wxWindow* window)
-	{
-		wxWindow* top = window;
-		if(wxWindow* parent = window->GetParent())
-		{
-			top = FindTop(parent);
-		}
-		return top;
-	}
-
-	void RefreshAll(wxWindow* window)
-	{
-		window->Refresh();
-		window->Update();
-		wxWindowList& children = window->GetChildren();
-		for(wxWindowList::iterator it = children.begin(), end = children.end(); it != end; ++it)
-		{
-			RefreshAll(*it);
-		}
-	}
 }
 
 void PalettesPanel::OnMouse(wxMouseEvent& event)
@@ -58,26 +39,33 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
 		ion::Vector2 mousePosMapSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
 
-		//Get current selection
-		unsigned int colourId = (unsigned int)floor(mousePosMapSpace.x / (float)colourRectSize);
-		unsigned int paletteId = (unsigned int)floor(mousePosMapSpace.y / (float)colourRectSize);
+		//Get panel size
+		wxSize panelSize = GetClientSize();
 
-		if(paletteId < 4 && colourId < Palette::coloursPerPalette)
+		float x = (m_orientation == eVertical) ? mousePosMapSpace.y : mousePosMapSpace.x;
+		float y = (m_orientation == eVertical) ? mousePosMapSpace.x : mousePosMapSpace.y;
+		float colourRectSize = (m_orientation == eVertical) ? (panelSize.y / Palette::coloursPerPalette) : (panelSize.x / Palette::coloursPerPalette);
+
+		//Get current selection
+		unsigned int colourId = (unsigned int)floor(x / colourRectSize);
+		unsigned int paletteId = (unsigned int)floor(y / colourRectSize);
+
+		if(paletteId < 4 && paletteId < m_project->GetNumPalettes())
 		{
 			if(Palette* palette = m_project->GetPalette((PaletteId)paletteId))
 			{
-				wxColourDialog dialogue(this);
-				if(dialogue.ShowModal() == wxID_OK)
+				if(colourId < palette->GetNumColours())
 				{
-					wxColour wxcolour = dialogue.GetColourData().GetColour();
-					Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
-					palette->SetColour(colourId, colour);
+					wxColourDialog dialogue(this);
+					if(dialogue.ShowModal() == wxID_OK)
+					{
+						wxColour wxcolour = dialogue.GetColourData().GetColour();
+						Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
+						palette->SetColour(colourId, colour);
 
-					//Invalidate map
-					m_project->InvalidateMap(true);
-
-					//Redraw all
-					RefreshAll(FindTop(this));
+						//Refresh tiles, stamps and map panels
+						m_mainWindow->RefreshAll();
+					}
 				}
 			}
 		}
@@ -102,17 +90,22 @@ void PalettesPanel::OnPaint(wxPaintEvent& event)
 	//No outline
 	destDC.SetPen(wxNullPen);
 
+	float colourRectSize = (m_orientation == eVertical) ? (clientSize.y / Palette::coloursPerPalette) : (clientSize.x / Palette::coloursPerPalette);
+
 	for(int i = 0; i < 4; i++)
 	{
 		const Palette* palette = m_project->GetPalette(i);
 
 		for(int j = 0; j < palette->GetNumColours(); j++)
 		{
+			int x = (m_orientation == eVertical) ? i : j;
+			int y = (m_orientation == eVertical) ? j : i;
+
 			const Colour& colour = palette->GetColour(j);
 			wxBrush brush;
 			brush.SetColour(wxColour(colour.r, colour.g, colour.b));
 			destDC.SetBrush(brush);
-			destDC.DrawRectangle(j * colourRectSize, i * colourRectSize, colourRectSize, colourRectSize);
+			destDC.DrawRectangle(x * colourRectSize, y * colourRectSize, colourRectSize, colourRectSize);
 		}
 	}
 }
@@ -120,4 +113,33 @@ void PalettesPanel::OnPaint(wxPaintEvent& event)
 void PalettesPanel::OnErase(wxEraseEvent& event)
 {
 	//Ignore event
+}
+
+void PalettesPanel::OnResize(wxSizeEvent& event)
+{
+	if(m_project)
+	{
+		wxSize newSize = event.GetSize();
+
+		if(newSize.x > newSize.y)
+		{
+			//Set new orientation
+			m_orientation = eHorizontal;
+
+			//Limit height
+			int colourRectSize = (newSize.x / Palette::coloursPerPalette);
+			SetMinSize(wxSize(1, colourRectSize * m_project->GetNumPalettes()));
+		}
+		else
+		{
+			//Set new orientation
+			m_orientation = eVertical;
+
+			//Limit width
+			int colourRectSize = (newSize.y / Palette::coloursPerPalette);
+			SetMinSize(wxSize(colourRectSize * m_project->GetNumPalettes(), 1));
+		}
+	}
+
+	Refresh();
 }

@@ -38,7 +38,7 @@ private:
 	void PaintStamps();
 
 	//Recalc all stamp positions and canvas size
-	void ArrangeStamps();
+	void ArrangeStamps(const ion::Vector2& panelSize);
 
 	//Render selection box
 	void RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);

@@ -115,12 +115,12 @@ void MainWindow::ShowPanelPalettes()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 100);
+			paneInfo.BestSize(100, 300);
 			paneInfo.Left();
 			paneInfo.Caption("Palettes");
 			paneInfo.CaptionVisible(true);
 
-			m_palettesPanel = new PalettesPanel(m_dockArea, NewControlId());
+			m_palettesPanel = new PalettesPanel(this, m_dockArea, NewControlId());
 			m_palettesPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_palettesPanel, paneInfo);
 		}
@@ -217,7 +217,7 @@ void MainWindow::ShowPanelToolbox()
 		wxAuiPaneInfo paneInfo;
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(100, 200);
+		paneInfo.BestSize(100, 300);
 		paneInfo.Left();
 		paneInfo.Caption("Toolbox");
 		paneInfo.CaptionVisible(true);
@@ -275,10 +275,24 @@ void MainWindow::RefreshAll()
 
 	if(m_stampsPanel)
 		m_stampsPanel->Refresh();
+
+	if(m_project.get())
+	{
+		m_project->InvalidateMap(false);
+		m_project->InvalidateTiles(false);
+		m_project->InvalidateStamps(false);
+	}
 }
 
 void MainWindow::RefreshPanel(Panel panel)
 {
+	if(m_project.get())
+	{
+		m_project->InvalidateMap(true);
+		m_project->InvalidateTiles(true);
+		m_project->InvalidateStamps(true);
+
+	}
 	switch(panel)
 	{
 	case ePanelMap:
@@ -297,6 +311,13 @@ void MainWindow::RefreshPanel(Panel panel)
 		if(m_palettesPanel)
 			m_palettesPanel->Refresh();
 		break;
+	}
+
+	if(m_project.get())
+	{
+		m_project->InvalidateMap(false);
+		m_project->InvalidateTiles(false);
+		m_project->InvalidateStamps(false);
 	}
 }
 
@@ -449,7 +470,6 @@ void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
 	if(m_project.get())
 	{
 		m_project->GetMap().Clear();
-		m_project->InvalidateMap(true);
 		RefreshPanel(ePanelMap);
 	}
 }
@@ -500,7 +520,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 					}
 				}
 
-				m_project->InvalidateMap(true);
+				//Refresh map panel
 				RefreshPanel(ePanelMap);
 			}
 		}

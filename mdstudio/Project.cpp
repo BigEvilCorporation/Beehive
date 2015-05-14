@@ -46,6 +46,7 @@ void Project::Clear()
 	m_eraseTile = 0;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
+	m_stampsInvalidated = true;
 	m_name = "untitled";
 	m_palettes.resize(numPalettes);
 
@@ -108,7 +109,6 @@ StampId Project::AddStamp(int width, int height)
 {
 	StampId id = m_nextFreeStampId++;
 	m_stamps.insert(std::make_pair(id, Stamp(id, width, height)));
-	InvalidateStamps(true);
 	return id;
 }
 
@@ -119,8 +119,6 @@ void Project::RemoveStamp(StampId stampId)
 	{
 		m_stamps.erase(it);
 	}
-
-	InvalidateStamps(true);
 }
 
 Stamp* Project::GetStamp(StampId stampId)
@@ -433,10 +431,6 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 					//Set in map
 					m_map.SetTile(tileX, tileY, tileId);
 				}
-
-				//Invalidate map
-				InvalidateMap(true);
-				InvalidateTiles(true);
 			}
 		}
 	}
