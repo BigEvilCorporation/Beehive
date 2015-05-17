@@ -15,7 +15,7 @@ public:
 	virtual ~StampsPanel();
 
 	//Events
-	virtual void OnMouse(wxMouseEvent& event);
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
 	virtual void OnKeyboard(wxKeyEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
@@ -42,6 +42,9 @@ private:
 
 	//Render selection box
 	void RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+
+	//Reset zoom/pan
+	void ResetZoomPan();
 
 	//Stamp position map
 	std::vector< std::pair<StampId, ion::Vector2i> > m_stampPosMap;

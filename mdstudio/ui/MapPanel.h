@@ -35,7 +35,7 @@ public:
 	virtual ~MapPanel();
 
 	//Events
-	virtual void OnMouse(wxMouseEvent& event);
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
 	virtual void OnKeyboard(wxKeyEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
@@ -115,9 +115,6 @@ private:
 	///////////////////////////////////////////////////
 	// PAINT STAMP tool
 	///////////////////////////////////////////////////
-
-	//Current paste stamp
-	StampId m_currentStampId;
 
 	//Temp cloning stamp
 	Stamp* m_tempStamp;

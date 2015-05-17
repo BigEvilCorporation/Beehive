@@ -243,6 +243,14 @@ void MainWindow::ShowPanelToolbox()
 	}
 }
 
+void MainWindow::SetMapTool(MapPanel::Tool tool)
+{
+	if(m_mapPanel)
+	{
+		m_mapPanel->SetTool(tool);
+	}
+}
+
 void MainWindow::SyncSettingsWidgets()
 {
 	if(m_project.get())

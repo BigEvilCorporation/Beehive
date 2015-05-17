@@ -41,6 +41,8 @@ public:
 	void ShowPanelMap();
 	void ShowPanelToolbox();
 
+	void SetMapTool(MapPanel::Tool tool);
+
 	void SyncSettingsWidgets();
 
 	void RefreshPanel(Panel panel);

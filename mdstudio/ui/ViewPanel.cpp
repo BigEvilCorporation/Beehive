@@ -85,7 +85,12 @@ ViewPanel::~ViewPanel()
 
 void ViewPanel::EventHandlerMouse(wxMouseEvent& event)
 {
-	OnMouse(event);
+	//Get mouse delta
+	ion::Vector2 mousePosScreenSpace(event.GetX(), event.GetY());
+	ion::Vector2 mouseDelta = m_mousePrevPos - mousePosScreenSpace;
+	m_mousePrevPos = mousePosScreenSpace;
+
+	OnMouse(event, mouseDelta);
 	event.Skip();
 }
 
@@ -410,7 +415,7 @@ void ViewPanel::CacheTileIndices()
 	}
 }
 
-void ViewPanel::OnMouse(wxMouseEvent& event)
+void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 {
 	if(m_project)
 	{
@@ -419,11 +424,6 @@ void ViewPanel::OnMouse(wxMouseEvent& event)
 
 		const int tileWidth = 8;
 		const int tileHeight = 8;
-
-		//Get mouse delta
-		ion::Vector2 mousePosScreenSpace(event.GetX(), event.GetY());
-		ion::Vector2 mouseDelta = m_mousePrevPos - mousePosScreenSpace;
-		m_mousePrevPos = mousePosScreenSpace;
 
 		//Get mouse position in panel space
 		wxClientDC clientDc(this);
