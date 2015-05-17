@@ -13,7 +13,6 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 {
 	
 	m_currentTool = eToolPaintTile;
-	m_currentStampId = InvalidStampId;
 	m_tempStamp = NULL;
 	m_stampPreviewPrimitive = NULL;
 	m_stampPastePos.x = -1;
@@ -59,9 +58,9 @@ MapPanel::~MapPanel()
 	delete m_selectionPixelShader;
 }
 
-void MapPanel::OnMouse(wxMouseEvent& event)
+void MapPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 {
-	ViewPanel::OnMouse(event);
+	ViewPanel::OnMouse(event, mouseDelta);
 }
 
 void MapPanel::OnKeyboard(wxKeyEvent& event)
@@ -286,7 +285,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 			case eToolPaintStamp:
 			{
 				//Paint temp cloning stamp, else Paint current paint stamp
-				Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_currentStampId);
+				Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_project->GetPaintStamp());
 				if(stamp)
 				{
 					//Update paste pos
@@ -408,15 +407,6 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			//Redraw map
 			PaintMap(map);
 		}
-
-		//If current stamp invalidated
-		if(m_currentStampId != m_project->GetPaintStamp())
-		{
-			//New stamp selected in stamp panel, set stamp paint tool
-			ResetToolData();
-			m_currentStampId = m_project->GetPaintStamp();
-			SetTool(eToolPaintStamp);
-		}
 	}
 
 	ViewPanel::Refresh(eraseBackground, rect);
@@ -471,7 +461,7 @@ void MapPanel::SetTool(Tool tool)
 			}
 
 			//Get temp cloning stamp, else get current painting stamp
-			Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_currentStampId);
+			Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_project->GetPaintStamp());
 			if(stamp)
 			{
 				//Create preview primitive
@@ -685,7 +675,7 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 	if(m_stampPreviewPrimitive && m_stampPastePos.x >= 0 && m_stampPastePos.y >= 0)
 	{
 		//Draw temp cloning stamp, else draw current paint stamp
-		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_currentStampId);
+		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_project->GetPaintStamp());
 		if(stamp)
 		{
 			const Map& map = m_project->GetMap();

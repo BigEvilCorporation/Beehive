@@ -49,9 +49,45 @@ StampsPanel::~StampsPanel()
 
 }
 
-void StampsPanel::OnMouse(wxMouseEvent& event)
+void StampsPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 {
-	ViewPanel::OnMouse(event);
+	ViewPanel::OnMouse(event, mouseDelta);
+
+	//Camera pan Y (if canvas is taller than panel)
+	wxSize panelSize = GetClientSize();
+	if((m_canvasSize.y * 8.0f) > (panelSize.y / m_cameraZoom))
+	{
+		float panDeltaY = 0.0f;
+
+		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
+		{
+			panDeltaY = mouseDelta.y;
+		}
+		else if(event.GetWheelRotation() != 0)
+		{
+			panDeltaY = (float)event.GetWheelRotation();
+		}
+
+		if(panDeltaY != 0.0f)
+		{
+			ion::Vector3 cameraPos = m_camera.GetPosition();
+			cameraPos.y += panDeltaY * m_cameraPanSpeed / m_cameraZoom;
+
+			//Clamp to size
+			float halfCanvas = (m_canvasSize.y * 4.0f);
+			float minY = -halfCanvas;
+			float maxY = halfCanvas - ((float)panelSize.y / m_cameraZoom);
+
+			if(cameraPos.y > maxY)
+				cameraPos.y = maxY;
+			else if(cameraPos.y < minY)
+				cameraPos.y = minY;
+
+			m_camera.SetPosition(cameraPos);
+
+			Refresh();
+		}
+	}
 }
 
 void StampsPanel::OnKeyboard(wxKeyEvent& event)
@@ -81,6 +117,9 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 
 		//Recreate grid
 		CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project->GetGridSize(), m_canvasSize.y / m_project->GetGridSize());
+
+		//Reset zoom/pan
+		ResetZoomPan();
 	}
 }
 
@@ -127,8 +166,8 @@ void StampsPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int 
 		//Set as current painting stamp
 		m_project->SetPaintStamp(selectedStamp);
 
-		//Refresh map panel to redraw stamp preview
-		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		//Set stamp paint tool
+		m_mainWindow->SetMapTool(MapPanel::eToolPaintStamp);
 	}
 
 	//Redraw
@@ -213,6 +252,9 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			//Redraw stamps on canvas
 			PaintStamps();
+
+			//Reset zoom/pan
+			ResetZoomPan();
 		}
 	}
 
@@ -321,4 +363,14 @@ void StampsPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, 
 	renderer.DrawVertexBuffer(m_selectionPrimitive->GetVertexBuffer(), m_selectionPrimitive->GetIndexBuffer());
 	m_selectionMaterial->Unbind();
 	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+}
+
+void StampsPanel::ResetZoomPan()
+{
+	wxSize panelSize = GetClientSize();
+	m_cameraZoom = (float)panelSize.x / (m_canvasSize.x * 8.0f);
+	ion::Vector3 cameraPos(-(panelSize.x / 2.0f / m_cameraZoom), -(panelSize.y / 2.0f / m_cameraZoom), 0.0f);
+
+	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+	m_camera.SetPosition(cameraPos);
 }
