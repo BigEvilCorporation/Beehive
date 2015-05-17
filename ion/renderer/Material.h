@@ -80,6 +80,7 @@ namespace ion
 
 			//Texture maps
 			void AddDiffuseMap(Texture* diffuse);
+			void SetDiffuseMap(Texture* diffuse, int diffuseMapIdx);
 			void SetNormalMap(Texture* normal);
 			void SetSpecularMap(Texture* specular);
 			void SetOpacityMap(Texture* opacity);

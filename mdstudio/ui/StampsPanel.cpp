@@ -206,7 +206,7 @@ void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 	//Render grid
 	if(m_project->GetShowGrid())
 	{
-		RenderGrid(m_renderer, cameraInverseMtx, projectionMtx, z);
+		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	}
 }
 

@@ -23,6 +23,7 @@ PalettesPanel::PalettesPanel(	MainWindow* mainWindow,
 	m_orientation = eVertical;
 
 	Bind(wxEVT_LEFT_DOWN,		&PalettesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_LEFT_DCLICK,		&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_PAINT,			&PalettesPanel::OnPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND,&PalettesPanel::OnErase, this, GetId());
 	Bind(wxEVT_SIZE,			&PalettesPanel::OnResize, this, GetId());
@@ -32,39 +33,51 @@ PalettesPanel::PalettesPanel(	MainWindow* mainWindow,
 
 void PalettesPanel::OnMouse(wxMouseEvent& event)
 {
-	if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+	if(m_project)
 	{
-		//Get mouse position in map space
-		wxClientDC clientDc(this);
-		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
-		ion::Vector2 mousePosMapSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
+		unsigned int colourId = 0;
+		unsigned int paletteId = 0;
 
-		//Get panel size
-		wxSize panelSize = GetClientSize();
-
-		float x = (m_orientation == eVertical) ? mousePosMapSpace.y : mousePosMapSpace.x;
-		float y = (m_orientation == eVertical) ? mousePosMapSpace.x : mousePosMapSpace.y;
-		float colourRectSize = (m_orientation == eVertical) ? (panelSize.y / Palette::coloursPerPalette) : (panelSize.x / Palette::coloursPerPalette);
-
-		//Get current selection
-		unsigned int colourId = (unsigned int)floor(x / colourRectSize);
-		unsigned int paletteId = (unsigned int)floor(y / colourRectSize);
-
-		if(paletteId < 4 && paletteId < m_project->GetNumPalettes())
+		if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 		{
-			if(Palette* palette = m_project->GetPalette((PaletteId)paletteId))
-			{
-				if(colourId < palette->GetNumColours())
-				{
-					wxColourDialog dialogue(this);
-					if(dialogue.ShowModal() == wxID_OK)
-					{
-						wxColour wxcolour = dialogue.GetColourData().GetColour();
-						Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
-						palette->SetColour(colourId, colour);
+			//Get mouse position in map space
+			wxClientDC clientDc(this);
+			wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
+			ion::Vector2 mousePosMapSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
 
-						//Refresh tiles, stamps and map panels
-						m_mainWindow->RefreshAll();
+			//Get panel size
+			wxSize panelSize = GetClientSize();
+
+			float x = (m_orientation == eVertical) ? mousePosMapSpace.y : mousePosMapSpace.x;
+			float y = (m_orientation == eVertical) ? mousePosMapSpace.x : mousePosMapSpace.y;
+			float colourRectSize = (m_orientation == eVertical) ? (panelSize.y / Palette::coloursPerPalette) : (panelSize.x / Palette::coloursPerPalette);
+
+			//Get current selection
+			colourId = (unsigned int)floor(x / colourRectSize);
+			paletteId = (unsigned int)floor(y / colourRectSize);
+
+			//Set current paint colour
+			m_project->SetPaintColour(colourId);
+		}
+
+		if(event.LeftDClick())
+		{
+			if(paletteId < 4 && paletteId < m_project->GetNumPalettes())
+			{
+				if(Palette* palette = m_project->GetPalette((PaletteId)paletteId))
+				{
+					if(colourId < palette->GetNumColours())
+					{
+						wxColourDialog dialogue(this);
+						if(dialogue.ShowModal() == wxID_OK)
+						{
+							wxColour wxcolour = dialogue.GetColourData().GetColour();
+							Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
+							palette->SetColour(colourId, colour);
+
+							//Refresh tiles, stamps and map panels
+							m_mainWindow->RefreshAll();
+						}
 					}
 				}
 			}

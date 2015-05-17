@@ -66,6 +66,10 @@ public:
 	const TStampMap::const_iterator StampsEnd() const;
 	int GetStampCount() const;
 
+	//Set current colour used for editing
+	void SetPaintColour(u8 colourIdx);
+	u8 GetPaintColour() const;
+
 	//Set current tile used for painting
 	void SetPaintTile(TileId tile);
 	TileId GetPaintTile() const;
@@ -129,6 +133,9 @@ private:
 	//Stamps
 	TStampMap m_stamps;
 	StampId m_nextFreeStampId;
+
+	//Colour used for painting
+	u8 m_paintColour;
 
 	//Tile used for painting
 	TileId m_paintTile;

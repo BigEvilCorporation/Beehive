@@ -16,6 +16,7 @@
 #include "TilesPanel.h"
 #include "StampsPanel.h"
 #include "MapPanel.h"
+#include "TileEditorPanel.h"
 
 #include "../Project.h"
 
@@ -29,22 +30,32 @@ public:
 		ePanelMap,
 		ePanelStamps,
 		ePanelTiles,
-		ePanelPalettes
+		ePanelPalettes,
+		ePanelTileEditor
 	};
 
 	MainWindow();
 	virtual ~MainWindow();
 
+	//Open panels
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
 	void ShowPanelMap();
+
+	//Open toolbox
 	void ShowPanelToolbox();
 
+	//Open tile editor
+	void EditTile(TileId tileId);
+
+	//Set current map editing tool
 	void SetMapTool(MapPanel::Tool tool);
 
+	//Sync project settings and their respective UI widget states
 	void SyncSettingsWidgets();
 
+	//Refresh panels
 	void RefreshPanel(Panel panel);
 	void RefreshAll();
 
@@ -76,6 +87,7 @@ private:
 	wxWeakRef<TilesPanel> m_tilesPanel;
 	wxWeakRef<StampsPanel> m_stampsPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
+	wxWeakRef<TileEditorPanel> m_tileEditorPanel;
 	wxWeakRef<MapToolbox> m_toolboxPanel;
 
 	ProjectPtr m_project;
