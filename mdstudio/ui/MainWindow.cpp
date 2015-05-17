@@ -85,6 +85,12 @@ void MainWindow::SetProject(Project* project)
 			delete m_stampsPanel;
 		}
 
+		if(m_tileEditorPanel)
+		{
+			m_auiManager.DetachPane(m_tileEditorPanel);
+			delete m_tileEditorPanel;
+		}
+
 		//Delete previous, set new
 		m_project.reset(project);
 
@@ -121,8 +127,11 @@ void MainWindow::ShowPanelPalettes()
 			paneInfo.CaptionVisible(true);
 
 			m_palettesPanel = new PalettesPanel(this, m_dockArea, NewControlId());
-			m_palettesPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_palettesPanel, paneInfo);
+			m_palettesPanel->Show();
+
+			m_palettesPanel->SetProject(m_project.get());
+			
 		}
 
 		if(!m_palettesPanel->IsShown())
@@ -146,9 +155,11 @@ void MainWindow::ShowPanelTiles()
 			paneInfo.Caption("Tiles");
 			paneInfo.CaptionVisible(true);
 			
-			m_tilesPanel = new TilesPanel(m_dockArea, NewControlId(), wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxALWAYS_SHOW_SB);
-			m_tilesPanel->SetProject(m_project.get());
+			m_tilesPanel = new TilesPanel(this, m_dockArea, NewControlId(), wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxALWAYS_SHOW_SB);
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
+			m_tilesPanel->Show();
+
+			m_tilesPanel->SetProject(m_project.get());
 		}
 
 		if(!m_tilesPanel->IsShown())
@@ -173,8 +184,10 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.CaptionVisible(true);
 
 			m_stampsPanel = new StampsPanel(this, *m_renderer, m_context, m_dockArea, NewControlId());
-			m_stampsPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_stampsPanel, paneInfo);
+			m_stampsPanel->Show();
+
+			m_stampsPanel->SetProject(m_project.get());
 		}
 
 		if(!m_stampsPanel->IsShown())
@@ -199,8 +212,10 @@ void MainWindow::ShowPanelMap()
 			paneInfo.CaptionVisible(true);
 
 			m_mapPanel = new MapPanel(this, *m_renderer, m_context, m_dockArea, NewControlId());
-			m_mapPanel->SetProject(m_project.get());
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
+			m_mapPanel->Show();
+
+			m_mapPanel->SetProject(m_project.get());
 		}
 
 		if(!m_mapPanel->IsShown())
@@ -240,6 +255,43 @@ void MainWindow::ShowPanelToolbox()
 	if(!m_toolboxPanel->IsShown())
 	{
 		m_toolboxPanel->Show();
+	}
+}
+
+void MainWindow::EditTile(TileId tileId)
+{
+	if(m_project.get())
+	{
+		if(!m_tileEditorPanel)
+		{
+			wxSize clientSize = GetClientSize();
+
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.FloatingPosition(wxPoint((clientSize.x / 2) - (paneInfo.best_size.x / 2), (clientSize.y / 2) - (paneInfo.best_size.y / 2)));
+			paneInfo.Float();
+			paneInfo.Caption("Tile Editor");
+			paneInfo.CaptionVisible(true);
+
+			m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
+			m_tileEditorPanel->Show();
+			m_auiManager.Update();
+
+			m_tileEditorPanel->SetProject(m_project.get());
+			m_tileEditorPanel->SetTile(tileId);
+		}
+		else
+		{
+			m_tileEditorPanel->SetTile(tileId);
+		}
+
+		if(!m_tileEditorPanel->IsShown())
+		{
+			m_tileEditorPanel->Show();
+		}
 	}
 }
 
@@ -284,6 +336,9 @@ void MainWindow::RefreshAll()
 	if(m_stampsPanel)
 		m_stampsPanel->Refresh();
 
+	if(m_tileEditorPanel)
+		m_tileEditorPanel->Refresh();
+
 	if(m_project.get())
 	{
 		m_project->InvalidateMap(false);
@@ -318,6 +373,10 @@ void MainWindow::RefreshPanel(Panel panel)
 	case ePanelPalettes:
 		if(m_palettesPanel)
 			m_palettesPanel->Refresh();
+		break;
+	case ePanelTileEditor:
+		if(m_tileEditorPanel)
+			m_tileEditorPanel->Refresh();
 		break;
 	}
 
@@ -540,6 +599,7 @@ void MainWindow::OnBtnGridShow(wxCommandEvent& event)
 	if(m_project.get())
 	{
 		m_project->SetShowGrid(!m_project->GetShowGrid());
+		RefreshAll();
 	}
 }
 

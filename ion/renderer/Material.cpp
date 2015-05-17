@@ -6,8 +6,9 @@
 ///////////////////////////////////////////////////
 
 #include "renderer/Material.h"
-
 #include "core/debug/Debug.h"
+
+#include <algorithm>
 
 namespace ion
 {
@@ -182,6 +183,11 @@ namespace ion
 		void Material::AddDiffuseMap(Texture* diffuse)
 		{
 			mDiffuseMaps.push_back(diffuse);
+		}
+
+		void Material::SetDiffuseMap(Texture* diffuse, int diffuseMapIdx)
+		{
+			mDiffuseMaps.insert(mDiffuseMaps.begin() + diffuseMapIdx, diffuse);
 		}
 
 		void Material::SetNormalMap(Texture* normal)

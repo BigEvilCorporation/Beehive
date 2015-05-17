@@ -15,10 +15,12 @@
 #include "UIBase.h"
 #include "../Project.h"
 
+class MainWindow;
+
 class TilesPanel : public wxPanel
 {
 public:
-	TilesPanel(wxWindow* parent, wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxVSCROLL, const wxString& name = "scrolledWindow");
+	TilesPanel(MainWindow* mainWindow, wxWindow* parent, wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxVSCROLL, const wxString& name = "scrolledWindow");
 
 	void SetProject(Project* project);
 
@@ -39,7 +41,12 @@ private:
 	//Invalidate tile rect
 	void InvalidateTileRect(int tileId);
 
+	//Project
 	Project* m_project;
+
+	//Main window
+	MainWindow* m_mainWindow;
+
 	float m_zoom;
 	int m_currentSelectionLeft;
 	int m_currentSelectionRight;

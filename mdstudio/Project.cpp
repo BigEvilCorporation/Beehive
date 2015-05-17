@@ -13,6 +13,7 @@
 
 Project::Project()
 {
+	m_paintColour = 0;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
 	m_paintStamp = InvalidStampId;
@@ -160,6 +161,16 @@ const TStampMap::const_iterator Project::StampsEnd() const
 int Project::GetStampCount() const
 {
 	return m_stamps.size();
+}
+
+void Project::SetPaintColour(u8 colourIdx)
+{
+	m_paintColour = colourIdx;
+}
+
+u8 Project::GetPaintColour() const
+{
+	return m_paintColour;
 }
 
 void Project::SetPaintTile(TileId tile)

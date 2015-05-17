@@ -180,8 +180,6 @@ void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
 
-	int mapWidth = m_project->GetMap().GetWidth();
-	int mapHeight = m_project->GetMap().GetHeight();
 	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), cellsX, cellsY);
 }
 

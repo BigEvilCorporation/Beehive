@@ -37,6 +37,8 @@ local SRC =
 	ui/ViewPanel.h
 	ui/StampsPanel.cpp
 	ui/StampsPanel.h
+	ui/TileEditorPanel.cpp
+	ui/TileEditorPanel.h
 	ui/TileRendering.cpp
 	ui/TileRendering.h
 	ui/TilesPanel.cpp

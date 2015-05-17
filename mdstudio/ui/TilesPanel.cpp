@@ -6,16 +6,18 @@
 
 #include "TilesPanel.h"
 #include "TileRendering.h"
+#include "MainWindow.h"
 
 #include <algorithm>
 
 #include <maths/Vector.h>
 
-TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+TilesPanel::TilesPanel(MainWindow* mainWindow, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxPanel(parent, id, pos, size, style, name)
 	, m_canvas(8, 8)
 	, m_scrollHelper(this)
 {
+	m_mainWindow = mainWindow;
 	m_project = NULL;
 	m_zoom = 4.0f;
 	m_currentSelectionLeft = -1;
@@ -26,6 +28,7 @@ TilesPanel::TilesPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
 
 	Bind(wxEVT_LEFT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_RIGHT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_LEFT_DCLICK,		 &TilesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_MOUSEWHEEL,		 &TilesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_PAINT,			 &TilesPanel::OnPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND, &TilesPanel::OnErase, this, GetId());
@@ -41,6 +44,8 @@ void TilesPanel::SetProject(Project* project)
 
 void TilesPanel::OnMouse(wxMouseEvent& event)
 {
+	TileId tileId = InvalidTileId;
+
 	if(event.ButtonIsDown(wxMOUSE_BTN_LEFT) || event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
 	{
 		//Get mouse position
@@ -63,8 +68,6 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 		{
 			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 			{
-				TileId tileId = 0;
-
 				//TODO: Very slow, use indexed multimap
 				auto it = m_project->GetTileset().Begin();
 				auto end = m_project->GetTileset().End();
@@ -130,6 +133,12 @@ void TilesPanel::OnMouse(wxMouseEvent& event)
 
 		//Invalidate whole frame
 		Refresh();
+	}
+
+	if(event.LeftDClick() && tileId)
+	{
+		//Left double-click, edit tile
+		m_mainWindow->EditTile(tileId);
 	}
 
 	event.Skip();
