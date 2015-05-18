@@ -47,15 +47,17 @@ public:
 
 	int AddColour(const Colour& colour);
 	void SetColour(int colourIdx, const Colour& colour);
-	const Colour& GetColour(int colourIdx) const;
-	const bool GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const;
+	bool IsColourUsed(int colourIdx) const;
 
-	int GetNumColours() const;
+	const Colour& GetColour(int colourIdx) const;
+	bool GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const;
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
 
 private:
+	void MarkUsed(int colourIdx);
+
 	std::vector<Colour> m_colours;
-	int m_numColours;
+	u16 m_usedColours;
 };

@@ -41,7 +41,7 @@ u16 Colour::ToVDPFormat() const
 Palette::Palette()
 {
 	m_colours.resize(coloursPerPalette);
-	m_numColours = 0;
+	m_usedColours = 0;
 }
 
 void Palette::Clear()
@@ -52,18 +52,32 @@ void Palette::Clear()
 	}
 }
 
-int Palette::GetNumColours() const
+bool Palette::IsColourUsed(int colourIdx) const
 {
-	return m_numColours;
+	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
+	return (m_usedColours & (1 << colourIdx)) != 0;
+}
+
+void Palette::MarkUsed(int colourIdx)
+{
+	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
+	m_usedColours |= (1 << colourIdx);
 }
 
 int Palette::AddColour(const Colour& colour)
 {
 	int index = -1;
 
-	if(m_numColours < coloursPerPalette)
+	for(int i = 0; i < coloursPerPalette && index == -1; i++)
 	{
-		index = m_numColours++;
+		if(!IsColourUsed(i))
+		{
+			index = i;
+		}
+	}
+
+	if(index >= 0)
+	{
 		SetColour(index, colour);
 	}
 
@@ -72,26 +86,30 @@ int Palette::AddColour(const Colour& colour)
 
 void Palette::SetColour(int colourIdx, const Colour& colour)
 {
-	ion::debug::Assert(colourIdx < m_numColours, "Out of range");
+	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
+	MarkUsed(colourIdx);
 	m_colours[colourIdx] = colour;
 }
 
 const Colour& Palette::GetColour(int colourIdx) const
 {
-	ion::debug::Assert(colourIdx < m_numColours, "Out of range");
+	ion::debug::Assert(IsColourUsed(colourIdx), "Colour not in use");
 	return m_colours[colourIdx];
 }
 
-const bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const
+bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const
 {
 	if(algorithm == eExact)
 	{
-		for(int i = 0; i < m_numColours; i++)
+		for(int i = 0; i < coloursPerPalette; i++)
 		{
-			if(m_colours[i] == colour)
+			if(IsColourUsed(i))
 			{
-				colourIdx = i;
-				return true;
+				if(m_colours[i] == colour)
+				{
+					colourIdx = i;
+					return true;
+				}
 			}
 		}
 	}
@@ -102,7 +120,7 @@ const bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo 
 void Palette::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_colours);
-	archive.Serialise(m_numColours);
+	archive.Serialise(m_usedColours);
 }
 
 void Palette::Export(std::stringstream& stream) const
@@ -113,11 +131,7 @@ void Palette::Export(std::stringstream& stream) const
 	{
 		stream << "\tdc.w\t0x";
 
-		u32 value = 0;
-		if(i < m_numColours)
-		{
-			value = m_colours[i].ToVDPFormat();
-		}
+		u32 value = m_colours[i].ToVDPFormat();
 
 		stream << std::setw(4) << (u32)m_colours[i].ToVDPFormat() << std::endl;
 	}

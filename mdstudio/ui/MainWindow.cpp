@@ -499,6 +499,9 @@ void MainWindow::RefreshAll()
 
 void MainWindow::RedrawAll()
 {
+	if(m_project.get())
+		CreateTilesetTexture(m_project->GetTileset());
+
 	if(m_palettesPanel)
 		m_palettesPanel->Refresh();
 
