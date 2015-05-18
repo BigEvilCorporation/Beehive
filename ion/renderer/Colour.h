@@ -22,6 +22,8 @@ namespace ion
 		Colour();
 		Colour(float red, float green, float blue);
 		Colour(float red, float green, float blue, float alpha);
+		Colour(u8 red, u8 green, u8 blue);
+		Colour(u8 red, u8 green, u8 blue, u8 alpha);
 
 		//TODO: Convertions - RGBA, hue/sat, etc...
 

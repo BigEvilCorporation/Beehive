@@ -1,18 +1,18 @@
 #include "ViewPanel.h"
+#include "MainWindow.h"
 
-ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxGLCanvas(parent, glContext, winid, pos, size, style, name, NULL, wxNullPalette)
 	, m_renderer(renderer)
 	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
 {
 	m_project = NULL;
 	m_mainWindow = mainWindow;
+	m_tilesetTexture = tilesetTexture;
 	m_canvasPrimitive = NULL;
 	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;
 	m_cameraPanSpeed = 1.0f;
-	m_tilesetSizeSq = 1;
-	m_cellSizeTexSpaceSq = 1.0f;
 	m_panelSize = size;
 	m_prevMouseBits = 0;
 	m_enableZoom = true;
@@ -35,9 +35,6 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 	{
 		ion::debug::Error("Error loading pixel shader");
 	}
-
-	//Create tileset texture
-	m_tilesetTexture = ion::render::Texture::Create();
 
 	//Create map material
 	m_canvasMaterial = new ion::render::Material();
@@ -72,7 +69,6 @@ ViewPanel::~ViewPanel()
 {
 	delete m_canvasMaterial;
 	delete m_gridMaterial;
-	delete m_tilesetTexture;
 	delete m_vertexShader;
 	delete m_pixelShader;
 
@@ -149,12 +145,6 @@ void ViewPanel::SetProject(Project* project)
 	//Centre camera on canvas
 	CentreCamera();
 
-	//Recreate tileset texture
-	CreateTilesetTexture(project->GetTileset());
-
-	//Recreate index cache
-	CacheTileIndices();
-
 	//Refresh panel
 	Refresh();
 }
@@ -183,128 +173,13 @@ void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), cellsX, cellsY);
 }
 
-void ViewPanel::CreateTilesetTexture(const Tileset& tileset)
-{
-	const int tileWidth = 8;
-	const int tileHeight = 8;
-
-	u32 numTiles = tileset.GetCount();
-	m_tilesetSizeSq = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles));
-	u32 textureWidth = m_tilesetSizeSq * tileWidth;
-	u32 textureHeight = m_tilesetSizeSq * tileHeight;
-	u32 bytesPerPixel = 3;
-	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
-	m_cellSizeTexSpaceSq = 1.0f / (float)m_tilesetSizeSq;
-
-	u8* data = new u8[textureSize];
-	ion::memory::MemSet(data, 0, textureSize);
-
-	u32 tileIndex = 0;
-
-	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
-	{
-		const Tile& tile = it->second;
-		PaletteId paletteId = tile.GetPaletteId();
-		Palette* palette = m_project->GetPalette(paletteId);
-
-		u32 x = tileIndex % m_tilesetSizeSq;
-		u32 y = tileIndex / m_tilesetSizeSq;
-
-		for(int pixelY = 0; pixelY < 8; pixelY++)
-		{
-			for(int pixelX = 0; pixelX < 8; pixelX++)
-			{
-				//Invert Y for OpenGL
-				int pixelY_OGL = tileHeight - 1 - pixelY;
-				const Colour& colour = palette->GetColour(tile.GetPixelColour(pixelX, pixelY_OGL));
-
-				int destPixelX = (x * tileWidth) + pixelX;
-				int destPixelY = (y * tileHeight) + pixelY;
-				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-				u32 dataOffset = pixelIdx * bytesPerPixel;
-				ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
-				data[dataOffset] = colour.r;
-				data[dataOffset + 1] = colour.g;
-				data[dataOffset + 2] = colour.b;
-			}
-		}
-	}
-
-	m_tilesetTexture->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, data);
-	m_tilesetTexture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
-
-	delete data;
-}
-
-int ViewPanel::GetTileIndex(TileId tileId) const
-{
-	std::map<TileId, u32>::const_iterator it = m_tileIndexMap.find(tileId);
-	ion::debug::Assert(it != m_tileIndexMap.end(), "TileId not found in tileset");
-	return it->second;
-}
-
-void ViewPanel::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const
-{
-	if(tileId == InvalidTileId)
-	{
-		//Invalid tile, use top-left pixel
-		float onePixelTexSpace = m_cellSizeTexSpaceSq / 8.0f;
-
-		//Top left
-		texCoords[0].x = 0.0f;
-		texCoords[0].y = 0.0f;
-		//Bottom left
-		texCoords[1].x = 0.0f;
-		texCoords[1].y = onePixelTexSpace;
-		//Bottom right
-		texCoords[2].x = onePixelTexSpace;
-		texCoords[2].y = onePixelTexSpace;
-		//Top right
-		texCoords[3].x = onePixelTexSpace;
-		texCoords[3].y = 0.0f;
-	}
-	else
-	{
-		//Map tile ID to index
-		u32 tileIndex = GetTileIndex(tileId);
-
-		//Map tile to X/Y on tileset texture
-		int tilesetX = (tileIndex % m_tilesetSizeSq);
-		int tilesetY = (tileIndex / m_tilesetSizeSq);
-		ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
-
-		bool flipX = (flipFlags & Map::eFlipX) != 0;
-		bool flipY = (flipFlags & Map::eFlipY) != 0;
-
-		float top = flipY ? (textureBottomLeft.y) : (textureBottomLeft.y + m_cellSizeTexSpaceSq);
-		float left = flipX ? (textureBottomLeft.x + m_cellSizeTexSpaceSq) : (textureBottomLeft.x);
-		float bottom = flipY ? (textureBottomLeft.y + m_cellSizeTexSpaceSq) : (textureBottomLeft.y);
-		float right = flipX ? (textureBottomLeft.x) : (textureBottomLeft.x + m_cellSizeTexSpaceSq);
-
-		//Top left
-		texCoords[0].x = left;
-		texCoords[0].y = top;
-		//Bottom left
-		texCoords[1].x = left;
-		texCoords[1].y = bottom;
-		//Bottom right
-		texCoords[2].x = right;
-		texCoords[2].y = bottom;
-		//Top right
-		texCoords[3].x = right;
-		texCoords[3].y = top;
-	}
-}
-
 void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 {
 	if(m_project)
 	{
 		//Set texture coords for cell
 		ion::render::TexCoord coords[4];
-		GetTileTexCoords(tileId, coords, flipFlags);
+		m_mainWindow->GetTileTexCoords(tileId, coords, flipFlags);
 		m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 	}
 }
@@ -393,23 +268,6 @@ void ViewPanel::FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, i
 			top = y;
 		if(y > bottom)
 			bottom = y;
-	}
-}
-
-void ViewPanel::CacheTileIndices()
-{
-	m_tileIndexMap.clear();
-
-	if(m_project)
-	{
-		const Tileset& tileset = m_project->GetTileset();
-		u32 tileIndex = 0;
-
-		for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
-		{
-			//Map ID to index
-			m_tileIndexMap.insert(std::make_pair(it->first, tileIndex));
-		}
 	}
 }
 

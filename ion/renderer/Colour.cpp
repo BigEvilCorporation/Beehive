@@ -32,6 +32,22 @@ namespace ion
 		a = alpha;
 	}
 
+	Colour::Colour(u8 red, u8 green, u8 blue)
+	{
+		r = (float)red / 255.0f;
+		g = (float)green / 255.0f;
+		b = (float)blue / 255.0f;
+		a = 1.0f;
+	}
+
+	Colour::Colour(u8 red, u8 green, u8 blue, u8 alpha)
+	{
+		r = (float)red / 255.0f;
+		g = (float)green / 255.0f;
+		b = (float)blue / 255.0f;
+		a = (float)alpha / 255.0f;
+	}
+
 	ColourRGB::ColourRGB()
 	{
 		r = g = b = 1.0f;

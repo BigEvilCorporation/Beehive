@@ -8,7 +8,9 @@
 #pragma once
 
 #include "core/Types.h"
+#include "maths/Vector.h"
 #include "io/Archive.h"
+#include "renderer/Colour.h"
 
 #include <string>
 
@@ -24,7 +26,8 @@ namespace ion
 				eRGB,
 				eBGR,
 				eRGBA,
-				eBGRA
+				eBGRA,
+				eRGBA_DXT5
 			};
 
 			enum BitsPerPixel
@@ -51,19 +54,21 @@ namespace ion
 			};
 
 			static Texture* Create();
-			static Texture* Create(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data);
+			static Texture* Create(u32 width, u32 height, Format sourceFormat, Format destFormat, BitsPerPixel bitsPerPixel, bool generateMipmaps, const u8* data);
 
 			virtual ~Texture();
 
 			u32 GetWidth() const;
 			u32 GetHeight() const;
 
-			virtual bool Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data) { return false; }
+			virtual bool Load(u32 width, u32 height, Format sourceFormat, Format destFormat, BitsPerPixel bitsPerPixel, bool generateMipmaps, const u8* data) { return false; }
 			void SetImageFilename(const std::string& filename);
 
 			virtual void SetMinifyFilter(Filter filter) = 0;
 			virtual void SetMagnifyFilter(Filter filter) = 0;
 			virtual void SetWrapping(Wrapping wrapping) = 0;
+
+			virtual void SetPixel(const ion::Vector2i& position, const Colour& colour) = 0;
 
 			//Serialise
 			static void RegisterSerialiseType(io::Archive& archive);
@@ -71,7 +76,7 @@ namespace ion
 
 		protected:
 			Texture();
-			Texture(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data);
+			Texture(u32 width, u32 height, Format sourceFormat, Format destFormat, BitsPerPixel bitsPerPixel, bool generateMipmaps, const u8* data);
 
 			virtual bool Load() { return false; }
 			virtual void Unload() { }

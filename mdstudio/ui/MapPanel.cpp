@@ -8,8 +8,8 @@
 #include "MainWindow.h"
 #include "TileRendering.h"
 
-MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, parent, winid, pos, size, style, name)
+MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
 {
 	
 	m_currentTool = eToolPaintTile;
@@ -398,12 +398,6 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			//Recreate grid
 			CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
 
-			//Recreate tileset texture
-			CreateTilesetTexture(tileset);
-
-			//Recreate index cache
-			CacheTileIndices();
-
 			//Redraw map
 			PaintMap(map);
 		}
@@ -594,7 +588,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 		//Set preview quad texture coords
 		ion::render::TexCoord coords[4];
 		u32 flipFlags = (m_previewTileFlipX ? Map::eFlipX : 0) | (m_previewTileFlipY ? Map::eFlipY : 0);
-		GetTileTexCoords(m_previewTile, coords, flipFlags);
+		m_mainWindow->GetTileTexCoords(m_previewTile, coords, flipFlags);
 		m_previewPrimitive->SetTexCoords(coords);
 
 		ion::Matrix4 previewQuadMtx;
@@ -756,7 +750,7 @@ void MapPanel::CreateStampPreview(Stamp* stamp)
 		{
 			TileId tileId = stamp->GetTile(x, y);
 			u32 tileFlags = stamp->GetTileFlags(x, y);
-			GetTileTexCoords(tileId, coords, tileFlags);
+			m_mainWindow->GetTileTexCoords(tileId, coords, tileFlags);
 			int y_inv = height - 1 - y;
 			m_stampPreviewPrimitive->SetTexCoords((y_inv * width) + x, coords);
 		}
