@@ -280,15 +280,18 @@ bool Project::ImportPalette(Colour* pixels, Palette& palette)
 
 bool Project::MergePalettes(Palette& dest, const Palette& source)
 {
-	for(int i = 0; i < source.GetNumColours(); i++)
+	for(int i = 0; i < Palette::coloursPerPalette; i++)
 	{
-		const Colour& sourceColour = source.GetColour(i);
-		int colourIdx = 0;
-		if(!dest.GetNearestColourIdx(sourceColour, Palette::eExact, colourIdx))
+		if(source.IsColourUsed(i))
 		{
-			if(!dest.AddColour(sourceColour))
+			const Colour& sourceColour = source.GetColour(i);
+			int colourIdx = 0;
+			if(!dest.GetNearestColourIdx(sourceColour, Palette::eExact, colourIdx))
 			{
-				return false;
+				if(!dest.AddColour(sourceColour))
+				{
+					return false;
+				}
 			}
 		}
 	}
@@ -370,8 +373,27 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 					bool merged = false;
 					if(closestPaletteColourMatches > 0)
 					{
-						int spareColours = Palette::coloursPerPalette - m_palettes[closestPaletteId].GetNumColours();
-						int requiredNewColours = importedPalette.GetNumColours() - closestPaletteColourMatches;
+						int closestPaletteUsedColours = 0;
+						int importedPaletteUsedColours = 0;
+
+						for(int i = 0; i < Palette::coloursPerPalette; i++)
+						{
+							if(m_palettes[closestPaletteId].IsColourUsed(i))
+							{
+								closestPaletteUsedColours++;
+							}
+						}
+
+						for(int i = 0; i < Palette::coloursPerPalette; i++)
+						{
+							if(importedPalette.IsColourUsed(i))
+							{
+								importedPaletteUsedColours++;
+							}
+						}
+
+						int spareColours = Palette::coloursPerPalette - closestPaletteUsedColours;
+						int requiredNewColours = importedPaletteUsedColours - closestPaletteColourMatches;
 
 						if(spareColours >= requiredNewColours)
 						{
