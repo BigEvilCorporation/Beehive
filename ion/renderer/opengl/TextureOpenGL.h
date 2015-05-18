@@ -31,12 +31,14 @@ namespace ion
 			TextureOpenGL();
 			virtual ~TextureOpenGL();
 
-			virtual bool Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data);
+			virtual bool Load(u32 width, u32 height, Format sourceFormat, Format destFormat, BitsPerPixel bitsPerPixel, bool generateMipmaps, const u8* data);
 			GLuint GetTextureId() const;
 
 			virtual void SetMinifyFilter(Filter filter);
 			virtual void SetMagnifyFilter(Filter filter);
 			virtual void SetWrapping(Wrapping wrapping);
+
+			virtual void SetPixel(const ion::Vector2i& position, const Colour& colour);
 
 		protected:
 			virtual bool Load();
@@ -44,6 +46,7 @@ namespace ion
 			static int GetOpenGLMode(Format format, BitsPerPixel bitsPerPixel);
 
 			GLuint mGLTextureId;
+			int mGLFormat;
 		};
 	}
 }

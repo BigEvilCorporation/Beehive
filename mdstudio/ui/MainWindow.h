@@ -9,6 +9,7 @@
 #include <wx/aui/aui.h>
 
 #include <ion/renderer/Renderer.h>
+#include <ion/renderer/Texture.h>
 
 #include "UIBase.h"
 
@@ -52,12 +53,23 @@ public:
 	//Set current map editing tool
 	void SetMapTool(MapPanel::Tool tool);
 
+	//Get tileset UV coords for tile
+	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
+
+	//Edit tileset texture pixel
+	void SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx);
+
 	//Sync project settings and their respective UI widget states
 	void SyncSettingsWidgets();
 
-	//Refresh panels
+	//Refresh/redraw panels
 	void RefreshPanel(Panel panel);
+	void RedrawPanel(Panel panel);
 	void RefreshAll();
+	void RedrawAll();
+
+	//Refresh tileset
+	void RefreshTileset();
 
 protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
@@ -79,7 +91,17 @@ protected:
 	void OnBtnTool(wxCommandEvent& event);
 
 private:
+	//Set current project (opens default panels)
 	void SetProject(Project* project);
+
+	//Create and redraw tileset texture
+	void CreateTilesetTexture(const Tileset& tileset);
+
+	//Create TileID to index cache
+	void CacheTileIndices(const Tileset& tileset);
+
+	//Get tile index into tileset
+	int GetTilesetTexTileIndex(TileId tileId) const;
 
 	wxAuiManager m_auiManager;
 
@@ -100,4 +122,16 @@ private:
 
 	//Blank canvas for creating gobal DC
 	wxWeakRef<wxGLCanvas> m_blankCanvas;
+
+	//Map tile IDs to indices
+	std::map<TileId, u32> m_tileIndexMap;
+
+	//Tileset texture
+	ion::render::Texture* m_tilesetTexture;
+
+	//Tileset size sq
+	u32 m_tilesetSizeSq;
+
+	//Tileset texture cell size sq
+	float m_cellSizeTexSpaceSq;
 };

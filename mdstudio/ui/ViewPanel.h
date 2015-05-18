@@ -38,7 +38,7 @@ public:
 		eMouseRight = 1 << 2
 	};
 
-	ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~ViewPanel();
 
 	//Set current project
@@ -69,12 +69,6 @@ protected:
 	//Create grid
 	void CreateGrid(int width, int height, int cellsX, int cellsY);
 
-	//Create and redraw tileset texture
-	void CreateTilesetTexture(const Tileset& tileset);
-
-	//Create TileID to index cache
-	void CacheTileIndices();
-
 	//Paint single tile to canvas
 	void PaintTile(TileId tileId, int x, int y, u32 flipFlags);
 
@@ -87,12 +81,6 @@ protected:
 
 	//Find bounds from selected tile coords
 	void FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, int& top, int& right, int& bottom) const;
-
-	//Get tile index into tileset
-	int GetTileIndex(TileId tileId) const;
-
-	//Get tileset UV coords for tile
-	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
 
 	//Centre camera on canvas
 	void CentreCamera();
@@ -136,17 +124,8 @@ protected:
 	//Tileset texture
 	ion::render::Texture* m_tilesetTexture;
 
-	//Map tile IDs to indices
-	std::map<TileId, u32> m_tileIndexMap;
-
 	//Canvas size (tiles)
 	ion::Vector2i m_canvasSize;
-
-	//Tileset size sq
-	u32 m_tilesetSizeSq;
-
-	//Tileset texture cell size sq
-	float m_cellSizeTexSpaceSq;
 
 	//Prev panel size (for filtering resize events)
 	wxSize m_panelSize;

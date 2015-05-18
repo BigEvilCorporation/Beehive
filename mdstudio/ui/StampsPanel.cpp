@@ -7,8 +7,8 @@
 #include "StampsPanel.h"
 #include "MainWindow.h"
 
-StampsPanel::StampsPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, parent, winid, pos, size, style, name)
+StampsPanel::StampsPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
 {
 	m_selectedStamp = InvalidStampId;
 	m_hoverStamp = InvalidStampId;
@@ -223,16 +223,6 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(m_project)
 	{
-		//If tiles are invalidated
-		if(m_project->TilesAreInvalidated())
-		{
-			//Recreate tileset texture
-			CreateTilesetTexture(m_project->GetTileset());
-
-			//Recreate index cache
-			CacheTileIndices();
-		}
-
 		wxSize panelSize = GetClientSize();
 
 		//If stamps invalidated

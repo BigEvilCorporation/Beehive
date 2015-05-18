@@ -65,7 +65,7 @@ namespace ion
 				}
 				
 				//Load image to OpenGL texture
-				Load(mWidth, mHeight, format, BitsPerPixel(sdlSurface->format->BytesPerPixel * 8), (const u8*)sdlSurface->pixels);
+				Load(mWidth, mHeight, format, eRGBA_DXT5, BitsPerPixel(sdlSurface->format->BytesPerPixel * 8), true, (const u8*)sdlSurface->pixels);
 
 				//Free SDL surface
 				SDL_FreeSurface(sdlSurface);
@@ -74,7 +74,7 @@ namespace ion
 			return mGLTextureId != 0;
 		}
 
-		bool TextureOpenGL::Load(u32 width, u32 height, Format format, BitsPerPixel bitsPerPixel, const u8* data)
+		bool TextureOpenGL::Load(u32 width, u32 height, Format sourceFormat, Format destFormat, BitsPerPixel bitsPerPixel, bool generateMipmaps, const u8* data)
 		{
 			//Destroy existing texture
 			if(mGLTextureId)
@@ -91,16 +91,20 @@ namespace ion
 			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
 
 			//Generate mipmaps
-			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, generateMipmaps ? GL_TRUE : GL_FALSE);
 
 			//Set default filters
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, generateMipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+
+			//Get GL format
+			mGLFormat = GetOpenGLMode(destFormat, bitsPerPixel);
+			int GLSourceFormat = GetOpenGLMode(sourceFormat, bitsPerPixel);
 
 			//Copy all pixels in SDL surface to GL texture
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, GetOpenGLMode(format, bitsPerPixel), GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, mGLFormat, width, height, 0, GLSourceFormat, GL_UNSIGNED_BYTE, data);
 
 			//Unbind texture
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -126,6 +130,22 @@ namespace ion
 		GLuint TextureOpenGL::GetTextureId() const
 		{
 			return mGLTextureId;
+		}
+
+		void TextureOpenGL::SetPixel(const ion::Vector2i& position, const Colour& colour)
+		{
+			ion::debug::Assert(mGLFormat == GL_RGB || mGLFormat == GL_RGBA, "TextureOpenGL::SetPixel() - Only supported for 24 bit texture formats");
+
+			u8 data[4];
+
+			data[0] = (int)(colour.r * 255);
+			data[1] = (int)(colour.g * 255);
+			data[2] = (int)(colour.b * 255);
+			data[3] = (int)(colour.a * 255);
+
+			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, position.x, position.y, 1, 1, mGLFormat, GL_UNSIGNED_BYTE, data);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 		void TextureOpenGL::SetMinifyFilter(Filter filter)
@@ -234,6 +254,7 @@ namespace ion
 				{
 				case eRGB: return GL_RGB;
 				case eRGBA: return GL_RGBA;
+				case eRGBA_DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				default: break;
 				}
 				break;
@@ -245,7 +266,6 @@ namespace ion
 				default: break;
 				}
 				break;
-
 			default:
 				ion::debug::Error("Unsupported texture data format");
 				break;
