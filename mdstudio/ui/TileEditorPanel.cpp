@@ -9,6 +9,8 @@
 
 #include <ion/renderer/Texture.h>
 
+const float TileEditorPanel::s_defaultZoom = 4.0f;
+
 TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
 {
@@ -129,6 +131,10 @@ void TileEditorPanel::SetTile(TileId tileId)
 	ion::render::TexCoord texCoords[4];
 	m_mainWindow->GetTileTexCoords(m_tileId, texCoords, 0);
 	m_tilePrimitive->SetTexCoords(texCoords);
+
+	//Centre camera and reset zoom
+	CentreCamera();
+	SetCameraZoom(s_defaultZoom);
 
 	//Refresh panel
 	Refresh();
