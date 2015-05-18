@@ -85,6 +85,9 @@ protected:
 	//Centre camera on canvas
 	void CentreCamera();
 
+	//Set camera zoom
+	void SetCameraZoom(float zoom);
+
 	//Rendering
 	void RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);

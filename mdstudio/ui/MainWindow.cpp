@@ -431,36 +431,30 @@ void MainWindow::EditTile(TileId tileId)
 {
 	if(m_project.get())
 	{
-		if(!m_tileEditorPanel)
+		if(m_tileEditorPanel)
 		{
-			wxSize clientSize = GetClientSize();
-
-			wxAuiPaneInfo paneInfo;
-			paneInfo.Dockable(true);
-			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
-			paneInfo.FloatingPosition(wxPoint((clientSize.x / 2) - (paneInfo.best_size.x / 2), (clientSize.y / 2) - (paneInfo.best_size.y / 2)));
-			paneInfo.Float();
-			paneInfo.Caption("Tile Editor");
-			paneInfo.CaptionVisible(true);
-
-			m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
-			m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
-			m_tileEditorPanel->Show();
-			m_auiManager.Update();
-
-			m_tileEditorPanel->SetProject(m_project.get());
-			m_tileEditorPanel->SetTile(tileId);
-		}
-		else
-		{
-			m_tileEditorPanel->SetTile(tileId);
+			m_auiManager.DetachPane(m_tileEditorPanel);
+			delete m_tileEditorPanel;
 		}
 
-		if(!m_tileEditorPanel->IsShown())
-		{
-			m_tileEditorPanel->Show();
-		}
+		wxSize clientSize = GetClientSize();
+
+		wxAuiPaneInfo paneInfo;
+		paneInfo.Dockable(true);
+		paneInfo.DockFixed(false);
+		paneInfo.BestSize(300, 300);
+		paneInfo.FloatingPosition(wxPoint((clientSize.x / 2) - (paneInfo.best_size.x / 2), (clientSize.y / 2) - (paneInfo.best_size.y / 2)));
+		paneInfo.Float();
+		paneInfo.Caption("Tile Editor");
+		paneInfo.CaptionVisible(true);
+
+		m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
+		m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
+		m_tileEditorPanel->Show();
+		m_auiManager.Update();
+
+		m_tileEditorPanel->SetProject(m_project.get());
+		m_tileEditorPanel->SetTile(tileId);
 	}
 }
 

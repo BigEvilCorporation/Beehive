@@ -341,41 +341,32 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 		{
 			if(m_enableZoom)
 			{
-				float prevZoom = m_cameraZoom;
+				float zoom = m_cameraZoom;
 
 				//Zoom camera
 				int wheelDelta = event.GetWheelRotation();
 				float zoomSpeed = 1.0f;
 
 				//Reduce speed for <1.0f
-				if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
+				if((wheelDelta < 0 && zoom <= 1.0f) || (wheelDelta > 0 && zoom < 1.0f))
 				{
 					zoomSpeed = 0.2f;
 				}
 
 				//One notch at a time
 				if(wheelDelta > 0)
-					m_cameraZoom += zoomSpeed;
+					zoom += zoomSpeed;
 				else if(wheelDelta < 0)
-					m_cameraZoom -= zoomSpeed;
+					zoom -= zoomSpeed;
 
 				//Clamp
-				if(m_cameraZoom < 0.2f)
-					m_cameraZoom = 0.2f;
-				else if(m_cameraZoom > 10.0f)
-					m_cameraZoom = 10.0f;
+				if(zoom < 0.2f)
+					zoom = 0.2f;
+				else if(zoom > 10.0f)
+					zoom = 10.0f;
 
 				//Set camera zoom
-				m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
-
-				//Compensate camera pos
-				wxSize panelSize = GetClientSize();
-				ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
-				ion::Vector2 newViewportSize((float)panelSize.x / m_cameraZoom, (float)panelSize.y / m_cameraZoom);
-				ion::Vector3 cameraPos = m_camera.GetPosition();
-				cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
-				cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
-				m_camera.SetPosition(cameraPos);
+				SetCameraZoom(zoom);
 
 				//Invalidate rect
 				Refresh();
@@ -436,4 +427,23 @@ void ViewPanel::CentreCamera()
 	wxRect clientRect = GetClientRect();
 	ion::Vector3 cameraPos(-(clientRect.width / 2.0f), -(clientRect.height / 2.0f), 0.0f);
 	m_camera.SetPosition(cameraPos);
+}
+
+void ViewPanel::SetCameraZoom(float zoom)
+{
+	float prevZoom = m_cameraZoom;
+
+	//Set camera zoom
+	m_camera.SetZoom(ion::Vector3(zoom, zoom, 1.0f));
+
+	//Compensate camera pos
+	wxSize panelSize = GetClientSize();
+	ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
+	ion::Vector2 newViewportSize((float)panelSize.x / zoom, (float)panelSize.y / zoom);
+	ion::Vector3 cameraPos = m_camera.GetPosition();
+	cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
+	cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
+	m_camera.SetPosition(cameraPos);
+
+	m_cameraZoom = zoom;
 }
