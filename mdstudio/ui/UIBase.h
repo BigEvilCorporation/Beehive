@@ -50,16 +50,18 @@
 #define wxID_BTN_MAP_CLEAR 1011
 #define wxID_BTN_MAP_RESIZE 1012
 #define wxID_BTN_TILES_IMPORT 1013
-#define wxID_BTN_CANCEL 1014
-#define wxID_TOOL_SELECT 1015
-#define wxID_TOOL_PAINT 1016
-#define wxID_TOOL_STAMP 1017
-#define wxID_TOOL_PICKER 1018
-#define wxID_TOOL_FLIPX 1019
-#define wxID_TOOL_FLIPY 1020
-#define wxID_TOOL_FILL 1021
-#define wxID_TOOL_CLONE 1022
-#define wxID_TOOL_CREATESTAMP 1023
+#define wxID_BTN_TILES_CREATE 1014
+#define wxID_BTN_TILES_DELETE 1015
+#define wxID_BTN_CANCEL 1016
+#define wxID_TOOL_SELECT 1017
+#define wxID_TOOL_PAINT 1018
+#define wxID_TOOL_STAMP 1019
+#define wxID_TOOL_PICKER 1020
+#define wxID_TOOL_FLIPX 1021
+#define wxID_TOOL_FLIPY 1022
+#define wxID_TOOL_FILL 1023
+#define wxID_TOOL_CLONE 1024
+#define wxID_TOOL_CREATESTAMP 1025
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -83,8 +85,6 @@ class MainWindowBase : public wxFrame
 		wxRibbonButtonBar* m_ribbonButtonBarMap;
 		wxRibbonPanel* m_ribbonPanelTiles;
 		wxRibbonButtonBar* m_ribbonButtonBarTiles;
-		wxRibbonPanel* m_ribbonPanelPalettes;
-		wxRibbonButtonBar* m_ribbonButtonBarPalettes;
 		wxRibbonPanel* m_ribbonPanelStamps;
 		wxRibbonButtonBar* m_ribbonButtonBarStamps;
 		wxRibbonPanel* m_ribbonPanelCollision;
@@ -107,6 +107,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapResize( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	

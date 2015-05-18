@@ -709,6 +709,94 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 	}
 }
 
+void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		//Add new tile
+		TileId tileId = m_project->GetTileset().AddTile();
+
+		//Rebuild index map
+		CacheTileIndices(m_project->GetTileset());
+
+		//Recreate tileset texture
+		CreateTilesetTexture(m_project->GetTileset());
+
+		//Set as current paint tile
+		m_project->SetPaintTile(tileId);
+
+		//Set paint tool
+		SetMapTool(MapPanel::eToolPaintTile);
+
+		//Refresh tiles panel
+		RefreshPanel(ePanelTiles);
+
+		//Start editing tile
+		EditTile(tileId);
+	}
+}
+
+void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		TileId tileId = m_project->GetPaintTile();
+		if(tileId != InvalidTileId)
+		{
+			Map& map = m_project->GetMap();
+			Tileset& tileset = m_project->GetTileset();
+
+			//Erase tile
+			tileset.RemoveTile(tileId);
+
+			//Get blank tile
+			TileId blankTile = (tileset.GetCount() > 0) ? tileset.Begin()->first : InvalidTileId;
+
+			//Find all uses of tile, set blank
+			for(int x = 0; x < map.GetWidth(); x++)
+			{
+				for(int y = 0; y < map.GetHeight(); y++)
+				{
+					if(map.GetTile(x, y) == tileId)
+					{
+						map.SetTile(x, y, blankTile);
+						map.SetTileFlags(x, y, 0);
+					}
+				}
+			}
+			
+
+			//Set blank paint tile
+			m_project->SetPaintTile(InvalidTileId);
+
+			if(tileId == m_project->GetEraseTile())
+			{
+				//Set blank erase tile
+				m_project->SetEraseTile(InvalidTileId);
+			}
+
+			if(m_tileEditorPanel && m_tileEditorPanel->GetTile() == tileId)
+			{
+				//Currently editing tile, close panel
+				m_auiManager.DetachPane(m_tileEditorPanel);
+				delete m_tileEditorPanel;
+			}
+
+			//Rebuild index map
+			CacheTileIndices(tileset);
+
+			//Recreate tileset texture
+			CreateTilesetTexture(m_project->GetTileset());
+
+			//Revert to select tool
+			SetMapTool(MapPanel::eToolSelect);
+
+			//Refresh
+			RefreshAll();
+		}
+	}
+}
+
 void MainWindow::OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event )
 {
 	ShowPanelToolbox();
