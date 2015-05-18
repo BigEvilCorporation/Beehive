@@ -77,12 +77,13 @@ protected:
 	virtual void OnBtnProjSave(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjSaveAs(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjExport(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event );
-	virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-	virtual void OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event );
-	virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event );
-	virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-	virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event );
+	virtual void OnBtnTilesImport(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnTilesCreate(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnTilesDelete(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnToolsMapEdit(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnToolsTiles(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event) { event.Skip(); }
+	virtual void OnBtnToolsPalettes(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);

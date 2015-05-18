@@ -26,6 +26,7 @@ public:
 
 	//Set editing tile
 	void SetTile(TileId tileId);
+	TileId GetTile() const { return m_tileId; }
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
