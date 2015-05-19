@@ -324,7 +324,7 @@ void MainWindow::ShowPanelTiles()
 			paneInfo.Caption("Tiles");
 			paneInfo.CaptionVisible(true);
 			
-			m_tilesPanel = new TilesPanel(this, m_dockArea, NewControlId(), wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxALWAYS_SHOW_SB);
+			m_tilesPanel = new TilesPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
 			m_tilesPanel->Show();
 

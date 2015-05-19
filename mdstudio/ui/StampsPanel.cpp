@@ -184,10 +184,12 @@ void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 	//Render selected stamp
 	if(m_selectedStamp)
 	{
-		Stamp* stamp = m_project->GetStamp(m_selectedStamp);
-		ion::debug::Assert(stamp, "Invalid stamp");
-		ion::Vector2 size(stamp->GetWidth(), stamp->GetHeight());
-		RenderBox(m_selectedStampPos, size, m_selectColour, renderer, cameraInverseMtx, projectionMtx, z);
+		if(Stamp* stamp = m_project->GetStamp(m_selectedStamp))
+		{
+			ion::debug::Assert(stamp, "Invalid stamp");
+			ion::Vector2 size(stamp->GetWidth(), stamp->GetHeight());
+			RenderBox(m_selectedStampPos, size, m_selectColour, renderer, cameraInverseMtx, projectionMtx, z);
+		}
 	}
 
 	z += zOffset;
@@ -195,10 +197,12 @@ void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 	//Render mouse hover stamp
 	if(m_hoverStamp && m_hoverStamp != m_selectedStamp)
 	{
-		Stamp* stamp = m_project->GetStamp(m_hoverStamp);
-		ion::debug::Assert(stamp, "Invalid stamp");
-		ion::Vector2 size(stamp->GetWidth(), stamp->GetHeight());
-		RenderBox(m_hoverStampPos, size, m_hoverColour, renderer, cameraInverseMtx, projectionMtx, z);
+		if(Stamp* stamp = m_project->GetStamp(m_hoverStamp))
+		{
+			ion::debug::Assert(stamp, "Invalid stamp");
+			ion::Vector2 size(stamp->GetWidth(), stamp->GetHeight());
+			RenderBox(m_hoverStampPos, size, m_hoverColour, renderer, cameraInverseMtx, projectionMtx, z);
+		}
 	}
 
 	z += zOffset;

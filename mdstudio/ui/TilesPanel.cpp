@@ -5,300 +5,319 @@
 ///////////////////////////////////////////////////////
 
 #include "TilesPanel.h"
-#include "TileRendering.h"
 #include "MainWindow.h"
 
 #include <algorithm>
 
-#include <maths/Vector.h>
+const float TilesPanel::s_tileSize = 4.0f;
 
-TilesPanel::TilesPanel(MainWindow* mainWindow, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: wxPanel(parent, id, pos, size, style, name)
-	, m_canvas(8, 8)
-	, m_scrollHelper(this)
+TilesPanel::TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
 {
-	m_mainWindow = mainWindow;
-	m_project = NULL;
-	m_zoom = 4.0f;
-	m_currentSelectionLeft = -1;
-	m_currentSelectionRight = -1;
-	m_tileCount = 0;
-	m_numCols = 0;
-	m_numRows = 0;
+	m_selectedTile = InvalidTileId;
+	m_hoverTile = InvalidTileId;
 
-	Bind(wxEVT_LEFT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
-	Bind(wxEVT_RIGHT_DOWN,		 &TilesPanel::OnMouse, this, GetId());
-	Bind(wxEVT_LEFT_DCLICK,		 &TilesPanel::OnMouse, this, GetId());
-	Bind(wxEVT_MOUSEWHEEL,		 &TilesPanel::OnMouse, this, GetId());
-	Bind(wxEVT_PAINT,			 &TilesPanel::OnPaint, this, GetId());
-	Bind(wxEVT_ERASE_BACKGROUND, &TilesPanel::OnErase, this, GetId());
-	Bind(wxEVT_SIZE,			 &TilesPanel::OnSize, this, GetId());
+	//Custom zoom/pan handling
+	EnableZoom(false);
+	EnablePan(false);
 
-	SetBackgroundStyle(wxBG_STYLE_PAINT);
+	//Colours
+	m_selectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
+	m_hoverColour = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
+
+	//Load shaders
+	m_selectionVertexShader = ion::render::Shader::Create();
+	if(!m_selectionVertexShader->Load("shaders/flat_v.ion.shader"))
+	{
+		ion::debug::Error("Error loading vertex shader");
+	}
+
+	m_selectionPixelShader = ion::render::Shader::Create();
+	if(!m_selectionPixelShader->Load("shaders/flat_p.ion.shader"))
+	{
+		ion::debug::Error("Error loading pixel shader");
+	}
+
+	//Create selection material
+	m_selectionMaterial = new ion::render::Material();
+	m_selectionMaterial->SetDiffuseColour(m_selectColour);
+	m_selectionMaterial->SetVertexShader(m_selectionVertexShader);
+	m_selectionMaterial->SetPixelShader(m_selectionPixelShader);
+
+	//Create selection quad
+	m_selectionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
+}
+
+TilesPanel::~TilesPanel()
+{
+
+}
+
+void TilesPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+{
+	ViewPanel::OnMouse(event, mouseDelta);
+
+	//Camera pan Y (if canvas is taller than panel)
+	wxSize panelSize = GetClientSize();
+	if((m_canvasSize.y * 8.0f) > (panelSize.y / m_cameraZoom))
+	{
+		float panDeltaY = 0.0f;
+
+		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
+		{
+			panDeltaY = mouseDelta.y;
+		}
+		else if(event.GetWheelRotation() != 0)
+		{
+			panDeltaY = (float)event.GetWheelRotation();
+		}
+
+		if(panDeltaY != 0.0f)
+		{
+			ion::Vector3 cameraPos = m_camera.GetPosition();
+			cameraPos.y += panDeltaY * m_cameraPanSpeed / m_cameraZoom;
+
+			//Clamp to size
+			float halfCanvas = (m_canvasSize.y * 4.0f);
+			float minY = -halfCanvas;
+			float maxY = halfCanvas - ((float)panelSize.y / m_cameraZoom);
+
+			if(cameraPos.y > maxY)
+				cameraPos.y = maxY;
+			else if(cameraPos.y < minY)
+				cameraPos.y = minY;
+
+			m_camera.SetPosition(cameraPos);
+
+			Refresh();
+		}
+	}
+
+	if(event.LeftDClick() && m_selectedTile)
+	{
+		//Left double-click, edit tile
+		m_mainWindow->EditTile(m_selectedTile);
+	}
+}
+
+void TilesPanel::OnKeyboard(wxKeyEvent& event)
+{
+	ViewPanel::OnKeyboard(event);
+}
+
+void TilesPanel::OnResize(wxSizeEvent& event)
+{
+	ViewPanel::OnResize(event);
+
+	wxSize panelSize = event.GetSize();
+
+	if(panelSize.x > 8 && panelSize.y > 8)
+	{
+		ion::Vector2i canvasSize = CalcCanvasSize();
+
+		if(canvasSize.x != m_canvasSize.x || canvasSize.y != m_canvasSize.y)
+		{
+			InitPanel(canvasSize.x, canvasSize.y);
+		}
+	}
+}
+
+void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+{
+	ViewPanel::OnMouseTileEvent(mouseDelta, buttonBits, x, y);
+
+	TileId selectedTile = InvalidTileId;
+
+	//If in range, get tile under mouse cursor
+	if(x >= 0 && y >= 0 && x < m_canvasSize.x && y < m_canvasSize.y)
+	{
+		//TODO: Index-to_TileId map
+		//Brute force search for tile ID
+		ion::Vector2i mousePos(x, y);
+
+		int tileIndex = (y * m_canvasSize.x) + x;
+		Tileset& tileset = m_project->GetTileset();
+
+		if(tileIndex < tileset.GetCount())
+		{
+			int i = 0;
+			for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end && i <= tileIndex; ++it, ++i)
+			{
+				selectedTile = it->first;
+			}
+		}
+	}
+
+	//Set mouse hover tile
+	m_hoverTile = selectedTile;
+	m_hoverTilePos.x = x;
+	m_hoverTilePos.y = y;
+
+	if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+	{
+		//Left click, set current tile
+		m_selectedTile = selectedTile;
+		m_selectedTilePos = m_hoverTilePos;
+
+		//Set as current painting tile
+		m_project->SetPaintTile(selectedTile);
+
+		//Set tile paint tool
+		m_mainWindow->SetMapTool(MapPanel::eToolPaintTile);
+	}
+
+	//Redraw
+	Refresh();
+}
+
+void TilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
+{
+	//Render canvas
+	RenderCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
+	//Render selected tile
+	if(m_selectedTile)
+	{
+		if(Tile* tile = m_project->GetTileset().GetTile(m_selectedTile))
+		{
+			ion::debug::Assert(tile, "Invalid tile");
+			ion::Vector2 size(1, 1);
+			RenderBox(m_selectedTilePos, size, m_selectColour, renderer, cameraInverseMtx, projectionMtx, z);
+		}
+	}
+
+	z += zOffset;
+
+	//Render mouse hover tile
+	if(m_hoverTile && m_hoverTile != m_selectedTile)
+	{
+		if(Tile* tile = m_project->GetTileset().GetTile(m_hoverTile))
+		{
+			ion::debug::Assert(tile, "Invalid tile");
+			ion::Vector2 size(1, 1);
+			RenderBox(m_hoverTilePos, size, m_hoverColour, renderer, cameraInverseMtx, projectionMtx, z);
+		}
+	}
+
+	z += zOffset;
+
+	//Render grid
+	if(m_project->GetShowGrid())
+	{
+		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
+	}
 }
 
 void TilesPanel::SetProject(Project* project)
 {
-	m_project = project;
-}
+	ViewPanel::SetProject(project);
 
-void TilesPanel::OnMouse(wxMouseEvent& event)
-{
-	TileId tileId = InvalidTileId;
-
-	if(event.ButtonIsDown(wxMOUSE_BTN_LEFT) || event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
-	{
-		//Get mouse position
-		wxClientDC clientDc(this);
-		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
-
-		//Get scroll offset
-		wxPoint scrollOffset = GetScrollHelper()->CalcUnscrolledPosition(wxPoint());
-
-		//To map space
-		ion::Vector2 mousePosMapSpace(mouseCanvasPosWx.x / m_zoom, (mouseCanvasPosWx.y + scrollOffset.y) / m_zoom);
-
-		//Set current selection
-		int x = (int)floor(mousePosMapSpace.x / 8.0f);
-		int y = (int)floor(mousePosMapSpace.y / 8.0f);
-		wxSize clientSize = GetClientSize();
-		int selection = (y * m_numCols) + x;
-
-		if(selection < m_project->GetTileset().GetCount())
-		{
-			if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
-			{
-				//TODO: Very slow, use indexed multimap
-				auto it = m_project->GetTileset().Begin();
-				auto end = m_project->GetTileset().End();
-				for(int i = 0; i <= selection && it != end; ++i, ++it)
-				{
-					tileId = it->first;
-				}
-
-				//Set tile to draw on left click
-				m_project->SetPaintTile(tileId);
-
-				//Invalidate old and new rects
-				InvalidateTileRect(m_currentSelectionLeft);
-				InvalidateTileRect(selection);
-
-				//Update selection
-				m_currentSelectionLeft = selection;
-			}
-			else if(event.ButtonIsDown(wxMOUSE_BTN_RIGHT))
-			{
-				TileId tileId = 0;
-
-				//TODO: Very slow, use indexed multimap
-				auto it = m_project->GetTileset().Begin();
-				auto end = m_project->GetTileset().End();
-				for(int i = 0; i <= selection && it != end; ++i, ++it)
-				{
-					tileId = it->first;
-				}
-
-				//Set tile to draw on right click
-				m_project->SetEraseTile(tileId);
-
-				//Invalidate old and new rects
-				InvalidateTileRect(m_currentSelectionRight);
-				InvalidateTileRect(selection);
-
-				//Update selection
-				m_currentSelectionRight = selection;
-			}
-		}
-	}
-	else if(event.GetEventType() == wxEVT_MOUSEWHEEL || event.GetWheelRotation() != 0)
-	{
-		//Zoom camera
-		int wheelDelta = event.GetWheelRotation();
-		const float zoomSpeed = 1.0f;
-
-		//One notch at a time
-		if(wheelDelta > 0)
-			m_zoom += zoomSpeed;
-		else if(wheelDelta < 0)
-			m_zoom -= zoomSpeed;
-
-		//Clamp
-		if(m_zoom < 1.0f)
-			m_zoom = 1.0f;
-		else if(m_zoom > 10.0f)
-			m_zoom = 10.0f;
-
-		//Scroll size changed, re-init panel
-		InitPanel();
-
-		//Invalidate whole frame
-		Refresh();
-	}
-
-	if(event.LeftDClick() && tileId)
-	{
-		//Left double-click, edit tile
-		m_mainWindow->EditTile(tileId);
-	}
-
-	event.Skip();
-}
-
-void TilesPanel::OnPaint(wxPaintEvent& event)
-{
-	//Double buffered dest dc
-	wxAutoBufferedPaintDC destDC(this);
-
-	//Bitmap source dc
-	wxMemoryDC sourceDC(m_canvas);
-
-	//Get scroll offset
-	wxPoint scrollOffset = GetScrollHelper()->CalcUnscrolledPosition(wxPoint());
-
-	//Update all invalidated regions
-	for(wxRegionIterator it = GetUpdateRegion(); it; it++)
-	{
-		//Get invalidated rect
-		wxRect destRect(it.GetRect());
-		wxRect sourceRect(it.GetRect());
-
-		//Offset scroll
-		sourceRect.y += scrollOffset.y;
-
-		//Copy rect from canvas
-		destDC.Blit(destRect.x, destRect.y, destRect.width, destRect.height, &sourceDC, sourceRect.x, sourceRect.y);
-	}
-
-	//Draw rectangles around current selections
-	if(m_tileCount > 0)
-	{
-		destDC.SetBrush(*wxTRANSPARENT_BRUSH);
-
-		if(m_currentSelectionLeft > -1)
-		{
-			wxPen pen(*wxRED_PEN);
-			pen.SetWidth(2);
-			destDC.SetPen(pen);
-			int currSelectionY = ((m_currentSelectionLeft / m_numCols) * 8 * m_zoom) - scrollOffset.y;
-			int currSelectionX = (m_currentSelectionLeft % m_numCols) * 8 * m_zoom;
-			destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
-		}
-
-		if(m_currentSelectionRight > -1)
-		{
-			wxPen pen(*wxYELLOW_PEN);
-			pen.SetWidth(2);
-			destDC.SetPen(pen);
-			int currSelectionY = ((m_currentSelectionRight / m_numCols) * 8 * m_zoom) - scrollOffset.y;
-			int currSelectionX = (m_currentSelectionRight % m_numCols) * 8 * m_zoom;
-			destDC.DrawRectangle(currSelectionX, currSelectionY, 8 * m_zoom, 8 * m_zoom);
-		}
-	}
-}
-
-void TilesPanel::OnErase(wxEraseEvent& event)
-{
-	//Ignore event
-}
-
-void TilesPanel::OnSize(wxSizeEvent& event)
-{
-	//Recalculate size and redraw tiles to canvas
-	InitPanel();
+	//Refresh
+	Refresh();
 }
 
 void TilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	if(m_project && m_project->TilesAreInvalidated())
-	{
-		//Full refresh, redraw tiles to canvas
-		InitPanel();
-	}
-
-	wxPanel::Refresh(eraseBackground, rect);
-}
-
-void TilesPanel::InitPanel()
-{
 	if(m_project)
 	{
-		//Update tile count
-		m_tileCount = m_project->GetTileset().GetCount();
-		m_numCols = ion::maths::Ceil(((float)GetClientSize().x / 8.0f) / m_zoom);
-		m_numRows = m_numCols > 0 ? ion::maths::Ceil((float)m_tileCount / (float)m_numCols) : 0;
+		wxSize panelSize = GetClientSize();
 
-		//Update frame title
-		std::stringstream name;
-		name << "Tiles (" << m_tileCount << ")";
-		SetLabel(name.str());
-
-		//Set pixels per scroll unit, scroll rate and num units
-		int pixelsPerScrollUnitY = 8 * m_zoom;
-		GetScrollHelper()->SetScrollbars(1, pixelsPerScrollUnitY, 1, m_numRows, 0, 0, true);
-		GetScrollHelper()->SetScrollRate(0, 1);
-
-		//Calc canvas size
-		int scrollPageHeight = std::max(pixelsPerScrollUnitY * m_numRows, (int)(8.0f * m_zoom));
-		wxSize canvasSize(GetClientSize().x, scrollPageHeight);
-
-		//Set scroll page size
-		SetVirtualSize(canvasSize);
-
-		//Recreate local canvas
-		m_canvas = wxBitmap(canvasSize);
-
-		//Paint all tiles to canvas
-		wxMemoryDC dc(m_canvas);
-		PaintAllToDc(dc);
-	}
-}
-
-void TilesPanel::InvalidateTileRect(int tileId)
-{
-	if(tileId >= 0)
-	{
-		wxPoint scrollOffset = GetScrollHelper()->CalcUnscrolledPosition(wxPoint());
-		int tileY = (tileId / m_numCols) * 8 * m_zoom;
-		int tileX = (tileId % m_numCols) * 8 * m_zoom;
-		RefreshRect(wxRect(tileX - 1, tileY - 1 - scrollOffset.y, (8 * m_zoom) + 1, (8 * m_zoom) + 1));
-	}
-}
-
-void TilesPanel::PaintAllToDc(wxMemoryDC& dc)
-{
-	if(m_project)
-	{
-		//Get renderable rect
-		wxSize canvasSize = m_canvas.GetSize();
-		wxRect canvasRect(0, 0, canvasSize.x, canvasSize.y);
-
-		//Clear canvas
-		dc.SetBrush(*wxBLACK_BRUSH);
-		dc.DrawRectangle(canvasRect);
-
-		if(m_numCols > 0)
+		//If tiles invalidated
+		if(m_project->TilesAreInvalidated())
 		{
-			int i = 0;
-			for(auto it = m_project->GetTileset().Begin(), end = m_project->GetTileset().End(); it != end; ++it, ++i)
+			if(panelSize.x > 8 && panelSize.y > 8)
 			{
-				int y = i / m_numCols;
-				int x = i % m_numCols;
-
-				const Palette* palette = m_project->GetPalette(it->second.GetPaletteId());
-				if(palette)
-				{
-					TileRenderer::PaintTileToDc(x, y, it->second, *palette, 0, dc);
-				}
+				ion::Vector2i canvasSize = CalcCanvasSize();
+				InitPanel(canvasSize.x, canvasSize.y);
 			}
-
-			//Scale canvas
-			int originalWidth = m_numCols * 8;
-			int originalHeight = m_numRows * 8;
-			wxRect sourceRect(0, 0, originalWidth, originalHeight);
-			wxRect destRect(0, 0, originalWidth * m_zoom, originalHeight * m_zoom);
-
-			//Copy rect from canvas
-			dc.StretchBlit(destRect.x, destRect.y, destRect.width, destRect.height, &dc, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height);
 		}
 	}
+
+	ViewPanel::Refresh(eraseBackground, rect);
+}
+
+ion::Vector2i TilesPanel::CalcCanvasSize()
+{
+	wxSize panelSize = GetClientSize();
+	int numTiles = m_project->GetTileset().GetCount();
+	int numCols = ion::maths::Ceil((float)panelSize.x / 8.0f / s_tileSize);
+	int numRows = max(numCols, (int)ion::maths::Ceil((float)numTiles / (float)numCols / s_tileSize));
+	return ion::Vector2i(numCols, numRows);
+}
+
+void TilesPanel::InitPanel(int numCols, int numRows)
+{
+	//Recreate canvas
+	CreateCanvas(numCols, numRows);
+
+	//Fill with invalid tile
+	FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(numCols - 1, numRows - 1));
+
+	//Redraw tiles on canvas
+	PaintTiles();
+
+	//Recreate grid
+	CreateGrid(numCols, numRows, numCols, numRows);
+
+	//Centre camera and reset zoom
+	ResetZoomPan();
+}
+
+void TilesPanel::PaintTiles()
+{
+	Tileset& tileset = m_project->GetTileset();
+
+	int i = 0;
+
+	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++i)
+	{
+		TileId tileId = it->first;
+
+		int x = max(0, i % m_canvasSize.x);
+		int y = max(0, m_canvasSize.y - 1 - (i / m_canvasSize.x));
+
+		PaintTile(tileId, x, y, 0);
+	}
+}
+
+void TilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+	const int quadHalfExtentsX = 4;
+	const int quadHalfExtentsY = 4;
+
+	float bottom = (m_canvasSize.y - (pos.y + size.y));
+
+	ion::Matrix4 boxMtx;
+	ion::Vector3 boxScale(size.x, size.y, 0.0f);
+	ion::Vector3 boxPos(floor((pos.x - (m_canvasSize.x / 2.0f) + (boxScale.x / 2.0f)) * tileWidth),
+		floor((bottom - (m_canvasSize.y / 2.0f) + (boxScale.y / 2.0f)) * tileHeight), z);
+
+	boxMtx.SetTranslation(boxPos);
+	boxMtx.SetScale(boxScale);
+
+	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	m_selectionMaterial->SetDiffuseColour(colour);
+	m_selectionMaterial->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_selectionPrimitive->GetVertexBuffer(), m_selectionPrimitive->GetIndexBuffer());
+	m_selectionMaterial->Unbind();
+	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+}
+
+void TilesPanel::ResetZoomPan()
+{
+	wxSize panelSize = GetClientSize();
+	m_cameraZoom = (float)panelSize.x / (m_canvasSize.x * 8.0f);
+
+	//Scroll to top
+	float halfCanvas = (m_canvasSize.y * 4.0f);
+	float maxY = halfCanvas - ((float)panelSize.y / m_cameraZoom);
+
+	ion::Vector3 cameraPos(-(panelSize.x / 2.0f / m_cameraZoom), maxY, 0.0f);
+
+	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+	m_camera.SetPosition(cameraPos);
 }
