@@ -6,58 +6,67 @@
 
 #pragma once
 
-#include <wx/scrolwin.h>
-#include <wx/event.h>
-#include <wx/dcbuffer.h>
+#include "ViewPanel.h"
 
-#include <vector>
-
-#include "UIBase.h"
-#include "../Project.h"
-
-class MainWindow;
-
-class TilesPanel : public wxPanel
+class TilesPanel : public ViewPanel
 {
+	static const float s_tileSize;
+
 public:
-	TilesPanel(MainWindow* mainWindow, wxWindow* parent, wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxVSCROLL, const wxString& name = "scrolledWindow");
+	TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	virtual ~TilesPanel();
 
-	void SetProject(Project* project);
+	//Events
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
+	virtual void OnKeyboard(wxKeyEvent& event);
+	virtual void OnResize(wxSizeEvent& event);
 
-	void OnMouse(wxMouseEvent& event);
-	void OnPaint(wxPaintEvent& event);
-	void OnErase(wxEraseEvent& event);
-	void OnSize(wxSizeEvent& event);
+	//Set current project
+	virtual void SetProject(Project* project);
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
+protected:
+
+	//Mouse click or changed tile callback
+	virtual void OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y);
+
+	//Render callback
+	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
+
 private:
-	//Recreate canvas, draw all tiles, update scroll size and title
-	void InitPanel();
+	//Calc canvas size
+	ion::Vector2i CalcCanvasSize();
 
-	//Paint all tiles to dc
-	void PaintAllToDc(wxMemoryDC& dc);
+	//Create canvas and grid
+	void InitPanel(int numCols, int numRows);
 
-	//Invalidate tile rect
-	void InvalidateTileRect(int tileId);
+	//Paint all tiles to canvas
+	void PaintTiles();
 
-	//Project
-	Project* m_project;
+	//Render selection box
+	void RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
-	//Main window
-	MainWindow* m_mainWindow;
+	//Centre camera, reset zoom
+	void ResetZoomPan();
 
-	float m_zoom;
-	int m_currentSelectionLeft;
-	int m_currentSelectionRight;
+	//Current/hover tile
+	TileId m_selectedTile;
+	TileId m_hoverTile;
 
-	int m_tileCount;
-	int m_numCols;
-	int m_numRows;
+	//Current/hover stamp pos
+	ion::Vector2i m_selectedTilePos;
+	ion::Vector2i m_hoverTilePos;
 
-	//Local drawing canvas
-	wxBitmap m_canvas;
+	//Rendering materials and shaders
+	ion::render::Shader* m_selectionVertexShader;
+	ion::render::Shader* m_selectionPixelShader;
+	ion::render::Material* m_selectionMaterial;
 
-	//Scroll helper
-	wxScrollHelper m_scrollHelper;
+	//Rendering primitives
+	ion::render::Quad* m_selectionPrimitive;
+
+	//Rendering colours
+	ion::Colour m_hoverColour;
+	ion::Colour m_selectColour;
 };

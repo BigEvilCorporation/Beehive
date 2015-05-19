@@ -52,6 +52,7 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 	//Bind events
 	Bind(wxEVT_LEFT_DOWN, &ViewPanel::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP, &ViewPanel::EventHandlerMouse, this, GetId());
+	Bind(wxEVT_LEFT_DCLICK, &ViewPanel::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_MIDDLE_DOWN, &ViewPanel::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_MIDDLE_UP, &ViewPanel::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_RIGHT_DOWN, &ViewPanel::EventHandlerMouse, this, GetId());

@@ -121,7 +121,7 @@ void PalettesPanel::OnPaint(wxPaintEvent& event)
 			else
 			{
 				brush.SetStyle(wxBRUSHSTYLE_CROSSDIAG_HATCH);
-				brush.SetColour(wxColour(255, 0, 0, 50));
+				brush.SetColour(wxColour(100, 100, 100, 50));
 			}
 
 			destDC.SetBrush(brush);
