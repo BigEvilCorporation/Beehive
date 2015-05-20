@@ -75,7 +75,6 @@ protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjSave(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnProjSaveAs(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjExport(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesImport(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesCreate(wxRibbonButtonBarEvent& event);
