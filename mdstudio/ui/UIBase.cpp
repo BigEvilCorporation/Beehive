@@ -7,13 +7,25 @@
 
 #include "UIBase.h"
 
-#include "icons/arrow_plain_blue_NE_SE_SW_NW.bmp.h"
-#include "icons/arrow_plain_green_E.bmp.h"
-#include "icons/file_yellow_empty.bmp.h"
-#include "icons/floppy_35inch_blue.bmp.h"
-#include "icons/minus_red.bmp.h"
-#include "icons/plus_green.bmp.h"
-#include "icons/tables.bmp.h"
+#include "../FormBuilderProj/clearmap.xpm"
+#include "../FormBuilderProj/collision.xpm"
+#include "../FormBuilderProj/config.xpm"
+#include "../FormBuilderProj/deletestamp.xpm"
+#include "../FormBuilderProj/deletetile.xpm"
+#include "../FormBuilderProj/grid.xpm"
+#include "../FormBuilderProj/gridsnap.xpm"
+#include "../FormBuilderProj/importtiles.xpm"
+#include "../FormBuilderProj/megadrive2.xpm"
+#include "../FormBuilderProj/newproj.xpm"
+#include "../FormBuilderProj/newstamp.xpm"
+#include "../FormBuilderProj/newtile.xpm"
+#include "../FormBuilderProj/open.xpm"
+#include "../FormBuilderProj/palettespanel.xpm"
+#include "../FormBuilderProj/resizemap.xpm"
+#include "../FormBuilderProj/save.xpm"
+#include "../FormBuilderProj/stampspanel.xpm"
+#include "../FormBuilderProj/tilespanel.xpm"
+#include "../FormBuilderProj/toolspanel.xpm"
 #include "icons/window.bmp.h"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -28,43 +40,42 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonBar = new wxRibbonBar( this, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxRIBBON_BAR_DEFAULT_STYLE|wxRIBBON_BAR_FLOW_HORIZONTAL|wxRIBBON_BAR_SHOW_PAGE_ICONS|wxRIBBON_BAR_SHOW_PAGE_LABELS|wxRIBBON_BAR_SHOW_PANEL_MINIMISE_BUTTONS|wxNO_BORDER );
 	m_ribbonBar->SetArtProvider(new wxRibbonDefaultArtProvider); 
 	m_ribbonPageProject = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Project") , wxNullBitmap , 0 );
-	m_ribbonBar->SetActivePage( m_ribbonPageProject ); 
 	m_ribbonPanelProject = new wxRibbonPanel( m_ribbonPageProject, wxID_ANY, wxT("Project") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarProject = new wxRibbonButtonBar( m_ribbonPanelProject, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_NEW, wxT("New"), file_yellow_empty_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_OPEN, wxT("Open"), floppy_35inch_blue_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_SAVEAS, wxT("Save as..."), floppy_35inch_blue_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_SAVE, wxT("Save"), floppy_35inch_blue_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_EXPORT, wxT("Export"), arrow_plain_green_E_bmp_to_wx_bitmap(), wxEmptyString);
+	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_NEW, wxT("New"), wxBitmap( newproj_xpm ), wxEmptyString);
+	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_OPEN, wxT("Open"), wxBitmap( open_xpm ), wxEmptyString);
+	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_SAVE, wxT("Save"), wxBitmap( save_xpm ), wxEmptyString);
+	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_EXPORT, wxT("Export"), wxBitmap( megadrive2_xpm ), wxEmptyString);
 	m_ribbonPageView = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("View") , wxNullBitmap , 0 );
 	m_ribbonPanelView = new wxRibbonPanel( m_ribbonPageView, wxID_ANY, wxT("Grid") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarGrid = new wxRibbonButtonBar( m_ribbonPanelView, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SHOW, wxT("Show Grid"), tables_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SNAP, wxT("Snap to Grid"), tables_bmp_to_wx_bitmap(), wxEmptyString);
+	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SHOW, wxT("Show Grid"), wxBitmap( grid_xpm ), wxEmptyString);
+	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SNAP, wxT("Snap to Grid"), wxBitmap( gridsnap_xpm ), wxEmptyString);
 	m_ribbonPageTools = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Tools") , wxNullBitmap , 0 );
+	m_ribbonBar->SetActivePage( m_ribbonPageTools ); 
 	m_ribbonPanelTools = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tool Panels") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarTools = new wxRibbonButtonBar( m_ribbonPanelTools, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAPEDIT, wxT("Map Editing"), window_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_TILES, wxT("Tiles"), window_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_ANY, wxT("Stamps"), window_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_PALETTES, wxT("Palettes"), window_bmp_to_wx_bitmap(), wxEmptyString);
+	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAPEDIT, wxT("Toolbox"), wxBitmap( toolspanel_xpm ), wxEmptyString);
+	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_TILES, wxT("Tiles"), wxBitmap( tilespanel_xpm ), wxEmptyString);
+	m_ribbonButtonBarTools->AddButton( wxID_ANY, wxT("Stamps"), wxBitmap( stampspanel_xpm ), wxEmptyString);
+	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_PALETTES, wxT("Palettes"), wxBitmap( palettespanel_xpm ), wxEmptyString);
 	m_ribbonPanelMap = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Map") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarMap = new wxRibbonButtonBar( m_ribbonPanelMap, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_CLEAR, wxT("Clear Map"), arrow_plain_blue_NE_SE_SW_NW_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_RESIZE, wxT("Resize"), arrow_plain_blue_NE_SE_SW_NW_bmp_to_wx_bitmap(), wxEmptyString);
+	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_CLEAR, wxT("Clear Map"), wxBitmap( clearmap_xpm ), wxEmptyString);
+	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_RESIZE, wxT("Resize Map"), wxBitmap( resizemap_xpm ), wxEmptyString);
 	m_ribbonPanelTiles = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tiles") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarTiles = new wxRibbonButtonBar( m_ribbonPanelTiles, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_IMPORT, wxT("Import"), plus_green_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_CREATE, wxT("New"), plus_green_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_DELETE, wxT("Delete"), minus_red_bmp_to_wx_bitmap(), wxEmptyString);
+	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_IMPORT, wxT("Import"), wxBitmap( importtiles_xpm ), wxEmptyString);
+	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_CREATE, wxT("New"), wxBitmap( newtile_xpm ), wxEmptyString);
+	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_DELETE, wxT("Delete"), wxBitmap( deletetile_xpm ), wxEmptyString);
 	m_ribbonPanelStamps = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Stamps") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarStamps = new wxRibbonButtonBar( m_ribbonPanelStamps, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarStamps->AddButton( wxID_ANY, wxT("Create"), plus_green_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarStamps->AddButton( wxID_ANY, wxT("Delete"), minus_red_bmp_to_wx_bitmap(), wxEmptyString);
+	m_ribbonButtonBarStamps->AddButton( wxID_ANY, wxT("Create"), wxBitmap( newstamp_xpm ), wxEmptyString);
+	m_ribbonButtonBarStamps->AddButton( wxID_ANY, wxT("Delete"), wxBitmap( deletestamp_xpm ), wxEmptyString);
 	m_ribbonPanelCollision = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Collision") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarCollision = new wxRibbonButtonBar( m_ribbonPanelCollision, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarCollision->AddButton( wxID_ANY, wxT("Configuration"), tables_bmp_to_wx_bitmap(), wxEmptyString);
-	m_ribbonButtonBarCollision->AddButton( wxID_ANY, wxT("Collision Tile Editor"), tables_bmp_to_wx_bitmap(), wxEmptyString);
+	m_ribbonButtonBarCollision->AddButton( wxID_ANY, wxT("Configuration"), wxBitmap( config_xpm ), wxEmptyString);
+	m_ribbonButtonBarCollision->AddButton( wxID_ANY, wxT("Collision Tile Editor"), wxBitmap( collision_xpm ), wxEmptyString);
 	m_ribbonBar->Realize();
 	
 	bSizer1->Add( m_ribbonBar, 0, wxALL|wxEXPAND, 0 );
@@ -82,7 +93,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	// Connect Events
 	this->Connect( wxID_BTN_PROJ_NEW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjNew ) );
 	this->Connect( wxID_BTN_PROJ_OPEN, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjOpen ) );
-	this->Connect( wxID_BTN_PROJ_SAVEAS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSaveAs ) );
 	this->Connect( wxID_BTN_PROJ_SAVE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSave ) );
 	this->Connect( wxID_BTN_PROJ_EXPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjExport ) );
 	this->Connect( wxID_BTN_GRID_SHOW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnGridShow ) );
@@ -103,7 +113,6 @@ MainWindowBase::~MainWindowBase()
 	// Disconnect Events
 	this->Disconnect( wxID_BTN_PROJ_NEW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjNew ) );
 	this->Disconnect( wxID_BTN_PROJ_OPEN, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjOpen ) );
-	this->Disconnect( wxID_BTN_PROJ_SAVEAS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSaveAs ) );
 	this->Disconnect( wxID_BTN_PROJ_SAVE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSave ) );
 	this->Disconnect( wxID_BTN_PROJ_EXPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjExport ) );
 	this->Disconnect( wxID_BTN_GRID_SHOW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnGridShow ) );

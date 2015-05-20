@@ -39,29 +39,28 @@
 #define wxID_MAINWINDOW 1000
 #define wxID_BTN_PROJ_NEW 1001
 #define wxID_BTN_PROJ_OPEN 1002
-#define wxID_BTN_PROJ_SAVEAS 1003
-#define wxID_BTN_PROJ_SAVE 1004
-#define wxID_BTN_PROJ_EXPORT 1005
-#define wxID_BTN_GRID_SHOW 1006
-#define wxID_BTN_GRID_SNAP 1007
-#define wxID_BTN_TOOLS_MAPEDIT 1008
-#define wxID_BTN_TOOLS_TILES 1009
-#define wxID_BTN_TOOLS_PALETTES 1010
-#define wxID_BTN_MAP_CLEAR 1011
-#define wxID_BTN_MAP_RESIZE 1012
-#define wxID_BTN_TILES_IMPORT 1013
-#define wxID_BTN_TILES_CREATE 1014
-#define wxID_BTN_TILES_DELETE 1015
-#define wxID_BTN_CANCEL 1016
-#define wxID_TOOL_SELECT 1017
-#define wxID_TOOL_PAINT 1018
-#define wxID_TOOL_STAMP 1019
-#define wxID_TOOL_PICKER 1020
-#define wxID_TOOL_FLIPX 1021
-#define wxID_TOOL_FLIPY 1022
-#define wxID_TOOL_FILL 1023
-#define wxID_TOOL_CLONE 1024
-#define wxID_TOOL_CREATESTAMP 1025
+#define wxID_BTN_PROJ_SAVE 1003
+#define wxID_BTN_PROJ_EXPORT 1004
+#define wxID_BTN_GRID_SHOW 1005
+#define wxID_BTN_GRID_SNAP 1006
+#define wxID_BTN_TOOLS_MAPEDIT 1007
+#define wxID_BTN_TOOLS_TILES 1008
+#define wxID_BTN_TOOLS_PALETTES 1009
+#define wxID_BTN_MAP_CLEAR 1010
+#define wxID_BTN_MAP_RESIZE 1011
+#define wxID_BTN_TILES_IMPORT 1012
+#define wxID_BTN_TILES_CREATE 1013
+#define wxID_BTN_TILES_DELETE 1014
+#define wxID_BTN_CANCEL 1015
+#define wxID_TOOL_SELECT 1016
+#define wxID_TOOL_PAINT 1017
+#define wxID_TOOL_STAMP 1018
+#define wxID_TOOL_PICKER 1019
+#define wxID_TOOL_FLIPX 1020
+#define wxID_TOOL_FLIPY 1021
+#define wxID_TOOL_FILL 1022
+#define wxID_TOOL_CLONE 1023
+#define wxID_TOOL_CREATESTAMP 1024
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -95,7 +94,6 @@ class MainWindowBase : public wxFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjOpen( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-		virtual void OnBtnProjSaveAs( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjSave( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjExport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnGridShow( wxCommandEvent& event ) { event.Skip(); }

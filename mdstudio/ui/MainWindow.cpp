@@ -614,41 +614,24 @@ void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		const std::string& lastFilename = m_project->GetFilename();
+		std::string filename = m_project->GetFilename();
 
-		if(!lastFilename.size())
+		if(!filename.size())
 		{
-			//No previous filename, open "Save As..." dialog
-			OnBtnProjSaveAs(event);
-		}
-		else
-		{
-			//Save with last filename
-			SetStatusText("Saving...");
-
-			if(m_project->Save(lastFilename))
+			//No previous filename
+			wxFileDialog dialogue(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			if(dialogue.ShowModal() == wxID_OK)
 			{
-				SetStatusText("Save complete");
-			}
-			else
-			{
-				wxMessageBox("Error writing project", "Error", wxOK | wxICON_ERROR);
-				SetStatusText("Save error");
+				filename = dialogue.GetPath().c_str().AsChar();
 			}
 		}
-	}
-}
-
-void MainWindow::OnBtnProjSaveAs(wxRibbonButtonBarEvent& event)
-{
-	if(m_project.get())
-	{
-		wxFileDialog dialogue(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		if(dialogue.ShowModal() == wxID_OK)
+		
+		if(filename.size())
 		{
+			//Save
 			SetStatusText("Saving...");
 
-			if(m_project->Save(dialogue.GetPath().c_str().AsChar()))
+			if(m_project->Save(filename))
 			{
 				SetStatusText("Save complete");
 			}
