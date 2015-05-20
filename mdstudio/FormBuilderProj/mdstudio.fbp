@@ -198,7 +198,7 @@
                             <property name="name">m_ribbonPageProject</property>
                             <property name="permission">protected</property>
                             <property name="pos"></property>
-                            <property name="select">0</property>
+                            <property name="select">1</property>
                             <property name="size"></property>
                             <property name="subclass"></property>
                             <property name="tooltip"></property>
@@ -764,7 +764,7 @@
                             <property name="name">m_ribbonPageTools</property>
                             <property name="permission">protected</property>
                             <property name="pos"></property>
-                            <property name="select">1</property>
+                            <property name="select">0</property>
                             <property name="size"></property>
                             <property name="subclass"></property>
                             <property name="tooltip"></property>
@@ -2780,7 +2780,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_select.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -2873,7 +2873,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_painttile.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -2966,7 +2966,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_paintstamp.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -3059,7 +3059,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_picker.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -3152,7 +3152,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_flipx.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -3245,7 +3245,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_flipy.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -3338,7 +3338,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_fill.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -3431,7 +3431,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_clone.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>
@@ -3524,7 +3524,7 @@
                         <property name="aui_row"></property>
                         <property name="best_size"></property>
                         <property name="bg"></property>
-                        <property name="bitmap">Load From Embedded File; ..\ui\icons\window.bmp</property>
+                        <property name="bitmap">Load From Embedded File; tool_createstamp.xpm</property>
                         <property name="caption"></property>
                         <property name="caption_visible">1</property>
                         <property name="center_pane">0</property>

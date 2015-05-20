@@ -25,8 +25,16 @@
 #include "../FormBuilderProj/save.xpm"
 #include "../FormBuilderProj/stampspanel.xpm"
 #include "../FormBuilderProj/tilespanel.xpm"
+#include "../FormBuilderProj/tool_clone.xpm"
+#include "../FormBuilderProj/tool_createstamp.xpm"
+#include "../FormBuilderProj/tool_fill.xpm"
+#include "../FormBuilderProj/tool_flipx.xpm"
+#include "../FormBuilderProj/tool_flipy.xpm"
+#include "../FormBuilderProj/tool_paintstamp.xpm"
+#include "../FormBuilderProj/tool_painttile.xpm"
+#include "../FormBuilderProj/tool_picker.xpm"
+#include "../FormBuilderProj/tool_select.xpm"
 #include "../FormBuilderProj/toolspanel.xpm"
-#include "icons/window.bmp.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -40,6 +48,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonBar = new wxRibbonBar( this, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxRIBBON_BAR_DEFAULT_STYLE|wxRIBBON_BAR_FLOW_HORIZONTAL|wxRIBBON_BAR_SHOW_PAGE_ICONS|wxRIBBON_BAR_SHOW_PAGE_LABELS|wxRIBBON_BAR_SHOW_PANEL_MINIMISE_BUTTONS|wxNO_BORDER );
 	m_ribbonBar->SetArtProvider(new wxRibbonDefaultArtProvider); 
 	m_ribbonPageProject = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Project") , wxNullBitmap , 0 );
+	m_ribbonBar->SetActivePage( m_ribbonPageProject ); 
 	m_ribbonPanelProject = new wxRibbonPanel( m_ribbonPageProject, wxID_ANY, wxT("Project") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarProject = new wxRibbonButtonBar( m_ribbonPanelProject, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_NEW, wxT("New"), wxBitmap( newproj_xpm ), wxEmptyString);
@@ -52,7 +61,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SHOW, wxT("Show Grid"), wxBitmap( grid_xpm ), wxEmptyString);
 	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SNAP, wxT("Snap to Grid"), wxBitmap( gridsnap_xpm ), wxEmptyString);
 	m_ribbonPageTools = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Tools") , wxNullBitmap , 0 );
-	m_ribbonBar->SetActivePage( m_ribbonPageTools ); 
 	m_ribbonPanelTools = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tool Panels") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarTools = new wxRibbonButtonBar( m_ribbonPanelTools, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAPEDIT, wxT("Toolbox"), wxBitmap( toolspanel_xpm ), wxEmptyString);
@@ -199,47 +207,47 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	fgSizer1->SetFlexibleDirection( wxBOTH );
 	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_toolSelect = new wxBitmapButton( this, wxID_TOOL_SELECT, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolSelect = new wxBitmapButton( this, wxID_TOOL_SELECT, wxBitmap( tool_select_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolSelect->SetToolTip( wxT("Select Tile(s)") );
 	
 	fgSizer1->Add( m_toolSelect, 0, wxALL, 5 );
 	
-	m_toolPaint = new wxBitmapButton( this, wxID_TOOL_PAINT, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaint = new wxBitmapButton( this, wxID_TOOL_PAINT, wxBitmap( tool_painttile_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolPaint->SetToolTip( wxT("Paint Tile") );
 	
 	fgSizer1->Add( m_toolPaint, 0, wxALL, 5 );
 	
-	m_toolStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, wxBitmap( tool_paintstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolStamp->SetToolTip( wxT("Paint Stamp") );
 	
 	fgSizer1->Add( m_toolStamp, 0, wxALL, 5 );
 	
-	m_toolPicker = new wxBitmapButton( this, wxID_TOOL_PICKER, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPicker = new wxBitmapButton( this, wxID_TOOL_PICKER, wxBitmap( tool_picker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolPicker->SetToolTip( wxT("Pick Tile") );
 	
 	fgSizer1->Add( m_toolPicker, 0, wxALL, 5 );
 	
-	m_toolFlipX = new wxBitmapButton( this, wxID_TOOL_FLIPX, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolFlipX = new wxBitmapButton( this, wxID_TOOL_FLIPX, wxBitmap( tool_flipx_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolFlipX->SetToolTip( wxT("Flip Horizontal") );
 	
 	fgSizer1->Add( m_toolFlipX, 0, wxALL, 5 );
 	
-	m_toolFlipY = new wxBitmapButton( this, wxID_TOOL_FLIPY, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolFlipY = new wxBitmapButton( this, wxID_TOOL_FLIPY, wxBitmap( tool_flipy_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolFlipY->SetToolTip( wxT("Flip Vertical") );
 	
 	fgSizer1->Add( m_toolFlipY, 0, wxALL, 5 );
 	
-	m_toolFill = new wxBitmapButton( this, wxID_TOOL_FILL, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolFill = new wxBitmapButton( this, wxID_TOOL_FILL, wxBitmap( tool_fill_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolFill->SetToolTip( wxT("Fill Selection") );
 	
 	fgSizer1->Add( m_toolFill, 0, wxALL, 5 );
 	
-	m_toolClone = new wxBitmapButton( this, wxID_TOOL_CLONE, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolClone = new wxBitmapButton( this, wxID_TOOL_CLONE, wxBitmap( tool_clone_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolClone->SetToolTip( wxT("Clone Selection") );
 	
 	fgSizer1->Add( m_toolClone, 0, wxALL, 5 );
 	
-	m_toolCreateStamp = new wxBitmapButton( this, wxID_TOOL_CREATESTAMP, window_bmp_to_wx_bitmap(), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolCreateStamp = new wxBitmapButton( this, wxID_TOOL_CREATESTAMP, wxBitmap( tool_createstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolCreateStamp->SetToolTip( wxT("Create stamp from selection") );
 	
 	fgSizer1->Add( m_toolCreateStamp, 0, wxALL, 5 );
