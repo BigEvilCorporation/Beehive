@@ -324,54 +324,65 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 		m_prevMouseBits = buttonBits;
 
 		//Camera pan/zoom
+		float zoomDelta = 0.0f;
+
 		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
 		{
-			if(m_enablePan)
+			if(event.ShiftDown())
 			{
-				//Pan camera (invert Y for OpenGL)
-				ion::Vector3 cameraPos = m_camera.GetPosition();
-				cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
-				cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
-				m_camera.SetPosition(cameraPos);
+				//SHIFT + middle mouse + drag = zoom
+				float zoomSpeed = 0.05f;
+				zoomDelta -= mouseDelta.y * zoomSpeed;
+			}
+			else
+			{
+				if(m_enablePan)
+				{
+					//Middle mouse + drag = pan
+					ion::Vector3 cameraPos = m_camera.GetPosition();
+					cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
+					cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
+					m_camera.SetPosition(cameraPos);
 
-				//Invalidate rect
-				Refresh();
+					//Invalidate rect
+					Refresh();
+				}
 			}
 		}
 		else if(event.GetWheelRotation() != 0)
 		{
-			if(m_enableZoom)
+			//Zoom camera
+			int wheelDelta = event.GetWheelRotation();
+			float zoomSpeed = 1.0f;
+
+			//Reduce speed for <1.0f
+			if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
 			{
-				float zoom = m_cameraZoom;
-
-				//Zoom camera
-				int wheelDelta = event.GetWheelRotation();
-				float zoomSpeed = 1.0f;
-
-				//Reduce speed for <1.0f
-				if((wheelDelta < 0 && zoom <= 1.0f) || (wheelDelta > 0 && zoom < 1.0f))
-				{
-					zoomSpeed = 0.2f;
-				}
-
-				//One notch at a time
-				if(wheelDelta > 0)
-					zoom += zoomSpeed;
-				else if(wheelDelta < 0)
-					zoom -= zoomSpeed;
-
-				//Clamp
-				if(zoom < 0.2f)
-					zoom = 0.2f;
-				else if(zoom > 10.0f)
-					zoom = 10.0f;
-
-				//Set camera zoom
-				SetCameraZoom(zoom);
-
-				//Invalidate rect
-				Refresh();
+				zoomSpeed = 0.2f;
 			}
+
+			//One notch at a time
+			if(wheelDelta > 0)
+				zoomDelta = zoomSpeed;
+			else if(wheelDelta < 0)
+				zoomDelta = -zoomSpeed;
+		}
+
+		if(m_enableZoom && zoomDelta != 0.0f)
+		{
+			float zoom = m_cameraZoom + zoomDelta;
+
+			//Clamp
+			if(zoom < 0.2f)
+				zoom = 0.2f;
+			else if(zoom > 10.0f)
+				zoom = 10.0f;
+
+			//Set camera zoom
+			SetCameraZoom(zoom);
+
+			//Invalidate rect
+			Refresh();
 		}
 	}
 }
