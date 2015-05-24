@@ -14,6 +14,33 @@
 
 #include "Stamp.h"
 
+struct StampMapEntry
+{
+	StampMapEntry() { m_id = 0; m_flags = 0; }
+	StampMapEntry(StampId stampId, u32 flags, const ion::Vector2i& position, const ion::Vector2i& size)
+	{
+		m_id = stampId;
+		m_flags = flags;
+		m_position = position;
+		m_size = size;
+	}
+
+	void Serialise(ion::io::Archive& archive)
+	{
+		archive.Serialise(m_id);
+		archive.Serialise(m_flags);
+		archive.Serialise(m_position);
+		archive.Serialise(m_size);
+	}
+
+	StampId m_id;
+	u32 m_flags;
+	ion::Vector2i m_position;
+	ion::Vector2i m_size;
+};
+
+typedef std::vector<StampMapEntry> TStampPosMap;
+
 class Map
 {
 public:
@@ -48,6 +75,10 @@ public:
 	void SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
 	void BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
 	StampId FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const;
+	void RemoveStamp(int x, int y);
+
+	const TStampPosMap::const_iterator StampsBegin() const;
+	const TStampPosMap::const_iterator StampsEnd() const;
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
@@ -70,21 +101,6 @@ private:
 		u32 m_flags;
 	};
 
-	struct StampDesc
-	{
-		StampDesc() { m_id = 0; m_flags = 0; }
-		StampDesc(StampId stampId, u32 flags) { m_id = stampId; m_flags = flags; }
-
-		void Serialise(ion::io::Archive& archive)
-		{
-			archive.Serialise(m_id);
-			archive.Serialise(m_flags);
-		}
-
-		StampId m_id;
-		u32 m_flags;
-	};
-
 	std::vector<TileDesc> m_tiles;
-	std::vector< std::tuple<ion::Vector2i, ion::Vector2i, StampDesc> > m_stamps;
+	TStampPosMap m_stamps;
 };

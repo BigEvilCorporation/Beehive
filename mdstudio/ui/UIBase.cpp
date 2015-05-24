@@ -27,6 +27,7 @@
 #include "../FormBuilderProj/tilespanel.xpm"
 #include "../FormBuilderProj/tool_clone.xpm"
 #include "../FormBuilderProj/tool_createstamp.xpm"
+#include "../FormBuilderProj/tool_deletestamp.xpm"
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
@@ -263,6 +264,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_toolCreateStamp->SetToolTip( wxT("Create stamp from selection") );
 	
 	fgSizer1->Add( m_toolCreateStamp, 0, wxALL, 5 );
+	
+	m_toolRemoveStamp = new wxBitmapButton( this, wxID_TOOL_REMOVESTAMP, wxBitmap( tool_deletestamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolRemoveStamp->SetToolTip( wxT("Remove Stamp") );
+	
+	fgSizer1->Add( m_toolRemoveStamp, 0, wxALL, 5 );
 	
 	
 	this->SetSizer( fgSizer1 );

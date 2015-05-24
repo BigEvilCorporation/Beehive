@@ -101,10 +101,7 @@ u32 Map::GetTileFlags(int x, int y) const
 void Map::SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
 {
 	//Add to stamp map
-	m_stamps.push_back(std::make_tuple(ion::Vector2i(x, y), ion::Vector2i(stamp.GetWidth(), stamp.GetHeight()), StampDesc(stamp.GetId(), flipFlags)));
-
-	//Bake it into the tiles
-	BakeStamp(x, y, stamp, flipFlags);
+	m_stamps.push_back(StampMapEntry(stamp.GetId(), flipFlags, ion::Vector2i(x, y), ion::Vector2i(stamp.GetWidth(), stamp.GetHeight())));
 }
 
 void Map::BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
@@ -144,21 +141,53 @@ StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const
 	ion::Vector2i size;
 	ion::Vector2i bottomRight;
 
-	for(int i = 0; i < m_stamps.size() && !stampId; i++)
+	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end && !stampId; ++it)
 	{
-		topLeft = std::get<0>(m_stamps[i]);
-		size = std::get<1>(m_stamps[i]);
+		topLeft = it->m_position;
+		size = it->m_size;
 
 		bottomRight = topLeft + size;
 
 		if(x >= topLeft.x && y >= topLeft.y
 			&& x < bottomRight.x && y < bottomRight.y)
 		{
-			stampId = std::get<2>(m_stamps[i]).m_id;
+			stampId = it->m_id;
 		}
 	}
 
 	return stampId;
+}
+
+void Map::RemoveStamp(int x, int y)
+{
+	ion::Vector2i size;
+	ion::Vector2i bottomRight;
+
+	for(TStampPosMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		ion::Vector2i topLeft = it->m_position;
+		ion::Vector2i size = it->m_size;
+
+		bottomRight = topLeft + size;
+
+		if(x >= topLeft.x && y >= topLeft.y
+			&& x < bottomRight.x && y < bottomRight.y)
+		{
+			std::swap(*it, m_stamps.back());
+			m_stamps.pop_back();
+			break;
+		}
+	}
+}
+
+const TStampPosMap::const_iterator Map::StampsBegin() const
+{
+	return m_stamps.begin();
+}
+
+const TStampPosMap::const_iterator Map::StampsEnd() const
+{
+	return m_stamps.end();
 }
 
 void Map::Export(std::stringstream& stream) const

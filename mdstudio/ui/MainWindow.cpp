@@ -428,6 +428,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 	}
 
 	if(!m_toolboxPanel->IsShown())
@@ -912,6 +913,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_CREATESTAMP:
 			m_mapPanel->SetTool(MapPanel::eToolCreateStamp);
+			break;
+		case wxID_TOOL_REMOVESTAMP:
+			m_mapPanel->SetTool(MapPanel::eToolRemoveStamp);
 			break;
 		}
 	}

@@ -235,7 +235,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 
 			case eToolSelectStamp:
 			case eToolStampPicker:
-				{
+			case eToolRemoveStamp:
+			{
 					//Find stamp under cursor
 					ion::Vector2i stampPos;
 					u32 stampFlags = 0;
@@ -244,14 +245,13 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 					m_hoverStamp = stampId;
 					m_hoverStampPos = stampPos;
 
-					if(buttonBits & eMouseLeft)
+					if(buttonBits & eMouseLeft && !(m_prevMouseBits & eMouseLeft))
 					{
 						m_selectedStamp = m_hoverStamp;
 
 						if(m_currentTool == eToolSelectStamp)
 						{
-							//Clear current selection and reset box
-							m_selectedTiles.clear();
+							//Reset selection box
 							m_boxSelectStart.x = -1;
 							m_boxSelectStart.y = -1;
 							m_boxSelectEnd.x = -1;
@@ -264,15 +264,6 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 								m_boxSelectStart.y = stampPos.y;
 								m_boxSelectEnd.x = stampPos.x + stamp->GetWidth() - 1;
 								m_boxSelectEnd.y = stampPos.y + stamp->GetHeight() - 1;
-
-								//Add all tiles in stamp to selection
-								for(int tileX = stampPos.x; tileX < stamp->GetWidth(); tileX++)
-								{
-									for(int tileY = stampPos.y; tileY < stamp->GetHeight(); tileY++)
-									{
-										m_selectedTiles.push_back(ion::Vector2i(tileX, tileY));
-									}
-								}
 							}
 						}
 
@@ -285,6 +276,29 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 							SetTool(eToolPaintStamp);
 
 							//TODO: Update tileset panel selection + toolbox button state
+						}
+
+						if(m_currentTool == eToolRemoveStamp)
+						{
+							if(Stamp* stamp = m_project->GetStamp(stampId))
+							{
+								//Remove stamp under cursor
+								map.RemoveStamp(x, y);
+
+								//Clear hover stamp
+								m_hoverStamp = InvalidStampId;
+
+								//Repaint area underneath stamp
+								for(int tileX = stampPos.x; tileX < stampPos.x + stamp->GetWidth(); tileX++)
+								{
+									for(int tileY = stampPos.y; tileY < stampPos.y + stamp->GetHeight(); tileY++)
+									{
+										//Invert Y for OpenGL
+										int y_inv = map.GetHeight() - 1 - tileY;
+										PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
+									}
+								}
+							}
 						}
 					}
 
@@ -493,10 +507,10 @@ void MapPanel::SetTool(Tool tool)
 		switch(tool)
 		{
 		case eToolFill:
-			//If previous tool was selectTiles or selectStamp, fill selection and leave previous tool data
+			//If previous tool was selectTiles, fill selection and leave previous tool data
 			//TODO: Should this really be a tool? Doesn't follow the same rules as the others
 			//(it's a single action, rather than a state which requires interaction from the user via the map)
-			if(previousTool == eToolSelectTiles || previousTool == eToolSelectStamp)
+			if(previousTool == eToolSelectTiles)
 			{
 				if(m_project->GetPaintTile() != InvalidTileId)
 				{
@@ -827,6 +841,7 @@ void MapPanel::PaintMap(const Map& map)
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
 
+	//Paint all tiles
 	for(int y = 0; y < mapHeight; y++)
 	{
 		for(int x = 0; x < mapWidth; x++)
@@ -842,6 +857,15 @@ void MapPanel::PaintMap(const Map& map)
 
 			//Paint tile
 			PaintTile(tileId, x, yInv, tileFlags);
+		}
+	}
+
+	//Paint all stamps
+	for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
+	{
+		if(Stamp* stamp = m_project->GetStamp(it->m_id))
+		{
+			PaintStamp(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
 		}
 	}
 }
