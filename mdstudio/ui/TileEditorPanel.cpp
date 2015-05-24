@@ -15,7 +15,6 @@ TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& 
 	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
 {
 	m_texture = NULL;
-	m_tileId = InvalidTileId;
 
 	//No panning
 	EnablePan(false);
@@ -35,9 +34,6 @@ TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& 
 
 	//Create 8x8 grid
 	CreateGrid(s_tileWidth, s_tileHeight, s_tileWidth, s_tileHeight);
-
-	//Centre camera
-	CentreCamera();
 }
 
 TileEditorPanel::~TileEditorPanel()
@@ -63,6 +59,7 @@ void TileEditorPanel::OnResize(wxSizeEvent& event)
 {
 	ViewPanel::OnResize(event);
 	CentreCamera();
+	SetCameraZoom(s_defaultZoom);
 	Refresh();
 }
 
@@ -70,11 +67,13 @@ void TileEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, 
 {
 	const int tileHeight = 8;
 
-	if(m_project && m_tileId)
+	if(m_project && m_project->GetPaintTile())
 	{
+		TileId tileId = m_project->GetPaintTile();
+
 		if(buttonBits & ViewPanel::eMouseLeft)
 		{
-			if(Tile* tile = m_project->GetTileset().GetTile(m_tileId))
+			if(Tile* tile = m_project->GetTileset().GetTile(tileId))
 			{
 				if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
 				{
@@ -91,7 +90,7 @@ void TileEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, 
 						tile->SetPixelColour(x, y, colourIdx);
 
 						//Set colour on tileset texture
-						m_mainWindow->SetTilesetTexPixel(m_tileId, ion::Vector2i(x, y), colourIdx);
+						m_mainWindow->SetTilesetTexPixel(tileId, ion::Vector2i(x, y), colourIdx);
 
 						//Refresh panel
 						Refresh();
@@ -124,30 +123,14 @@ void TileEditorPanel::SetProject(Project* project)
 	ViewPanel::SetProject(project);
 }
 
-void TileEditorPanel::SetTile(TileId tileId)
-{
-	m_tileId = tileId;
-	
-	ion::render::TexCoord texCoords[4];
-	m_mainWindow->GetTileTexCoords(m_tileId, texCoords, 0);
-	m_tilePrimitive->SetTexCoords(texCoords);
-
-	//Centre camera and reset zoom
-	CentreCamera();
-	SetCameraZoom(s_defaultZoom);
-
-	//Refresh panel
-	Refresh();
-}
-
 void TileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	ViewPanel::Refresh(eraseBackground, rect);
 
-	if(m_project && m_project->TilesAreInvalidated() && m_tileId)
+	if(m_project)
 	{
 		ion::render::TexCoord texCoords[4];
-		m_mainWindow->GetTileTexCoords(m_tileId, texCoords, 0);
+		m_mainWindow->GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
 		m_tilePrimitive->SetTexCoords(texCoords);
 	}
 }

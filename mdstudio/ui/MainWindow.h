@@ -43,12 +43,10 @@ public:
 	void ShowPanelTiles();
 	void ShowPanelStamps();
 	void ShowPanelMap();
+	void ShowPanelTileEditor();
 
 	//Open toolbox
 	void ShowPanelToolbox();
-
-	//Open tile editor
-	void EditTile(TileId tileId);
 
 	//Set current map editing tool
 	void SetMapTool(MapPanel::Tool tool);

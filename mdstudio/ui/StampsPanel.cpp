@@ -54,8 +54,7 @@ void StampsPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 	ViewPanel::OnMouse(event, mouseDelta);
 
 	//Camera pan Y (if canvas is taller than panel)
-	wxSize panelSize = GetClientSize();
-	if((m_canvasSize.y * 8.0f) > (panelSize.y / m_cameraZoom))
+	if((m_canvasSize.y * 8.0f) > (m_panelSize.y / m_cameraZoom))
 	{
 		float panDeltaY = 0.0f;
 
@@ -76,7 +75,7 @@ void StampsPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 			//Clamp to size
 			float halfCanvas = (m_canvasSize.y * 4.0f);
 			float minY = -halfCanvas;
-			float maxY = halfCanvas - ((float)panelSize.y / m_cameraZoom);
+			float maxY = halfCanvas - ((float)m_panelSize.y / m_cameraZoom);
 
 			if(cameraPos.y > maxY)
 				cameraPos.y = maxY;
@@ -99,12 +98,10 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 {
 	ViewPanel::OnResize(event);
 
-	wxSize panelSize = event.GetSize();
-
-	if(panelSize.x > 8 && panelSize.y > 8)
+	if(m_panelSize.x > 8 && m_panelSize.y > 8)
 	{
 		//Rearrange stamps (calculates canvas size)
-		ArrangeStamps(ion::Vector2(panelSize.x, panelSize.y));
+		ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));
 
 		//Recreate canvas
 		CreateCanvas(m_canvasSize.x, m_canvasSize.y);
@@ -227,13 +224,11 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(m_project)
 	{
-		wxSize panelSize = GetClientSize();
-
 		//If stamps invalidated
-		if(m_project->StampsAreInvalidated() && panelSize.x > 8)
+		if(m_project->StampsAreInvalidated() && m_panelSize.x > 8)
 		{
 			//Rearrange stamps (calculates canvas size)
-			ArrangeStamps(ion::Vector2(panelSize.x, panelSize.y));
+			ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));
 
 			//Recreate canvas
 			CreateCanvas(m_canvasSize.x, m_canvasSize.y);
@@ -361,9 +356,8 @@ void StampsPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, 
 
 void StampsPanel::ResetZoomPan()
 {
-	wxSize panelSize = GetClientSize();
-	m_cameraZoom = (float)panelSize.x / (m_canvasSize.x * 8.0f);
-	ion::Vector3 cameraPos(-(panelSize.x / 2.0f / m_cameraZoom), -(panelSize.y / 2.0f / m_cameraZoom), 0.0f);
+	m_cameraZoom = (float)m_panelSize.x / (m_canvasSize.x * 8.0f);
+	ion::Vector3 cameraPos(-(m_panelSize.x / 2.0f / m_cameraZoom), -(m_panelSize.y / 2.0f / m_cameraZoom), 0.0f);
 
 	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
 	m_camera.SetPosition(cameraPos);

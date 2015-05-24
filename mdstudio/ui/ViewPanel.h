@@ -130,8 +130,11 @@ protected:
 	//Canvas size (tiles)
 	ion::Vector2i m_canvasSize;
 
+	//Panel size (pixels)
+	ion::Vector2i m_panelSize;
+
 	//Prev panel size (for filtering resize events)
-	wxSize m_panelSize;
+	ion::Vector2i m_prevPanelSize;
 
 private:
 
