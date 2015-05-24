@@ -13,13 +13,15 @@ class MapPanel : public ViewPanel
 public:
 	enum Tool
 	{
-		eToolSelect,
+		eToolSelectTiles,
+		eToolSelectStamp,
 		eToolPaintTile,
 		eToolPaintStamp,
 		eToolClone,
 		eToolCreateStamp,
 		eToolFill,
-		eToolPicker,
+		eToolTilePicker,
+		eToolStampPicker,
 		eToolFlipX,
 		eToolFlipY
 	};
@@ -60,7 +62,8 @@ private:
 	//Rendering
 	void RenderPaintPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
-	void RenderSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderStampSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
 	//Paint whole map to canvas
 	void PaintMap(const Map& map);
@@ -94,6 +97,12 @@ private:
 
 	//Selected tiles
 	std::vector<ion::Vector2i> m_selectedTiles;
+
+	//Selected stamp
+	StampId m_hoverStamp;
+	StampId m_selectedStamp;
+	ion::Vector2i m_hoverStampPos;
+	ion::Vector2i m_selectedStampPos;
 
 	//Multiple (CTRL) selection
 	bool m_multipleSelection;

@@ -52,15 +52,17 @@
 #define wxID_BTN_TILES_CREATE 1013
 #define wxID_BTN_TILES_DELETE 1014
 #define wxID_BTN_CANCEL 1015
-#define wxID_TOOL_SELECT 1016
-#define wxID_TOOL_PAINT 1017
-#define wxID_TOOL_STAMP 1018
-#define wxID_TOOL_PICKER 1019
-#define wxID_TOOL_FLIPX 1020
-#define wxID_TOOL_FLIPY 1021
-#define wxID_TOOL_FILL 1022
-#define wxID_TOOL_CLONE 1023
-#define wxID_TOOL_CREATESTAMP 1024
+#define wxID_TOOL_SELECTTILE 1016
+#define wxID_TOOL_SELECTSTAMP 1017
+#define wxID_TOOL_PAINT 1018
+#define wxID_TOOL_STAMP 1019
+#define wxID_TOOL_TILEPICKER 1020
+#define wxID_TOOL_STAMPPICKER 1021
+#define wxID_TOOL_FLIPX 1022
+#define wxID_TOOL_FLIPY 1023
+#define wxID_TOOL_FILL 1024
+#define wxID_TOOL_CLONE 1025
+#define wxID_TOOL_CREATESTAMP 1026
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -153,10 +155,12 @@ class MapToolbox : public wxPanel
 	private:
 	
 	protected:
-		wxBitmapButton* m_toolSelect;
+		wxBitmapButton* m_toolSelectTile;
+		wxBitmapButton* m_toolSelectStamp;
 		wxBitmapButton* m_toolPaint;
 		wxBitmapButton* m_toolStamp;
-		wxBitmapButton* m_toolPicker;
+		wxBitmapButton* m_toolTilePicker;
+		wxBitmapButton* m_toolStampPicker;
 		wxBitmapButton* m_toolFlipX;
 		wxBitmapButton* m_toolFlipY;
 		wxBitmapButton* m_toolFill;

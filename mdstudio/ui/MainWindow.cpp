@@ -410,10 +410,12 @@ void MainWindow::ShowPanelToolbox()
 		m_auiManager.AddPane(m_toolboxPanel, paneInfo);
 
 		//Subscribe to toolbox buttons
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECT);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTTILE);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTSTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINT);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMP);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PICKER);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_TILEPICKER);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMPPICKER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPX);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
@@ -772,7 +774,7 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 			CreateTilesetTexture(m_project->GetTileset());
 
 			//Revert to select tool
-			SetMapTool(MapPanel::eToolSelect);
+			SetMapTool(MapPanel::eToolSelectTiles);
 
 			//Refresh
 			RefreshAll();
@@ -880,8 +882,11 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 	{
 		switch(event.GetId())
 		{
-		case wxID_TOOL_SELECT:
-			m_mapPanel->SetTool(MapPanel::eToolSelect);
+		case wxID_TOOL_SELECTTILE:
+			m_mapPanel->SetTool(MapPanel::eToolSelectTiles);
+			break;
+		case wxID_TOOL_SELECTSTAMP:
+			m_mapPanel->SetTool(MapPanel::eToolSelectStamp);
 			break;
 		case wxID_TOOL_PAINT:
 			m_mapPanel->SetTool(MapPanel::eToolPaintTile);
@@ -889,8 +894,11 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 		case wxID_TOOL_STAMP:
 			m_mapPanel->SetTool(MapPanel::eToolPaintStamp);
 			break;
-		case wxID_TOOL_PICKER:
-			m_mapPanel->SetTool(MapPanel::eToolPicker);
+		case wxID_TOOL_TILEPICKER:
+			m_mapPanel->SetTool(MapPanel::eToolTilePicker);
+			break;
+		case wxID_TOOL_STAMPPICKER:
+			m_mapPanel->SetTool(MapPanel::eToolStampPicker);
 			break;
 		case wxID_TOOL_FLIPX:
 			m_mapPanel->SetTool(MapPanel::eToolFlipX);

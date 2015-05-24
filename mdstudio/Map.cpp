@@ -30,6 +30,7 @@ void Map::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_width);
 	archive.Serialise(m_height);
 	archive.Serialise(m_tiles);
+	archive.Serialise(m_stamps);
 }
 
 int Map::GetWidth() const
@@ -97,7 +98,16 @@ u32 Map::GetTileFlags(int x, int y) const
 	return m_tiles[tileIdx].m_flags;
 }
 
-void Map::DrawStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
+void Map::SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
+{
+	//Add to stamp map
+	m_stamps.push_back(std::make_tuple(ion::Vector2i(x, y), ion::Vector2i(stamp.GetWidth(), stamp.GetHeight()), StampDesc(stamp.GetId(), flipFlags)));
+
+	//Bake it into the tiles
+	BakeStamp(x, y, stamp, flipFlags);
+}
+
+void Map::BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
 {
 	int width = stamp.GetWidth();
 	int height = stamp.GetHeight();
@@ -126,6 +136,29 @@ void Map::DrawStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
 			}
 		}
 	}
+}
+
+StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const
+{
+	StampId stampId = InvalidStampId;
+	ion::Vector2i size;
+	ion::Vector2i bottomRight;
+
+	for(int i = 0; i < m_stamps.size() && !stampId; i++)
+	{
+		topLeft = std::get<0>(m_stamps[i]);
+		size = std::get<1>(m_stamps[i]);
+
+		bottomRight = topLeft + size;
+
+		if(x >= topLeft.x && y >= topLeft.y
+			&& x < bottomRight.x && y < bottomRight.y)
+		{
+			stampId = std::get<2>(m_stamps[i]).m_id;
+		}
+	}
+
+	return stampId;
 }
 
 void Map::Export(std::stringstream& stream) const
