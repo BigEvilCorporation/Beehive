@@ -24,10 +24,6 @@ public:
 	//Set current project
 	virtual void SetProject(Project* project);
 
-	//Set editing tile
-	void SetTile(TileId tileId);
-	TileId GetTile() const { return m_tileId; }
-
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
 protected:
@@ -49,9 +45,6 @@ private:
 
 	//Texture
 	ion::render::Texture* m_texture;
-
-	//Tile ID
-	TileId m_tileId;
 
 	static const int s_tileWidth = 8;
 	static const int s_tileHeight = 8;

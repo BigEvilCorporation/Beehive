@@ -13,7 +13,6 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;
 	m_cameraPanSpeed = 1.0f;
-	m_panelSize = size;
 	m_prevMouseBits = 0;
 	m_enableZoom = true;
 	m_enablePan = true;
@@ -139,12 +138,11 @@ void ViewPanel::SetProject(Project* project)
 {
 	m_project = project;
 
-	//Reset zoom
-	m_cameraZoom = 1.0f;
-	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
-
 	//Centre camera on canvas
 	CentreCamera();
+
+	//Reset zoom
+	SetCameraZoom(1.0f);
 
 	//Refresh panel
 	Refresh();
@@ -285,11 +283,10 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 		//Get mouse position in panel space
 		wxClientDC clientDc(this);
 		wxPoint mousePanelPosWx = event.GetLogicalPosition(clientDc);
-		wxSize panelSizeWx = GetClientSize();
 
 		//Centre of map quad is 0,0
-		ion::Vector2 mousePos(mousePanelPosWx.x, panelSizeWx.y - mousePanelPosWx.y);
-		ion::Vector2 viewportSize(panelSizeWx.x, panelSizeWx.y);
+		ion::Vector2 mousePos(mousePanelPosWx.x, m_panelSize.y - mousePanelPosWx.y);
+		ion::Vector2 viewportSize(m_panelSize.x, m_panelSize.y);
 		ion::Vector2 cameraPos(m_camera.GetPosition().x * m_cameraZoom, m_camera.GetPosition().y * m_cameraZoom);
 		ion::Vector2 canvasSizePixels(m_canvasSize.x * tileWidth * m_cameraZoom, m_canvasSize.y * tileHeight * m_cameraZoom);
 		ion::Vector2 mousePosCanvasSpace;
@@ -418,15 +415,17 @@ void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& 
 
 void ViewPanel::OnResize(wxSizeEvent& event)
 {
-	wxSize panelSize = GetClientSize();
+	wxSize clientSize = event.GetSize();
+	m_panelSize.x = clientSize.x;
+	m_panelSize.y = clientSize.y;
 
-	if(panelSize.x > 1 && panelSize.y > 1)
+	if(m_panelSize.x > 1 && m_panelSize.y > 1)
 	{
 		//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
-		if(m_panelSize.x != panelSize.x || m_panelSize.y != panelSize.y)
+		if(m_prevPanelSize.x != m_panelSize.x || m_prevPanelSize.y != m_panelSize.y)
 		{
-			m_panelSize = panelSize;
-			m_viewport.Resize(panelSize.x, panelSize.y);
+			m_prevPanelSize = m_panelSize;
+			m_viewport.Resize(m_panelSize.x, m_panelSize.y);
 			CentreCamera();
 		}
 	}
@@ -436,9 +435,16 @@ void ViewPanel::OnResize(wxSizeEvent& event)
 
 void ViewPanel::CentreCamera()
 {
-	wxRect clientRect = GetClientRect();
-	ion::Vector3 cameraPos(-(clientRect.width / 2.0f), -(clientRect.height / 2.0f), 0.0f);
+	//Reset zoom to identity
+	float zoom = m_cameraZoom;
+	SetCameraZoom(1.0f);
+
+	//Centre camera
+	ion::Vector3 cameraPos(-(m_panelSize.x / 2.0f), -(m_panelSize.y / 2.0f), 0.0f);
 	m_camera.SetPosition(cameraPos);
+
+	//Re-apply zoom
+	SetCameraZoom(zoom);
 }
 
 void ViewPanel::SetCameraZoom(float zoom)
@@ -449,9 +455,8 @@ void ViewPanel::SetCameraZoom(float zoom)
 	m_camera.SetZoom(ion::Vector3(zoom, zoom, 1.0f));
 
 	//Compensate camera pos
-	wxSize panelSize = GetClientSize();
-	ion::Vector2 originalViewportSize((float)panelSize.x / prevZoom, (float)panelSize.y / prevZoom);
-	ion::Vector2 newViewportSize((float)panelSize.x / zoom, (float)panelSize.y / zoom);
+	ion::Vector2 originalViewportSize((float)m_panelSize.x / prevZoom, (float)m_panelSize.y / prevZoom);
+	ion::Vector2 newViewportSize((float)m_panelSize.x / zoom, (float)m_panelSize.y / zoom);
 	ion::Vector3 cameraPos = m_camera.GetPosition();
 	cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
 	cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;

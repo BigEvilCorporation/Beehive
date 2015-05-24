@@ -50,6 +50,9 @@ private:
 	//Centre camera, reset zoom
 	void ResetZoomPan();
 
+	//Reset scroll
+	void ScrollToTop();
+
 	//Current/hover tile
 	TileId m_selectedTile;
 	TileId m_hoverTile;

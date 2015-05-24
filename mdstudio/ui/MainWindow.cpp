@@ -24,11 +24,17 @@ wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
 MainWindow::MainWindow()
 	: MainWindowBase(NULL)
 {
-	m_auiManager.SetManagedWindow(m_dockArea);
 	SetStatusText("BEEhive v0.1");
 
 	m_tilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
+
+	//Setup panel docking manager
+	m_auiManager.SetManagedWindow(m_dockArea);
+	m_auiManager.SetFlags(	wxAUI_MGR_ALLOW_FLOATING			//Allow floating panels
+							| wxAUI_MGR_TRANSPARENT_HINT		//Draw possible dock locations
+							| wxAUI_MGR_TRANSPARENT_DRAG		//Transparent panel whilst dragging
+							| wxAUI_MGR_LIVE_RESIZE);			//Refresh on each discreet resize
 
 	//Create blank OpenGL panel to create global DC
 	wxGLCanvas* m_blankCanvas = new wxGLCanvas(this, wxID_ANY, NULL);
@@ -111,6 +117,7 @@ void MainWindow::SetProject(Project* project)
 			ShowPanelPalettes();
 			ShowPanelTiles();
 			ShowPanelStamps();
+			ShowPanelTileEditor();
 			ShowPanelMap();
 
 			//Sync settings widgets states
@@ -319,9 +326,9 @@ void MainWindow::ShowPanelTiles()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 500);
+			paneInfo.BestSize(300, 300);
 			paneInfo.Right();
-			paneInfo.Caption("Tiles");
+			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 			
 			m_tilesPanel = new TilesPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
@@ -429,34 +436,34 @@ void MainWindow::ShowPanelToolbox()
 	}
 }
 
-void MainWindow::EditTile(TileId tileId)
+void MainWindow::ShowPanelTileEditor()
 {
 	if(m_project.get())
 	{
-		if(m_tileEditorPanel)
+		if(!m_tileEditorPanel)
 		{
-			m_auiManager.DetachPane(m_tileEditorPanel);
-			delete m_tileEditorPanel;
+			wxSize clientSize = GetClientSize();
+
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Right();
+			paneInfo.Caption("Tile");
+			paneInfo.CaptionVisible(true);
+
+			m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
+			m_tileEditorPanel->Show();
+			m_auiManager.Update();
+
+			m_tileEditorPanel->SetProject(m_project.get());
 		}
 
-		wxSize clientSize = GetClientSize();
-
-		wxAuiPaneInfo paneInfo;
-		paneInfo.Dockable(true);
-		paneInfo.DockFixed(false);
-		paneInfo.BestSize(300, 300);
-		paneInfo.FloatingPosition(wxPoint((clientSize.x / 2) - (paneInfo.best_size.x / 2), (clientSize.y / 2) - (paneInfo.best_size.y / 2)));
-		paneInfo.Float();
-		paneInfo.Caption("Tile Editor");
-		paneInfo.CaptionVisible(true);
-
-		m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
-		m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
-		m_tileEditorPanel->Show();
-		m_auiManager.Update();
-
-		m_tileEditorPanel->SetProject(m_project.get());
-		m_tileEditorPanel->SetTile(tileId);
+		if(!m_tileEditorPanel->IsShown())
+		{
+			m_tileEditorPanel->Show();
+		}
 	}
 }
 
@@ -713,11 +720,9 @@ void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 		//Set paint tool
 		SetMapTool(MapPanel::eToolPaintTile);
 
-		//Refresh tiles panel
+		//Refresh tiles and tile editor panels
 		RefreshPanel(ePanelTiles);
-
-		//Start editing tile
-		EditTile(tileId);
+		RefreshPanel(ePanelTileEditor);
 	}
 }
 
@@ -758,13 +763,6 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 			{
 				//Set blank erase tile
 				m_project->SetEraseTile(InvalidTileId);
-			}
-
-			if(m_tileEditorPanel && m_tileEditorPanel->GetTile() == tileId)
-			{
-				//Currently editing tile, close panel
-				m_auiManager.DetachPane(m_tileEditorPanel);
-				delete m_tileEditorPanel;
 			}
 
 			//Rebuild index map

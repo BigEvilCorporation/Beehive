@@ -58,8 +58,7 @@ void TilesPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 	ViewPanel::OnMouse(event, mouseDelta);
 
 	//Camera pan Y (if canvas is taller than panel)
-	wxSize panelSize = GetClientSize();
-	if((m_canvasSize.y * 8.0f) > (panelSize.y / m_cameraZoom))
+	if((m_canvasSize.y * 8.0f) > (m_panelSize.y / m_cameraZoom))
 	{
 		float panDeltaY = 0.0f;
 
@@ -80,7 +79,7 @@ void TilesPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 			//Clamp to size
 			float halfCanvas = (m_canvasSize.y * 4.0f);
 			float minY = -halfCanvas;
-			float maxY = halfCanvas - ((float)panelSize.y / m_cameraZoom);
+			float maxY = halfCanvas - ((float)m_panelSize.y / m_cameraZoom);
 
 			if(cameraPos.y > maxY)
 				cameraPos.y = maxY;
@@ -91,12 +90,6 @@ void TilesPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 
 			Refresh();
 		}
-	}
-
-	if(event.LeftDClick() && m_selectedTile)
-	{
-		//Left double-click, edit tile
-		m_mainWindow->EditTile(m_selectedTile);
 	}
 }
 
@@ -109,9 +102,7 @@ void TilesPanel::OnResize(wxSizeEvent& event)
 {
 	ViewPanel::OnResize(event);
 
-	wxSize panelSize = event.GetSize();
-
-	if(panelSize.x > 8 && panelSize.y > 8)
+	if(m_panelSize.x > 8 && m_panelSize.y > 8)
 	{
 		ion::Vector2i canvasSize = CalcCanvasSize();
 
@@ -120,6 +111,8 @@ void TilesPanel::OnResize(wxSizeEvent& event)
 			InitPanel(canvasSize.x, canvasSize.y);
 		}
 	}
+
+	ResetZoomPan();
 }
 
 void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
@@ -164,6 +157,9 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x
 
 		//Set tile paint tool
 		m_mainWindow->SetMapTool(MapPanel::eToolPaintTile);
+
+		//Refresh tile editor panel
+		m_mainWindow->RefreshPanel(MainWindow::ePanelTileEditor);
 	}
 
 	//Redraw
@@ -222,12 +218,10 @@ void TilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(m_project)
 	{
-		wxSize panelSize = GetClientSize();
-
 		//If tiles invalidated
 		if(m_project->TilesAreInvalidated())
 		{
-			if(panelSize.x > 8 && panelSize.y > 8)
+			if(m_panelSize.x > 8 && m_panelSize.y > 8)
 			{
 				ion::Vector2i canvasSize = CalcCanvasSize();
 				InitPanel(canvasSize.x, canvasSize.y);
@@ -309,15 +303,28 @@ void TilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, c
 
 void TilesPanel::ResetZoomPan()
 {
-	wxSize panelSize = GetClientSize();
-	m_cameraZoom = (float)panelSize.x / (m_canvasSize.x * 8.0f);
+	m_cameraZoom = (float)m_panelSize.x / (m_canvasSize.x * 8.0f);
 
 	//Scroll to top
 	float halfCanvas = (m_canvasSize.y * 4.0f);
-	float maxY = halfCanvas - ((float)panelSize.y / m_cameraZoom);
-
-	ion::Vector3 cameraPos(-(panelSize.x / 2.0f / m_cameraZoom), maxY, 0.0f);
+	float maxY = halfCanvas - ((float)m_panelSize.y / m_cameraZoom);
+	ion::Vector3 cameraPos(-(m_panelSize.x / 2.0f / m_cameraZoom), maxY, 0.0f);
 
 	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
 	m_camera.SetPosition(cameraPos);
+}
+
+void TilesPanel::ScrollToTop()
+{
+	//Reset zoom to identity
+	//float zoom = m_cameraZoom;
+	//SetCameraZoom(1.0f);
+
+	//Scroll to top
+	float halfCanvas = (m_canvasSize.y * 4.0f);
+	float maxY = halfCanvas - ((float)m_panelSize.y / m_cameraZoom);
+	ion::Vector3 cameraPos(-(m_panelSize.x / 2.0f / m_cameraZoom), maxY, 0.0f);
+
+	//Re-apply zoom
+	//SetCameraZoom(zoom);
 }
