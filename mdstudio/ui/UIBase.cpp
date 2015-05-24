@@ -34,6 +34,8 @@
 #include "../FormBuilderProj/tool_painttile.xpm"
 #include "../FormBuilderProj/tool_picker.xpm"
 #include "../FormBuilderProj/tool_select.xpm"
+#include "../FormBuilderProj/tool_selectstamp.xpm"
+#include "../FormBuilderProj/tool_stamppicker.xpm"
 #include "../FormBuilderProj/toolspanel.xpm"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -207,10 +209,15 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	fgSizer1->SetFlexibleDirection( wxBOTH );
 	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_toolSelect = new wxBitmapButton( this, wxID_TOOL_SELECT, wxBitmap( tool_select_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolSelect->SetToolTip( wxT("Select Tile(s)") );
+	m_toolSelectTile = new wxBitmapButton( this, wxID_TOOL_SELECTTILE, wxBitmap( tool_select_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolSelectTile->SetToolTip( wxT("Select Tile(s)") );
 	
-	fgSizer1->Add( m_toolSelect, 0, wxALL, 5 );
+	fgSizer1->Add( m_toolSelectTile, 0, wxALL, 5 );
+	
+	m_toolSelectStamp = new wxBitmapButton( this, wxID_TOOL_SELECTSTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolSelectStamp->SetToolTip( wxT("Select Stamp") );
+	
+	fgSizer1->Add( m_toolSelectStamp, 0, wxALL, 5 );
 	
 	m_toolPaint = new wxBitmapButton( this, wxID_TOOL_PAINT, wxBitmap( tool_painttile_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolPaint->SetToolTip( wxT("Paint Tile") );
@@ -222,10 +229,15 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolStamp, 0, wxALL, 5 );
 	
-	m_toolPicker = new wxBitmapButton( this, wxID_TOOL_PICKER, wxBitmap( tool_picker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolPicker->SetToolTip( wxT("Pick Tile") );
+	m_toolTilePicker = new wxBitmapButton( this, wxID_TOOL_TILEPICKER, wxBitmap( tool_picker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolTilePicker->SetToolTip( wxT("Pick Tile") );
 	
-	fgSizer1->Add( m_toolPicker, 0, wxALL, 5 );
+	fgSizer1->Add( m_toolTilePicker, 0, wxALL, 5 );
+	
+	m_toolStampPicker = new wxBitmapButton( this, wxID_TOOL_STAMPPICKER, wxBitmap( tool_stamppicker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolStampPicker->SetToolTip( wxT("Pick Stamp") );
+	
+	fgSizer1->Add( m_toolStampPicker, 0, wxALL, 5 );
 	
 	m_toolFlipX = new wxBitmapButton( this, wxID_TOOL_FLIPX, wxBitmap( tool_flipx_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolFlipX->SetToolTip( wxT("Flip Horizontal") );

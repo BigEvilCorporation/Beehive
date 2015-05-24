@@ -66,6 +66,7 @@ namespace ion
 
 			//Serialise STL containers
 			template <typename T1, typename T2> void Serialise(std::pair<T1, T2>& pair);
+			template <typename T1, typename T2, typename T3> void Serialise(std::tuple<T1, T2, T3>& tuple);
 			template <typename T> void Serialise(std::vector<T>& objects);
 			template <typename T> void Serialise(std::list<T>& objects);
 			template <typename KEY, typename T> void Serialise(std::map<KEY, T>& objects);
@@ -336,6 +337,13 @@ namespace ion
 		{
 			Serialise(pair.first);
 			Serialise(pair.second);
+		}
+
+		template <typename T1, typename T2, typename T3> void Archive::Serialise(std::tuple<T1, T2, T3>& tuple)
+		{
+			Serialise(std::get<0>(tuple));
+			Serialise(std::get<1>(tuple));
+			Serialise(std::get<2>(tuple));
 		}
 
 		template <typename T> void Archive::Serialise(std::vector<T>& objects)

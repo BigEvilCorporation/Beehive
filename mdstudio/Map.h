@@ -8,7 +8,10 @@
 
 #include <vector>
 #include <sstream>
+
 #include <io/Archive.h>
+#include <maths/Vector.h>
+
 #include "Stamp.h"
 
 class Map
@@ -41,8 +44,10 @@ public:
 	void SetTileFlags(int x, int y, u32 flags);
 	u32 GetTileFlags(int x, int y) const;
 
-	//Draw stamp on map
-	void DrawStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
+	//Set stamp on map
+	void SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
+	void BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
+	StampId FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const;
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
@@ -65,5 +70,21 @@ private:
 		u32 m_flags;
 	};
 
+	struct StampDesc
+	{
+		StampDesc() { m_id = 0; m_flags = 0; }
+		StampDesc(StampId stampId, u32 flags) { m_id = stampId; m_flags = flags; }
+
+		void Serialise(ion::io::Archive& archive)
+		{
+			archive.Serialise(m_id);
+			archive.Serialise(m_flags);
+		}
+
+		StampId m_id;
+		u32 m_flags;
+	};
+
 	std::vector<TileDesc> m_tiles;
+	std::vector< std::tuple<ion::Vector2i, ion::Vector2i, StampDesc> > m_stamps;
 };
