@@ -63,6 +63,7 @@
 #define wxID_TOOL_FILL 1024
 #define wxID_TOOL_CLONE 1025
 #define wxID_TOOL_CREATESTAMP 1026
+#define wxID_TOOL_REMOVESTAMP 1027
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -166,6 +167,7 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolFill;
 		wxBitmapButton* m_toolClone;
 		wxBitmapButton* m_toolCreateStamp;
+		wxBitmapButton* m_toolRemoveStamp;
 	
 	public:
 		

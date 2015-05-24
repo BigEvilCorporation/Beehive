@@ -19,6 +19,7 @@ public:
 		eToolPaintStamp,
 		eToolClone,
 		eToolCreateStamp,
+		eToolRemoveStamp,
 		eToolFill,
 		eToolTilePicker,
 		eToolStampPicker,
