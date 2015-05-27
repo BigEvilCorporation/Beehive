@@ -24,6 +24,9 @@
 #include <stdint.h>
 
 #include "UIBase.h"
+#include "Mouse.h"
+#include "Tool.h"
+#include "RenderResources.h"
 #include "../Project.h"
 
 class MainWindow;
@@ -31,14 +34,7 @@ class MainWindow;
 class ViewPanel : public wxGLCanvas
 {
 public:
-	enum MouseButtons
-	{
-		eMouseLeft = 1 << 0,
-		eMouseMiddle = 1 << 1,
-		eMouseRight = 1 << 2
-	};
-
-	ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~ViewPanel();
 
 	//Set current project
@@ -101,6 +97,9 @@ protected:
 	//Renderer
 	ion::render::Renderer& m_renderer;
 
+	//Rendering resources
+	RenderResources& m_renderResources;
+
 	//Viewport
 	ion::render::Viewport m_viewport;
 
@@ -114,18 +113,9 @@ protected:
 	ion::Vector2i m_prevMouseOverTilePos;
 	int m_prevMouseBits;
 
-	//Rendering materials and shaders
-	ion::render::Shader* m_vertexShader;
-	ion::render::Shader* m_pixelShader;
-	ion::render::Material* m_canvasMaterial;
-	ion::render::Material* m_gridMaterial;
-
 	//Rendering primitives
 	ion::render::Chessboard* m_canvasPrimitive;
 	ion::render::Grid* m_gridPrimitive;
-
-	//Tileset texture
-	ion::render::Texture* m_tilesetTexture;
 
 	//Canvas size (tiles)
 	ion::Vector2i m_canvasSize;

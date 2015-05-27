@@ -13,7 +13,7 @@ class TilesPanel : public ViewPanel
 	static const float s_tileSize;
 
 public:
-	TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~TilesPanel();
 
 	//Events
@@ -61,15 +61,6 @@ private:
 	ion::Vector2i m_selectedTilePos;
 	ion::Vector2i m_hoverTilePos;
 
-	//Rendering materials and shaders
-	ion::render::Shader* m_selectionVertexShader;
-	ion::render::Shader* m_selectionPixelShader;
-	ion::render::Material* m_selectionMaterial;
-
 	//Rendering primitives
 	ion::render::Quad* m_selectionPrimitive;
-
-	//Rendering colours
-	ion::Colour m_hoverColour;
-	ion::Colour m_selectColour;
 };

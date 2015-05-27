@@ -26,9 +26,6 @@ MainWindow::MainWindow()
 {
 	SetStatusText("BEEhive v0.1");
 
-	m_tilesetSizeSq = 1;
-	m_cellSizeTexSpaceSq = 1.0f;
-
 	//Setup panel docking manager
 	m_auiManager.SetManagedWindow(m_dockArea);
 	m_auiManager.SetFlags(	wxAUI_MGR_ALLOW_FLOATING			//Allow floating panels
@@ -45,8 +42,8 @@ MainWindow::MainWindow()
 	//Create renderer (from global DC
 	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
 
-	//Create tileset texture
-	m_tilesetTexture = ion::render::Texture::Create();
+	//Create and load rendering resources
+	m_renderResources = new RenderResources;
 
 	//Create default project
 	SetProject(new Project());
@@ -57,8 +54,10 @@ MainWindow::~MainWindow()
 	//Close project and panels
 	SetProject(NULL);
 
-	//Delete texture, renderer and OpenGL context
-	delete m_tilesetTexture;
+	//Delete rendering resources
+	delete m_renderResources;
+
+	//Delete renderer and OpenGL context
 	delete m_renderer;
 	delete m_context;
 }
@@ -109,6 +108,9 @@ void MainWindow::SetProject(Project* project)
 
 		if(project)
 		{
+			//Set render resources project
+			m_renderResources->SetProject(project);
+
 			//Recreate tileset texture and tile index cache
 			RefreshTileset();
 
@@ -126,165 +128,6 @@ void MainWindow::SetProject(Project* project)
 
 		//Refresh whole window
 		RefreshAll();
-	}
-}
-
-void MainWindow::CreateTilesetTexture(const Tileset& tileset)
-{
-	const int tileWidth = 8;
-	const int tileHeight = 8;
-
-	u32 numTiles = tileset.GetCount();
-	m_tilesetSizeSq = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles));
-	u32 textureWidth = m_tilesetSizeSq * tileWidth;
-	u32 textureHeight = m_tilesetSizeSq * tileHeight;
-	u32 bytesPerPixel = 3;
-	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
-	m_cellSizeTexSpaceSq = 1.0f / (float)m_tilesetSizeSq;
-
-	u8* data = new u8[textureSize];
-	ion::memory::MemSet(data, 0, textureSize);
-
-	u32 tileIndex = 0;
-
-	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
-	{
-		const Tile& tile = it->second;
-		PaletteId paletteId = tile.GetPaletteId();
-		Palette* palette = m_project->GetPalette(paletteId);
-
-		u32 x = tileIndex % m_tilesetSizeSq;
-		u32 y = tileIndex / m_tilesetSizeSq;
-
-		for(int pixelY = 0; pixelY < 8; pixelY++)
-		{
-			for(int pixelX = 0; pixelX < 8; pixelX++)
-			{
-				//Invert Y for OpenGL
-				int pixelY_OGL = tileHeight - 1 - pixelY;
-				const Colour& colour = palette->GetColour(tile.GetPixelColour(pixelX, pixelY_OGL));
-
-				int destPixelX = (x * tileWidth) + pixelX;
-				int destPixelY = (y * tileHeight) + pixelY;
-				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-				u32 dataOffset = pixelIdx * bytesPerPixel;
-				ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
-				data[dataOffset] = colour.r;
-				data[dataOffset + 1] = colour.g;
-				data[dataOffset + 2] = colour.b;
-			}
-		}
-	}
-
-	m_tilesetTexture->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
-	m_tilesetTexture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTexture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_tilesetTexture->SetWrapping(ion::render::Texture::eWrapClamp);
-
-	delete data;
-}
-
-void MainWindow::CacheTileIndices(const Tileset& tileset)
-{
-	m_tileIndexMap.clear();
-
-	if(m_project.get())
-	{
-		u32 tileIndex = 0;
-
-		for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
-		{
-			//Map ID to index
-			m_tileIndexMap.insert(std::make_pair(it->first, tileIndex));
-		}
-	}
-}
-
-void MainWindow::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const
-{
-	if(tileId == InvalidTileId)
-	{
-		//Invalid tile, use top-left pixel
-		float onePixelTexSpace = m_cellSizeTexSpaceSq / 8.0f;
-
-		//Top left
-		texCoords[0].x = 0.0f;
-		texCoords[0].y = 0.0f;
-		//Bottom left
-		texCoords[1].x = 0.0f;
-		texCoords[1].y = onePixelTexSpace;
-		//Bottom right
-		texCoords[2].x = onePixelTexSpace;
-		texCoords[2].y = onePixelTexSpace;
-		//Top right
-		texCoords[3].x = onePixelTexSpace;
-		texCoords[3].y = 0.0f;
-	}
-	else
-	{
-		//Map tile ID to index
-		u32 tileIndex = GetTilesetTexTileIndex(tileId);
-
-		//Map tile to X/Y on tileset texture
-		int tilesetX = (tileIndex % m_tilesetSizeSq);
-		int tilesetY = (tileIndex / m_tilesetSizeSq);
-		ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
-
-		bool flipX = (flipFlags & Map::eFlipX) != 0;
-		bool flipY = (flipFlags & Map::eFlipY) != 0;
-
-		float top = flipY ? (textureBottomLeft.y) : (textureBottomLeft.y + m_cellSizeTexSpaceSq);
-		float left = flipX ? (textureBottomLeft.x + m_cellSizeTexSpaceSq) : (textureBottomLeft.x);
-		float bottom = flipY ? (textureBottomLeft.y + m_cellSizeTexSpaceSq) : (textureBottomLeft.y);
-		float right = flipX ? (textureBottomLeft.x) : (textureBottomLeft.x + m_cellSizeTexSpaceSq);
-
-		//Top left
-		texCoords[0].x = left;
-		texCoords[0].y = top;
-		//Bottom left
-		texCoords[1].x = left;
-		texCoords[1].y = bottom;
-		//Bottom right
-		texCoords[2].x = right;
-		texCoords[2].y = bottom;
-		//Top right
-		texCoords[3].x = right;
-		texCoords[3].y = top;
-	}
-}
-
-int MainWindow::GetTilesetTexTileIndex(TileId tileId) const
-{
-	std::map<TileId, u32>::const_iterator it = m_tileIndexMap.find(tileId);
-	ion::debug::Assert(it != m_tileIndexMap.end(), "TileId not found in tileset");
-	return it->second;
-}
-
-void MainWindow::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx)
-{
-	if(m_project.get() && m_tilesetTexture)
-	{
-		if(Tile* tile = m_project->GetTileset().GetTile(tileId))
-		{
-			if(Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
-			{
-				const int tileWidth = 8;
-				const int tileHeight = 8;
-
-				const Colour& colour = palette->GetColour(colourIdx);
-
-				int tileIndex = GetTilesetTexTileIndex(tileId);
-				u32 x = tileIndex % m_tilesetSizeSq;
-				u32 y = tileIndex / m_tilesetSizeSq;
-
-				//Invert Y for OpenGL
-				int y_inv = tileHeight - 1 - pixel.y;
-
-				ion::Vector2i pixelPos((x * tileWidth) + pixel.x, (y * tileHeight) + y_inv);
-
-				m_tilesetTexture->SetPixel(pixelPos, ion::Colour(colour.r, colour.g, colour.b));
-			}
-		}
 	}
 }
 
@@ -331,7 +174,7 @@ void MainWindow::ShowPanelTiles()
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 			
-			m_tilesPanel = new TilesPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
+			m_tilesPanel = new TilesPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
 			m_tilesPanel->Show();
 
@@ -359,7 +202,7 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
-			m_stampsPanel = new StampsPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
+			m_stampsPanel = new StampsPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_stampsPanel, paneInfo);
 			m_stampsPanel->Show();
 
@@ -387,7 +230,7 @@ void MainWindow::ShowPanelMap()
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
 
-			m_mapPanel = new MapPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
+			m_mapPanel = new MapPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
 			m_mapPanel->Show();
 
@@ -453,7 +296,7 @@ void MainWindow::ShowPanelTileEditor()
 			paneInfo.Caption("Tile");
 			paneInfo.CaptionVisible(true);
 
-			m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, m_tilesetTexture, m_dockArea, NewControlId());
+			m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
 			m_tileEditorPanel->Show();
 			m_auiManager.Update();
@@ -468,7 +311,7 @@ void MainWindow::ShowPanelTileEditor()
 	}
 }
 
-void MainWindow::SetMapTool(MapPanel::Tool tool)
+void MainWindow::SetMapTool(ToolType tool)
 {
 	if(m_mapPanel)
 	{
@@ -509,8 +352,7 @@ void MainWindow::RefreshAll()
 
 void MainWindow::RedrawAll()
 {
-	if(m_project.get())
-		CreateTilesetTexture(m_project->GetTileset());
+	RefreshTileset();
 
 	if(m_palettesPanel)
 		m_palettesPanel->Refresh();
@@ -533,10 +375,7 @@ void MainWindow::RefreshTileset()
 	if(m_project.get())
 	{
 		//Recreate tileset texture
-		CreateTilesetTexture(m_project->GetTileset());
-
-		//Recreate index cache
-		CacheTileIndices(m_project->GetTileset());
+		m_renderResources->CreateTilesetTexture();
 	}
 }
 
@@ -709,17 +548,14 @@ void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 		//Add new tile
 		TileId tileId = m_project->GetTileset().AddTile();
 
-		//Rebuild index map
-		CacheTileIndices(m_project->GetTileset());
-
 		//Recreate tileset texture
-		CreateTilesetTexture(m_project->GetTileset());
+		RefreshTileset();
 
 		//Set as current paint tile
 		m_project->SetPaintTile(tileId);
 
 		//Set paint tool
-		SetMapTool(MapPanel::eToolPaintTile);
+		SetMapTool(eToolPaintTile);
 
 		//Refresh tiles and tile editor panels
 		RefreshPanel(ePanelTiles);
@@ -766,14 +602,11 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 				m_project->SetEraseTile(InvalidTileId);
 			}
 
-			//Rebuild index map
-			CacheTileIndices(tileset);
-
 			//Recreate tileset texture
-			CreateTilesetTexture(m_project->GetTileset());
+			RefreshTileset();
 
 			//Revert to select tool
-			SetMapTool(MapPanel::eToolSelectTiles);
+			SetMapTool(eToolSelectTiles);
 
 			//Refresh
 			RefreshAll();
@@ -882,40 +715,40 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 		switch(event.GetId())
 		{
 		case wxID_TOOL_SELECTTILE:
-			m_mapPanel->SetTool(MapPanel::eToolSelectTiles);
+			m_mapPanel->SetTool(eToolSelectTiles);
 			break;
 		case wxID_TOOL_SELECTSTAMP:
-			m_mapPanel->SetTool(MapPanel::eToolSelectStamp);
+			m_mapPanel->SetTool(eToolSelectStamp);
 			break;
 		case wxID_TOOL_PAINT:
-			m_mapPanel->SetTool(MapPanel::eToolPaintTile);
+			m_mapPanel->SetTool(eToolPaintTile);
 			break;
 		case wxID_TOOL_STAMP:
-			m_mapPanel->SetTool(MapPanel::eToolPaintStamp);
+			m_mapPanel->SetTool(eToolPaintStamp);
 			break;
 		case wxID_TOOL_TILEPICKER:
-			m_mapPanel->SetTool(MapPanel::eToolTilePicker);
+			m_mapPanel->SetTool(eToolTilePicker);
 			break;
 		case wxID_TOOL_STAMPPICKER:
-			m_mapPanel->SetTool(MapPanel::eToolStampPicker);
+			m_mapPanel->SetTool(eToolStampPicker);
 			break;
 		case wxID_TOOL_FLIPX:
-			m_mapPanel->SetTool(MapPanel::eToolFlipX);
+			m_mapPanel->SetTool(eToolFlipX);
 			break;
 		case wxID_TOOL_FLIPY:
-			m_mapPanel->SetTool(MapPanel::eToolFlipY);
+			m_mapPanel->SetTool(eToolFlipY);
 			break;
 		case wxID_TOOL_FILL:
-			m_mapPanel->SetTool(MapPanel::eToolFill);
+			m_mapPanel->SetTool(eToolFill);
 			break;
 		case wxID_TOOL_CLONE:
-			m_mapPanel->SetTool(MapPanel::eToolClone);
+			m_mapPanel->SetTool(eToolClone);
 			break;
 		case wxID_TOOL_CREATESTAMP:
-			m_mapPanel->SetTool(MapPanel::eToolCreateStamp);
+			m_mapPanel->SetTool(eToolCreateStamp);
 			break;
 		case wxID_TOOL_REMOVESTAMP:
-			m_mapPanel->SetTool(MapPanel::eToolRemoveStamp);
+			m_mapPanel->SetTool(eToolRemoveStamp);
 			break;
 		}
 	}

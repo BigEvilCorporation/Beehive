@@ -8,8 +8,8 @@
 #include "MainWindow.h"
 #include "TileRendering.h"
 
-MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
+MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	
 	m_currentTool = eToolPaintTile;
@@ -20,30 +20,6 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 
 	ResetToolData();
 
-	//Colours
-	m_previewColour = ion::Colour(1.0f, 1.0f, 1.0f, 1.0f);
-	m_boxSelectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
-	m_clonePreviewColour = ion::Colour(0.7f, 0.7f, 0.7f, 1.0f);
-
-	//Load shaders
-	m_selectionVertexShader = ion::render::Shader::Create();
-	if(!m_selectionVertexShader->Load("shaders/flat_v.ion.shader"))
-	{
-		ion::debug::Error("Error loading vertex shader");
-	}
-
-	m_selectionPixelShader = ion::render::Shader::Create();
-	if(!m_selectionPixelShader->Load("shaders/flat_p.ion.shader"))
-	{
-		ion::debug::Error("Error loading pixel shader");
-	}
-
-	//Create selection material
-	m_selectionMaterial = new ion::render::Material();
-	m_selectionMaterial->SetDiffuseColour(m_boxSelectColour);
-	m_selectionMaterial->SetVertexShader(m_selectionVertexShader);
-	m_selectionMaterial->SetPixelShader(m_selectionPixelShader);
-
 	//Create preview quad
 	m_previewPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
 }
@@ -52,10 +28,7 @@ MapPanel::~MapPanel()
 {
 	ResetToolData();
 
-	delete m_selectionMaterial;
 	delete m_previewPrimitive;
-	delete m_selectionVertexShader;
-	delete m_selectionPixelShader;
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
@@ -495,9 +468,9 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	ViewPanel::Refresh(eraseBackground, rect);
 }
 
-void MapPanel::SetTool(Tool tool)
+void MapPanel::SetTool(ToolType tool)
 {
-	Tool previousTool = m_currentTool;
+	ToolType previousTool = m_currentTool;
 	m_currentTool = tool;
 
 	if(m_project)
@@ -681,18 +654,21 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 		//Set preview quad texture coords
 		ion::render::TexCoord coords[4];
 		u32 flipFlags = (m_previewTileFlipX ? Map::eFlipX : 0) | (m_previewTileFlipY ? Map::eFlipY : 0);
-		m_mainWindow->GetTileTexCoords(m_previewTile, coords, flipFlags);
+		m_renderResources.GetTileTexCoords(m_previewTile, coords, flipFlags);
 		m_previewPrimitive->SetTexCoords(coords);
+
+		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
+		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
 
 		ion::Matrix4 previewQuadMtx;
 		ion::Vector3 previewQuadPos(((m_previewTilePos.x - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
 			((mapHeight - 1 - m_previewTilePos.y - (mapHeight / 2)) * tileHeight) + quadHalfExtentsY, z);
 		previewQuadMtx.SetTranslation(previewQuadPos);
 
-		m_canvasMaterial->SetDiffuseColour(m_previewColour);
-		m_canvasMaterial->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
+		material->SetDiffuseColour(colour);
+		material->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
-		m_canvasMaterial->Unbind();
+		material->Unbind();
 	}
 }
 
@@ -705,6 +681,9 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 	const int tileHeight = 8;
 	const int quadHalfExtentsX = 4;
 	const int quadHalfExtentsY = 4;
+
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
 	if(m_boxSelectStart.x >= 0 && m_boxSelectEnd.x >= 0)
 	{
@@ -721,9 +700,10 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 		boxMtx.SetScale(boxScale);
 
 		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
-		m_selectionMaterial->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		material->SetDiffuseColour(colour);
+		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
-		m_selectionMaterial->Unbind();
+		material->Unbind();
 		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 	}
 	else if(m_selectedTiles.size() > 0)
@@ -731,10 +711,12 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 		//Draw overlay over selected tiles
 		ion::Matrix4 selectionMtx;
 		ion::Matrix4 worldViewProjMtx;
-		ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = m_selectionVertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
+		ion::render::Shader* vertexShader = m_renderResources.GetVertexShader(RenderResources::eShaderFlatColour);
+		ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
 
 		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
-		m_selectionMaterial->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
+		material->SetDiffuseColour(colour);
+		material->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
 
 		for(int i = 0; i < m_selectedTiles.size(); i++)
 		{
@@ -752,7 +734,7 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 			renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
 		}
 
-		m_selectionMaterial->Unbind();
+		material->Unbind();
 		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 	}
 }
@@ -788,11 +770,13 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 			renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 			renderer.SetDepthTest(ion::render::Renderer::Always);
 
-			m_canvasMaterial->SetDiffuseColour(m_clonePreviewColour);
-			m_canvasMaterial->Bind(clonePreviewMtx, cameraInverseMtx, projectionMtx);
+			ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
+			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourPreview);
+
+			material->SetDiffuseColour(colour);
+			material->Bind(clonePreviewMtx, cameraInverseMtx, projectionMtx);
 			renderer.DrawVertexBuffer(m_stampPreviewPrimitive->GetVertexBuffer(), m_stampPreviewPrimitive->GetIndexBuffer());
-			m_canvasMaterial->Unbind();
-			m_canvasMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+			material->Unbind();
 
 			renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 			renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
@@ -827,10 +811,14 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 			boxMtx.SetTranslation(boxPos);
 			boxMtx.SetScale(boxScale);
 
+			ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
+
 			renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
-			m_selectionMaterial->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+			material->SetDiffuseColour(colour);
+			material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 			renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
-			m_selectionMaterial->Unbind();
+			material->Unbind();
 			renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 		}
 	}
@@ -888,7 +876,7 @@ void MapPanel::CreateStampPreview(Stamp* stamp)
 		{
 			TileId tileId = stamp->GetTile(x, y);
 			u32 tileFlags = stamp->GetTileFlags(x, y);
-			m_mainWindow->GetTileTexCoords(tileId, coords, tileFlags);
+			m_renderResources.GetTileTexCoords(tileId, coords, tileFlags);
 			int y_inv = height - 1 - y;
 			m_stampPreviewPrimitive->SetTexCoords((y_inv * width) + x, coords);
 		}
