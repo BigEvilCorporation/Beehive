@@ -13,7 +13,7 @@ class TileEditorPanel : public ViewPanel
 	static const float s_defaultZoom;
 
 public:
-	TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~TileEditorPanel();
 
 	//Events
@@ -39,12 +39,6 @@ private:
 
 	//Rendering primitive
 	ion::render::Quad* m_tilePrimitive;
-
-	//Rendering material
-	ion::render::Material* m_tileMaterial;
-
-	//Texture
-	ion::render::Texture* m_texture;
 
 	static const int s_tileWidth = 8;
 	static const int s_tileHeight = 8;

@@ -11,11 +11,9 @@
 
 const float TileEditorPanel::s_defaultZoom = 4.0f;
 
-TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
+TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
-	m_texture = NULL;
-
 	//No panning
 	EnablePan(false);
 
@@ -25,13 +23,6 @@ TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& 
 	//Create rendering primitive
 	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(s_tileWidth * 4.0f, s_tileHeight * 4.0f));
 
-	//Create selection material
-	m_tileMaterial = new ion::render::Material();
-	m_tileMaterial->AddDiffuseMap(tilesetTexture);
-	m_tileMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	m_tileMaterial->SetVertexShader(m_vertexShader);
-	m_tileMaterial->SetPixelShader(m_pixelShader);
-
 	//Create 8x8 grid
 	CreateGrid(s_tileWidth, s_tileHeight, s_tileWidth, s_tileHeight);
 }
@@ -39,10 +30,6 @@ TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& 
 TileEditorPanel::~TileEditorPanel()
 {
 	delete m_tilePrimitive;
-	delete m_tileMaterial;
-
-	if(m_texture)
-		delete m_texture;
 }
 
 void TileEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
@@ -71,7 +58,7 @@ void TileEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, 
 	{
 		TileId tileId = m_project->GetPaintTile();
 
-		if(buttonBits & ViewPanel::eMouseLeft)
+		if(buttonBits & eMouseLeft)
 		{
 			if(Tile* tile = m_project->GetTileset().GetTile(tileId))
 			{
@@ -90,7 +77,7 @@ void TileEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, 
 						tile->SetPixelColour(x, y, colourIdx);
 
 						//Set colour on tileset texture
-						m_mainWindow->SetTilesetTexPixel(tileId, ion::Vector2i(x, y), colourIdx);
+						m_renderResources.SetTilesetTexPixel(tileId, ion::Vector2i(x, y), colourIdx);
 
 						//Refresh panel
 						Refresh();
@@ -130,7 +117,7 @@ void TileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	if(m_project)
 	{
 		ion::render::TexCoord texCoords[4];
-		m_mainWindow->GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
+		m_renderResources.GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
 		m_tilePrimitive->SetTexCoords(texCoords);
 	}
 }
@@ -138,7 +125,9 @@ void TileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 void TileEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//Draw tile
-	m_tileMaterial->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
+	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_tilePrimitive->GetVertexBuffer(), m_tilePrimitive->GetIndexBuffer());
-	m_tileMaterial->Unbind();
+	material->Unbind();
 }

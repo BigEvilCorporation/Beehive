@@ -11,8 +11,8 @@
 
 const float TilesPanel::s_tileSize = 4.0f;
 
-TilesPanel::TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, tilesetTexture, parent, winid, pos, size, style, name)
+TilesPanel::TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	m_selectedTile = InvalidTileId;
 	m_hoverTile = InvalidTileId;
@@ -20,30 +20,6 @@ TilesPanel::TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, 
 	//Custom zoom/pan handling
 	EnableZoom(false);
 	EnablePan(false);
-
-	//Colours
-	m_selectColour = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
-	m_hoverColour = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
-
-	//Load shaders
-	m_selectionVertexShader = ion::render::Shader::Create();
-	if(!m_selectionVertexShader->Load("shaders/flat_v.ion.shader"))
-	{
-		ion::debug::Error("Error loading vertex shader");
-	}
-
-	m_selectionPixelShader = ion::render::Shader::Create();
-	if(!m_selectionPixelShader->Load("shaders/flat_p.ion.shader"))
-	{
-		ion::debug::Error("Error loading pixel shader");
-	}
-
-	//Create selection material
-	m_selectionMaterial = new ion::render::Material();
-	m_selectionMaterial->SetDiffuseColour(m_selectColour);
-	m_selectionMaterial->SetVertexShader(m_selectionVertexShader);
-	m_selectionMaterial->SetPixelShader(m_selectionPixelShader);
-
 	//Create selection quad
 	m_selectionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
 }
@@ -156,7 +132,7 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x
 		m_project->SetPaintTile(selectedTile);
 
 		//Set tile paint tool
-		m_mainWindow->SetMapTool(MapPanel::eToolPaintTile);
+		m_mainWindow->SetMapTool(eToolPaintTile);
 
 		//Refresh tile editor panel
 		m_mainWindow->RefreshPanel(MainWindow::ePanelTileEditor);
@@ -180,7 +156,8 @@ void TilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& c
 		{
 			ion::debug::Assert(tile, "Invalid tile");
 			ion::Vector2 size(1, 1);
-			RenderBox(m_selectedTilePos, size, m_selectColour, renderer, cameraInverseMtx, projectionMtx, z);
+			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
+			RenderBox(m_selectedTilePos, size, colour, renderer, cameraInverseMtx, projectionMtx, z);
 		}
 	}
 
@@ -193,7 +170,8 @@ void TilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& c
 		{
 			ion::debug::Assert(tile, "Invalid tile");
 			ion::Vector2 size(1, 1);
-			RenderBox(m_hoverTilePos, size, m_hoverColour, renderer, cameraInverseMtx, projectionMtx, z);
+			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
+			RenderBox(m_hoverTilePos, size, colour, renderer, cameraInverseMtx, projectionMtx, z);
 		}
 	}
 
@@ -293,11 +271,13 @@ void TilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, c
 	boxMtx.SetTranslation(boxPos);
 	boxMtx.SetScale(boxScale);
 
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+
 	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
-	m_selectionMaterial->SetDiffuseColour(colour);
-	m_selectionMaterial->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+	material->SetDiffuseColour(colour);
+	material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_selectionPrimitive->GetVertexBuffer(), m_selectionPrimitive->GetIndexBuffer());
-	m_selectionMaterial->Unbind();
+	material->Unbind();
 	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 }
 

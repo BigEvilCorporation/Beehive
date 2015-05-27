@@ -12,6 +12,8 @@
 #include <ion/renderer/Texture.h>
 
 #include "UIBase.h"
+#include "RenderResources.h"
+#include "Tool.h"
 
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
@@ -49,13 +51,7 @@ public:
 	void ShowPanelToolbox();
 
 	//Set current map editing tool
-	void SetMapTool(MapPanel::Tool tool);
-
-	//Get tileset UV coords for tile
-	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
-
-	//Edit tileset texture pixel
-	void SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx);
+	void SetMapTool(ToolType tool);
 
 	//Sync project settings and their respective UI widget states
 	void SyncSettingsWidgets();
@@ -92,15 +88,6 @@ private:
 	//Set current project (opens default panels)
 	void SetProject(Project* project);
 
-	//Create and redraw tileset texture
-	void CreateTilesetTexture(const Tileset& tileset);
-
-	//Create TileID to index cache
-	void CacheTileIndices(const Tileset& tileset);
-
-	//Get tile index into tileset
-	int GetTilesetTexTileIndex(TileId tileId) const;
-
 	wxAuiManager m_auiManager;
 
 	wxWeakRef<PalettesPanel> m_palettesPanel;
@@ -121,15 +108,6 @@ private:
 	//Blank canvas for creating gobal DC
 	wxWeakRef<wxGLCanvas> m_blankCanvas;
 
-	//Map tile IDs to indices
-	std::map<TileId, u32> m_tileIndexMap;
-
-	//Tileset texture
-	ion::render::Texture* m_tilesetTexture;
-
-	//Tileset size sq
-	u32 m_tilesetSizeSq;
-
-	//Tileset texture cell size sq
-	float m_cellSizeTexSpaceSq;
+	//Rendering resources
+	RenderResources* m_renderResources;
 };

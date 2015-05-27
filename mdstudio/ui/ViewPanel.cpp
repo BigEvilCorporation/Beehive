@@ -1,14 +1,14 @@
 #include "ViewPanel.h"
 #include "MainWindow.h"
 
-ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxGLCanvas(parent, glContext, winid, pos, size, style, name, NULL, wxNullPalette)
 	, m_renderer(renderer)
+	, m_renderResources(renderResources)
 	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
 {
 	m_project = NULL;
 	m_mainWindow = mainWindow;
-	m_tilesetTexture = tilesetTexture;
 	m_canvasPrimitive = NULL;
 	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;
@@ -21,32 +21,6 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 
 	//Set viewport clear colour
 	m_viewport.SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
-
-	//Load shaders
-	m_vertexShader = ion::render::Shader::Create();
-	if(!m_vertexShader->Load("shaders/flattextured_v.ion.shader"))
-	{
-		ion::debug::Error("Error loading vertex shader");
-	}
-
-	m_pixelShader = ion::render::Shader::Create();
-	if(!m_pixelShader->Load("shaders/flattextured_p.ion.shader"))
-	{
-		ion::debug::Error("Error loading pixel shader");
-	}
-
-	//Create map material
-	m_canvasMaterial = new ion::render::Material();
-	m_canvasMaterial->AddDiffuseMap(m_tilesetTexture);
-	m_canvasMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_canvasMaterial->SetVertexShader(m_vertexShader);
-	m_canvasMaterial->SetPixelShader(m_pixelShader);
-
-	//Create grid material
-	m_gridMaterial = new ion::render::Material();
-	m_gridMaterial->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 0.0f));
-	m_gridMaterial->SetVertexShader(m_vertexShader);
-	m_gridMaterial->SetPixelShader(m_pixelShader);
 
 	//Bind events
 	Bind(wxEVT_LEFT_DOWN, &ViewPanel::EventHandlerMouse, this, GetId());
@@ -67,16 +41,7 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 
 ViewPanel::~ViewPanel()
 {
-	delete m_canvasMaterial;
-	delete m_gridMaterial;
-	delete m_vertexShader;
-	delete m_pixelShader;
 
-	if(m_canvasPrimitive)
-		delete m_canvasPrimitive;
-
-	if(m_gridPrimitive)
-		delete m_gridPrimitive;
 }
 
 void ViewPanel::EventHandlerMouse(wxMouseEvent& event)
@@ -178,7 +143,7 @@ void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 	{
 		//Set texture coords for cell
 		ion::render::TexCoord coords[4];
-		m_mainWindow->GetTileTexCoords(tileId, coords, flipFlags);
+		m_renderResources.GetTileTexCoords(tileId, coords, flipFlags);
 		m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 	}
 }
@@ -394,10 +359,14 @@ void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4
 	//No depth test (stops grid cells Z fighting)
 	renderer.SetDepthTest(ion::render::Renderer::Always);
 
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
+
 	//Draw map
-	m_canvasMaterial->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
-	m_canvasMaterial->Unbind();
+	material->Unbind();
 
 	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 }
@@ -405,12 +374,16 @@ void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4
 void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//Draw grid
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourGrid);
+
 	ion::Matrix4 gridMtx;
 	gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
 	gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
-	m_gridMaterial->Bind(gridMtx, cameraInverseMtx, projectionMtx);
+	material->SetDiffuseColour(colour);
+	material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
-	m_gridMaterial->Unbind();
+	material->Unbind();
 }
 
 void ViewPanel::OnResize(wxSizeEvent& event)

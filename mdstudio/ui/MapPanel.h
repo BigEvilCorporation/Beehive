@@ -11,30 +11,8 @@
 class MapPanel : public ViewPanel
 {
 public:
-	enum Tool
-	{
-		eToolSelectTiles,
-		eToolSelectStamp,
-		eToolPaintTile,
-		eToolPaintStamp,
-		eToolClone,
-		eToolCreateStamp,
-		eToolRemoveStamp,
-		eToolFill,
-		eToolTilePicker,
-		eToolStampPicker,
-		eToolFlipX,
-		eToolFlipY
-	};
 
-	enum MouseButtons
-	{
-		eMouseLeft		= 1<<0,
-		eMouseMiddle	= 1<<1,
-		eMouseRight		= 1<<2
-	};
-
-	MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~MapPanel();
 
 	//Events
@@ -46,7 +24,7 @@ public:
 	virtual void SetProject(Project* project);
 
 	//Set current tool
-	void SetTool(Tool tool);
+	void SetTool(ToolType tool);
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
@@ -75,22 +53,12 @@ private:
 	//Clear all tool data
 	void ResetToolData();
 
-	//Rendering materials and shaders
-	ion::render::Shader* m_selectionVertexShader;
-	ion::render::Shader* m_selectionPixelShader;
-	ion::render::Material* m_selectionMaterial;
-
 	//Rendering primitives
 	ion::render::Quad* m_previewPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
 
-	//Rendering colours
-	ion::Colour m_previewColour;
-	ion::Colour m_clonePreviewColour;
-	ion::Colour m_boxSelectColour;
-
 	//Current tool
-	Tool m_currentTool;
+	ToolType m_currentTool;
 
 	///////////////////////////////////////////////////
 	// SELECT tool

@@ -11,7 +11,7 @@
 class StampsPanel : public ViewPanel
 {
 public:
-	StampsPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, ion::render::Texture* tilesetTexture, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	StampsPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~StampsPanel();
 
 	//Events
@@ -64,8 +64,4 @@ private:
 
 	//Rendering primitives
 	ion::render::Quad* m_selectionPrimitive;
-
-	//Rendering colours
-	ion::Colour m_hoverColour;
-	ion::Colour m_selectColour;
 };
