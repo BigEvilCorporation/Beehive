@@ -20,6 +20,8 @@
 #include "StampsPanel.h"
 #include "MapPanel.h"
 #include "TileEditorPanel.h"
+#include "CollisionEditorPanel.h"
+#include "CollisionTypeDialog.h"
 
 #include "../Project.h"
 
@@ -34,7 +36,8 @@ public:
 		ePanelStamps,
 		ePanelTiles,
 		ePanelPalettes,
-		ePanelTileEditor
+		ePanelTileEditor,
+		ePanelCollisionEditor
 	};
 
 	MainWindow();
@@ -46,6 +49,7 @@ public:
 	void ShowPanelStamps();
 	void ShowPanelMap();
 	void ShowPanelTileEditor();
+	void ShowPanelCollisionEditor();
 
 	//Open toolbox
 	void ShowPanelToolbox();
@@ -81,6 +85,8 @@ protected:
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
+	virtual void OnBtnCollisionConfig(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event);
 
 	void OnBtnTool(wxCommandEvent& event);
 
@@ -95,7 +101,9 @@ private:
 	wxWeakRef<StampsPanel> m_stampsPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<TileEditorPanel> m_tileEditorPanel;
+	wxWeakRef<CollisionEditorPanel> m_collisionEditorPanel;
 	wxWeakRef<MapToolbox> m_toolboxPanel;
+	wxWeakRef<CollisionTypeDialog> m_collisionTypeDialog;
 
 	ProjectPtr m_project;
 

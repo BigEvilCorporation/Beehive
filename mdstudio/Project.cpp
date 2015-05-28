@@ -103,6 +103,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_tileset);
 	archive.Serialise(m_map);
 	archive.Serialise(m_stamps);
+	archive.Serialise(m_collisionTypes);
 	archive.Serialise(m_nextFreeStampId);
 }
 
@@ -161,6 +162,57 @@ const TStampMap::const_iterator Project::StampsEnd() const
 int Project::GetStampCount() const
 {
 	return m_stamps.size();
+}
+
+void Project::AddCollisionType(const CollisionType& type)
+{
+	m_collisionTypes.insert(std::make_pair(type.bit, type));
+}
+
+void Project::RemoveCollisionType(const CollisionType& type)
+{
+	m_collisionTypes.erase(type.bit);
+}
+
+CollisionType* Project::GetCollisionType(const std::string& name)
+{
+	for(TCollisionTypeMap::iterator it = m_collisionTypes.begin(), end = m_collisionTypes.end(); it != end; ++it)
+	{
+		if(name == it->second.name)
+		{
+			return &it->second;
+		}
+	}
+
+	return NULL;
+}
+
+CollisionType* Project::GetCollisionType(u8 bit)
+{
+	CollisionType* collisionType = NULL;
+
+	TCollisionTypeMap::iterator it = m_collisionTypes.find(bit);
+	if(it != m_collisionTypes.end())
+	{
+		collisionType = &it->second;
+	}
+
+	return collisionType;
+}
+
+const TCollisionTypeMap::const_iterator Project::CollisionTypesBegin() const
+{
+	return m_collisionTypes.begin();
+}
+
+const TCollisionTypeMap::const_iterator Project::CollisionTypesEnd() const
+{
+	return m_collisionTypes.end();
+}
+
+int Project::GetCollisionTypeCount() const
+{
+	return m_collisionTypes.size();
 }
 
 void Project::SetPaintColour(u8 colourIdx)

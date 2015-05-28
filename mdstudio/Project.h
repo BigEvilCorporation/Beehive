@@ -15,8 +15,10 @@
 #include "Stamp.h"
 #include "Tile.h"
 #include "Tileset.h"
+#include "Collision.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
+typedef std::map<u8, CollisionType> TCollisionTypeMap;
 
 class Project
 {
@@ -65,6 +67,15 @@ public:
 	const TStampMap::const_iterator StampsBegin() const;
 	const TStampMap::const_iterator StampsEnd() const;
 	int GetStampCount() const;
+
+	//Collision types
+	void AddCollisionType(const CollisionType& type);
+	void RemoveCollisionType(const CollisionType& type);
+	CollisionType* GetCollisionType(const std::string& name);
+	CollisionType* GetCollisionType(u8 bit);
+	const TCollisionTypeMap::const_iterator CollisionTypesBegin() const;
+	const TCollisionTypeMap::const_iterator CollisionTypesEnd() const;
+	int GetCollisionTypeCount() const;
 
 	//Set current colour used for editing
 	void SetPaintColour(u8 colourIdx);
@@ -133,6 +144,9 @@ private:
 	//Stamps
 	TStampMap m_stamps;
 	StampId m_nextFreeStampId;
+
+	//Collision types
+	TCollisionTypeMap m_collisionTypes;
 
 	//Colour used for painting
 	u8 m_paintColour;

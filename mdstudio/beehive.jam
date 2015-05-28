@@ -31,6 +31,10 @@ local SRC =
 	ui/Dialogs.h
 	ui/MainWindow.cpp
 	ui/MainWindow.h
+	ui/CollisionEditorPanel.cpp
+	ui/CollisionEditorPanel.h
+	ui/CollisionTypeDialog.cpp
+	ui/CollisionTypeDialog.h
 	ui/MapPanel.cpp
 	ui/MapPanel.h
 	ui/ViewPanel.cpp

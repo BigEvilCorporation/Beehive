@@ -7,6 +7,7 @@
 
 #include "UIBase.h"
 
+#include "../FormBuilderProj/add_16_16.xpm"
 #include "../FormBuilderProj/clearmap.xpm"
 #include "../FormBuilderProj/collision.xpm"
 #include "../FormBuilderProj/config.xpm"
@@ -21,6 +22,8 @@
 #include "../FormBuilderProj/newtile.xpm"
 #include "../FormBuilderProj/open.xpm"
 #include "../FormBuilderProj/palettespanel.xpm"
+#include "../FormBuilderProj/qmark_16_16.xpm"
+#include "../FormBuilderProj/remove_16_16.xpm"
 #include "../FormBuilderProj/resizemap.xpm"
 #include "../FormBuilderProj/save.xpm"
 #include "../FormBuilderProj/stampspanel.xpm"
@@ -85,8 +88,8 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarStamps->AddButton( wxID_ANY, wxT("Delete"), wxBitmap( deletestamp_xpm ), wxEmptyString);
 	m_ribbonPanelCollision = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Collision") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarCollision = new wxRibbonButtonBar( m_ribbonPanelCollision, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarCollision->AddButton( wxID_ANY, wxT("Configuration"), wxBitmap( config_xpm ), wxEmptyString);
-	m_ribbonButtonBarCollision->AddButton( wxID_ANY, wxT("Collision Tile Editor"), wxBitmap( collision_xpm ), wxEmptyString);
+	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COLLISION_CONFIG, wxT("Configuration"), wxBitmap( config_xpm ), wxEmptyString);
+	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COLLISION_TILEEDIT, wxT("Collision Tile Editor"), wxBitmap( collision_xpm ), wxEmptyString);
 	m_ribbonBar->Realize();
 	
 	bSizer1->Add( m_ribbonBar, 0, wxALL|wxEXPAND, 0 );
@@ -117,6 +120,8 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
 	this->Connect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
 	this->Connect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
+	this->Connect( wxID_BTN_COLLISION_CONFIG, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnCollisionConfig ) );
+	this->Connect( wxID_BTN_COLLISION_TILEEDIT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnCollisionTileEdit ) );
 }
 
 MainWindowBase::~MainWindowBase()
@@ -137,6 +142,87 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
 	this->Disconnect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
 	this->Disconnect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
+	this->Disconnect( wxID_BTN_COLLISION_CONFIG, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnCollisionConfig ) );
+	this->Disconnect( wxID_BTN_COLLISION_TILEEDIT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnCollisionTileEdit ) );
+	
+}
+
+CollisionTypeDialogBase::CollisionTypeDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	m_toolBar1 = this->CreateToolBar( wxTB_HORIZONTAL, wxID_ANY ); 
+	m_toolAddCollisionType = m_toolBar1->AddTool( wxID_COL_TOOL_ADD, wxT("tool"), wxBitmap( add_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
+	m_toolRemoveCollisionType = m_toolBar1->AddTool( wxID_COL_TOOL_DEL, wxT("tool"), wxBitmap( remove_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
+	m_toolBar1->Realize(); 
+	
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_listCollisionTypes = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON );
+	bSizer5->Add( m_listCollisionTypes, 0, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer6;
+	bSizer6 = new wxBoxSizer( wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizer2;
+	fgSizer2 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer2->SetFlexibleDirection( wxBOTH );
+	fgSizer2->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticText6 = new wxStaticText( this, wxID_ANY, wxT("Icon:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText6->Wrap( -1 );
+	fgSizer2->Add( m_staticText6, 0, wxALL, 5 );
+	
+	m_buttonIcon = new wxBitmapButton( this, wxID_ANY, wxBitmap( qmark_16_16_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	fgSizer2->Add( m_buttonIcon, 0, wxALL, 5 );
+	
+	m_staticText4 = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText4->Wrap( -1 );
+	fgSizer2->Add( m_staticText4, 0, wxALL, 5 );
+	
+	m_textName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer2->Add( m_textName, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText5 = new wxStaticText( this, wxID_ANY, wxT("Bit:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5->Wrap( -1 );
+	fgSizer2->Add( m_staticText5, 0, wxALL, 5 );
+	
+	m_spinBit = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 8, 1 );
+	fgSizer2->Add( m_spinBit, 0, wxALL, 5 );
+	
+	
+	bSizer6->Add( fgSizer2, 1, wxEXPAND, 5 );
+	
+	
+	bSizer5->Add( bSizer6, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer5 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	this->Connect( m_toolAddCollisionType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( CollisionTypeDialogBase::OnAddType ) );
+	this->Connect( m_toolRemoveCollisionType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( CollisionTypeDialogBase::OnRemoveType ) );
+	m_listCollisionTypes->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( CollisionTypeDialogBase::OnTypeSelected ), NULL, this );
+	m_buttonIcon->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CollisionTypeDialogBase::OnIconChange ), NULL, this );
+	m_textName->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CollisionTypeDialogBase::OnNameChange ), NULL, this );
+	m_spinBit->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( CollisionTypeDialogBase::OnBitChange ), NULL, this );
+}
+
+CollisionTypeDialogBase::~CollisionTypeDialogBase()
+{
+	// Disconnect Events
+	this->Disconnect( m_toolAddCollisionType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( CollisionTypeDialogBase::OnAddType ) );
+	this->Disconnect( m_toolRemoveCollisionType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( CollisionTypeDialogBase::OnRemoveType ) );
+	m_listCollisionTypes->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( CollisionTypeDialogBase::OnTypeSelected ), NULL, this );
+	m_buttonIcon->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CollisionTypeDialogBase::OnIconChange ), NULL, this );
+	m_textName->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CollisionTypeDialogBase::OnNameChange ), NULL, this );
+	m_spinBit->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( CollisionTypeDialogBase::OnBitChange ), NULL, this );
 	
 }
 
