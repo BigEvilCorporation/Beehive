@@ -103,6 +103,17 @@ void MainWindow::SetProject(Project* project)
 			delete m_tileEditorPanel;
 		}
 
+		if(m_collisionEditorPanel)
+		{
+			m_auiManager.DetachPane(m_collisionEditorPanel);
+			delete m_collisionEditorPanel;
+		}
+
+		if(m_collisionTypeDialog)
+		{
+			delete m_collisionTypeDialog;
+		}
+
 		//Delete previous, set new
 		m_project.reset(project);
 
@@ -311,6 +322,38 @@ void MainWindow::ShowPanelTileEditor()
 	}
 }
 
+void MainWindow::ShowPanelCollisionEditor()
+{
+	if(m_project.get())
+	{
+		if(!m_collisionEditorPanel)
+		{
+			wxSize clientSize = GetClientSize();
+
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.FloatingSize(300, 300);
+			paneInfo.Float();
+			paneInfo.Caption("Collision");
+			paneInfo.CaptionVisible(true);
+
+			m_collisionEditorPanel = new CollisionEditorPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_collisionEditorPanel, paneInfo);
+			m_collisionEditorPanel->Show();
+			m_auiManager.Update();
+
+			m_collisionEditorPanel->SetProject(m_project.get());
+		}
+
+		if(!m_collisionEditorPanel->IsShown())
+		{
+			m_collisionEditorPanel->Show();
+		}
+	}
+}
+
 void MainWindow::SetMapTool(ToolType tool)
 {
 	if(m_mapPanel)
@@ -368,6 +411,9 @@ void MainWindow::RedrawAll()
 
 	if(m_tileEditorPanel)
 		m_tileEditorPanel->Refresh();
+
+	if(m_collisionEditorPanel)
+		m_collisionEditorPanel->Refresh();
 }
 
 void MainWindow::RefreshTileset()
@@ -422,6 +468,9 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelTileEditor:
 		if(m_tileEditorPanel)
 			m_tileEditorPanel->Refresh();
+	case ePanelCollisionEditor:
+		if(m_collisionEditorPanel)
+			m_collisionEditorPanel->Refresh();
 		break;
 	}
 }
@@ -706,6 +755,22 @@ void MainWindow::OnBtnGridSnap(wxCommandEvent& event)
 	{
 		m_project->SetGridSnap(!m_project->GetGridSnap());
 	}
+}
+
+void MainWindow::OnBtnCollisionConfig(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		if(!m_collisionTypeDialog)
+			m_collisionTypeDialog = new CollisionTypeDialog(*this, *m_project);
+
+		m_collisionTypeDialog->Show();
+	}
+}
+
+void MainWindow::OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event)
+{
+	ShowPanelCollisionEditor();
 }
 
 void MainWindow::OnBtnTool(wxCommandEvent& event)
