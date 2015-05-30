@@ -47,6 +47,17 @@ MainWindow::MainWindow()
 
 	//Create default project
 	SetProject(new Project());
+
+	static bool openWelcomeProject = true;
+
+	if(openWelcomeProject)
+	{
+		wxString directory = wxGetCwd();
+		wxString path = directory + "\\projects\\welcome.bee";
+		m_project->Load(path.c_str().AsChar());
+		RefreshTileset();
+		RefreshAll();
+	}
 }
 
 MainWindow::~MainWindow()
