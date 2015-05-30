@@ -36,8 +36,8 @@ MainWindow::MainWindow()
 	//Create blank OpenGL panel to create global DC
 	wxGLCanvas* m_blankCanvas = new wxGLCanvas(this, wxID_ANY, NULL);
 
-	//Get GL context
-	m_context = m_blankCanvas->GetContext();
+	//Create GL context
+	m_context = new wxGLContext(m_blankCanvas);
 
 	//Create renderer (from global DC
 	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
