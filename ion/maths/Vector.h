@@ -145,12 +145,12 @@ namespace ion
 
 	template <typename T> TVector2<T> TVector2<T>::operator +(const TVector2<T> &Vector) const
 	{
-		return TVector2<T>(Vector.x + x, Vector.y + y);
+		return TVector2<T>(x + Vector.x, y + Vector.y);
 	}
 
 	template <typename T> TVector2<T> TVector2<T>::operator -(const TVector2<T> &Vector) const
 	{
-		return TVector2<T>(Vector.x - x, Vector.y - y);
+		return TVector2<T>(x - Vector.x, y - Vector.y);
 	}
 
 	template <typename T> T TVector2<T>::GetLength() const

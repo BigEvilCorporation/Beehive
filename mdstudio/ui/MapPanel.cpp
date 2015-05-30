@@ -283,14 +283,33 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 			{
 				if(buttonBits & eMouseLeft)
 				{
-					//Pick tile
-					TileId tile = map.GetTile(x, y);
+					TileId tileId = InvalidTileId;
+
+					//Find stamp under cursor first
+					ion::Vector2i stampPos;
+					u32 stampFlags = 0;
+					StampId stampId = map.FindStamp(x, y, stampPos, stampFlags);
+
+					if(stampId)
+					{
+						//Get from stamp
+						if(Stamp* stamp = m_project->GetStamp(stampId))
+						{
+							ion::Vector2i offset = ion::Vector2i(x, y) - stampPos;
+							tileId = stamp->GetTile(offset.x, offset.y);
+						}
+					}
+					else
+					{
+						//Pick tile
+						tileId = map.GetTile(x, y);
+					}
 
 					//Set as paint tile
-					m_project->SetPaintTile(tile);
+					m_project->SetPaintTile(tileId);
 
 					//Set as preview tile
-					m_previewTile = tile;
+					m_previewTile = tileId;
 
 					//Set paint tool
 					SetTool(eToolPaintTile);

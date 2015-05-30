@@ -48,7 +48,7 @@ void ViewPanel::EventHandlerMouse(wxMouseEvent& event)
 {
 	//Get mouse delta
 	ion::Vector2 mousePosScreenSpace(event.GetX(), event.GetY());
-	ion::Vector2 mouseDelta = m_mousePrevPos - mousePosScreenSpace;
+	ion::Vector2 mouseDelta = mousePosScreenSpace - m_mousePrevPos;
 	m_mousePrevPos = mousePosScreenSpace;
 
 	OnMouse(event, mouseDelta);

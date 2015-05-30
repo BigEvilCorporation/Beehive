@@ -182,7 +182,7 @@
                         <event name="OnSetFocus"></event>
                         <event name="OnSize"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="wxRibbonPage" expanded="0">
+                        <object class="wxRibbonPage" expanded="1">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -228,7 +228,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -275,7 +275,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -794,7 +794,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -841,7 +841,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -990,7 +990,7 @@
                                         <property name="font"></property>
                                         <property name="help"></property>
                                         <property name="hidden">0</property>
-                                        <property name="id">wxID_ANY</property>
+                                        <property name="id">wxID_BTN_TOOLS_STAMPS</property>
                                         <property name="label">Stamps</property>
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
@@ -1078,7 +1078,7 @@
                                     </object>
                                 </object>
                             </object>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1266,7 +1266,7 @@
                                     </object>
                                 </object>
                             </object>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1502,7 +1502,7 @@
                                     </object>
                                 </object>
                             </object>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1549,7 +1549,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1602,7 +1602,7 @@
                                         <property name="font"></property>
                                         <property name="help"></property>
                                         <property name="hidden">0</property>
-                                        <property name="id">wxID_ANY</property>
+                                        <property name="id">wxID_BTN_STAMPS_CREATE</property>
                                         <property name="label">Create</property>
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
@@ -1650,7 +1650,7 @@
                                         <property name="font"></property>
                                         <property name="help"></property>
                                         <property name="hidden">0</property>
-                                        <property name="id">wxID_ANY</property>
+                                        <property name="id">wxID_BTN_STAMPS_DELETE</property>
                                         <property name="label">Delete</property>
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
