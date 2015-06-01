@@ -47,6 +47,13 @@ namespace ion
 			void SetTexCoords(TexCoord coords[4]);
 		};
 
+		class LineQuad : public Primitive
+		{
+		public:
+			enum Axis { xy, xz, yz };
+			LineQuad(Axis axis, const Vector2& halfExtents);
+		};
+
 		class Grid : public Primitive
 		{
 		public:

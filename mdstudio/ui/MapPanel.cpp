@@ -22,6 +22,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 
 	//Create preview quad
 	m_previewPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
+	m_outlinePrimitive = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(4.0f, 4.0f));
 }
 
 MapPanel::~MapPanel()
@@ -313,6 +314,9 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 
 					//Set paint tool
 					SetTool(eToolPaintTile);
+
+					//Refresh tile edit panel
+					m_mainWindow->RefreshPanel(MainWindow::ePanelTileEditor);
 				}
 
 				//TODO: Update tileset panel selection + toolbox button state
@@ -323,6 +327,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 			{
 				//Flip preview opposite of current tile
 				m_previewTile = map.GetTile(x, y);
+				m_previewTilePos.x = x;
+				m_previewTilePos.y = y;
 				m_previewTileFlipX = (map.GetTileFlags(x, y) & Map::eFlipX) == 0;
 
 				if(buttonBits & eMouseLeft)
@@ -345,6 +351,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 			{
 				//Flip preview opposite of current tile
 				m_previewTile = map.GetTile(x, y);
+				m_previewTilePos.x = x;
+				m_previewTilePos.y = y;
 				m_previewTileFlipY = (map.GetTileFlags(x, y) & Map::eFlipY) == 0;
 
 				if(buttonBits & eMouseLeft)
@@ -438,7 +446,12 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	if(m_project->GetShowGrid())
 	{
 		RenderGrid(m_renderer, cameraInverseMtx, projectionMtx, z);
+
+		z += zOffset;
 	}
+
+	//Render stamp outlines
+	RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
 }
 
 void MapPanel::SetProject(Project* project)
@@ -590,7 +603,30 @@ void MapPanel::SetTool(ToolType tool)
 						int stampX = mapX - left;
 						int stampY = mapY - top;
 						int y_inv = height - 1 - stampY;
-						TileId tileId = map.GetTile(mapX, mapY);
+
+						TileId tileId = InvalidTileId;
+
+						//Find stamp under cursor first
+						ion::Vector2i stampPos;
+						u32 stampFlags = 0;
+						StampId stampId = map.FindStamp(mapX, mapY, stampPos, stampFlags);
+
+						//TODO - optimise for known stamp
+						if(stampId)
+						{
+							//Get from stamp
+							if(Stamp* stamp = m_project->GetStamp(stampId))
+							{
+								ion::Vector2i offset = ion::Vector2i(mapX, mapY) - stampPos;
+								tileId = stamp->GetTile(offset.x, offset.y);
+							}
+						}
+						else
+						{
+							//Pick tile
+							tileId = map.GetTile(mapX, mapY);
+						}
+
 						u32 tileFlags = map.GetTileFlags(mapX, mapY);
 						stamp->SetTile(stampX, stampY, tileId);
 						stamp->SetTileFlags(stampX, stampY, tileFlags);
@@ -802,6 +838,52 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 			renderer.SetFaceCulling(ion::render::Renderer::CounterClockwise);
 		}
 	}
+}
+
+void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	ion::Matrix4 worldViewProjMtx;
+	ion::Matrix4 outlineMtx;
+	ion::render::Shader* vertexShader = m_renderResources.GetVertexShader(RenderResources::eShaderFlatColour);
+	ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
+
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
+
+	const Map& map = m_project->GetMap();
+	const int mapWidth = map.GetWidth();
+	const int mapHeight = map.GetHeight();
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	material->SetDiffuseColour(colour);
+	material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
+
+	for(TStampPosMap::const_iterator it = m_project->GetMap().StampsBegin(), end = m_project->GetMap().StampsEnd(); it != end; ++it)
+	{
+		Stamp* stamp = m_project->GetStamp(it->m_id);
+		if(stamp)
+		{
+			const ion::Vector2i& stampPos = it->m_position;
+			float width = stamp->GetWidth();
+			float height = stamp->GetHeight();
+			float left = stampPos.x;
+			float bottom = mapHeight - stampPos.y - height;
+
+			ion::Vector3 outlinePos(floor((left - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
+									floor((bottom - (mapHeight / 2.0f) + (height / 2.0f)) * tileHeight), z);
+
+			outlineMtx.SetTranslation(outlinePos);
+			outlineMtx.SetScale(ion::Vector3(width, height, 1.0f));
+
+			worldViewProjMtx = outlineMtx * cameraInverseMtx * projectionMtx;
+			worldViewProjParamV.SetValue(worldViewProjMtx);
+
+			renderer.DrawVertexBuffer(m_outlinePrimitive->GetVertexBuffer());
+		}
+	}
+
+	material->Unbind();
 }
 
 void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
