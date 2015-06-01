@@ -70,6 +70,25 @@ namespace ion
 			}
 		}
 
+		LineQuad::LineQuad(Axis axis, const Vector2& halfExtents)
+			: Primitive(VertexBuffer::Lines)
+		{
+			if(axis == xy)
+			{
+				mVertexBuffer.AddVertex(Vector3(-halfExtents.x, -halfExtents.y, 0.0f), Vector3(), TexCoord());
+				mVertexBuffer.AddVertex(Vector3( halfExtents.x, -halfExtents.y, 0.0f), Vector3(), TexCoord());
+
+				mVertexBuffer.AddVertex(Vector3(halfExtents.x, -halfExtents.y, 0.0f), Vector3(), TexCoord());
+				mVertexBuffer.AddVertex(Vector3( halfExtents.x,  halfExtents.y, 0.0f), Vector3(), TexCoord());
+
+				mVertexBuffer.AddVertex(Vector3(halfExtents.x, halfExtents.y, 0.0f), Vector3(), TexCoord());
+				mVertexBuffer.AddVertex(Vector3(-halfExtents.x,  halfExtents.y, 0.0f), Vector3(), TexCoord());
+
+				mVertexBuffer.AddVertex(Vector3(-halfExtents.x, halfExtents.y, 0.0f), Vector3(), TexCoord());
+				mVertexBuffer.AddVertex(Vector3(-halfExtents.x, -halfExtents.y, 0.0f), Vector3(), TexCoord());
+			}
+		}
+
 		Grid::Grid(Axis axis, const Vector2& halfExtents, int widthCells, int heightCells)
 			: Primitive(VertexBuffer::Lines)
 		{
