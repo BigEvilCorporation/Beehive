@@ -23,6 +23,9 @@ void Map::Clear()
 			SetTile(x, y, InvalidTileId);
 		}
 	}
+
+	//Clear stamps
+	m_stamps.clear();
 }
 
 void Map::Serialise(ion::io::Archive& archive)
