@@ -38,7 +38,14 @@ void Tile::AddPixelCollisionBits(int x, int y, u8 collisionBits)
 {
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
-	m_pixels[pixelIdx].collisionBits = collisionBits;
+	m_pixels[pixelIdx].collisionBits |= collisionBits;
+}
+
+void Tile::ClearPixelCollisionBits(int x, int y, u8 collisionBits)
+{
+	int pixelIdx = (y * tileHeight) + x;
+	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
+	m_pixels[pixelIdx].collisionBits &= ~collisionBits;
 }
 
 u8 Tile::GetPixelCollisionBits(int x, int y) const

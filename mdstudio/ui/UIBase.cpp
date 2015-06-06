@@ -165,7 +165,7 @@ CollisionTypeDialogBase::CollisionTypeDialogBase( wxWindow* parent, wxWindowID i
 	wxBoxSizer* bSizer5;
 	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_listCollisionTypes = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON );
+	m_listCollisionTypes = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST );
 	bSizer5->Add( m_listCollisionTypes, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer6;
@@ -180,7 +180,7 @@ CollisionTypeDialogBase::CollisionTypeDialogBase( wxWindow* parent, wxWindowID i
 	m_staticText6->Wrap( -1 );
 	fgSizer2->Add( m_staticText6, 0, wxALL, 5 );
 	
-	m_buttonIcon = new wxBitmapButton( this, wxID_ANY, wxBitmap( qmark_16_16_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_buttonIcon = new wxBitmapButton( this, wxID_BTN_COL_IMG, wxBitmap( qmark_16_16_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	fgSizer2->Add( m_buttonIcon, 0, wxALL, 5 );
 	
 	m_staticText4 = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
