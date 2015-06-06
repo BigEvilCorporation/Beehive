@@ -345,6 +345,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT2</td><td>{2D71810A-F9E7-4289-9322-AE48A7981342}</td><td>SHADERS</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT3</td><td>{74E7B56C-484F-4660-B80A-D5C2565C723E}</td><td>PROGRAMS</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT4</td><td>{C26FCE19-2AFA-4425-8438-B3F3A6D8D7DA}</td><td>CG</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT5</td><td>{ADDD9067-2475-4A13-AE85-EEFF200DA0E3}</td><td>PROJECTS</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>SDL2.dll</td><td>{386F8977-43D4-486D-882C-46DB999A191C}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>SDL2_image.dll</td><td>{6136AB51-568C-4AAE-B8A5-F6A9C845F235}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2_image.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>beehive.release.exe</td><td>{30369517-DE01-488F-918E-86D1F9225736}</td><td>INSTALLDIR</td><td>2</td><td/><td>beehive.release.exe</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -1189,6 +1190,7 @@
 		<row><td>MyPicturesFolder</td><td>TARGETDIR</td><td>.:MyPict~1|MyPictures</td><td/><td>0</td><td/></row>
 		<row><td>NetHoodFolder</td><td>TARGETDIR</td><td>.:NetHood</td><td/><td>0</td><td/></row>
 		<row><td>PROGRAMS</td><td>SHADERS</td><td>programs</td><td/><td>0</td><td/></row>
+		<row><td>PROJECTS</td><td>INSTALLDIR</td><td>projects</td><td/><td>0</td><td/></row>
 		<row><td>PersonalFolder</td><td>TARGETDIR</td><td>.:Personal</td><td/><td>0</td><td/></row>
 		<row><td>PrimaryVolumePath</td><td>TARGETDIR</td><td>.:Primar~1|PrimaryVolumePath</td><td/><td>0</td><td/></row>
 		<row><td>PrintHoodFolder</td><td>TARGETDIR</td><td>.:PRINTH~1|PrintHood</td><td/><td>0</td><td/></row>
@@ -1908,6 +1910,7 @@
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT2</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT3</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT4</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT5</td></row>
 		<row><td>AlwaysInstall</td><td>SDL2.dll</td></row>
 		<row><td>AlwaysInstall</td><td>SDL2_image.dll</td></row>
 		<row><td>AlwaysInstall</td><td>beehive.release.exe</td></row>
@@ -1979,6 +1982,7 @@
 		<row><td>sprite.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>SPRITE~1.CGF|sprite.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporation\mdstudio\shaders\programs\cg\sprite.cgfx</td><td>1</td><td/></row>
 		<row><td>sprite_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>SPRITE~1.SHA|sprite_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporation\mdstudio\shaders\sprite_p.ion.shader</td><td>1</td><td/></row>
 		<row><td>sprite_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>SPRITE~1.SHA|sprite_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporation\mdstudio\shaders\sprite_v.ion.shader</td><td>1</td><td/></row>
+		<row><td>welcome.bee</td><td>ISX_DEFAULTCOMPONENT5</td><td>welcome.bee</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporation\mdstudio\projects\welcome.bee</td><td>1</td><td/></row>
 		<row><td>wxbase30u_net_vc120.dll</td><td>wxbase30u_net_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_net_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporation\mdstudio\bin\wxbase30u_net_vc120.dll</td><td>1</td><td/></row>
 		<row><td>wxbase30u_vc120.dll</td><td>wxbase30u_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporation\mdstudio\bin\wxbase30u_vc120.dll</td><td>1</td><td/></row>
 		<row><td>wxbase30u_xml_vc120.dll</td><td>wxbase30u_xml_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_xml_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporation\mdstudio\bin\wxbase30u_xml_vc120.dll</td><td>1</td><td/></row>
@@ -2144,6 +2148,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT2</td><td/><td/><td>_7687C41F_735F_4BD5_B594_E24D13F78AFE_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT3</td><td/><td/><td>_32EA8C99_9477_4550_885B_D482FB8DB70E_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT4</td><td/><td/><td>_B78CFD4A_53C0_498D_92CC_BC15CB1B6A3D_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT5</td><td/><td/><td>_919CEE5C_40A3_4B10_B0C9_59E2B51D936C_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>SDL2.dll</td><td/><td/><td>_573E2ECF_CDB9_494F_904D_ED1E58E15F46_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>SDL2_image.dll</td><td/><td/><td>_7A424623_6EBD_41CB_9A89_889D30860F4B_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>beehive.release.exe</td><td/><td/><td>_D8808D22_8AF5_43EB_BB3F_9B7C8D2D1DC7_FILTER</td><td/><td/><td/><td/></row>

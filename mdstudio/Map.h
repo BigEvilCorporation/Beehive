@@ -14,6 +14,8 @@
 
 #include "Stamp.h"
 
+class Project;
+
 struct StampMapEntry
 {
 	StampMapEntry() { m_id = 0; m_flags = 0; }
@@ -81,12 +83,9 @@ public:
 	const TStampPosMap::const_iterator StampsEnd() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream) const;
+	void Export(const Project& project, std::stringstream& stream) const;
 
 private:
-	int m_width;
-	int m_height;
-
 	struct TileDesc
 	{
 		TileDesc() { m_id = 0; m_flags = 0; }
@@ -101,6 +100,10 @@ private:
 		u32 m_flags;
 	};
 
+	void BakeStamp(std::vector<TileDesc>& tiles, int x, int y, const Stamp& stamp, u32 flipFlags) const;
+
+	int m_width;
+	int m_height;
 	std::vector<TileDesc> m_tiles;
 	TStampPosMap m_stamps;
 };
