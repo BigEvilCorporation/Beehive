@@ -14,12 +14,13 @@
 struct CollisionType
 {
 	std::string name;
-	Icon* icon;
+	std::vector<u8> iconData;
 	u8 bit;
 
 	void Serialise(ion::io::Archive& archive)
 	{
 		archive.Serialise(name);
 		archive.Serialise(bit);
+		archive.Serialise(iconData);
 	}
 };

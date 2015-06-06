@@ -62,19 +62,20 @@
 #define wxID_BTN_COLLISION_TILEEDIT 1020
 #define wxID_COL_TOOL_ADD 1021
 #define wxID_COL_TOOL_DEL 1022
-#define wxID_BTN_CANCEL 1023
-#define wxID_TOOL_SELECTTILE 1024
-#define wxID_TOOL_SELECTSTAMP 1025
-#define wxID_TOOL_PAINT 1026
-#define wxID_TOOL_STAMP 1027
-#define wxID_TOOL_TILEPICKER 1028
-#define wxID_TOOL_STAMPPICKER 1029
-#define wxID_TOOL_FLIPX 1030
-#define wxID_TOOL_FLIPY 1031
-#define wxID_TOOL_FILL 1032
-#define wxID_TOOL_CLONE 1033
-#define wxID_TOOL_CREATESTAMP 1034
-#define wxID_TOOL_REMOVESTAMP 1035
+#define wxID_BTN_COL_IMG 1023
+#define wxID_BTN_CANCEL 1024
+#define wxID_TOOL_SELECTTILE 1025
+#define wxID_TOOL_SELECTSTAMP 1026
+#define wxID_TOOL_PAINT 1027
+#define wxID_TOOL_STAMP 1028
+#define wxID_TOOL_TILEPICKER 1029
+#define wxID_TOOL_STAMPPICKER 1030
+#define wxID_TOOL_FLIPX 1031
+#define wxID_TOOL_FLIPY 1032
+#define wxID_TOOL_FILL 1033
+#define wxID_TOOL_CLONE 1034
+#define wxID_TOOL_CREATESTAMP 1035
+#define wxID_TOOL_REMOVESTAMP 1036
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase

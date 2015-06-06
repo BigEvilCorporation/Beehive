@@ -39,6 +39,7 @@ public:
 	u8 GetPixelColour(int x, int y) const;
 
 	void AddPixelCollisionBits(int x, int y, u8 collisionBits);
+	void ClearPixelCollisionBits(int x, int y, u8 collisionBits);
 	u8 GetPixelCollisionBits(int x, int y) const;
 
 	void SetPaletteId(PaletteId palette);

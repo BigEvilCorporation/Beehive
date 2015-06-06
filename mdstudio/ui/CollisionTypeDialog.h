@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <ion/core/Types.h>
+
 #include "UIBase.h"
 
 class MainWindow;
@@ -25,7 +27,13 @@ protected:
 	virtual void OnBitChange(wxSpinEvent& event);
 
 private:
+	static const int sIconWidth = 16;
+	static const int sIconHeight = 16;
+
 	void PopulateList();
+	void OnTypeSelected(u8 collisionTypeBit);
+	u8 GetSelection();
+
 	MainWindow& m_mainWindow;
 	Project& m_project;
 };

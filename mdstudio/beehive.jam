@@ -15,6 +15,7 @@ local SRC =
 
 	BMPReader.cpp
 	BMPReader.h
+	Collision.h
 	Map.cpp
 	Map.h
 	Palette.cpp
