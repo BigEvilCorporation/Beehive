@@ -24,6 +24,7 @@ Project::Project()
 	m_gridSize = 1;
 	m_showGrid = true;
 	m_snapToGrid = false;
+	m_showStampOutlines = true;
 	m_palettes.resize(numPalettes);
 	m_palettes[0].AddColour(Colour(255, 255, 255));
 	m_nextFreeStampId = 1;

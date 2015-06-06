@@ -19,17 +19,11 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	m_stampPastePos.y = -1;
 
 	ResetToolData();
-
-	//Create preview quad
-	m_previewPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
-	m_outlinePrimitive = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(4.0f, 4.0f));
 }
 
 MapPanel::~MapPanel()
 {
 	ResetToolData();
-
-	delete m_previewPrimitive;
 }
 
 void MapPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
@@ -451,7 +445,10 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	}
 
 	//Render stamp outlines
-	RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
+	if(m_project->GetShowStampOutlines())
+	{
+		RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
+	}
 }
 
 void MapPanel::SetProject(Project* project)
@@ -706,14 +703,15 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 		const int quadHalfExtentsX = 4;
 		const int quadHalfExtentsY = 4;
 
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
+		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
+
 		//Set preview quad texture coords
 		ion::render::TexCoord coords[4];
 		u32 flipFlags = (m_previewTileFlipX ? Map::eFlipX : 0) | (m_previewTileFlipY ? Map::eFlipY : 0);
 		m_renderResources.GetTileTexCoords(m_previewTile, coords, flipFlags);
-		m_previewPrimitive->SetTexCoords(coords);
-
-		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
-		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
+		((ion::render::Quad*)primitive)->SetTexCoords(coords);
 
 		ion::Matrix4 previewQuadMtx;
 		ion::Vector3 previewQuadPos(((m_previewTilePos.x - (mapWidth / 2)) * tileWidth) + quadHalfExtentsX,
@@ -722,7 +720,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 
 		material->SetDiffuseColour(colour);
 		material->Bind(previewQuadMtx, cameraInverseMtx, projectionMtx);
-		renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 	}
 }
@@ -737,6 +735,7 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 	const int quadHalfExtentsX = 4;
 	const int quadHalfExtentsY = 4;
 
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
@@ -746,18 +745,18 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 		float bottom = min(mapHeight - 1 - m_boxSelectStart.y, mapHeight - 1 - m_boxSelectEnd.y);
 		float left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
 
-		ion::Matrix4 boxMtx;
 		ion::Vector3 boxScale((float)abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1.0f, (float)abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1.0f, 0.0f);
 		ion::Vector3 boxPos(floor((left - (mapWidth / 2.0f) + (boxScale.x / 2.0f)) * tileWidth),
 			floor((bottom - (mapHeight / 2.0f) + (boxScale.y / 2.0f)) * tileHeight), z);
 
+		ion::Matrix4 boxMtx;
 		boxMtx.SetTranslation(boxPos);
 		boxMtx.SetScale(boxScale);
 
 		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 		material->SetDiffuseColour(colour);
 		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
-		renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 	}
@@ -786,7 +785,7 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 			worldViewProjMtx = selectionMtx * cameraInverseMtx * projectionMtx;
 			worldViewProjParamV.SetValue(worldViewProjMtx);
 
-			renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
+			renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		}
 
 		material->Unbind();
@@ -847,14 +846,12 @@ void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::M
 	ion::render::Shader* vertexShader = m_renderResources.GetVertexShader(RenderResources::eShaderFlatColour);
 	ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
 
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitLineQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
 
 	const Map& map = m_project->GetMap();
-	const int mapWidth = map.GetWidth();
-	const int mapHeight = map.GetHeight();
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const ion::Vector2i mapSize(map.GetWidth(), map.GetHeight());
 
 	material->SetDiffuseColour(colour);
 	material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
@@ -864,22 +861,11 @@ void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::M
 		Stamp* stamp = m_project->GetStamp(it->m_id);
 		if(stamp)
 		{
-			const ion::Vector2i& stampPos = it->m_position;
-			float width = stamp->GetWidth();
-			float height = stamp->GetHeight();
-			float left = stampPos.x;
-			float bottom = mapHeight - stampPos.y - height;
-
-			ion::Vector3 outlinePos(floor((left - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
-									floor((bottom - (mapHeight / 2.0f) + (height / 2.0f)) * tileHeight), z);
-
-			outlineMtx.SetTranslation(outlinePos);
-			outlineMtx.SetScale(ion::Vector3(width, height, 1.0f));
-
+			outlineMtx = m_renderResources.CalcBoxMatrix(it->m_position, ion::Vector2i(stamp->GetWidth(), stamp->GetHeight()), mapSize, z);
 			worldViewProjMtx = outlineMtx * cameraInverseMtx * projectionMtx;
 			worldViewProjParamV.SetValue(worldViewProjMtx);
 
-			renderer.DrawVertexBuffer(m_outlinePrimitive->GetVertexBuffer());
+			renderer.DrawVertexBuffer(primitive->GetVertexBuffer());
 		}
 	}
 
@@ -912,13 +898,14 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 			boxMtx.SetTranslation(boxPos);
 			boxMtx.SetScale(boxScale);
 
+			ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 			ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
 
 			renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 			material->SetDiffuseColour(colour);
 			material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
-			renderer.DrawVertexBuffer(m_previewPrimitive->GetVertexBuffer(), m_previewPrimitive->GetIndexBuffer());
+			renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 			material->Unbind();
 			renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 		}

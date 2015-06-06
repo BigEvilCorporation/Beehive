@@ -55,9 +55,7 @@ private:
 	void ResetToolData();
 
 	//Rendering primitives
-	ion::render::Quad* m_previewPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
-	ion::render::LineQuad* m_outlinePrimitive;
 
 	//Current tool
 	ToolType m_currentTool;

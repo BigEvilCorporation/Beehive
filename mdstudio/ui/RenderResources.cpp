@@ -60,6 +60,10 @@ RenderResources::RenderResources()
 	m_colours[eColourPreview] = ion::Colour(1.0f, 1.0f, 1.0f, 0.8f);
 	m_colours[eColourOutline] = ion::Colour(1.0f, 1.0f, 0.0f, 1.0f);
 	m_colours[eColourGrid] = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
+
+	//Create primitives
+	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
+	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(4.0f, 4.0f));
 }
 
 RenderResources::~RenderResources()
@@ -245,4 +249,17 @@ void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pix
 			}
 		}
 	}
+}
+
+ion::Matrix4 RenderResources::CalcBoxMatrix(const ion::Vector2i& position, const ion::Vector2i& size, const ion::Vector2i& mapSize, float z)
+{
+	ion::Matrix4 matrix;
+
+	float bottom = mapSize.y - position.y - size.y;
+	ion::Vector2 tileSize(8, 8);
+	ion::Vector3 translation(floor((position.x - (mapSize.x / 2.0f) + (size.x / 2.0f)) * tileSize.x), floor((bottom - (mapSize.y / 2.0f) + (size.y / 2.0f)) * tileSize.y), z);
+	matrix.SetTranslation(translation);
+	matrix.SetScale(ion::Vector3(size.x, size.y, 1.0f));
+
+	return matrix;
 }

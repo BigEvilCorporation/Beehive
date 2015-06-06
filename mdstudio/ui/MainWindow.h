@@ -85,6 +85,7 @@ protected:
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
+	virtual void OnBtnShowOutlines(wxCommandEvent& event);
 	virtual void OnBtnCollisionConfig(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event);
 

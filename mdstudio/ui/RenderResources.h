@@ -51,6 +51,7 @@ public:
 	enum PrimitiveType
 	{
 		ePrimitiveUnitQuad,
+		ePrimitiveUnitLineQuad,
 		ePrimitiveMax
 	};
 
@@ -73,8 +74,11 @@ public:
 	ion::render::Material* GetMaterial(MaterialType type) { return m_materials[type]; }
 	ion::render::Shader* GetVertexShader(ShaderType type) { return m_vertexShaders[type]; }
 	ion::render::Shader* GetPixelhader(ShaderType type) { return m_pixelShaders[type]; }
-	const ion::render::Primitive* GetPrimitive(PrimitiveType type) const { return m_primitives[type]; }
+	ion::render::Primitive* GetPrimitive(PrimitiveType type) const { return m_primitives[type]; }
 	const ion::Colour& GetColour(ColourType type) const { return m_colours[type]; }
+
+	//Rendering util functions
+	ion::Matrix4 CalcBoxMatrix(const ion::Vector2i& position, const ion::Vector2i& size, const ion::Vector2i& mapSize, float z);
 
 private:
 	//Create TileID to index cache
