@@ -101,6 +101,10 @@ public:
 	bool GetGridSnap() const { return m_snapToGrid; }
 	void SetGridSnap(bool snap) { m_snapToGrid = snap; }
 
+	//Stamp outlines
+	bool GetShowStampOutlines() const { return m_showStampOutlines; }
+	void SetShowStampOutlines(bool show) { m_showStampOutlines = show; }
+
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
 	void InvalidateStamps(bool invalidate) { m_stampsInvalidated = invalidate; }
@@ -164,6 +168,9 @@ private:
 	int m_gridSize;
 	bool m_showGrid;
 	bool m_snapToGrid;
+
+	//Stamp outlines
+	bool m_showStampOutlines;
 
 	//Map needs redraw
 	bool m_mapInvalidated;

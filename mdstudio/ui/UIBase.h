@@ -46,34 +46,35 @@
 #define wxID_BTN_PROJ_EXPORT 1004
 #define wxID_BTN_GRID_SHOW 1005
 #define wxID_BTN_GRID_SNAP 1006
-#define wxID_BTN_TOOLS_MAPEDIT 1007
-#define wxID_BTN_TOOLS_TILES 1008
-#define wxID_BTN_TOOLS_STAMPS 1009
-#define wxID_BTN_TOOLS_PALETTES 1010
-#define wxID_BTN_MAP_CLEAR 1011
-#define wxID_BTN_MAP_RESIZE 1012
-#define wxID_BTN_TILES_IMPORT 1013
-#define wxID_BTN_TILES_CREATE 1014
-#define wxID_BTN_TILES_DELETE 1015
-#define wxID_BTN_STAMPS_CREATE 1016
-#define wxID_BTN_STAMPS_DELETE 1017
-#define wxID_BTN_COLLISION_CONFIG 1018
-#define wxID_BTN_COLLISION_TILEEDIT 1019
-#define wxID_COL_TOOL_ADD 1020
-#define wxID_COL_TOOL_DEL 1021
-#define wxID_BTN_CANCEL 1022
-#define wxID_TOOL_SELECTTILE 1023
-#define wxID_TOOL_SELECTSTAMP 1024
-#define wxID_TOOL_PAINT 1025
-#define wxID_TOOL_STAMP 1026
-#define wxID_TOOL_TILEPICKER 1027
-#define wxID_TOOL_STAMPPICKER 1028
-#define wxID_TOOL_FLIPX 1029
-#define wxID_TOOL_FLIPY 1030
-#define wxID_TOOL_FILL 1031
-#define wxID_TOOL_CLONE 1032
-#define wxID_TOOL_CREATESTAMP 1033
-#define wxID_TOOL_REMOVESTAMP 1034
+#define wxID_BTN_SHOW_OUTLINES 1007
+#define wxID_BTN_TOOLS_MAPEDIT 1008
+#define wxID_BTN_TOOLS_TILES 1009
+#define wxID_BTN_TOOLS_STAMPS 1010
+#define wxID_BTN_TOOLS_PALETTES 1011
+#define wxID_BTN_MAP_CLEAR 1012
+#define wxID_BTN_MAP_RESIZE 1013
+#define wxID_BTN_TILES_IMPORT 1014
+#define wxID_BTN_TILES_CREATE 1015
+#define wxID_BTN_TILES_DELETE 1016
+#define wxID_BTN_STAMPS_CREATE 1017
+#define wxID_BTN_STAMPS_DELETE 1018
+#define wxID_BTN_COLLISION_CONFIG 1019
+#define wxID_BTN_COLLISION_TILEEDIT 1020
+#define wxID_COL_TOOL_ADD 1021
+#define wxID_COL_TOOL_DEL 1022
+#define wxID_BTN_CANCEL 1023
+#define wxID_TOOL_SELECTTILE 1024
+#define wxID_TOOL_SELECTSTAMP 1025
+#define wxID_TOOL_PAINT 1026
+#define wxID_TOOL_STAMP 1027
+#define wxID_TOOL_TILEPICKER 1028
+#define wxID_TOOL_STAMPPICKER 1029
+#define wxID_TOOL_FLIPX 1030
+#define wxID_TOOL_FLIPY 1031
+#define wxID_TOOL_FILL 1032
+#define wxID_TOOL_CLONE 1033
+#define wxID_TOOL_CREATESTAMP 1034
+#define wxID_TOOL_REMOVESTAMP 1035
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -111,6 +112,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnProjExport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnGridShow( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnGridSnap( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnShowOutlines( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
