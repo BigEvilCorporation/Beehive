@@ -591,7 +591,7 @@ bool Project::ExportMap(const std::string& filename) const
 		std::stringstream stream;
 		stream << "map_" << m_name << ":" << std::endl;
 
-		m_map.Export(stream);
+		m_map.Export(*this, stream);
 
 		stream << "map_" << m_name << "_end:" << std::endl;
 		stream << "map_" << m_name << "_size_b\tequ (map_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;

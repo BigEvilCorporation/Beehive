@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////
 
 #include "Map.h"
+#include "Project.h"
 
 Map::Map()
 {
@@ -109,6 +110,11 @@ void Map::SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
 
 void Map::BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
 {
+	BakeStamp(m_tiles, x, y, stamp, flipFlags);
+}
+
+void Map::BakeStamp(std::vector<TileDesc>& tiles, int x, int y, const Stamp& stamp, u32 flipFlags) const
+{
 	int width = stamp.GetWidth();
 	int height = stamp.GetHeight();
 
@@ -128,11 +134,10 @@ void Map::BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
 				int mapX = stampX + x;
 				int mapY = stampY + y;
 
-				//Copy tile
-				SetTile(mapX, mapY, tileId);
-
-				//Copy flags
-				SetTileFlags(mapX, mapY, tileFlags);
+				//Copy tile and flags
+				int tileIdx = (mapY * m_width) + mapX;
+				tiles[tileIdx].m_id = tileId;
+				tiles[tileIdx].m_flags = tileFlags;
 			}
 		}
 	}
@@ -193,8 +198,20 @@ const TStampPosMap::const_iterator Map::StampsEnd() const
 	return m_stamps.end();
 }
 
-void Map::Export(std::stringstream& stream) const
+void Map::Export(const Project& project, std::stringstream& stream) const
 {
+	//Copy tiles
+	std::vector<TileDesc> tiles = m_tiles;
+
+	//Blit stamps
+	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		const Stamp& stamp = *project.GetStamp(it->m_id);
+		const ion::Vector2i& position = it->m_position;
+		BakeStamp(tiles, position.x, position.y, stamp, 0);
+	}
+
+	//Output to stream
 	stream << std::hex << std::setfill('0') << std::uppercase;
 
 	for(int y = 0; y < m_height; y++)
@@ -204,7 +221,7 @@ void Map::Export(std::stringstream& stream) const
 		for(int x = 0; x < m_width; x++)
 		{
 			//TODO: V/H flip bits
-			u8 byte = m_tiles[(y * m_width) + x].m_id;
+			u8 byte = tiles[(y * m_width) + x].m_id;
 			stream << "0x" << std::setw(2) << (u32)byte;
 
 			if(x < (m_width - 1))

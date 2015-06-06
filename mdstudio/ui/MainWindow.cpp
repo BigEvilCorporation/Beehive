@@ -541,6 +541,11 @@ void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
 			//Save
 			SetStatusText("Saving...");
 
+			int nameStart = filename.find_last_of('\\') + 1;
+			int nameLength = filename.find_last_of('.') - nameStart;
+			std::string projectName = filename.substr(nameStart, nameLength);
+			m_project->SetName(projectName);
+
 			if(m_project->Save(filename))
 			{
 				SetStatusText("Save complete");
