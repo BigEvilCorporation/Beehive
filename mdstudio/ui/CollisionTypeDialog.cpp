@@ -16,7 +16,8 @@ CollisionTypeDialog::CollisionTypeDialog(MainWindow& mainWindow, Project& projec
 	, m_mainWindow(mainWindow)
 	, m_project(project)
 {
-
+	//Deselect
+	OnTypeSelected(0);
 }
 
 void CollisionTypeDialog::OnAddType(wxCommandEvent& event)
@@ -56,7 +57,7 @@ void CollisionTypeDialog::OnRemoveType(wxCommandEvent& event)
 
 void CollisionTypeDialog::OnTypeSelected(wxListEvent& event)
 {
-
+	OnTypeSelected(GetSelection());
 }
 
 void CollisionTypeDialog::OnIconChange(wxCommandEvent& event)
@@ -98,7 +99,16 @@ void CollisionTypeDialog::OnIconChange(wxCommandEvent& event)
 
 void CollisionTypeDialog::OnNameChange(wxCommandEvent& event)
 {
+	u8 collisionTypeBits = GetSelection();
+	if(collisionTypeBits)
+	{
+		if(CollisionType* collisionType = m_project.GetCollisionType(collisionTypeBits))
+		{
+			collisionType->name = m_textName->GetValue();
+		}
+	}
 
+	event.Skip();
 }
 
 void CollisionTypeDialog::OnBitChange(wxSpinEvent& event)
@@ -175,13 +185,15 @@ void CollisionTypeDialog::PopulateList()
 
 void CollisionTypeDialog::OnTypeSelected(u8 collisionTypeBit)
 {
-	//Deselect all
-
 	int index = m_listCollisionTypes->FindItem(-1, (wxUIntPtr)collisionTypeBit);
 	if(index >= 0)
 	{
 		if(const CollisionType* collisionType = m_project.GetCollisionType(collisionTypeBit))
 		{
+			m_buttonIcon->Enable();
+			m_textName->Enable();
+			m_spinBit->Enable();
+
 			//Set name, icon, bit
 			m_textName->SetValue(collisionType->name);
 
@@ -191,6 +203,12 @@ void CollisionTypeDialog::OnTypeSelected(u8 collisionTypeBit)
 				m_buttonIcon->SetImageLabel(wxBitmap(image));
 			}
 		}
+	}
+	else
+	{
+		m_buttonIcon->Disable();
+		m_textName->Disable();
+		m_spinBit->Disable();
 	}
 }
 

@@ -165,7 +165,7 @@ CollisionTypeDialogBase::CollisionTypeDialogBase( wxWindow* parent, wxWindowID i
 	wxBoxSizer* bSizer5;
 	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_listCollisionTypes = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST );
+	m_listCollisionTypes = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_SINGLE_SEL );
 	bSizer5->Add( m_listCollisionTypes, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer6;
