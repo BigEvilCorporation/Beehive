@@ -35,14 +35,14 @@ namespace ion
 			virtual bool Open(const std::string& filename, OpenMode openMode = OpenRead);
 			virtual void Close();
 
+			virtual u64 GetSize() const;
+			virtual u64 GetPosition() const;
+			virtual u64 Read(void* data, u64 size);
+			virtual u64 Write(const void* data, u64 Size);
+			virtual u64 Seek(u64 position);
 			u64 Seek(u64 position, SeekMode origin = Current);
-			u64 Read(void* data, u64 size);
-			u64 Write(const void* data, u64 Size);
 
 			void Flush();
-
-			u64 GetSize();
-			u64 GetPosition();
 
 			bool IsOpen() const;
 
@@ -52,8 +52,8 @@ namespace ion
 			std::string mFilename;
 			OpenMode mOpenMode;
 
-			u64 mSize;
 			u64 mCurrentPosition;
+			u64 mSize;
 
 			bool mOpen;
 

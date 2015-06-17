@@ -1,5 +1,5 @@
 #include "IOTestData.h"
-#include "core/Debug.h"
+#include "core/debug/Debug.h"
 
 TestSerialisable::TestSerialisable()
 {
@@ -58,6 +58,12 @@ bool TestSerialisable::operator == (TestSerialisable& rhs)
 	}
 
 	return mTestInt == rhs.mTestInt
+		&& mTestIntBlock1 == mTestIntBlock1
+		&& mTestIntBlock2 == mTestIntBlock2
+		&& mTestIntBlock3 == mTestIntBlock3
+		&& mTestIntBlock4 == mTestIntBlock4
+		&& mTestIntBlock5 == mTestIntBlock5
+		&& mTestIntBlock6 == mTestIntBlock6
 		&& mTestIntV2 == rhs.mTestIntV2
 		&& mTestFloat == rhs.mTestFloat
 		&& mTestString1.compare(rhs.mTestString1) == 0
@@ -111,7 +117,7 @@ bool TestSerialisable::Test(TestSerialisable& rhs, u32 version)
 	return passed;
 }
 
-void TestSerialisable::Serialise(ion::serialise::Archive& archive)
+void TestSerialisable::Serialise(ion::io::Archive& archive)
 {
 	//Register pointer types
 	archive.RegisterPointerType<TestSerialisable::SubClass>();
@@ -123,13 +129,76 @@ void TestSerialisable::Serialise(ion::serialise::Archive& archive)
 	archive.Serialise(mTestInt);
 	archive.Serialise(mTestFloat);
 	
-	archive.Serialise(mTestIntArray);
-	archive.Serialise(mTestFloatArray);
-	archive.Serialise(mTestIntList);
-	archive.Serialise(mTestIntMap);
+	if(archive.PushBlock("TestBlock"))
+	{
+		if(archive.GetDirection() == ion::io::Archive::Out)
+		{
+			archive.Serialise(mTestIntArray, "TestIntArray");
+			archive.Serialise(mTestFloatArray, "TestFloatArray");
+			archive.Serialise(mTestIntList, "TestIntList");
+			archive.Serialise(mTestIntMap, "TestIntMap");
+			archive.Serialise(mTestString1, "TestString1");
+			archive.Serialise(mTestString2, "TestString2");
+		}
+		else
+		{
+			//Change the order on the way back in
+			archive.Serialise(mTestString1, "TestString1");
+			archive.Serialise(mTestIntMap, "TestIntMap");
+			archive.Serialise(mTestFloatArray, "TestFloatArray");
+			archive.Serialise(mTestIntList, "TestIntList");
+			archive.Serialise(mTestString2, "TestString2");
+			archive.Serialise(mTestIntArray, "TestIntArray");
+		}
 
-	archive.Serialise(mTestString1);
-	archive.Serialise(mTestString2);
+		archive.PopBlock();
+	}
+	
+
+	//Blocks
+	if(archive.PushBlock("TestBlock1"))
+	{
+		archive.Serialise(mTestIntBlock1);
+		archive.PopBlock();
+	}
+
+	if(archive.PushBlock("TestBlock2"))
+	{
+		if(archive.PushBlock("TestBlock3"))
+		{
+			archive.Serialise(mTestIntBlock2);
+			archive.PopBlock();
+		}
+
+		if(archive.PushBlock("TestBlock4"))
+		{
+			if(archive.PushBlock("TestBlock5"))
+			{
+				archive.Serialise(mTestIntBlock3);
+
+				if(archive.PushBlock("TestBlock6"))
+				{
+					archive.Serialise(mTestIntBlock4);
+					archive.PopBlock();
+				}
+				
+				archive.PopBlock();
+			}
+			
+			archive.Serialise(mTestIntBlock5);
+
+			archive.PopBlock();
+		}
+
+		if(archive.PushBlock("TestBlock7"))
+		{
+			archive.Serialise(mTestIntBlock6);
+			archive.PopBlock();
+		}
+		
+		archive.PopBlock();
+	}
+		
 
 	if(archive.GetVersion() >= 2)
 	{
@@ -183,7 +252,7 @@ bool TestSerialisable::SubClass::Test(TestSerialisable::SubClass& rhs, u32 versi
 	return passed;
 }
 
-void TestSerialisable::SubClass::Serialise(ion::serialise::Archive& archive)
+void TestSerialisable::SubClass::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(mTestInt);
 	archive.Serialise(mTestFloat);
@@ -211,7 +280,7 @@ bool TestSerialisable::SubClassDerived::Test(TestSerialisable::SubClassDerived& 
 	return (*this == rhs);
 }
 
-void TestSerialisable::SubClassDerived::Serialise(ion::serialise::Archive& archive)
+void TestSerialisable::SubClassDerived::Serialise(ion::io::Archive& archive)
 {
 	//Serialise base class first
 	SubClass::Serialise(archive);

@@ -26,16 +26,16 @@ namespace ion
 		File::File()
 		{
 			mOpenMode = OpenRead;
-			mSize = 0;
 			mCurrentPosition = 0;
+			mSize = 0;
 			mOpen = false;
 		}
 
 		File::File(const std::string& filename, File::OpenMode openMode)
 		{
 			mOpenMode = openMode;
-			mSize = 0;
 			mCurrentPosition = 0;
+			mSize = 0;
 			mOpen = false;
 
 			Open(filename, openMode);
@@ -63,8 +63,12 @@ namespace ion
 
 			if(mOpen)
 			{
-				//Cache size
-				GetSize();
+				//Get size (seek to end, tell, seek back)
+				u64 currPos = (u64)mStream.tellg();
+
+				mStream.seekg(0, std::ios::end);
+				mSize = (u64)mStream.tellg();
+				mStream.seekg(currPos, std::ios::beg);
 			}
 
 			return mOpen;
@@ -79,10 +83,13 @@ namespace ion
 			}
 		}
 
+		u64 File::Seek(u64 position)
+		{
+			return Seek(position, Start);
+		}
+
 		u64 File::Seek(u64 position, SeekMode origin)
 		{
-			u64 newPosition = mCurrentPosition;
-
 			if(mOpen && position != mCurrentPosition)
 			{
 				std::ios_base::seek_dir direction = std::ios_base::cur;
@@ -92,10 +99,10 @@ namespace ion
 			
 				mStream.seekg(position, direction);
 
-				newPosition = (u64)mStream.tellg();
+				mCurrentPosition = (u64)mStream.tellg();
 			}
 		
-			return newPosition;
+			return mCurrentPosition;
 		}
 
 		u64 File::Read(void* data, u64 size)
@@ -132,33 +139,14 @@ namespace ion
 			mStream.flush();
 		}
 
-		u64 File::GetSize()
+		u64 File::GetSize() const
 		{
-			//If open, and filesize hasn't yet been cached
-			if(mOpen && !mSize)
-			{
-				//Get size (seek to end, tell, seek back)
-				u64 currPos = (u64)mStream.tellg();
-
-				mStream.seekg(0, std::ios::end);
-				mSize = (u64)mStream.tellg();
-			
-				mStream.seekg(currPos, std::ios::beg);
-			}
-
 			return mSize;
 		}
 
-		u64 File::GetPosition()
+		u64 File::GetPosition() const
 		{
-			u64 position = 0;
-
-			if(mOpen)
-			{
-				position = (u64)mStream.tellg();
-			}
-
-			return position;
+			return mCurrentPosition;
 		}
 
 		File::OpenMode File::GetOpenMode() const
