@@ -11,5 +11,5 @@ SRC =
 	;
 	
 AutoSourceGroup iotest : $(SRC) ;
-C.RuntimeType iotest : dynamic ;
+C.RuntimeType iotest : static ;
 C.Application iotest : $(SRC) ;

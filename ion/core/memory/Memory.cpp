@@ -16,7 +16,7 @@ namespace ion
 			memset(address, value, (size_t)size);
 		}
 
-		void MemCopy(void* destination, void* source, u32 size)
+		void MemCopy(void* destination, const void* source, u32 size)
 		{
 			memcpy(destination, source, size);
 		}

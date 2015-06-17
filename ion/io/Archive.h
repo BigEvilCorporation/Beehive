@@ -11,11 +11,13 @@
 
 //Includes for ion types handled directly by Archive
 #include "core/Types.h"
+#include "maths/Maths.h"
 
 //Includes STL types handled directly by Archive
 #include <vector>
 #include <list>
 #include <map>
+#include <algorithm>
 
 namespace ion
 {
@@ -29,7 +31,24 @@ namespace ion
 		public:
 			enum Direction { In, Out };
 
+			struct Tag
+			{
+				Tag();
+				Tag(const char* string);
+				Tag(u32 hash);
+				Tag(const Tag& rhs);
+				Tag& operator = (u32 hash);
+				bool operator == (const Tag& rhs) const;
+				bool operator != (const Tag& rhs) const;
+
+				u32 m_hash;
+			};
+
 			Archive(Stream& stream, Direction direction, ResourceManager* resourceManager = NULL, u32 version = 0);
+
+			//Named blocks
+			bool PushBlock(const Tag& tag);
+			void PopBlock();
 
 			//Register pointer type mapping
 			template <typename T> void RegisterPointerType();
@@ -40,11 +59,17 @@ namespace ion
 			//Default templated serialise
 			template <typename T> void Serialise(T& object);
 
+			//Default named block serialise
+			template <typename T> void Serialise(T& object, const Tag& tag);
+
 			//Pointer serialise
 			template <typename T> void Serialise(T*& object);
 
 			//Resource serialise
 			template <typename T> void Serialise(ResourceHandle<T>& object);
+
+			//Stream serialise
+			template <> void Serialise(MemoryStream& stream);
 
 			//Raw serialisation (no endian flipping)
 			void Serialise(void* data, u64 size);
@@ -87,6 +112,28 @@ namespace ion
 
 			//Resource manager
 			ResourceManager* mResourceManager;
+
+			//Block
+			struct Block
+			{
+				#pragma pack(push, 1)
+				struct Header
+				{
+					Tag tag;
+					u64 size;
+
+					void Serialise(Archive& archive);
+				};
+				#pragma pack(pop)
+				
+				Header header;
+				MemoryStream data;
+				u64 startPos;
+				Block* parent;
+			};
+
+			//Block tree
+			Block* m_blockNode;
 
 			//Pointer constructor/serialiser
 			struct PointerMappingBase
@@ -165,6 +212,15 @@ namespace ion
 			object.Serialise(*this);
 		}
 
+		template <typename T> void Archive::Serialise(T& object, const Tag& tag)
+		{
+			if(PushBlock(tag))
+			{
+				Serialise(object);
+				PopBlock();
+			}
+		}
+
 		template <typename T> void Archive::Serialise(T*& object)
 		{
 			//Serialise NULL flag
@@ -239,6 +295,43 @@ namespace ion
 					//Write resource name
 					std::string resourceName = handle.GetName();
 					Serialise(resourceName);
+				}
+			}
+		}
+
+		template <> void Archive::Serialise<MemoryStream>(MemoryStream& stream)
+		{
+			const u64 bufferSize = 1024;
+			u8 buffer[bufferSize] = { 0 };
+
+			if(GetDirection() == In)
+			{
+				u64 size = mStream.GetSize();
+
+				while(size)
+				{
+					u64 bytesToWrite = maths::Min(size, bufferSize);
+					mStream.Read(buffer, bytesToWrite);
+					stream.Write(buffer, bytesToWrite);
+					size -= bytesToWrite;
+				}
+			}
+			else
+			{
+				u64 size = stream.GetSize();
+				stream.Seek(0);
+
+				while(size)
+				{
+					u64 bytesToWrite = maths::Min(size, bufferSize);
+					stream.Read(buffer, bytesToWrite);
+
+					if(m_blockNode)
+						m_blockNode->data.Write(buffer, bytesToWrite);
+					else
+						mStream.Write(buffer, bytesToWrite);
+
+					size -= bytesToWrite;
 				}
 			}
 		}
@@ -329,7 +422,7 @@ namespace ion
 				Serialise(numChars);
 
 				//Serialise out chars
-				mStream.Write(string.data(), numChars);
+				Serialise((void*)string.data(), numChars);
 			}
 		}
 

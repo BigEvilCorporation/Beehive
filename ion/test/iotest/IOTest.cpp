@@ -1,9 +1,8 @@
 #include "IOTest.h"
 #include "core/Version.h"
-#include "core/Debug.h"
-#include "core/Thread.h"
-#include "core/Time.h"
-#include "core/BinaryFile.h"
+#include "core/debug/Debug.h"
+#include "core/thread/Thread.h"
+#include "core/time/Time.h"
 
 #include <sstream>
 
@@ -38,7 +37,7 @@ bool IOTest::Initialise()
 
 	//Run tests
 	TestBasicSerialisation();
-	TestVersionedSerialisation();
+	//TestVersionedSerialisation();
 	
 	//No updating/rendering required, exit app
 	return true;
@@ -54,6 +53,12 @@ void IOTest::TestBasicSerialisation()
 	sourceObject.mTestFloat = 2.0f;
 	sourceObject.mTestString1 = "Hello ";
 	sourceObject.mTestString2 = " world!";
+	sourceObject.mTestIntBlock1 = 5;
+	sourceObject.mTestIntBlock2 = 6;
+	sourceObject.mTestIntBlock3 = 7;
+	sourceObject.mTestIntBlock4 = 8;
+	sourceObject.mTestIntBlock5 = 9;
+	sourceObject.mTestIntBlock6 = 10;
 	sourceObject.mTestIntArray.push_back(67890);
 	sourceObject.mTestIntArray.push_back(98765);
 	sourceObject.mTestFloatArray.push_back(3.14195f);
@@ -99,7 +104,7 @@ void IOTest::TestBasicSerialisation()
 	}
 
 	//Create an archive for serialising out
-	ion::serialise::Archive archiveOut(fileOut, ion::serialise::Archive::Out, TestSerialisable::sVersion);
+	ion::io::Archive archiveOut(fileOut, ion::io::Archive::Out, NULL);
 
 	//Serialise
 	archiveOut.Serialise(sourceObject);
@@ -118,7 +123,7 @@ void IOTest::TestBasicSerialisation()
 	}
 
 	//Create an archive for serialising in
-	ion::serialise::Archive archiveIn(fileIn, ion::serialise::Archive::In, TestSerialisable::sVersion);
+	ion::io::Archive archiveIn(fileIn, ion::io::Archive::In, NULL);
 
 	//Serialise
 	archiveIn.Serialise(destinationObject);
@@ -205,8 +210,8 @@ void IOTest::TestVersionedSerialisation()
 	}
 
 	//Create archives for serialising out
-	ion::serialise::Archive archiveOutV1(fileOutV1, ion::serialise::Archive::Out, 1);
-	ion::serialise::Archive archiveOutV2(fileOutV2, ion::serialise::Archive::Out, 2);
+	ion::io::Archive archiveOutV1(fileOutV1, ion::io::Archive::Out, NULL);
+	ion::io::Archive archiveOutV2(fileOutV2, ion::io::Archive::Out, NULL);
 
 	//Serialise
 	sourceObject.Serialise(archiveOutV1);
@@ -235,8 +240,8 @@ void IOTest::TestVersionedSerialisation()
 	}
 
 	//Create archives for serialising in
-	ion::serialise::Archive archiveInV1(fileInV1, ion::serialise::Archive::In, 1);
-	ion::serialise::Archive archiveInV2(fileInV2, ion::serialise::Archive::In, 2);
+	ion::io::Archive archiveInV1(fileInV1, ion::io::Archive::In, NULL);
+	ion::io::Archive archiveInV2(fileInV2, ion::io::Archive::In, NULL);
 
 	//Serialise
 	destinationObjectV1.Serialise(archiveInV1);

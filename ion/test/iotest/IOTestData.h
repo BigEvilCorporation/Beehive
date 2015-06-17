@@ -1,4 +1,4 @@
-#include "core/Archive.h"
+#include "io/Archive.h"
 
 #include <string>
 #include <vector>
@@ -29,7 +29,7 @@ public:
 		//Additional data for V2
 		int mTestIntV2;
 
-		void Serialise(ion::serialise::Archive& archive);
+		void Serialise(ion::io::Archive& archive);
 	};
 
 	//A derived class
@@ -43,7 +43,7 @@ public:
 
 		virtual int GetTestInt() { return mTestInt + 1; }
 
-		void Serialise(ion::serialise::Archive& archive);
+		void Serialise(ion::io::Archive& archive);
 
 		int mTestInt2;
 		int mTestInt3;
@@ -79,6 +79,14 @@ public:
 	//Additional data for V2
 	int mTestIntV2;
 
+	//Block data
+	int mTestIntBlock1;
+	int mTestIntBlock2;
+	int mTestIntBlock3;
+	int mTestIntBlock4;
+	int mTestIntBlock5;
+	int mTestIntBlock6;
+
 	SubClass mTestSubClass;
 
 	SubClass* mTestSubClassPtrBase;
@@ -87,5 +95,5 @@ public:
 	SubClass* mNullPtr;
 	SubClassDerivedSerialiseAsBase* mTestSubClassPtrDerived3;
 
-	void Serialise(ion::serialise::Archive& archive);
+	void Serialise(ion::io::Archive& archive);
 };

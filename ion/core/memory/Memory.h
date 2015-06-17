@@ -15,6 +15,6 @@ namespace ion
 	namespace memory
 	{
 		void MemSet(void* address, int value, u32 size);
-		void MemCopy(void* destination, void* source, u32 size);
+		void MemCopy(void* destination, const void* source, u32 size);
 	}
 }

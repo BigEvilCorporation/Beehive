@@ -41,6 +41,9 @@ namespace ion
 		float Lerp(float valueA, float valueB, float time);
 		float UnLerp(float valueFrom, float valueTo, float valueCurrent);
 
+		template <typename T> T Min(const T& a, const T& b);
+		template <typename T> T Max(const T& a, const T& b);
+
 		float Cos(float value);
 		float Sin(float value);
 
@@ -49,5 +52,18 @@ namespace ion
 
 		float DegreesToRadians(float degrees);
 		float RadiansToDegrees(float radians);
+	}
+
+	namespace maths
+	{
+		template <typename T> T Min(const T& a, const T& b)
+		{
+			return a < b ? a : b;
+		}
+
+		template <typename T> T Max(const T& a, const T& b)
+		{
+			return a > b ? a : b;
+		}
 	}
 }
