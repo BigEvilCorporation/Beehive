@@ -100,12 +100,13 @@ bool Project::Save(const std::string& filename)
 
 void Project::Serialise(ion::io::Archive& archive)
 {
-	archive.Serialise(m_palettes);
-	archive.Serialise(m_tileset);
-	archive.Serialise(m_map);
-	archive.Serialise(m_stamps);
-	archive.Serialise(m_collisionTypes);
-	archive.Serialise(m_nextFreeStampId);
+	archive.Serialise(m_palettes, "palettes");
+	archive.Serialise(m_tileset, "tileset");
+	archive.Serialise(m_palettes, "palettes2");
+	archive.Serialise(m_map, "map");
+	archive.Serialise(m_stamps, "stamps");
+	archive.Serialise(m_collisionTypes, "collisionTypes");
+	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 }
 
 StampId Project::AddStamp(int width, int height)

@@ -91,8 +91,8 @@ int Tileset::GetCount() const
 
 void Tileset::Serialise(ion::io::Archive& archive)
 {
-	archive.Serialise(m_tiles);
-	archive.Serialise(m_nextFreeId);
+	archive.Serialise(m_tiles, "tiles");
+	archive.Serialise(m_nextFreeId, "nextFreeId");
 }
 
 void Tileset::Export(std::stringstream& stream) const

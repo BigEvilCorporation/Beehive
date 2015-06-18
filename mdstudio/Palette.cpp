@@ -119,8 +119,8 @@ bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo algori
 
 void Palette::Serialise(ion::io::Archive& archive)
 {
-	archive.Serialise(m_colours);
-	archive.Serialise(m_usedColours);
+	archive.Serialise(m_colours, "colours");
+	archive.Serialise(m_usedColours, "usedColours");
 }
 
 void Palette::Export(std::stringstream& stream) const

@@ -60,10 +60,13 @@ namespace ion
 			if(mDirection == In)
 			{
 				u64 parentBlockStartPos = m_blockNode ? m_blockNode->startPos : 0;
-				u64 parentBlockEndPos = m_blockNode ? parentBlockStartPos + m_blockNode->header.size : mStream.GetSize();
+				u64 parentBlockEndPos = m_blockNode ? (parentBlockStartPos + m_blockNode->header.size - 1) : (mStream.GetSize() - 1);
 
-				//Record start pos
-				block->startPos = mStream.GetPosition();
+				//Record search start pos
+				u64 searchStartPos = mStream.GetPosition();
+
+				//Record block start pos
+				block->startPos = searchStartPos;
 				block->header.tag = 0;
 				block->header.size = 0;
 
@@ -72,14 +75,16 @@ namespace ion
 
 				if(block->header.tag != tag)
 				{
-					//No match, seek to each child of current block in turn, checking tag
+					//No match, begin search of current block (or whole file if not in a block)
 					if(m_blockNode)
-					{
-						//Seek to start of parent block first
-						mStream.Seek(m_blockNode->startPos + sizeof(Block::Header));
-						block->startPos = mStream.GetPosition();
-					}
+						block->startPos = m_blockNode->startPos + sizeof(Block::Header);
+					else
+						block->startPos = 0;
 
+					//Seek to start of search block
+					mStream.Seek(block->startPos);
+
+					//Seek to each child of current block in turn, checking tag
 					while(block->header.tag != tag && block->startPos + block->header.size < parentBlockEndPos)
 					{
 						//Record start pos
@@ -93,6 +98,12 @@ namespace ion
 							//Seek to end of block
 							mStream.Seek(block->startPos + block->header.size);
 						}
+					}
+
+					if(block->header.tag != tag)
+					{
+						//Block not found, return to original starting position
+						mStream.Seek(searchStartPos);
 					}
 				}
 			}
