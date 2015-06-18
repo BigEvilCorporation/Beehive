@@ -34,6 +34,7 @@ namespace ion
 		{
 			size = std::min(size, GetSize() - m_position);
 			memory::MemCopy(data, &m_bytes[m_position], size);
+			m_position += size;
 			return size;
 		}
 

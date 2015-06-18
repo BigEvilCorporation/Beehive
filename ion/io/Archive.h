@@ -46,9 +46,8 @@ namespace ion
 
 			Archive(Stream& stream, Direction direction, ResourceManager* resourceManager = NULL, u32 version = 0);
 
-			//Named blocks
-			bool PushBlock(const Tag& tag);
-			void PopBlock();
+			//Default named block serialise
+			template <typename T> void Serialise(T& object, const Tag& tag);
 
 			//Register pointer type mapping
 			template <typename T> void RegisterPointerType();
@@ -56,11 +55,18 @@ namespace ion
 			//Register pointer type mapping with strictly defined serialise/runtime types
 			template <typename SERIALISE_T, typename RUNTIME_T> void RegisterPointerTypeStrict();
 
+			Direction GetDirection() const;
+			u32 GetVersion() const;
+			ResourceManager* GetResourceManager() const;
+
+		//private:
+
+			//Named blocks
+			bool PushBlock(const Tag& tag);
+			void PopBlock();
+
 			//Default templated serialise
 			template <typename T> void Serialise(T& object);
-
-			//Default named block serialise
-			template <typename T> void Serialise(T& object, const Tag& tag);
 
 			//Pointer serialise
 			template <typename T> void Serialise(T*& object);
@@ -96,11 +102,6 @@ namespace ion
 			template <typename T> void Serialise(std::list<T>& objects);
 			template <typename KEY, typename T> void Serialise(std::map<KEY, T>& objects);
 
-			Direction GetDirection() const;
-			u32 GetVersion() const;
-			ResourceManager* GetResourceManager() const;
-
-		private:
 			//i/o stream
 			Stream& mStream;
 
@@ -225,7 +226,7 @@ namespace ion
 		{
 			//Serialise NULL flag
 			bool nullPtr = (object == NULL);
-			Serialise(nullPtr);
+			Serialise(nullPtr, "nullPtr");
 
 			if(GetDirection() == In)
 			{
@@ -237,11 +238,11 @@ namespace ion
 				else
 				{
 					//Serialise class name
-					std::string serialiseClassName;
-					Serialise(serialiseClassName);
+					std::string serialiseTypeName;
+					Serialise(serialiseTypeName, "typeName");
 
 					//Find in pointer mapping
-					std::map<std::string, PointerMappingBase*>::iterator it = mPointerMappingsBySerialiseName.find(serialiseClassName);
+					std::map<std::string, PointerMappingBase*>::iterator it = mPointerMappingsBySerialiseName.find(serialiseTypeName);
 					ion::debug::Assert(it != mPointerMappingsBySerialiseName.end(), "Archive::Serialise(T*) - Pointer type not registered");
 
 					//Construct
@@ -263,7 +264,7 @@ namespace ion
 					ion::debug::Assert(it != mPointerMappingsByRuntimeName.end(), "Archive::Serialise(T*) - Pointer type not registered");
 
 					//Serialise class name
-					Serialise(it->second->mSerialiseTypeName);
+					Serialise(it->second->mSerialiseTypeName, "typeName");
 
 					//Serialise out
 					it->second->Serialise(*this, object);
@@ -275,7 +276,7 @@ namespace ion
 		{
 			//Serialise NULL ptr flag
 			bool validResource = handle.IsValid();
-			Serialise(validResource);
+			Serialise(validResource, "valid");
 
 			if(validResource)
 			{
@@ -285,7 +286,7 @@ namespace ion
 
 					//Read resource name
 					std::string resourceName;
-					Serialise(resourceName);
+					Serialise(resourceName, "name");
 
 					//Request resource
 					handle = mResourceManager->GetResource<T>(resourceName);
@@ -294,7 +295,7 @@ namespace ion
 				{
 					//Write resource name
 					std::string resourceName = handle.GetName();
-					Serialise(resourceName);
+					Serialise(resourceName, "name");
 				}
 			}
 		}
@@ -306,15 +307,7 @@ namespace ion
 
 			if(GetDirection() == In)
 			{
-				u64 size = mStream.GetSize();
-
-				while(size)
-				{
-					u64 bytesToWrite = maths::Min(size, bufferSize);
-					mStream.Read(buffer, bytesToWrite);
-					stream.Write(buffer, bytesToWrite);
-					size -= bytesToWrite;
-				}
+				debug::Error("Archive::Serialise() - Cannot serialise a stream back in");
 			}
 			else
 			{
@@ -325,12 +318,7 @@ namespace ion
 				{
 					u64 bytesToWrite = maths::Min(size, bufferSize);
 					stream.Read(buffer, bytesToWrite);
-
-					if(m_blockNode)
-						m_blockNode->data.Write(buffer, bytesToWrite);
-					else
-						mStream.Write(buffer, bytesToWrite);
-
+					Serialise((void*)buffer, bytesToWrite);
 					size -= bytesToWrite;
 				}
 			}
@@ -402,41 +390,45 @@ namespace ion
 			{
 				//Serialise in num chars
 				int numChars = 0;
-				Serialise(numChars);
+				Serialise(numChars); // , "count");
 
 				//Reserve string
 				string.reserve(numChars);
 
 				//Serialise chars
+				//PushBlock("chars");
 				for(int i = 0; i < numChars; i++)
 				{
 					char character = 0;
 					Serialise(character);
 					string += character;
 				}
+				//PopBlock();
 			}
 			else
 			{
 				//Serialise out num chars
 				int numChars = (int)string.size();
-				Serialise(numChars);
+				Serialise(numChars); // , "count");
 
 				//Serialise out chars
+				//PushBlock("chars");
 				Serialise((void*)string.data(), numChars);
+				//PopBlock();
 			}
 		}
 
 		template <typename T1, typename T2> void Archive::Serialise(std::pair<T1, T2>& pair)
 		{
-			Serialise(pair.first);
-			Serialise(pair.second);
+			Serialise(pair.first, "first");
+			Serialise(pair.second, "second");
 		}
 
 		template <typename T1, typename T2, typename T3> void Archive::Serialise(std::tuple<T1, T2, T3>& tuple)
 		{
-			Serialise(std::get<0>(tuple));
-			Serialise(std::get<1>(tuple));
-			Serialise(std::get<2>(tuple));
+			Serialise(std::get<0>(tuple), "t1");
+			Serialise(std::get<1>(tuple), "t2");
+			Serialise(std::get<2>(tuple), "t3");
 		}
 
 		template <typename T> void Archive::Serialise(std::vector<T>& objects)
@@ -445,7 +437,7 @@ namespace ion
 			{
 				//Serialise in num objects
 				int numObjects = 0;
-				Serialise(numObjects);
+				Serialise(numObjects, "count");
 
 				//Clear and reserve vector
 				objects.clear();
@@ -454,19 +446,19 @@ namespace ion
 				//Serialise all objects
 				for(int i = 0; i < numObjects; i++)
 				{
-					Serialise(objects[i]);
+					Serialise(objects[i], "object");
 				}
 			}
 			else
 			{
 				//Serialise out num objects
 				int numObjects = objects.size();
-				Serialise(numObjects);
+				Serialise(numObjects, "count");
 
 				//Serialise all objects out
 				for(int i = 0; i < numObjects; i++)
 				{
-					Serialise(objects[i]);
+					Serialise(objects[i], "object");
 				}
 			}
 		}
@@ -477,13 +469,13 @@ namespace ion
 			{
 				//Serialise in num objects
 				int numObjects = 0;
-				Serialise(numObjects);
+				Serialise(numObjects, "count");
 
 				//Serialise all objects and add to list
 				for(int i = 0; i < numObjects; i++)
 				{
 					T object;
-					Serialise(object);
+					Serialise(object, "object");
 					objects.push_back(object);
 				}
 			}
@@ -491,12 +483,12 @@ namespace ion
 			{
 				//Serialise out num objects
 				int numObjects = objects.size();
-				Serialise(numObjects);
+				Serialise(numObjects, "count");
 
 				//Serialise all objects out
 				for(std::list<T>::iterator it = objects.begin(), end = objects.end(); it != end; ++it)
 				{
-					Serialise(*it);
+					Serialise(*it, "object");
 				}
 			}
 		}
@@ -517,11 +509,11 @@ namespace ion
 				{
 					//Serialise key
 					KEY key;
-					Serialise(key);
+					Serialise(key, "key");
 
 					//Serialise object
 					T object;
-					Serialise(object);
+					Serialise(object, "object");
 
 					//Add to map
 					objects.insert(std::pair<KEY, T>(key, object));
@@ -537,10 +529,10 @@ namespace ion
 				for(std::map<KEY, T>::iterator it = objects.begin(), end = objects.end(); it != end; ++it)
 				{
 					//Serialise key (lose const correctness, direction is known)
-					Serialise((KEY&)it->first);
+					Serialise((KEY&)it->first, "key");
 
 					//Serialise object
-					Serialise(it->second);
+					Serialise(it->second, "object");
 				}
 			}
 		}

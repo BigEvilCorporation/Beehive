@@ -31,10 +31,10 @@ void Map::Clear()
 
 void Map::Serialise(ion::io::Archive& archive)
 {
-	archive.Serialise(m_width);
-	archive.Serialise(m_height);
-	archive.Serialise(m_tiles);
-	archive.Serialise(m_stamps);
+	archive.Serialise(m_width, "width");
+	archive.Serialise(m_height, "height");
+	archive.Serialise(m_tiles, "tiles");
+	archive.Serialise(m_stamps, "stamps");
 }
 
 int Map::GetWidth() const

@@ -94,10 +94,10 @@ u32 Stamp::GetNameHash() const
 
 void Stamp::Serialise(ion::io::Archive& archive)
 {
-	archive.Serialise(m_id);
-	archive.Serialise(m_width);
-	archive.Serialise(m_height);
-	archive.Serialise(m_name);
-	archive.Serialise(m_nameHash);
-	archive.Serialise(m_tiles);
+	archive.Serialise(m_id, "id");
+	archive.Serialise(m_width, "width");
+	archive.Serialise(m_height, "height");
+	archive.Serialise(m_name, "name");
+	archive.Serialise(m_nameHash, "nameHash");
+	archive.Serialise(m_tiles, "tiles");
 }

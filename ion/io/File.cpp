@@ -9,6 +9,8 @@
 
 #include "io/File.h"
 
+#include <algorithm>
+
 namespace ion
 {
 	namespace io
@@ -63,12 +65,10 @@ namespace ion
 
 			if(mOpen)
 			{
-				//Get size (seek to end, tell, seek back)
-				u64 currPos = (u64)mStream.tellg();
-
+				//Get size (seek to end, get pos, seek back)
 				mStream.seekg(0, std::ios::end);
 				mSize = (u64)mStream.tellg();
-				mStream.seekg(currPos, std::ios::beg);
+				mStream.seekg(0, std::ios::beg);
 			}
 
 			return mOpen;
@@ -95,7 +95,14 @@ namespace ion
 				std::ios_base::seek_dir direction = std::ios_base::cur;
 
 				if(origin == Start)
+				{
 					direction = std::ios_base::beg;
+					position = std::min(position, mSize - 1);
+				}
+				else
+				{
+					position = std::min(position, mSize - mCurrentPosition - 1);
+				}
 			
 				mStream.seekg(position, direction);
 
@@ -111,6 +118,7 @@ namespace ion
 
 			if(mOpen)
 			{
+				size = std::min(size, mCurrentPosition + mSize);
 				mStream.read((char*)data, size);
 				mCurrentPosition = (u64)mStream.tellg();
 				bytesRead = (u64)mStream.gcount();
@@ -128,7 +136,7 @@ namespace ion
 				u64 startPosition = (u64)mStream.tellp();
 				mStream.write((const char*)Data, Size);
 				mCurrentPosition = (u64)mStream.tellp();
-				bytesWritten = mCurrentPosition = startPosition;
+				bytesWritten = mCurrentPosition - startPosition;
 			}
 
 			return bytesWritten;
