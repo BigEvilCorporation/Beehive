@@ -40,7 +40,7 @@ namespace ion
 
 		u64 MemoryStream::Write(const void* data, u64 size)
 		{
-			u64 requiredSize = m_position + size;
+			u64 requiredSize = m_position + size + 1;
 			if(m_position + size > GetSize())
 				m_bytes.resize(requiredSize);
 			memory::MemCopy(&m_bytes[m_position], data, size);
