@@ -69,7 +69,6 @@ void Tile::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_palette, "palette");
 	archive.Serialise(m_colourHash, "colourHash");
-	archive.Serialise(m_colourHash, "colourHash2");
 	archive.Serialise(m_collisionHash, "collisionHash");
 	archive.Serialise(m_pixels, "pixels");
 	archive.Serialise(m_pixels, "pixels2");
