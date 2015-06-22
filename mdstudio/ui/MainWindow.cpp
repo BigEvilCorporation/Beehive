@@ -24,7 +24,7 @@ wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
 MainWindow::MainWindow()
 	: MainWindowBase(NULL)
 {
-	SetStatusText("BEEhive v0.1");
+	SetStatusText("BEEhive v0.11");
 
 	//Setup panel docking manager
 	m_auiManager.SetManagedWindow(m_dockArea);
@@ -32,6 +32,10 @@ MainWindow::MainWindow()
 							| wxAUI_MGR_TRANSPARENT_HINT		//Draw possible dock locations
 							| wxAUI_MGR_TRANSPARENT_DRAG		//Transparent panel whilst dragging
 							| wxAUI_MGR_LIVE_RESIZE);			//Refresh on each discreet resize
+
+	//Bind events
+	Bind(wxEVT_KEY_DOWN, &MainWindow::EventHandlerKeyboard, this, GetId());
+	Bind(wxEVT_KEY_UP, &MainWindow::EventHandlerKeyboard, this, GetId());
 
 	//Create blank OpenGL panel to create global DC
 	wxGLCanvas* m_blankCanvas = new wxGLCanvas(this, wxID_ANY, NULL);
@@ -58,6 +62,8 @@ MainWindow::MainWindow()
 		RefreshTileset();
 		RefreshAll();
 	}
+
+	SetFocus();
 }
 
 MainWindow::~MainWindow()
@@ -71,6 +77,17 @@ MainWindow::~MainWindow()
 	//Delete renderer and OpenGL context
 	delete m_renderer;
 	delete m_context;
+}
+
+void MainWindow::EventHandlerKeyboard(wxKeyEvent& event)
+{
+	//Pass to map window
+	if(m_mapPanel)
+	{
+		m_mapPanel->GetEventHandler()->ProcessEvent(event);
+	}
+
+	event.Skip();
 }
 
 void MainWindow::SetProject(Project* project)
@@ -88,6 +105,12 @@ void MainWindow::SetProject(Project* project)
 		{
 			m_auiManager.DetachPane(m_palettesPanel);
 			delete m_palettesPanel;
+		}
+
+		if(m_collisionTypesPanel)
+		{
+			m_auiManager.DetachPane(m_collisionTypesPanel);
+			delete m_collisionTypesPanel;
 		}
 
 		if(m_mapPanel)
@@ -139,6 +162,7 @@ void MainWindow::SetProject(Project* project)
 			//New project, open default panels
 			ShowPanelToolbox();
 			ShowPanelPalettes();
+			ShowPanelCollisionTypes();
 			ShowPanelTiles();
 			ShowPanelStamps();
 			ShowPanelTileEditor();
@@ -178,6 +202,35 @@ void MainWindow::ShowPanelPalettes()
 		if(!m_palettesPanel->IsShown())
 		{
 			m_palettesPanel->Show();
+		}
+	}
+}
+
+void MainWindow::ShowPanelCollisionTypes()
+{
+	if(m_project.get())
+	{
+		if(!m_collisionTypesPanel)
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(100, 300);
+			paneInfo.Left();
+			paneInfo.Caption("Collision Types");
+			paneInfo.CaptionVisible(true);
+
+			m_collisionTypesPanel = new CollisionTypePanel(this, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_collisionTypesPanel, paneInfo);
+			m_collisionTypesPanel->Show();
+
+			m_collisionTypesPanel->SetProject(m_project.get());
+
+		}
+
+		if(!m_collisionTypesPanel->IsShown())
+		{
+			m_collisionTypesPanel->Show();
 		}
 	}
 }
@@ -412,6 +465,9 @@ void MainWindow::RedrawAll()
 	if(m_palettesPanel)
 		m_palettesPanel->Refresh();
 
+	if(m_collisionTypesPanel)
+		m_collisionTypesPanel->Refresh();
+
 	if(m_tilesPanel)
 		m_tilesPanel->Refresh();
 
@@ -476,6 +532,10 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelPalettes:
 		if(m_palettesPanel)
 			m_palettesPanel->Refresh();
+		break;
+	case ePanelCollisionTypes:
+		if(m_collisionTypesPanel)
+			m_collisionTypesPanel->Refresh();
 		break;
 	case ePanelTileEditor:
 		if(m_tileEditorPanel)

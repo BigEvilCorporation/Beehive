@@ -14,6 +14,7 @@
 Project::Project()
 {
 	m_paintColour = 0;
+	m_paintCollisionType = NULL;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
 	m_paintStamp = InvalidStampId;
@@ -44,8 +45,11 @@ Project::Project()
 
 void Project::Clear()
 {
-	m_paintTile = 0;
-	m_eraseTile = 0;
+	m_paintColour = 0;
+	m_paintCollisionType = NULL;
+	m_paintTile = InvalidTileId;
+	m_eraseTile = InvalidTileId;
+	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
 	m_stampsInvalidated = true;
@@ -225,6 +229,16 @@ void Project::SetPaintColour(u8 colourIdx)
 u8 Project::GetPaintColour() const
 {
 	return m_paintColour;
+}
+
+void Project::SetPaintCollisionType(CollisionType* type)
+{
+	m_paintCollisionType = type;
+}
+
+const CollisionType* Project::GetPaintCollisionType() const
+{
+	return m_paintCollisionType;
 }
 
 void Project::SetPaintTile(TileId tile)

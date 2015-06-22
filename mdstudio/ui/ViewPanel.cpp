@@ -239,9 +239,6 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 {
 	if(m_project)
 	{
-		//If a tool is active, ensure this window has keyboard focus (to catch SHIFT/CTRL keys)
-		SetFocus();
-
 		const int tileWidth = 8;
 		const int tileHeight = 8;
 
