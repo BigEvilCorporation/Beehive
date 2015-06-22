@@ -100,9 +100,9 @@ bool Project::Save(const std::string& filename)
 
 void Project::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_name, "name");
 	archive.Serialise(m_palettes, "palettes");
 	archive.Serialise(m_tileset, "tileset");
-	archive.Serialise(m_palettes, "palettes2");
 	archive.Serialise(m_map, "map");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_collisionTypes, "collisionTypes");
@@ -559,11 +559,9 @@ bool Project::ExportTiles(const std::string& filename) const
 		std::stringstream stream;
 		stream << "tiles_" << m_name << ":" << std::endl;
 
-		for(int i = 0; i < numPalettes; i++)
-		{
-			m_tileset.Export(stream);
-			stream << std::endl;
-		}
+		m_tileset.Export(stream);
+
+		stream << std::endl;
 
 		stream << "tiles_" << m_name << "_end" << std::endl;
 		stream << "tiles_" << m_name << "_size_b\tequ (tiles_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
