@@ -86,6 +86,9 @@ void CollisionTypeDialog::OnIconChange(wxCommandEvent& event)
 						//Repopulate list and re-select current item to display icons
 						PopulateList();
 						OnTypeSelected(collisionTypeBits);
+
+						//Refresh collision types panel
+						m_mainWindow.RedrawPanel(MainWindow::ePanelCollisionTypes);
 					}
 					else
 					{

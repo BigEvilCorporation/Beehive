@@ -16,6 +16,7 @@
 #include "Tool.h"
 
 #include "PalettesPanel.h"
+#include "CollisionTypePanel.h"
 #include "TilesPanel.h"
 #include "StampsPanel.h"
 #include "MapPanel.h"
@@ -36,6 +37,7 @@ public:
 		ePanelStamps,
 		ePanelTiles,
 		ePanelPalettes,
+		ePanelCollisionTypes,
 		ePanelTileEditor,
 		ePanelCollisionEditor
 	};
@@ -45,6 +47,7 @@ public:
 
 	//Open panels
 	void ShowPanelPalettes();
+	void ShowPanelCollisionTypes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
 	void ShowPanelMap();
@@ -91,6 +94,8 @@ protected:
 
 	void OnBtnTool(wxCommandEvent& event);
 
+	void EventHandlerKeyboard(wxKeyEvent& event);
+
 private:
 	//Set current project (opens default panels)
 	void SetProject(Project* project);
@@ -98,6 +103,7 @@ private:
 	wxAuiManager m_auiManager;
 
 	wxWeakRef<PalettesPanel> m_palettesPanel;
+	wxWeakRef<CollisionTypePanel> m_collisionTypesPanel;
 	wxWeakRef<TilesPanel> m_tilesPanel;
 	wxWeakRef<StampsPanel> m_stampsPanel;
 	wxWeakRef<MapPanel> m_mapPanel;

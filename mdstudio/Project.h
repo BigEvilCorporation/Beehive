@@ -81,6 +81,10 @@ public:
 	void SetPaintColour(u8 colourIdx);
 	u8 GetPaintColour() const;
 
+	//Set current collision type used for painting
+	void SetPaintCollisionType(CollisionType* type);
+	const CollisionType* GetPaintCollisionType() const;
+
 	//Set current tile used for painting
 	void SetPaintTile(TileId tile);
 	TileId GetPaintTile() const;
@@ -154,6 +158,9 @@ private:
 
 	//Colour used for painting
 	u8 m_paintColour;
+
+	//Collision type used for painting
+	CollisionType* m_paintCollisionType;
 
 	//Tile used for painting
 	TileId m_paintTile;
