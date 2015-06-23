@@ -72,6 +72,9 @@ public:
 	//Refresh tileset
 	void RefreshTileset();
 
+	//Refresh collision set
+	void RefreshCollisionSet();
+
 protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);

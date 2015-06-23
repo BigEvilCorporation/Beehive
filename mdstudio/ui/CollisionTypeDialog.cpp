@@ -42,10 +42,7 @@ void CollisionTypeDialog::OnAddType(wxCommandEvent& event)
 			bit = numTypes + 1;
 		}
 		
-		CollisionType collisionType;
-		collisionType.bit = bit;
-		
-		m_project.AddCollisionType(collisionType);
+		m_project.AddCollisionType(bit);
 		PopulateList();
 	}
 }

@@ -29,12 +29,14 @@ public:
 	{
 		eMaterialFlatColour,
 		eMaterialTileset,
+		eMaterialCollisionSet,
 		eMaterialMax
 	};
 
 	enum TextureType
 	{
 		eTextureTileset,
+		eTextureCollisionSet,
 		eTextureMax
 	};
 
@@ -64,8 +66,14 @@ public:
 	//Create and redraw tileset texture
 	void CreateTilesetTexture();
 
+	//Create and redraw collision set texture
+	void CreateCollisionTexture();
+
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
+
+	//Get collision set UV coords for collision type
+	void GetCollisionTypeTexCoords(u8 collisionBit, ion::render::TexCoord texCoords[4]) const;
 
 	//Edit tileset texture pixel
 	void SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx);
@@ -93,8 +101,14 @@ private:
 	//Tileset size sq
 	u32 m_tilesetSizeSq;
 
+	//Collision set size sq
+	u32 m_collisionSetSizeSq;
+
 	//Tileset texture cell size sq
 	float m_cellSizeTexSpaceSq;
+
+	//Collision set texture cell size sq
+	float m_cellSizeCollisionTexSpaceSq;
 
 	//Current project
 	Project* m_project;

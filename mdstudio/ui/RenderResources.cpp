@@ -34,8 +34,11 @@ RenderResources::RenderResources()
 	if(!m_pixelShaders[eShaderFlatTextured]->Load("shaders/flattextured_p.ion.shader"))
 		ion::debug::Error("Error loading pixel shader");
 
-	//Create tileset texture
-	m_textures[eTextureTileset] = ion::render::Texture::Create();
+	//Create textures
+	for(int i = 0; i < eTextureMax; i++)
+	{
+		m_textures[i] = ion::render::Texture::Create();
+	}
 
 	//Create materials
 	for(int i = 0; i < eMaterialMax; i++)
@@ -53,6 +56,12 @@ RenderResources::RenderResources()
 	m_materials[eMaterialTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 	m_materials[eMaterialTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
 	m_materials[eMaterialTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+
+	//Setup textured collision set material
+	m_materials[eMaterialCollisionSet]->AddDiffuseMap(m_textures[eTextureCollisionSet]);
+	m_materials[eMaterialCollisionSet]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialCollisionSet]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
+	m_materials[eMaterialCollisionSet]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
@@ -150,6 +159,79 @@ void RenderResources::CreateTilesetTexture()
 	delete data;
 }
 
+void RenderResources::CreateCollisionTexture()
+{
+	const int iconWidth = 16;
+	const int iconHeight = 16;
+
+	const u32 bytesPerPixelSource = 3;
+	const u32 bytesPerPixelDest = 4;
+
+	u32 numCollisionTypes = m_project->GetCollisionTypeCount() + 1;
+	m_collisionSetSizeSq = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes));
+	u32 textureWidth =  m_collisionSetSizeSq * iconWidth;
+	u32 textureHeight = m_collisionSetSizeSq * iconHeight;
+	u32 textureSize = textureWidth * textureHeight * bytesPerPixelDest;
+	m_cellSizeCollisionTexSpaceSq = 1.0f / (float)m_collisionSetSizeSq;
+
+	u8* data = new u8[textureSize];
+	ion::memory::MemSet(data, 0, textureSize);
+
+	for(TCollisionTypeMap::const_iterator it = m_project->CollisionTypesBegin(), end = m_project->CollisionTypesEnd(); it != end; ++it)
+	{
+		const CollisionType& collisionType = it->second;
+
+		int index = -1;
+
+		//Cheap and lazy bit scan
+		for(int i = 0; i < sizeof(u8) * 8 && index < 0; i++)
+		{
+			if((1 << i) & collisionType.bit)
+			{
+				//First icon is blank
+				index = i + 1;
+			}
+		}
+
+		u32 x = index % m_collisionSetSizeSq;
+		u32 y = index / m_collisionSetSizeSq;
+
+		for(int pixelY = 0; pixelY < iconHeight; pixelY++)
+		{
+			for(int pixelX = 0; pixelX < iconWidth; pixelX++)
+			{
+				//Invert Y for OpenGL
+				int pixelY_OGL = iconHeight - 1 - pixelY;
+
+				int destPixelX = (x * iconWidth) + pixelX;
+				int destPixelY = (y * iconHeight) + pixelY;
+				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+				u32 destOffset = pixelIdx * bytesPerPixelDest;
+				u32 sourceOffset = ((pixelY * iconWidth) + pixelX) * bytesPerPixelSource;
+				ion::debug::Assert(destOffset + 2 < textureSize, "Out of bounds");
+				ion::debug::Assert(sourceOffset + 2 < collisionType.iconData.size(), "Out of bounds");
+
+				const u8& r = collisionType.iconData[sourceOffset];
+				const u8& g = collisionType.iconData[sourceOffset + 1];
+				const u8& b = collisionType.iconData[sourceOffset + 2];
+				data[destOffset] = r;
+				data[destOffset + 1] = g;
+				data[destOffset + 2] = b;
+
+				//White is transparent
+				data[destOffset + 3] = (r == 255 && g == 255 && b == 255) ? 0 : 255;
+			}
+		}
+	}
+
+	m_textures[eTextureCollisionSet]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureCollisionSet]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionSet]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionSet]->SetWrapping(ion::render::Texture::eWrapClamp);
+
+	delete data;
+}
+
 void RenderResources::CacheTileIndices(const Tileset& tileset)
 {
 	m_tileIndexMap.clear();
@@ -214,6 +296,51 @@ void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texC
 		texCoords[3].x = right;
 		texCoords[3].y = top;
 	}
+}
+
+void RenderResources::GetCollisionTypeTexCoords(u8 collisionBit, ion::render::TexCoord texCoords[4]) const
+{
+	int index = -1;
+
+	if(collisionBit)
+	{
+		//Cheap and lazy bit scan
+		for(int i = 0; i < sizeof(u8) * 8 && index < 0; i++)
+		{
+			if((1 << i) & collisionBit)
+			{
+				//First icon is blank
+				index = i + 1;
+			}
+		}
+	}
+	else
+	{
+		index = 0;
+	}
+
+	//Map bit to X/Y on collision set texture
+	int tilesetX = (index % m_collisionSetSizeSq);
+	int tilesetY = (index / m_collisionSetSizeSq);
+	ion::Vector2 textureBottomLeft(m_cellSizeCollisionTexSpaceSq * tilesetX, m_cellSizeCollisionTexSpaceSq * tilesetY);
+
+	float top = (textureBottomLeft.y + m_cellSizeCollisionTexSpaceSq);
+	float left = textureBottomLeft.x;
+	float bottom = textureBottomLeft.y;
+	float right = (textureBottomLeft.x + m_cellSizeCollisionTexSpaceSq);
+
+	//Top left
+	texCoords[0].x = left;
+	texCoords[0].y = top;
+	//Bottom left
+	texCoords[1].x = left;
+	texCoords[1].y = bottom;
+	//Bottom right
+	texCoords[2].x = right;
+	texCoords[2].y = bottom;
+	//Top right
+	texCoords[3].x = right;
+	texCoords[3].y = top;
 }
 
 int RenderResources::GetTilesetTexTileIndex(TileId tileId) const

@@ -50,18 +50,19 @@ MainWindow::MainWindow()
 	m_renderResources = new RenderResources;
 
 	//Create default project
-	SetProject(new Project());
+	Project* defaultProject = new Project();
 
+	//Open welcome project
 	static bool openWelcomeProject = true;
-
 	if(openWelcomeProject)
 	{
 		wxString directory = wxGetCwd();
 		wxString path = directory + "\\projects\\welcome.bee";
-		m_project->Load(path.c_str().AsChar());
-		RefreshTileset();
-		RefreshAll();
+		defaultProject->Load(path.c_str().AsChar());
 	}
+
+	//Set default project
+	SetProject(defaultProject);
 
 	SetFocus();
 }
@@ -156,8 +157,9 @@ void MainWindow::SetProject(Project* project)
 			//Set render resources project
 			m_renderResources->SetProject(project);
 
-			//Recreate tileset texture and tile index cache
+			//Recreate tileset/collision set textures, and tile index cache
 			RefreshTileset();
+			RefreshCollisionSet();
 
 			//New project, open default panels
 			ShowPanelToolbox();
@@ -166,6 +168,7 @@ void MainWindow::SetProject(Project* project)
 			ShowPanelTiles();
 			ShowPanelStamps();
 			ShowPanelTileEditor();
+			ShowPanelCollisionEditor();
 			ShowPanelMap();
 
 			//Sync settings widgets states
@@ -399,8 +402,8 @@ void MainWindow::ShowPanelCollisionEditor()
 			paneInfo.DockFixed(false);
 			paneInfo.BestSize(300, 300);
 			paneInfo.FloatingSize(300, 300);
-			paneInfo.Float();
-			paneInfo.Caption("Collision");
+			paneInfo.Right();
+			paneInfo.Caption("Collision Tile");
 			paneInfo.CaptionVisible(true);
 
 			m_collisionEditorPanel = new CollisionEditorPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
@@ -445,6 +448,7 @@ void MainWindow::RefreshAll()
 	{
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
+		m_project->InvalidateCollisionTypes(true);
 		m_project->InvalidateStamps(true);
 	}
 
@@ -454,6 +458,7 @@ void MainWindow::RefreshAll()
 	{
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
+		m_project->InvalidateCollisionTypes(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -461,6 +466,7 @@ void MainWindow::RefreshAll()
 void MainWindow::RedrawAll()
 {
 	RefreshTileset();
+	RefreshCollisionSet();
 
 	if(m_palettesPanel)
 		m_palettesPanel->Refresh();
@@ -493,12 +499,22 @@ void MainWindow::RefreshTileset()
 	}
 }
 
+void MainWindow::RefreshCollisionSet()
+{
+	if(m_project.get())
+	{
+		//Recreate collision set texture
+		m_renderResources->CreateCollisionTexture();
+	}
+}
+
 void MainWindow::RefreshPanel(Panel panel)
 {
 	if(m_project.get())
 	{
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
+		m_project->InvalidateCollisionTypes(true);
 		m_project->InvalidateStamps(true);
 
 	}
@@ -509,6 +525,7 @@ void MainWindow::RefreshPanel(Panel panel)
 	{
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
+		m_project->InvalidateCollisionTypes(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -540,6 +557,7 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelTileEditor:
 		if(m_tileEditorPanel)
 			m_tileEditorPanel->Refresh();
+		break;
 	case ePanelCollisionEditor:
 		if(m_collisionEditorPanel)
 			m_collisionEditorPanel->Refresh();
@@ -658,6 +676,9 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 
 			//Refresh tileset
 			RefreshTileset();
+
+			//Refresh Collison Set
+			RefreshCollisionSet();
 
 			//Refresh whole application
 			RefreshAll();

@@ -36,9 +36,17 @@ protected:
 
 private:
 	void RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderCollision(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
-	//Rendering primitive
+	//Paint background tile
+	void PaintTile();
+
+	//Paint collision type bitmaps to canvas
+	void PaintCollision();
+
+	//Rendering primitives
 	ion::render::Quad* m_tilePrimitive;
+	ion::render::Chessboard* m_collisionPrimitive;
 
 	static const int s_tileWidth = 8;
 	static const int s_tileHeight = 8;
