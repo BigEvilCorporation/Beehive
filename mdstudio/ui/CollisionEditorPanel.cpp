@@ -6,7 +6,6 @@
 
 #include "CollisionEditorPanel.h"
 #include "MainWindow.h"
-
 #include <ion/renderer/Texture.h>
 
 const float CollisionEditorPanel::s_defaultZoom = 4.0f;
@@ -20,8 +19,9 @@ CollisionEditorPanel::CollisionEditorPanel(MainWindow* mainWindow, ion::render::
 	m_canvasSize.x = s_tileWidth;
 	m_canvasSize.y = s_tileHeight;
 
-	//Create rendering primitive
+	//Create rendering primitives
 	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(s_tileWidth * 4.0f, s_tileHeight * 4.0f));
+	m_collisionPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2(s_tileWidth * 4.0f, s_tileHeight * 4.0f), 8, 8, true);
 
 	//Create 8x8 grid
 	CreateGrid(s_tileWidth, s_tileHeight, s_tileWidth, s_tileHeight);
@@ -30,6 +30,7 @@ CollisionEditorPanel::CollisionEditorPanel(MainWindow* mainWindow, ion::render::
 CollisionEditorPanel::~CollisionEditorPanel()
 {
 	delete m_tilePrimitive;
+	delete m_collisionPrimitive;
 }
 
 void CollisionEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
@@ -54,30 +55,32 @@ void CollisionEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonB
 {
 	const int tileHeight = 8;
 
-	if(m_project && m_project->GetPaintTile())
+	if(m_project)
 	{
-		TileId tileId = m_project->GetPaintTile();
-
-		if(buttonBits & eMouseLeft)
+		if(const CollisionType* collisionType = m_project->GetPaintCollisionType())
 		{
-			if(Tile* tile = m_project->GetTileset().GetTile(tileId))
+			if((buttonBits & eMouseLeft) && !m_prevMouseBits & eMouseLeft)
 			{
-				if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
+				if(Tile* tile = m_project->GetTileset().GetTile(m_project->GetPaintTile()))
 				{
-					//Get palette
-					Palette* palette = m_project->GetPalette(tile->GetPaletteId());
-
-					if(palette)
+					if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
 					{
-						//Get colour
-						u8 colourIdx = m_project->GetPaintColour();
-						const Colour& colour = palette->GetColour(colourIdx);
+						u8 collisionBit = collisionType->bit;
+						u8 existingBits = tile->GetPixelCollisionBits(x, y);
 
-						//Set colour on tile
-						tile->SetPixelColour(x, y, colourIdx);
+						if(existingBits & collisionBit)
+						{
+							//Bit is set, remove
+							tile->ClearPixelCollisionBits(x, y, collisionBit);
+						}
+						else
+						{
+							//Bit is not set, add
+							tile->AddPixelCollisionBits(x, y, collisionType->bit);
+						}
 
-						//Set colour on tileset texture
-						m_renderResources.SetTilesetTexPixel(tileId, ion::Vector2i(x, y), colourIdx);
+						//Invalidate collision types
+						m_project->InvalidateCollisionTypes(true);
 
 						//Refresh panel
 						Refresh();
@@ -99,6 +102,10 @@ void CollisionEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::
 
 	z += zOffset;
 
+	RenderCollision(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
 	if(m_project->GetShowGrid())
 	{
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
@@ -116,9 +123,9 @@ void CollisionEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 	if(m_project)
 	{
-		ion::render::TexCoord texCoords[4];
-		m_renderResources.GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
-		m_tilePrimitive->SetTexCoords(texCoords);
+		//Redraw tile and collision
+		PaintTile();
+		PaintCollision();
 	}
 }
 
@@ -130,4 +137,75 @@ void CollisionEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion
 	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_tilePrimitive->GetVertexBuffer(), m_tilePrimitive->GetIndexBuffer());
 	material->Unbind();
+}
+
+void CollisionEditorPanel::RenderCollision(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	//Draw collision tile
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialCollisionSet);
+	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_collisionPrimitive->GetVertexBuffer(), m_collisionPrimitive->GetIndexBuffer());
+	material->Unbind();
+	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+}
+
+void CollisionEditorPanel::PaintTile()
+{
+	ion::render::TexCoord texCoords[4];
+	m_renderResources.GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
+	m_tilePrimitive->SetTexCoords(texCoords);
+}
+
+void CollisionEditorPanel::PaintCollision()
+{
+	if(m_project)
+	{
+		const int tileWidth = 8;
+		const int tileHeight = 8;
+
+		//Reset
+		ion::render::TexCoord blankCoords[4];
+		m_renderResources.GetCollisionTypeTexCoords(0, blankCoords);
+
+		for(int x = 0; x < tileWidth; x++)
+		{
+			for(int y = 0; y < tileHeight; y++)
+			{
+				m_collisionPrimitive->SetTexCoords((y * tileWidth) + x, blankCoords);
+			}
+		}
+
+		//Draw collision icons
+		TileId tileId = m_project->GetPaintTile();
+		if(Tile* tile = m_project->GetTileset().GetTile(tileId))
+		{
+			for(int x = 0; x < tileWidth; x++)
+			{
+				for(int y = 0; y < tileHeight; y++)
+				{
+					u8 collisionBits = tile->GetPixelCollisionBits(x, y);
+
+					for(int i = 0; i < sizeof(u8) * 8; i++)
+					{
+						u8 collisionBit = (1 << i);
+						if(collisionBits & collisionBit)
+						{
+							if(const CollisionType* collisionType = m_project->GetCollisionType(1 << i))
+							{
+								//Pixel uses this collision type, draw
+								int yInv = tileHeight - 1 - y;
+
+								//Set texture coords for cell
+								ion::render::TexCoord coords[4];
+								m_renderResources.GetCollisionTypeTexCoords(collisionBit, coords);
+								m_collisionPrimitive->SetTexCoords((yInv * tileWidth) + x, coords);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

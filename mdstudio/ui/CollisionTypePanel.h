@@ -10,6 +10,8 @@
 #include <wx/event.h>
 #include <wx/dcbuffer.h>
 #include <wx/colordlg.h>
+#include <wx/tipwin.h>
+#include <wx/bitmap.h>
 
 #include <vector>
 
@@ -36,7 +38,7 @@ public:
 					long style = wxDEFAULT_FRAME_STYLE,
 					const wxString& name = wxFrameNameStr);
 
-	void SetProject(Project* project) { m_project = project; }
+	void SetProject(Project* project);
 
 	void OnMouse(wxMouseEvent& event);
 	void OnPaint(wxPaintEvent& event);
@@ -50,4 +52,7 @@ private:
 	Project* m_project;
 	MainWindow* m_mainWindow;
 	Orientation m_orientation;
+	wxWeakRef<wxTipWindow> m_tooltip;
+
+	std::vector<wxBitmap> m_icons;
 };

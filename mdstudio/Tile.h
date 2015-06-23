@@ -19,6 +19,12 @@ struct Pixel
 	u8 colourIdx;
 	u8 collisionBits;
 
+	Pixel()
+	{
+		colourIdx = 0;
+		collisionBits = 0;
+	}
+
 	void Serialise(ion::io::Archive& archive)
 	{
 		archive.Serialise(colourIdx);

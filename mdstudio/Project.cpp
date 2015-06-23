@@ -20,6 +20,7 @@ Project::Project()
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
+	m_collisionTypesInvalidated = true;
 	m_stampsInvalidated = true;
 	m_name = "untitled";
 	m_gridSize = 1;
@@ -52,6 +53,7 @@ void Project::Clear()
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
+	m_collisionTypesInvalidated = true;
 	m_stampsInvalidated = true;
 	m_name = "untitled";
 	m_palettes.resize(numPalettes);
@@ -170,14 +172,16 @@ int Project::GetStampCount() const
 	return m_stamps.size();
 }
 
-void Project::AddCollisionType(const CollisionType& type)
+CollisionType* Project::AddCollisionType(u8 bit)
 {
-	m_collisionTypes.insert(std::make_pair(type.bit, type));
+	CollisionType* collisionType = &m_collisionTypes.insert(std::make_pair(bit, CollisionType())).first->second;
+	collisionType->bit = bit;
+	return collisionType;
 }
 
-void Project::RemoveCollisionType(const CollisionType& type)
+void Project::RemoveCollisionType(u8 bit)
 {
-	m_collisionTypes.erase(type.bit);
+	m_collisionTypes.erase(bit);
 }
 
 CollisionType* Project::GetCollisionType(const std::string& name)

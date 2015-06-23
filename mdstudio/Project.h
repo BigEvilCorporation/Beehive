@@ -69,8 +69,8 @@ public:
 	int GetStampCount() const;
 
 	//Collision types
-	void AddCollisionType(const CollisionType& type);
-	void RemoveCollisionType(const CollisionType& type);
+	CollisionType* AddCollisionType(u8 bit);
+	void RemoveCollisionType(u8 bit);
 	CollisionType* GetCollisionType(const std::string& name);
 	CollisionType* GetCollisionType(u8 bit);
 	const TCollisionTypeMap::const_iterator CollisionTypesBegin() const;
@@ -111,9 +111,11 @@ public:
 
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
+	void InvalidateCollisionTypes(bool invalidate) { m_collisionTypesInvalidated = invalidate; }
 	void InvalidateStamps(bool invalidate) { m_stampsInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
 	bool TilesAreInvalidated() const { return m_tilesInvalidated; }
+	bool CollisionTypesAreInvalidated() const { return m_collisionTypesInvalidated; }
 	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
 	//Import bitmap
@@ -182,5 +184,6 @@ private:
 	//Map needs redraw
 	bool m_mapInvalidated;
 	bool m_tilesInvalidated;
+	bool m_collisionTypesInvalidated;
 	bool m_stampsInvalidated;
 };

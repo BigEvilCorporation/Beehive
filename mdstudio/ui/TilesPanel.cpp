@@ -136,6 +136,9 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x
 
 		//Refresh tile editor panel
 		m_mainWindow->RefreshPanel(MainWindow::ePanelTileEditor);
+
+		//Refresh collision tile editor panel
+		m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionEditor);
 	}
 
 	//Redraw
