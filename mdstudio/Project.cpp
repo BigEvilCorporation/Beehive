@@ -577,7 +577,7 @@ bool Project::ExportTiles(const std::string& filename) const
 		std::stringstream stream;
 		stream << "tiles_" << m_name << ":" << std::endl;
 
-		m_tileset.Export(stream);
+		m_tileset.ExportArt(stream);
 
 		stream << std::endl;
 
@@ -597,6 +597,27 @@ bool Project::ExportTiles(const std::string& filename) const
 
 bool Project::ExportCollision(const std::string& filename) const
 {
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		stream << "collision_" << m_name << ":" << std::endl;
+
+		m_tileset.ExportCollision(stream);
+
+		stream << std::endl;
+
+		stream << "collision_" << m_name << "_end" << std::endl;
+		stream << "collision_" << m_name << "_size_b\tequ (collision_" << m_name << "_end-collision_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "collision_" << m_name << "_size_w\tequ (collision_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "collision_" << m_name << "_size_l\tequ (collision_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << "collision_" << m_name << "_size_t\tequ (collision_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
 	return false;
 }
 
