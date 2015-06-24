@@ -46,7 +46,9 @@ private:
 
 	//Rendering primitives
 	ion::render::Quad* m_tilePrimitive;
-	ion::render::Chessboard* m_collisionPrimitive;
+
+	static const int s_numCollisionTypes = sizeof(u8) * 8;
+	ion::render::Chessboard* m_collisionPrimitives[s_numCollisionTypes];
 
 	static const int s_tileWidth = 8;
 	static const int s_tileHeight = 8;

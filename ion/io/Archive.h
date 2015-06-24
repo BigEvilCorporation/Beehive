@@ -392,7 +392,8 @@ namespace ion
 				int numChars = 0;
 				Serialise(numChars); // , "count");
 
-				//Reserve string
+				//Clear and reserve string
+				string.clear();
 				string.reserve(numChars);
 
 				//Serialise chars

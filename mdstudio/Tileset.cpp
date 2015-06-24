@@ -95,11 +95,20 @@ void Tileset::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_nextFreeId, "nextFreeId");
 }
 
-void Tileset::Export(std::stringstream& stream) const
+void Tileset::ExportArt(std::stringstream& stream) const
 {
 	for(TTileMap::const_iterator it = m_tiles.begin(), end = m_tiles.end(); it != end; ++it)
 	{
 		it->second.ExportColour(stream);
+		stream << std::endl;
+	}
+}
+
+void Tileset::ExportCollision(std::stringstream& stream) const
+{
+	for(TTileMap::const_iterator it = m_tiles.begin(), end = m_tiles.end(); it != end; ++it)
+	{
+		it->second.ExportCollision(stream);
 		stream << std::endl;
 	}
 }

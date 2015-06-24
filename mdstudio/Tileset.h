@@ -32,7 +32,8 @@ public:
 	int GetCount() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream) const;
+	void ExportArt(std::stringstream& stream) const;
+	void ExportCollision(std::stringstream& stream) const;
 	
 private:
 	TileId m_nextFreeId;

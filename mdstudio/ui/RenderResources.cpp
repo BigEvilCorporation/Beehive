@@ -207,7 +207,7 @@ void RenderResources::CreateCollisionTexture()
 				int destPixelY = (y * iconHeight) + pixelY;
 				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
 				u32 destOffset = pixelIdx * bytesPerPixelDest;
-				u32 sourceOffset = ((pixelY * iconWidth) + pixelX) * bytesPerPixelSource;
+				u32 sourceOffset = ((pixelY_OGL * iconWidth) + pixelX) * bytesPerPixelSource;
 				ion::debug::Assert(destOffset + 2 < textureSize, "Out of bounds");
 				ion::debug::Assert(sourceOffset + 2 < collisionType.iconData.size(), "Out of bounds");
 
