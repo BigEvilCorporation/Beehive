@@ -150,7 +150,8 @@ StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const
 	ion::Vector2i size;
 	ion::Vector2i bottomRight;
 
-	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end && !stampId; ++it)
+	//Work backwards, find last placed stamp first
+	for(TStampPosMap::const_reverse_iterator it = m_stamps.rbegin(), end = m_stamps.rend(); it != end && !stampId; ++it)
 	{
 		topLeft = it->m_position;
 		size = it->m_size;
