@@ -641,21 +641,37 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		wxDirDialog dialogue(this, "Select export directory");
-		if(dialogue.ShowModal() == wxID_OK)
+		//wxDirDialog dialogue(this, "Select export directory");
+
+		ExportDialog dialog(this);
+
+		dialog.m_txtProjectName->SetValue(m_project->GetName());
+		dialog.m_filePickerPalettes->SetPath(m_project->m_exportFilenames.palettes);
+		dialog.m_filePickerTileset->SetPath(m_project->m_exportFilenames.tileset);
+		dialog.m_filePickerMap->SetPath(m_project->m_exportFilenames.map);
+		dialog.m_filePickerCollisionTiles->SetPath(m_project->m_exportFilenames.collisionTiles);
+
+		if(dialog.ShowModal() == wxID_OK)
 		{
 			SetStatusText("Exporting...");
 
-			std::string directory = dialogue.GetPath();
-			std::string filenamePalettes = directory + "\\" + m_project->GetName() + "_pal.asm";
-			std::string filenameTiles = directory + "\\" + m_project->GetName() + "_til.asm";
-			std::string filenameMap = directory + "\\" + m_project->GetName() + "_map.asm";
-			std::string filenameCollision = directory + "\\" + m_project->GetName() + "_col.asm";
+			m_project->SetName(std::string(dialog.m_txtProjectName->GetValue()));
+			m_project->m_exportFilenames.palettes = dialog.m_filePickerPalettes->GetPath();
+			m_project->m_exportFilenames.tileset = dialog.m_filePickerTileset->GetPath();
+			m_project->m_exportFilenames.map = dialog.m_filePickerMap->GetPath();
+			m_project->m_exportFilenames.collisionTiles = dialog.m_filePickerCollisionTiles->GetPath();
 
-			m_project->ExportPalettes(filenamePalettes);
-			m_project->ExportTiles(filenameTiles);
-			m_project->ExportMap(filenameMap);
-			m_project->ExportCollision(filenameCollision);
+			if(dialog.m_chkPalettes->GetValue())
+				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
+
+			if(dialog.m_chkTileset->GetValue())
+				m_project->ExportTiles(m_project->m_exportFilenames.tileset);
+
+			if(dialog.m_chkMap->GetValue())
+				m_project->ExportMap(m_project->m_exportFilenames.map);
+
+			if(dialog.m_chkCollisionTiles->GetValue())
+				m_project->ExportCollision(m_project->m_exportFilenames.collisionTiles);
 
 			SetStatusText("Export complete");
 			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);

@@ -113,6 +113,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_collisionTypes, "collisionTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
+	archive.Serialise(m_exportFilenames, "exportFilenames");
 }
 
 StampId Project::AddStamp(int width, int height)

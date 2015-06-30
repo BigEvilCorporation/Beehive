@@ -368,3 +368,86 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 MapToolbox::~MapToolbox()
 {
 }
+
+ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxFlexGridSizer* fgSizer3;
+	fgSizer3 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer3->AddGrowableCol( 1 );
+	fgSizer3->SetFlexibleDirection( wxBOTH );
+	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_static1 = new wxStaticText( this, wxID_ANY, wxT("Project name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_static1->Wrap( -1 );
+	fgSizer3->Add( m_static1, 0, wxALL, 5 );
+	
+	m_txtProjectName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer3->Add( m_txtProjectName, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkPalettes->SetValue(true); 
+	fgSizer3->Add( m_chkPalettes, 0, wxALL, 5 );
+	
+	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer3->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTileset->SetValue(true); 
+	fgSizer3->Add( m_chkTileset, 0, wxALL, 5 );
+	
+	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer3->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkMap = new wxCheckBox( this, wxID_ANY, wxT("Export map:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkMap->SetValue(true); 
+	fgSizer3->Add( m_chkMap, 0, wxALL, 5 );
+	
+	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer3->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkCollisionTiles = new wxCheckBox( this, wxID_ANY, wxT("Export collision tiles:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkCollisionTiles->SetValue(true); 
+	fgSizer3->Add( m_chkCollisionTiles, 0, wxALL, 5 );
+	
+	m_filePickerCollisionTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer3->Add( m_filePickerCollisionTiles, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkCollisionMap = new wxCheckBox( this, wxID_ANY, wxT("Export collision map:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkCollisionMap->SetValue(true); 
+	fgSizer3->Add( m_chkCollisionMap, 0, wxALL, 5 );
+	
+	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer3->Add( m_filePickerCollisionMap, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	fgSizer3->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttons = new wxStdDialogButtonSizer();
+	m_buttonsOK = new wxButton( this, wxID_OK );
+	m_buttons->AddButton( m_buttonsOK );
+	m_buttonsCancel = new wxButton( this, wxID_CANCEL );
+	m_buttons->AddButton( m_buttonsCancel );
+	m_buttons->Realize();
+	
+	fgSizer3->Add( m_buttons, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( fgSizer3 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonsCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnCancel ), NULL, this );
+	m_buttonsOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnOk ), NULL, this );
+}
+
+ExportDialog::~ExportDialog()
+{
+	// Disconnect Events
+	m_buttonsCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnCancel ), NULL, this );
+	m_buttonsOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnOk ), NULL, this );
+	
+}
