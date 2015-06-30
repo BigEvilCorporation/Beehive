@@ -36,6 +36,8 @@
 #include <wx/textctrl.h>
 #include <wx/spinctrl.h>
 #include <wx/dialog.h>
+#include <wx/checkbox.h>
+#include <wx/filepicker.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -224,6 +226,42 @@ class MapToolbox : public wxPanel
 		
 		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL ); 
 		~MapToolbox();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ExportDialog
+///////////////////////////////////////////////////////////////////////////////
+class ExportDialog : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_static1;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		wxTextCtrl* m_txtProjectName;
+		wxCheckBox* m_chkPalettes;
+		wxFilePickerCtrl* m_filePickerPalettes;
+		wxCheckBox* m_chkTileset;
+		wxFilePickerCtrl* m_filePickerTileset;
+		wxCheckBox* m_chkMap;
+		wxFilePickerCtrl* m_filePickerMap;
+		wxCheckBox* m_chkCollisionTiles;
+		wxFilePickerCtrl* m_filePickerCollisionTiles;
+		wxCheckBox* m_chkCollisionMap;
+		wxFilePickerCtrl* m_filePickerCollisionMap;
+		wxStdDialogButtonSizer* m_buttons;
+		wxButton* m_buttonsOK;
+		wxButton* m_buttonsCancel;
+		
+		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 549,281 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~ExportDialog();
 	
 };
 

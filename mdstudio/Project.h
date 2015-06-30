@@ -130,6 +130,25 @@ public:
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
 
+	//Last used export filenames
+	struct ExportFilenames
+	{
+		std::string palettes;
+		std::string tileset;
+		std::string map;
+		std::string collisionTiles;
+
+		void Serialise(ion::io::Archive& archive)
+		{
+			archive.Serialise(palettes, "exportFNamePalettes");
+			archive.Serialise(tileset, "exportFNameTileset");
+			archive.Serialise(map, "exportFNameMap");
+			archive.Serialise(collisionTiles, "exportFNameCollisionTiles");
+		}
+	};
+	
+	ExportFilenames m_exportFilenames;
+
 private:
 	//Find palette matching 8x8 colour grid
 	bool FindPalette(Colour* pixels, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const;
