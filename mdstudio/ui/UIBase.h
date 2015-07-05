@@ -265,4 +265,35 @@ class ExportDialog : public wxDialog
 	
 };
 
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImportDialog
+///////////////////////////////////////////////////////////////////////////////
+class ImportDialog : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText8;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2OK;
+		wxButton* m_sdbSizer2Cancel;
+	
+	public:
+		wxFilePickerCtrl* m_fileBitmap;
+		wxCheckBox* m_chkClearTiles;
+		wxCheckBox* m_chkClearMap;
+		wxCheckBox* m_chkClearPalettes;
+		wxCheckBox* m_chkPaintToMap;
+		wxCheckBox* m_chkImportToStamp;
+		wxCheckBox* m_chkImportToSprite;
+		wxCheckBox* m_chkPalette1;
+		wxCheckBox* m_chkPalette2;
+		wxCheckBox* m_chkPalette3;
+		wxCheckBox* m_chkPalette4;
+		
+		ImportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,271 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~ImportDialog();
+	
+};
+
 #endif //__UIBASE_H__

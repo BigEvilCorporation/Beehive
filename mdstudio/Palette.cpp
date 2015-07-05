@@ -58,6 +58,11 @@ bool Palette::IsColourUsed(int colourIdx) const
 	return (m_usedColours & (1 << colourIdx)) != 0;
 }
 
+u16 Palette::GetUsedColourMask() const
+{
+	return m_usedColours;
+}
+
 void Palette::MarkUsed(int colourIdx)
 {
 	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");

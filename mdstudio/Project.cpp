@@ -27,21 +27,8 @@ Project::Project()
 	m_showGrid = true;
 	m_snapToGrid = false;
 	m_showStampOutlines = true;
-	m_palettes.resize(numPalettes);
-	m_palettes[0].AddColour(Colour(255, 255, 255));
+	m_palettes.resize(s_maxPalettes);
 	m_nextFreeStampId = 1;
-
-	//Create initial background tile
-	TileId backgroundTile = m_tileset.AddTile();
-
-	//Fill background
-	for(int x = 0; x < m_map.GetWidth(); x++)
-	{
-		for(int y = 0; y < m_map.GetHeight(); y++)
-		{
-			m_map.SetTile(x, y, backgroundTile);
-		}
-	}
 }
 
 void Project::Clear()
@@ -56,14 +43,13 @@ void Project::Clear()
 	m_collisionTypesInvalidated = true;
 	m_stampsInvalidated = true;
 	m_name = "untitled";
-	m_palettes.resize(numPalettes);
+	m_palettes.resize(s_maxPalettes);
 
-	for(int i = 0; i < numPalettes; i++)
+	for(int i = 0; i < s_maxPalettes; i++)
 	{
 		m_palettes[i].Clear();
 	}
 
-	m_palettes[0].AddColour(Colour(255, 255, 255));
 	m_map.Clear();
 	m_tileset.Clear();
 	m_stamps.clear();
@@ -276,46 +262,49 @@ StampId Project::GetPaintStamp() const
 	return m_paintStamp;
 }
 
-bool Project::FindPalette(Colour* pixels, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const
+bool Project::FindPalette(Colour* pixels, u32 useablePalettes, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const
 {
 	//Set of found colour idxs
 	std::set<int> colourMatches;
 
 	//For each palette
-	for(int paletteIdx = 0; paletteIdx < numPalettes; paletteIdx++)
+	for(int paletteIdx = 0; paletteIdx < s_maxPalettes; paletteIdx++)
 	{
-		const Palette& palette = m_palettes[paletteIdx];
-
-		bool match = true;
-		colourMatches.clear();
-
-		//For each pixel
-		for(int i = 0; i < 8*8; i++)
+		if(useablePalettes & (1 << paletteIdx))
 		{
-			int colourIdx = 0;
+			const Palette& palette = m_palettes[paletteIdx];
 
-			//Check if this pixel colour is contained in the palette
-			if(palette.GetNearestColourIdx(pixels[i], Palette::eExact, colourIdx))
+			bool match = true;
+			colourMatches.clear();
+
+			//For each pixel
+			for(int i = 0; i < 8 * 8; i++)
 			{
-				colourMatches.insert(colourIdx);
+				int colourIdx = 0;
+
+				//Check if this pixel colour is contained in the palette
+				if(palette.GetNearestColourIdx(pixels[i], Palette::eExact, colourIdx))
+				{
+					colourMatches.insert(colourIdx);
+				}
+				else
+				{
+					match = false;
+				}
 			}
-			else
+
+			if(match)
 			{
-				match = false;
+				paletteId = paletteIdx;
+				return true;
 			}
-		}
 
-		if(match)
-		{
-			paletteId = paletteIdx;
-			return true;
-		}
-
-		if(colourMatches.size() > closestColourCount)
-		{
-			//Found a closer match
-			closestColourCount = colourMatches.size();
-			closestPalette = paletteIdx;
+			if(colourMatches.size() > closestColourCount)
+			{
+				//Found a closer match
+				closestColourCount = colourMatches.size();
+				closestPalette = paletteIdx;
+			}
 		}
 	}
 
@@ -372,12 +361,27 @@ bool Project::MergePalettes(Palette& dest, const Palette& source)
 	return true;
 }
 
-bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
+bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits)
 {
-	if(importFlags & eBMPImportReplaceAll)
+	if(importFlags & eBMPImportClearPalettes)
 	{
-		//Clear map, tiles and palettes
-		Clear();
+		for(int i = 0; i < s_maxPalettes; i++)
+		{
+			if(paletteBits & (1 << i))
+			{
+				m_palettes[i].Clear();
+			}
+		}
+	}
+
+	if(importFlags & eBMPImportClearTiles)
+	{
+		m_tileset.Clear();
+	}
+
+	if(importFlags & eBMPImportClearMap)
+	{
+		m_map.Clear();
 	}
 
 	//Read BMP
@@ -396,10 +400,20 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 		int tilesWidth = reader.GetWidth() / 8;
 		int tilesHeight = reader.GetHeight() / 8;
 
-		//Resize map
-		m_map.Resize(tilesWidth, tilesHeight);
+		if(importFlags & eBMPImportDrawToMap)
+		{
+			//Grow map if necessary
+			m_map.Resize(max(m_map.GetWidth(), tilesWidth), max(m_map.GetHeight(), tilesHeight));
+		}
 
-		int newPaletteCount = 0;
+		Stamp* stamp = NULL;
+
+		if(importFlags & eBMPImportToStamp)
+		{
+			//Create new stamp
+			StampId stampId = AddStamp(tilesWidth, tilesHeight);
+			stamp = GetStamp(stampId);
+		}
 
 		const int tileWidth = 8;
 		const int tileHeight = 8;
@@ -426,15 +440,9 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 				PaletteId paletteId = 0;
 				PaletteId closestPaletteId = 0;
 				int closestPaletteColourMatches = 0;
-				if(!FindPalette(pixels, paletteId, closestPaletteId, closestPaletteColourMatches))
+				if(!FindPalette(pixels, paletteBits, paletteId, closestPaletteId, closestPaletteColourMatches))
 				{
-					//No existing palette found, create new
-					if(newPaletteCount == numPalettes)
-					{
-						wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK | wxICON_ERROR);
-						return false;
-					}
-
+					//Import palette
 					Palette importedPalette;
 					if(!ImportPalette(pixels, importedPalette))
 					{
@@ -481,8 +489,24 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 					
 					if(!merged)
 					{
+						//Find free useable palette
+						bool foundFreePalette = false;
+						for(int i = 0; i < s_maxPalettes && !foundFreePalette; i++)
+						{
+							if((paletteBits & (1 << i)) && m_palettes[i].GetUsedColourMask() == 0)
+							{
+								paletteId = i;
+								foundFreePalette = true;
+							}
+						}
+
+						if(!foundFreePalette)
+						{
+							wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK | wxICON_ERROR);
+							return false;
+						}
+
 						//Use imported palette
-						paletteId = newPaletteCount++;
 						m_palettes[paletteId] = importedPalette;
 					}
 				}
@@ -537,6 +561,12 @@ bool Project::ImportBitmap(const std::string& filename, u8 importFlags)
 					//Set in map
 					m_map.SetTile(tileX, tileY, tileId);
 				}
+
+				if(importFlags & eBMPImportToStamp)
+				{
+					//Set in stamp
+					stamp->SetTile(tileX, tileY, tileId);
+				}
 			}
 		}
 	}
@@ -556,7 +586,7 @@ bool Project::ExportPalettes(const std::string& filename) const
 		std::stringstream stream;
 		stream << "palette_" << m_name << ":" << std::endl;
 
-		for(int i = 0; i < numPalettes; i++)
+		for(int i = 0; i < s_maxPalettes; i++)
 		{
 			m_palettes[i].Export(stream);
 			stream << std::endl;

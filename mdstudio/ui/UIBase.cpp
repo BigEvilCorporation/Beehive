@@ -381,42 +381,42 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	m_static1 = new wxStaticText( this, wxID_ANY, wxT("Project name:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_static1->Wrap( -1 );
-	fgSizer3->Add( m_static1, 0, wxALL, 5 );
+	fgSizer3->Add( m_static1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_txtProjectName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer3->Add( m_txtProjectName, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkPalettes->SetValue(true); 
-	fgSizer3->Add( m_chkPalettes, 0, wxALL, 5 );
+	fgSizer3->Add( m_chkPalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkTileset->SetValue(true); 
-	fgSizer3->Add( m_chkTileset, 0, wxALL, 5 );
+	fgSizer3->Add( m_chkTileset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkMap = new wxCheckBox( this, wxID_ANY, wxT("Export map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkMap->SetValue(true); 
-	fgSizer3->Add( m_chkMap, 0, wxALL, 5 );
+	fgSizer3->Add( m_chkMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkCollisionTiles = new wxCheckBox( this, wxID_ANY, wxT("Export collision tiles:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkCollisionTiles->SetValue(true); 
-	fgSizer3->Add( m_chkCollisionTiles, 0, wxALL, 5 );
+	fgSizer3->Add( m_chkCollisionTiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerCollisionTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerCollisionTiles, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkCollisionMap = new wxCheckBox( this, wxID_ANY, wxT("Export collision map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkCollisionMap->SetValue(true); 
-	fgSizer3->Add( m_chkCollisionMap, 0, wxALL, 5 );
+	fgSizer3->Add( m_chkCollisionMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerCollisionMap, 0, wxALL|wxEXPAND, 5 );
@@ -450,4 +450,93 @@ ExportDialog::~ExportDialog()
 	m_buttonsCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnCancel ), NULL, this );
 	m_buttonsOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnOk ), NULL, this );
 	
+}
+
+ImportDialog::ImportDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer10;
+	bSizer10 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer11;
+	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticText8 = new wxStaticText( this, wxID_ANY, wxT("Bitmap file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText8->Wrap( -1 );
+	bSizer11->Add( m_staticText8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_fileBitmap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
+	bSizer11->Add( m_fileBitmap, 1, wxALL|wxEXPAND, 5 );
+	
+	
+	bSizer10->Add( bSizer11, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer12;
+	bSizer12 = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxBoxSizer* bSizer13;
+	bSizer13 = new wxBoxSizer( wxVERTICAL );
+	
+	m_chkClearTiles = new wxCheckBox( this, wxID_ANY, wxT("Clear tiles"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkClearTiles, 0, wxALL, 5 );
+	
+	m_chkClearMap = new wxCheckBox( this, wxID_ANY, wxT("Clear map"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkClearMap, 0, wxALL, 5 );
+	
+	m_chkClearPalettes = new wxCheckBox( this, wxID_ANY, wxT("Clear palettes"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkClearPalettes, 0, wxALL, 5 );
+	
+	m_chkPaintToMap = new wxCheckBox( this, wxID_ANY, wxT("Paint to map"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkPaintToMap, 0, wxALL, 5 );
+	
+	m_chkImportToStamp = new wxCheckBox( this, wxID_ANY, wxT("Import as new stamp"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkImportToStamp, 0, wxALL, 5 );
+	
+	m_chkImportToSprite = new wxCheckBox( this, wxID_ANY, wxT("Import as new sprite"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkImportToSprite, 0, wxALL, 5 );
+	
+	
+	bSizer12->Add( bSizer13, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer14;
+	bSizer14 = new wxBoxSizer( wxVERTICAL );
+	
+	m_chkPalette1 = new wxCheckBox( this, wxID_ANY, wxT("Use palette 1"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkPalette1->SetValue(true); 
+	bSizer14->Add( m_chkPalette1, 0, wxALL, 5 );
+	
+	m_chkPalette2 = new wxCheckBox( this, wxID_ANY, wxT("Use palette 2"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer14->Add( m_chkPalette2, 0, wxALL, 5 );
+	
+	m_chkPalette3 = new wxCheckBox( this, wxID_ANY, wxT("Use palette 3"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer14->Add( m_chkPalette3, 0, wxALL, 5 );
+	
+	m_chkPalette4 = new wxCheckBox( this, wxID_ANY, wxT("Use palette 4"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer14->Add( m_chkPalette4, 0, wxALL, 5 );
+	
+	
+	bSizer12->Add( bSizer14, 1, wxEXPAND, 5 );
+	
+	
+	bSizer10->Add( bSizer12, 1, wxEXPAND, 5 );
+	
+	m_sdbSizer2 = new wxStdDialogButtonSizer();
+	m_sdbSizer2OK = new wxButton( this, wxID_OK );
+	m_sdbSizer2->AddButton( m_sdbSizer2OK );
+	m_sdbSizer2Cancel = new wxButton( this, wxID_CANCEL );
+	m_sdbSizer2->AddButton( m_sdbSizer2Cancel );
+	m_sdbSizer2->Realize();
+	
+	bSizer10->Add( m_sdbSizer2, 1, 0, 5 );
+	
+	
+	this->SetSizer( bSizer10 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+}
+
+ImportDialog::~ImportDialog()
+{
 }

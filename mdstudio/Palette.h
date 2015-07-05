@@ -48,6 +48,7 @@ public:
 	int AddColour(const Colour& colour);
 	void SetColour(int colourIdx, const Colour& colour);
 	bool IsColourUsed(int colourIdx) const;
+	u16 GetUsedColourMask() const;
 
 	const Colour& GetColour(int colourIdx) const;
 	bool GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const;

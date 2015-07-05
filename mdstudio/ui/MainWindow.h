@@ -103,6 +103,9 @@ private:
 	//Set current project (opens default panels)
 	void SetProject(Project* project);
 
+	//Set all panel captions
+	void SetPanelCaptions();
+
 	wxAuiManager m_auiManager;
 
 	wxWeakRef<PalettesPanel> m_palettesPanel;
