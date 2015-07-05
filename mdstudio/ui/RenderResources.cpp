@@ -134,16 +134,23 @@ void RenderResources::CreateTilesetTexture()
 			{
 				//Invert Y for OpenGL
 				int pixelY_OGL = tileHeight - 1 - pixelY;
-				const Colour& colour = palette->GetColour(tile.GetPixelColour(pixelX, pixelY_OGL));
 
-				int destPixelX = (x * tileWidth) + pixelX;
-				int destPixelY = (y * tileHeight) + pixelY;
-				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-				u32 dataOffset = pixelIdx * bytesPerPixel;
-				ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
-				data[dataOffset] = colour.r;
-				data[dataOffset + 1] = colour.g;
-				data[dataOffset + 2] = colour.b;
+				u8 colourIdx = tile.GetPixelColour(pixelX, pixelY_OGL);
+
+				//Protect against blank tiles
+				if(palette->IsColourUsed(colourIdx))
+				{
+					const Colour& colour = palette->GetColour(colourIdx);
+
+					int destPixelX = (x * tileWidth) + pixelX;
+					int destPixelY = (y * tileHeight) + pixelY;
+					u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+					u32 dataOffset = pixelIdx * bytesPerPixel;
+					ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+					data[dataOffset] = colour.r;
+					data[dataOffset + 1] = colour.g;
+					data[dataOffset + 2] = colour.b;
+				}
 			}
 		}
 	}

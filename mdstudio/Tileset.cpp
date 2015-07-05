@@ -8,13 +8,13 @@
 
 Tileset::Tileset()
 {
-	m_nextFreeId = 1;
+	m_nextFreeId = 0;
 }
 
 void Tileset::Clear()
 {
 	m_tiles.clear();
-	m_nextFreeId = 1;
+	m_nextFreeId = 0;
 }
 
 TileId Tileset::AddTile()

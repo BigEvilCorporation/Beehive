@@ -38,49 +38,45 @@ bool BMPReader::Read(const std::string& filename)
 			BMPHeader bmpHeader = {0};
 			if(file.Read(&bmpHeader, sizeof(BMPHeader)))
 			{
-				//Sanity check used colours
-				if(bmpHeader.numUsedColours > 0)
+				//Sanity check size
+				if(bmpHeader.imageWidth > 0 || bmpHeader.imageHeight > 0)
 				{
-					//Sanity check size
-					if(bmpHeader.imageWidth > 0 || bmpHeader.imageHeight > 0)
+					//Set width/height/data size
+					m_width = bmpHeader.imageWidth;
+					m_height = bmpHeader.imageHeight;
+					m_dataSize = bmpHeader.dataSizeBytes;
+
+					//Set bits per pixel
+					if(bmpHeader.bitFormat == eIndexed16Colour)
 					{
-						//Set width/height/data size
-						m_width = bmpHeader.imageWidth;
-						m_height = bmpHeader.imageHeight;
-						m_dataSize = bmpHeader.dataSizeBytes;
+						m_bitsPerPixel = 4;
+					}
 
-						//Set bits per pixel
-						if(bmpHeader.bitFormat == eIndexed16Colour)
+					if(m_bitsPerPixel > 0)
+					{
+						//Seek to palette pos
+						u64 paletteDataPos = sizeof(FileHeader) + bmpHeader.headerSize;
+						if(file.Seek(paletteDataPos, ion::io::File::Start) == paletteDataPos)
 						{
-							m_bitsPerPixel = 4;
-						}
+							//Calc palette size and alloc
+							m_paletteSize = (1 << m_bitsPerPixel);
+							m_palette = new RGBQuad[m_paletteSize];
 
-						if(m_bitsPerPixel > 0)
-						{
-							//Seek to palette pos
-							u64 paletteDataPos = sizeof(FileHeader) + bmpHeader.headerSize;
-							if(file.Seek(paletteDataPos, ion::io::File::Start) == paletteDataPos)
+							//Read palette
+							u64 paletteSizeBytes = m_paletteSize * sizeof(RGBQuad);
+							if(file.Read(m_palette, paletteSizeBytes) == paletteSizeBytes)
 							{
-								//Calc palette size and alloc
-								m_paletteSize = (1 << m_bitsPerPixel);
-								m_palette = new RGBQuad[m_paletteSize];
-
-								//Read palette
-								u64 paletteSizeBytes = m_paletteSize * sizeof(RGBQuad);
-								if(file.Read(m_palette, paletteSizeBytes) == paletteSizeBytes)
+								//Seek to data pos
+								if(file.Seek(fileHeader.dataOffset, ion::io::File::Start) == fileHeader.dataOffset)
 								{
-									//Seek to data pos
-									if(file.Seek(fileHeader.dataOffset, ion::io::File::Start) == fileHeader.dataOffset)
-									{
-										//Alloc pixel data buffer
-										m_data = new u8[m_dataSize];
+									//Alloc pixel data buffer
+									m_data = new u8[m_dataSize];
 
-										//Read pixel data
-										if(file.Read(m_data, m_dataSize) == m_dataSize)
-										{
-											//Success
-											return true;
-										}
+									//Read pixel data
+									if(file.Read(m_data, m_dataSize) == m_dataSize)
+									{
+										//Success
+										return true;
 									}
 								}
 							}

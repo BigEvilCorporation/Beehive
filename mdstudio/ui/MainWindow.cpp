@@ -53,7 +53,7 @@ MainWindow::MainWindow()
 	Project* defaultProject = new Project();
 
 	//Open welcome project
-	static bool openWelcomeProject = false;
+	static bool openWelcomeProject = true;
 	if(openWelcomeProject)
 	{
 		wxString directory = wxGetCwd();
@@ -180,6 +180,18 @@ void MainWindow::SetProject(Project* project)
 	}
 }
 
+void MainWindow::SetPanelCaptions()
+{
+	if(m_tilesPanel.get())
+	{
+		wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(m_tilesPanel.get());
+		wxString caption;
+		caption << "Tileset " << "(" << m_project->GetTileset().GetCount() << ")";
+		paneInfo.Caption(caption);
+		m_auiManager.Update();
+	}
+}
+
 void MainWindow::ShowPanelPalettes()
 {
 	if(m_project.get())
@@ -191,6 +203,7 @@ void MainWindow::ShowPanelPalettes()
 			paneInfo.DockFixed(false);
 			paneInfo.BestSize(100, 300);
 			paneInfo.Left();
+			paneInfo.Row(1);
 			paneInfo.Caption("Palettes");
 			paneInfo.CaptionVisible(true);
 
@@ -220,6 +233,7 @@ void MainWindow::ShowPanelCollisionTypes()
 			paneInfo.DockFixed(false);
 			paneInfo.BestSize(100, 300);
 			paneInfo.Left();
+			paneInfo.Row(1);
 			paneInfo.Caption("Collision Types");
 			paneInfo.CaptionVisible(true);
 
@@ -247,8 +261,9 @@ void MainWindow::ShowPanelTiles()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(300, 450);
 			paneInfo.Right();
+			paneInfo.Row(0);
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 			
@@ -275,8 +290,9 @@ void MainWindow::ShowPanelStamps()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(300, 450);
 			paneInfo.Right();
+			paneInfo.Row(1);
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
@@ -303,7 +319,7 @@ void MainWindow::ShowPanelMap()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(800, 600);
 			paneInfo.Centre();
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
@@ -331,6 +347,7 @@ void MainWindow::ShowPanelToolbox()
 		paneInfo.DockFixed(false);
 		paneInfo.BestSize(100, 300);
 		paneInfo.Left();
+		paneInfo.Row(0);
 		paneInfo.Caption("Toolbox");
 		paneInfo.CaptionVisible(true);
 
@@ -369,8 +386,9 @@ void MainWindow::ShowPanelTileEditor()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(100, 100);
 			paneInfo.Right();
+			paneInfo.Row(0);
 			paneInfo.Caption("Tile");
 			paneInfo.CaptionVisible(true);
 
@@ -400,9 +418,10 @@ void MainWindow::ShowPanelCollisionEditor()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
-			paneInfo.FloatingSize(300, 300);
+			paneInfo.BestSize(100, 100);
+			paneInfo.FloatingSize(100, 100);
 			paneInfo.Right();
+			paneInfo.Row(1);
 			paneInfo.Caption("Collision Tile");
 			paneInfo.CaptionVisible(true);
 
@@ -467,6 +486,7 @@ void MainWindow::RedrawAll()
 {
 	RefreshTileset();
 	RefreshCollisionSet();
+	SetPanelCaptions();
 
 	if(m_palettesPanel)
 		m_palettesPanel->Refresh();
@@ -520,6 +540,7 @@ void MainWindow::RefreshPanel(Panel panel)
 	}
 	
 	RedrawPanel(panel);
+	SetPanelCaptions();
 
 	if(m_project.get())
 	{
@@ -636,8 +657,6 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		//wxDirDialog dialogue(this, "Select export directory");
-
 		ExportDialog dialog(this);
 
 		dialog.m_txtProjectName->SetValue(m_project->GetName());
@@ -678,12 +697,38 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 {
 	if(m_project.get())
 	{
-		wxFileDialog dialogue(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
-		if(dialogue.ShowModal() == wxID_OK)
+		ImportDialog dialog(this);
+		if(dialog.ShowModal() == wxID_OK)
 		{
 			SetStatusText("Importing...");
 
-			m_project->ImportBitmap(dialogue.GetPath().c_str().AsChar(), Project::eBMPImportReplaceAll | Project::eBMPImportDrawToMap);
+			u32 flags = 0;
+
+			if(dialog.m_chkClearPalettes->GetValue())
+				flags |= Project::eBMPImportClearPalettes;
+			if(dialog.m_chkClearTiles->GetValue())
+				flags |= Project::eBMPImportClearTiles;
+			if(dialog.m_chkClearMap->GetValue())
+				flags |= Project::eBMPImportClearMap;
+			if(dialog.m_chkPaintToMap->GetValue())
+				flags |= Project::eBMPImportDrawToMap;
+			if(dialog.m_chkImportToStamp->GetValue())
+				flags |= Project::eBMPImportToStamp;
+			if(dialog.m_chkImportToSprite->GetValue())
+				flags |= Project::eBMPImportToSprite;
+
+			u32 palettes = 0;
+
+			if(dialog.m_chkPalette1->GetValue())
+				palettes |= (1 << 0);
+			if(dialog.m_chkPalette2->GetValue())
+				palettes |= (1 << 1);
+			if(dialog.m_chkPalette3->GetValue())
+				palettes |= (1 << 2);
+			if(dialog.m_chkPalette4->GetValue())
+				palettes |= (1 << 3);
+
+			m_project->ImportBitmap(dialog.m_fileBitmap->GetPath().c_str().AsChar(), flags, palettes);
 
 			//Refresh tileset
 			RefreshTileset();

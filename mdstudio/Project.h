@@ -23,13 +23,17 @@ typedef std::map<u8, CollisionType> TCollisionTypeMap;
 class Project
 {
 	//TODO: Add/remove palettes
-	static const int numPalettes = 4;
+	static const int s_maxPalettes = 4;
 
 public:
 	enum BMPImportFlags
 	{
-		eBMPImportReplaceAll	= (1<<0),
-		eBMPImportDrawToMap		= (1<<1),
+		eBMPImportClearPalettes	= (1 << 0),
+		eBMPImportClearTiles	= (1 << 1),
+		eBMPImportClearMap		= (1 << 2),
+		eBMPImportDrawToMap		= (1 << 3),
+		eBMPImportToStamp		= (1 << 4),
+		eBMPImportToSprite		= (1 << 5),
 	};
 
 	Project();
@@ -57,7 +61,7 @@ public:
 
 	//Get palette
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
-	int GetNumPalettes() const { return numPalettes; }
+	int GetNumPalettes() const { return s_maxPalettes; }
 
 	//Stamps
 	StampId AddStamp(int width, int height);
@@ -119,7 +123,7 @@ public:
 	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
 	//Import bitmap
-	bool ImportBitmap(const std::string& filename, u8 importFlags = (BMPImportFlags)(0));
+	bool ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits);
 
 	//Export
 	bool ExportPalettes(const std::string& filename) const;
@@ -151,7 +155,7 @@ public:
 
 private:
 	//Find palette matching 8x8 colour grid
-	bool FindPalette(Colour* pixels, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const;
+	bool FindPalette(Colour* pixels, u32 useablePalettes, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const;
 	bool ImportPalette(Colour* pixels, Palette& palette);
 	bool MergePalettes(Palette& dest, const Palette& source);
 
