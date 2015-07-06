@@ -24,6 +24,8 @@ namespace ion
 
 		class File : public io::Stream
 		{
+			static const int s_bufferSize = (1024 * 32);
+
 		public:
 			enum OpenMode { OpenRead, OpenWrite, OpenAppend };
 			enum SeekMode { Start, Current };
@@ -58,6 +60,7 @@ namespace ion
 			bool mOpen;
 
 			std::fstream mStream;
+			u8 m_buffer[s_bufferSize];
 		};
 	}
 } //Namespace

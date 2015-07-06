@@ -418,10 +418,10 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		const int tileWidth = 8;
 		const int tileHeight = 8;
 
-		//For all 8x8 tiles
-		for(int tileX = 0; tileX < tilesWidth; tileX++)
+		//For all 8x8 tiles, in row-at-a-time order
+		for(int tileY = 0; tileY < tilesHeight; tileY++)
 		{
-			for(int tileY = 0; tileY < tilesHeight; tileY++)
+			for(int tileX = 0; tileX < tilesWidth; tileX++)
 			{
 				Colour pixels[tileWidth * tileHeight];
 
@@ -537,13 +537,14 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 					}
 				}
 
-				//Hash invalidated, recalculate
-				tile.CalculateColourHash();
+				//Hash invalidated
+				tile.CalculateHash();
 
 				//Find duplicate or create new
 				TileId tileId = 0;
-				TileId duplicateId = m_tileset.FindDuplicate(tile);
-				if(duplicateId)
+				u32 tileFlags = 0;
+				TileId duplicateId = m_tileset.FindDuplicate(tile, tileFlags);
+				if(duplicateId != InvalidTileId)
 				{
 					//Tile already exists
 					tileId = duplicateId;
@@ -553,19 +554,24 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 					//Create new tile and copy
 					tileId = m_tileset.AddTile();
 					Tile* newTile = m_tileset.GetTile(tileId);
-					*newTile = tile;
+					newTile->CopyPixels(tile);
+
+					//Re-add to hash map
+					m_tileset.HashChanged(tileId);
 				}
 
 				if(importFlags & eBMPImportDrawToMap)
 				{
 					//Set in map
 					m_map.SetTile(tileX, tileY, tileId);
+					m_map.SetTileFlags(tileX, tileY, tileFlags);
 				}
 
 				if(importFlags & eBMPImportToStamp)
 				{
 					//Set in stamp
 					stamp->SetTile(tileX, tileY, tileId);
+					stamp->SetTileFlags(tileX, tileY, tileFlags);
 				}
 			}
 		}
@@ -608,7 +614,7 @@ bool Project::ExportTiles(const std::string& filename) const
 		std::stringstream stream;
 		stream << "tiles_" << m_name << ":" << std::endl;
 
-		m_tileset.ExportArt(stream);
+		m_tileset.Export(stream);
 
 		stream << std::endl;
 

@@ -12,25 +12,7 @@
 #include "Palette.h"
 
 typedef u32 TileId;
-static const TileId InvalidTileId = 0;
-
-struct Pixel
-{
-	u8 colourIdx;
-	u8 collisionBits;
-
-	Pixel()
-	{
-		colourIdx = 0;
-		collisionBits = 0;
-	}
-
-	void Serialise(ion::io::Archive& archive)
-	{
-		archive.Serialise(colourIdx);
-		archive.Serialise(collisionBits);
-	}
-};
+static const TileId InvalidTileId = 0xFFFFFFFF;
 
 class Tile
 {
@@ -41,8 +23,16 @@ public:
 
 	Tile();
 
+	void SetIndex(u32 index);
+	u32 GetIndex() const;
+
+	void CalculateHash();
+	u64 GetHash() const;
+
 	void SetPixelColour(int x, int y, u8 colourIdx);
 	u8 GetPixelColour(int x, int y) const;
+	void CopyPixels(const Tile& tile);
+	void GetPixels(u8 pixels[pixelsPerTile]) const;
 
 	void AddPixelCollisionBits(int x, int y, u8 collisionBits);
 	void ClearPixelCollisionBits(int x, int y, u8 collisionBits);
@@ -52,17 +42,17 @@ public:
 	PaletteId GetPaletteId() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void ExportColour(std::stringstream& stream) const;
-	void ExportCollision(std::stringstream& stream) const;
+	void Export(std::stringstream& stream) const;
 
-	void CalculateColourHash();
-	void CalculateCollisionHash();
-	u32 GetColourHash() const;
-	u32 GetCollisionHash() const;
+	//TODO: Move
+	void ExportCollision(std::stringstream& stream) const;
 
 private:
 	PaletteId m_palette;
-	u32 m_colourHash;
-	u32 m_collisionHash;
-	std::vector<Pixel> m_pixels;
+	u32 m_index;
+	u64 m_hash;
+	std::vector<u8> m_pixels;
+
+	//TODO: Move
+	std::vector<u8> m_collisionPixels;
 };

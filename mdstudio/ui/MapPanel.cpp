@@ -6,7 +6,6 @@
 
 #include "MapPanel.h"
 #include "MainWindow.h"
-#include "TileRendering.h"
 
 MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)

@@ -116,7 +116,7 @@ void PalettesPanel::OnPaint(wxPaintEvent& event)
 			if(palette->IsColourUsed(j))
 			{
 				const Colour& colour = palette->GetColour(j);
-				brush.SetColour(wxColour(colour.r, colour.g, colour.b));
+				brush.SetColour(wxColour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
 			}
 			else
 			{

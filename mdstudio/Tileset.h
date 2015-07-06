@@ -7,15 +7,18 @@
 #pragma once
 
 #include <map>
+#include <vector>
+#include <algorithm>
 #include <sstream>
 #include <io/Archive.h>
 
 #include "Tile.h"
 
-typedef std::map<TileId, Tile> TTileMap;
-
 class Tileset
 {
+	//typedef std::map<u32, std::vector<TileId> > HashMap;
+	typedef std::map<u64, TileId> HashMap;
+
 public:
 	Tileset();
 
@@ -23,20 +26,34 @@ public:
 
 	TileId AddTile();
 	void RemoveTile(TileId tileId);
-	TileId FindDuplicate(const Tile& tile) const;
+	void HashChanged(TileId tileId);
+	TileId FindDuplicate(const Tile& tile, u32& tileFlags) const;
 
 	Tile* GetTile(TileId tileId);
 	const Tile* GetTile(TileId tileId) const;
-	const TTileMap::const_iterator Begin() const;
-	const TTileMap::const_iterator End() const;
 	int GetCount() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void ExportArt(std::stringstream& stream) const;
+	void Export(std::stringstream& stream) const;
 	void ExportCollision(std::stringstream& stream) const;
 	
 private:
-	TileId m_nextFreeId;
+	enum HashOrientation
+	{
+		eNormal,
+		eFlipX,
+		eFlipY,
+		eFlipXY,
+
+		eNumHashOrientations
+	};
+
+	static const u32 s_orientationFlags[eNumHashOrientations];
+
+	void AddToHashMap(TileId tileId);
+	void RemoveFromHashMap(TileId tileId);
+	void CalculateHashes(const Tile& tile, u64 hashes[eNumHashOrientations]) const;
 	
-	TTileMap m_tiles;
+	std::vector<Tile> m_tiles;
+	HashMap m_hashMap;
 };

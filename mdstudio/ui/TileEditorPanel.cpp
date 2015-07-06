@@ -76,6 +76,9 @@ void TileEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, 
 						//Set colour on tile
 						tile->SetPixelColour(x, y, colourIdx);
 
+						//Re-add to hash map
+						m_project->GetTileset().HashChanged(tileId);
+
 						//Set colour on tileset texture
 						m_renderResources.SetTilesetTexPixel(tileId, ion::Vector2i(x, y), colourIdx);
 

@@ -12,4 +12,6 @@
 namespace ion
 {
 	u32 Hash(const char* string);
+	u32 Hash(const u8* data, int size);
+	u64 Hash64(const u8* data, int size);
 }

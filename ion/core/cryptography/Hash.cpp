@@ -21,4 +21,30 @@ namespace ion
 
 		return hash;
 	}
+
+	u32 Hash(const u8* data, int size)
+	{
+		u32 hash = 0;
+
+		for(int i = 0; i < size; i++)
+		{
+			hash = (*data++) + (hash << 6) + (hash << 16) - hash;
+		}
+
+		return hash;
+	}
+
+	u64 Hash64(const u8* data, int size)
+	{
+		const u64 mulp = 2654435789;
+
+		u64 hash = 104395301;
+
+		for(int i = 0; i < size; i++)
+		{
+			hash += (*data++ * mulp) ^ (hash >> 23);
+		}
+
+		return hash ^ (hash << 37);
+	}
 }

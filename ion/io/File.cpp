@@ -65,6 +65,9 @@ namespace ion
 
 			if(mOpen)
 			{
+				//Use buffer
+				mStream.rdbuf()->pubsetbuf((char*)m_buffer, s_bufferSize);
+
 				//Get size (seek to end, get pos, seek back)
 				mStream.seekg(0, std::ios::end);
 				mSize = (u64)mStream.tellg();
@@ -98,15 +101,15 @@ namespace ion
 				{
 					direction = std::ios_base::beg;
 					position = std::min(position, mSize - 1);
+					mCurrentPosition = position;
 				}
-				else
+				else if(origin == Current)
 				{
 					position = std::min(position, mSize - mCurrentPosition - 1);
+					mCurrentPosition += position;
 				}
 			
 				mStream.seekg(position, direction);
-
-				mCurrentPosition = (u64)mStream.tellg();
 			}
 		
 			return mCurrentPosition;
@@ -120,8 +123,8 @@ namespace ion
 			{
 				size = std::min(size, mCurrentPosition + mSize);
 				mStream.read((char*)data, size);
-				mCurrentPosition = (u64)mStream.tellg();
-				bytesRead = (u64)mStream.gcount();
+				mCurrentPosition += size;
+				bytesRead = size;
 			}
 
 			return bytesRead;

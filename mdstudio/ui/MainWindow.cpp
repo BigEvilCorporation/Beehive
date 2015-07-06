@@ -53,7 +53,7 @@ MainWindow::MainWindow()
 	Project* defaultProject = new Project();
 
 	//Open welcome project
-	static bool openWelcomeProject = true;
+	static bool openWelcomeProject = false;
 	if(openWelcomeProject)
 	{
 		wxString directory = wxGetCwd();
@@ -779,8 +779,8 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 			//Erase tile
 			tileset.RemoveTile(tileId);
 
-			//Get blank tile
-			TileId blankTile = (tileset.GetCount() > 0) ? tileset.Begin()->first : InvalidTileId;
+			//Fill with tile 0
+			TileId blankTile = 0;
 
 			//Find all uses of tile, set blank
 			for(int x = 0; x < map.GetWidth(); x++)
@@ -796,14 +796,11 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 			}
 			
 
-			//Set blank paint tile
+			//Clear paint tile
 			m_project->SetPaintTile(InvalidTileId);
 
-			if(tileId == m_project->GetEraseTile())
-			{
-				//Set blank erase tile
-				m_project->SetEraseTile(InvalidTileId);
-			}
+			//Clear erase tile
+			m_project->SetEraseTile(InvalidTileId);
 
 			//Recreate tileset texture
 			RefreshTileset();
@@ -865,9 +862,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 				map.Resize(width, height);
 
 				//Fill extra tiles with background tile
-				TileId backgroundTile = InvalidTileId;
-				if(m_project->GetTileset().GetCount() > 0)
-					backgroundTile = m_project->GetTileset().Begin()->first;
+				TileId backgroundTile = 0;
 
 				//Extra X
 				for(int y = 0; y < height; y++)
