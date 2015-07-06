@@ -89,12 +89,7 @@ public:
 	ion::Matrix4 CalcBoxMatrix(const ion::Vector2i& position, const ion::Vector2i& size, const ion::Vector2i& mapSize, float z);
 
 private:
-	//Create TileID to index cache
-	void CacheTileIndices(const Tileset& tileset);
-
-	//Get tile index into tileset
-	int GetTilesetTexTileIndex(TileId tileId) const;
-
+	
 	//Map tile IDs to indices
 	std::map<TileId, u32> m_tileIndexMap;
 

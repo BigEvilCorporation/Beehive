@@ -100,21 +100,7 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x
 	//If in range, get tile under mouse cursor
 	if(x >= 0 && y >= 0 && x < m_canvasSize.x && y < m_canvasSize.y)
 	{
-		//TODO: Index-to_TileId map
-		//Brute force search for tile ID
-		ion::Vector2i mousePos(x, y);
-
-		int tileIndex = (y * m_canvasSize.x) + x;
-		Tileset& tileset = m_project->GetTileset();
-
-		if(tileIndex < tileset.GetCount())
-		{
-			int i = 0;
-			for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end && i <= tileIndex; ++it, ++i)
-			{
-				selectedTile = it->first;
-			}
-		}
+		selectedTile = (y * m_canvasSize.x) + x;
 	}
 
 	//Set mouse hover tile
@@ -244,16 +230,12 @@ void TilesPanel::PaintTiles()
 {
 	Tileset& tileset = m_project->GetTileset();
 
-	int i = 0;
-
-	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++i)
+	for(int i = 0; i < tileset.GetCount(); i++)
 	{
-		TileId tileId = it->first;
-
 		int x = max(0, i % m_canvasSize.x);
 		int y = max(0, m_canvasSize.y - 1 - (i / m_canvasSize.x));
 
-		PaintTile(tileId, x, y, 0);
+		PaintTile(i, x, y, 0);
 	}
 }
 

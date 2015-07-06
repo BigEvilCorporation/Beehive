@@ -11,28 +11,59 @@
 
 Colour::Colour()
 {
-	r = 0;
-	g = 0;
-	b = 0;
+	rgb = 0;
 }
 
 Colour::Colour(u8 red, u8 green, u8 blue)
 {
-	r = red;
-	g = green;
-	b = blue;
+	SetRed(red);
+	SetGreen(green);
+	SetBlue(blue);
+}
+
+u8 Colour::GetRed() const
+{
+	return (rgb & 0x00FF0000) >> 16;
+}
+
+u8 Colour::GetGreen() const
+{
+	return (rgb & 0x0000FF00) >> 8;
+}
+
+u8 Colour::GetBlue() const
+{
+	return (rgb & 0x000000FF);
+}
+
+void Colour::SetRed(u8 r)
+{
+	rgb &= 0x0000FFFF;
+	rgb |= (r << 16);
+}
+
+void Colour::SetGreen(u8 r)
+{
+	rgb &= 0x00FF00FF;
+	rgb |= (r << 8);
+}
+
+void Colour::SetBlue(u8 r)
+{
+	rgb &= 0x00FFFF00;
+	rgb |= r;
 }
 
 bool Colour::operator == (const Colour& rhs) const
 {
-	return ToVDPFormat() == rhs.ToVDPFormat();
+	return rgb == rhs.rgb;
 }
 
 u16 Colour::ToVDPFormat() const
 {
-	u8 rNybble = (u8)(((float)r / (float)0xFF) * (float)0xE);
-	u8 gNybble = (u8)(((float)g / (float)0xFF) * (float)0xE);
-	u8 bNybble = (u8)(((float)b / (float)0xFF) * (float)0xE);
+	u8 rNybble = (u8)(((float)GetRed()	/ (float)0xFF) * (float)0xE);
+	u8 gNybble = (u8)(((float)GetGreen() / (float)0xFF) * (float)0xE);
+	u8 bNybble = (u8)(((float)GetBlue() / (float)0xFF) * (float)0xE);
 
 	u16 mdValue = bNybble << 8 | gNybble << 4 | rNybble;
 	return mdValue;
@@ -54,7 +85,6 @@ void Palette::Clear()
 
 bool Palette::IsColourUsed(int colourIdx) const
 {
-	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
 	return (m_usedColours & (1 << colourIdx)) != 0;
 }
 
@@ -104,17 +134,14 @@ const Colour& Palette::GetColour(int colourIdx) const
 
 bool Palette::GetNearestColourIdx(const Colour& colour, NearestColourAlgo algorithm, int& colourIdx) const
 {
-	if(algorithm == eExact)
+	//if(algorithm == eExact)
 	{
 		for(int i = 0; i < coloursPerPalette; i++)
 		{
-			if(IsColourUsed(i))
+			if(m_colours[i] == colour && IsColourUsed(i))
 			{
-				if(m_colours[i] == colour)
-				{
-					colourIdx = i;
-					return true;
-				}
+				colourIdx = i;
+				return true;
 			}
 		}
 	}

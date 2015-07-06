@@ -14,45 +14,68 @@
 
 Tile::Tile()
 {
+	m_index = 0;
 	m_palette = 0;
-	m_colourHash = 0;
-	m_collisionHash = 0;
+	m_hash = 0;
 	m_pixels.resize(pixelsPerTile);
+
+	//TODO: Move
+	m_collisionPixels.resize(pixelsPerTile);
+}
+
+void Tile::SetIndex(u32 index)
+{
+	m_index = index;
+}
+
+u32 Tile::GetIndex() const
+{
+	return m_index;
 }
 
 void Tile::SetPixelColour(int x, int y, u8 colourIdx)
 {
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
-	m_pixels[pixelIdx].colourIdx = colourIdx;
+	m_pixels[pixelIdx] = colourIdx;
 }
 
 u8 Tile::GetPixelColour(int x, int y) const
 {
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
-	return m_pixels[pixelIdx].colourIdx;
+	return m_pixels[pixelIdx];
+}
+
+void Tile::CopyPixels(const Tile& tile)
+{
+	m_pixels = tile.m_pixels;
+}
+
+void Tile::GetPixels(u8 pixels[pixelsPerTile]) const
+{
+	ion::memory::MemCopy(pixels, &m_pixels[0], pixelsPerTile);
 }
 
 void Tile::AddPixelCollisionBits(int x, int y, u8 collisionBits)
 {
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
-	m_pixels[pixelIdx].collisionBits |= collisionBits;
+	m_collisionPixels[pixelIdx] |= collisionBits;
 }
 
 void Tile::ClearPixelCollisionBits(int x, int y, u8 collisionBits)
 {
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
-	m_pixels[pixelIdx].collisionBits &= ~collisionBits;
+	m_collisionPixels[pixelIdx] &= ~collisionBits;
 }
 
 u8 Tile::GetPixelCollisionBits(int x, int y) const
 {
 	int pixelIdx = (y * tileHeight) + x;
 	ion::debug::Assert(pixelIdx < pixelsPerTile, "Out of range");
-	return m_pixels[pixelIdx].collisionBits;
+	return m_collisionPixels[pixelIdx];
 }
 
 void Tile::SetPaletteId(PaletteId palette)
@@ -67,14 +90,16 @@ PaletteId Tile::GetPaletteId() const
 
 void Tile::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_index, "index");
 	archive.Serialise(m_palette, "palette");
-	archive.Serialise(m_colourHash, "colourHash");
-	archive.Serialise(m_collisionHash, "collisionHash");
+	archive.Serialise(m_hash, "hash");
 	archive.Serialise(m_pixels, "pixels");
-	archive.Serialise(m_pixels, "pixels2");
+
+	//TODO: Move
+	archive.Serialise(m_collisionPixels, "collisionPixels");
 }
 
-void Tile::ExportColour(std::stringstream& stream) const
+void Tile::Export(std::stringstream& stream) const
 {
 	stream << std::hex << std::setfill('0') << std::uppercase;
 
@@ -112,36 +137,12 @@ void Tile::ExportCollision(std::stringstream& stream) const
 	stream << std::dec;
 }
 
-void Tile::CalculateColourHash()
+void Tile::CalculateHash()
 {
-	std::string string;
-	string.reserve(pixelsPerTile);
-	for(int i = 0; i < pixelsPerTile; i++)
-	{
-		string += ('a' + m_pixels[i].colourIdx);
-	}
-
-	m_colourHash = ion::Hash(string.c_str());
+	m_hash = ion::Hash64(&m_pixels[0], pixelsPerTile);
 }
 
-void Tile::CalculateCollisionHash()
+u64 Tile::GetHash() const
 {
-	std::string string;
-	string.reserve(pixelsPerTile);
-	for(int i = 0; i < pixelsPerTile; i++)
-	{
-		string += ('a' + m_pixels[i].collisionBits);
-	}
-
-	m_collisionHash = ion::Hash(string.c_str());
-}
-
-u32 Tile::GetColourHash() const
-{
-	return m_colourHash;
-}
-
-u32 Tile::GetCollisionHash() const
-{
-	return m_collisionHash;
+	return m_hash;
 }

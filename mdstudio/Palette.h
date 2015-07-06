@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <vector>
 #include <core/Types.h>
 #include <io/Archive.h>
 
@@ -15,18 +16,25 @@ struct Colour
 {
 	Colour();
 	Colour(u8 red, u8 green, u8 blue);
-	bool operator == (const Colour& rhs) const;
-	bool operator != (const Colour& rhs) const { return !(*this == rhs); }
+
+	inline u8 GetGreen() const;
+	inline u8 GetRed() const;
+	inline u8 GetBlue() const;
+
+	inline void SetRed(u8 r);
+	inline void SetGreen(u8 r);
+	inline void SetBlue(u8 r);
+
+	inline bool operator == (const Colour& rhs) const;
+	inline bool operator != (const Colour& rhs) const { return !(*this == rhs); }
 
 	u16 ToVDPFormat() const;
 	void Serialise(ion::io::Archive& archive)
 	{
-		archive.Serialise(r);
-		archive.Serialise(g);
-		archive.Serialise(b);
+		archive.Serialise(rgb);
 	}
 
-	u8 r, g, b;
+	u32 rgb;
 };
 
 typedef u8 PaletteId;

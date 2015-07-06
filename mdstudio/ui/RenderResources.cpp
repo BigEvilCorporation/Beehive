@@ -107,7 +107,7 @@ void RenderResources::CreateTilesetTexture()
 	const Tileset& tileset = m_project->GetTileset();
 
 	u32 numTiles = tileset.GetCount();
-	m_tilesetSizeSq = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles));
+	m_tilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
 	u32 textureWidth = m_tilesetSizeSq * tileWidth;
 	u32 textureHeight = m_tilesetSizeSq * tileHeight;
 	u32 bytesPerPixel = 3;
@@ -117,16 +117,14 @@ void RenderResources::CreateTilesetTexture()
 	u8* data = new u8[textureSize];
 	ion::memory::MemSet(data, 0, textureSize);
 
-	u32 tileIndex = 0;
-
-	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
+	for(int i = 0; i < tileset.GetCount(); i++)
 	{
-		const Tile& tile = it->second;
+		const Tile& tile = *tileset.GetTile(i);
 		PaletteId paletteId = tile.GetPaletteId();
 		Palette* palette = m_project->GetPalette(paletteId);
 
-		u32 x = tileIndex % m_tilesetSizeSq;
-		u32 y = tileIndex / m_tilesetSizeSq;
+		u32 x = i % m_tilesetSizeSq;
+		u32 y = i / m_tilesetSizeSq;
 
 		for(int pixelY = 0; pixelY < 8; pixelY++)
 		{
@@ -147,9 +145,9 @@ void RenderResources::CreateTilesetTexture()
 					u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
 					u32 dataOffset = pixelIdx * bytesPerPixel;
 					ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
-					data[dataOffset] = colour.r;
-					data[dataOffset + 1] = colour.g;
-					data[dataOffset + 2] = colour.b;
+					data[dataOffset] = colour.GetRed();
+					data[dataOffset + 1] = colour.GetGreen();
+					data[dataOffset + 2] = colour.GetBlue();
 				}
 			}
 		}
@@ -159,9 +157,6 @@ void RenderResources::CreateTilesetTexture()
 	m_textures[eTextureTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
-
-	//Rebuild tileset index cache
-	CacheTileIndices(tileset);
 
 	delete data;
 }
@@ -239,19 +234,6 @@ void RenderResources::CreateCollisionTexture()
 	delete data;
 }
 
-void RenderResources::CacheTileIndices(const Tileset& tileset)
-{
-	m_tileIndexMap.clear();
-
-	u32 tileIndex = 0;
-
-	for(TTileMap::const_iterator it = tileset.Begin(), end = tileset.End(); it != end; ++it, ++tileIndex)
-	{
-		//Map ID to index
-		m_tileIndexMap.insert(std::make_pair(it->first, tileIndex));
-	}
-}
-
 void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const
 {
 	if(tileId == InvalidTileId)
@@ -274,12 +256,9 @@ void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texC
 	}
 	else
 	{
-		//Map tile ID to index
-		u32 tileIndex = GetTilesetTexTileIndex(tileId);
-
 		//Map tile to X/Y on tileset texture
-		int tilesetX = (tileIndex % m_tilesetSizeSq);
-		int tilesetY = (tileIndex / m_tilesetSizeSq);
+		int tilesetX = (tileId % m_tilesetSizeSq);
+		int tilesetY = (tileId / m_tilesetSizeSq);
 		ion::Vector2 textureBottomLeft(m_cellSizeTexSpaceSq * tilesetX, m_cellSizeTexSpaceSq * tilesetY);
 
 		bool flipX = (flipFlags & Map::eFlipX) != 0;
@@ -350,13 +329,6 @@ void RenderResources::GetCollisionTypeTexCoords(u8 collisionBit, ion::render::Te
 	texCoords[3].y = top;
 }
 
-int RenderResources::GetTilesetTexTileIndex(TileId tileId) const
-{
-	std::map<TileId, u32>::const_iterator it = m_tileIndexMap.find(tileId);
-	ion::debug::Assert(it != m_tileIndexMap.end(), "TileId not found in tileset");
-	return it->second;
-}
-
 void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx)
 {
 	if(m_project && m_textures[eTextureTileset])
@@ -370,16 +342,15 @@ void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pix
 
 				const Colour& colour = palette->GetColour(colourIdx);
 
-				int tileIndex = GetTilesetTexTileIndex(tileId);
-				u32 x = tileIndex % m_tilesetSizeSq;
-				u32 y = tileIndex / m_tilesetSizeSq;
+				u32 x = tileId % m_tilesetSizeSq;
+				u32 y = tileId / m_tilesetSizeSq;
 
 				//Invert Y for OpenGL
 				int y_inv = tileHeight - 1 - pixel.y;
 
 				ion::Vector2i pixelPos((x * tileWidth) + pixel.x, (y * tileHeight) + y_inv);
 
-				m_textures[eTextureTileset]->SetPixel(pixelPos, ion::Colour(colour.r, colour.g, colour.b));
+				m_textures[eTextureTileset]->SetPixel(pixelPos, ion::Colour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
 			}
 		}
 	}

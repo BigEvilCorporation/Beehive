@@ -130,8 +130,8 @@ Colour BMPReader::GetPixel(int x, int y) const
 	RGBQuad rgbQuad = m_palette[colourIndex];
 
 	Colour colour;
-	colour.r = rgbQuad.r;
-	colour.g = rgbQuad.g;
-	colour.b = rgbQuad.b;
+	colour.SetRed(rgbQuad.r);
+	colour.SetGreen(rgbQuad.g);
+	colour.SetBlue(rgbQuad.b);
 	return colour;
 }
