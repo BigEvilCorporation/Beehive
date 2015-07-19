@@ -13,6 +13,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	
 	m_currentTool = eToolPaintTile;
 	m_tempStamp = NULL;
+	m_collisionCanvasPrimitive = NULL;
 	m_stampPreviewPrimitive = NULL;
 	m_stampPastePos.x = -1;
 	m_stampPastePos.y = -1;
@@ -101,7 +102,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 					m_previewTilePos.y = y;
 
 					//If clicking/dragging, paint tile
-					if(buttonBits)
+					if(buttonBits & eMouseLeft)
 					{
 						//Get tile ID to paint
 						TileId tileId = InvalidTileId;
@@ -135,6 +136,27 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 					m_previewTile = InvalidTileId;
 				}
 				
+				break;
+			}
+
+			case eToolPaintCollisionTile:
+			{
+				//If clicking/dragging, paint collision tile
+				if(buttonBits & eMouseLeft)
+				{
+					//Get tile ID to paint
+					CollisionTileId tileId = m_project->GetPaintCollisionTile();
+
+					if(tileId != InvalidCollisionTileId)
+					{
+						//Set on map
+						map.SetCollisionTile(x, y, tileId);
+
+						//Paint to canvas
+						PaintCollisionTile(tileId, x, y_inv);
+					}
+				}
+
 				break;
 			}
 
@@ -418,6 +440,11 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	z += zOffset;
 
+	//Render collision map
+	RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
 	//Render paint preview tile
 	RenderPaintPreview(renderer, cameraInverseMtx, projectionMtx, z);
 
@@ -465,12 +492,16 @@ void MapPanel::SetProject(Project* project)
 
 	//Create canvas
 	CreateCanvas(mapWidth, mapHeight);
+	CreateCollisionCanvas(mapWidth, mapHeight);
 
 	//Create grid
 	CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
 
 	//Redraw map
 	PaintMap(m_project->GetMap());
+
+	//Redraw collision map
+	PaintCollisionMap(m_project->GetMap());
 }
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -487,16 +518,29 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			//Recreate canvas
 			CreateCanvas(mapWidth, mapHeight);
+			CreateCollisionCanvas(mapWidth, mapHeight);
 
 			//Recreate grid
 			CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
 
 			//Redraw map
 			PaintMap(map);
+
+			//Redraw collision map
+			PaintCollisionMap(map);
 		}
 	}
 
 	ViewPanel::Refresh(eraseBackground, rect);
+}
+
+void MapPanel::CreateCollisionCanvas(int width, int height)
+{
+	//Create rendering primitive
+	if(m_collisionCanvasPrimitive)
+		delete m_collisionCanvasPrimitive;
+
+	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
 }
 
 void MapPanel::SetTool(ToolType tool)
@@ -693,9 +737,27 @@ void MapPanel::ResetToolData()
 	}
 }
 
+void MapPanel::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	//No depth test (stops grid cells Z fighting)
+	renderer.SetDepthTest(ion::render::Renderer::Always);
+
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialCollisionTileset);
+
+	//Draw map
+	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
+	material->Unbind();
+	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+
+	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+}
+
 void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	if(m_previewTile)
+	if(m_previewTile != InvalidTileId)
 	{
 		const Map& map = m_project->GetMap();
 		const int mapWidth = map.GetWidth();
@@ -945,6 +1007,39 @@ void MapPanel::PaintMap(const Map& map)
 		{
 			PaintStamp(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
 		}
+	}
+}
+
+void MapPanel::PaintCollisionMap(const Map& map)
+{
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
+	//Paint all collision tiles
+	for(int y = 0; y < mapHeight; y++)
+	{
+		for(int x = 0; x < mapWidth; x++)
+		{
+			//Get tile
+			CollisionTileId tileId = map.GetCollisionTile(x, y);
+
+			//Invert Y for OpenGL
+			int yInv = mapHeight - 1 - y;
+
+			//Paint tile
+			PaintCollisionTile(tileId, x, yInv);
+		}
+	}
+}
+
+void MapPanel::PaintCollisionTile(TileId tileId, int x, int y)
+{
+	if(m_project)
+	{
+		//Set texture coords for cell
+		ion::render::TexCoord coords[4];
+		m_renderResources.GetCollisionTileTexCoords(tileId, coords);
+		m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 	}
 }
 

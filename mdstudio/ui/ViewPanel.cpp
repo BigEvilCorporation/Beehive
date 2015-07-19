@@ -357,7 +357,6 @@ void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4
 	renderer.SetDepthTest(ion::render::Renderer::Always);
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
-	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
 
 	//Draw map
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
