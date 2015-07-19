@@ -108,12 +108,6 @@ void MainWindow::SetProject(Project* project)
 			delete m_palettesPanel;
 		}
 
-		if(m_collisionTypesPanel)
-		{
-			m_auiManager.DetachPane(m_collisionTypesPanel);
-			delete m_collisionTypesPanel;
-		}
-
 		if(m_mapPanel)
 		{
 			m_auiManager.DetachPane(m_mapPanel);
@@ -138,15 +132,22 @@ void MainWindow::SetProject(Project* project)
 			delete m_tileEditorPanel;
 		}
 
+		if(m_collisionTypesPanel)
+		{
+			m_auiManager.DetachPane(m_collisionTypesPanel);
+			delete m_collisionTypesPanel;
+		}
+
+		if(m_collisionTilesPanel)
+		{
+			m_auiManager.DetachPane(m_collisionTilesPanel);
+			delete m_collisionTilesPanel;
+		}
+
 		if(m_collisionEditorPanel)
 		{
 			m_auiManager.DetachPane(m_collisionEditorPanel);
 			delete m_collisionEditorPanel;
-		}
-
-		if(m_collisionTypeDialog)
-		{
-			delete m_collisionTypeDialog;
 		}
 
 		//Delete previous, set new
@@ -161,14 +162,19 @@ void MainWindow::SetProject(Project* project)
 			RefreshTileset();
 			RefreshCollisionSet();
 
-			//New project, open default panels
+			//New project, open left panels
 			ShowPanelToolbox();
 			ShowPanelPalettes();
 			ShowPanelCollisionTypes();
+
+			//Open right panels
 			ShowPanelTiles();
-			ShowPanelStamps();
+			ShowPanelCollisionTiles();
 			ShowPanelTileEditor();
 			ShowPanelCollisionEditor();
+			ShowPanelStamps();
+
+			//Open centre panels
 			ShowPanelMap();
 
 			//Sync settings widgets states
@@ -187,6 +193,15 @@ void MainWindow::SetPanelCaptions()
 		wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(m_tilesPanel.get());
 		wxString caption;
 		caption << "Tileset " << "(" << m_project->GetTileset().GetCount() << ")";
+		paneInfo.Caption(caption);
+		m_auiManager.Update();
+	}
+
+	if(m_collisionTilesPanel.get())
+	{
+		wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(m_collisionTilesPanel.get());
+		wxString caption;
+		caption << "Collision Tileset " << "(" << m_project->GetCollisionTileset().GetCount() << ")";
 		paneInfo.Caption(caption);
 		m_auiManager.Update();
 	}
@@ -278,6 +293,39 @@ void MainWindow::ShowPanelTiles()
 		{
 			m_tilesPanel->Show();
 		}
+
+		SetPanelCaptions();
+	}
+}
+
+void MainWindow::ShowPanelCollisionTiles()
+{
+	if(m_project.get())
+	{
+		if(!m_collisionTilesPanel)
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 450);
+			paneInfo.Right();
+			paneInfo.Row(0);
+			paneInfo.Caption("Tileset");
+			paneInfo.CaptionVisible(true);
+
+			m_collisionTilesPanel = new CollisionTilesPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_collisionTilesPanel, paneInfo);
+			m_collisionTilesPanel->Show();
+
+			m_collisionTilesPanel->SetProject(m_project.get());
+		}
+
+		if(!m_collisionTilesPanel->IsShown())
+		{
+			m_collisionTilesPanel->Show();
+		}
+
+		SetPanelCaptions();
 	}
 }
 
@@ -290,9 +338,9 @@ void MainWindow::ShowPanelStamps()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 450);
+			paneInfo.BestSize(300, 800);
 			paneInfo.Right();
-			paneInfo.Row(1);
+			paneInfo.Row(2);
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
@@ -386,9 +434,9 @@ void MainWindow::ShowPanelTileEditor()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(100, 100);
+			paneInfo.BestSize(300, 450);
 			paneInfo.Right();
-			paneInfo.Row(0);
+			paneInfo.Row(1);
 			paneInfo.Caption("Tile");
 			paneInfo.CaptionVisible(true);
 
@@ -418,8 +466,7 @@ void MainWindow::ShowPanelCollisionEditor()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(100, 100);
-			paneInfo.FloatingSize(100, 100);
+			paneInfo.BestSize(300, 450);
 			paneInfo.Right();
 			paneInfo.Row(1);
 			paneInfo.Caption("Collision Tile");
@@ -467,6 +514,7 @@ void MainWindow::RefreshAll()
 	{
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
+		m_project->InvalidateCollisionTiles(true);
 		m_project->InvalidateCollisionTypes(true);
 		m_project->InvalidateStamps(true);
 	}
@@ -477,6 +525,7 @@ void MainWindow::RefreshAll()
 	{
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
+		m_project->InvalidateCollisionTiles(false);
 		m_project->InvalidateCollisionTypes(false);
 		m_project->InvalidateStamps(false);
 	}
@@ -491,9 +540,6 @@ void MainWindow::RedrawAll()
 	if(m_palettesPanel)
 		m_palettesPanel->Refresh();
 
-	if(m_collisionTypesPanel)
-		m_collisionTypesPanel->Refresh();
-
 	if(m_tilesPanel)
 		m_tilesPanel->Refresh();
 
@@ -506,6 +552,12 @@ void MainWindow::RedrawAll()
 	if(m_tileEditorPanel)
 		m_tileEditorPanel->Refresh();
 
+	if(m_collisionTilesPanel)
+		m_collisionTilesPanel->Refresh();
+
+	if(m_collisionTypesPanel)
+		m_collisionTypesPanel->Refresh();
+
 	if(m_collisionEditorPanel)
 		m_collisionEditorPanel->Refresh();
 }
@@ -516,6 +568,7 @@ void MainWindow::RefreshTileset()
 	{
 		//Recreate tileset texture
 		m_renderResources->CreateTilesetTexture();
+		m_renderResources->CreateCollisionTilesTexture();
 	}
 }
 
@@ -524,7 +577,7 @@ void MainWindow::RefreshCollisionSet()
 	if(m_project.get())
 	{
 		//Recreate collision set texture
-		m_renderResources->CreateCollisionTexture();
+		m_renderResources->CreateCollisionTypesTexture();
 	}
 }
 
@@ -534,6 +587,7 @@ void MainWindow::RefreshPanel(Panel panel)
 	{
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
+		m_project->InvalidateCollisionTiles(true);
 		m_project->InvalidateCollisionTypes(true);
 		m_project->InvalidateStamps(true);
 
@@ -546,6 +600,7 @@ void MainWindow::RefreshPanel(Panel panel)
 	{
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
+		m_project->InvalidateCollisionTiles(false);
 		m_project->InvalidateCollisionTypes(false);
 		m_project->InvalidateStamps(false);
 	}
@@ -571,6 +626,10 @@ void MainWindow::RedrawPanel(Panel panel)
 		if(m_palettesPanel)
 			m_palettesPanel->Refresh();
 		break;
+	case ePanelCollisionTiles:
+		if(m_collisionTilesPanel)
+			m_collisionTilesPanel->Refresh();
+		break;
 	case ePanelCollisionTypes:
 		if(m_collisionTypesPanel)
 			m_collisionTypesPanel->Refresh();
@@ -579,7 +638,7 @@ void MainWindow::RedrawPanel(Panel panel)
 		if(m_tileEditorPanel)
 			m_tileEditorPanel->Refresh();
 		break;
-	case ePanelCollisionEditor:
+	case ePanelCollisionTileEditor:
 		if(m_collisionEditorPanel)
 			m_collisionEditorPanel->Refresh();
 		break;
@@ -779,9 +838,6 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 			//Erase tile
 			tileset.RemoveTile(tileId);
 
-			//Fill with tile 0
-			TileId blankTile = 0;
-
 			//Find all uses of tile, set blank
 			for(int x = 0; x < map.GetWidth(); x++)
 			{
@@ -789,7 +845,7 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 				{
 					if(map.GetTile(x, y) == tileId)
 					{
-						map.SetTile(x, y, blankTile);
+						map.SetTile(x, y, InvalidTileId);
 						map.SetTileFlags(x, y, 0);
 					}
 				}
@@ -801,6 +857,68 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 
 			//Clear erase tile
 			m_project->SetEraseTile(InvalidTileId);
+
+			//Recreate tileset texture
+			RefreshTileset();
+
+			//Revert to select tool
+			SetMapTool(eToolSelectTiles);
+
+			//Refresh
+			RefreshAll();
+		}
+	}
+}
+
+void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		//Add new collision tile
+		CollisionTileId tileId = m_project->GetCollisionTileset().AddCollisionTile();
+
+		//Recreate tileset texture
+		RefreshTileset();
+
+		//Set as current paint collision tile
+		m_project->SetPaintCollisionTile(tileId);
+
+		//Set paint tool
+		SetMapTool(eToolPaintCollisionTile);
+
+		//Refresh collision tiles and collision tile editor panels
+		RefreshPanel(ePanelCollisionTiles);
+		RefreshPanel(ePanelCollisionTileEditor);
+	}
+}
+
+void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		CollisionTileId tileId = m_project->GetPaintCollisionTile();
+		if(tileId != InvalidTileId)
+		{
+			Map& map = m_project->GetMap();
+			CollisionTileset& tileset = m_project->GetCollisionTileset();
+
+			//Erase tile
+			tileset.RemoveCollisionTile(tileId);
+
+			//Find all uses of tile, set blank
+			for(int x = 0; x < map.GetWidth(); x++)
+			{
+				for(int y = 0; y < map.GetHeight(); y++)
+				{
+					//if(map.GetCollisionTile(x, y) == tileId)
+					//{
+					//	map.SetCollisionTile(x, y, InvalidCollisionTileId);
+					//}
+				}
+			}
+
+			//Clear paint collision tile
+			m_project->SetPaintCollisionTile(InvalidCollisionTileId);
 
 			//Recreate tileset texture
 			RefreshTileset();
@@ -915,17 +1033,6 @@ void MainWindow::OnBtnShowOutlines(wxCommandEvent& event)
 		m_project->SetShowStampOutlines(!m_project->GetShowStampOutlines());
 		RefreshPanel(ePanelMap);
 		RefreshPanel(ePanelStamps);
-	}
-}
-
-void MainWindow::OnBtnCollisionConfig(wxRibbonButtonBarEvent& event)
-{
-	if(m_project.get())
-	{
-		if(!m_collisionTypeDialog)
-			m_collisionTypeDialog = new CollisionTypeDialog(*this, *m_project);
-
-		m_collisionTypeDialog->Show();
 	}
 }
 

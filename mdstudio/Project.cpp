@@ -15,11 +15,13 @@ Project::Project()
 {
 	m_paintColour = 0;
 	m_paintCollisionType = NULL;
+	m_paintCollisionTile = InvalidCollisionTileId;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
+	m_collisionTilesInvalidated = true;
 	m_collisionTypesInvalidated = true;
 	m_stampsInvalidated = true;
 	m_name = "untitled";
@@ -35,6 +37,7 @@ void Project::Clear()
 {
 	m_paintColour = 0;
 	m_paintCollisionType = NULL;
+	m_paintCollisionTile = InvalidCollisionTileId;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
 	m_paintStamp = InvalidStampId;
@@ -230,6 +233,16 @@ void Project::SetPaintCollisionType(CollisionType* type)
 const CollisionType* Project::GetPaintCollisionType() const
 {
 	return m_paintCollisionType;
+}
+
+void Project::SetPaintCollisionTile(CollisionTileId tile)
+{
+	m_paintCollisionTile = tile;
+}
+
+CollisionTileId Project::GetPaintCollisionTile() const
+{
+	return m_paintCollisionTile;
 }
 
 void Project::SetPaintTile(TileId tile)
@@ -515,7 +528,6 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 				Palette& palette = m_palettes[paletteId];
 
 				Tile tile;
-				tile.SetPaletteId(paletteId);
 
 				//Find pixel colours from palette
 				for(int pixelX = 0; pixelX < tileWidth; pixelX++)
@@ -555,6 +567,7 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 					tileId = m_tileset.AddTile();
 					Tile* newTile = m_tileset.GetTile(tileId);
 					newTile->CopyPixels(tile);
+					newTile->SetPaletteId(paletteId);
 
 					//Re-add to hash map
 					m_tileset.HashChanged(tileId);
@@ -640,7 +653,7 @@ bool Project::ExportCollision(const std::string& filename) const
 		std::stringstream stream;
 		stream << "collision_" << m_name << ":" << std::endl;
 
-		m_tileset.ExportCollision(stream);
+		m_collisionTileset.Export(stream);
 
 		stream << std::endl;
 

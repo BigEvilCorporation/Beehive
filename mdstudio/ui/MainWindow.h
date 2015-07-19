@@ -16,13 +16,13 @@
 #include "Tool.h"
 
 #include "PalettesPanel.h"
-#include "CollisionTypePanel.h"
 #include "TilesPanel.h"
 #include "StampsPanel.h"
 #include "MapPanel.h"
 #include "TileEditorPanel.h"
+#include "CollisionTypePanel.h"
+#include "CollisionTilesPanel.h"
 #include "CollisionEditorPanel.h"
-#include "CollisionTypeDialog.h"
 
 #include "../Project.h"
 
@@ -37,9 +37,10 @@ public:
 		ePanelStamps,
 		ePanelTiles,
 		ePanelPalettes,
-		ePanelCollisionTypes,
 		ePanelTileEditor,
-		ePanelCollisionEditor
+		ePanelCollisionTiles,
+		ePanelCollisionTypes,
+		ePanelCollisionTileEditor
 	};
 
 	MainWindow();
@@ -47,11 +48,12 @@ public:
 
 	//Open panels
 	void ShowPanelPalettes();
-	void ShowPanelCollisionTypes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
 	void ShowPanelMap();
 	void ShowPanelTileEditor();
+	void ShowPanelCollisionTiles();
+	void ShowPanelCollisionTypes();
 	void ShowPanelCollisionEditor();
 
 	//Open toolbox
@@ -83,6 +85,8 @@ protected:
 	virtual void OnBtnTilesImport(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesCreate(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesDelete(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnColTilesCreate(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnColTilesDelete(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsMapEdit(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsTiles(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event) { event.Skip(); }
@@ -92,7 +96,6 @@ protected:
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 	virtual void OnBtnShowOutlines(wxCommandEvent& event);
-	virtual void OnBtnCollisionConfig(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event);
 
 	void OnBtnTool(wxCommandEvent& event);
@@ -108,15 +111,15 @@ private:
 
 	wxAuiManager m_auiManager;
 
+	wxWeakRef<MapToolbox> m_toolboxPanel;
 	wxWeakRef<PalettesPanel> m_palettesPanel;
-	wxWeakRef<CollisionTypePanel> m_collisionTypesPanel;
+	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<TilesPanel> m_tilesPanel;
 	wxWeakRef<StampsPanel> m_stampsPanel;
-	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<TileEditorPanel> m_tileEditorPanel;
+	wxWeakRef<CollisionTilesPanel> m_collisionTilesPanel;
+	wxWeakRef<CollisionTypePanel> m_collisionTypesPanel;
 	wxWeakRef<CollisionEditorPanel> m_collisionEditorPanel;
-	wxWeakRef<MapToolbox> m_toolboxPanel;
-	wxWeakRef<CollisionTypeDialog> m_collisionTypeDialog;
 
 	ProjectPtr m_project;
 

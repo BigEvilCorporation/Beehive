@@ -17,7 +17,7 @@
 
 #include "UIBase.h"
 #include "../Project.h"
-#include "../Collision.h"
+#include "../CollisionType.h"
 
 class MainWindow;
 
