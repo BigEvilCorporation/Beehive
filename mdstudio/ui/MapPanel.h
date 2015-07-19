@@ -38,15 +38,25 @@ protected:
 
 private:
 
+	//Create collision canvas
+	void CreateCollisionCanvas(int width, int height);
+
 	//Rendering
 	void RenderPaintPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampOutlines(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
 	//Paint whole map to canvas
 	void PaintMap(const Map& map);
+
+	//Paint whole collision map to canvas
+	void PaintCollisionMap(const Map& map);
+
+	//Paint collision tile to canvas
+	void PaintCollisionTile(CollisionTileId tileId, int x, int y);
 
 	//Create stamp preview primitive
 	void CreateStampPreview(Stamp* stamp);
@@ -55,6 +65,7 @@ private:
 	void ResetToolData();
 
 	//Rendering primitives
+	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
 
 	//Current tool

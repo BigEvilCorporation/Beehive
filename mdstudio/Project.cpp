@@ -98,6 +98,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_palettes, "palettes");
 	archive.Serialise(m_tileset, "tileset");
+	archive.Serialise(m_collisionTileset, "collisionTileset");
 	archive.Serialise(m_map, "map");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_collisionTypes, "collisionTypes");

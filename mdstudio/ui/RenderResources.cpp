@@ -179,7 +179,7 @@ void RenderResources::CreateCollisionTilesTexture()
 	m_collisionTilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
 	u32 textureWidth = m_collisionTilesetSizeSq * tileWidth;
 	u32 textureHeight = m_collisionTilesetSizeSq * tileHeight;
-	u32 bytesPerPixel = 3;
+	u32 bytesPerPixel = 4;
 	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
 	m_cellSizeCollisionTilesetTexSpaceSq = 1.0f / (float)m_collisionTilesetSizeSq;
 
@@ -200,43 +200,48 @@ void RenderResources::CreateCollisionTilesTexture()
 				//Invert Y for OpenGL
 				int pixelY_OGL = tileHeight - 1 - pixelY;
 
-				u8 collisionBits = tile.GetPixelCollisionBits(pixelX, pixelY);
+				u8 collisionBits = tile.GetPixelCollisionBits(pixelX, pixelY_OGL);
 
+				//TODO: Read pixel data from icon
+				static const ion::Colour colours[8] =
+				{
+					ion::Colour(1.0f, 0.0f, 0.0f),
+					ion::Colour(0.0f, 1.0f, 0.0f),
+					ion::Colour(0.0f, 0.0f, 1.0f),
+					ion::Colour(1.0f, 1.0f, 0.0f),
+					ion::Colour(1.0f, 0.0f, 1.0f),
+					ion::Colour(0.0f, 1.0f, 1.0f),
+					ion::Colour(1.0f, 1.0f, 1.0f),
+					ion::Colour(0.0f, 0.0f, 0.0f)
+				};
+
+				//Transparent by default
+				ion::Colour colour(0.0f, 0.0f, 0.0f, 0.0f);
+
+				//Get colour from collision bits
 				for(int i = 0; i < 8; i++)
 				{
 					if(collisionBits & (1 << i))
 					{
-
-						//TODO: Read pixel data from icon
-						static const Colour colours[8] = 
-						{
-							Colour(255, 0, 0),
-							Colour(0, 255, 0),
-							Colour(0, 0, 255),
-							Colour(255, 255, 0),
-							Colour(255, 0, 255),
-							Colour(0, 255, 255),
-							Colour(255, 255, 255),
-							Colour(0, 0, 0)
-						};
-
-						const Colour& colour = colours[i];
-
-						int destPixelX = (x * tileWidth) + pixelX;
-						int destPixelY = (y * tileHeight) + pixelY;
-						u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-						u32 dataOffset = pixelIdx * bytesPerPixel;
-						ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
-						data[dataOffset] = colour.GetRed();
-						data[dataOffset + 1] = colour.GetGreen();
-						data[dataOffset + 2] = colour.GetBlue();
+						colour = colours[i];
+						break;
 					}
 				}
+
+				int destPixelX = (x * tileWidth) + pixelX;
+				int destPixelY = (y * tileHeight) + pixelY;
+				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+				u32 dataOffset = pixelIdx * bytesPerPixel;
+				ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+				data[dataOffset] = colour.r * 255;
+				data[dataOffset + 1] = colour.g * 255;
+				data[dataOffset + 2] = colour.b * 255;
+				data[dataOffset + 3] = colour.a * 255;
 			}
 		}
 	}
 
-	m_textures[eTextureCollisionTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureCollisionTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
 	m_textures[eTextureCollisionTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureCollisionTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureCollisionTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
@@ -371,21 +376,18 @@ void RenderResources::GetCollisionTileTexCoords(CollisionTileId tileId, ion::ren
 {
 	if(tileId == InvalidCollisionTileId)
 	{
-		//Invalid tile, use top-left pixel
-		float onePixelTexSpace = m_cellSizeCollisionTilesetTexSpaceSq / 8.0f;
-	
 		//Top left
-		texCoords[0].x = 0.0f;
-		texCoords[0].y = 0.0f;
+		texCoords[0].x = 1.0f;
+		texCoords[0].y = 1.0f;
 		//Bottom left
-		texCoords[1].x = 0.0f;
-		texCoords[1].y = onePixelTexSpace;
+		texCoords[1].x = 1.0f;
+		texCoords[1].y = 1.0f;
 		//Bottom right
-		texCoords[2].x = onePixelTexSpace;
-		texCoords[2].y = onePixelTexSpace;
+		texCoords[2].x = 1.0f;
+		texCoords[2].y = 1.0f;
 		//Top right
-		texCoords[3].x = onePixelTexSpace;
-		texCoords[3].y = 0.0f;
+		texCoords[3].x = 1.0f;
+		texCoords[3].y = 1.0f;
 	}
 	else
 	{
@@ -492,39 +494,44 @@ void RenderResources::SetCollisionTilesetTexPixel(CollisionTileId tileId, const 
 	{
 		if(CollisionTile* tile = m_project->GetCollisionTileset().GetCollisionTile(tileId))
 		{
+			//TODO: Read pixel data from icon
+			static const ion::Colour colours[8] =
+			{
+				ion::Colour(1.0f, 0.0f, 0.0f),
+				ion::Colour(0.0f, 1.0f, 0.0f),
+				ion::Colour(0.0f, 0.0f, 1.0f),
+				ion::Colour(1.0f, 1.0f, 0.0f),
+				ion::Colour(1.0f, 0.0f, 1.0f),
+				ion::Colour(0.0f, 1.0f, 1.0f),
+				ion::Colour(1.0f, 1.0f, 1.0f),
+				ion::Colour(0.0f, 0.0f, 0.0f)
+			};
+
+			//Transparent by default
+			ion::Colour colour(0.0f, 0.0f, 0.0f, 0.0f);
+
+			//Get colour from collision bits
 			for(int i = 0; i < 8; i++)
 			{
 				if(collisionBits & (1 << i))
 				{
-
-					//TODO: Read pixel data from icon
-					static const Colour colours[8] =
-					{
-						Colour(255, 0, 0),
-						Colour(0, 255, 0),
-						Colour(0, 0, 255),
-						Colour(255, 255, 0),
-						Colour(255, 0, 255),
-						Colour(0, 255, 255),
-						Colour(255, 255, 255),
-						Colour(0, 0, 0)
-					};
-
-					const Colour& colour = colours[i];
-					const int tileWidth = 8;
-					const int tileHeight = 8;
-
-					u32 x = tileId % m_collisionTilesetSizeSq;
-					u32 y = tileId / m_collisionTilesetSizeSq;
-
-					//Invert Y for OpenGL
-					int y_inv = tileHeight - 1 - pixel.y;
-
-					ion::Vector2i pixelPos((x * tileWidth) + pixel.x, (y * tileHeight) + y_inv);
-
-					m_textures[eTextureCollisionTileset]->SetPixel(pixelPos, ion::Colour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
+					colour = colours[i];
+					break;
 				}
 			}
+			
+			const int tileWidth = 8;
+			const int tileHeight = 8;
+
+			u32 x = tileId % m_collisionTilesetSizeSq;
+			u32 y = tileId / m_collisionTilesetSizeSq;
+
+			//Invert Y for OpenGL
+			int y_inv = tileHeight - 1 - pixel.y;
+
+			ion::Vector2i pixelPos((x * tileWidth) + pixel.x, (y * tileHeight) + y_inv);
+
+			m_textures[eTextureCollisionTileset]->SetPixel(pixelPos, colour);
 		}
 	}
 }

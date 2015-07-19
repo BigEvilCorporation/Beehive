@@ -910,10 +910,10 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 			{
 				for(int y = 0; y < map.GetHeight(); y++)
 				{
-					//if(map.GetCollisionTile(x, y) == tileId)
-					//{
-					//	map.SetCollisionTile(x, y, InvalidCollisionTileId);
-					//}
+					if(map.GetCollisionTile(x, y) == tileId)
+					{
+						map.SetCollisionTile(x, y, InvalidCollisionTileId);
+					}
 				}
 			}
 
