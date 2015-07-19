@@ -19,6 +19,7 @@ enum ToolType
 	eToolSelectTiles,
 	eToolSelectStamp,
 	eToolPaintTile,
+	eToolPaintCollisionTile,
 	eToolPaintStamp,
 	eToolClone,
 	eToolCreateStamp,

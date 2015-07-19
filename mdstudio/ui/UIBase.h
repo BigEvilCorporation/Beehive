@@ -28,14 +28,12 @@
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
-#include <wx/toolbar.h>
-#include <wx/listctrl.h>
 #include <wx/stattext.h>
-#include <wx/bmpbuttn.h>
-#include <wx/button.h>
-#include <wx/textctrl.h>
 #include <wx/spinctrl.h>
+#include <wx/button.h>
 #include <wx/dialog.h>
+#include <wx/bmpbuttn.h>
+#include <wx/textctrl.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 
@@ -60,24 +58,21 @@
 #define wxID_BTN_TILES_DELETE 1016
 #define wxID_BTN_STAMPS_CREATE 1017
 #define wxID_BTN_STAMPS_DELETE 1018
-#define wxID_BTN_COLLISION_CONFIG 1019
-#define wxID_BTN_COLLISION_TILEEDIT 1020
-#define wxID_COL_TOOL_ADD 1021
-#define wxID_COL_TOOL_DEL 1022
-#define wxID_BTN_COL_IMG 1023
-#define wxID_BTN_CANCEL 1024
-#define wxID_TOOL_SELECTTILE 1025
-#define wxID_TOOL_SELECTSTAMP 1026
-#define wxID_TOOL_PAINT 1027
-#define wxID_TOOL_STAMP 1028
-#define wxID_TOOL_TILEPICKER 1029
-#define wxID_TOOL_STAMPPICKER 1030
-#define wxID_TOOL_FLIPX 1031
-#define wxID_TOOL_FLIPY 1032
-#define wxID_TOOL_FILL 1033
-#define wxID_TOOL_CLONE 1034
-#define wxID_TOOL_CREATESTAMP 1035
-#define wxID_TOOL_REMOVESTAMP 1036
+#define wxID_BTN_COL_TILES_CREATE 1019
+#define wxID_BTN_COL_TILES_DELETE 1020
+#define wxID_BTN_CANCEL 1021
+#define wxID_TOOL_SELECTTILE 1022
+#define wxID_TOOL_SELECTSTAMP 1023
+#define wxID_TOOL_PAINT 1024
+#define wxID_TOOL_STAMP 1025
+#define wxID_TOOL_TILEPICKER 1026
+#define wxID_TOOL_STAMPPICKER 1027
+#define wxID_TOOL_FLIPX 1028
+#define wxID_TOOL_FLIPY 1029
+#define wxID_TOOL_FILL 1030
+#define wxID_TOOL_CLONE 1031
+#define wxID_TOOL_CREATESTAMP 1032
+#define wxID_TOOL_REMOVESTAMP 1033
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -125,8 +120,8 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-		virtual void OnBtnCollisionConfig( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-		virtual void OnBtnCollisionTileEdit( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnColTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnColTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	
 	public:
@@ -134,42 +129,6 @@ class MainWindowBase : public wxFrame
 		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 720,489 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowBase();
-	
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class CollisionTypeDialogBase
-///////////////////////////////////////////////////////////////////////////////
-class CollisionTypeDialogBase : public wxFrame 
-{
-	private:
-	
-	protected:
-		wxToolBar* m_toolBar1;
-		wxToolBarToolBase* m_toolAddCollisionType; 
-		wxToolBarToolBase* m_toolRemoveCollisionType; 
-		wxListCtrl* m_listCollisionTypes;
-		wxStaticText* m_staticText6;
-		wxBitmapButton* m_buttonIcon;
-		wxStaticText* m_staticText4;
-		wxTextCtrl* m_textName;
-		wxStaticText* m_staticText5;
-		wxSpinCtrl* m_spinBit;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnAddType( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnRemoveType( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnTypeSelected( wxListEvent& event ) { event.Skip(); }
-		virtual void OnIconChange( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnNameChange( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBitChange( wxSpinEvent& event ) { event.Skip(); }
-		
-	
-	public:
-		
-		CollisionTypeDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Collision Pixel Types"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 316,298 ), long style = wxCAPTION|wxCLOSE_BOX|wxFRAME_NO_TASKBAR|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
-		
-		~CollisionTypeDialogBase();
 	
 };
 

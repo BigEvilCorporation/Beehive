@@ -149,7 +149,7 @@ void CollisionTypePanel::OnMouse(wxMouseEvent& event)
 				Refresh();
 
 				//Refresh collision tile editor panel
-				m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionEditor);
+				m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionTileEditor);
 			}
 
 			if(collisionTypeIndex < m_project->GetCollisionTypeCount())

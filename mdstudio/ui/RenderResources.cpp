@@ -11,6 +11,7 @@
 RenderResources::RenderResources()
 {
 	m_tilesetSizeSq = 1;
+	m_collisionTilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
 	m_project = NULL;
 
@@ -57,11 +58,17 @@ RenderResources::RenderResources()
 	m_materials[eMaterialTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
 	m_materials[eMaterialTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
-	//Setup textured collision set material
-	m_materials[eMaterialCollisionSet]->AddDiffuseMap(m_textures[eTextureCollisionSet]);
-	m_materials[eMaterialCollisionSet]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialCollisionSet]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
-	m_materials[eMaterialCollisionSet]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+	//Setup textured collision tileset material
+	m_materials[eMaterialCollisionTileset]->AddDiffuseMap(m_textures[eTextureCollisionTileset]);
+	m_materials[eMaterialCollisionTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialCollisionTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
+	m_materials[eMaterialCollisionTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+
+	//Setup textured collision types material
+	m_materials[eMaterialCollisionTypes]->AddDiffuseMap(m_textures[eTextureCollisionTypes]);
+	m_materials[eMaterialCollisionTypes]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialCollisionTypes]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
+	m_materials[eMaterialCollisionTypes]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
@@ -161,7 +168,83 @@ void RenderResources::CreateTilesetTexture()
 	delete data;
 }
 
-void RenderResources::CreateCollisionTexture()
+void RenderResources::CreateCollisionTilesTexture()
+{
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	const CollisionTileset& tileset = m_project->GetCollisionTileset();
+
+	u32 numTiles = tileset.GetCount();
+	m_collisionTilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
+	u32 textureWidth = m_collisionTilesetSizeSq * tileWidth;
+	u32 textureHeight = m_collisionTilesetSizeSq * tileHeight;
+	u32 bytesPerPixel = 3;
+	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+	m_cellSizeCollisionTilesetTexSpaceSq = 1.0f / (float)m_collisionTilesetSizeSq;
+
+	u8* data = new u8[textureSize];
+	ion::memory::MemSet(data, 0, textureSize);
+
+	for(int i = 0; i < tileset.GetCount(); i++)
+	{
+		const CollisionTile& tile = *tileset.GetCollisionTile(i);
+
+		u32 x = i % m_collisionTilesetSizeSq;
+		u32 y = i / m_collisionTilesetSizeSq;
+
+		for(int pixelY = 0; pixelY < 8; pixelY++)
+		{
+			for(int pixelX = 0; pixelX < 8; pixelX++)
+			{
+				//Invert Y for OpenGL
+				int pixelY_OGL = tileHeight - 1 - pixelY;
+
+				u8 collisionBits = tile.GetPixelCollisionBits(pixelX, pixelY);
+
+				for(int i = 0; i < 8; i++)
+				{
+					if(collisionBits & (1 << i))
+					{
+
+						//TODO: Read pixel data from icon
+						static const Colour colours[8] = 
+						{
+							Colour(255, 0, 0),
+							Colour(0, 255, 0),
+							Colour(0, 0, 255),
+							Colour(255, 255, 0),
+							Colour(255, 0, 255),
+							Colour(0, 255, 255),
+							Colour(255, 255, 255),
+							Colour(0, 0, 0)
+						};
+
+						const Colour& colour = colours[i];
+
+						int destPixelX = (x * tileWidth) + pixelX;
+						int destPixelY = (y * tileHeight) + pixelY;
+						u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+						u32 dataOffset = pixelIdx * bytesPerPixel;
+						ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+						data[dataOffset] = colour.GetRed();
+						data[dataOffset + 1] = colour.GetGreen();
+						data[dataOffset + 2] = colour.GetBlue();
+					}
+				}
+			}
+		}
+	}
+
+	m_textures[eTextureCollisionTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureCollisionTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
+
+	delete data;
+}
+
+void RenderResources::CreateCollisionTypesTexture()
 {
 	const int iconWidth = 16;
 	const int iconHeight = 16;
@@ -170,11 +253,11 @@ void RenderResources::CreateCollisionTexture()
 	const u32 bytesPerPixelDest = 4;
 
 	u32 numCollisionTypes = m_project->GetCollisionTypeCount() + 1;
-	m_collisionSetSizeSq = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes));
-	u32 textureWidth =  m_collisionSetSizeSq * iconWidth;
-	u32 textureHeight = m_collisionSetSizeSq * iconHeight;
+	m_collisionTypesSizeSq = (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes));
+	u32 textureWidth =  m_collisionTypesSizeSq * iconWidth;
+	u32 textureHeight = m_collisionTypesSizeSq * iconHeight;
 	u32 textureSize = textureWidth * textureHeight * bytesPerPixelDest;
-	m_cellSizeCollisionTexSpaceSq = 1.0f / (float)m_collisionSetSizeSq;
+	m_cellSizeCollisionTypesTexSpaceSq = 1.0f / (float)m_collisionTypesSizeSq;
 
 	u8* data = new u8[textureSize];
 	ion::memory::MemSet(data, 0, textureSize);
@@ -195,8 +278,8 @@ void RenderResources::CreateCollisionTexture()
 			}
 		}
 
-		u32 x = index % m_collisionSetSizeSq;
-		u32 y = index / m_collisionSetSizeSq;
+		u32 x = index % m_collisionTypesSizeSq;
+		u32 y = index / m_collisionTypesSizeSq;
 
 		for(int pixelY = 0; pixelY < iconHeight; pixelY++)
 		{
@@ -226,10 +309,10 @@ void RenderResources::CreateCollisionTexture()
 		}
 	}
 
-	m_textures[eTextureCollisionSet]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
-	m_textures[eTextureCollisionSet]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureCollisionSet]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureCollisionSet]->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_textures[eTextureCollisionTypes]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureCollisionTypes]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionTypes]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::eWrapClamp);
 
 	delete data;
 }
@@ -284,6 +367,53 @@ void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texC
 	}
 }
 
+void RenderResources::GetCollisionTileTexCoords(CollisionTileId tileId, ion::render::TexCoord texCoords[4]) const
+{
+	if(tileId == InvalidCollisionTileId)
+	{
+		//Invalid tile, use top-left pixel
+		float onePixelTexSpace = m_cellSizeCollisionTilesetTexSpaceSq / 8.0f;
+	
+		//Top left
+		texCoords[0].x = 0.0f;
+		texCoords[0].y = 0.0f;
+		//Bottom left
+		texCoords[1].x = 0.0f;
+		texCoords[1].y = onePixelTexSpace;
+		//Bottom right
+		texCoords[2].x = onePixelTexSpace;
+		texCoords[2].y = onePixelTexSpace;
+		//Top right
+		texCoords[3].x = onePixelTexSpace;
+		texCoords[3].y = 0.0f;
+	}
+	else
+	{
+		//Map tile to X/Y on tileset texture
+		int tilesetX = (tileId % m_collisionTilesetSizeSq);
+		int tilesetY = (tileId / m_collisionTilesetSizeSq);
+		ion::Vector2 textureBottomLeft(m_cellSizeCollisionTilesetTexSpaceSq * tilesetX, m_cellSizeCollisionTilesetTexSpaceSq * tilesetY);
+	
+		float top = textureBottomLeft.y + m_cellSizeCollisionTilesetTexSpaceSq;
+		float left = textureBottomLeft.x;
+		float bottom = textureBottomLeft.y;
+		float right = textureBottomLeft.x + m_cellSizeCollisionTilesetTexSpaceSq;
+	
+		//Top left
+		texCoords[0].x = left;
+		texCoords[0].y = top;
+		//Bottom left
+		texCoords[1].x = left;
+		texCoords[1].y = bottom;
+		//Bottom right
+		texCoords[2].x = right;
+		texCoords[2].y = bottom;
+		//Top right
+		texCoords[3].x = right;
+		texCoords[3].y = top;
+	}
+}
+
 void RenderResources::GetCollisionTypeTexCoords(u8 collisionBit, ion::render::TexCoord texCoords[4]) const
 {
 	int index = -1;
@@ -306,14 +436,14 @@ void RenderResources::GetCollisionTypeTexCoords(u8 collisionBit, ion::render::Te
 	}
 
 	//Map bit to X/Y on collision set texture
-	int tilesetX = (index % m_collisionSetSizeSq);
-	int tilesetY = (index / m_collisionSetSizeSq);
-	ion::Vector2 textureBottomLeft(m_cellSizeCollisionTexSpaceSq * tilesetX, m_cellSizeCollisionTexSpaceSq * tilesetY);
+	int tilesetX = (index % m_collisionTypesSizeSq);
+	int tilesetY = (index / m_collisionTypesSizeSq);
+	ion::Vector2 textureBottomLeft(m_cellSizeCollisionTypesTexSpaceSq * tilesetX, m_cellSizeCollisionTypesTexSpaceSq * tilesetY);
 
-	float top = (textureBottomLeft.y + m_cellSizeCollisionTexSpaceSq);
+	float top = (textureBottomLeft.y + m_cellSizeCollisionTypesTexSpaceSq);
 	float left = textureBottomLeft.x;
 	float bottom = textureBottomLeft.y;
-	float right = (textureBottomLeft.x + m_cellSizeCollisionTexSpaceSq);
+	float right = (textureBottomLeft.x + m_cellSizeCollisionTypesTexSpaceSq);
 
 	//Top left
 	texCoords[0].x = left;
@@ -351,6 +481,49 @@ void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pix
 				ion::Vector2i pixelPos((x * tileWidth) + pixel.x, (y * tileHeight) + y_inv);
 
 				m_textures[eTextureTileset]->SetPixel(pixelPos, ion::Colour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
+			}
+		}
+	}
+}
+
+void RenderResources::SetCollisionTilesetTexPixel(CollisionTileId tileId, const ion::Vector2i& pixel, u8 collisionBits)
+{
+	if(m_project && m_textures[eTextureCollisionTileset])
+	{
+		if(CollisionTile* tile = m_project->GetCollisionTileset().GetCollisionTile(tileId))
+		{
+			for(int i = 0; i < 8; i++)
+			{
+				if(collisionBits & (1 << i))
+				{
+
+					//TODO: Read pixel data from icon
+					static const Colour colours[8] =
+					{
+						Colour(255, 0, 0),
+						Colour(0, 255, 0),
+						Colour(0, 0, 255),
+						Colour(255, 255, 0),
+						Colour(255, 0, 255),
+						Colour(0, 255, 255),
+						Colour(255, 255, 255),
+						Colour(0, 0, 0)
+					};
+
+					const Colour& colour = colours[i];
+					const int tileWidth = 8;
+					const int tileHeight = 8;
+
+					u32 x = tileId % m_collisionTilesetSizeSq;
+					u32 y = tileId / m_collisionTilesetSizeSq;
+
+					//Invert Y for OpenGL
+					int y_inv = tileHeight - 1 - pixel.y;
+
+					ion::Vector2i pixelPos((x * tileWidth) + pixel.x, (y * tileHeight) + y_inv);
+
+					m_textures[eTextureCollisionTileset]->SetPixel(pixelPos, ion::Colour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
+				}
 			}
 		}
 	}

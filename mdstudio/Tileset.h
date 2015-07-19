@@ -16,7 +16,6 @@
 
 class Tileset
 {
-	//typedef std::map<u32, std::vector<TileId> > HashMap;
 	typedef std::map<u64, TileId> HashMap;
 
 public:
@@ -35,7 +34,6 @@ public:
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
-	void ExportCollision(std::stringstream& stream) const;
 	
 private:
 	enum HashOrientation

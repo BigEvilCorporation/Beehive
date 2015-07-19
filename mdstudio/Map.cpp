@@ -235,14 +235,14 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 			const TileDesc& tileDesc = tiles[(y * m_width) + x];
 			u8 paletteId = 0;
 
-			//Tile ids start from 1, but blank tiles have id 0
-			u32 tileId = max(1, tileDesc.m_id);
+			//If blank tile, use background tile
+			u32 tileId = (tileDesc.m_id == InvalidTileId) ? 0 : tileDesc.m_id;
 
 			const Tile* tile = project.GetTileset().GetTile(tileId);
 			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
 
 			//Generate components
-			u16 tileIndex = (tileId-1) & 0x7FF;						//Bottom 11 bits (index from 0)
+			u16 tileIndex = tileId & 0x7FF;						//Bottom 11 bits (index from 0)
 			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 11 : 0;	//12th bit
 			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 12 : 0;	//13th bit
 			u16 palette = (tile->GetPaletteId() & 0x3) << 13;		//14th and 15th bits

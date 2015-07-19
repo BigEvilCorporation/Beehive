@@ -15,7 +15,9 @@
 #include "Stamp.h"
 #include "Tile.h"
 #include "Tileset.h"
-#include "Collision.h"
+#include "CollisionTile.h"
+#include "CollisionTileset.h"
+#include "CollisionType.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<u8, CollisionType> TCollisionTypeMap;
@@ -59,6 +61,10 @@ public:
 	Tileset& GetTileset() { return m_tileset; }
 	const Tileset& GetTileset() const { return m_tileset; }
 
+	//Get collision tileset
+	CollisionTileset& GetCollisionTileset() { return m_collisionTileset; }
+	const CollisionTileset& GetCollisionTileset() const { return m_collisionTileset; }
+
 	//Get palette
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
 	int GetNumPalettes() const { return s_maxPalettes; }
@@ -89,6 +95,10 @@ public:
 	void SetPaintCollisionType(CollisionType* type);
 	const CollisionType* GetPaintCollisionType() const;
 
+	//Set current collision tile used for painting
+	void SetPaintCollisionTile(CollisionTileId tile);
+	CollisionTileId GetPaintCollisionTile() const;
+
 	//Set current tile used for painting
 	void SetPaintTile(TileId tile);
 	TileId GetPaintTile() const;
@@ -115,10 +125,12 @@ public:
 
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
+	void InvalidateCollisionTiles(bool invalidate) { m_collisionTilesInvalidated = invalidate; }
 	void InvalidateCollisionTypes(bool invalidate) { m_collisionTypesInvalidated = invalidate; }
 	void InvalidateStamps(bool invalidate) { m_stampsInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
 	bool TilesAreInvalidated() const { return m_tilesInvalidated; }
+	bool CollisionTilesAreInvalidated() const { return m_collisionTilesInvalidated; }
 	bool CollisionTypesAreInvalidated() const { return m_collisionTypesInvalidated; }
 	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
@@ -168,6 +180,9 @@ private:
 	//Tileset
 	Tileset m_tileset;
 
+	//Collision tileset
+	CollisionTileset m_collisionTileset;
+
 	//Map
 	Map m_map;
 
@@ -186,6 +201,9 @@ private:
 
 	//Collision type used for painting
 	CollisionType* m_paintCollisionType;
+
+	//Collision tile used for painting
+	CollisionTileId m_paintCollisionTile;
 
 	//Tile used for painting
 	TileId m_paintTile;
@@ -207,6 +225,7 @@ private:
 	//Map needs redraw
 	bool m_mapInvalidated;
 	bool m_tilesInvalidated;
+	bool m_collisionTilesInvalidated;
 	bool m_collisionTypesInvalidated;
 	bool m_stampsInvalidated;
 };

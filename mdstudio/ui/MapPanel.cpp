@@ -312,7 +312,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 					m_mainWindow->RefreshPanel(MainWindow::ePanelTileEditor);
 
 					//Refresh collision tile edit panel
-					m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionEditor);
+					m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionTileEditor);
 				}
 
 				//TODO: Update tileset panel selection + toolbox button state
