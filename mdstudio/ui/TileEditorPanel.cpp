@@ -9,7 +9,7 @@
 
 #include <ion/renderer/Texture.h>
 
-const float TileEditorPanel::s_defaultZoom = 4.0f;
+const float TileEditorPanel::s_defaultZoom = 3.0f;
 
 TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)

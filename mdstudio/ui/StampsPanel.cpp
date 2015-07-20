@@ -204,7 +204,7 @@ void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	if(m_project)
 	{
 		//If stamps invalidated
-		if(m_project->StampsAreInvalidated() && m_panelSize.x > 8)
+		if(m_project->StampsAreInvalidated() && m_panelSize.x > 8 && m_panelSize.y > 8)
 		{
 			//Rearrange stamps (calculates canvas size)
 			ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));

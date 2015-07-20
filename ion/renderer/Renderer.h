@@ -64,6 +64,7 @@ namespace ion
 			virtual void BeginFrame(const Viewport& viewport, const DeviceContext& deviceContext) = 0;
 			virtual void EndFrame() = 0;
 			virtual void SwapBuffers() = 0;
+			virtual void SetClearColour(const Colour& colour) = 0;
 			virtual void ClearColour() = 0;
 			virtual void ClearDepth() = 0;
 

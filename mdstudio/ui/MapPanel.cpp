@@ -149,8 +149,11 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 
 					if(tileId != InvalidCollisionTileId)
 					{
+						//Get collision map
+						CollisionMap& collisionMap = m_project->GetCollisionMap();
+
 						//Set on map
-						map.SetCollisionTile(x, y, tileId);
+						collisionMap.SetCollisionTile(x, y, tileId);
 
 						//Paint to canvas
 						PaintCollisionTile(tileId, x, y_inv);
@@ -486,13 +489,14 @@ void MapPanel::SetProject(Project* project)
 	ViewPanel::SetProject(project);
 
 	Map& map = project->GetMap();
+	CollisionMap& collisionMap = project->GetCollisionMap();
 	Tileset& tileset = project->GetTileset();
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
 
 	//Create canvas
 	CreateCanvas(mapWidth, mapHeight);
-	CreateCollisionCanvas(mapWidth, mapHeight);
+	CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
 
 	//Create grid
 	CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
@@ -501,7 +505,7 @@ void MapPanel::SetProject(Project* project)
 	PaintMap(m_project->GetMap());
 
 	//Redraw collision map
-	PaintCollisionMap(m_project->GetMap());
+	PaintCollisionMap(m_project->GetCollisionMap());
 }
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -512,13 +516,14 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		if(m_project->MapIsInvalidated())
 		{
 			Map& map = m_project->GetMap();
+			CollisionMap& collisionMap = m_project->GetCollisionMap();
 			Tileset& tileset = m_project->GetTileset();
 			int mapWidth = map.GetWidth();
 			int mapHeight = map.GetHeight();
 
 			//Recreate canvas
 			CreateCanvas(mapWidth, mapHeight);
-			CreateCollisionCanvas(mapWidth, mapHeight);
+			CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
 
 			//Recreate grid
 			CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
@@ -527,7 +532,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			PaintMap(map);
 
 			//Redraw collision map
-			PaintCollisionMap(map);
+			PaintCollisionMap(collisionMap);
 		}
 	}
 
@@ -1010,7 +1015,7 @@ void MapPanel::PaintMap(const Map& map)
 	}
 }
 
-void MapPanel::PaintCollisionMap(const Map& map)
+void MapPanel::PaintCollisionMap(const CollisionMap& map)
 {
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();

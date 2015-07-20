@@ -75,10 +75,6 @@ public:
 	void SetTileFlags(int x, int y, u32 flags);
 	u32 GetTileFlags(int x, int y) const;
 
-	//Set collision tile on map
-	void SetCollisionTile(int x, int y, CollisionTileId tile);
-	CollisionTileId GetCollisionTile(int x, int y) const;
-
 	//Set stamp on map
 	void SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
 	void BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
@@ -111,6 +107,5 @@ private:
 	int m_width;
 	int m_height;
 	std::vector<TileDesc> m_tiles;
-	std::vector<CollisionTileId> m_collisionTiles;
 	TStampPosMap m_stamps;
 };

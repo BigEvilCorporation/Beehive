@@ -15,6 +15,7 @@
 #include "Stamp.h"
 #include "Tile.h"
 #include "Tileset.h"
+#include "CollisionMap.h"
 #include "CollisionTile.h"
 #include "CollisionTileset.h"
 #include "CollisionType.h"
@@ -56,6 +57,9 @@ public:
 
 	//Get map
 	Map& GetMap() { return m_map; }
+
+	//Get collision map
+	CollisionMap& GetCollisionMap() { return m_collisionMap; }
 
 	//Get tileset
 	Tileset& GetTileset() { return m_tileset; }
@@ -140,8 +144,9 @@ public:
 	//Export
 	bool ExportPalettes(const std::string& filename) const;
 	bool ExportTiles(const std::string& filename) const;
-	bool ExportCollision(const std::string& filename) const;
 	bool ExportMap(const std::string& filename) const;
+	bool ExportCollisionTiles(const std::string& filename) const;
+	bool ExportCollisionMap(const std::string& filename) const;
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
@@ -153,13 +158,20 @@ public:
 		std::string tileset;
 		std::string map;
 		std::string collisionTiles;
+		std::string collisionMap;
 
 		void Serialise(ion::io::Archive& archive)
 		{
-			archive.Serialise(palettes, "exportFNamePalettes");
-			archive.Serialise(tileset, "exportFNameTileset");
-			archive.Serialise(map, "exportFNameMap");
-			archive.Serialise(collisionTiles, "exportFNameCollisionTiles");
+			//TEMP: Wrap strings in block until they get their own serialise tags (need to update shader file format to support it first)
+			if(archive.PushBlock("exportFilenames"))
+			{
+				archive.Serialise(palettes, "exportFNamePalettes");
+				archive.Serialise(tileset, "exportFNameTileset");
+				archive.Serialise(map, "exportFNameMap");
+				archive.Serialise(collisionTiles, "exportFNameCollisionTiles");
+				archive.Serialise(collisionMap, "exportFNameCollisionMap");
+				archive.PopBlock();
+			}
 		}
 	};
 	
@@ -170,6 +182,8 @@ private:
 	bool FindPalette(Colour* pixels, u32 useablePalettes, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const;
 	bool ImportPalette(Colour* pixels, Palette& palette);
 	bool MergePalettes(Palette& dest, const Palette& source);
+
+	void WriteFileHeader(std::stringstream& stream) const;
 
 	//Project name
 	std::string m_name;
@@ -185,6 +199,9 @@ private:
 
 	//Map
 	Map m_map;
+
+	//Collision map
+	CollisionMap m_collisionMap;
 
 	//Palettes
 	std::vector<Palette> m_palettes;

@@ -40,6 +40,7 @@ namespace ion
 			virtual void BeginFrame(const Viewport& viewport, const DeviceContext& deviceContext);
 			virtual void EndFrame();
 			virtual void SwapBuffers();
+			virtual void SetClearColour(const Colour& colour);
 			virtual void ClearColour();
 			virtual void ClearDepth();
 
