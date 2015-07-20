@@ -842,7 +842,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -889,7 +889,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1314,7 +1314,7 @@
                                     </object>
                                 </object>
                             </object>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1361,7 +1361,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1738,7 +1738,7 @@
                                     </object>
                                 </object>
                             </object>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1785,7 +1785,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1828,7 +1828,7 @@
                                     <event name="OnSetFocus"></event>
                                     <event name="OnSize"></event>
                                     <event name="OnUpdateUI"></event>
-                                    <object class="ribbonButton" expanded="1">
+                                    <object class="ribbonButton" expanded="0">
                                         <property name="bg"></property>
                                         <property name="bitmap">Load From Embedded File; newtile.xpm</property>
                                         <property name="context_help"></property>
@@ -1876,7 +1876,7 @@
                                         <event name="OnSize"></event>
                                         <event name="OnUpdateUI"></event>
                                     </object>
-                                    <object class="ribbonButton" expanded="1">
+                                    <object class="ribbonButton" expanded="0">
                                         <property name="bg"></property>
                                         <property name="bitmap">Load From Embedded File; deletetile.xpm</property>
                                         <property name="context_help"></property>

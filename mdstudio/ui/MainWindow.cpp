@@ -162,16 +162,18 @@ void MainWindow::SetProject(Project* project)
 			RefreshTileset();
 			RefreshCollisionSet();
 
-			//New project, open left panels
+			//Open bottom panels
+			ShowPanelTiles();
+			ShowPanelCollisionEditor();
+			ShowPanelCollisionTiles();
+			ShowPanelTileEditor();
+
+			//Open left panels
 			ShowPanelToolbox();
 			ShowPanelPalettes();
 			ShowPanelCollisionTypes();
 
 			//Open right panels
-			ShowPanelTiles();
-			ShowPanelCollisionTiles();
-			ShowPanelTileEditor();
-			ShowPanelCollisionEditor();
 			ShowPanelStamps();
 
 			//Open centre panels
@@ -276,9 +278,8 @@ void MainWindow::ShowPanelTiles()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 450);
-			paneInfo.Right();
-			paneInfo.Row(0);
+			paneInfo.BestSize(450, 300);
+			paneInfo.Bottom();
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 			
@@ -307,9 +308,8 @@ void MainWindow::ShowPanelCollisionTiles()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 450);
-			paneInfo.Right();
-			paneInfo.Row(0);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Bottom();
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 
@@ -340,7 +340,7 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.DockFixed(false);
 			paneInfo.BestSize(300, 800);
 			paneInfo.Right();
-			paneInfo.Row(2);
+			paneInfo.Row(0);
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
@@ -434,9 +434,8 @@ void MainWindow::ShowPanelTileEditor()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 450);
-			paneInfo.Right();
-			paneInfo.Row(1);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Bottom();
 			paneInfo.Caption("Tile");
 			paneInfo.CaptionVisible(true);
 
@@ -466,9 +465,8 @@ void MainWindow::ShowPanelCollisionEditor()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 450);
-			paneInfo.Right();
-			paneInfo.Row(1);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Bottom();
 			paneInfo.Caption("Collision Tile");
 			paneInfo.CaptionVisible(true);
 
@@ -723,6 +721,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerTileset->SetPath(m_project->m_exportFilenames.tileset);
 		dialog.m_filePickerMap->SetPath(m_project->m_exportFilenames.map);
 		dialog.m_filePickerCollisionTiles->SetPath(m_project->m_exportFilenames.collisionTiles);
+		dialog.m_filePickerCollisionMap->SetPath(m_project->m_exportFilenames.collisionMap);
 
 		if(dialog.ShowModal() == wxID_OK)
 		{
@@ -733,6 +732,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.tileset = dialog.m_filePickerTileset->GetPath();
 			m_project->m_exportFilenames.map = dialog.m_filePickerMap->GetPath();
 			m_project->m_exportFilenames.collisionTiles = dialog.m_filePickerCollisionTiles->GetPath();
+			m_project->m_exportFilenames.collisionMap = dialog.m_filePickerCollisionMap->GetPath();
 
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
@@ -744,7 +744,10 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				m_project->ExportMap(m_project->m_exportFilenames.map);
 
 			if(dialog.m_chkCollisionTiles->GetValue())
-				m_project->ExportCollision(m_project->m_exportFilenames.collisionTiles);
+				m_project->ExportCollisionTiles(m_project->m_exportFilenames.collisionTiles);
+
+			if(dialog.m_chkCollisionMap->GetValue())
+				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap);
 
 			SetStatusText("Export complete");
 			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
@@ -899,7 +902,7 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 		CollisionTileId tileId = m_project->GetPaintCollisionTile();
 		if(tileId != InvalidTileId)
 		{
-			Map& map = m_project->GetMap();
+			CollisionMap& map = m_project->GetCollisionMap();
 			CollisionTileset& tileset = m_project->GetCollisionTileset();
 
 			//Erase tile
@@ -952,6 +955,7 @@ void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
 	if(m_project.get())
 	{
 		m_project->GetMap().Clear();
+		m_project->GetCollisionMap().Clear();
 		RefreshPanel(ePanelMap);
 	}
 }
@@ -961,6 +965,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 	if(m_project.get())
 	{
 		Map& map = m_project->GetMap();
+		CollisionMap& collisionMap = m_project->GetCollisionMap();
 
 		int originalWidth = map.GetWidth();
 		int originalHeight = map.GetHeight();
@@ -978,27 +983,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 			{
 				//Resize map
 				map.Resize(width, height);
-
-				//Fill extra tiles with background tile
-				TileId backgroundTile = 0;
-
-				//Extra X
-				for(int y = 0; y < height; y++)
-				{
-					for(int x = originalWidth; x < width; x++)
-					{
-						map.SetTile(x, y, backgroundTile);
-					}
-				}
-
-				//Extra Y
-				for(int x = 0; x < width; x++)
-				{
-					for(int y = originalHeight; y < height; y++)
-					{
-						map.SetTile(x, y, backgroundTile);
-					}
-				}
+				collisionMap.Resize(width, height);
 
 				//Refresh map panel
 				RefreshPanel(ePanelMap);

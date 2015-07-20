@@ -304,6 +304,11 @@ namespace ion
 			::SwapBuffers(m_currentDC);
 		}
 
+		void RendererOpenGL::SetClearColour(const Colour& colour)
+		{
+			glClearColor(colour.r, colour.g, colour.b, colour.a);
+		}
+
 		void RendererOpenGL::ClearColour()
 		{
 			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");

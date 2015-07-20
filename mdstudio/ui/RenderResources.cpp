@@ -122,7 +122,7 @@ void RenderResources::CreateTilesetTexture()
 	m_cellSizeTexSpaceSq = 1.0f / (float)m_tilesetSizeSq;
 
 	u8* data = new u8[textureSize];
-	ion::memory::MemSet(data, 0, textureSize);
+	ion::memory::MemSet(data, 255, textureSize);
 
 	for(int i = 0; i < tileset.GetCount(); i++)
 	{

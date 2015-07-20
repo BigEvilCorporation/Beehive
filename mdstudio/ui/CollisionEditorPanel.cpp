@@ -8,7 +8,7 @@
 #include "MainWindow.h"
 #include <ion/renderer/Texture.h>
 
-const float CollisionEditorPanel::s_defaultZoom = 4.0f;
+const float CollisionEditorPanel::s_defaultZoom = 3.0f;
 
 CollisionEditorPanel::CollisionEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
@@ -67,7 +67,7 @@ void CollisionEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonB
 	{
 		if(const CollisionType* collisionType = m_project->GetPaintCollisionType())
 		{
-			if((buttonBits & eMouseLeft) && !m_prevMouseBits & eMouseLeft)
+			if(buttonBits & eMouseLeft)
 			{
 				CollisionTileId tileId = m_project->GetPaintCollisionTile();
 				if(CollisionTile* tile = m_project->GetCollisionTileset().GetCollisionTile(tileId))
@@ -89,7 +89,7 @@ void CollisionEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonB
 						}
 
 						//Set collision pixel on collision tileset texture
-						m_renderResources.SetCollisionTilesetTexPixel(tileId, ion::Vector2i(x, y), existingBits | collisionBit);
+						m_renderResources.SetCollisionTilesetTexPixel(tileId, ion::Vector2i(x, y), tile->GetPixelCollisionBits(x, y));
 
 						//Invalidate collision types
 						m_project->InvalidateCollisionTypes(true);

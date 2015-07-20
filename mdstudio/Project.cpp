@@ -54,6 +54,7 @@ void Project::Clear()
 	}
 
 	m_map.Clear();
+	m_collisionMap.Clear();
 	m_tileset.Clear();
 	m_stamps.clear();
 	m_nextFreeStampId = 1;
@@ -100,6 +101,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_tileset, "tileset");
 	archive.Serialise(m_collisionTileset, "collisionTileset");
 	archive.Serialise(m_map, "map");
+	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_collisionTypes, "collisionTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
@@ -598,12 +600,26 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 	return true;
 }
 
+void Project::WriteFileHeader(std::stringstream& stream) const
+{
+	stream << "; == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==" << std::endl;
+	stream << ";   Created with BEEhive - the complete art tool for SEGA Mega Drive" << std::endl;
+	stream << "; == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==" << std::endl;
+	stream << ";   http://www.bigevilcorporation.co.uk" << std::endl;
+	stream << "; == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==" << std::endl;
+	stream << ";   BEEhive and SEGA Genesis Framework (c) Matt Phillips 2015" << std::endl;
+	stream << "; == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==" << std::endl;
+	stream << std::endl;
+	stream << std::endl;
+}
+
 bool Project::ExportPalettes(const std::string& filename) const
 {
 	ion::io::File file(filename, ion::io::File::OpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
+		WriteFileHeader(stream);
 		stream << "palette_" << m_name << ":" << std::endl;
 
 		for(int i = 0; i < s_maxPalettes; i++)
@@ -626,6 +642,7 @@ bool Project::ExportTiles(const std::string& filename) const
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
+		WriteFileHeader(stream);
 		stream << "tiles_" << m_name << ":" << std::endl;
 
 		m_tileset.Export(stream);
@@ -646,12 +663,13 @@ bool Project::ExportTiles(const std::string& filename) const
 	return false;
 }
 
-bool Project::ExportCollision(const std::string& filename) const
+bool Project::ExportCollisionTiles(const std::string& filename) const
 {
 	ion::io::File file(filename, ion::io::File::OpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
+		WriteFileHeader(stream);
 		stream << "collision_" << m_name << ":" << std::endl;
 
 		m_collisionTileset.Export(stream);
@@ -678,6 +696,7 @@ bool Project::ExportMap(const std::string& filename) const
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
+		WriteFileHeader(stream);
 		stream << "map_" << m_name << ":" << std::endl;
 
 		m_map.Export(*this, stream);
@@ -690,6 +709,35 @@ bool Project::ExportMap(const std::string& filename) const
 		stream << std::hex << std::setfill('0') << std::uppercase;
 		stream << "map_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_map.GetWidth() << std::endl;
 		stream << "map_" << m_name << "_height\tequ " << "0x" << std::setw(2) <<  m_map.GetHeight() << std::endl;
+		stream << std::dec;
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Project::ExportCollisionMap(const std::string& filename) const
+{
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		WriteFileHeader(stream);
+		stream << "colmap_" << m_name << ":" << std::endl;
+
+		m_collisionMap.Export(*this, stream);
+
+		stream << "colmap_" << m_name << "_end:" << std::endl;
+		stream << "colmap_" << m_name << "_size_b\tequ (map_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "colmap_" << m_name << "_size_w\tequ (map_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "colmap_" << m_name << "_size_l\tequ (map_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+
+		stream << std::hex << std::setfill('0') << std::uppercase;
+		stream << "colmap_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_map.GetWidth() << std::endl;
+		stream << "colmap_" << m_name << "_height\tequ " << "0x" << std::setw(2) << m_map.GetHeight() << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());

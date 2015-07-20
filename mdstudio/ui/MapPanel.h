@@ -53,7 +53,7 @@ private:
 	void PaintMap(const Map& map);
 
 	//Paint whole collision map to canvas
-	void PaintCollisionMap(const Map& map);
+	void PaintCollisionMap(const CollisionMap& map);
 
 	//Paint collision tile to canvas
 	void PaintCollisionTile(CollisionTileId tileId, int x, int y);
