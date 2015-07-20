@@ -97,7 +97,11 @@ void CollisionMap::Export(const Project& project, std::stringstream& stream) con
 
 		for(int x = 0; x < m_width; x++)
 		{
-			stream << "0x" << std::setw(2) << (u32)m_collisionTiles[(y * m_width) + x];
+			CollisionTileId tileId = m_collisionTiles[(y * m_width) + x];
+			if(tileId == InvalidCollisionTileId)
+				tileId = 0;
+
+			stream << "0x" << std::setw(2) << (u32)tileId;
 
 			if(x < (m_width - 1))
 				stream << ",";
