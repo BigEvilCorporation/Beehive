@@ -670,17 +670,17 @@ bool Project::ExportCollisionTiles(const std::string& filename) const
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "collision_" << m_name << ":" << std::endl;
+		stream << "collisiontiles_" << m_name << ":" << std::endl;
 
 		m_collisionTileset.Export(stream);
 
 		stream << std::endl;
 
-		stream << "collision_" << m_name << "_end" << std::endl;
-		stream << "collision_" << m_name << "_size_b\tequ (collision_" << m_name << "_end-collision_" << m_name << ")\t; Size in bytes" << std::endl;
-		stream << "collision_" << m_name << "_size_w\tequ (collision_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
-		stream << "collision_" << m_name << "_size_l\tequ (collision_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
-		stream << "collision_" << m_name << "_size_t\tequ (collision_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
+		stream << "collisiontiles_" << m_name << "_end" << std::endl;
+		stream << "collisiontiles_" << m_name << "_size_b\tequ (collisiontiles_" << m_name << "_end-collisiontiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "collisiontiles_" << m_name << "_size_w\tequ (collisiontiles_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "collisiontiles_" << m_name << "_size_l\tequ (collisiontiles_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << "collisiontiles_" << m_name << "_size_t\tequ (collisiontiles_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
 
 		file.Write(stream.str().c_str(), stream.str().size());
 
@@ -702,7 +702,7 @@ bool Project::ExportMap(const std::string& filename) const
 		m_map.Export(*this, stream);
 
 		stream << "map_" << m_name << "_end:" << std::endl;
-		stream << "map_" << m_name << "_size_b\tequ (map_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "map_" << m_name << "_size_b\tequ (map_" << m_name << "_end-map_" << m_name << ")\t; Size in bytes" << std::endl;
 		stream << "map_" << m_name << "_size_w\tequ (map_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
 		stream << "map_" << m_name << "_size_l\tequ (map_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 
@@ -726,18 +726,18 @@ bool Project::ExportCollisionMap(const std::string& filename) const
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "colmap_" << m_name << ":" << std::endl;
+		stream << "collisionmap_" << m_name << ":" << std::endl;
 
 		m_collisionMap.Export(*this, stream);
 
-		stream << "colmap_" << m_name << "_end:" << std::endl;
-		stream << "colmap_" << m_name << "_size_b\tequ (map_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
-		stream << "colmap_" << m_name << "_size_w\tequ (map_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
-		stream << "colmap_" << m_name << "_size_l\tequ (map_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << "collisionmap_" << m_name << "_end:" << std::endl;
+		stream << "collisionmap_" << m_name << "_size_b\tequ (collisionmap_" << m_name << "_end-collisionmap_" << m_name << ")\t; Size in bytes" << std::endl;
+		stream << "collisionmap_" << m_name << "_size_w\tequ (collisionmap_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "collisionmap_" << m_name << "_size_l\tequ (collisionmap_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << "colmap_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_map.GetWidth() << std::endl;
-		stream << "colmap_" << m_name << "_height\tequ " << "0x" << std::setw(2) << m_map.GetHeight() << std::endl;
+		stream << "collisionmap_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_collisionMap.GetWidth() << std::endl;
+		stream << "collisionmap_" << m_name << "_height\tequ " << "0x" << std::setw(2) << m_collisionMap.GetHeight() << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());

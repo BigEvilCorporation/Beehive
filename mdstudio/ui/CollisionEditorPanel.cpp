@@ -109,6 +109,10 @@ void CollisionEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonB
 
 void CollisionEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
+	RenderTile(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
 	RenderCollision(renderer, cameraInverseMtx, projectionMtx, z);
 
 	z += zOffset;
@@ -130,9 +134,21 @@ void CollisionEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 	if(m_project)
 	{
+		//Redraw tile and collision
+		PaintTile();
 		//Redraw collision tile
 		PaintCollision();
 	}
+}
+
+void CollisionEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	//Draw tile
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
+	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_tilePrimitive->GetVertexBuffer(), m_tilePrimitive->GetIndexBuffer());
+	material->Unbind();
 }
 
 void CollisionEditorPanel::RenderCollision(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
