@@ -7,7 +7,10 @@
 #include "PalettesPanel.h"
 #include "MainWindow.h"
 #include <wx/App.h>
+#include <wx/Menu.h>
 #include <maths/Vector.h>
+
+#include <stdio.h>
 
 PalettesPanel::PalettesPanel(	MainWindow* mainWindow,
 								wxWindow *parent,
@@ -24,6 +27,7 @@ PalettesPanel::PalettesPanel(	MainWindow* mainWindow,
 
 	Bind(wxEVT_LEFT_DOWN,		&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_DCLICK,		&PalettesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_RIGHT_UP,		&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_PAINT,			&PalettesPanel::OnPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND,&PalettesPanel::OnErase, this, GetId());
 	Bind(wxEVT_SIZE,			&PalettesPanel::OnResize, this, GetId());
@@ -51,30 +55,54 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 		unsigned int colourId = (unsigned int)floor(x / colourRectSize);
 		unsigned int paletteId = (unsigned int)floor(y / colourRectSize);
 
-		if(paletteId < 4 && paletteId < m_project->GetNumPalettes() && colourId < Palette::coloursPerPalette)
+		if(paletteId < 4)
 		{
-			if(Palette* palette = m_project->GetPalette((PaletteId)paletteId))
+			if(event.RightUp())
 			{
-				if(event.LeftDClick())
-				{
-					wxColourDialog dialogue(this);
-					if(dialogue.ShowModal() == wxID_OK)
-					{
-						wxColour wxcolour = dialogue.GetColourData().GetColour();
-						Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
-						palette->SetColour(colourId, colour);
+				//Right-click slot menu
+				wxMenu slotMenu;
 
-						//Refresh tiles, stamps and map panels
-						m_mainWindow->RefreshAll();
-					}
+				char text[1024] = { 0 };
+				int numSlots = m_project->GetNumPaletteSlots();
+
+				for(int i = 0; i < numSlots; i++)
+				{
+					sprintf(text, "Restore slot %u", i);
+					slotMenu.Append(i, wxString(text));
 				}
 
-				if(palette->IsColourUsed(colourId))
+				slotMenu.AppendSeparator();
+				slotMenu.Append(numSlots, wxString("Backup to new slot"));
+				slotMenu.SetClientData((void*)paletteId);
+				slotMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PalettesPanel::OnSlotsMenuClick, NULL, this);
+				PopupMenu(&slotMenu, event.GetPosition());
+			}
+
+			if(paletteId < m_project->GetNumPalettes() && colourId < Palette::coloursPerPalette)
+			{
+				if(Palette* palette = m_project->GetPalette((PaletteId)paletteId))
 				{
-					if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+					if(event.LeftDClick())
 					{
-						//Set current paint colour
-						m_project->SetPaintColour(colourId);
+						wxColourDialog dialogue(this);
+						if(dialogue.ShowModal() == wxID_OK)
+						{
+							wxColour wxcolour = dialogue.GetColourData().GetColour();
+							Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
+							palette->SetColour(colourId, colour);
+
+							//Refresh tiles, stamps and map panels
+							m_mainWindow->RefreshAll();
+						}
+					}
+
+					if(palette->IsColourUsed(colourId))
+					{
+						if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+						{
+							//Set current paint colour
+							m_project->SetPaintColour(colourId);
+						}
 					}
 				}
 			}
@@ -82,6 +110,28 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 	}
 
 	event.Skip();
+}
+
+void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
+{
+	int slotId = event.GetId();
+	int numSlots = m_project->GetNumPaletteSlots();
+	PaletteId paletteId = (PaletteId)event.GetClientData();
+
+	if(slotId == numSlots)
+	{
+		//Backup palette to new slot
+		Palette* palette = m_project->GetPalette(paletteId);
+		int newSlotId = m_project->AddPaletteSlot(*palette);
+	}
+	else
+	{
+		//Set active palette slot
+		m_project->SetActivePaletteSlot(paletteId, slotId);
+
+		//Refresh tiles, stamps and map panels
+		m_mainWindow->RefreshAll();
+	}
 }
 
 void PalettesPanel::OnPaint(wxPaintEvent& event)

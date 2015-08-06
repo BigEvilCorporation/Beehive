@@ -41,6 +41,7 @@ public:
 	void OnPaint(wxPaintEvent& event);
 	void OnErase(wxEraseEvent& event);
 	void OnResize(wxSizeEvent& event);
+	void OnSlotsMenuClick(wxCommandEvent& event);
 
 private:
 	Project* m_project;

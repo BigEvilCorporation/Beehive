@@ -98,6 +98,7 @@ void Project::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_palettes, "palettes");
+	archive.Serialise(m_paletteSlots, "paletteSlots");
 	archive.Serialise(m_tileset, "tileset");
 	archive.Serialise(m_collisionTileset, "collisionTileset");
 	archive.Serialise(m_map, "map");
@@ -106,6 +107,46 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_collisionTypes, "collisionTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_exportFilenames, "exportFilenames");
+}
+
+int Project::AddPaletteSlot(Palette& palette)
+{
+	m_paletteSlots.push_back(palette);
+	return m_paletteSlots.size() - 1;
+}
+
+Palette* Project::GetPaletteSlot(int slotIndex)
+{
+	ion::debug::Assert(slotIndex < GetNumPaletteSlots(), "Project::GetPaletteSlot() - Invalid slot index");
+	return &m_paletteSlots[slotIndex];
+}
+
+int Project::GetNumPaletteSlots() const
+{
+	return m_paletteSlots.size();
+}
+
+void Project::SetActivePaletteSlot(PaletteId paletteId, int slotIndex)
+{
+	ion::debug::Assert(slotIndex < GetNumPaletteSlots(), "Project::GetPaletteSlot() - Invalid slot index");
+	ion::debug::Assert(paletteId < GetNumPalettes(), "Project::GetPaletteSlot() - Invalid palettes index");
+
+	Palette* source = GetPaletteSlot(slotIndex);
+	Palette* dest = GetPalette(paletteId);
+	*dest = *source;
+}
+
+void Project::CollapsePaletteSlots()
+{
+	m_paletteSlots.clear();
+
+	for(int i = 0; i < GetNumPalettes(); i++)
+	{
+		if(m_palettes[i].GetUsedColourMask() > 0)
+		{
+			int slotIndex = AddPaletteSlot(m_palettes[i]);
+		}
+	}
 }
 
 StampId Project::AddStamp(int width, int height)

@@ -73,6 +73,12 @@ public:
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
 	int GetNumPalettes() const { return s_maxPalettes; }
 
+	//Palette slots
+	int AddPaletteSlot(Palette& palette);
+	Palette* GetPaletteSlot(int slotIndex);
+	int GetNumPaletteSlots() const;
+	void SetActivePaletteSlot(PaletteId paletteId, int slotIndex);
+
 	//Stamps
 	StampId AddStamp(int width, int height);
 	void RemoveStamp(StampId stampId);
@@ -185,6 +191,9 @@ private:
 
 	void WriteFileHeader(std::stringstream& stream) const;
 
+	//Collapse palette slots to palettes in use
+	void CollapsePaletteSlots();
+
 	//Project name
 	std::string m_name;
 
@@ -203,8 +212,11 @@ private:
 	//Collision map
 	CollisionMap m_collisionMap;
 
-	//Palettes
+	//Active palettes
 	std::vector<Palette> m_palettes;
+
+	//Saved palette slots
+	std::vector<Palette> m_paletteSlots;
 
 	//Stamps
 	TStampMap m_stamps;
