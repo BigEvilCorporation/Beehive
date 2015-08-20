@@ -50,7 +50,7 @@ void TileEditorPanel::OnResize(wxSizeEvent& event)
 	Refresh();
 }
 
-void TileEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+void TileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
 	const int tileHeight = 8;
 

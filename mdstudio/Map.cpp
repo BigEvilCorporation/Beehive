@@ -217,11 +217,18 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 	{
 		const Stamp& stamp = *project.GetStamp(it->m_id);
 		const ion::Vector2i& position = it->m_position;
-		BakeStamp(tiles, position.x, position.y, stamp, 0);
+		BakeStamp(tiles, position.x, position.y, stamp, it->m_flags);
 	}
 
 	//Output to stream
 	stream << std::hex << std::setfill('0') << std::uppercase;
+
+	//Use background tile if there is one, else use first tile
+	u32 backgroundTileId = project.GetBackgroundTile();
+	if(backgroundTileId == InvalidTileId)
+	{
+		backgroundTileId = 0;
+	}
 
 	for(int y = 0; y < m_height; y++)
 	{
@@ -243,15 +250,15 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 			u8 paletteId = 0;
 
 			//If blank tile, use background tile
-			u32 tileId = (tileDesc.m_id == InvalidTileId) ? 0 : tileDesc.m_id;
+			u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
 
 			const Tile* tile = project.GetTileset().GetTile(tileId);
 			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
 
 			//Generate components
 			u16 tileIndex = tileId & 0x7FF;						//Bottom 11 bits (index from 0)
-			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 11 : 0;	//12th bit
-			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 12 : 0;	//13th bit
+			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;	//12th bit
+			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;	//13th bit
 			u16 palette = (tile->GetPaletteId() & 0x3) << 13;		//14th and 15th bits
 			u16 plane = 1 << 15;									//16th bit
 

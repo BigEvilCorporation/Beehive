@@ -139,8 +139,8 @@ void CollisionTypePanel::OnMouse(wxMouseEvent& event)
 					m_icons.resize(collisionTypeIndex + 1);
 				m_icons[collisionTypeIndex] = wxBitmap(image, wxBITMAP_SCREEN_DEPTH);
 
-				//Recreate collision type texture
-				m_mainWindow->RefreshCollisionSet();
+				//Recreate collision types texture
+				m_mainWindow->RefreshCollisionTypes();
 
 				//Invalidate collision types
 				m_project->InvalidateCollisionTypes(true);

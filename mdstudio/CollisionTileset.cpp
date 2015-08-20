@@ -28,7 +28,12 @@ CollisionTileId CollisionTileset::AddCollisionTile()
 
 void CollisionTileset::RemoveCollisionTile(CollisionTileId tileId)
 {
-
+	if(tileId < m_tiles.size())
+	{
+		//TODO: Delete from vector and shuffle the rest down, this is essentially a leaked tile and will be exported
+		CollisionTile blankTile;
+		m_tiles[tileId].CopyPixels(blankTile);
+	}
 }
 
 void CollisionTileset::HashChanged(CollisionTileId tileId)

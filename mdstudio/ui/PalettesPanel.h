@@ -44,6 +44,13 @@ public:
 	void OnSlotsMenuClick(wxCommandEvent& event);
 
 private:
+	enum MenuItems
+	{
+		eMenuSave = (1 << 0) << 8,
+		eMenuLoad = (1 << 1) << 8,
+		eMenuNew =  (1 << 2) << 8
+	};
+
 	Project* m_project;
 	MainWindow* m_mainWindow;
 	Orientation m_orientation;

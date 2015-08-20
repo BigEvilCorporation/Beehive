@@ -37,6 +37,8 @@ public:
 		eBMPImportDrawToMap		= (1 << 3),
 		eBMPImportToStamp		= (1 << 4),
 		eBMPImportToSprite		= (1 << 5),
+		eBMPImportWholePalette	= (1 << 6),
+		eBMPImportInsertBGTile	= (1 << 7),
 	};
 
 	Project();
@@ -79,9 +81,15 @@ public:
 	int GetNumPaletteSlots() const;
 	void SetActivePaletteSlot(PaletteId paletteId, int slotIndex);
 
+	//Tiles
+	void DeleteTile(TileId tileId);
+	void SwapTiles(TileId tileId1, TileId tileId2);
+	void SetBackgroundTile(TileId tileId);
+	TileId GetBackgroundTile() const { return m_backgroundTile; }
+
 	//Stamps
 	StampId AddStamp(int width, int height);
-	void RemoveStamp(StampId stampId);
+	void DeleteStamp(StampId stampId);
 	Stamp* GetStamp(StampId stampId);
 	const Stamp* GetStamp(StampId stampId) const;
 	const TStampMap::const_iterator StampsBegin() const;
@@ -242,6 +250,9 @@ private:
 
 	//Tile used for erasing
 	TileId m_eraseTile;
+
+	//Background tile (replaced InvalidTileId on export)
+	TileId m_backgroundTile;
 
 	//Grid
 	int m_gridSize;

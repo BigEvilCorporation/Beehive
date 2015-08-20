@@ -30,6 +30,7 @@
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
+#include "../FormBuilderProj/tool_paintcolpixel.xpm"
 #include "../FormBuilderProj/tool_paintstamp.xpm"
 #include "../FormBuilderProj/tool_painttile.xpm"
 #include "../FormBuilderProj/tool_picker.xpm"
@@ -276,6 +277,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolRemoveStamp, 0, wxALL, 5 );
 	
+	m_toolPaintCollisionPixel = new wxBitmapButton( this, wxID_TOOL_PAINTCOLLISIONPIXEL, wxBitmap( tool_paintcolpixel_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintCollisionPixel->SetToolTip( wxT("Paint Collision Pixel") );
+	
+	fgSizer1->Add( m_toolPaintCollisionPixel, 0, wxALL, 5 );
+	
 	
 	this->SetSizer( fgSizer1 );
 	this->Layout();
@@ -402,6 +408,12 @@ ImportDialog::ImportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	m_chkClearPalettes = new wxCheckBox( this, wxID_ANY, wxT("Clear palettes"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer13->Add( m_chkClearPalettes, 0, wxALL, 5 );
+	
+	m_chkImportPalette = new wxCheckBox( this, wxID_ANY, wxT("Import whole palette"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkImportPalette, 0, wxALL, 5 );
+	
+	m_chkInsertBGTile = new wxCheckBox( this, wxID_ANY, wxT("Insert background tile"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkInsertBGTile, 0, wxALL, 5 );
 	
 	m_chkPaintToMap = new wxCheckBox( this, wxID_ANY, wxT("Paint to map"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer13->Add( m_chkPaintToMap, 0, wxALL, 5 );

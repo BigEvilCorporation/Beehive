@@ -59,7 +59,7 @@ bool BMPReader::Read(const std::string& filename)
 						if(file.Seek(paletteDataPos, ion::io::File::Start) == paletteDataPos)
 						{
 							//Calc palette size and alloc
-							m_paletteSize = (1 << m_bitsPerPixel);
+							m_paletteSize = bmpHeader.importantColourCount;
 							m_palette = new RGBQuad[m_paletteSize];
 
 							//Read palette
@@ -112,6 +112,23 @@ int BMPReader::GetHeight() const
 	return m_height;
 }
 
+int BMPReader::GetPaletteSize() const
+{
+	return m_paletteSize;
+}
+
+Colour BMPReader::GetPaletteEntry(int index) const
+{
+	ion::debug::Assert(index < m_paletteSize, "Out of range");
+
+	RGBQuad rgbQuad = m_palette[index];
+	Colour colour;
+	colour.SetRed(rgbQuad.r);
+	colour.SetGreen(rgbQuad.g);
+	colour.SetBlue(rgbQuad.b);
+	return colour;
+}
+
 Colour BMPReader::GetPixel(int x, int y) const
 {
 	ion::debug::Assert(x < m_width && y < m_height, "Out of range");
@@ -127,11 +144,5 @@ Colour BMPReader::GetPixel(int x, int y) const
 
 	ion::debug::Assert(colourIndex < m_paletteSize, "Out of range");
 
-	RGBQuad rgbQuad = m_palette[colourIndex];
-
-	Colour colour;
-	colour.SetRed(rgbQuad.r);
-	colour.SetGreen(rgbQuad.g);
-	colour.SetBlue(rgbQuad.b);
-	return colour;
+	return GetPaletteEntry(colourIndex);
 }

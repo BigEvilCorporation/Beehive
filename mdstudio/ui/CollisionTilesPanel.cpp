@@ -92,9 +92,9 @@ void CollisionTilesPanel::OnResize(wxSizeEvent& event)
 	ResetZoomPan();
 }
 
-void CollisionTilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+void CollisionTilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(mouseDelta, buttonBits, x, y);
+	ViewPanel::OnMouseTileEvent(buttonBits, x, y);
 
 	CollisionTileId selectedCollisionTile = InvalidCollisionTileId;
 

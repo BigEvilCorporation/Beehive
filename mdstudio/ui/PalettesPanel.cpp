@@ -61,18 +61,25 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 			{
 				//Right-click slot menu
 				wxMenu slotMenu;
+				wxMenu* saveMenu = new wxMenu();
+				wxMenu* loadMenu = new wxMenu();
 
 				char text[1024] = { 0 };
 				int numSlots = m_project->GetNumPaletteSlots();
 
 				for(int i = 0; i < numSlots; i++)
 				{
-					sprintf(text, "Restore slot %u", i);
-					slotMenu.Append(i, wxString(text));
+					sprintf(text, "Slot %u", i);
+					saveMenu->Append(i | eMenuSave, wxString(text));
+					loadMenu->Append(i | eMenuLoad, wxString(text));
 				}
 
-				slotMenu.AppendSeparator();
-				slotMenu.Append(numSlots, wxString("Backup to new slot"));
+				saveMenu->AppendSeparator();
+				saveMenu->Append(eMenuNew, wxString("Backup to new slot"));
+
+				slotMenu.AppendSubMenu(saveMenu, "Save");
+				slotMenu.AppendSubMenu(loadMenu, "Load");
+				
 				slotMenu.SetClientData((void*)paletteId);
 				slotMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PalettesPanel::OnSlotsMenuClick, NULL, this);
 				PopupMenu(&slotMenu, event.GetPosition());
@@ -114,17 +121,25 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 
 void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 {
-	int slotId = event.GetId();
+	int menuItemId = event.GetId();
+	int slotId = menuItemId & 0xFF;
 	int numSlots = m_project->GetNumPaletteSlots();
 	PaletteId paletteId = (PaletteId)event.GetClientData();
 
-	if(slotId == numSlots)
+	if(menuItemId & eMenuNew)
 	{
 		//Backup palette to new slot
 		Palette* palette = m_project->GetPalette(paletteId);
-		int newSlotId = m_project->AddPaletteSlot(*palette);
+		m_project->AddPaletteSlot(*palette);
 	}
-	else
+	else if(menuItemId & eMenuSave)
+	{
+		//Backup palette to existing slot
+		Palette* palette = m_project->GetPalette(paletteId);
+		Palette* slot = m_project->GetPaletteSlot(slotId);
+		*slot = *palette;
+	}
+	else if(menuItemId & eMenuLoad)
 	{
 		//Set active palette slot
 		m_project->SetActivePaletteSlot(paletteId, slotId);
