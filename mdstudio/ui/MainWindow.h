@@ -23,6 +23,7 @@
 #include "CollisionTypePanel.h"
 #include "CollisionTilesPanel.h"
 #include "CollisionEditorPanel.h"
+#include "GameObjectTypeDialog.h"
 
 #include "../Project.h"
 
@@ -100,6 +101,7 @@ protected:
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 	virtual void OnBtnShowOutlines(wxCommandEvent& event);
 	virtual void OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnGameObjTypes(wxRibbonButtonBarEvent& event);
 
 	void OnBtnTool(wxCommandEvent& event);
 
