@@ -1021,6 +1021,15 @@ void MainWindow::OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event)
 	ShowPanelCollisionEditor();
 }
 
+void MainWindow::OnBtnGameObjTypes(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		GameObjectTypeDialog dialog(*this, *m_project);
+		dialog.ShowModal();
+	}
+}
+
 void MainWindow::OnBtnTool(wxCommandEvent& event)
 {
 	if(m_mapPanel)

@@ -22,6 +22,8 @@ local SRC =
 	CollisionTile.h
 	CollisionTileset.cpp
 	CollisionTileset.h
+	GameObject.cpp
+	GameObject.h
 	Map.cpp
 	Map.h
 	Palette.cpp
@@ -44,6 +46,8 @@ local SRC =
 	ui/CollisionTilesPanel.h
 	ui/CollisionTypePanel.cpp
 	ui/CollisionTypePanel.h
+	ui/GameObjectTypeDialog.cpp
+	ui/GameObjectTypeDialog.h
 	ui/MapPanel.cpp
 	ui/MapPanel.h
 	ui/ViewPanel.cpp

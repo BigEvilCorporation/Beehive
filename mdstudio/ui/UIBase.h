@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jun  5 2014)
+// C++ code generated with wxFormBuilder (version Jun 17 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -36,6 +36,11 @@
 #include <wx/textctrl.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
+#include <wx/toolbar.h>
+#include <wx/listbox.h>
+#include <wx/listctrl.h>
+#include <wx/statline.h>
+#include <wx/choice.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -101,6 +106,8 @@ class MainWindowBase : public wxFrame
 		wxRibbonButtonBar* m_ribbonButtonBarStamps;
 		wxRibbonPanel* m_ribbonPanelCollision;
 		wxRibbonButtonBar* m_ribbonButtonBarCollision;
+		wxRibbonPanel* m_ribbonPanelGameObj;
+		wxRibbonButtonBar* m_ribbonButtonBarGameObj;
 		wxPanel* m_dockArea;
 		wxStatusBar* m_statusBar;
 		
@@ -123,6 +130,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnGameObjTypes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	
 	public:
@@ -256,6 +264,58 @@ class ImportDialog : public wxDialog
 		
 		ImportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,309 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ImportDialog();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GameObjTypeDialogBase
+///////////////////////////////////////////////////////////////////////////////
+class GameObjTypeDialogBase : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxToolBar* m_toolBar1;
+		wxToolBarToolBase* m_toolAddGameObjType; 
+		wxToolBarToolBase* m_toolRemoveGameObjType; 
+		wxToolBarToolBase* m_toolAddVariable; 
+		wxToolBarToolBase* m_toolRemoveVariable; 
+		wxListBox* m_listGameObjTypes;
+		wxListCtrl* m_listVariables;
+		wxStaticText* m_staticText10;
+		wxTextCtrl* m_textGameObjName;
+		wxStaticLine* m_staticline2;
+		wxStaticText* m_staticText6;
+		wxTextCtrl* m_textVariableName;
+		wxStaticText* m_staticText7;
+		wxChoice* m_choiceSize;
+		wxStaticText* m_staticText8;
+		wxTextCtrl* m_textValue;
+		wxStaticText* m_staticText9;
+		wxSpinCtrl* m_spinWidth;
+		wxSpinCtrl* m_spinHeight;
+		wxButton* m_btnImport;
+		wxButton* m_btnExport;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnToolGameObjAdd( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolGameObjRemove( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnGameObjNameChange( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnVariableNameChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnValueChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnWidthChanged( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnHeightChanged( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		GameObjTypeDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Game Object Types"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 548,444 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~GameObjTypeDialogBase();
 	
 };
 

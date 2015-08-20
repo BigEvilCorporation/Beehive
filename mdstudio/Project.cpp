@@ -386,6 +386,23 @@ int Project::GetCollisionTypeCount() const
 	return m_collisionTypes.size();
 }
 
+GameObjectType& Project::AddGameObjectType(const std::string name)
+{
+	GameObjectType& type = m_gameObjectTypes.insert(std::make_pair(name, GameObjectType())).first->second;
+	type.SetName(name);
+	return type;
+}
+
+void Project::RemoveGameObjectType(const GameObjectType& gameObjType)
+{
+	m_gameObjectTypes.erase(gameObjType.GetName());
+}
+
+const TGameObjTypeMap& Project::GetGameObjectTypes() const
+{
+	return m_gameObjectTypes;
+}
+
 void Project::SetPaintColour(u8 colourIdx)
 {
 	m_paintColour = colourIdx;

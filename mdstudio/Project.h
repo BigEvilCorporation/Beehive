@@ -19,9 +19,11 @@
 #include "CollisionTile.h"
 #include "CollisionTileset.h"
 #include "CollisionType.h"
+#include "GameObject.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<u8, CollisionType> TCollisionTypeMap;
+typedef std::map<std::string, GameObjectType> TGameObjTypeMap;
 
 class Project
 {
@@ -104,6 +106,11 @@ public:
 	const TCollisionTypeMap::const_iterator CollisionTypesBegin() const;
 	const TCollisionTypeMap::const_iterator CollisionTypesEnd() const;
 	int GetCollisionTypeCount() const;
+
+	//Game object types
+	GameObjectType& AddGameObjectType(const std::string name);
+	void RemoveGameObjectType(const GameObjectType& gameObjType);
+	const TGameObjTypeMap& GetGameObjectTypes() const;
 
 	//Set current colour used for editing
 	void SetPaintColour(u8 colourIdx);
@@ -232,6 +239,9 @@ private:
 
 	//Collision types
 	TCollisionTypeMap m_collisionTypes;
+
+	//Game object types
+	TGameObjTypeMap m_gameObjectTypes;
 
 	//Colour used for painting
 	u8 m_paintColour;
