@@ -7,6 +7,8 @@
 #include "StampsPanel.h"
 #include "MainWindow.h"
 
+#include <wx/menu.h>
+
 StampsPanel::StampsPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
@@ -97,9 +99,9 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void StampsPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(mouseDelta, buttonBits, x, y);
+	ViewPanel::OnMouseTileEvent(buttonBits, x, y);
 
 	StampId selectedStamp = InvalidStampId;
 	ion::Vector2i stampTopLeft;
@@ -144,8 +146,37 @@ void StampsPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int 
 		m_mainWindow->SetMapTool(eToolPaintStamp);
 	}
 
+	if(buttonBits & eMouseRight)
+	{
+		if(m_hoverStamp != InvalidStampId)
+		{
+			//Right-click menu
+			wxMenu contextMenu;
+
+			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
+			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampsPanel::OnContextMenuClick, NULL, this);
+			PopupMenu(&contextMenu);
+		}
+	}
+
 	//Redraw
 	Refresh();
+}
+
+void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
+{
+	if(event.GetId() == eMenuDeleteStamp)
+	{
+		//Delete stamp
+		m_project->DeleteStamp(m_hoverStamp);
+
+		//Invalidate hover/selected stamp
+		m_hoverStamp = InvalidStampId;
+		m_selectedStamp = InvalidStampId;
+
+		//Refresh
+		m_mainWindow->RefreshAll();
+	}
 }
 
 void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)

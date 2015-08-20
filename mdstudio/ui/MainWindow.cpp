@@ -160,7 +160,8 @@ void MainWindow::SetProject(Project* project)
 
 			//Recreate tileset/collision set textures, and tile index cache
 			RefreshTileset();
-			RefreshCollisionSet();
+			RefreshCollisionTypes();
+			RefreshCollisionTileset();
 
 			//Open bottom panels
 			ShowPanelTiles();
@@ -415,6 +416,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINTCOLLISIONPIXEL);
 	}
 
 	if(!m_toolboxPanel->IsShown())
@@ -532,7 +534,8 @@ void MainWindow::RefreshAll()
 void MainWindow::RedrawAll()
 {
 	RefreshTileset();
-	RefreshCollisionSet();
+	RefreshCollisionTileset();
+	RefreshCollisionTypes();
 	SetPanelCaptions();
 
 	if(m_palettesPanel)
@@ -566,15 +569,23 @@ void MainWindow::RefreshTileset()
 	{
 		//Recreate tileset texture
 		m_renderResources->CreateTilesetTexture();
-		m_renderResources->CreateCollisionTilesTexture();
 	}
 }
 
-void MainWindow::RefreshCollisionSet()
+void MainWindow::RefreshCollisionTileset()
 {
 	if(m_project.get())
 	{
 		//Recreate collision set texture
+		m_renderResources->CreateCollisionTilesTexture();
+	}
+}
+
+void MainWindow::RefreshCollisionTypes()
+{
+	if(m_project.get())
+	{
+		//Recreate collision types texture
 		m_renderResources->CreateCollisionTypesTexture();
 	}
 }
@@ -778,6 +789,10 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 				flags |= Project::eBMPImportToStamp;
 			if(dialog.m_chkImportToSprite->GetValue())
 				flags |= Project::eBMPImportToSprite;
+			if(dialog.m_chkImportPalette->GetValue())
+				flags |= Project::eBMPImportWholePalette;
+			if(dialog.m_chkInsertBGTile->GetValue())
+				flags |= Project::eBMPImportInsertBGTile;
 
 			u32 palettes = 0;
 
@@ -795,8 +810,11 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 			//Refresh tileset
 			RefreshTileset();
 
-			//Refresh Collison Set
-			RefreshCollisionSet();
+			//Refresh collision types
+			RefreshCollisionTypes();
+
+			//Refresh collison tileset
+			RefreshCollisionTileset();
 
 			//Refresh whole application
 			RefreshAll();
@@ -835,31 +853,8 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 		TileId tileId = m_project->GetPaintTile();
 		if(tileId != InvalidTileId)
 		{
-			Map& map = m_project->GetMap();
-			Tileset& tileset = m_project->GetTileset();
-
-			//Erase tile
-			tileset.RemoveTile(tileId);
-
-			//Find all uses of tile, set blank
-			for(int x = 0; x < map.GetWidth(); x++)
-			{
-				for(int y = 0; y < map.GetHeight(); y++)
-				{
-					if(map.GetTile(x, y) == tileId)
-					{
-						map.SetTile(x, y, InvalidTileId);
-						map.SetTileFlags(x, y, 0);
-					}
-				}
-			}
-			
-
-			//Clear paint tile
-			m_project->SetPaintTile(InvalidTileId);
-
-			//Clear erase tile
-			m_project->SetEraseTile(InvalidTileId);
+			//Delete tile
+			m_project->DeleteTile(tileId);
 
 			//Recreate tileset texture
 			RefreshTileset();
@@ -881,7 +876,7 @@ void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 		CollisionTileId tileId = m_project->GetCollisionTileset().AddCollisionTile();
 
 		//Recreate tileset texture
-		RefreshTileset();
+		RefreshCollisionTileset();
 
 		//Set as current paint collision tile
 		m_project->SetPaintCollisionTile(tileId);
@@ -924,7 +919,7 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 			m_project->SetPaintCollisionTile(InvalidCollisionTileId);
 
 			//Recreate tileset texture
-			RefreshTileset();
+			RefreshCollisionTileset();
 
 			//Revert to select tool
 			SetMapTool(eToolSelectTiles);
@@ -1043,6 +1038,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_STAMP:
 			m_mapPanel->SetTool(eToolPaintStamp);
+			break;
+		case wxID_TOOL_PAINTCOLLISIONPIXEL:
+			m_mapPanel->SetTool(eToolPaintCollisionPixel);
 			break;
 		case wxID_TOOL_TILEPICKER:
 			m_mapPanel->SetTool(eToolTilePicker);

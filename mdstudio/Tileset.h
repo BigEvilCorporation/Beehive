@@ -24,7 +24,7 @@ public:
 	void Clear();
 
 	TileId AddTile();
-	void RemoveTile(TileId tileId);
+	void PopBackTile();
 	void HashChanged(TileId tileId);
 	TileId FindDuplicate(const Tile& tile, u32& tileFlags) const;
 

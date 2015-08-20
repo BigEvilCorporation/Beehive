@@ -54,7 +54,10 @@ protected:
 	virtual void OnResize(wxSizeEvent& event);
 
 	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y) {}
+	virtual void OnMouseTileEvent(int buttonBits, int x, int y) {}
+
+	//Mouse click or changed pixel callback
+	virtual void OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, int y) {}
 
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset) {}
@@ -111,6 +114,7 @@ protected:
 	//Mouse
 	ion::Vector2 m_mousePrevPos;
 	ion::Vector2i m_prevMouseOverTilePos;
+	ion::Vector2i m_prevMouseOverPixelPos;
 	int m_prevMouseBits;
 
 	//Rendering primitives

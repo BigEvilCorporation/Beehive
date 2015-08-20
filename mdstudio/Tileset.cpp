@@ -28,9 +28,9 @@ TileId Tileset::AddTile()
 	return index;
 }
 
-void Tileset::RemoveTile(TileId tileId)
+void Tileset::PopBackTile()
 {
-
+	m_tiles.pop_back();
 }
 
 void Tileset::HashChanged(TileId tileId)

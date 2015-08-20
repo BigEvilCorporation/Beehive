@@ -326,6 +326,18 @@ void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texC
 {
 	if(tileId == InvalidTileId)
 	{
+		//Use background tile if there is one
+		tileId = m_project->GetBackgroundTile();
+
+		if(tileId == InvalidTileId && m_project->GetTileset().GetCount() > 0)
+		{
+			//If no background tile, and there are tiles available, use first tile
+			tileId = 0;
+		}
+	}
+
+	if(tileId == InvalidTileId)
+	{
 		//Invalid tile, use top-left pixel
 		float onePixelTexSpace = m_cellSizeTexSpaceSq / 8.0f;
 

@@ -255,6 +255,10 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 		mousePosCanvasSpace.x = (canvasSizePixels.x - (canvasSizePixels.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
 		mousePosCanvasSpace.y = (canvasSizePixels.y - (canvasSizePixels.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
 
+		//Get pixel x/y
+		int mousePixelY_inv = (m_canvasSize.y * tileHeight) - (int)floor(mousePosCanvasSpace.y) - 1;
+		ion::Vector2i mousePixelPosCanvas((int)floor(mousePosCanvasSpace.x), mousePixelY_inv);
+
 		//Get tile x/y
 		int x = (int)floor(mousePosCanvasSpace.x / (float)tileWidth);
 		int y_inv = (int)floor(mousePosCanvasSpace.y / (float)tileHeight);
@@ -274,10 +278,17 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 		if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))
 		{
 			//Mouse button clicked or changed grid pos
-			OnMouseTileEvent(mouseDelta, buttonBits, x, y);
+			OnMouseTileEvent(buttonBits, x, y);
 
 			m_prevMouseOverTilePos.x = x;
 			m_prevMouseOverTilePos.y = y;
+		}
+
+		if((buttonBits != m_prevMouseBits) || (mousePixelPosCanvas.x != m_prevMouseOverPixelPos.x) || (mousePixelPosCanvas.y != m_prevMouseOverPixelPos.y))
+		{
+			//Mouse button clicked or changed pixel pos
+			OnMousePixelEvent(mousePixelPosCanvas, buttonBits, x, y);
+			m_prevMouseOverPixelPos = mousePixelPosCanvas;
 		}
 
 		m_prevMouseBits = buttonBits;

@@ -18,6 +18,7 @@ Project::Project()
 	m_paintCollisionTile = InvalidCollisionTileId;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
+	m_backgroundTile = InvalidTileId;
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
@@ -100,6 +101,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_palettes, "palettes");
 	archive.Serialise(m_paletteSlots, "paletteSlots");
 	archive.Serialise(m_tileset, "tileset");
+	archive.Serialise(m_backgroundTile, "backgroundTile");
 	archive.Serialise(m_collisionTileset, "collisionTileset");
 	archive.Serialise(m_map, "map");
 	archive.Serialise(m_collisionMap, "collisionMap");
@@ -149,6 +151,115 @@ void Project::CollapsePaletteSlots()
 	}
 }
 
+void Project::DeleteTile(TileId tileId)
+{
+	//Find all uses of tile on map, set blank
+	for(int x = 0; x < m_map.GetWidth(); x++)
+	{
+		for(int y = 0; y < m_map.GetHeight(); y++)
+		{
+			if(m_map.GetTile(x, y) == tileId)
+			{
+				m_map.SetTile(x, y, InvalidTileId);
+				m_map.SetTileFlags(x, y, 0);
+			}
+		}
+	}
+
+	//Find all uses of tiles in stamps, set blank
+	for(TStampMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		for(int x = 0; x < it->second.GetWidth(); x++)
+		{
+			for(int y = 0; y < it->second.GetHeight(); y++)
+			{
+				if(it->second.GetTile(x, y) == tileId)
+				{
+					it->second.SetTile(x, y, InvalidTileId);
+					it->second.SetTileFlags(x, y, 0);
+				}
+			}
+		}
+	}
+
+	if(m_tileset.GetCount() > 0)
+	{
+		//Swap with last tile
+		Tile* tile1 = m_tileset.GetTile(tileId);
+		Tile* tile2 = m_tileset.GetTile((TileId)m_tileset.GetCount() - 1);
+		ion::debug::Assert(tile1 && tile2, "Project::DeleteTile() - Invalid tile");
+
+		Tile tmpTile;
+		tmpTile = *tile1;
+		*tile1 = *tile2;
+		*tile2 = tmpTile;
+	}
+
+	//Erase last tile
+	m_tileset.PopBackTile();
+
+	//Clear paint tile
+	SetPaintTile(InvalidTileId);
+
+	//Clear erase tile
+	SetEraseTile(InvalidTileId);
+}
+
+void Project::SwapTiles(TileId tileId1, TileId tileId2)
+{
+	//Swap in tileset
+	Tile* tile1 = m_tileset.GetTile(tileId1);
+	Tile* tile2 = m_tileset.GetTile(tileId2);
+	ion::debug::Assert(tile1 && tile2, "Project::SwapTiles() - Invalid tile");
+
+	Tile tmpTile;
+	tmpTile = *tile1;
+	*tile1 = *tile2;
+	*tile2 = tmpTile;
+
+	//Find all uses of tiles on map, swap ids
+	for(int x = 0; x < m_map.GetWidth(); x++)
+	{
+		for(int y = 0; y < m_map.GetHeight(); y++)
+		{
+			TileId currTileId = m_map.GetTile(x, y);
+			if(currTileId == tileId1)
+			{
+				m_map.SetTile(x, y, tileId2);
+			}
+			else if(currTileId == tileId2)
+			{
+				m_map.SetTile(x, y, tileId1);
+			}
+		}
+	}
+
+	//Find all uses of tiles in stamps, swap ids
+	for(TStampMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		for(int x = 0; x < it->second.GetWidth(); x++)
+		{
+			for(int y = 0; y < it->second.GetHeight(); y++)
+			{
+				TileId currTileId = it->second.GetTile(x, y);
+				if(currTileId == tileId1)
+				{
+					it->second.SetTile(x, y, tileId2);
+				}
+				else if(currTileId == tileId2)
+				{
+					it->second.SetTile(x, y, tileId1);
+				}
+			}
+		}
+	}
+}
+
+void Project::SetBackgroundTile(TileId tileId)
+{
+	m_backgroundTile = tileId;
+}
+
 StampId Project::AddStamp(int width, int height)
 {
 	StampId id = m_nextFreeStampId++;
@@ -156,8 +267,24 @@ StampId Project::AddStamp(int width, int height)
 	return id;
 }
 
-void Project::RemoveStamp(StampId stampId)
+void Project::DeleteStamp(StampId stampId)
 {
+	//Remove all uses of stamp on map
+	std::vector<ion::Vector2i> stampUseCoords;
+	for(TStampPosMap::const_iterator it = m_map.StampsBegin(), end = m_map.StampsEnd(); it != end; ++it)
+	{
+		if(it->m_id == stampId)
+		{
+			stampUseCoords.push_back(it->m_position);
+		}
+	}
+
+	for(int i = 0; i < stampUseCoords.size(); i++)
+	{
+		m_map.RemoveStamp(stampUseCoords[i].x, stampUseCoords[i].y);
+	}
+
+	//Delete stamp
 	TStampMap::iterator it = m_stamps.find(stampId);
 	if(it != m_stamps.end())
 	{
@@ -441,6 +568,11 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		m_map.Clear();
 	}
 
+	if(importFlags & eBMPImportInsertBGTile)
+	{
+		m_tileset.AddTile();
+	}
+
 	//Read BMP
 	BMPReader reader;
 	if(reader.Read(filename))
@@ -470,6 +602,38 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 			//Create new stamp
 			StampId stampId = AddStamp(tilesWidth, tilesHeight);
 			stamp = GetStamp(stampId);
+		}
+
+		if(importFlags & eBMPImportWholePalette)
+		{
+			//Read whole palette
+			int paletteIndex = -1;
+
+			//Get selected palette index
+			for(int i = 0; i < s_maxPalettes && paletteIndex == -1; i++)
+			{
+				if(paletteBits & (1 << i))
+				{
+					paletteIndex = i;
+				}
+			}
+
+			//Insert palettes up to this index
+			while(paletteIndex >= m_palettes.size())
+			{
+				m_palettes.push_back(Palette());
+			}
+
+			//Clear palette
+			m_palettes[paletteIndex] = Palette();
+
+			//Get palette
+			Palette& palette = m_palettes[paletteIndex];
+
+			for(int i = 0; i < reader.GetPaletteSize(); i++)
+			{
+				palette.AddColour(reader.GetPaletteEntry(i));
+			}
 		}
 
 		const int tileWidth = 8;

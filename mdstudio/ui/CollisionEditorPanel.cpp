@@ -59,7 +59,7 @@ void CollisionEditorPanel::OnResize(wxSizeEvent& event)
 	Refresh();
 }
 
-void CollisionEditorPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+void CollisionEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
 	const int tileHeight = 8;
 

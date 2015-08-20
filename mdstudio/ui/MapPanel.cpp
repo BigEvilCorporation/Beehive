@@ -71,7 +71,7 @@ void MapPanel::OnResize(wxSizeEvent& event)
 	ViewPanel::OnResize(event);
 }
 
-void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
 	Map& map = m_project->GetMap();
 	Tileset& tileset = m_project->GetTileset();
@@ -436,6 +436,102 @@ void MapPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, 
 	Refresh();
 }
 
+void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, int y)
+{
+	Map& map = m_project->GetMap();
+	Tileset& tileset = m_project->GetTileset();
+
+	const int mapWidth = map.GetWidth();
+	const int mapHeight = map.GetHeight();
+
+	//Invert for OpenGL
+	int y_inv = (mapHeight - 1 - y);
+
+	switch(m_currentTool)
+	{
+		case eToolPaintCollisionPixel:
+		{
+			if(buttonBits & eMouseLeft)
+			{
+				//Get current collision paint type
+				const CollisionType* collisionType = m_project->GetPaintCollisionType();
+
+				//Get collision map
+				CollisionMap& collisionMap = m_project->GetCollisionMap();
+
+				//Get collision tileset
+				CollisionTileset& collisionTileset = m_project->GetCollisionTileset();
+
+				//Get pixel tile under cursor
+				CollisionTileId tileId = collisionMap.GetCollisionTile(x, y);
+
+				if(tileId == InvalidCollisionTileId)
+				{
+					//Create new collision tile
+					tileId = collisionTileset.AddCollisionTile();
+
+					//Set on map
+					collisionMap.SetCollisionTile(x, y, tileId);
+
+					//Paint to canvas
+					PaintCollisionTile(tileId, x, y_inv);
+
+					//Invalidate collision tileset
+					m_project->InvalidateCollisionTiles(true);
+
+					//Refresh collision tileset texture
+					m_mainWindow->RefreshCollisionTileset();
+				}
+
+				//Get collision tile
+				if(CollisionTile* collisionTile = collisionTileset.GetCollisionTile(tileId))
+				{
+					//Get pixel offset into tile
+					const int tileSize = 8;
+					int pixelX = mousePos.x - (x * tileSize);
+					int pixelY = mousePos.y - (y * tileSize);
+
+					if(collisionType)
+					{
+						u8 collisionBit = collisionType->bit;
+						u8 existingBits = collisionTile->GetPixelCollisionBits(pixelX, pixelY);
+
+						if(existingBits & collisionBit)
+						{
+							//Bit is set, remove
+							collisionTile->ClearPixelCollisionBits(pixelX, pixelY, collisionBit);
+						}
+						else
+						{
+							//Bit is not set, add
+							collisionTile->AddPixelCollisionBits(pixelX, pixelY, collisionBit);
+						}
+					}
+					else
+					{
+						//Clear all collision bits
+						collisionTile->ClearPixelCollisionBits(pixelX, pixelY, 0xFF);
+					}
+
+					//Set collision pixel on collision tileset texture
+					m_renderResources.SetCollisionTilesetTexPixel(tileId, ion::Vector2i(pixelX, pixelY), collisionTile->GetPixelCollisionBits(pixelX, pixelY));
+
+					//Refresh this panel
+					Refresh();
+
+					//Refresh collision panels
+					m_mainWindow->RedrawPanel(MainWindow::ePanelCollisionTiles);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelCollisionTileEditor);
+				}
+
+				m_project->InvalidateCollisionTiles(false);
+			}
+
+			break;
+		}
+	}
+}
+
 void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
 	//Render map
@@ -530,9 +626,13 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			//Redraw map
 			PaintMap(map);
+		}
 
+		//If collision tilset invalidated
+		if(m_project->CollisionTilesAreInvalidated())
+		{
 			//Redraw collision map
-			PaintCollisionMap(collisionMap);
+			PaintCollisionMap(m_project->GetCollisionMap());
 		}
 	}
 

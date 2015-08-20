@@ -32,7 +32,10 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 
+	int GetPaletteSize() const;
+
 	Colour GetPixel(int x, int y) const;
+	Colour GetPaletteEntry(int index) const;
 
 private:
 

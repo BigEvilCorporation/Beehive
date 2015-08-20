@@ -73,6 +73,7 @@
 #define wxID_TOOL_CLONE 1031
 #define wxID_TOOL_CREATESTAMP 1032
 #define wxID_TOOL_REMOVESTAMP 1033
+#define wxID_TOOL_PAINTCOLLISIONPIXEL 1034
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -180,10 +181,11 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolClone;
 		wxBitmapButton* m_toolCreateStamp;
 		wxBitmapButton* m_toolRemoveStamp;
+		wxBitmapButton* m_toolPaintCollisionPixel;
 	
 	public:
 		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL ); 
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 121,416 ), long style = wxTAB_TRAVERSAL ); 
 		~MapToolbox();
 	
 };
@@ -242,6 +244,8 @@ class ImportDialog : public wxDialog
 		wxCheckBox* m_chkClearTiles;
 		wxCheckBox* m_chkClearMap;
 		wxCheckBox* m_chkClearPalettes;
+		wxCheckBox* m_chkImportPalette;
+		wxCheckBox* m_chkInsertBGTile;
 		wxCheckBox* m_chkPaintToMap;
 		wxCheckBox* m_chkImportToStamp;
 		wxCheckBox* m_chkImportToSprite;
@@ -250,7 +254,7 @@ class ImportDialog : public wxDialog
 		wxCheckBox* m_chkPalette3;
 		wxCheckBox* m_chkPalette4;
 		
-		ImportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,271 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		ImportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,309 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ImportDialog();
 	
 };

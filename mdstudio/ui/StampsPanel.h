@@ -27,12 +27,20 @@ public:
 protected:
 
 	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y);
+	virtual void OnMouseTileEvent(int buttonBits, int x, int y);
 
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
+	//Right-click menu callback
+	void OnContextMenuClick(wxCommandEvent& event);
+
 private:
+
+	enum MenuItems
+	{
+		eMenuDeleteStamp
+	};
 
 	//Paint all stamps using position map to canvas
 	void PaintStamps();

@@ -7,6 +7,7 @@
 #include "TilesPanel.h"
 #include "MainWindow.h"
 
+#include <wx/Menu.h>
 #include <algorithm>
 
 const float TilesPanel::s_tileSize = 4.0f;
@@ -91,9 +92,9 @@ void TilesPanel::OnResize(wxSizeEvent& event)
 	ResetZoomPan();
 }
 
-void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x, int y)
+void TilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(mouseDelta, buttonBits, x, y);
+	ViewPanel::OnMouseTileEvent(buttonBits, x, y);
 
 	TileId selectedTile = InvalidTileId;
 
@@ -127,8 +128,49 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2 mouseDelta, int buttonBits, int x
 		m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionTileEditor);
 	}
 
+	if(buttonBits & eMouseRight)
+	{
+		if(m_hoverTile != InvalidTileId)
+		{
+			//Right-click menu
+			wxMenu contextMenu;
+
+			contextMenu.Append(eMenuDeleteTile, wxString("Delete tile"));
+			contextMenu.Append(eMenuUseAsBgTile, wxString("Use as background tile"));
+			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&TilesPanel::OnContextMenuClick, NULL, this);
+			PopupMenu(&contextMenu);
+		}
+	}
+
 	//Redraw
 	Refresh();
+}
+
+void TilesPanel::OnContextMenuClick(wxCommandEvent& event)
+{
+	if(event.GetId() == eMenuDeleteTile)
+	{
+		//Delete tile
+		m_project->DeleteTile(m_hoverTile);
+
+		//Invalidate hover/selected tile
+		m_hoverTile = InvalidTileId;
+		m_selectedTile = InvalidTileId;
+
+		//Recreate tileset texture
+		m_mainWindow->RefreshTileset();
+
+		//Refresh
+		m_mainWindow->RefreshAll();
+	}
+	else if(event.GetId() == eMenuUseAsBgTile)
+	{
+		//Set background tile
+		m_project->SetBackgroundTile(m_hoverTile);
+
+		//Refresh map
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+	}
 }
 
 void TilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
