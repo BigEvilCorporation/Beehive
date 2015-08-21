@@ -32,6 +32,7 @@ Project::Project()
 	m_showStampOutlines = true;
 	m_palettes.resize(s_maxPalettes);
 	m_nextFreeStampId = 1;
+	m_nextFreeGameObjTypeId = 1;
 }
 
 void Project::Clear()
@@ -59,6 +60,7 @@ void Project::Clear()
 	m_tileset.Clear();
 	m_stamps.clear();
 	m_nextFreeStampId = 1;
+	m_nextFreeGameObjTypeId = 1;
 }
 
 bool Project::Load(const std::string& filename)
@@ -108,6 +110,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_collisionTypes, "collisionTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
+	archive.Serialise(m_nextFreeGameObjTypeId, "nextFreeGameObjTypeId");
 	archive.Serialise(m_exportFilenames, "exportFilenames");
 }
 
@@ -386,16 +389,25 @@ int Project::GetCollisionTypeCount() const
 	return m_collisionTypes.size();
 }
 
-GameObjectType& Project::AddGameObjectType(const std::string name)
+GameObjTypeId Project::AddGameObjectType()
 {
-	GameObjectType& type = m_gameObjectTypes.insert(std::make_pair(name, GameObjectType())).first->second;
-	type.SetName(name);
-	return type;
+	GameObjTypeId typeId = m_nextFreeGameObjTypeId++;
+	m_gameObjectTypes.insert(std::make_pair(typeId, GameObjectType(typeId)));
+	return typeId;
 }
 
-void Project::RemoveGameObjectType(const GameObjectType& gameObjType)
+void Project::RemoveGameObjectType(GameObjTypeId gameObjType)
 {
-	m_gameObjectTypes.erase(gameObjType.GetName());
+	m_gameObjectTypes.erase(gameObjType);
+}
+
+GameObjectType* Project::GetGameObjectType(GameObjTypeId gameObjTypeId)
+{
+	GameObjectType* gameObjType = NULL;
+	TGameObjTypeMap::iterator it = m_gameObjectTypes.find(gameObjTypeId);
+	if(it != m_gameObjectTypes.end())
+		gameObjType = &it->second;
+	return gameObjType;
 }
 
 const TGameObjTypeMap& Project::GetGameObjectTypes() const

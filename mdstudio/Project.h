@@ -23,7 +23,7 @@
 
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<u8, CollisionType> TCollisionTypeMap;
-typedef std::map<std::string, GameObjectType> TGameObjTypeMap;
+typedef std::map<GameObjTypeId, GameObjectType> TGameObjTypeMap;
 
 class Project
 {
@@ -108,8 +108,9 @@ public:
 	int GetCollisionTypeCount() const;
 
 	//Game object types
-	GameObjectType& AddGameObjectType(const std::string name);
-	void RemoveGameObjectType(const GameObjectType& gameObjType);
+	GameObjTypeId AddGameObjectType();
+	void RemoveGameObjectType(GameObjTypeId gameObjTypeId);
+	GameObjectType* GetGameObjectType(GameObjTypeId gameObjTypeId);
 	const TGameObjTypeMap& GetGameObjectTypes() const;
 
 	//Set current colour used for editing
@@ -242,6 +243,7 @@ private:
 
 	//Game object types
 	TGameObjTypeMap m_gameObjectTypes;
+	GameObjTypeId m_nextFreeGameObjTypeId;
 
 	//Colour used for painting
 	u8 m_paintColour;

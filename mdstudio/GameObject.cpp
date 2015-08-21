@@ -6,8 +6,10 @@
 
 #include "GameObject.h"
 
-GameObjectType::GameObjectType()
+GameObjectType::GameObjectType(u32 id)
 {
+	m_id = id;
+	m_name = "GameObj_";
 	m_dimensions.x = 16;
 	m_dimensions.y = 16;
 }
@@ -31,14 +33,15 @@ void GameObjectType::RemoveVariable(GameObjectType::Variable& variable)
 	}
 }
 
+GameObjectType::Variable* GameObjectType::GetVariable(u32 index)
+{
+	ion::debug::Assert(index < m_variables.size(), "GameObjectType::GetVariable() - out of range");
+	return &m_variables[index];
+}
+
 void GameObjectType::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_variables, "variables");
 	archive.Serialise(m_dimensions, "dimensions");
-}
-
-void GameObjectType::Export(std::stringstream& stream) const
-{
-
 }

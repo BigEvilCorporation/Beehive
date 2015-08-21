@@ -9,6 +9,7 @@
 #include <ion/core/Types.h>
 
 #include "UIBase.h"
+#include "../GameObject.h"
 
 class MainWindow;
 class Project;
@@ -23,6 +24,8 @@ protected:
 	virtual void OnToolGameObjRemove(wxCommandEvent& event);
 	virtual void OnToolVariableAdd(wxCommandEvent& event);
 	virtual void OnToolVariableRemove(wxCommandEvent& event);
+	virtual void OnSelectGameObjType(wxCommandEvent& event);
+	virtual void OnSelectVariable(wxListEvent& event);
 	virtual void OnGameObjNameChange(wxCommandEvent& event);
 	virtual void OnVariableNameChanged(wxCommandEvent& event);
 	virtual void OnVariableSizeChanged(wxCommandEvent& event);
@@ -33,9 +36,15 @@ protected:
 	virtual void OnBtnExport(wxCommandEvent& event);
 
 private:
-	void PopulateList();
+	void PopulateTypeList();
+	void PopulateTypeFields(GameObjectType* gameObjType);
+	void PopulateVarsList(GameObjectType* gameObjType);
+	void PopulateVarsFields(GameObjectType::Variable* variable);
 
 	MainWindow& m_mainWindow;
 	Project& m_project;
-	GameObjectType* m_currentType;
+	GameObjTypeId m_currentTypeId;
+	GameObjectType::Variable* m_currentVariable;
+
+	std::map<u32, GameObjTypeId> m_gameObjIndexMap;
 };
