@@ -284,6 +284,9 @@ class GameObjTypeDialogBase : public wxDialog
 		wxListCtrl* m_listVariables;
 		wxStaticText* m_staticText10;
 		wxTextCtrl* m_textGameObjName;
+		wxStaticText* m_staticText9;
+		wxSpinCtrl* m_spinWidth;
+		wxSpinCtrl* m_spinHeight;
 		wxStaticLine* m_staticline2;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* m_textVariableName;
@@ -291,9 +294,6 @@ class GameObjTypeDialogBase : public wxDialog
 		wxChoice* m_choiceSize;
 		wxStaticText* m_staticText8;
 		wxTextCtrl* m_textValue;
-		wxStaticText* m_staticText9;
-		wxSpinCtrl* m_spinWidth;
-		wxSpinCtrl* m_spinHeight;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
 		
@@ -302,19 +302,21 @@ class GameObjTypeDialogBase : public wxDialog
 		virtual void OnToolGameObjRemove( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectGameObjType( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
 		virtual void OnGameObjNameChange( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnWidthChanged( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnHeightChanged( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnVariableNameChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnValueChanged( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnWidthChanged( wxSpinEvent& event ) { event.Skip(); }
-		virtual void OnHeightChanged( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
 		
-		GameObjTypeDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Game Object Types"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 548,444 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		GameObjTypeDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Game Object Types"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 973,667 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~GameObjTypeDialogBase();
 	
 };
