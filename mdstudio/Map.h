@@ -15,6 +15,7 @@
 #include "Tile.h"
 #include "CollisionTile.h"
 #include "Stamp.h"
+#include "GameObject.h"
 
 class Project;
 
@@ -43,7 +44,30 @@ struct StampMapEntry
 	ion::Vector2i m_size;
 };
 
+struct GameObjectMapEntry
+{
+	GameObjectMapEntry() { m_id = 0; }
+	GameObjectMapEntry(GameObjectId stampId, const ion::Vector2i& position, const ion::Vector2i& size)
+	{
+		m_id = stampId;
+		m_position = position;
+		m_size = size;
+	}
+
+	void Serialise(ion::io::Archive& archive)
+	{
+		archive.Serialise(m_id);
+		archive.Serialise(m_position);
+		archive.Serialise(m_size);
+	}
+
+	StampId m_id;
+	ion::Vector2i m_position;
+	ion::Vector2i m_size;
+};
+
 typedef std::vector<StampMapEntry> TStampPosMap;
+typedef std::vector<GameObjectMapEntry> TGameObjectPosMap;
 
 class Map
 {
@@ -81,6 +105,12 @@ public:
 	StampId FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const;
 	void RemoveStamp(int x, int y);
 
+	//Place game object on map
+	void PlaceGameObject(int x, int y, const GameObject& gameObject, const GameObjectType& objectType);
+	GameObjectId FindGameObject(int x, int y, ion::Vector2i& topLeft) const;
+	void RemoveGameObject(int x, int y);
+	const TGameObjectPosMap& GetGameObjects() const;
+
 	const TStampPosMap::const_iterator StampsBegin() const;
 	const TStampPosMap::const_iterator StampsEnd() const;
 
@@ -108,4 +138,5 @@ private:
 	int m_height;
 	std::vector<TileDesc> m_tiles;
 	TStampPosMap m_stamps;
+	TGameObjectPosMap m_gameObjects;
 };

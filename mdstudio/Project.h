@@ -23,7 +23,7 @@
 
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<u8, CollisionType> TCollisionTypeMap;
-typedef std::map<GameObjTypeId, GameObjectType> TGameObjTypeMap;
+typedef std::map<GameObjectTypeId, GameObjectType> TGameObjectTypeMap;
 
 class Project
 {
@@ -108,10 +108,10 @@ public:
 	int GetCollisionTypeCount() const;
 
 	//Game object types
-	GameObjTypeId AddGameObjectType();
-	void RemoveGameObjectType(GameObjTypeId gameObjTypeId);
-	GameObjectType* GetGameObjectType(GameObjTypeId gameObjTypeId);
-	const TGameObjTypeMap& GetGameObjectTypes() const;
+	GameObjectTypeId AddGameObjectType();
+	void RemoveGameObjectType(GameObjectTypeId typeId);
+	GameObjectType* GetGameObjectType(GameObjectTypeId typeId);
+	const TGameObjectTypeMap& GetGameObjectTypes() const;
 
 	//Set current colour used for editing
 	void SetPaintColour(u8 colourIdx);
@@ -136,6 +136,10 @@ public:
 	//Set current stamp used for painting
 	void SetPaintStamp(StampId stamp);
 	StampId GetPaintStamp() const;
+
+	//Set current game object type for placing
+	void SetPaintGameObjectType(GameObjectTypeId typeId);
+	GameObjectTypeId GetPaintGameObjectType() const;
 
 	//Grid
 	int GetGridSize() const { return m_gridSize; }
@@ -242,8 +246,8 @@ private:
 	TCollisionTypeMap m_collisionTypes;
 
 	//Game object types
-	TGameObjTypeMap m_gameObjectTypes;
-	GameObjTypeId m_nextFreeGameObjTypeId;
+	TGameObjectTypeMap m_gameObjectTypes;
+	GameObjectTypeId m_nextFreeGameObjectTypeId;
 
 	//Colour used for painting
 	u8 m_paintColour;
@@ -262,6 +266,9 @@ private:
 
 	//Tile used for erasing
 	TileId m_eraseTile;
+
+	//Game object used for placing
+	GameObjectTypeId m_paintGameObjectType;
 
 	//Background tile (replaced InvalidTileId on export)
 	TileId m_backgroundTile;

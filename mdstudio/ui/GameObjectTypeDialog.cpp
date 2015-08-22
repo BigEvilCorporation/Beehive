@@ -12,7 +12,7 @@ GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& proj
 	, m_mainWindow(mainWindow)
 	, m_project(project)
 {
-	m_currentTypeId = InvalidGameObjTypeId;
+	m_currentTypeId = InvalidGameObjectTypeId;
 	m_currentVariable = NULL;
 }
 
@@ -30,10 +30,10 @@ void GameObjectTypeDialog::OnToolGameObjAdd(wxCommandEvent& event)
 
 void GameObjectTypeDialog::OnToolGameObjRemove(wxCommandEvent& event)
 {
-	if(m_currentTypeId != InvalidGameObjTypeId)
+	if(m_currentTypeId != InvalidGameObjectTypeId)
 	{
 		m_project.RemoveGameObjectType(m_currentTypeId);
-		m_currentTypeId = InvalidGameObjTypeId;
+		m_currentTypeId = InvalidGameObjectTypeId;
 		PopulateTypeList();
 		PopulateTypeFields(NULL);
 		PopulateVarsList(NULL);
@@ -173,10 +173,10 @@ void GameObjectTypeDialog::PopulateTypeList()
 	m_listGameObjTypes->Clear();
 	m_gameObjIndexMap.clear();
 
-	const TGameObjTypeMap& typesMap = m_project.GetGameObjectTypes();
+	const TGameObjectTypeMap& typesMap = m_project.GetGameObjectTypes();
 
 	int index = 0;
-	for(TGameObjTypeMap::const_iterator it = typesMap.begin(), end = typesMap.end(); it != end; ++it, ++index)
+	for(TGameObjectTypeMap::const_iterator it = typesMap.begin(), end = typesMap.end(); it != end; ++it, ++index)
 	{
 		m_listGameObjTypes->Insert(wxString(it->second.GetName()), index);
 		m_gameObjIndexMap.insert(std::make_pair(index, it->second.GetId()));

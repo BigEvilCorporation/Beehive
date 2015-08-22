@@ -43,8 +43,8 @@ private:
 
 	MainWindow& m_mainWindow;
 	Project& m_project;
-	GameObjTypeId m_currentTypeId;
+	GameObjectTypeId m_currentTypeId;
 	GameObjectType::Variable* m_currentVariable;
 
-	std::map<u32, GameObjTypeId> m_gameObjIndexMap;
+	std::map<u32, GameObjectTypeId> m_gameObjIndexMap;
 };

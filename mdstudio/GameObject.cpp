@@ -45,3 +45,41 @@ void GameObjectType::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_variables, "variables");
 	archive.Serialise(m_dimensions, "dimensions");
 }
+
+GameObject::GameObject(GameObjectId objectId, GameObjectTypeId typeId)
+{
+	m_objectId = objectId;
+	m_typeId = typeId;
+}
+
+void GameObject::Serialise(ion::io::Archive& archive)
+{
+
+}
+
+void GameObject::Export(std::stringstream& stream, GameObjectType& objectType) const
+{
+	stream << objectType.GetName().c_str() << "_" << (u32)m_objectId << ":" << std::endl;
+
+	const std::vector<GameObjectType::Variable>& variables = objectType.GetVariables();
+
+	for(int i = 0; i < variables.size(); i++)
+	{
+		//"move.[s] #[value], [name](a0)"
+
+		switch(variables[i].m_size)
+		{
+		case GameObjectType::eSizeByte:
+			stream << "move.b ";
+			break;
+		case GameObjectType::eSizeWord:
+			stream << "move.w ";
+			break;
+		case GameObjectType::eSizeLong:
+			stream << "move.l ";
+			break;
+		}
+
+		stream << "#" << variables[i].m_value.c_str() << ", " << variables[i].m_name.c_str() << "(a0)" << std::endl;
+	}
+}

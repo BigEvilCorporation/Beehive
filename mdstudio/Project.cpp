@@ -32,7 +32,7 @@ Project::Project()
 	m_showStampOutlines = true;
 	m_palettes.resize(s_maxPalettes);
 	m_nextFreeStampId = 1;
-	m_nextFreeGameObjTypeId = 1;
+	m_nextFreeGameObjectTypeId = 1;
 }
 
 void Project::Clear()
@@ -60,7 +60,7 @@ void Project::Clear()
 	m_tileset.Clear();
 	m_stamps.clear();
 	m_nextFreeStampId = 1;
-	m_nextFreeGameObjTypeId = 1;
+	m_nextFreeGameObjectTypeId = 1;
 }
 
 bool Project::Load(const std::string& filename)
@@ -110,7 +110,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_collisionTypes, "collisionTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
-	archive.Serialise(m_nextFreeGameObjTypeId, "nextFreeGameObjTypeId");
+	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
 	archive.Serialise(m_exportFilenames, "exportFilenames");
 }
 
@@ -389,28 +389,28 @@ int Project::GetCollisionTypeCount() const
 	return m_collisionTypes.size();
 }
 
-GameObjTypeId Project::AddGameObjectType()
+GameObjectTypeId Project::AddGameObjectType()
 {
-	GameObjTypeId typeId = m_nextFreeGameObjTypeId++;
+	GameObjectTypeId typeId = m_nextFreeGameObjectTypeId++;
 	m_gameObjectTypes.insert(std::make_pair(typeId, GameObjectType(typeId)));
 	return typeId;
 }
 
-void Project::RemoveGameObjectType(GameObjTypeId gameObjType)
+void Project::RemoveGameObjectType(GameObjectTypeId typeId)
 {
-	m_gameObjectTypes.erase(gameObjType);
+	m_gameObjectTypes.erase(typeId);
 }
 
-GameObjectType* Project::GetGameObjectType(GameObjTypeId gameObjTypeId)
+GameObjectType* Project::GetGameObjectType(GameObjectTypeId typeId)
 {
-	GameObjectType* gameObjType = NULL;
-	TGameObjTypeMap::iterator it = m_gameObjectTypes.find(gameObjTypeId);
+	GameObjectType* gameObjectType = NULL;
+	TGameObjectTypeMap::iterator it = m_gameObjectTypes.find(typeId);
 	if(it != m_gameObjectTypes.end())
-		gameObjType = &it->second;
-	return gameObjType;
+		gameObjectType = &it->second;
+	return gameObjectType;
 }
 
-const TGameObjTypeMap& Project::GetGameObjectTypes() const
+const TGameObjectTypeMap& Project::GetGameObjectTypes() const
 {
 	return m_gameObjectTypes;
 }
@@ -473,6 +473,16 @@ void Project::SetPaintStamp(StampId stamp)
 StampId Project::GetPaintStamp() const
 {
 	return m_paintStamp;
+}
+
+void Project::SetPaintGameObjectType(GameObjectTypeId typeId)
+{
+	m_paintGameObjectType = typeId;
+}
+
+GameObjectTypeId Project::GetPaintGameObjectType() const
+{
+	return m_paintGameObjectType;2
 }
 
 bool Project::FindPalette(Colour* pixels, u32 useablePalettes, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const

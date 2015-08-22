@@ -46,6 +46,8 @@ local SRC =
 	ui/CollisionTilesPanel.h
 	ui/CollisionTypePanel.cpp
 	ui/CollisionTypePanel.h
+	ui/GameObjectTypePanel.cpp
+	ui/GameObjectTypePanel.h
 	ui/GameObjectTypeDialog.cpp
 	ui/GameObjectTypeDialog.h
 	ui/MapPanel.cpp
