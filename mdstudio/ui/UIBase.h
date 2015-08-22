@@ -33,11 +33,11 @@
 #include <wx/button.h>
 #include <wx/dialog.h>
 #include <wx/bmpbuttn.h>
+#include <wx/listbox.h>
 #include <wx/textctrl.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/toolbar.h>
-#include <wx/listbox.h>
 #include <wx/listctrl.h>
 #include <wx/statline.h>
 #include <wx/choice.h>
@@ -199,6 +199,27 @@ class MapToolbox : public wxPanel
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class GameObjTypesPanelBase
+///////////////////////////////////////////////////////////////////////////////
+class GameObjTypesPanelBase : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxListBox* m_listGameObjTypes;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnGameObjectTypeSelected( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		GameObjTypesPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL ); 
+		~GameObjTypesPanelBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class ExportDialog
 ///////////////////////////////////////////////////////////////////////////////
 class ExportDialog : public wxDialog 
@@ -225,11 +246,13 @@ class ExportDialog : public wxDialog
 		wxFilePickerCtrl* m_filePickerCollisionTiles;
 		wxCheckBox* m_chkCollisionMap;
 		wxFilePickerCtrl* m_filePickerCollisionMap;
+		wxCheckBox* m_chkGameObj;
+		wxFilePickerCtrl* m_filePickerGameObj;
 		wxStdDialogButtonSizer* m_buttons;
 		wxButton* m_buttonsOK;
 		wxButton* m_buttonsCancel;
 		
-		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 549,281 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 548,311 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ExportDialog();
 	
 };

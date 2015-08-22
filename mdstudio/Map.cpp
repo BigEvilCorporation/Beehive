@@ -180,7 +180,7 @@ void Map::RemoveStamp(int x, int y)
 	ion::Vector2i size;
 	ion::Vector2i bottomRight;
 
-	for(TStampPosMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	for(TStampPosMap::reverse_iterator it = m_stamps.rbegin(), end = m_stamps.rend(); it != end; ++it)
 	{
 		ion::Vector2i topLeft = it->m_position;
 		ion::Vector2i size = it->m_size;
@@ -195,6 +195,62 @@ void Map::RemoveStamp(int x, int y)
 			break;
 		}
 	}
+}
+
+void Map::PlaceGameObject(int x, int y, const GameObject& gameObject, const GameObjectType& objectType)
+{
+	m_gameObjects.push_back(GameObjectMapEntry(gameObject.GetId(), ion::Vector2i(x, y), ion::Vector2i(objectType.GetDimensions().x, objectType.GetDimensions().y)));
+}
+
+GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
+{
+	GameObjectId gameObjectId = InvalidGameObjectId;
+	ion::Vector2i size;
+	ion::Vector2i bottomRight;
+
+	//Work backwards, find last placed stamp first
+	for(TGameObjectPosMap::const_reverse_iterator it = m_gameObjects.rbegin(), end = m_gameObjects.rend(); it != end && !gameObjectId; ++it)
+	{
+		topLeft = it->m_position;
+		size = it->m_size;
+
+		bottomRight = topLeft + size;
+
+		if(x >= topLeft.x && y >= topLeft.y
+			&& x < bottomRight.x && y < bottomRight.y)
+		{
+			gameObjectId = it->m_id;
+		}
+	}
+
+	return gameObjectId;
+}
+
+void Map::RemoveGameObject(int x, int y)
+{
+	ion::Vector2i size;
+	ion::Vector2i bottomRight;
+
+	for(TGameObjectPosMap::reverse_iterator it = m_gameObjects.rbegin(), end = m_gameObjects.rend(); it != end; ++it)
+	{
+		ion::Vector2i topLeft = it->m_position;
+		ion::Vector2i size = it->m_size;
+
+		bottomRight = topLeft + size;
+
+		if(x >= topLeft.x && y >= topLeft.y
+			&& x < bottomRight.x && y < bottomRight.y)
+		{
+			std::swap(*it, m_gameObjects.back());
+			m_gameObjects.pop_back();
+			break;
+		}
+	}
+}
+
+const TGameObjectPosMap& Map::GetGameObjects() const
+{
+	return m_gameObjects;
 }
 
 const TStampPosMap::const_iterator Map::StampsBegin() const

@@ -299,6 +299,30 @@ MapToolbox::~MapToolbox()
 {
 }
 
+GameObjTypesPanelBase::GameObjTypesPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	wxBoxSizer* bSizer15;
+	bSizer15 = new wxBoxSizer( wxVERTICAL );
+	
+	m_listGameObjTypes = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 ); 
+	bSizer15->Add( m_listGameObjTypes, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer15 );
+	this->Layout();
+	bSizer15->Fit( this );
+	
+	// Connect Events
+	m_listGameObjTypes->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypesPanelBase::OnGameObjectTypeSelected ), NULL, this );
+}
+
+GameObjTypesPanelBase::~GameObjTypesPanelBase()
+{
+	// Disconnect Events
+	m_listGameObjTypes->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypesPanelBase::OnGameObjectTypeSelected ), NULL, this );
+	
+}
+
 ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
@@ -350,6 +374,13 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerCollisionMap, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkGameObj = new wxCheckBox( this, wxID_ANY, wxT("Export game objects:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkGameObj->SetValue(true); 
+	fgSizer3->Add( m_chkGameObj, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer3->Add( m_filePickerGameObj, 0, wxALL|wxEXPAND, 5 );
 	
 	
 	fgSizer3->Add( 0, 0, 1, wxEXPAND, 5 );

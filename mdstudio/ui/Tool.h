@@ -29,7 +29,8 @@ enum ToolType
 	eToolTilePicker,
 	eToolStampPicker,
 	eToolFlipX,
-	eToolFlipY
+	eToolFlipY,
+	eToolPlaceGameObject
 };
 
 class Tool

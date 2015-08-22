@@ -12,8 +12,11 @@
 #include <sstream>
 #include <string>
 
-typedef u32 GameObjTypeId;
-static const GameObjTypeId InvalidGameObjTypeId = 0;
+typedef u32 GameObjectTypeId;
+typedef u32 GameObjectId;
+
+static const GameObjectTypeId InvalidGameObjectTypeId = 0;
+static const GameObjectTypeId InvalidGameObjectId = 0;
 
 class GameObjectType
 {
@@ -46,9 +49,9 @@ public:
 		u8 m_size;
 	};
 
-	GameObjectType(GameObjTypeId id);
+	GameObjectType(GameObjectTypeId id);
 
-	GameObjTypeId GetId() const { return m_id; }
+	GameObjectTypeId GetId() const { return m_id; }
 
 	void SetName(const std::string& name) { m_name = name; }
 	const std::string& GetName() const { return m_name; }
@@ -64,7 +67,7 @@ public:
 	void Serialise(ion::io::Archive& archive);
 
 private:
-	GameObjTypeId m_id;
+	GameObjectTypeId m_id;
 	std::string m_name;
 	std::vector<Variable> m_variables;
 	ion::Vector2i m_dimensions;
@@ -73,11 +76,16 @@ private:
 class GameObject
 {
 public:
+	GameObject(GameObjectId objectId, GameObjectTypeId typeId);
+
+	GameObjectId GetId() const { return m_objectId; }
+	GameObjectTypeId GetTypeId() const { return m_typeId; }
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream) const;
+	void Export(std::stringstream& stream, GameObjectType& objectType) const;
 
 private:
-	GameObjTypeId m_typeId;
+	GameObjectId m_objectId;
+	GameObjectTypeId m_typeId;
 	ion::Vector2i m_position;
 };
