@@ -9,6 +9,7 @@
 #include <io/Archive.h>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "Map.h"
 #include "Palette.h"
@@ -88,6 +89,7 @@ public:
 	void SwapTiles(TileId tileId1, TileId tileId2);
 	void SetBackgroundTile(TileId tileId);
 	TileId GetBackgroundTile() const { return m_backgroundTile; }
+	int CleanupTiles();
 
 	//Stamps
 	StampId AddStamp(int width, int height);

@@ -168,15 +168,25 @@ void Project::CollapsePaletteSlots()
 
 void Project::DeleteTile(TileId tileId)
 {
+	TileId swapTileId = (TileId)m_tileset.GetCount() - 1;
+
 	//Find all uses of tile on map, set blank
 	for(int x = 0; x < m_map.GetWidth(); x++)
 	{
 		for(int y = 0; y < m_map.GetHeight(); y++)
 		{
-			if(m_map.GetTile(x, y) == tileId)
+			TileId currTileId = m_map.GetTile(x, y);
+			if(currTileId == tileId)
 			{
+				//Referencing deleted tile, set as invalid
 				m_map.SetTile(x, y, InvalidTileId);
-				m_map.SetTileFlags(x, y, 0);
+			}
+			else if(currTileId == swapTileId)
+			{
+				//Referencing swap tile, set new id
+				u32 flags = m_map.GetTileFlags(x, y);
+				m_map.SetTile(x, y, tileId);
+				m_map.SetTileFlags(x, y, flags);
 			}
 		}
 	}
@@ -188,10 +198,18 @@ void Project::DeleteTile(TileId tileId)
 		{
 			for(int y = 0; y < it->second.GetHeight(); y++)
 			{
-				if(it->second.GetTile(x, y) == tileId)
+				TileId currTileId = it->second.GetTile(x, y);
+				if(currTileId == tileId)
 				{
+					//Referencing deleted tile, set as invalid
 					it->second.SetTile(x, y, InvalidTileId);
-					it->second.SetTileFlags(x, y, 0);
+				}
+				else if(currTileId == swapTileId)
+				{
+					//Referencing swap tile, set new id
+					u32 flags = it->second.GetTileFlags(x, y);
+					it->second.SetTile(x, y, tileId);
+					it->second.SetTileFlags(x, y, flags);
 				}
 			}
 		}
@@ -199,7 +217,7 @@ void Project::DeleteTile(TileId tileId)
 
 	if(m_tileset.GetCount() > 0)
 	{
-		//Swap with last tile
+		//Swap tiles
 		Tile* tile1 = m_tileset.GetTile(tileId);
 		Tile* tile2 = m_tileset.GetTile((TileId)m_tileset.GetCount() - 1);
 		ion::debug::Assert(tile1 && tile2, "Project::DeleteTile() - Invalid tile");
@@ -208,6 +226,7 @@ void Project::DeleteTile(TileId tileId)
 		tmpTile = *tile1;
 		*tile1 = *tile2;
 		*tile2 = tmpTile;
+
 	}
 
 	//Erase last tile
@@ -273,6 +292,161 @@ void Project::SwapTiles(TileId tileId1, TileId tileId2)
 void Project::SetBackgroundTile(TileId tileId)
 {
 	m_backgroundTile = tileId;
+}
+
+int Project::CleanupTiles()
+{
+	std::set<TileId> usedTiles;
+
+	//Collect all used tile ids from map
+	for(int x = 0; x < m_map.GetWidth(); x++)
+	{
+		for(int y = 0; y < m_map.GetHeight(); y++)
+		{
+			TileId tileId = m_map.GetTile(x, y);
+			usedTiles.insert(tileId);
+		}
+	}
+
+	//Collect all used tile ids from stamps
+	for(TStampMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		const Stamp& stamp = it->second;
+
+		for(int x = 0; x < stamp.GetWidth(); x++)
+		{
+			for(int y = 0; y < stamp.GetHeight(); y++)
+			{
+				TileId tileId = stamp.GetTile(x, y);
+				usedTiles.insert(tileId);
+			}
+		}
+	}
+
+	std::set<TileId> unusedTiles;
+
+	for(TileId i = 0; i < m_tileset.GetCount(); i++)
+	{
+		if(usedTiles.find(i) == usedTiles.end())
+		{
+			unusedTiles.insert(i);
+		}
+	}
+
+	if(unusedTiles.size() > 0)
+	{
+		std::stringstream message;
+		message << "Found " << unusedTiles.size() << " unused tiles, delete?";
+
+		if(wxMessageBox(message.str().c_str(), "Delete unused tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		{
+			//Delete in reverse, popping from back
+			for(std::set<TileId>::const_reverse_iterator it = unusedTiles.rbegin(), end = unusedTiles.rend(); it != end; ++it)
+			{
+				DeleteTile(*it);
+			}
+		}
+	}
+
+	//Calculate hashes for all tiles
+	struct Duplicate
+	{
+		TileId original;
+		TileId duplicate;
+		Tileset::HashOrientation duplicateOrientation;
+	};
+
+	std::map<u64, TileId> tileMaps[Tileset::eNumHashOrientations];
+	std::vector<Duplicate> duplicates;
+	u64 hashes[Tileset::eNumHashOrientations];
+
+	for(int i = 0; i < m_tileset.GetCount(); i++)
+	{
+		const Tile* tile = m_tileset.GetTile(i);
+		m_tileset.CalculateHashes(*tile, hashes);
+		bool duplicateFound = false;
+
+		for(int j = 0; j < Tileset::eNumHashOrientations && !duplicateFound; j++)
+		{
+			std::map<u64, TileId>::iterator it = tileMaps[j].find(tile->GetHash());
+			if(it != tileMaps[j].end())
+			{
+				Duplicate duplicate;
+				duplicate.original = it->second;
+				duplicate.duplicate = i;
+				duplicate.duplicateOrientation = (Tileset::HashOrientation)j;
+				duplicates.push_back(duplicate);
+				duplicateFound = true;
+			}
+		}
+
+		if(!duplicateFound)
+		{
+			for(int j = 0; j < Tileset::eNumHashOrientations; j++)
+			{
+				tileMaps[j].insert(std::make_pair(hashes[j], i));
+			}
+		}
+	}
+
+	if(duplicates.size() > 0)
+	{
+		std::stringstream message;
+		message << "Found " << duplicates.size() << " duplicate tiles, delete?";
+
+		if(wxMessageBox(message.str().c_str(), "Delete duplicate tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		{
+			for(int i = 0; i < duplicates.size(); i++)
+			{
+				//Find use of duplicate id in map
+				for(int x = 0; x < m_map.GetWidth(); x++)
+				{
+					for(int y = 0; y < m_map.GetHeight(); y++)
+					{
+						if(m_map.GetTile(x, y) == duplicates[i].duplicate)
+						{
+							u32 originalFlags = m_map.GetTileFlags(x, y);
+
+							//Replace duplicate with original
+							m_map.SetTile(x, y, duplicates[i].original);
+
+							//Orientate to match duplicate
+							m_map.SetTileFlags(x, y, originalFlags ^ Tileset::s_orientationFlags[duplicates[i].duplicateOrientation]);
+						}
+					}
+				}
+
+				//Find uses of duplicate id in stamps
+				for(TStampMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+				{
+					for(int x = 0; x < it->second.GetWidth(); x++)
+					{
+						for(int y = 0; y < it->second.GetHeight(); y++)
+						{
+							if(it->second.GetTile(x, y) == duplicates[i].duplicate)
+							{
+								u32 originalFlags = it->second.GetTileFlags(x, y);
+
+								//Replace duplicate with original
+								it->second.SetTile(x, y, duplicates[i].original);
+
+								//Orientate to match duplicate
+								it->second.SetTileFlags(x, y, originalFlags ^ Tileset::s_orientationFlags[duplicates[i].duplicateOrientation]);
+							}
+						}
+					}
+				}
+			}
+
+			//Delete duplicates (in reverse, popping from back)
+			for(int i = duplicates.size() - 1; i >= 0; --i)
+			{
+				DeleteTile(duplicates[i].duplicate);
+			}
+		}
+	}
+
+	return unusedTiles.size() + duplicates.size();
 }
 
 StampId Project::AddStamp(int width, int height)

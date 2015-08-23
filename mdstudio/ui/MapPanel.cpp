@@ -422,6 +422,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						PaintStamp(*stamp, m_stampPastePos.x, m_stampPastePos.y, flipFlags);
 					}
 				}
+				break;
 			}
 
 			case eToolPlaceGameObject:
@@ -436,8 +437,20 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					if(GameObjectType* gameObjectType = m_project->GetGameObjectType(gameObjectTypeId))
 					{
 						m_project->GetMap().PlaceGameObject(x, y, *gameObjectType);
+						Refresh();
 					}
 				}
+				break;
+			}
+
+			case eToolRemoveGameObject:
+			{
+				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+				{
+					m_project->GetMap().RemoveGameObject(x, y);
+					Refresh();
+				}
+				break;
 			}
 		}
 	}
@@ -911,20 +924,25 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	{
 		for(std::vector<GameObjectMapEntry>::const_iterator itVec = itMap->second.begin(), endVec = itMap->second.end(); itVec != endVec; ++itVec)
 		{
-			//Draw box over game obj
-			ion::Vector2 position((float)itVec->m_position.x, (float)(mapHeight - 1 - itVec->m_position.y));
-			ion::Vector3 size((float)itVec->m_size.x / (float)tileWidth, (float)itVec->m_size.y / (float)tileHeight, 1.0f);
+			if(const GameObjectType* gameObjectType = m_project->GetGameObjectType(itVec->m_gameObject.GetTypeId()))
+			{
+				float x = itVec->m_position.x;
+				float y_inv = mapHeight - 1 - itVec->m_position.y;
+				float width = gameObjectType->GetDimensions().x / tileWidth;
+				float height_inv = -gameObjectType->GetDimensions().y / tileHeight;
 
-			ion::Vector3 boxPos(floor((position.x - (mapWidth / 2.0f) + (size.x / 2.0f)) * tileWidth),
-				floor((position.y - (mapHeight / 2.0f) + (size.y / 2.0f)) * tileHeight), z);
+				ion::Vector3 scale(gameObjectType->GetDimensions().x / tileWidth, gameObjectType->GetDimensions().y / tileHeight, 1.0f);
+				ion::Matrix4 mtx;
+				ion::Vector3 pos(floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
+					floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
 
-			ion::Matrix4 boxMtx;
-			boxMtx.SetTranslation(boxPos);
-			boxMtx.SetScale(size);
+				mtx.SetTranslation(pos);
+				mtx.SetScale(scale);
 
-			material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
-			renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-			material->Unbind();
+				material->Bind(mtx, cameraInverseMtx, projectionMtx);
+				renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+				material->Unbind();
+			}
 		}
 	}
 
@@ -933,12 +951,6 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 
 void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	const Map& map = m_project->GetMap();
-	const int mapWidth = map.GetWidth();
-	const int mapHeight = map.GetHeight();
-	const int tileWidth = 8;
-	const int tileHeight = 8;
-
 	if(const GameObjectType* gameObjectType = m_project->GetGameObjectType(m_previewGameObjectType))
 	{
 		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
@@ -948,18 +960,25 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 		material->SetDiffuseColour(colour);
 
-		//Draw box over game obj
-		ion::Vector2 position((float)m_previewGameObjectPos.x, (float)(mapHeight - 1 - m_previewGameObjectPos.y));
-		ion::Vector3 size((float)gameObjectType->GetDimensions().x / (float)tileWidth, (float)gameObjectType->GetDimensions().y / (float)tileHeight, 1.0f);
+		const Map& map = m_project->GetMap();
+		const int mapWidth = map.GetWidth();
+		const int mapHeight = map.GetHeight();
+		const int tileWidth = 8;
+		const int tileHeight = 8;
 
-		ion::Vector3 boxPos(floor((position.x - (mapWidth / 2.0f) + (size.x / 2.0f)) * tileWidth),
-			floor((position.y - (mapHeight / 2.0f) + (size.y / 2.0f)) * tileHeight), z);
+		float x = m_previewGameObjectPos.x;
+		float y_inv = mapHeight - 1 - m_previewGameObjectPos.y;
+		float width = gameObjectType->GetDimensions().x / tileWidth;
+		float height_inv = -gameObjectType->GetDimensions().y / tileHeight;
 
-		ion::Matrix4 boxMtx;
-		boxMtx.SetTranslation(boxPos);
-		boxMtx.SetScale(size);
+		ion::Vector3 previewScale(gameObjectType->GetDimensions().x / tileWidth, gameObjectType->GetDimensions().y / tileHeight, 1.0f);
+		ion::Matrix4 previewMtx;
+		ion::Vector3 previewPos(floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
+								floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
+		previewMtx.SetTranslation(previewPos);
+		previewMtx.SetScale(previewScale);
 
-		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		material->Bind(previewMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 

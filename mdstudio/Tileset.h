@@ -19,6 +19,18 @@ class Tileset
 	typedef std::map<u64, TileId> HashMap;
 
 public:
+	enum HashOrientation
+	{
+		eNormal,
+		eFlipX,
+		eFlipY,
+		eFlipXY,
+
+		eNumHashOrientations
+	};
+
+	static const u32 s_orientationFlags[eNumHashOrientations];
+
 	Tileset();
 
 	void Clear();
@@ -32,25 +44,15 @@ public:
 	const Tile* GetTile(TileId tileId) const;
 	int GetCount() const;
 
+	void CalculateHashes(const Tile& tile, u64 hashes[eNumHashOrientations]) const;
+
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
 	
 private:
-	enum HashOrientation
-	{
-		eNormal,
-		eFlipX,
-		eFlipY,
-		eFlipXY,
-
-		eNumHashOrientations
-	};
-
-	static const u32 s_orientationFlags[eNumHashOrientations];
 
 	void AddToHashMap(TileId tileId);
 	void RemoveFromHashMap(TileId tileId);
-	void CalculateHashes(const Tile& tile, u64 hashes[eNumHashOrientations]) const;
 	
 	std::vector<Tile> m_tiles;
 	HashMap m_hashMap;
