@@ -195,7 +195,8 @@ void Map::RemoveStamp(int x, int y)
 		{
 			std::swap(*it, m_stamps.back());
 			m_stamps.pop_back();
-			break;
+			
+			return;
 		}
 	}
 }
@@ -263,7 +264,8 @@ void Map::RemoveGameObject(int x, int y)
 				{
 					m_gameObjects.erase(itMap);
 				}
-				break;
+				
+				return;
 			}
 		}
 	}

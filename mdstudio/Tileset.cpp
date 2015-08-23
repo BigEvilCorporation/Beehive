@@ -5,9 +5,10 @@
 ///////////////////////////////////////////////////////
 
 #include "Tileset.h"
+#include "Map.h"
 #include <ion/core/cryptography/Hash.h>
 
-const u32 Tileset::s_orientationFlags[eNumHashOrientations] = { 0, 1, 2, 4 };
+const u32 Tileset::s_orientationFlags[eNumHashOrientations] = { 0, Map::eFlipX, Map::eFlipY, Map::eFlipX | Map::eFlipY };
 
 Tileset::Tileset()
 {
@@ -31,6 +32,7 @@ TileId Tileset::AddTile()
 void Tileset::PopBackTile()
 {
 	m_tiles.pop_back();
+	RemoveFromHashMap(m_tiles.size() - 1);
 }
 
 void Tileset::HashChanged(TileId tileId)

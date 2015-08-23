@@ -92,12 +92,14 @@ protected:
 	virtual void OnBtnTilesImport(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesCreate(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesDelete(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnTilesCleanup(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesCreate(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesDelete(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsMapEdit(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsTiles(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event) { event.Skip(); }
 	virtual void OnBtnToolsPalettes(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);

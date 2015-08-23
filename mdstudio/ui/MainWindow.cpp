@@ -186,9 +186,6 @@ void MainWindow::SetProject(Project* project)
 			//Open centre panels
 			ShowPanelMap();
 
-			//Open floating panels
-			ShowPanelGameObjectTypes();
-
 			//Sync settings widgets states
 			SyncSettingsWidgets();
 		}
@@ -920,6 +917,17 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnTilesCleanup(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		if(m_project->CleanupTiles())
+		{
+			RefreshAll();
+		}
+	}
+}
+
 void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
@@ -995,6 +1003,11 @@ void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )
 void MainWindow::OnBtnToolsPalettes( wxRibbonButtonBarEvent& event )
 {
 	ShowPanelPalettes();
+}
+
+void MainWindow::OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event)
+{
+	ShowPanelGameObjectTypes();
 }
 
 void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
