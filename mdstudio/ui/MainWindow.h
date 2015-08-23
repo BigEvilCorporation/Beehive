@@ -23,6 +23,7 @@
 #include "CollisionTypePanel.h"
 #include "CollisionTilesPanel.h"
 #include "CollisionEditorPanel.h"
+#include "GameObjectTypePanel.h"
 #include "GameObjectTypeDialog.h"
 
 #include "../Project.h"
@@ -41,7 +42,8 @@ public:
 		ePanelTileEditor,
 		ePanelCollisionTiles,
 		ePanelCollisionTypes,
-		ePanelCollisionTileEditor
+		ePanelCollisionTileEditor,
+		ePanelGameObjectTypes
 	};
 
 	MainWindow();
@@ -56,6 +58,7 @@ public:
 	void ShowPanelCollisionTiles();
 	void ShowPanelCollisionTypes();
 	void ShowPanelCollisionEditor();
+	void ShowPanelGameObjectTypes();
 
 	//Open toolbox
 	void ShowPanelToolbox();
@@ -125,6 +128,7 @@ private:
 	wxWeakRef<CollisionTilesPanel> m_collisionTilesPanel;
 	wxWeakRef<CollisionTypePanel> m_collisionTypesPanel;
 	wxWeakRef<CollisionEditorPanel> m_collisionEditorPanel;
+	wxWeakRef<GameObjectTypesPanel> m_gameObjectTypePanel;
 
 	ProjectPtr m_project;
 

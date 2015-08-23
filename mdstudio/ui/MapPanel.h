@@ -51,6 +51,8 @@ private:
 	void RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
 	//Paint whole map to canvas
 	void PaintMap(const Map& map);
@@ -113,4 +115,12 @@ private:
 
 	//Paste pos
 	ion::Vector2i m_stampPastePos;
+
+	///////////////////////////////////////////////////
+	// PLACE GAME OBJECT tool
+	///////////////////////////////////////////////////
+
+	//Current preview gameobj
+	GameObjectTypeId m_previewGameObjectType;
+	ion::Vector2i m_previewGameObjectPos;
 };

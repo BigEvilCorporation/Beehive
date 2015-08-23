@@ -77,6 +77,17 @@ bool Project::Load(const std::string& filename)
 
 		m_filename = filename;
 
+		std::map<u64, Tile> tiles;
+		int count = m_tileset.GetCount();
+		for(int i = 0; i < count; i++)
+		{
+			Tile tile = *m_tileset.GetTile(i);
+			tile.CalculateHash();
+			tiles.insert(std::make_pair(tile.GetHash(), tile));
+		}
+
+		int countAfter = tiles.size();
+
 		return true;
 	}
 
@@ -109,6 +120,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_collisionTypes, "collisionTypes");
+	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
 	archive.Serialise(m_exportFilenames, "exportFilenames");
@@ -410,9 +422,40 @@ GameObjectType* Project::GetGameObjectType(GameObjectTypeId typeId)
 	return gameObjectType;
 }
 
+const GameObjectType* Project::GetGameObjectType(GameObjectTypeId typeId) const
+{
+	const GameObjectType* gameObjectType = NULL;
+	TGameObjectTypeMap::const_iterator it = m_gameObjectTypes.find(typeId);
+	if(it != m_gameObjectTypes.end())
+		gameObjectType = &it->second;
+	return gameObjectType;
+}
+
 const TGameObjectTypeMap& Project::GetGameObjectTypes() const
 {
 	return m_gameObjectTypes;
+}
+
+void Project::ExportGameObjectTypes(const std::string& filename)
+{
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		ion::io::Archive archive(file, ion::io::Archive::Out);
+		archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
+		archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjTypeId");
+	}
+}
+
+void Project::ImportGameObjectTypes(const std::string& filename)
+{
+	ion::io::File file(filename, ion::io::File::OpenRead);
+	if(file.IsOpen())
+	{
+		ion::io::Archive archive(file, ion::io::Archive::In);
+		archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
+		archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjTypeId");
+	}
 }
 
 void Project::SetPaintColour(u8 colourIdx)
@@ -482,7 +525,7 @@ void Project::SetPaintGameObjectType(GameObjectTypeId typeId)
 
 GameObjectTypeId Project::GetPaintGameObjectType() const
 {
-	return m_paintGameObjectType;2
+	return m_paintGameObjectType;
 }
 
 bool Project::FindPalette(Colour* pixels, u32 useablePalettes, PaletteId& paletteId, PaletteId& closestPalette, int& closestColourCount) const
@@ -983,6 +1026,44 @@ bool Project::ExportCollisionMap(const std::string& filename) const
 		stream << "collisionmap_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_collisionMap.GetWidth() << std::endl;
 		stream << "collisionmap_" << m_name << "_height\tequ " << "0x" << std::setw(2) << m_collisionMap.GetHeight() << std::endl;
 		stream << std::dec;
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Project::ExportGameObjects(const std::string& filename) const
+{
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		WriteFileHeader(stream);
+		stream << "gameobjects:" << std::endl;
+
+		const TGameObjectPosMap& gameObjects = m_map.GetGameObjects();
+
+		for(TGameObjectPosMap::const_iterator itMap = gameObjects.begin(), endMap = gameObjects.end(); itMap != endMap; ++itMap)
+		{
+			if(const GameObjectType* gameObjectType = GetGameObjectType(itMap->first))
+			{
+				stream << "gameobjects_" << gameObjectType->GetName() << "_count equ " << itMap->second.size() << std::endl;
+				stream << "LoadGameObjects_" << gameObjectType->GetName() << ":" << std::endl;
+
+				for(int i = 0; i < itMap->second.size(); i++)
+				{
+					itMap->second[i].m_gameObject.Export(stream, *gameObjectType);
+					stream << '\t' << "add.l #" << gameObjectType->GetName() << "_Struct_Size, a0" << std::endl;
+				}
+
+				stream << '\t' << "rts" << std::endl;
+			}
+
+			stream << std::endl;
+		}
 
 		file.Write(stream.str().c_str(), stream.str().size());
 

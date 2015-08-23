@@ -12,6 +12,7 @@ Map::Map()
 {
 	m_width = 0;
 	m_height = 0;
+	m_nextFreeGameObjectId = 1;
 	Resize(defaultWidth, defaultHeight);
 }
 
@@ -36,6 +37,8 @@ void Map::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_height, "height");
 	archive.Serialise(m_tiles, "tiles");
 	archive.Serialise(m_stamps, "stamps");
+	archive.Serialise(m_gameObjects, "gameObjects");
+	archive.Serialise(m_nextFreeGameObjectId, "nextFreeGameObjId");
 }
 
 int Map::GetWidth() const
@@ -197,9 +200,16 @@ void Map::RemoveStamp(int x, int y)
 	}
 }
 
-void Map::PlaceGameObject(int x, int y, const GameObject& gameObject, const GameObjectType& objectType)
+GameObjectId Map::PlaceGameObject(int x, int y, const GameObjectType& objectType)
 {
-	m_gameObjects.push_back(GameObjectMapEntry(gameObject.GetId(), ion::Vector2i(x, y), ion::Vector2i(objectType.GetDimensions().x, objectType.GetDimensions().y)));
+	TGameObjectPosMap::iterator it = m_gameObjects.find(objectType.GetId());
+	if(it == m_gameObjects.end())
+		it = m_gameObjects.insert(std::make_pair(objectType.GetId(), std::vector<GameObjectMapEntry>())).first;
+
+	GameObjectId objectId = m_nextFreeGameObjectId++;
+	GameObject gameObject(objectId, objectType.GetId(), ion::Vector2i(x, y));
+	it->second.push_back(GameObjectMapEntry(gameObject, ion::Vector2i(x, y), ion::Vector2i(objectType.GetDimensions().x, objectType.GetDimensions().y)));
+	return objectId;
 }
 
 GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
@@ -208,18 +218,21 @@ GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
 	ion::Vector2i size;
 	ion::Vector2i bottomRight;
 
-	//Work backwards, find last placed stamp first
-	for(TGameObjectPosMap::const_reverse_iterator it = m_gameObjects.rbegin(), end = m_gameObjects.rend(); it != end && !gameObjectId; ++it)
+	//Work backwards, find last placed game obj first
+	for(TGameObjectPosMap::const_iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap && !gameObjectId; ++itMap)
 	{
-		topLeft = it->m_position;
-		size = it->m_size;
-
-		bottomRight = topLeft + size;
-
-		if(x >= topLeft.x && y >= topLeft.y
-			&& x < bottomRight.x && y < bottomRight.y)
+		for(std::vector<GameObjectMapEntry>::const_reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec && !gameObjectId; ++itVec)
 		{
-			gameObjectId = it->m_id;
+			topLeft = itVec->m_position;
+			size = itVec->m_size;
+
+			bottomRight = topLeft + size;
+
+			if(x >= topLeft.x && y >= topLeft.y
+				&& x < bottomRight.x && y < bottomRight.y)
+			{
+				gameObjectId = itVec->m_gameObject.GetId();
+			}
 		}
 	}
 
@@ -231,19 +244,27 @@ void Map::RemoveGameObject(int x, int y)
 	ion::Vector2i size;
 	ion::Vector2i bottomRight;
 
-	for(TGameObjectPosMap::reverse_iterator it = m_gameObjects.rbegin(), end = m_gameObjects.rend(); it != end; ++it)
+	for(TGameObjectPosMap::iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap; ++itMap)
 	{
-		ion::Vector2i topLeft = it->m_position;
-		ion::Vector2i size = it->m_size;
-
-		bottomRight = topLeft + size;
-
-		if(x >= topLeft.x && y >= topLeft.y
-			&& x < bottomRight.x && y < bottomRight.y)
+		for(std::vector<GameObjectMapEntry>::reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec; ++itVec)
 		{
-			std::swap(*it, m_gameObjects.back());
-			m_gameObjects.pop_back();
-			break;
+			ion::Vector2i topLeft = itVec->m_position;
+			ion::Vector2i size = itVec->m_size;
+
+			bottomRight = topLeft + size;
+
+			if(x >= topLeft.x && y >= topLeft.y
+				&& x < bottomRight.x && y < bottomRight.y)
+			{
+				std::swap(*itVec, itMap->second.back());
+				itMap->second.pop_back();
+
+				if(itMap->second.size() == 0)
+				{
+					m_gameObjects.erase(itMap);
+				}
+				break;
+			}
 		}
 	}
 }

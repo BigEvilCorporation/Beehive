@@ -65,20 +65,23 @@
 #define wxID_BTN_STAMPS_DELETE 1018
 #define wxID_BTN_COL_TILES_CREATE 1019
 #define wxID_BTN_COL_TILES_DELETE 1020
-#define wxID_BTN_CANCEL 1021
-#define wxID_TOOL_SELECTTILE 1022
-#define wxID_TOOL_SELECTSTAMP 1023
+#define wxID_BTN_GAME_OBJ_TYPES 1021
+#define wxID_BTN_CANCEL 1022
+#define wxID_TOOL_SELECTTILE 1023
 #define wxID_TOOL_PAINT 1024
-#define wxID_TOOL_STAMP 1025
-#define wxID_TOOL_TILEPICKER 1026
-#define wxID_TOOL_STAMPPICKER 1027
-#define wxID_TOOL_FLIPX 1028
-#define wxID_TOOL_FLIPY 1029
-#define wxID_TOOL_FILL 1030
-#define wxID_TOOL_CLONE 1031
-#define wxID_TOOL_CREATESTAMP 1032
-#define wxID_TOOL_REMOVESTAMP 1033
-#define wxID_TOOL_PAINTCOLLISIONPIXEL 1034
+#define wxID_TOOL_TILEPICKER 1025
+#define wxID_TOOL_FLIPX 1026
+#define wxID_TOOL_FLIPY 1027
+#define wxID_TOOL_FILL 1028
+#define wxID_TOOL_CLONE 1029
+#define wxID_TOOL_SELECTSTAMP 1030
+#define wxID_TOOL_STAMP 1031
+#define wxID_TOOL_STAMPPICKER 1032
+#define wxID_TOOL_CREATESTAMP 1033
+#define wxID_TOOL_REMOVESTAMP 1034
+#define wxID_TOOL_PAINTCOLLISIONPIXEL 1035
+#define wxID_TOOL_PLACEGAMEOBJ 1036
+#define wxID_TOOL_REMOVEGAMEOBJ 1037
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -177,23 +180,29 @@ class MapToolbox : public wxPanel
 	private:
 	
 	protected:
+		wxStaticText* m_staticText11;
 		wxBitmapButton* m_toolSelectTile;
-		wxBitmapButton* m_toolSelectStamp;
 		wxBitmapButton* m_toolPaint;
-		wxBitmapButton* m_toolStamp;
 		wxBitmapButton* m_toolTilePicker;
-		wxBitmapButton* m_toolStampPicker;
 		wxBitmapButton* m_toolFlipX;
 		wxBitmapButton* m_toolFlipY;
 		wxBitmapButton* m_toolFill;
 		wxBitmapButton* m_toolClone;
+		wxStaticText* m_staticText12;
+		wxBitmapButton* m_toolSelectStamp;
+		wxBitmapButton* m_toolPaintStamp;
+		wxBitmapButton* m_toolStampPicker;
 		wxBitmapButton* m_toolCreateStamp;
 		wxBitmapButton* m_toolRemoveStamp;
+		wxStaticText* m_staticText13;
 		wxBitmapButton* m_toolPaintCollisionPixel;
+		wxStaticText* m_staticText14;
+		wxBitmapButton* m_toolPlaceGameObject;
+		wxBitmapButton* m_toolRemoveGameObject;
 	
 	public:
 		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 121,416 ), long style = wxTAB_TRAVERSAL ); 
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 121,559 ), long style = wxTAB_TRAVERSAL ); 
 		~MapToolbox();
 	
 };
@@ -214,7 +223,7 @@ class GameObjTypesPanelBase : public wxPanel
 	
 	public:
 		
-		GameObjTypesPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL ); 
+		GameObjTypesPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 342,231 ), long style = wxTAB_TRAVERSAL ); 
 		~GameObjTypesPanelBase();
 	
 };
@@ -317,6 +326,7 @@ class GameObjTypeDialogBase : public wxDialog
 		wxChoice* m_choiceSize;
 		wxStaticText* m_staticText8;
 		wxTextCtrl* m_textValue;
+		wxButton* m_btnApply;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
 		
@@ -327,12 +337,10 @@ class GameObjTypeDialogBase : public wxDialog
 		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectGameObjType( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
-		virtual void OnGameObjNameChange( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnWidthChanged( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnHeightChanged( wxSpinEvent& event ) { event.Skip(); }
-		virtual void OnVariableNameChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnValueChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnApplyChanges( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
 		

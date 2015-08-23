@@ -17,6 +17,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	m_stampPreviewPrimitive = NULL;
 	m_stampPastePos.x = -1;
 	m_stampPastePos.y = -1;
+	m_previewGameObjectType = InvalidGameObjectTypeId;
 
 	ResetToolData();
 }
@@ -422,6 +423,22 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					}
 				}
 			}
+
+			case eToolPlaceGameObject:
+			{
+				m_previewGameObjectType = m_project->GetPaintGameObjectType();
+				m_previewGameObjectPos.x = x;
+				m_previewGameObjectPos.y = y;
+
+				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+				{
+					GameObjectTypeId gameObjectTypeId = m_project->GetPaintGameObjectType();
+					if(GameObjectType* gameObjectType = m_project->GetGameObjectType(gameObjectTypeId))
+					{
+						m_project->GetMap().PlaceGameObject(x, y, *gameObjectType);
+					}
+				}
+			}
 		}
 	}
 	else
@@ -539,6 +556,11 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	z += zOffset;
 
+	//Render game objects
+	RenderGameObjects(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
 	//Render collision map
 	RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
 
@@ -561,6 +583,11 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	//Render stamp preview tiles
 	RenderStampPreview(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
+	//Render game object preview
+	RenderGameObjectPreview(renderer, cameraInverseMtx, projectionMtx, z);
 
 	z += zOffset;
 
@@ -828,6 +855,9 @@ void MapPanel::ResetToolData()
 	m_hoverStamp = InvalidStampId;
 	m_selectedStamp = InvalidStampId;
 
+	//Invalidate game object preview
+	m_previewGameObjectType = InvalidGameObjectTypeId;
+
 	//Delete clipboard stamp
 	if(m_tempStamp)
 	{
@@ -858,6 +888,83 @@ void MapPanel::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion:
 	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 
 	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+}
+
+void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	const TGameObjectPosMap& gameObjects = m_project->GetMap().GetGameObjects();
+
+	const Map& map = m_project->GetMap();
+	const int mapWidth = map.GetWidth();
+	const int mapHeight = map.GetHeight();
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
+
+	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	material->SetDiffuseColour(colour);
+
+	for(TGameObjectPosMap::const_iterator itMap = gameObjects.begin(), endMap = gameObjects.end(); itMap != endMap; ++itMap)
+	{
+		for(std::vector<GameObjectMapEntry>::const_iterator itVec = itMap->second.begin(), endVec = itMap->second.end(); itVec != endVec; ++itVec)
+		{
+			//Draw box over game obj
+			ion::Vector2 position((float)itVec->m_position.x, (float)(mapHeight - 1 - itVec->m_position.y));
+			ion::Vector3 size((float)itVec->m_size.x / (float)tileWidth, (float)itVec->m_size.y / (float)tileHeight, 1.0f);
+
+			ion::Vector3 boxPos(floor((position.x - (mapWidth / 2.0f) + (size.x / 2.0f)) * tileWidth),
+				floor((position.y - (mapHeight / 2.0f) + (size.y / 2.0f)) * tileHeight), z);
+
+			ion::Matrix4 boxMtx;
+			boxMtx.SetTranslation(boxPos);
+			boxMtx.SetScale(size);
+
+			material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+			renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+			material->Unbind();
+		}
+	}
+
+	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+}
+
+void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	const Map& map = m_project->GetMap();
+	const int mapWidth = map.GetWidth();
+	const int mapHeight = map.GetHeight();
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	if(const GameObjectType* gameObjectType = m_project->GetGameObjectType(m_previewGameObjectType))
+	{
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
+
+		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		material->SetDiffuseColour(colour);
+
+		//Draw box over game obj
+		ion::Vector2 position((float)m_previewGameObjectPos.x, (float)(mapHeight - 1 - m_previewGameObjectPos.y));
+		ion::Vector3 size((float)gameObjectType->GetDimensions().x / (float)tileWidth, (float)gameObjectType->GetDimensions().y / (float)tileHeight, 1.0f);
+
+		ion::Vector3 boxPos(floor((position.x - (mapWidth / 2.0f) + (size.x / 2.0f)) * tileWidth),
+			floor((position.y - (mapHeight / 2.0f) + (size.y / 2.0f)) * tileHeight), z);
+
+		ion::Matrix4 boxMtx;
+		boxMtx.SetTranslation(boxPos);
+		boxMtx.SetScale(size);
+
+		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+		material->Unbind();
+
+		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	}
 }
 
 void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
