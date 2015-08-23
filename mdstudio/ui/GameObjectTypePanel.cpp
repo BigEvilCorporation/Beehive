@@ -5,8 +5,9 @@
 ///////////////////////////////////////////////////////
 
 #include "GameObjectTypePanel.h"
+#include "MainWindow.h"
 
-GameObjTypesPanel::GameObjTypesPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+GameObjectTypesPanel::GameObjectTypesPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: GameObjTypesPanelBase(parent, id, pos, size, style)
 	, m_project(project)
 	, m_mainWindow(mainWindow)
@@ -14,21 +15,21 @@ GameObjTypesPanel::GameObjTypesPanel(MainWindow* mainWindow, Project& project, w
 
 }
 
-void GameObjTypesPanel::Refresh(bool eraseBackground, const wxRect *rect)
+void GameObjectTypesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	m_listGameObjTypes->Clear();w
+	m_listGameObjTypes->Clear();
+	m_gameObjectTypeMap.clear();
 	const TGameObjectTypeMap& types = m_project.GetGameObjectTypes();
 
-	for(int i = 0; i < types.size(); i++)
+	int index = 0;
+	for(TGameObjectTypeMap::const_iterator it = types.begin(), end = types.end(); it != end; ++it, ++index)
 	{
-		m_listGameObjTypes->Insert(wxString(types[i].m_name), i);
+		m_gameObjectTypeMap.push_back(it->second.GetId());
+		m_listGameObjTypes->Insert(wxString(it->second.GetName()), index);
 	}
 }
 
-void GameObjTypesPanel::OnGameObjectTypeSelected(wxCommandEvent& event)
+void GameObjectTypesPanel::OnGameObjectTypeSelected(wxCommandEvent& event)
 {
-	const TGameObjectTypeMap& types = m_project.GetGameObjectTypes();
-	GameObjectTypeId selection = types[event.GetSelection()].GetId();
-	m_project->SetPaintGameObjectType(selection);
-	m_mainWindow->SetMapTool(eToolPlaceGameObject);
+	m_project.SetPaintGameObjectType(m_gameObjectTypeMap[event.GetSelection()]);
 }

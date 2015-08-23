@@ -150,6 +150,12 @@ void MainWindow::SetProject(Project* project)
 			delete m_collisionEditorPanel;
 		}
 
+		if(m_gameObjectTypePanel)
+		{
+			m_auiManager.DetachPane(m_gameObjectTypePanel);
+			delete m_gameObjectTypePanel;
+		}
+
 		//Delete previous, set new
 		m_project.reset(project);
 
@@ -179,6 +185,9 @@ void MainWindow::SetProject(Project* project)
 
 			//Open centre panels
 			ShowPanelMap();
+
+			//Open floating panels
+			ShowPanelGameObjectTypes();
 
 			//Sync settings widgets states
 			SyncSettingsWidgets();
@@ -417,6 +426,8 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINTCOLLISIONPIXEL);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
 	}
 
 	if(!m_toolboxPanel->IsShown())
@@ -483,6 +494,36 @@ void MainWindow::ShowPanelCollisionEditor()
 		if(!m_collisionEditorPanel->IsShown())
 		{
 			m_collisionEditorPanel->Show();
+		}
+	}
+}
+
+void MainWindow::ShowPanelGameObjectTypes()
+{
+	if(m_project.get())
+	{
+		if(!m_gameObjectTypePanel)
+		{
+			wxSize clientSize = GetClientSize();
+
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.Float();
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Bottom();
+			paneInfo.Caption("Game Object Types");
+			paneInfo.CaptionVisible(true);
+
+			m_gameObjectTypePanel = new GameObjectTypesPanel(this, *m_project.get(), m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_gameObjectTypePanel, paneInfo);
+			m_gameObjectTypePanel->Show();
+			m_auiManager.Update();
+		}
+
+		if(!m_gameObjectTypePanel->IsShown())
+		{
+			m_gameObjectTypePanel->Show();
 		}
 	}
 }
@@ -561,6 +602,9 @@ void MainWindow::RedrawAll()
 
 	if(m_collisionEditorPanel)
 		m_collisionEditorPanel->Refresh();
+
+	if(m_gameObjectTypePanel)
+		m_gameObjectTypePanel->Refresh();
 }
 
 void MainWindow::RefreshTileset()
@@ -651,6 +695,9 @@ void MainWindow::RedrawPanel(Panel panel)
 		if(m_collisionEditorPanel)
 			m_collisionEditorPanel->Refresh();
 		break;
+	case ePanelGameObjectTypes:
+		if(m_gameObjectTypePanel)
+			m_gameObjectTypePanel->Refresh();
 	}
 }
 
@@ -733,6 +780,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerMap->SetPath(m_project->m_exportFilenames.map);
 		dialog.m_filePickerCollisionTiles->SetPath(m_project->m_exportFilenames.collisionTiles);
 		dialog.m_filePickerCollisionMap->SetPath(m_project->m_exportFilenames.collisionMap);
+		dialog.m_filePickerGameObj->SetPath(m_project->m_exportFilenames.gameObjects);
 
 		if(dialog.ShowModal() == wxID_OK)
 		{
@@ -744,6 +792,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.map = dialog.m_filePickerMap->GetPath();
 			m_project->m_exportFilenames.collisionTiles = dialog.m_filePickerCollisionTiles->GetPath();
 			m_project->m_exportFilenames.collisionMap = dialog.m_filePickerCollisionMap->GetPath();
+			m_project->m_exportFilenames.gameObjects = dialog.m_filePickerGameObj->GetPath();
 
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
@@ -759,6 +808,9 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			if(dialog.m_chkCollisionMap->GetValue())
 				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap);
+
+			if(dialog.m_chkGameObj->GetValue())
+				m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
 
 			SetStatusText("Export complete");
 			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
@@ -1074,6 +1126,12 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_REMOVESTAMP:
 			m_mapPanel->SetTool(eToolRemoveStamp);
+			break;
+		case wxID_TOOL_PLACEGAMEOBJ:
+			m_mapPanel->SetTool(eToolPlaceGameObject);
+			break;
+		case wxID_TOOL_REMOVEGAMEOBJ:
+			m_mapPanel->SetTool(eToolRemoveGameObject);
 			break;
 		}
 	}

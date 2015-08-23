@@ -49,6 +49,7 @@ public:
 		u8 m_size;
 	};
 
+	GameObjectType();
 	GameObjectType(GameObjectTypeId id);
 
 	GameObjectTypeId GetId() const { return m_id; }
@@ -76,15 +77,18 @@ private:
 class GameObject
 {
 public:
-	GameObject(GameObjectId objectId, GameObjectTypeId typeId);
+	GameObject();
+	GameObject(GameObjectId objectId, GameObjectTypeId typeId, const ion::Vector2i& position);
 
 	GameObjectId GetId() const { return m_objectId; }
 	GameObjectTypeId GetTypeId() const { return m_typeId; }
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream, GameObjectType& objectType) const;
+	void Export(std::stringstream& stream, const GameObjectType& objectType) const;
 
 private:
+	void ParseValueTokens(std::string& valueString) const;
+
 	GameObjectId m_objectId;
 	GameObjectTypeId m_typeId;
 	ion::Vector2i m_position;

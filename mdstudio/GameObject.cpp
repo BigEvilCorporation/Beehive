@@ -5,6 +5,13 @@
 ///////////////////////////////////////////////////////
 
 #include "GameObject.h"
+#include <algorithm>
+#include <iomanip>
+
+GameObjectType::GameObjectType()
+{
+	m_id = InvalidGameObjectTypeId;
+}
 
 GameObjectType::GameObjectType(u32 id)
 {
@@ -41,31 +48,44 @@ GameObjectType::Variable* GameObjectType::GetVariable(u32 index)
 
 void GameObjectType::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_id, "id");
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_variables, "variables");
 	archive.Serialise(m_dimensions, "dimensions");
 }
 
-GameObject::GameObject(GameObjectId objectId, GameObjectTypeId typeId)
+GameObject::GameObject()
+{
+	m_objectId = InvalidGameObjectId;
+	m_typeId = InvalidGameObjectTypeId;
+}
+
+GameObject::GameObject(GameObjectId objectId, GameObjectTypeId typeId, const ion::Vector2i& position)
 {
 	m_objectId = objectId;
 	m_typeId = typeId;
+	m_position = position;
 }
 
 void GameObject::Serialise(ion::io::Archive& archive)
 {
-
+	archive.Serialise(m_objectId, "objectId");
+	archive.Serialise(m_typeId, "typeId");
+	archive.Serialise(m_position, "position");
 }
 
-void GameObject::Export(std::stringstream& stream, GameObjectType& objectType) const
+void GameObject::Export(std::stringstream& stream, const GameObjectType& objectType) const
 {
 	stream << objectType.GetName().c_str() << "_" << (u32)m_objectId << ":" << std::endl;
+	stream << '\t' << "jsr " << objectType.GetName() << "Init" << std::endl;
 
 	const std::vector<GameObjectType::Variable>& variables = objectType.GetVariables();
 
 	for(int i = 0; i < variables.size(); i++)
 	{
 		//"move.[s] #[value], [name](a0)"
+
+		stream << '\t';
 
 		switch(variables[i].m_size)
 		{
@@ -80,6 +100,42 @@ void GameObject::Export(std::stringstream& stream, GameObjectType& objectType) c
 			break;
 		}
 
-		stream << "#" << variables[i].m_value.c_str() << ", " << variables[i].m_name.c_str() << "(a0)" << std::endl;
+		std::string valueString = variables[i].m_value;
+		ParseValueTokens(valueString);
+
+		stream << "#" << valueString << ", " << variables[i].m_name << "(a0)" << std::endl;
+	}
+}
+
+void GameObject::ParseValueTokens(std::string& valueString) const
+{
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+	const int screenToWorldSpaceShift = 8;
+
+	const std::string worldPosXString("&WORLDPOSX");
+
+	std::string::size_type worldPosXStart = valueString.find(worldPosXString);
+	if(worldPosXStart != std::string::npos)
+	{
+		u32 worldPosX = (m_position.x * tileWidth) << screenToWorldSpaceShift;
+
+		std::stringstream hexStream;
+		hexStream << "0x" << std::hex << std::setfill('0') << std::setw(8) << worldPosX;
+
+		valueString.replace(worldPosXStart, worldPosXString.size(), hexStream.str());
+	}
+
+	const std::string worldPosYString("&WORLDPOSY");
+
+	std::string::size_type worldPosYStart = valueString.find(worldPosYString);
+	if(worldPosYStart != std::string::npos)
+	{
+		u32 worldPosY = (m_position.y * tileHeight) << screenToWorldSpaceShift;
+
+		std::stringstream hexStream;
+		hexStream << "0x" << std::hex << std::setfill('0') << std::setw(8) << worldPosY;
+
+		valueString.replace(worldPosYStart, worldPosYString.size(), hexStream.str());
 	}
 }

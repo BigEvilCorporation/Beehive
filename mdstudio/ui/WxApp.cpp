@@ -15,6 +15,7 @@ wxAppConsole *wxCreateApp()
 
 BeehiveWxApp::BeehiveWxApp()
 {
+
 }
 
 BeehiveWxApp::~BeehiveWxApp()

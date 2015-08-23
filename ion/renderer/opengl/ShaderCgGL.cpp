@@ -117,7 +117,7 @@ namespace ion
 
 				//Load program file
 				std::string shaderDirectory = filename.substr(0, filename.find_first_of('/'));
-				std::string programFilename = shaderDirectory + "/programs/" + mProgramFilename;
+				std::string programFilename = shaderDirectory + "/programs/cg/" + mProgramFilename;
 				io::File programFile(programFilename, io::File::OpenRead);
 
 				if(programFile.IsOpen())

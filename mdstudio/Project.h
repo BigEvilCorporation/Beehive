@@ -111,7 +111,10 @@ public:
 	GameObjectTypeId AddGameObjectType();
 	void RemoveGameObjectType(GameObjectTypeId typeId);
 	GameObjectType* GetGameObjectType(GameObjectTypeId typeId);
+	const GameObjectType* GetGameObjectType(GameObjectTypeId typeId) const;
 	const TGameObjectTypeMap& GetGameObjectTypes() const;
+	void ExportGameObjectTypes(const std::string& filename);
+	void ImportGameObjectTypes(const std::string& filename);
 
 	//Set current colour used for editing
 	void SetPaintColour(u8 colourIdx);
@@ -173,6 +176,7 @@ public:
 	bool ExportMap(const std::string& filename) const;
 	bool ExportCollisionTiles(const std::string& filename) const;
 	bool ExportCollisionMap(const std::string& filename) const;
+	bool ExportGameObjects(const std::string& filename) const;
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
@@ -185,19 +189,16 @@ public:
 		std::string map;
 		std::string collisionTiles;
 		std::string collisionMap;
+		std::string gameObjects;
 
 		void Serialise(ion::io::Archive& archive)
 		{
-			//TEMP: Wrap strings in block until they get their own serialise tags (need to update shader file format to support it first)
-			if(archive.PushBlock("exportFilenames"))
-			{
-				archive.Serialise(palettes, "exportFNamePalettes");
-				archive.Serialise(tileset, "exportFNameTileset");
-				archive.Serialise(map, "exportFNameMap");
-				archive.Serialise(collisionTiles, "exportFNameCollisionTiles");
-				archive.Serialise(collisionMap, "exportFNameCollisionMap");
-				archive.PopBlock();
-			}
+			archive.Serialise(palettes, "exportFNamePalettes");
+			archive.Serialise(tileset, "exportFNameTileset");
+			archive.Serialise(map, "exportFNameMap");
+			archive.Serialise(collisionTiles, "exportFNameCollisionTiles");
+			archive.Serialise(collisionMap, "exportFNameCollisionMap");
+			archive.Serialise(gameObjects, "exportFNameGameObjects");
 		}
 	};
 	

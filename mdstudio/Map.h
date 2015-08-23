@@ -46,28 +46,28 @@ struct StampMapEntry
 
 struct GameObjectMapEntry
 {
-	GameObjectMapEntry() { m_id = 0; }
-	GameObjectMapEntry(GameObjectId stampId, const ion::Vector2i& position, const ion::Vector2i& size)
+	GameObjectMapEntry() { }
+	GameObjectMapEntry(const GameObject& gameObject, const ion::Vector2i& position, const ion::Vector2i& size)
 	{
-		m_id = stampId;
+		m_gameObject = gameObject;
 		m_position = position;
 		m_size = size;
 	}
 
 	void Serialise(ion::io::Archive& archive)
 	{
-		archive.Serialise(m_id);
+		archive.Serialise(m_gameObject);
 		archive.Serialise(m_position);
 		archive.Serialise(m_size);
 	}
 
-	StampId m_id;
+	GameObject m_gameObject;
 	ion::Vector2i m_position;
 	ion::Vector2i m_size;
 };
 
 typedef std::vector<StampMapEntry> TStampPosMap;
-typedef std::vector<GameObjectMapEntry> TGameObjectPosMap;
+typedef std::map< GameObjectTypeId, std::vector<GameObjectMapEntry> > TGameObjectPosMap;
 
 class Map
 {
@@ -106,7 +106,7 @@ public:
 	void RemoveStamp(int x, int y);
 
 	//Place game object on map
-	void PlaceGameObject(int x, int y, const GameObject& gameObject, const GameObjectType& objectType);
+	GameObjectId PlaceGameObject(int x, int y, const GameObjectType& objectType);
 	GameObjectId FindGameObject(int x, int y, ion::Vector2i& topLeft) const;
 	void RemoveGameObject(int x, int y);
 	const TGameObjectPosMap& GetGameObjects() const;
@@ -139,4 +139,5 @@ private:
 	std::vector<TileDesc> m_tiles;
 	TStampPosMap m_stamps;
 	TGameObjectPosMap m_gameObjects;
+	GameObjectId m_nextFreeGameObjectId;
 };

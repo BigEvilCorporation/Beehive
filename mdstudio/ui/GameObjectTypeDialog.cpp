@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////
 
 #include "GameObjectTypeDialog.h"
+#include "MainWindow.h"
 #include "../Project.h"
 
 GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& project)
@@ -14,6 +15,9 @@ GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& proj
 {
 	m_currentTypeId = InvalidGameObjectTypeId;
 	m_currentVariable = NULL;
+
+	PopulateTypeList();
+	PopulateVarsList(NULL);
 }
 
 void GameObjectTypeDialog::OnToolGameObjAdd(wxCommandEvent& event)
@@ -25,6 +29,7 @@ void GameObjectTypeDialog::OnToolGameObjAdd(wxCommandEvent& event)
 		PopulateTypeList();
 		PopulateTypeFields(gameObjType);
 		PopulateVarsList(gameObjType);
+		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
 	}
 }
 
@@ -37,6 +42,7 @@ void GameObjectTypeDialog::OnToolGameObjRemove(wxCommandEvent& event)
 		PopulateTypeList();
 		PopulateTypeFields(NULL);
 		PopulateVarsList(NULL);
+		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
 	}
 }
 
@@ -82,34 +88,19 @@ void GameObjectTypeDialog::OnSelectVariable(wxListEvent& event)
 	}
 }
 
-void GameObjectTypeDialog::OnGameObjNameChange(wxCommandEvent& event)
+void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
 {
 	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
 	{
-		gameObjType->SetName(event.GetString().c_str().AsChar());
-		PopulateTypeList();
-	}
-}
+		gameObjType->SetName(m_textGameObjName->GetValue().c_str().AsChar());
+		gameObjType->SetDimensions(ion::Vector2i(m_spinWidth->GetValue(), m_spinHeight->GetValue()));
 
-void GameObjectTypeDialog::OnVariableNameChanged(wxCommandEvent& event)
-{
-	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
-	{
 		if(m_currentVariable)
 		{
-			m_currentVariable->m_name = event.GetString();
-			PopulateVarsList(gameObjType);
-		}
-	}
-}
+			m_currentVariable->m_name = m_textVariableName->GetValue().c_str().AsChar();
+			m_currentVariable->m_value = m_textValue->GetValue().c_str().AsChar();
 
-void GameObjectTypeDialog::OnVariableSizeChanged(wxCommandEvent& event)
-{
-	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
-	{
-		if(m_currentVariable)
-		{
-			switch(event.GetSelection())
+			switch(m_choiceSize->GetSelection())
 			{
 			case 0:
 				m_currentVariable->m_size = GameObjectType::eSizeByte;
@@ -124,48 +115,35 @@ void GameObjectTypeDialog::OnVariableSizeChanged(wxCommandEvent& event)
 				ion::debug::Error("GameObjectTypeDialog::OnVariableSizeChanged() - Bad size");
 				break;
 			}
-
-			PopulateVarsList(gameObjType);
 		}
-	}
-}
 
-void GameObjectTypeDialog::OnValueChanged(wxCommandEvent& event)
-{
-	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
-	{
-		if(m_currentVariable)
-		{
-			m_currentVariable->m_value = event.GetString();
-			PopulateVarsList(gameObjType);
-		}
-	}
-}
-
-void GameObjectTypeDialog::OnWidthChanged(wxSpinEvent& event)
-{
-	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
-	{
-		gameObjType->SetDimensions(ion::Vector2i(event.GetInt(), gameObjType->GetDimensions().y));
-	}
-}
-
-void GameObjectTypeDialog::OnHeightChanged(wxSpinEvent& event)
-{
-	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
-	{
-		gameObjType->SetDimensions(ion::Vector2i(gameObjType->GetDimensions().x, event.GetInt()));
+		PopulateTypeList();
+		PopulateVarsList(gameObjType);
+		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
 	}
 }
 
 void GameObjectTypeDialog::OnBtnImport(wxCommandEvent& event)
 {
-
+	wxFileDialog dialogue(this, _("Open BEE GameObj file"), "", "", "BEE_GameObj files (*.bee_gameobj)|*.bee_gameobj", wxFD_OPEN);
+	if(dialogue.ShowModal() == wxID_OK)
+	{
+		std::string filename = dialogue.GetPath().c_str().AsChar();
+		m_project.ImportGameObjectTypes(filename);
+		PopulateTypeList();
+		PopulateVarsList(NULL);
+		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
+	}
 }
 
 void GameObjectTypeDialog::OnBtnExport(wxCommandEvent& event)
 {
-
+	wxFileDialog dialogue(this, _("Open BEE GameObj file"), "", "", "BEE_GameObj files (*.bee_gameobj)|*.bee_gameobj", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	if(dialogue.ShowModal() == wxID_OK)
+	{
+		std::string filename = dialogue.GetPath().c_str().AsChar();
+		m_project.ExportGameObjectTypes(filename);
+	}
 }
 
 void GameObjectTypeDialog::PopulateTypeList()
@@ -185,9 +163,18 @@ void GameObjectTypeDialog::PopulateTypeList()
 
 void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 {
-	m_textGameObjName->SetValue(gameObjType->GetName());
-	m_spinWidth->SetValue(gameObjType->GetDimensions().x);
-	m_spinHeight->SetValue(gameObjType->GetDimensions().y);
+	if(gameObjType)
+	{
+		m_textGameObjName->SetValue(gameObjType->GetName());
+		m_spinWidth->SetValue(gameObjType->GetDimensions().x);
+		m_spinHeight->SetValue(gameObjType->GetDimensions().y);
+	}
+	else
+	{
+		m_textGameObjName->SetValue("");
+		m_spinWidth->SetValue(1);
+		m_spinHeight->SetValue(1);
+	}
 }
 
 void GameObjectTypeDialog::PopulateVarsList(GameObjectType* gameObjType)

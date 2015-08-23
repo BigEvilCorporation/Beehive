@@ -388,34 +388,40 @@ namespace ion
 		{
 			if(GetDirection() == In)
 			{
-				//Serialise in num chars
-				int numChars = 0;
-				Serialise(numChars); // , "count");
-
-				//Clear and reserve string
-				string.clear();
-				string.reserve(numChars);
-
-				//Serialise chars
-				//PushBlock("chars");
-				for(int i = 0; i < numChars; i++)
+				if(PushBlock("__string"))
 				{
-					char character = 0;
-					Serialise(character);
-					string += character;
+					//Serialise in num chars
+					int numChars = 0;
+					Serialise(numChars, "count");
+
+					//Clear and reserve string
+					string.clear();
+					string.reserve(numChars);
+
+					//Serialise chars
+					for(int i = 0; i < numChars; i++)
+					{
+						char character = 0;
+						Serialise(character);
+						string += character;
+					}
+
+					PopBlock();
 				}
-				//PopBlock();
 			}
 			else
 			{
-				//Serialise out num chars
-				int numChars = (int)string.size();
-				Serialise(numChars); // , "count");
+				if(PushBlock("__string"))
+				{
+					//Serialise out num chars
+					int numChars = (int)string.size();
+					Serialise(numChars, "count");
 
-				//Serialise out chars
-				//PushBlock("chars");
-				Serialise((void*)string.data(), numChars);
-				//PopBlock();
+					//Serialise out chars
+					Serialise((void*)string.data(), numChars);
+
+					PopBlock();
+				}
 			}
 		}
 

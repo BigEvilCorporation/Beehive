@@ -29,6 +29,7 @@
 #include "../FormBuilderProj/tilespanel.xpm"
 #include "../FormBuilderProj/tool_clone.xpm"
 #include "../FormBuilderProj/tool_createstamp.xpm"
+#include "../FormBuilderProj/tool_deletegameobj.xpm"
 #include "../FormBuilderProj/tool_deletestamp.xpm"
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
@@ -37,6 +38,7 @@
 #include "../FormBuilderProj/tool_paintstamp.xpm"
 #include "../FormBuilderProj/tool_painttile.xpm"
 #include "../FormBuilderProj/tool_picker.xpm"
+#include "../FormBuilderProj/tool_placegameobj.xpm"
 #include "../FormBuilderProj/tool_select.xpm"
 #include "../FormBuilderProj/tool_selectstamp.xpm"
 #include "../FormBuilderProj/tool_stamppicker.xpm"
@@ -93,7 +95,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_DELETE, wxT("Delete"), wxBitmap( deletetile_xpm ), wxEmptyString);
 	m_ribbonPanelGameObj = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Objects") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarGameObj = new wxRibbonButtonBar( m_ribbonPanelGameObj, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarGameObj->AddButton( wxID_BTN_COL_TILES_CREATE, wxT("Types"), wxBitmap( gameobj_xpm ), wxEmptyString);
+	m_ribbonButtonBarGameObj->AddButton( wxID_BTN_GAME_OBJ_TYPES, wxT("Types"), wxBitmap( gameobj_xpm ), wxEmptyString);
 	m_ribbonBar->Realize();
 	
 	bSizer1->Add( m_ribbonBar, 0, wxALL|wxEXPAND, 0 );
@@ -127,7 +129,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
 	this->Connect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Connect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
-	this->Connect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
+	this->Connect( wxID_BTN_GAME_OBJ_TYPES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
 }
 
 MainWindowBase::~MainWindowBase()
@@ -151,7 +153,7 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
 	this->Disconnect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Disconnect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
-	this->Disconnect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
+	this->Disconnect( wxID_BTN_GAME_OBJ_TYPES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
 	
 }
 
@@ -220,6 +222,13 @@ DialogMapSizeBase::~DialogMapSizeBase()
 
 MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
+	wxBoxSizer* bSizer16;
+	bSizer16 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText11 = new wxStaticText( this, wxID_ANY, wxT("Tile Tools"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText11->Wrap( -1 );
+	bSizer16->Add( m_staticText11, 0, wxALIGN_CENTER, 5 );
+	
 	wxFlexGridSizer* fgSizer1;
 	fgSizer1 = new wxFlexGridSizer( 0, 2, 0, 0 );
 	fgSizer1->SetFlexibleDirection( wxBOTH );
@@ -230,30 +239,15 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolSelectTile, 0, wxALL, 5 );
 	
-	m_toolSelectStamp = new wxBitmapButton( this, wxID_TOOL_SELECTSTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolSelectStamp->SetToolTip( wxT("Select Stamp") );
-	
-	fgSizer1->Add( m_toolSelectStamp, 0, wxALL, 5 );
-	
 	m_toolPaint = new wxBitmapButton( this, wxID_TOOL_PAINT, wxBitmap( tool_painttile_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolPaint->SetToolTip( wxT("Paint Tile") );
 	
 	fgSizer1->Add( m_toolPaint, 0, wxALL, 5 );
 	
-	m_toolStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, wxBitmap( tool_paintstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolStamp->SetToolTip( wxT("Paint Stamp") );
-	
-	fgSizer1->Add( m_toolStamp, 0, wxALL, 5 );
-	
 	m_toolTilePicker = new wxBitmapButton( this, wxID_TOOL_TILEPICKER, wxBitmap( tool_picker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolTilePicker->SetToolTip( wxT("Pick Tile") );
 	
 	fgSizer1->Add( m_toolTilePicker, 0, wxALL, 5 );
-	
-	m_toolStampPicker = new wxBitmapButton( this, wxID_TOOL_STAMPPICKER, wxBitmap( tool_stamppicker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolStampPicker->SetToolTip( wxT("Pick Stamp") );
-	
-	fgSizer1->Add( m_toolStampPicker, 0, wxALL, 5 );
 	
 	m_toolFlipX = new wxBitmapButton( this, wxID_TOOL_FLIPX, wxBitmap( tool_flipx_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolFlipX->SetToolTip( wxT("Flip Horizontal") );
@@ -275,23 +269,87 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolClone, 0, wxALL, 5 );
 	
+	
+	bSizer16->Add( fgSizer1, 1, wxEXPAND, 5 );
+	
+	m_staticText12 = new wxStaticText( this, wxID_ANY, wxT("Stamp Tools"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText12->Wrap( -1 );
+	bSizer16->Add( m_staticText12, 0, wxALIGN_CENTER, 5 );
+	
+	wxFlexGridSizer* fgSizer7;
+	fgSizer7 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer7->SetFlexibleDirection( wxBOTH );
+	fgSizer7->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_toolSelectStamp = new wxBitmapButton( this, wxID_TOOL_SELECTSTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolSelectStamp->SetToolTip( wxT("Select Stamp") );
+	
+	fgSizer7->Add( m_toolSelectStamp, 0, wxALL, 5 );
+	
+	m_toolPaintStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, wxBitmap( tool_paintstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintStamp->SetToolTip( wxT("Paint Stamp") );
+	
+	fgSizer7->Add( m_toolPaintStamp, 0, wxALL, 5 );
+	
+	m_toolStampPicker = new wxBitmapButton( this, wxID_TOOL_STAMPPICKER, wxBitmap( tool_stamppicker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolStampPicker->SetToolTip( wxT("Pick Stamp") );
+	
+	fgSizer7->Add( m_toolStampPicker, 0, wxALL, 5 );
+	
 	m_toolCreateStamp = new wxBitmapButton( this, wxID_TOOL_CREATESTAMP, wxBitmap( tool_createstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolCreateStamp->SetToolTip( wxT("Create stamp from selection") );
 	
-	fgSizer1->Add( m_toolCreateStamp, 0, wxALL, 5 );
+	fgSizer7->Add( m_toolCreateStamp, 0, wxALL, 5 );
 	
 	m_toolRemoveStamp = new wxBitmapButton( this, wxID_TOOL_REMOVESTAMP, wxBitmap( tool_deletestamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolRemoveStamp->SetToolTip( wxT("Remove Stamp") );
 	
-	fgSizer1->Add( m_toolRemoveStamp, 0, wxALL, 5 );
+	fgSizer7->Add( m_toolRemoveStamp, 0, wxALL, 5 );
+	
+	
+	bSizer16->Add( fgSizer7, 1, wxEXPAND, 5 );
+	
+	m_staticText13 = new wxStaticText( this, wxID_ANY, wxT("Collision Tools"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText13->Wrap( -1 );
+	bSizer16->Add( m_staticText13, 0, wxALIGN_CENTER, 5 );
+	
+	wxFlexGridSizer* fgSizer8;
+	fgSizer8 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer8->SetFlexibleDirection( wxBOTH );
+	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
 	m_toolPaintCollisionPixel = new wxBitmapButton( this, wxID_TOOL_PAINTCOLLISIONPIXEL, wxBitmap( tool_paintcolpixel_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolPaintCollisionPixel->SetToolTip( wxT("Paint Collision Pixel") );
 	
-	fgSizer1->Add( m_toolPaintCollisionPixel, 0, wxALL, 5 );
+	fgSizer8->Add( m_toolPaintCollisionPixel, 0, wxALL, 5 );
 	
 	
-	this->SetSizer( fgSizer1 );
+	bSizer16->Add( fgSizer8, 1, wxEXPAND, 5 );
+	
+	m_staticText14 = new wxStaticText( this, wxID_ANY, wxT("Game Object Tools"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText14->Wrap( -1 );
+	bSizer16->Add( m_staticText14, 0, wxALIGN_CENTER, 5 );
+	
+	wxFlexGridSizer* fgSizer9;
+	fgSizer9 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer9->SetFlexibleDirection( wxBOTH );
+	fgSizer9->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_toolPlaceGameObject = new wxBitmapButton( this, wxID_TOOL_PLACEGAMEOBJ, wxBitmap( tool_placegameobj_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPlaceGameObject->SetToolTip( wxT("Place Game Object") );
+	
+	fgSizer9->Add( m_toolPlaceGameObject, 0, wxALL, 5 );
+	
+	m_toolRemoveGameObject = new wxBitmapButton( this, wxID_TOOL_REMOVEGAMEOBJ, wxBitmap( tool_deletegameobj_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolRemoveGameObject->SetToolTip( wxT("Remove Game Object") );
+	
+	fgSizer9->Add( m_toolRemoveGameObject, 0, wxALL, 5 );
+	
+	
+	bSizer16->Add( fgSizer9, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer16 );
 	this->Layout();
 }
 
@@ -301,16 +359,19 @@ MapToolbox::~MapToolbox()
 
 GameObjTypesPanelBase::GameObjTypesPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
-	wxBoxSizer* bSizer15;
-	bSizer15 = new wxBoxSizer( wxVERTICAL );
+	wxFlexGridSizer* fgSizer13;
+	fgSizer13 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer13->AddGrowableCol( 0 );
+	fgSizer13->AddGrowableRow( 0 );
+	fgSizer13->SetFlexibleDirection( wxBOTH );
+	fgSizer13->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
 	m_listGameObjTypes = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 ); 
-	bSizer15->Add( m_listGameObjTypes, 0, wxALL|wxEXPAND, 5 );
+	fgSizer13->Add( m_listGameObjTypes, 0, wxALL|wxEXPAND, 5 );
 	
 	
-	this->SetSizer( bSizer15 );
+	this->SetSizer( fgSizer13 );
 	this->Layout();
-	bSizer15->Fit( this );
 	
 	// Connect Events
 	m_listGameObjTypes->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypesPanelBase::OnGameObjectTypeSelected ), NULL, this );
@@ -624,6 +685,13 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	
 	fgSizer3->Add( 0, 0, 1, wxEXPAND, 5 );
 	
+	m_btnApply = new wxButton( this, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_btnApply->SetDefault(); 
+	fgSizer3->Add( m_btnApply, 0, wxALL, 5 );
+	
+	
+	fgSizer3->Add( 0, 0, 1, wxEXPAND, 5 );
+	
 	wxBoxSizer* bSizer141;
 	bSizer141 = new wxBoxSizer( wxHORIZONTAL );
 	
@@ -658,12 +726,10 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	this->Connect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolVariableRemove ) );
 	m_listGameObjTypes->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypeDialogBase::OnSelectGameObjType ), NULL, this );
 	m_listVariables->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( GameObjTypeDialogBase::OnSelectVariable ), NULL, this );
-	m_textGameObjName->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GameObjTypeDialogBase::OnGameObjNameChange ), NULL, this );
 	m_spinWidth->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( GameObjTypeDialogBase::OnWidthChanged ), NULL, this );
 	m_spinHeight->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( GameObjTypeDialogBase::OnHeightChanged ), NULL, this );
-	m_textVariableName->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GameObjTypeDialogBase::OnVariableNameChanged ), NULL, this );
 	m_choiceSize->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjTypeDialogBase::OnVariableSizeChanged ), NULL, this );
-	m_textValue->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GameObjTypeDialogBase::OnValueChanged ), NULL, this );
+	m_btnApply->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnBtnApplyChanges ), NULL, this );
 	m_btnImport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnBtnImport ), NULL, this );
 	m_btnExport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnBtnExport ), NULL, this );
 }
@@ -677,12 +743,10 @@ GameObjTypeDialogBase::~GameObjTypeDialogBase()
 	this->Disconnect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolVariableRemove ) );
 	m_listGameObjTypes->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypeDialogBase::OnSelectGameObjType ), NULL, this );
 	m_listVariables->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( GameObjTypeDialogBase::OnSelectVariable ), NULL, this );
-	m_textGameObjName->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GameObjTypeDialogBase::OnGameObjNameChange ), NULL, this );
 	m_spinWidth->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( GameObjTypeDialogBase::OnWidthChanged ), NULL, this );
 	m_spinHeight->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( GameObjTypeDialogBase::OnHeightChanged ), NULL, this );
-	m_textVariableName->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GameObjTypeDialogBase::OnVariableNameChanged ), NULL, this );
 	m_choiceSize->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjTypeDialogBase::OnVariableSizeChanged ), NULL, this );
-	m_textValue->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GameObjTypeDialogBase::OnValueChanged ), NULL, this );
+	m_btnApply->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnBtnApplyChanges ), NULL, this );
 	m_btnImport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnBtnImport ), NULL, this );
 	m_btnExport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnBtnExport ), NULL, this );
 	
