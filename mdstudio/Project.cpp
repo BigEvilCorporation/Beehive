@@ -153,6 +153,26 @@ void Project::SetActivePaletteSlot(PaletteId paletteId, int slotIndex)
 	*dest = *source;
 }
 
+void Project::ExportPaletteSlots(const std::string& filename)
+{
+	ion::io::File file(filename, ion::io::File::OpenWrite);
+	if(file.IsOpen())
+	{
+		ion::io::Archive archive(file, ion::io::Archive::Out);
+		archive.Serialise(m_paletteSlots, "paletteSlots");
+	}
+}
+
+void Project::ImportPaletteSlots(const std::string& filename)
+{
+	ion::io::File file(filename, ion::io::File::OpenRead);
+	if(file.IsOpen())
+	{
+		ion::io::Archive archive(file, ion::io::Archive::In);
+		archive.Serialise(m_paletteSlots, "paletteSlots");
+	}
+}
+
 void Project::CollapsePaletteSlots()
 {
 	m_paletteSlots.clear();

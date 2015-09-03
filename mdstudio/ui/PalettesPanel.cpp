@@ -79,6 +79,8 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 
 				slotMenu.AppendSubMenu(saveMenu, "Save");
 				slotMenu.AppendSubMenu(loadMenu, "Load");
+				slotMenu.Append(eMenuImport, wxString("Import..."));
+				slotMenu.Append(eMenuExport, wxString("Export..."));
 				
 				slotMenu.SetClientData((void*)paletteId);
 				slotMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PalettesPanel::OnSlotsMenuClick, NULL, this);
@@ -146,6 +148,25 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 
 		//Refresh tiles, stamps and map panels
 		m_mainWindow->RefreshAll();
+	}
+	else if(menuItemId & eMenuImport)
+	{
+		wxFileDialog dialogue(this, _("Open BEE Palettes file"), "", "", "BEE_Palette files (*.bee_palette)|*.bee_palette", wxFD_OPEN);
+		if(dialogue.ShowModal() == wxID_OK)
+		{
+			std::string filename = dialogue.GetPath().c_str().AsChar();
+			m_project->ImportPaletteSlots(filename);
+			m_mainWindow->RefreshAll();
+		}
+	}
+	else if(menuItemId & eMenuExport)
+	{
+		wxFileDialog dialogue(this, _("Save BEE Palettes file"), "", "", "BEE_Palette files (*.bee_palette)|*.bee_palette", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		if(dialogue.ShowModal() == wxID_OK)
+		{
+			std::string filename = dialogue.GetPath().c_str().AsChar();
+			m_project->ExportPaletteSlots(filename);
+		}
 	}
 }
 

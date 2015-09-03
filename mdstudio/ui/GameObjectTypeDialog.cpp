@@ -138,7 +138,7 @@ void GameObjectTypeDialog::OnBtnImport(wxCommandEvent& event)
 
 void GameObjectTypeDialog::OnBtnExport(wxCommandEvent& event)
 {
-	wxFileDialog dialogue(this, _("Open BEE GameObj file"), "", "", "BEE_GameObj files (*.bee_gameobj)|*.bee_gameobj", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	wxFileDialog dialogue(this, _("Save BEE GameObj file"), "", "", "BEE_GameObj files (*.bee_gameobj)|*.bee_gameobj", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	if(dialogue.ShowModal() == wxID_OK)
 	{
 		std::string filename = dialogue.GetPath().c_str().AsChar();

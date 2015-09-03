@@ -112,13 +112,15 @@ void GameObject::ParseValueTokens(std::string& valueString) const
 	const int tileWidth = 8;
 	const int tileHeight = 8;
 	const int screenToWorldSpaceShift = 8;
+	const int spriteBorderX = 128;
+	const int spriteBorderY = 128;
 
 	const std::string worldPosXString("&WORLDPOSX");
 
 	std::string::size_type worldPosXStart = valueString.find(worldPosXString);
 	if(worldPosXStart != std::string::npos)
 	{
-		u32 worldPosX = (m_position.x * tileWidth) << screenToWorldSpaceShift;
+		u32 worldPosX = ((m_position.x * tileWidth) + spriteBorderX) << screenToWorldSpaceShift;
 
 		std::stringstream hexStream;
 		hexStream << "0x" << std::hex << std::setfill('0') << std::setw(8) << worldPosX;
@@ -131,7 +133,7 @@ void GameObject::ParseValueTokens(std::string& valueString) const
 	std::string::size_type worldPosYStart = valueString.find(worldPosYString);
 	if(worldPosYStart != std::string::npos)
 	{
-		u32 worldPosY = (m_position.y * tileHeight) << screenToWorldSpaceShift;
+		u32 worldPosY = ((m_position.y * tileHeight) + spriteBorderY) << screenToWorldSpaceShift;
 
 		std::stringstream hexStream;
 		hexStream << "0x" << std::hex << std::setfill('0') << std::setw(8) << worldPosY;
