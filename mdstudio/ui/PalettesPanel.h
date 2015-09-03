@@ -46,9 +46,11 @@ public:
 private:
 	enum MenuItems
 	{
-		eMenuSave = (1 << 0) << 8,
-		eMenuLoad = (1 << 1) << 8,
-		eMenuNew =  (1 << 2) << 8
+		eMenuSave =		(1 << 0) << 8,
+		eMenuLoad =		(1 << 1) << 8,
+		eMenuNew =		(1 << 2) << 8,
+		eMenuImport =	(1 << 3) << 8,
+		eMenuExport =	(1 << 4) << 8
 	};
 
 	Project* m_project;

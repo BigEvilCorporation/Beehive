@@ -83,6 +83,8 @@ public:
 	Palette* GetPaletteSlot(int slotIndex);
 	int GetNumPaletteSlots() const;
 	void SetActivePaletteSlot(PaletteId paletteId, int slotIndex);
+	void ExportPaletteSlots(const std::string& filename);
+	void ImportPaletteSlots(const std::string& filename);
 
 	//Tiles
 	void DeleteTile(TileId tileId);
