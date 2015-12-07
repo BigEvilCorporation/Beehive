@@ -53,7 +53,7 @@ MainWindow::MainWindow()
 	Project* defaultProject = new Project();
 
 	//Open welcome project
-	static bool openWelcomeProject = false;
+	static bool openWelcomeProject = true;
 	if(openWelcomeProject)
 	{
 		wxString directory = wxGetCwd();
@@ -425,6 +425,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINTCOLLISIONPIXEL);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_GENERATETERRAIN);
 	}
 
 	if(!m_toolboxPanel->IsShown())
@@ -708,14 +709,14 @@ void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 {
-	wxFileDialog dialogue(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if(dialogue.ShowModal() == wxID_OK)
+	wxFileDialog dialog(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if(dialog.ShowModal() == wxID_OK)
 	{
 		SetStatusText("Opening...");
 
 		Project* project = new Project();
 
-		if(project->Load(dialogue.GetPath().c_str().AsChar()))
+		if(project->Load(dialog.GetPath().c_str().AsChar()))
 		{
 			//Set new project, deletes old
 			SetProject(project);
@@ -740,10 +741,10 @@ void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
 		if(!filename.size())
 		{
 			//No previous filename
-			wxFileDialog dialogue(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-			if(dialogue.ShowModal() == wxID_OK)
+			wxFileDialog dialog(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			if(dialog.ShowModal() == wxID_OK)
 			{
-				filename = dialogue.GetPath().c_str().AsChar();
+				filename = dialog.GetPath().c_str().AsChar();
 			}
 		}
 		
@@ -795,16 +796,16 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
 
 			if(dialog.m_chkTileset->GetValue())
-				m_project->ExportTiles(m_project->m_exportFilenames.tileset);
+				m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkMap->GetValue())
-				m_project->ExportMap(m_project->m_exportFilenames.map);
+				m_project->ExportMap(m_project->m_exportFilenames.map, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkCollisionTiles->GetValue())
-				m_project->ExportCollisionTiles(m_project->m_exportFilenames.collisionTiles);
+				m_project->ExportCollisionTiles(m_project->m_exportFilenames.collisionTiles, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkCollisionMap->GetValue())
-				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap);
+				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkGameObj->GetValue())
 				m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
@@ -826,22 +827,27 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 
 			u32 flags = 0;
 
-			if(dialog.m_chkClearPalettes->GetValue())
-				flags |= Project::eBMPImportClearPalettes;
-			if(dialog.m_chkClearTiles->GetValue())
-				flags |= Project::eBMPImportClearTiles;
-			if(dialog.m_chkClearMap->GetValue())
-				flags |= Project::eBMPImportClearMap;
-			if(dialog.m_chkPaintToMap->GetValue())
-				flags |= Project::eBMPImportDrawToMap;
 			if(dialog.m_chkImportToStamp->GetValue())
 				flags |= Project::eBMPImportToStamp;
 			if(dialog.m_chkImportToSprite->GetValue())
 				flags |= Project::eBMPImportToSprite;
-			if(dialog.m_chkImportPalette->GetValue())
-				flags |= Project::eBMPImportWholePalette;
 			if(dialog.m_chkInsertBGTile->GetValue())
 				flags |= Project::eBMPImportInsertBGTile;
+
+			//Unsupported flags if multiple files selected
+			if(dialog.m_paths.size() > 0)
+			{
+				if(dialog.m_chkImportPalette->GetValue())
+					flags |= Project::eBMPImportWholePalette;
+				if(dialog.m_chkClearMap->GetValue())
+					flags |= Project::eBMPImportClearMap;
+				if(dialog.m_chkPaintToMap->GetValue())
+					flags |= Project::eBMPImportDrawToMap;
+				if(dialog.m_chkClearPalettes->GetValue())
+					flags |= Project::eBMPImportClearPalettes;
+				if(dialog.m_chkClearTiles->GetValue())
+					flags |= Project::eBMPImportClearTiles;
+			}
 
 			u32 palettes = 0;
 
@@ -854,7 +860,10 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 			if(dialog.m_chkPalette4->GetValue())
 				palettes |= (1 << 3);
 
-			m_project->ImportBitmap(dialog.m_fileBitmap->GetPath().c_str().AsChar(), flags, palettes);
+			for(int i = 0; i < dialog.m_paths.size(); i++)
+			{
+				m_project->ImportBitmap(dialog.m_paths[i].c_str().AsChar(), flags, palettes);
+			}
 
 			//Refresh tileset
 			RefreshTileset();
@@ -928,6 +937,17 @@ void MainWindow::OnBtnTilesCleanup(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		if(m_project->CleanupCollisionTiles())
+		{
+			RefreshAll();
+		}
+	}
+}
+
 void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
@@ -960,23 +980,8 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 			CollisionMap& map = m_project->GetCollisionMap();
 			CollisionTileset& tileset = m_project->GetCollisionTileset();
 
-			//Erase tile
-			tileset.RemoveCollisionTile(tileId);
-
-			//Find all uses of tile, set blank
-			for(int x = 0; x < map.GetWidth(); x++)
-			{
-				for(int y = 0; y < map.GetHeight(); y++)
-				{
-					if(map.GetCollisionTile(x, y) == tileId)
-					{
-						map.SetCollisionTile(x, y, InvalidCollisionTileId);
-					}
-				}
-			}
-
-			//Clear paint collision tile
-			m_project->SetPaintCollisionTile(InvalidCollisionTileId);
+			//Delete tile
+			m_project->DeleteCollisionTile(tileId);
 
 			//Recreate tileset texture
 			RefreshCollisionTileset();
@@ -1145,6 +1150,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_REMOVEGAMEOBJ:
 			m_mapPanel->SetTool(eToolRemoveGameObject);
+			break;
+		case wxID_TOOL_GENERATETERRAIN:
+			m_mapPanel->SetTool(eToolGenerateTerrain);
 			break;
 		}
 	}

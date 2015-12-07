@@ -99,6 +99,9 @@ public:
 	void SetTileFlags(int x, int y, u32 flags);
 	u32 GetTileFlags(int x, int y) const;
 
+	//Fill tiles on map
+	void FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection);
+
 	//Set stamp on map
 	void SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
 	void BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
@@ -116,6 +119,7 @@ public:
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(const Project& project, std::stringstream& stream) const;
+	void Export(const Project& project, ion::io::File& file) const;
 
 private:
 	struct TileDesc

@@ -111,6 +111,16 @@ public:
 	const TCollisionTypeMap::const_iterator CollisionTypesEnd() const;
 	int GetCollisionTypeCount() const;
 
+	//Collision tiles
+	void DeleteCollisionTile(CollisionTileId tileId);
+	void SwapCollisionTiles(CollisionTileId tileId1, CollisionTileId tileId2);
+	void SetDefaultCollisionTile(CollisionTileId tileId);
+	CollisionTileId GetDefaultCollisionTile() const { return m_defaultCollisionTile; }
+	int CleanupCollisionTiles();
+
+	//Terrain generation from graphic tiles
+	void GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles);
+
 	//Game object types
 	GameObjectTypeId AddGameObjectType();
 	void RemoveGameObjectType(GameObjectTypeId typeId);
@@ -176,10 +186,10 @@ public:
 
 	//Export
 	bool ExportPalettes(const std::string& filename) const;
-	bool ExportTiles(const std::string& filename) const;
-	bool ExportMap(const std::string& filename) const;
-	bool ExportCollisionTiles(const std::string& filename) const;
-	bool ExportCollisionMap(const std::string& filename) const;
+	bool ExportTiles(const std::string& filename, bool binary) const;
+	bool ExportMap(const std::string& filename, bool binary) const;
+	bool ExportCollisionTiles(const std::string& filename, bool binary) const;
+	bool ExportCollisionMap(const std::string& filename, bool binary) const;
 	bool ExportGameObjects(const std::string& filename) const;
 
 	//Serialise
@@ -218,6 +228,13 @@ private:
 
 	//Collapse palette slots to palettes in use
 	void CollapsePaletteSlots();
+
+	//Generate heighmap from graphic tile
+	void GenerateHeightMap(const Tile& graphicTile, std::vector<u8>& heightMap) const;
+	void GenerateCeilingMap(const Tile& graphicTile, std::vector<u8>& ceilingMap) const;
+
+	//Get tile at position (including on stamps)
+	TileId GetTileAtPosition(const ion::Vector2i& position);
 
 	//Project name
 	std::string m_name;
@@ -277,6 +294,9 @@ private:
 
 	//Background tile (replaced InvalidTileId on export)
 	TileId m_backgroundTile;
+
+	//Default collision tile (replaces InvalidCollisionTileId on export)
+	CollisionTileId m_defaultCollisionTile;
 
 	//Grid
 	int m_gridSize;

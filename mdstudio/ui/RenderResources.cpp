@@ -386,6 +386,18 @@ void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texC
 
 void RenderResources::GetCollisionTileTexCoords(CollisionTileId tileId, ion::render::TexCoord texCoords[4]) const
 {
+	if(tileId == InvalidTileId)
+	{
+		//Use default tile if there is one
+		tileId = m_project->GetDefaultCollisionTile();
+
+		if(tileId == InvalidTileId && m_project->GetCollisionTileset().GetCount() > 0)
+		{
+			//If no default tile, and there are tiles available, use first tile
+			tileId = 0;
+		}
+	}
+
 	if(tileId == InvalidCollisionTileId)
 	{
 		//Top left

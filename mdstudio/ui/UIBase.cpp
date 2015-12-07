@@ -36,6 +36,7 @@
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
+#include "../FormBuilderProj/tool_genterrain.xpm"
 #include "../FormBuilderProj/tool_paintcolpixel.xpm"
 #include "../FormBuilderProj/tool_paintstamp.xpm"
 #include "../FormBuilderProj/tool_painttile.xpm"
@@ -97,6 +98,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarCollision = new wxRibbonButtonBar( m_ribbonPanelCollision, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_CREATE, wxT("New"), wxBitmap( newtile_xpm ), wxEmptyString);
 	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_DELETE, wxT("Delete"), wxBitmap( deletetile_xpm ), wxEmptyString);
+	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_CLEANUP, wxT("Cleanup"), wxBitmap( deleteunusedtiles_xpm ), wxEmptyString);
 	m_ribbonPanelGameObj = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Objects") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarGameObj = new wxRibbonButtonBar( m_ribbonPanelGameObj, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarGameObj->AddButton( wxID_BTN_GAME_OBJ_TYPES, wxT("Types"), wxBitmap( gameobj_xpm ), wxEmptyString);
@@ -135,6 +137,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
 	this->Connect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Connect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
+	this->Connect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );
 	this->Connect( wxID_BTN_GAME_OBJ_TYPES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
 }
 
@@ -161,6 +164,7 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
 	this->Disconnect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Disconnect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
+	this->Disconnect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );
 	this->Disconnect( wxID_BTN_GAME_OBJ_TYPES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
 	
 }
@@ -331,6 +335,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer8->Add( m_toolPaintCollisionPixel, 0, wxALL, 5 );
 	
+	m_toolGenerateTerrain = new wxBitmapButton( this, wxID_TOOL_GENERATETERRAIN, wxBitmap( tool_genterrain_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolGenerateTerrain->SetToolTip( wxT("Paint Collision Pixel") );
+	
+	fgSizer8->Add( m_toolGenerateTerrain, 0, wxALL, 5 );
+	
 	
 	bSizer16->Add( fgSizer8, 1, wxEXPAND, 5 );
 	
@@ -451,8 +460,18 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerGameObj, 0, wxALL|wxEXPAND, 5 );
 	
+	wxBoxSizer* bSizer16;
+	bSizer16 = new wxBoxSizer( wxHORIZONTAL );
 	
-	fgSizer3->Add( 0, 0, 1, wxEXPAND, 5 );
+	m_btnText = new wxRadioButton( this, wxID_ANY, wxT("Text"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+	m_btnText->SetValue( true ); 
+	bSizer16->Add( m_btnText, 0, wxALL, 5 );
+	
+	m_btnBinary = new wxRadioButton( this, wxID_ANY, wxT("Binary"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer16->Add( m_btnBinary, 0, wxALL, 5 );
+	
+	
+	fgSizer3->Add( bSizer16, 1, wxEXPAND, 5 );
 	
 	m_buttons = new wxStdDialogButtonSizer();
 	m_buttonsOK = new wxButton( this, wxID_OK );
@@ -482,7 +501,7 @@ ExportDialog::~ExportDialog()
 	
 }
 
-ImportDialog::ImportDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
@@ -492,12 +511,15 @@ ImportDialog::ImportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	wxBoxSizer* bSizer11;
 	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText8 = new wxStaticText( this, wxID_ANY, wxT("Bitmap file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText8 = new wxStaticText( this, wxID_ANY, wxT("Bitmap files:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText8->Wrap( -1 );
 	bSizer11->Add( m_staticText8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_fileBitmap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
-	bSizer11->Add( m_fileBitmap, 1, wxALL|wxEXPAND, 5 );
+	m_filenames = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer11->Add( m_filenames, 0, wxALL|wxEXPAND, 5 );
+	
+	m_btnSelectFiles = new wxButton( this, wxID_ANY, wxT("Browse..."), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer11->Add( m_btnSelectFiles, 0, wxALL, 5 );
 	
 	
 	bSizer10->Add( bSizer11, 0, wxEXPAND, 5 );
@@ -571,10 +593,16 @@ ImportDialog::ImportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Layout();
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_btnSelectFiles->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ImportDialogBase::OnBtnBrowse ), NULL, this );
 }
 
-ImportDialog::~ImportDialog()
+ImportDialogBase::~ImportDialogBase()
 {
+	// Disconnect Events
+	m_btnSelectFiles->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ImportDialogBase::OnBtnBrowse ), NULL, this );
+	
 }
 
 GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )

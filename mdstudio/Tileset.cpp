@@ -159,3 +159,11 @@ void Tileset::Export(std::stringstream& stream) const
 		stream << std::endl;
 	}
 }
+
+void Tileset::Export(ion::io::File& file) const
+{
+	for(int i = 0; i < m_tiles.size(); i++)
+	{
+		m_tiles[i].Export(file);
+	}
+}

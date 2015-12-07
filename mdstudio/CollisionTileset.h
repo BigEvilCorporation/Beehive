@@ -24,7 +24,7 @@ public:
 	void Clear();
 
 	CollisionTileId AddCollisionTile();
-	void RemoveCollisionTile(CollisionTileId tileId);
+	void PopBackCollisionTile();
 	void HashChanged(CollisionTileId tileId);
 	CollisionTileId FindDuplicate(const CollisionTile& tile) const;
 
@@ -34,6 +34,7 @@ public:
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
+	void Export(ion::io::File& file) const;
 	
 private:
 	void AddToHashMap(CollisionTileId tileId);

@@ -37,6 +37,7 @@ public:
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(const Project& project, std::stringstream& stream) const;
+	void Export(const Project& project, ion::io::File& file) const;
 
 private:
 	int m_width;

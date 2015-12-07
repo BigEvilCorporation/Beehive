@@ -87,6 +87,21 @@ void CollisionTile::Export(std::stringstream& stream) const
 	stream << std::dec;
 }
 
+void CollisionTile::Export(ion::io::File& file) const
+{
+	for(int y = 0; y < tileHeight; y++)
+	{
+		for(int x = 0; x < tileWidth; x += 2)
+		{
+			u8 nybble1 = (u8)GetPixelCollisionBits(x, y) << 4;
+			u8 nybble2 = ((x + 1) < tileWidth) ? (u8)GetPixelCollisionBits(x + 1, y) : 0;
+
+			u8 byte = nybble1 | nybble2;
+			file.Write(&byte, sizeof(u8));
+		}
+	}
+}
+
 void CollisionTile::CalculateHash()
 {
 	m_hash = ion::Hash64(&m_collisionPixels[0], pixelsPerCollisionTile);
