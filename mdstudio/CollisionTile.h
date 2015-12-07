@@ -36,6 +36,7 @@ public:
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
+	void Export(ion::io::File& file) const;
 
 private:
 	u32 m_index;

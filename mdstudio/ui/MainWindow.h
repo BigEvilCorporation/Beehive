@@ -95,6 +95,7 @@ protected:
 	virtual void OnBtnTilesCleanup(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesCreate(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesDelete(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsMapEdit(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsTiles(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event) { event.Skip(); }

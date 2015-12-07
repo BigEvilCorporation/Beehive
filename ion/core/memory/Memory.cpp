@@ -20,5 +20,37 @@ namespace ion
 		{
 			memcpy(destination, source, size);
 		}
+
+		void EndianSwap(u16& value)
+		{
+			u8* bytes = (u8*)&value;
+			u8 temp = bytes[0];
+			bytes[0] = bytes[1];
+			bytes[1] = temp;
+		}
+
+		void EndianSwap(s16& value)
+		{
+			u8* bytes = (u8*)&value;
+			u8 temp = bytes[0];
+			bytes[0] = bytes[1];
+			bytes[1] = temp;
+		}
+
+		void EndianSwap(u32& value)
+		{
+			u8* bytes = (u8*)&value;
+			u8 temp = bytes[0];
+			bytes[0] = bytes[3];
+			bytes[3] = temp;
+			temp = bytes[1];
+			bytes[1] = bytes[2];
+			bytes[2] = temp;
+		}
+
+		void EndianSwap(s32& value)
+		{
+
+		}
 	}
 }

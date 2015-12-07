@@ -26,14 +26,10 @@ CollisionTileId CollisionTileset::AddCollisionTile()
 	return index;
 }
 
-void CollisionTileset::RemoveCollisionTile(CollisionTileId tileId)
+void CollisionTileset::PopBackCollisionTile()
 {
-	if(tileId < m_tiles.size())
-	{
-		//TODO: Delete from vector and shuffle the rest down, this is essentially a leaked tile and will be exported
-		CollisionTile blankTile;
-		m_tiles[tileId].CopyPixels(blankTile);
-	}
+	m_tiles.pop_back();
+	RemoveFromHashMap(m_tiles.size() - 1);
 }
 
 void CollisionTileset::HashChanged(CollisionTileId tileId)
@@ -119,5 +115,13 @@ void CollisionTileset::Export(std::stringstream& stream) const
 	{
 		m_tiles[i].Export(stream);
 		stream << std::endl;
+	}
+}
+
+void CollisionTileset::Export(ion::io::File& file) const
+{
+	for(int i = 0; i < m_tiles.size(); i++)
+	{
+		m_tiles[i].Export(file);
 	}
 }

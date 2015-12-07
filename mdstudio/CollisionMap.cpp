@@ -8,6 +8,8 @@
 #include "Project.h"
 #include <algorithm>
 
+#include <ion/core/memory/Memory.h>
+
 CollisionMap::CollisionMap()
 {
 	m_width = 0;
@@ -88,6 +90,13 @@ CollisionTileId CollisionMap::GetCollisionTile(int x, int y) const
 
 void CollisionMap::Export(const Project& project, std::stringstream& stream) const
 {
+	//Use default tile if there is one, else use first tile
+	u32 defaultTileId = project.GetDefaultCollisionTile();
+	if(defaultTileId == InvalidTileId)
+	{
+		defaultTileId = 0;
+	}
+
 	//Output to stream
 	stream << std::hex << std::setfill('0') << std::uppercase;
 
@@ -98,10 +107,11 @@ void CollisionMap::Export(const Project& project, std::stringstream& stream) con
 		for(int x = 0; x < m_width; x++)
 		{
 			CollisionTileId tileId = m_collisionTiles[(y * m_width) + x];
-			if(tileId == InvalidCollisionTileId)
-				tileId = 0;
 
-			stream << "0x" << std::setw(4) << (u32)tileId;
+			//If blank tile, use default tile
+			u32 tileIndex = (tileId == InvalidCollisionTileId) ? defaultTileId : tileId;
+
+			stream << "0x" << std::setw(4) << (u32)tileIndex;
 
 			if(x < (m_width - 1))
 				stream << ",";
@@ -111,4 +121,29 @@ void CollisionMap::Export(const Project& project, std::stringstream& stream) con
 	}
 
 	stream << std::dec;
+}
+
+void CollisionMap::Export(const Project& project, ion::io::File& file) const
+{
+	//Use default tile if there is one, else use first tile
+	u32 defaultTileId = project.GetDefaultCollisionTile();
+	if(defaultTileId == InvalidTileId)
+	{
+		defaultTileId = 0;
+	}
+
+	for(int y = 0; y < m_height; y++)
+	{
+		for(int x = 0; x < m_width; x++)
+		{
+			CollisionTileId tileId = m_collisionTiles[(y * m_width) + x];
+
+			//If blank tile, use default tile
+			u32 tileIndex = (tileId == InvalidCollisionTileId) ? defaultTileId : tileId;
+
+			u16 word = (u16)tileIndex;
+			ion::memory::EndianSwap(word);
+			file.Write(&word, sizeof(u16));
+		}
+	}
 }

@@ -8,6 +8,8 @@
 #include "Project.h"
 #include <algorithm>
 
+#include <ion/core/memory/Memory.h>
+
 Map::Map()
 {
 	m_width = 0;
@@ -111,6 +113,14 @@ u32 Map::GetTileFlags(int x, int y) const
 	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
 	return m_tiles[tileIdx].m_flags;
+}
+
+void Map::FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection)
+{
+	for(int i = 0; i < selection.size(); i++)
+	{
+		SetTile(selection[i].x, selection[i].y, tileId);
+	}
 }
 
 void Map::SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags)
@@ -335,7 +345,7 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
 
 			//Generate components
-			u16 tileIndex = tileId & 0x7FF;						//Bottom 11 bits (index from 0)
+			u16 tileIndex = tileId & 0x7FF;							//Bottom 11 bits (index from 0)
 			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;	//12th bit
 			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;	//13th bit
 			u16 palette = (tile->GetPaletteId() & 0x3) << 13;		//14th and 15th bits
@@ -354,4 +364,66 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 	}
 
 	stream << std::dec;
+}
+
+void Map::Export(const Project& project, ion::io::File& file) const
+{
+	//Copy tiles
+	std::vector<TileDesc> tiles = m_tiles;
+
+	//Blit stamps
+	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		const Stamp& stamp = *project.GetStamp(it->m_id);
+		const ion::Vector2i& position = it->m_position;
+		BakeStamp(tiles, position.x, position.y, stamp, it->m_flags);
+	}
+
+	//Use background tile if there is one, else use first tile
+	u32 backgroundTileId = project.GetBackgroundTile();
+	if(backgroundTileId == InvalidTileId)
+	{
+		backgroundTileId = 0;
+	}
+
+	for(int y = 0; y < m_height; y++)
+	{
+		for(int x = 0; x < m_width; x++)
+		{
+			//16 bit word:
+			//-------------------
+			//ABBC DEEE EEEE EEEE
+			//-------------------
+			//A = Low/high plane
+			//B = Palette ID
+			//C = Horizontal flip
+			//D = Vertical flip
+			//E = Tile ID
+
+			const TileDesc& tileDesc = tiles[(y * m_width) + x];
+			u8 paletteId = 0;
+
+			//If blank tile, use background tile
+			u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
+
+			const Tile* tile = project.GetTileset().GetTile(tileId);
+			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
+
+			//Generate components
+			u16 tileIndex = tileId & 0x7FF;							//Bottom 11 bits (index from 0)
+			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;	//12th bit
+			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;	//13th bit
+			u16 palette = (tile->GetPaletteId() & 0x3) << 13;		//14th and 15th bits
+			u16 plane = 1 << 15;									//16th bit
+
+			//Generate word
+			u16 word = tileIndex | flipV | flipH | palette;
+
+			//Endian flip
+			ion::memory::EndianSwap(word);
+
+			//Write
+			file.Write(&word, sizeof(u16));
+		}
+	}
 }

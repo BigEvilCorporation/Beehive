@@ -7,6 +7,8 @@
 #include "CollisionTilesPanel.h"
 #include "MainWindow.h"
 
+#include <wx/Menu.h>
+
 #include <algorithm>
 
 const float CollisionTilesPanel::s_CollisionTileSize = 4.0f;
@@ -123,6 +125,20 @@ void CollisionTilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 		//Refresh CollisionTile editor panel
 		m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionTileEditor);
+	}
+
+	if(buttonBits & eMouseRight)
+	{
+		if(m_hoverCollisionTile != InvalidCollisionTileId)
+		{
+			//Right-click menu
+			wxMenu contextMenu;
+
+			contextMenu.Append(eMenuDeleteTile, wxString("Delete collision tile"));
+			contextMenu.Append(eMenuUseAsDefaultTile, wxString("Use as default collision tile"));
+			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&CollisionTilesPanel::OnContextMenuClick, NULL, this);
+			PopupMenu(&contextMenu);
+		}
 	}
 
 	//Redraw
@@ -337,4 +353,31 @@ void CollisionTilesPanel::ScrollToTop()
 
 	//Re-apply zoom
 	//SetCameraZoom(zoom);
+}
+
+void CollisionTilesPanel::OnContextMenuClick(wxCommandEvent& event)
+{
+	if(event.GetId() == eMenuDeleteTile)
+	{
+		//Delete tile
+		m_project->DeleteCollisionTile(m_hoverCollisionTile);
+
+		//Invalidate hover/selected tile
+		m_hoverCollisionTile = InvalidCollisionTileId;
+		m_selectedCollisionTile = InvalidCollisionTileId;
+
+		//Recreate tileset texture
+		m_mainWindow->RefreshTileset();
+
+		//Refresh
+		m_mainWindow->RefreshAll();
+	}
+	else if(event.GetId() == eMenuUseAsDefaultTile)
+	{
+		//Set default tile
+		m_project->SetDefaultCollisionTile(m_hoverCollisionTile);
+
+		//Refresh map
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+	}
 }

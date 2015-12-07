@@ -324,7 +324,12 @@ int Project::CleanupTiles()
 		for(int y = 0; y < m_map.GetHeight(); y++)
 		{
 			TileId tileId = m_map.GetTile(x, y);
-			usedTiles.insert(tileId);
+
+			//Ignore background tile
+			if(tileId != m_backgroundTile)
+			{
+				usedTiles.insert(tileId);
+			}
 		}
 	}
 
@@ -593,6 +598,337 @@ const TCollisionTypeMap::const_iterator Project::CollisionTypesEnd() const
 int Project::GetCollisionTypeCount() const
 {
 	return m_collisionTypes.size();
+}
+
+void Project::DeleteCollisionTile(CollisionTileId collisionTileId)
+{
+	CollisionTileId swapCollisionTileId = (CollisionTileId)m_collisionTileset.GetCount() - 1;
+
+	//Find all uses of collision tile  on map, set blank
+	for(int x = 0; x < m_collisionMap.GetWidth(); x++)
+	{
+		for(int y = 0; y < m_collisionMap.GetHeight(); y++)
+		{
+			CollisionTileId currCollisionTileId = m_collisionMap.GetCollisionTile(x, y);
+			if(currCollisionTileId == collisionTileId)
+			{
+				//Referencing deleted CollisionTile, set as invalid
+				m_collisionMap.SetCollisionTile(x, y, InvalidCollisionTileId);
+			}
+			else if(currCollisionTileId == swapCollisionTileId)
+			{
+				//Referencing swap CollisionTile, set new id
+				m_collisionMap.SetCollisionTile(x, y, collisionTileId);
+			}
+		}
+	}
+
+	if(m_collisionTileset.GetCount() > 0)
+	{
+		//Swap CollisionTiles
+		CollisionTile* collisionTile1 = m_collisionTileset.GetCollisionTile(collisionTileId);
+		CollisionTile* collisionTile2 = m_collisionTileset.GetCollisionTile((CollisionTileId)m_collisionTileset.GetCount() - 1);
+		ion::debug::Assert(collisionTile1 && collisionTile2, "Project::DeleteCollisionTile() - Invalid CollisionTile");
+
+		CollisionTile tmpCollisionTile;
+		tmpCollisionTile = *collisionTile1;
+		*collisionTile1 = *collisionTile2;
+		*collisionTile2 = tmpCollisionTile;
+	}
+
+	//Erase last CollisionTile
+	m_collisionTileset.PopBackCollisionTile();
+
+	//Clear paint CollisionTile
+	SetPaintCollisionTile(InvalidCollisionTileId);
+}
+
+void Project::SwapCollisionTiles(CollisionTileId tileId1, CollisionTileId tileId2)
+{
+
+}
+
+void Project::SetDefaultCollisionTile(CollisionTileId tileId)
+{
+	m_defaultCollisionTile = tileId;
+}
+
+int Project::CleanupCollisionTiles()
+{
+	std::set<CollisionTileId> usedCollisionTiles;
+
+	//Collect all used CollisionTile ids from map
+	for(int x = 0; x < m_map.GetWidth(); x++)
+	{
+		for(int y = 0; y < m_map.GetHeight(); y++)
+		{
+			CollisionTileId collisionTileId = m_collisionMap.GetCollisionTile(x, y);
+
+			//Ignore default tile
+			if(collisionTileId != m_defaultCollisionTile)
+			{
+				usedCollisionTiles.insert(collisionTileId);
+			}
+		}
+	}
+
+	std::set<CollisionTileId> unusedCollisionTiles;
+
+	for(CollisionTileId i = 0; i < m_collisionTileset.GetCount(); i++)
+	{
+		if(usedCollisionTiles.find(i) == usedCollisionTiles.end())
+		{
+			unusedCollisionTiles.insert(i);
+		}
+	}
+
+	if(unusedCollisionTiles.size() > 0)
+	{
+		std::stringstream message;
+		message << "Found " << unusedCollisionTiles.size() << " unused collision tiles, delete?";
+
+		if(wxMessageBox(message.str().c_str(), "Delete unused collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		{
+			//Delete in reverse, popping from back
+			for(std::set<CollisionTileId>::const_reverse_iterator it = unusedCollisionTiles.rbegin(), end = unusedCollisionTiles.rend(); it != end; ++it)
+			{
+				DeleteCollisionTile(*it);
+			}
+		}
+	}
+
+	//Calculate hashes for all CollisionTiles
+	struct Duplicate
+	{
+		CollisionTileId original;
+		CollisionTileId duplicate;
+	};
+
+	std::map<u64, CollisionTileId> collisionTileMap;
+	std::vector<Duplicate> duplicates;
+
+	for(int i = 0; i < m_collisionTileset.GetCount(); i++)
+	{
+		CollisionTile* collisionTile = m_collisionTileset.GetCollisionTile(i);
+		collisionTile->CalculateHash();
+		u64 hash = collisionTile->GetHash();
+		bool duplicateFound = false;
+
+		std::map<u64, CollisionTileId>::iterator it = collisionTileMap.find(hash);
+		if(it != collisionTileMap.end())
+		{
+			Duplicate duplicate;
+			duplicate.original = it->second;
+			duplicate.duplicate = i;
+			duplicates.push_back(duplicate);
+			duplicateFound = true;
+		}
+
+		if(!duplicateFound)
+		{
+			collisionTileMap.insert(std::make_pair(hash, i));
+		}
+	}
+
+	if(duplicates.size() > 0)
+	{
+		std::stringstream message;
+		message << "Found " << duplicates.size() << " duplicate collision tiles, delete?";
+
+		if(wxMessageBox(message.str().c_str(), "Delete duplicate collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		{
+			for(int i = 0; i < duplicates.size(); i++)
+			{
+				//Find use of duplicate id in map
+				for(int x = 0; x < m_collisionMap.GetWidth(); x++)
+				{
+					for(int y = 0; y < m_collisionMap.GetHeight(); y++)
+					{
+						if(m_collisionMap.GetCollisionTile(x, y) == duplicates[i].duplicate)
+						{
+							//Replace duplicate with original
+							m_collisionMap.SetCollisionTile(x, y, duplicates[i].original);
+						}
+					}
+				}
+			}
+
+			//Delete duplicates (in reverse, popping from back)
+			for(int i = duplicates.size() - 1; i >= 0; --i)
+			{
+				DeleteCollisionTile(duplicates[i].duplicate);
+			}
+		}
+	}
+
+	return unusedCollisionTiles.size() + duplicates.size();
+}
+
+void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
+{
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	if(m_collisionTypes.size() > 0)
+	{
+		//Use first collision type
+		const CollisionType& collisionType = m_collisionTypes.begin()->second;
+
+		std::map<TileId, CollisionTileId> generatedTiles;
+
+		for(int i = 0; i < graphicTiles.size(); i++)
+		{
+			const ion::Vector2i& position = graphicTiles[i];
+
+			//Ignore the topmost tiles
+			if(position.y > 0)
+			{
+				TileId graphicTileId = GetTileAtPosition(position);
+
+				if(const Tile* graphicTile = m_tileset.GetTile(graphicTileId))
+				{
+					//Check if already generated
+					std::map<TileId, CollisionTileId>::iterator it = generatedTiles.find(graphicTileId);
+					if(it != generatedTiles.end())
+					{
+						m_collisionMap.SetCollisionTile(position.x, position.y, it->second);
+					}
+					else
+					{
+						//Generate height map from tile
+						std::vector<u8> heightMap;
+						GenerateHeightMap(*graphicTile, heightMap);
+
+						//If height map isn't empty (whole row is 0)
+						if(std::count(heightMap.begin(), heightMap.end(), 0) != tileWidth)
+						{
+							bool spaceForTerrain = true;
+
+							//If height map fills top row (whole row of 1)
+							if(std::count(heightMap.begin(), heightMap.end(), 1) == tileWidth)
+							{
+								//Generate ceiling map from tile above
+								TileId upperTile = GetTileAtPosition(ion::Vector2i(position.x, position.y - 1));
+								if(const Tile* graphicTile = m_tileset.GetTile(upperTile))
+								{
+									std::vector<u8> ceilingMap;
+									GenerateCeilingMap(*graphicTile, ceilingMap);
+
+									//If there's no space (whole row of tileHeight)
+									if(std::count(ceilingMap.begin(), ceilingMap.end(), tileHeight) == tileWidth)
+									{
+										//Don't bother
+										spaceForTerrain = false;
+									}
+								}
+							}
+
+							if(spaceForTerrain)
+							{
+								//Add new collision tile
+								CollisionTileId collisionTileId = m_collisionTileset.AddCollisionTile();
+								CollisionTile* collisionTile = m_collisionTileset.GetCollisionTile(collisionTileId);
+
+								//Create collision tile from height map
+								for(int x = 0; x < tileWidth; x++)
+								{
+									if(heightMap[x] > 0)
+									{
+										collisionTile->AddPixelCollisionBits(x, heightMap[x] - 1, collisionType.bit);
+									}
+								}
+
+								//TODO: Find duplicate
+
+								//Set on map
+								m_collisionMap.SetCollisionTile(position.x, position.y, collisionTileId);
+
+								//Add to cache
+								generatedTiles.insert(std::make_pair(graphicTileId, collisionTileId));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Project::GenerateHeightMap(const Tile& graphicTile, std::vector<u8>& heightMap) const
+{
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	heightMap.resize(tileWidth);
+	std::fill(heightMap.begin(), heightMap.end(), 0);
+
+	for(int x = 0; x < tileWidth; x++)
+	{
+		bool foundHeight = false;
+
+		for(int y = 0; y < tileHeight && !foundHeight; y++)
+		{
+			//If pixel not background colour
+			if(graphicTile.GetPixelColour(x, y) != 0)
+			{
+				//Use height
+				heightMap[x] = y + 1;
+				foundHeight = true;
+			}
+		}
+	}
+}
+
+void Project::GenerateCeilingMap(const Tile& graphicTile, std::vector<u8>& ceilingMap) const
+{
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	ceilingMap.resize(tileWidth);
+	std::fill(ceilingMap.begin(), ceilingMap.end(), 0);
+
+	for(int x = 0; x < tileWidth; x++)
+	{
+		bool foundHeight = false;
+
+		
+		for(int y = tileHeight - 1; y >= 0 && !foundHeight; y--)
+		{
+			//If pixel not background colour
+			if(graphicTile.GetPixelColour(x, y) != 0)
+			{
+				//Use height
+				ceilingMap[x] = y + 1;
+				foundHeight = true;
+			}
+		}
+	}
+}
+
+TileId Project::GetTileAtPosition(const ion::Vector2i& position)
+{
+	TileId tileId = InvalidTileId;
+
+	//Find stamp under cursor first
+	ion::Vector2i stampPos;
+	u32 stampFlags = 0;
+	StampId stampId = m_map.FindStamp(position.x, position.y, stampPos, stampFlags);
+	if(stampId)
+	{
+		//Get from stamp
+		if(Stamp* stamp = GetStamp(stampId))
+		{
+			ion::Vector2i offset = position - stampPos;
+			tileId = stamp->GetTile(offset.x, offset.y);
+		}
+	}
+	else
+	{
+		//Pick tile
+		tileId = m_map.GetTile(position.x, position.y);
+	}
+
+	return tileId;
 }
 
 GameObjectTypeId Project::AddGameObjectType()
@@ -869,6 +1205,7 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		{
 			//Grow map if necessary
 			m_map.Resize(max(m_map.GetWidth(), tilesWidth), max(m_map.GetHeight(), tilesHeight));
+			m_collisionMap.Resize(max(m_collisionMap.GetWidth(), tilesWidth), max(m_collisionMap.GetHeight(), tilesHeight));
 		}
 
 		Stamp* stamp = NULL;
@@ -1117,21 +1454,51 @@ bool Project::ExportPalettes(const std::string& filename) const
 	return false;
 }
 
-bool Project::ExportTiles(const std::string& filename) const
+bool Project::ExportTiles(const std::string& filename, bool binary) const
 {
+	u32 binarySize = 0;
+
+	if(binary)
+	{
+		std::string binaryFilename = filename.substr(0, filename.find_first_of('.'));
+		binaryFilename += ".bin";
+
+		//Export binary data
+		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		if(binaryFile.IsOpen())
+		{
+			m_tileset.Export(binaryFile);
+			binarySize = binaryFile.GetSize();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	ion::io::File file(filename, ion::io::File::OpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "tiles_" << m_name << ":" << std::endl;
 
-		m_tileset.Export(stream);
+		if(binary)
+		{
+			//Export size of binary file
+			stream << "tiles_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+		}
+		else
+		{
+			//Export label, data and size as inline text
+			stream << "tiles_" << m_name << ":" << std::endl;
 
-		stream << std::endl;
+			m_tileset.Export(stream);
 
-		stream << "tiles_" << m_name << "_end" << std::endl;
-		stream << "tiles_" << m_name << "_size_b\tequ (tiles_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+			stream << std::endl;
+			stream << "tiles_" << m_name << "_end" << std::endl;
+			stream << "tiles_" << m_name << "_size_b\tequ (tiles_" << m_name << "_end-tiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		}
+		
 		stream << "tiles_" << m_name << "_size_w\tequ (tiles_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
 		stream << "tiles_" << m_name << "_size_l\tequ (tiles_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 		stream << "tiles_" << m_name << "_size_t\tequ (tiles_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
@@ -1144,21 +1511,51 @@ bool Project::ExportTiles(const std::string& filename) const
 	return false;
 }
 
-bool Project::ExportCollisionTiles(const std::string& filename) const
+bool Project::ExportCollisionTiles(const std::string& filename, bool binary) const
 {
+	u32 binarySize = 0;
+
+	if(binary)
+	{
+		std::string binaryFilename = filename.substr(0, filename.find_first_of('.'));
+		binaryFilename += ".bin";
+
+		//Export binary data
+		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		if(binaryFile.IsOpen())
+		{
+			m_collisionTileset.Export(binaryFile);
+			binarySize = binaryFile.GetSize();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	ion::io::File file(filename, ion::io::File::OpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "collisiontiles_" << m_name << ":" << std::endl;
 
-		m_collisionTileset.Export(stream);
+		if(binary)
+		{
+			//Export size of binary file
+			stream << "collisiontiles_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+		}
+		else
+		{
+			//Export label, data and size as inline text
+			stream << "collisiontiles_" << m_name << ":" << std::endl;
 
-		stream << std::endl;
+			m_collisionTileset.Export(stream);
 
-		stream << "collisiontiles_" << m_name << "_end" << std::endl;
-		stream << "collisiontiles_" << m_name << "_size_b\tequ (collisiontiles_" << m_name << "_end-collisiontiles_" << m_name << ")\t; Size in bytes" << std::endl;
+			stream << std::endl;
+			stream << "collisiontiles_" << m_name << "_end" << std::endl;
+			stream << "collisiontiles_" << m_name << "_size_b\tequ (collisiontiles_" << m_name << "_end-collisiontiles_" << m_name << ")\t; Size in bytes" << std::endl;
+		}
+
 		stream << "collisiontiles_" << m_name << "_size_w\tequ (collisiontiles_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
 		stream << "collisiontiles_" << m_name << "_size_l\tequ (collisiontiles_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 		stream << "collisiontiles_" << m_name << "_size_t\tequ (collisiontiles_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
@@ -1171,19 +1568,51 @@ bool Project::ExportCollisionTiles(const std::string& filename) const
 	return false;
 }
 
-bool Project::ExportMap(const std::string& filename) const
+bool Project::ExportMap(const std::string& filename, bool binary) const
 {
+	u32 binarySize = 0;
+
+	if(binary)
+	{
+		std::string binaryFilename = filename.substr(0, filename.find_first_of('.'));
+		binaryFilename += ".bin";
+
+		//Export binary data
+		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		if(binaryFile.IsOpen())
+		{
+			m_map.Export(*this, binaryFile);
+			binarySize = binaryFile.GetSize();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	ion::io::File file(filename, ion::io::File::OpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "map_" << m_name << ":" << std::endl;
+		
+		if(binary)
+		{
+			//Export size of binary file
+			stream << "map_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+		}
+		else
+		{
+			//Export label, data and size as inline text
+			stream << "map_" << m_name << ":" << std::endl;
 
-		m_map.Export(*this, stream);
+			m_map.Export(*this, stream);
 
-		stream << "map_" << m_name << "_end:" << std::endl;
-		stream << "map_" << m_name << "_size_b\tequ (map_" << m_name << "_end-map_" << m_name << ")\t; Size in bytes" << std::endl;
+			stream << std::endl;
+			stream << "map_" << m_name << "_end:" << std::endl;
+			stream << "map_" << m_name << "_size_b\tequ (map_" << m_name << "_end-map_" << m_name << ")\t; Size in bytes" << std::endl;
+		}
+
 		stream << "map_" << m_name << "_size_w\tequ (map_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
 		stream << "map_" << m_name << "_size_l\tequ (map_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 
@@ -1200,19 +1629,51 @@ bool Project::ExportMap(const std::string& filename) const
 	return false;
 }
 
-bool Project::ExportCollisionMap(const std::string& filename) const
+bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 {
+	u32 binarySize = 0;
+
+	if(binary)
+	{
+		std::string binaryFilename = filename.substr(0, filename.find_first_of('.'));
+		binaryFilename += ".bin";
+
+		//Export binary data
+		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		if(binaryFile.IsOpen())
+		{
+			m_collisionMap.Export(*this, binaryFile);
+			binarySize = binaryFile.GetSize();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	ion::io::File file(filename, ion::io::File::OpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "collisionmap_" << m_name << ":" << std::endl;
+		
+		if(binary)
+		{
+			//Export size of binary file
+			stream << "collisionmap_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+		}
+		else
+		{
+			//Export label, data and size as inline text
+			stream << "collisionmap_" << m_name << ":" << std::endl;
 
-		m_collisionMap.Export(*this, stream);
+			m_collisionMap.Export(*this, stream);
 
-		stream << "collisionmap_" << m_name << "_end:" << std::endl;
-		stream << "collisionmap_" << m_name << "_size_b\tequ (collisionmap_" << m_name << "_end-collisionmap_" << m_name << ")\t; Size in bytes" << std::endl;
+			stream << std::endl;
+			stream << "collisionmap_" << m_name << "_end:" << std::endl;
+			stream << "collisionmap_" << m_name << "_size_b\tequ (collisionmap_" << m_name << "_end-collisionmap_" << m_name << ")\t; Size in bytes" << std::endl;
+		}
+
 		stream << "collisionmap_" << m_name << "_size_w\tequ (collisionmap_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
 		stream << "collisionmap_" << m_name << "_size_l\tequ (collisionmap_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 
@@ -1236,26 +1697,35 @@ bool Project::ExportGameObjects(const std::string& filename) const
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "gameobjects:" << std::endl;
+		stream << "gameobjects_" << m_name << ":" << std::endl;
 
-		const TGameObjectPosMap& gameObjects = m_map.GetGameObjects();
+		const TGameObjectPosMap& gameObjMap = m_map.GetGameObjects();
 
-		for(TGameObjectPosMap::const_iterator itMap = gameObjects.begin(), endMap = gameObjects.end(); itMap != endMap; ++itMap)
+		//Bake out all game object types, even if there's no game objects to go with them (still need the count and init subroutine)
+		for(TGameObjectTypeMap::const_iterator it = m_gameObjectTypes.begin(), end = m_gameObjectTypes.end(); it != end; ++it)
 		{
-			if(const GameObjectType* gameObjectType = GetGameObjectType(itMap->first))
+			const GameObjectType& gameObjectType = it->second;
+			const TGameObjectPosMap::const_iterator gameObjIt = gameObjMap.find(it->first);
+			u32 count = (gameObjIt != gameObjMap.end()) ? gameObjIt->second.size() : 0;
+			
+			//Export game object count
+			stream << "gameobjects_" << gameObjectType.GetName() << "_count equ " << count << std::endl;
+
+			//Export game object init sunroutine
+			stream << "LoadGameObjects_" << gameObjectType.GetName() << ":" << std::endl;
+
+			//Export all game objects of this type
+			if(gameObjIt != gameObjMap.end())
 			{
-				stream << "gameobjects_" << gameObjectType->GetName() << "_count equ " << itMap->second.size() << std::endl;
-				stream << "LoadGameObjects_" << gameObjectType->GetName() << ":" << std::endl;
-
-				for(int i = 0; i < itMap->second.size(); i++)
+				for(int i = 0; i < gameObjIt->second.size(); i++)
 				{
-					itMap->second[i].m_gameObject.Export(stream, *gameObjectType);
-					stream << '\t' << "add.l #" << gameObjectType->GetName() << "_Struct_Size, a0" << std::endl;
+					gameObjIt->second[i].m_gameObject.Export(stream, gameObjectType);
+					stream << '\t' << "add.l #" << gameObjectType.GetName() << "_Struct_Size, a0" << std::endl;
 				}
-
-				stream << '\t' << "rts" << std::endl;
 			}
 
+			//End subroutine
+			stream << '\t' << "rts" << std::endl;
 			stream << std::endl;
 		}
 

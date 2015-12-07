@@ -34,7 +34,16 @@ protected:
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
+	//Right-click menu callback
+	void OnContextMenuClick(wxCommandEvent& event);
+
 private:
+	enum MenuItems
+	{
+		eMenuDeleteTile,
+		eMenuUseAsDefaultTile
+	};
+
 	//Calc canvas size
 	ion::Vector2i CalcCanvasSize();
 

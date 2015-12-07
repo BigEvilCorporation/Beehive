@@ -140,6 +140,7 @@ namespace ion
 				mStream.write((const char*)Data, Size);
 				mCurrentPosition = (u64)mStream.tellp();
 				bytesWritten = mCurrentPosition - startPosition;
+				mSize += bytesWritten;
 			}
 
 			return bytesWritten;

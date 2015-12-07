@@ -41,6 +41,12 @@ protected:
 
 private:
 
+	enum ContextMenuItems
+	{
+		eContextMenuDeleteStamp,
+		eContextMenuBakeStamp
+	};
+
 	//Create collision canvas
 	void CreateCollisionCanvas(int width, int height);
 
@@ -69,6 +75,9 @@ private:
 	//Clear all tool data
 	void ResetToolData();
 
+	//On right-click menu click
+	void OnContextMenuClick(wxCommandEvent& event);
+
 	//Rendering primitives
 	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
@@ -88,6 +97,7 @@ private:
 	StampId m_selectedStamp;
 	ion::Vector2i m_hoverStampPos;
 	ion::Vector2i m_selectedStampPos;
+	u32 m_hoverStampFlags;
 
 	//Multiple (CTRL) selection
 	bool m_multipleSelection;

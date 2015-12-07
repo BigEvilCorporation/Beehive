@@ -37,6 +37,7 @@
 #include <wx/textctrl.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
+#include <wx/radiobut.h>
 #include <wx/toolbar.h>
 #include <wx/listctrl.h>
 #include <wx/statline.h>
@@ -67,23 +68,25 @@
 #define wxID_BTN_STAMPS_DELETE 1020
 #define wxID_BTN_COL_TILES_CREATE 1021
 #define wxID_BTN_COL_TILES_DELETE 1022
-#define wxID_BTN_GAME_OBJ_TYPES 1023
-#define wxID_BTN_CANCEL 1024
-#define wxID_TOOL_SELECTTILE 1025
-#define wxID_TOOL_PAINT 1026
-#define wxID_TOOL_TILEPICKER 1027
-#define wxID_TOOL_FLIPX 1028
-#define wxID_TOOL_FLIPY 1029
-#define wxID_TOOL_FILL 1030
-#define wxID_TOOL_CLONE 1031
-#define wxID_TOOL_SELECTSTAMP 1032
-#define wxID_TOOL_STAMP 1033
-#define wxID_TOOL_STAMPPICKER 1034
-#define wxID_TOOL_CREATESTAMP 1035
-#define wxID_TOOL_REMOVESTAMP 1036
-#define wxID_TOOL_PAINTCOLLISIONPIXEL 1037
-#define wxID_TOOL_PLACEGAMEOBJ 1038
-#define wxID_TOOL_REMOVEGAMEOBJ 1039
+#define wxID_BTN_COL_TILES_CLEANUP 1023
+#define wxID_BTN_GAME_OBJ_TYPES 1024
+#define wxID_BTN_CANCEL 1025
+#define wxID_TOOL_SELECTTILE 1026
+#define wxID_TOOL_PAINT 1027
+#define wxID_TOOL_TILEPICKER 1028
+#define wxID_TOOL_FLIPX 1029
+#define wxID_TOOL_FLIPY 1030
+#define wxID_TOOL_FILL 1031
+#define wxID_TOOL_CLONE 1032
+#define wxID_TOOL_SELECTSTAMP 1033
+#define wxID_TOOL_STAMP 1034
+#define wxID_TOOL_STAMPPICKER 1035
+#define wxID_TOOL_CREATESTAMP 1036
+#define wxID_TOOL_REMOVESTAMP 1037
+#define wxID_TOOL_PAINTCOLLISIONPIXEL 1038
+#define wxID_TOOL_GENERATETERRAIN 1039
+#define wxID_TOOL_PLACEGAMEOBJ 1040
+#define wxID_TOOL_REMOVEGAMEOBJ 1041
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -137,6 +140,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnColTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnGameObjTypes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	
@@ -200,6 +204,7 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolRemoveStamp;
 		wxStaticText* m_staticText13;
 		wxBitmapButton* m_toolPaintCollisionPixel;
+		wxBitmapButton* m_toolGenerateTerrain;
 		wxStaticText* m_staticText14;
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
@@ -261,6 +266,8 @@ class ExportDialog : public wxDialog
 		wxFilePickerCtrl* m_filePickerCollisionMap;
 		wxCheckBox* m_chkGameObj;
 		wxFilePickerCtrl* m_filePickerGameObj;
+		wxRadioButton* m_btnText;
+		wxRadioButton* m_btnBinary;
 		wxStdDialogButtonSizer* m_buttons;
 		wxButton* m_buttonsOK;
 		wxButton* m_buttonsCancel;
@@ -271,20 +278,25 @@ class ExportDialog : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class ImportDialog
+/// Class ImportDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class ImportDialog : public wxDialog 
+class ImportDialogBase : public wxDialog 
 {
 	private:
 	
 	protected:
 		wxStaticText* m_staticText8;
+		wxTextCtrl* m_filenames;
+		wxButton* m_btnSelectFiles;
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 		wxButton* m_sdbSizer2Cancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnBtnBrowse( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
-		wxFilePickerCtrl* m_fileBitmap;
 		wxCheckBox* m_chkClearTiles;
 		wxCheckBox* m_chkClearMap;
 		wxCheckBox* m_chkClearPalettes;
@@ -298,8 +310,8 @@ class ImportDialog : public wxDialog
 		wxCheckBox* m_chkPalette3;
 		wxCheckBox* m_chkPalette4;
 		
-		ImportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,309 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
-		~ImportDialog();
+		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,309 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~ImportDialogBase();
 	
 };
 
