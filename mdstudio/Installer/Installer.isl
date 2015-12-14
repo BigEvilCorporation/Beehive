@@ -4588,7 +4588,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGRAMFILETOLAUNCHATEND</td><td>[INSTALLDIR]beehive.release.exe</td><td/></row>
 		<row><td>ProductCode</td><td>{FA770048-0FAD-4035-B0A0-9FF3B4877FE9}</td><td/></row>
 		<row><td>ProductName</td><td>BEEhive</td><td/></row>
-		<row><td>ProductVersion</td><td>0.0.31</td><td/></row>
+		<row><td>ProductVersion</td><td>0.0.32</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>

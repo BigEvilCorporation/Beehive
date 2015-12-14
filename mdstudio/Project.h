@@ -19,11 +19,9 @@
 #include "CollisionMap.h"
 #include "CollisionTile.h"
 #include "CollisionTileset.h"
-#include "CollisionType.h"
 #include "GameObject.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
-typedef std::map<u8, CollisionType> TCollisionTypeMap;
 typedef std::map<GameObjectTypeId, GameObjectType> TGameObjectTypeMap;
 
 class Project
@@ -102,15 +100,6 @@ public:
 	const TStampMap::const_iterator StampsEnd() const;
 	int GetStampCount() const;
 
-	//Collision types
-	CollisionType* AddCollisionType(u8 bit);
-	void RemoveCollisionType(u8 bit);
-	CollisionType* GetCollisionType(const std::string& name);
-	CollisionType* GetCollisionType(u8 bit);
-	const TCollisionTypeMap::const_iterator CollisionTypesBegin() const;
-	const TCollisionTypeMap::const_iterator CollisionTypesEnd() const;
-	int GetCollisionTypeCount() const;
-
 	//Collision tiles
 	void DeleteCollisionTile(CollisionTileId tileId);
 	void SwapCollisionTiles(CollisionTileId tileId1, CollisionTileId tileId2);
@@ -133,10 +122,6 @@ public:
 	//Set current colour used for editing
 	void SetPaintColour(u8 colourIdx);
 	u8 GetPaintColour() const;
-
-	//Set current collision type used for painting
-	void SetPaintCollisionType(CollisionType* type);
-	const CollisionType* GetPaintCollisionType() const;
 
 	//Set current collision tile used for painting
 	void SetPaintCollisionTile(CollisionTileId tile);
@@ -173,12 +158,10 @@ public:
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
 	void InvalidateCollisionTiles(bool invalidate) { m_collisionTilesInvalidated = invalidate; }
-	void InvalidateCollisionTypes(bool invalidate) { m_collisionTypesInvalidated = invalidate; }
 	void InvalidateStamps(bool invalidate) { m_stampsInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
 	bool TilesAreInvalidated() const { return m_tilesInvalidated; }
 	bool CollisionTilesAreInvalidated() const { return m_collisionTilesInvalidated; }
-	bool CollisionTypesAreInvalidated() const { return m_collisionTypesInvalidated; }
 	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
 	//Import bitmap
@@ -264,18 +247,12 @@ private:
 	TStampMap m_stamps;
 	StampId m_nextFreeStampId;
 
-	//Collision types
-	TCollisionTypeMap m_collisionTypes;
-
 	//Game object types
 	TGameObjectTypeMap m_gameObjectTypes;
 	GameObjectTypeId m_nextFreeGameObjectTypeId;
 
 	//Colour used for painting
 	u8 m_paintColour;
-
-	//Collision type used for painting
-	CollisionType* m_paintCollisionType;
 
 	//Collision tile used for painting
 	CollisionTileId m_paintCollisionTile;
@@ -310,6 +287,5 @@ private:
 	bool m_mapInvalidated;
 	bool m_tilesInvalidated;
 	bool m_collisionTilesInvalidated;
-	bool m_collisionTypesInvalidated;
 	bool m_stampsInvalidated;
 };

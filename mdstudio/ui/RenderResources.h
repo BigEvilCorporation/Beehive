@@ -30,7 +30,6 @@ public:
 		eMaterialFlatColour,
 		eMaterialTileset,
 		eMaterialCollisionTileset,
-		eMaterialCollisionTypes,
 		eMaterialMax
 	};
 
@@ -38,7 +37,6 @@ public:
 	{
 		eTextureTileset,
 		eTextureCollisionTileset,
-		eTextureCollisionTypes,
 		eTextureMax
 	};
 
@@ -71,23 +69,17 @@ public:
 	//Create and redraw collision tileset texture
 	void CreateCollisionTilesTexture();
 
-	//Create and redraw collision types texture
-	void CreateCollisionTypesTexture();
-
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
 
 	//Get collision tileset UV coords for collision tile
 	void GetCollisionTileTexCoords(CollisionTileId tileId, ion::render::TexCoord texCoords[4]) const;
 
-	//Get collision tileset UV coords for collision type
-	void GetCollisionTypeTexCoords(u8 collisionBit, ion::render::TexCoord texCoords[4]) const;
-
 	//Edit tileset texture pixel
 	void SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx);
 
-	//Edit collision tileset texture pixel
-	void SetCollisionTilesetTexPixel(CollisionTileId tileId, const ion::Vector2i& pixel, u8 collisionBits);
+	//Edit collision tileset texture height
+	void SetCollisionTileHeight(CollisionTileId tileId, int x, s8 height);
 
 	//Get resources
 	ion::render::Material* GetMaterial(MaterialType type) { return m_materials[type]; }
@@ -110,17 +102,11 @@ private:
 	//Collision tileset size sq
 	u32 m_collisionTilesetSizeSq;
 
-	//Collision types size sq
-	u32 m_collisionTypesSizeSq;
-
 	//Tileset texture cell size sq
 	float m_cellSizeTexSpaceSq;
 
 	//Collision tileset texture cell size sq
 	float m_cellSizeCollisionTilesetTexSpaceSq;
-
-	//Collision set texture cell size sq
-	float m_cellSizeCollisionTypesTexSpaceSq;
 
 	//Current project
 	Project* m_project;

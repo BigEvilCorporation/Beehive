@@ -14,16 +14,15 @@
 Project::Project()
 {
 	m_paintColour = 0;
-	m_paintCollisionType = NULL;
 	m_paintCollisionTile = InvalidCollisionTileId;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
 	m_backgroundTile = InvalidTileId;
+	m_defaultCollisionTile = InvalidCollisionTileId;
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
 	m_collisionTilesInvalidated = true;
-	m_collisionTypesInvalidated = true;
 	m_stampsInvalidated = true;
 	m_name = "untitled";
 	m_gridSize = 1;
@@ -38,14 +37,14 @@ Project::Project()
 void Project::Clear()
 {
 	m_paintColour = 0;
-	m_paintCollisionType = NULL;
 	m_paintCollisionTile = InvalidCollisionTileId;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
+	m_backgroundTile = InvalidTileId;
+	m_defaultCollisionTile = InvalidCollisionTileId;
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
-	m_collisionTypesInvalidated = true;
 	m_stampsInvalidated = true;
 	m_name = "untitled";
 	m_palettes.resize(s_maxPalettes);
@@ -119,7 +118,6 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_map, "map");
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_stamps, "stamps");
-	archive.Serialise(m_collisionTypes, "collisionTypes");
 	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
@@ -547,59 +545,6 @@ int Project::GetStampCount() const
 	return m_stamps.size();
 }
 
-CollisionType* Project::AddCollisionType(u8 bit)
-{
-	CollisionType* collisionType = &m_collisionTypes.insert(std::make_pair(bit, CollisionType())).first->second;
-	collisionType->bit = bit;
-	return collisionType;
-}
-
-void Project::RemoveCollisionType(u8 bit)
-{
-	m_collisionTypes.erase(bit);
-}
-
-CollisionType* Project::GetCollisionType(const std::string& name)
-{
-	for(TCollisionTypeMap::iterator it = m_collisionTypes.begin(), end = m_collisionTypes.end(); it != end; ++it)
-	{
-		if(name == it->second.name)
-		{
-			return &it->second;
-		}
-	}
-
-	return NULL;
-}
-
-CollisionType* Project::GetCollisionType(u8 bit)
-{
-	CollisionType* collisionType = NULL;
-
-	TCollisionTypeMap::iterator it = m_collisionTypes.find(bit);
-	if(it != m_collisionTypes.end())
-	{
-		collisionType = &it->second;
-	}
-
-	return collisionType;
-}
-
-const TCollisionTypeMap::const_iterator Project::CollisionTypesBegin() const
-{
-	return m_collisionTypes.begin();
-}
-
-const TCollisionTypeMap::const_iterator Project::CollisionTypesEnd() const
-{
-	return m_collisionTypes.end();
-}
-
-int Project::GetCollisionTypeCount() const
-{
-	return m_collisionTypes.size();
-}
-
 void Project::DeleteCollisionTile(CollisionTileId collisionTileId)
 {
 	CollisionTileId swapCollisionTileId = (CollisionTileId)m_collisionTileset.GetCount() - 1;
@@ -769,83 +714,77 @@ void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 	const int tileWidth = 8;
 	const int tileHeight = 8;
 
-	if(m_collisionTypes.size() > 0)
+	std::map<TileId, CollisionTileId> generatedTiles;
+
+	for(int i = 0; i < graphicTiles.size(); i++)
 	{
-		//Use first collision type
-		const CollisionType& collisionType = m_collisionTypes.begin()->second;
+		const ion::Vector2i& position = graphicTiles[i];
 
-		std::map<TileId, CollisionTileId> generatedTiles;
-
-		for(int i = 0; i < graphicTiles.size(); i++)
+		//Ignore the topmost tiles
+		if(position.y > 0)
 		{
-			const ion::Vector2i& position = graphicTiles[i];
+			TileId graphicTileId = GetTileAtPosition(position);
 
-			//Ignore the topmost tiles
-			if(position.y > 0)
+			if(const Tile* graphicTile = m_tileset.GetTile(graphicTileId))
 			{
-				TileId graphicTileId = GetTileAtPosition(position);
-
-				if(const Tile* graphicTile = m_tileset.GetTile(graphicTileId))
+				//Check if already generated
+				std::map<TileId, CollisionTileId>::iterator it = generatedTiles.find(graphicTileId);
+				if(it != generatedTiles.end())
 				{
-					//Check if already generated
-					std::map<TileId, CollisionTileId>::iterator it = generatedTiles.find(graphicTileId);
-					if(it != generatedTiles.end())
-					{
-						m_collisionMap.SetCollisionTile(position.x, position.y, it->second);
-					}
-					else
-					{
-						//Generate height map from tile
-						std::vector<u8> heightMap;
-						GenerateHeightMap(*graphicTile, heightMap);
+					m_collisionMap.SetCollisionTile(position.x, position.y, it->second);
+				}
+				else
+				{
+					//Generate height map from tile
+					std::vector<u8> heightMap;
+					GenerateHeightMap(*graphicTile, heightMap);
 
-						//If height map isn't empty (whole row is 0)
-						if(std::count(heightMap.begin(), heightMap.end(), 0) != tileWidth)
+					//If height map isn't empty (whole row is 0)
+					if(std::count(heightMap.begin(), heightMap.end(), 0) != tileWidth)
+					{
+						bool spaceForTerrain = true;
+
+						//If height map fills top row (whole row of 1)
+						if(std::count(heightMap.begin(), heightMap.end(), 1) == tileWidth)
 						{
-							bool spaceForTerrain = true;
-
-							//If height map fills top row (whole row of 1)
-							if(std::count(heightMap.begin(), heightMap.end(), 1) == tileWidth)
+							//Generate ceiling map from tile above
+							TileId upperTile = GetTileAtPosition(ion::Vector2i(position.x, position.y - 1));
+							if(const Tile* graphicTile = m_tileset.GetTile(upperTile))
 							{
-								//Generate ceiling map from tile above
-								TileId upperTile = GetTileAtPosition(ion::Vector2i(position.x, position.y - 1));
-								if(const Tile* graphicTile = m_tileset.GetTile(upperTile))
-								{
-									std::vector<u8> ceilingMap;
-									GenerateCeilingMap(*graphicTile, ceilingMap);
+								std::vector<u8> ceilingMap;
+								GenerateCeilingMap(*graphicTile, ceilingMap);
 
-									//If there's no space (whole row of tileHeight)
-									if(std::count(ceilingMap.begin(), ceilingMap.end(), tileHeight) == tileWidth)
-									{
-										//Don't bother
-										spaceForTerrain = false;
-									}
+								//If there's no space (whole row of tileHeight)
+								if(std::count(ceilingMap.begin(), ceilingMap.end(), tileHeight) == tileWidth)
+								{
+									//Don't bother
+									spaceForTerrain = false;
+								}
+							}
+						}
+
+						if(spaceForTerrain)
+						{
+							//Add new collision tile
+							CollisionTileId collisionTileId = m_collisionTileset.AddCollisionTile();
+							CollisionTile* collisionTile = m_collisionTileset.GetCollisionTile(collisionTileId);
+
+							//Create collision tile from height map
+							for(int x = 0; x < tileWidth; x++)
+							{
+								if(heightMap[x] > 0)
+								{
+									collisionTile->SetHeight(x, heightMap[x] - 1);
 								}
 							}
 
-							if(spaceForTerrain)
-							{
-								//Add new collision tile
-								CollisionTileId collisionTileId = m_collisionTileset.AddCollisionTile();
-								CollisionTile* collisionTile = m_collisionTileset.GetCollisionTile(collisionTileId);
+							//TODO: Find duplicate
 
-								//Create collision tile from height map
-								for(int x = 0; x < tileWidth; x++)
-								{
-									if(heightMap[x] > 0)
-									{
-										collisionTile->AddPixelCollisionBits(x, heightMap[x] - 1, collisionType.bit);
-									}
-								}
+							//Set on map
+							m_collisionMap.SetCollisionTile(position.x, position.y, collisionTileId);
 
-								//TODO: Find duplicate
-
-								//Set on map
-								m_collisionMap.SetCollisionTile(position.x, position.y, collisionTileId);
-
-								//Add to cache
-								generatedTiles.insert(std::make_pair(graphicTileId, collisionTileId));
-							}
+							//Add to cache
+							generatedTiles.insert(std::make_pair(graphicTileId, collisionTileId));
 						}
 					}
 				}
@@ -996,16 +935,6 @@ void Project::SetPaintColour(u8 colourIdx)
 u8 Project::GetPaintColour() const
 {
 	return m_paintColour;
-}
-
-void Project::SetPaintCollisionType(CollisionType* type)
-{
-	m_paintCollisionType = type;
-}
-
-const CollisionType* Project::GetPaintCollisionType() const
-{
-	return m_paintCollisionType;
 }
 
 void Project::SetPaintCollisionTile(CollisionTileId tile)

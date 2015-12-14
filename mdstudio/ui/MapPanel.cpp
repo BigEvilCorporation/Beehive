@@ -533,6 +533,9 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 	const int mapWidth = map.GetWidth();
 	const int mapHeight = map.GetHeight();
 
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
 	//Invert for OpenGL
 	int y_inv = (mapHeight - 1 - y);
 
@@ -540,11 +543,8 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 	{
 		case eToolPaintCollisionPixel:
 		{
-			if(buttonBits & eMouseLeft)
+			if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 			{
-				//Get current collision paint type
-				const CollisionType* collisionType = m_project->GetPaintCollisionType();
-
 				//Get collision map
 				CollisionMap& collisionMap = m_project->GetCollisionMap();
 
@@ -580,30 +580,24 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 					int pixelX = mousePos.x - (x * tileSize);
 					int pixelY = mousePos.y - (y * tileSize);
 
-					if(collisionType)
+					if(buttonBits & eMouseLeft)
 					{
-						u8 collisionBit = collisionType->bit;
-						u8 existingBits = collisionTile->GetPixelCollisionBits(pixelX, pixelY);
+						//Set height at X
+						const int height = tileHeight - pixelY;
+						collisionTile->SetHeight(pixelX, height);
 
-						if(existingBits & collisionBit)
-						{
-							//Bit is set, remove
-							collisionTile->ClearPixelCollisionBits(pixelX, pixelY, collisionBit);
-						}
-						else
-						{
-							//Bit is not set, add
-							collisionTile->AddPixelCollisionBits(pixelX, pixelY, collisionBit);
-						}
+						//Set height on collision tile texture
+						m_renderResources.SetCollisionTileHeight(tileId, pixelX, height);
 					}
 					else
 					{
-						//Clear all collision bits
-						collisionTile->ClearPixelCollisionBits(pixelX, pixelY, 0xFF);
-					}
+						//Clear height at X
+						collisionTile->ClearHeight(pixelX);
 
-					//Set collision pixel on collision tileset texture
-					m_renderResources.SetCollisionTilesetTexPixel(tileId, ion::Vector2i(pixelX, pixelY), collisionTile->GetPixelCollisionBits(pixelX, pixelY));
+						//Clear height on collision tile texture
+						m_renderResources.SetCollisionTileHeight(tileId, pixelX, 0);
+					}
+					
 
 					//Refresh this panel
 					Refresh();
