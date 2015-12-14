@@ -132,12 +132,6 @@ void MainWindow::SetProject(Project* project)
 			delete m_tileEditorPanel;
 		}
 
-		if(m_collisionTypesPanel)
-		{
-			m_auiManager.DetachPane(m_collisionTypesPanel);
-			delete m_collisionTypesPanel;
-		}
-
 		if(m_collisionTilesPanel)
 		{
 			m_auiManager.DetachPane(m_collisionTilesPanel);
@@ -166,10 +160,10 @@ void MainWindow::SetProject(Project* project)
 
 			//Recreate tileset/collision set textures, and tile index cache
 			RefreshTileset();
-			RefreshCollisionTypes();
 			RefreshCollisionTileset();
 
 			//Open bottom panels
+			ShowPanelPalettes();
 			ShowPanelTiles();
 			ShowPanelCollisionEditor();
 			ShowPanelCollisionTiles();
@@ -177,8 +171,6 @@ void MainWindow::SetProject(Project* project)
 
 			//Open left panels
 			ShowPanelToolbox();
-			ShowPanelPalettes();
-			ShowPanelCollisionTypes();
 
 			//Open right panels
 			ShowPanelStamps();
@@ -225,9 +217,8 @@ void MainWindow::ShowPanelPalettes()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(100, 300);
-			paneInfo.Left();
-			paneInfo.Row(1);
+			paneInfo.BestSize(50, 300);
+			paneInfo.Bottom();
 			paneInfo.Caption("Palettes");
 			paneInfo.CaptionVisible(true);
 
@@ -236,42 +227,11 @@ void MainWindow::ShowPanelPalettes()
 			m_palettesPanel->Show();
 
 			m_palettesPanel->SetProject(m_project.get());
-			
 		}
 
 		if(!m_palettesPanel->IsShown())
 		{
 			m_palettesPanel->Show();
-		}
-	}
-}
-
-void MainWindow::ShowPanelCollisionTypes()
-{
-	if(m_project.get())
-	{
-		if(!m_collisionTypesPanel)
-		{
-			wxAuiPaneInfo paneInfo;
-			paneInfo.Dockable(true);
-			paneInfo.DockFixed(false);
-			paneInfo.BestSize(100, 300);
-			paneInfo.Left();
-			paneInfo.Row(1);
-			paneInfo.Caption("Collision Types");
-			paneInfo.CaptionVisible(true);
-
-			m_collisionTypesPanel = new CollisionTypePanel(this, m_dockArea, NewControlId());
-			m_auiManager.AddPane(m_collisionTypesPanel, paneInfo);
-			m_collisionTypesPanel->Show();
-
-			m_collisionTypesPanel->SetProject(m_project.get());
-
-		}
-
-		if(!m_collisionTypesPanel->IsShown())
-		{
-			m_collisionTypesPanel->Show();
 		}
 	}
 }
@@ -554,7 +514,6 @@ void MainWindow::RefreshAll()
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
 		m_project->InvalidateCollisionTiles(true);
-		m_project->InvalidateCollisionTypes(true);
 		m_project->InvalidateStamps(true);
 	}
 
@@ -565,7 +524,6 @@ void MainWindow::RefreshAll()
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
 		m_project->InvalidateCollisionTiles(false);
-		m_project->InvalidateCollisionTypes(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -574,7 +532,6 @@ void MainWindow::RedrawAll()
 {
 	RefreshTileset();
 	RefreshCollisionTileset();
-	RefreshCollisionTypes();
 	SetPanelCaptions();
 
 	if(m_palettesPanel)
@@ -594,9 +551,6 @@ void MainWindow::RedrawAll()
 
 	if(m_collisionTilesPanel)
 		m_collisionTilesPanel->Refresh();
-
-	if(m_collisionTypesPanel)
-		m_collisionTypesPanel->Refresh();
 
 	if(m_collisionEditorPanel)
 		m_collisionEditorPanel->Refresh();
@@ -623,14 +577,6 @@ void MainWindow::RefreshCollisionTileset()
 	}
 }
 
-void MainWindow::RefreshCollisionTypes()
-{
-	if(m_project.get())
-	{
-		//Recreate collision types texture
-		m_renderResources->CreateCollisionTypesTexture();
-	}
-}
 
 void MainWindow::RefreshPanel(Panel panel)
 {
@@ -639,7 +585,6 @@ void MainWindow::RefreshPanel(Panel panel)
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
 		m_project->InvalidateCollisionTiles(true);
-		m_project->InvalidateCollisionTypes(true);
 		m_project->InvalidateStamps(true);
 
 	}
@@ -652,7 +597,6 @@ void MainWindow::RefreshPanel(Panel panel)
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
 		m_project->InvalidateCollisionTiles(false);
-		m_project->InvalidateCollisionTypes(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -680,10 +624,6 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelCollisionTiles:
 		if(m_collisionTilesPanel)
 			m_collisionTilesPanel->Refresh();
-		break;
-	case ePanelCollisionTypes:
-		if(m_collisionTypesPanel)
-			m_collisionTypesPanel->Refresh();
 		break;
 	case ePanelTileEditor:
 		if(m_tileEditorPanel)
@@ -867,9 +807,6 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 
 			//Refresh tileset
 			RefreshTileset();
-
-			//Refresh collision types
-			RefreshCollisionTypes();
 
 			//Refresh collison tileset
 			RefreshCollisionTileset();

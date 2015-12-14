@@ -17,7 +17,7 @@ CollisionTile::CollisionTile()
 {
 	m_index = 0;
 	m_hash = 0;
-	m_collisionPixels.resize(pixelsPerCollisionTile);
+	m_heightmap.resize(tileWidth);
 }
 
 void CollisionTile::SetIndex(u32 index)
@@ -30,58 +30,56 @@ u32 CollisionTile::GetIndex() const
 	return m_index;
 }
 
-void CollisionTile::CopyPixels(const CollisionTile& tile)
+void CollisionTile::CopyHeights(const CollisionTile& tile)
 {
-	m_collisionPixels = tile.m_collisionPixels;
+	m_heightmap = tile.m_heightmap;
 }
 
-void CollisionTile::GetPixels(u8 pixels[pixelsPerCollisionTile]) const
+void CollisionTile::GetHeights(s8 heights[tileWidth]) const
 {
-	ion::memory::MemCopy(pixels, &m_collisionPixels[0], pixelsPerCollisionTile);
+	ion::memory::MemCopy(heights, &m_heightmap[0], tileWidth);
 }
 
-void CollisionTile::AddPixelCollisionBits(int x, int y, u8 collisionBits)
+void CollisionTile::SetHeight(int x, s8 height)
 {
-	int pixelIdx = (y * tileHeight) + x;
-	ion::debug::Assert(pixelIdx < pixelsPerCollisionTile, "Out of range");
-	m_collisionPixels[pixelIdx] |= collisionBits;
+	ion::debug::Assert(x < tileWidth, "Out of range");
+	ion::debug::Assert(height >= -tileHeight && height <= tileHeight, "Out of range");
+	m_heightmap[x] = height;
 }
 
-void CollisionTile::ClearPixelCollisionBits(int x, int y, u8 collisionBits)
+void CollisionTile::ClearHeight(int x)
 {
-	int pixelIdx = (y * tileHeight) + x;
-	ion::debug::Assert(pixelIdx < pixelsPerCollisionTile, "Out of range");
-	m_collisionPixels[pixelIdx] &= ~collisionBits;
+	ion::debug::Assert(x < tileWidth, "Out of range");
+	m_heightmap[x] = 0;
 }
 
-u8 CollisionTile::GetPixelCollisionBits(int x, int y) const
+s8 CollisionTile::GetHeight(int x) const
 {
-	int pixelIdx = (y * tileHeight) + x;
-	ion::debug::Assert(pixelIdx < pixelsPerCollisionTile, "Out of range");
-	return m_collisionPixels[pixelIdx];
+	ion::debug::Assert(x < tileWidth, "Out of range");
+	return m_heightmap[x];
 }
 
 void CollisionTile::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_index, "index");
 	archive.Serialise(m_hash, "hash");
-	archive.Serialise(m_collisionPixels, "collisionPixels");
+	archive.Serialise(m_heightmap, "heightMap");
 }
 
 void CollisionTile::Export(std::stringstream& stream) const
 {
 	stream << std::hex << std::setfill('0') << std::uppercase;
 
-	for(int y = 0; y < tileHeight; y++)
+	stream << "\tdc.b\t";
+
+	//1 byte per height
+	for(int x = 0; x < tileWidth; x++)
 	{
-		stream << "\tdc.l\t0x";
+		stream << "0x";
+		stream << std::setw(1) << (int)GetHeight(x);
 
-		for(int x = 0; x < tileWidth; x++)
-		{
-			stream << std::setw(1) << (int)GetPixelCollisionBits(x, y);
-		}
-
-		stream << std::endl;
+		if(x < (tileWidth-1))
+			stream << ", ";
 	}
 
 	stream << std::dec;
@@ -89,22 +87,17 @@ void CollisionTile::Export(std::stringstream& stream) const
 
 void CollisionTile::Export(ion::io::File& file) const
 {
-	for(int y = 0; y < tileHeight; y++)
+	//1 byte per width
+	for(int x = 0; x < tileWidth; x += 2)
 	{
-		for(int x = 0; x < tileWidth; x += 2)
-		{
-			u8 nybble1 = (u8)GetPixelCollisionBits(x, y) << 4;
-			u8 nybble2 = ((x + 1) < tileWidth) ? (u8)GetPixelCollisionBits(x + 1, y) : 0;
-
-			u8 byte = nybble1 | nybble2;
-			file.Write(&byte, sizeof(u8));
-		}
+		s8 byte = GetHeight(x);;
+		file.Write(&byte, sizeof(s8));
 	}
 }
 
 void CollisionTile::CalculateHash()
 {
-	m_hash = ion::Hash64(&m_collisionPixels[0], pixelsPerCollisionTile);
+	m_hash = ion::Hash64((const u8*)&m_heightmap[0], tileWidth);
 }
 
 u64 CollisionTile::GetHash() const

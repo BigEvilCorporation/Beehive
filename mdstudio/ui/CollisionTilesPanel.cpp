@@ -153,7 +153,7 @@ void CollisionTilesPanel::OnRender(ion::render::Renderer& renderer, const ion::M
 	z += zOffset;
 
 	//Render selected CollisionTile
-	if(m_selectedCollisionTile)
+	if(m_selectedCollisionTile != InvalidCollisionTileId)
 	{
 		if(CollisionTile* collisionTile = m_project->GetCollisionTileset().GetCollisionTile(m_selectedCollisionTile))
 		{
@@ -166,7 +166,7 @@ void CollisionTilesPanel::OnRender(ion::render::Renderer& renderer, const ion::M
 	z += zOffset;
 
 	//Render mouse hover CollisionTile
-	if(m_hoverCollisionTile && m_hoverCollisionTile != m_selectedCollisionTile)
+	if(m_hoverCollisionTile != InvalidCollisionTileId && m_hoverCollisionTile != m_selectedCollisionTile)
 	{
 		if(CollisionTile* collisionTile = m_project->GetCollisionTileset().GetCollisionTile(m_hoverCollisionTile))
 		{

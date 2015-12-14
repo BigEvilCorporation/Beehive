@@ -270,9 +270,9 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 		int buttonBits = 0;
 		if(event.LeftIsDown())
 			buttonBits |= eMouseLeft;
-		if(event.MiddleDown())
+		if(event.MiddleIsDown())
 			buttonBits |= eMouseMiddle;
-		if(event.RightDown())
+		if(event.RightIsDown())
 			buttonBits |= eMouseRight;
 
 		if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))

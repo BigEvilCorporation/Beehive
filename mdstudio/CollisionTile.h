@@ -17,7 +17,6 @@ class CollisionTile
 public:
 	static const int tileWidth = 8;
 	static const int tileHeight = 8;
-	static const int pixelsPerCollisionTile = tileWidth*tileHeight;
 
 	CollisionTile();
 
@@ -27,12 +26,12 @@ public:
 	void CalculateHash();
 	u64 GetHash() const;
 
-	void AddPixelCollisionBits(int x, int y, u8 collisionBits);
-	void ClearPixelCollisionBits(int x, int y, u8 collisionBits);
-	u8 GetPixelCollisionBits(int x, int y) const;
+	void SetHeight(int x, s8 height);
+	void ClearHeight(int x);
+	s8 GetHeight(int x) const;
 
-	void GetPixels(u8 pixels[pixelsPerCollisionTile]) const;
-	void CopyPixels(const CollisionTile& tile);
+	void GetHeights(s8 heights[tileWidth]) const;
+	void CopyHeights(const CollisionTile& tile);
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
@@ -41,5 +40,5 @@ public:
 private:
 	u32 m_index;
 	u64 m_hash;
-	std::vector<u8> m_collisionPixels;
+	std::vector<s8> m_heightmap;
 };

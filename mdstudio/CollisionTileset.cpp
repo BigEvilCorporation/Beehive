@@ -51,10 +51,10 @@ void CollisionTileset::RemoveFromHashMap(CollisionTileId tileId)
 
 void CollisionTileset::CalculateHash(const CollisionTile& tile, u64& hash) const
 {
-	u8 pixels[CollisionTile::pixelsPerCollisionTile];
-	tile.GetPixels(pixels);
+	s8 heights[CollisionTile::tileWidth];
+	tile.GetHeights(heights);
 
-	hash = ion::Hash64(pixels, CollisionTile::pixelsPerCollisionTile);
+	hash = ion::Hash64((const u8*)heights, CollisionTile::tileWidth);
 }
 
 CollisionTileId CollisionTileset::FindDuplicate(const CollisionTile& tile) const

@@ -20,7 +20,6 @@
 #include "StampsPanel.h"
 #include "MapPanel.h"
 #include "TileEditorPanel.h"
-#include "CollisionTypePanel.h"
 #include "CollisionTilesPanel.h"
 #include "CollisionEditorPanel.h"
 #include "GameObjectTypePanel.h"
@@ -41,7 +40,6 @@ public:
 		ePanelPalettes,
 		ePanelTileEditor,
 		ePanelCollisionTiles,
-		ePanelCollisionTypes,
 		ePanelCollisionTileEditor,
 		ePanelGameObjectTypes
 	};
@@ -56,7 +54,6 @@ public:
 	void ShowPanelMap();
 	void ShowPanelTileEditor();
 	void ShowPanelCollisionTiles();
-	void ShowPanelCollisionTypes();
 	void ShowPanelCollisionEditor();
 	void ShowPanelGameObjectTypes();
 
@@ -80,9 +77,6 @@ public:
 
 	//Refresh collision tileset
 	void RefreshCollisionTileset();
-
-	//Refresh collision types
-	void RefreshCollisionTypes();
 
 protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
@@ -129,7 +123,6 @@ private:
 	wxWeakRef<StampsPanel> m_stampsPanel;
 	wxWeakRef<TileEditorPanel> m_tileEditorPanel;
 	wxWeakRef<CollisionTilesPanel> m_collisionTilesPanel;
-	wxWeakRef<CollisionTypePanel> m_collisionTypesPanel;
 	wxWeakRef<CollisionEditorPanel> m_collisionEditorPanel;
 	wxWeakRef<GameObjectTypesPanel> m_gameObjectTypePanel;
 

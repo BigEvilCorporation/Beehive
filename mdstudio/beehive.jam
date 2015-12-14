@@ -17,7 +17,6 @@ local SRC =
 	BMPReader.h
 	CollisionMap.cpp
 	CollisionMap.h
-	CollisionType.h
 	CollisionTile.cpp
 	CollisionTile.h
 	CollisionTileset.cpp
@@ -44,8 +43,6 @@ local SRC =
 	ui/CollisionEditorPanel.h
 	ui/CollisionTilesPanel.cpp
 	ui/CollisionTilesPanel.h
-	ui/CollisionTypePanel.cpp
-	ui/CollisionTypePanel.h
 	ui/GameObjectTypePanel.cpp
 	ui/GameObjectTypePanel.h
 	ui/GameObjectTypeDialog.cpp
