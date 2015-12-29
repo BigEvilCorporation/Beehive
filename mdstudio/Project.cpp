@@ -557,12 +557,12 @@ void Project::DeleteCollisionTile(CollisionTileId collisionTileId)
 			CollisionTileId currCollisionTileId = m_collisionMap.GetCollisionTile(x, y);
 			if(currCollisionTileId == collisionTileId)
 			{
-				//Referencing deleted CollisionTile, set as invalid
+				//Referencing deleted tile, set as invalid
 				m_collisionMap.SetCollisionTile(x, y, InvalidCollisionTileId);
 			}
 			else if(currCollisionTileId == swapCollisionTileId)
 			{
-				//Referencing swap CollisionTile, set new id
+				//Referencing swap tile, set new id
 				m_collisionMap.SetCollisionTile(x, y, collisionTileId);
 			}
 		}
@@ -579,10 +579,10 @@ void Project::DeleteCollisionTile(CollisionTileId collisionTileId)
 		tmpCollisionTile = *collisionTile1;
 		*collisionTile1 = *collisionTile2;
 		*collisionTile2 = tmpCollisionTile;
-	}
 
-	//Erase last CollisionTile
-	m_collisionTileset.PopBackCollisionTile();
+		//Erase last CollisionTile
+		m_collisionTileset.PopBackCollisionTile();
+	}
 
 	//Clear paint CollisionTile
 	SetPaintCollisionTile(InvalidCollisionTileId);
@@ -600,6 +600,10 @@ void Project::SetDefaultCollisionTile(CollisionTileId tileId)
 
 int Project::CleanupCollisionTiles()
 {
+	//Backup default collision tile
+	CollisionTile* defaultTile = (m_defaultCollisionTile != InvalidCollisionTileId) ? GetCollisionTileset().GetCollisionTile(m_defaultCollisionTile) : NULL;
+	u64 defaultTileHash = defaultTile ? defaultTile->CalculateHash() : 0;
+
 	std::set<CollisionTileId> usedCollisionTiles;
 
 	//Collect all used CollisionTile ids from map
@@ -655,23 +659,27 @@ int Project::CleanupCollisionTiles()
 	for(int i = 0; i < m_collisionTileset.GetCount(); i++)
 	{
 		CollisionTile* collisionTile = m_collisionTileset.GetCollisionTile(i);
+
 		collisionTile->CalculateHash();
 		u64 hash = collisionTile->GetHash();
 		bool duplicateFound = false;
 
-		std::map<u64, CollisionTileId>::iterator it = collisionTileMap.find(hash);
-		if(it != collisionTileMap.end())
+		if(hash != defaultTileHash)
 		{
-			Duplicate duplicate;
-			duplicate.original = it->second;
-			duplicate.duplicate = i;
-			duplicates.push_back(duplicate);
-			duplicateFound = true;
-		}
+			std::map<u64, CollisionTileId>::iterator it = collisionTileMap.find(hash);
+			if(it != collisionTileMap.end())
+			{
+				Duplicate duplicate;
+				duplicate.original = it->second;
+				duplicate.duplicate = i;
+				duplicates.push_back(duplicate);
+				duplicateFound = true;
+			}
 
-		if(!duplicateFound)
-		{
-			collisionTileMap.insert(std::make_pair(hash, i));
+			if(!duplicateFound)
+			{
+				collisionTileMap.insert(std::make_pair(hash, i));
+			}
 		}
 	}
 
@@ -704,6 +712,12 @@ int Project::CleanupCollisionTiles()
 				DeleteCollisionTile(duplicates[i].duplicate);
 			}
 		}
+	}
+
+	//Find and set default tile
+	if(defaultTile)
+	{
+		m_defaultCollisionTile = m_collisionTileset.FindDuplicate(*defaultTile);
 	}
 
 	return unusedCollisionTiles.size() + duplicates.size();

@@ -26,7 +26,7 @@
         <property name="ui_table">UI</property>
         <property name="use_enum">0</property>
         <property name="use_microsoft_bom">0</property>
-        <object class="Frame" expanded="0">
+        <object class="Frame" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -88,16 +88,16 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer1</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">0</property>
                     <property name="flag">wxALL|wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxRibbonBar" expanded="0">
+                    <object class="wxRibbonBar" expanded="1">
                         <property name="BottomDockable">0</property>
                         <property name="LeftDockable">0</property>
                         <property name="RightDockable">0</property>
@@ -796,7 +796,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="0">
+                        <object class="wxRibbonPage" expanded="1">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -1174,7 +1174,7 @@
                                     </object>
                                 </object>
                             </object>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1221,7 +1221,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -1834,7 +1834,7 @@
                                     </object>
                                 </object>
                             </object>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1881,7 +1881,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -2061,6 +2061,54 @@
                                         <event name="OnMouseWheel"></event>
                                         <event name="OnPaint"></event>
                                         <event name="OnRibbonButtonClicked">OnBtnColTilesCleanup</event>
+                                        <event name="OnRightDClick"></event>
+                                        <event name="OnRightDown"></event>
+                                        <event name="OnRightUp"></event>
+                                        <event name="OnSetFocus"></event>
+                                        <event name="OnSize"></event>
+                                        <event name="OnUpdateUI"></event>
+                                    </object>
+                                    <object class="ribbonButton" expanded="1">
+                                        <property name="bg"></property>
+                                        <property name="bitmap">Load From Embedded File; clearmap.xpm</property>
+                                        <property name="context_help"></property>
+                                        <property name="context_menu">1</property>
+                                        <property name="enabled">1</property>
+                                        <property name="fg"></property>
+                                        <property name="font"></property>
+                                        <property name="help"></property>
+                                        <property name="hidden">0</property>
+                                        <property name="id">wxID_BTN_COL_MAP_CLEAR</property>
+                                        <property name="label">Clear Collision Map</property>
+                                        <property name="maximum_size"></property>
+                                        <property name="minimum_size"></property>
+                                        <property name="name">m_ribbonButtonColMapClear</property>
+                                        <property name="permission">protected</property>
+                                        <property name="pos"></property>
+                                        <property name="size"></property>
+                                        <property name="subclass"></property>
+                                        <property name="tooltip"></property>
+                                        <property name="window_extra_style"></property>
+                                        <property name="window_name"></property>
+                                        <property name="window_style"></property>
+                                        <event name="OnChar"></event>
+                                        <event name="OnEnterWindow"></event>
+                                        <event name="OnEraseBackground"></event>
+                                        <event name="OnKeyDown"></event>
+                                        <event name="OnKeyUp"></event>
+                                        <event name="OnKillFocus"></event>
+                                        <event name="OnLeaveWindow"></event>
+                                        <event name="OnLeftDClick"></event>
+                                        <event name="OnLeftDown"></event>
+                                        <event name="OnLeftUp"></event>
+                                        <event name="OnMiddleDClick"></event>
+                                        <event name="OnMiddleDown"></event>
+                                        <event name="OnMiddleUp"></event>
+                                        <event name="OnMotion"></event>
+                                        <event name="OnMouseEvents"></event>
+                                        <event name="OnMouseWheel"></event>
+                                        <event name="OnPaint"></event>
+                                        <event name="OnRibbonButtonClicked">OnBtnColMapClear</event>
                                         <event name="OnRightDClick"></event>
                                         <event name="OnRightDown"></event>
                                         <event name="OnRightUp"></event>
@@ -5138,7 +5186,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="1">
+        <object class="Dialog" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -5200,7 +5248,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxFlexGridSizer" expanded="1">
+            <object class="wxFlexGridSizer" expanded="0">
                 <property name="cols">2</property>
                 <property name="flexible_direction">wxBOTH</property>
                 <property name="growablecols">1</property>
@@ -6448,20 +6496,20 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="sizeritem" expanded="1">
+                <object class="sizeritem" expanded="0">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND</property>
                     <property name="proportion">1</property>
-                    <object class="wxBoxSizer" expanded="1">
+                    <object class="wxBoxSizer" expanded="0">
                         <property name="minimum_size"></property>
                         <property name="name">bSizer16</property>
                         <property name="orient">wxHORIZONTAL</property>
                         <property name="permission">none</property>
-                        <object class="sizeritem" expanded="1">
+                        <object class="sizeritem" expanded="0">
                             <property name="border">5</property>
                             <property name="flag">wxALL</property>
                             <property name="proportion">0</property>
-                            <object class="wxRadioButton" expanded="1">
+                            <object class="wxRadioButton" expanded="0">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
@@ -6545,11 +6593,11 @@
                                 <event name="OnUpdateUI"></event>
                             </object>
                         </object>
-                        <object class="sizeritem" expanded="1">
+                        <object class="sizeritem" expanded="0">
                             <property name="border">5</property>
                             <property name="flag">wxALL</property>
                             <property name="proportion">0</property>
-                            <object class="wxRadioButton" expanded="1">
+                            <object class="wxRadioButton" expanded="0">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>

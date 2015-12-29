@@ -87,6 +87,7 @@ protected:
 	virtual void OnBtnTilesCreate(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesDelete(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesCleanup(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnColMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesCreate(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesDelete(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event);
