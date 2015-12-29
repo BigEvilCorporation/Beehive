@@ -20,10 +20,7 @@ public:
 
 	CollisionTile();
 
-	void SetIndex(u32 index);
-	u32 GetIndex() const;
-
-	void CalculateHash();
+	u64 CalculateHash();
 	u64 GetHash() const;
 
 	void SetHeight(int x, s8 height);
@@ -38,7 +35,6 @@ public:
 	void Export(ion::io::File& file) const;
 
 private:
-	u32 m_index;
 	u64 m_hash;
 	std::vector<s8> m_heightmap;
 };

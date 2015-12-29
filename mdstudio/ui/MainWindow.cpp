@@ -874,6 +874,15 @@ void MainWindow::OnBtnTilesCleanup(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnColMapClear(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		m_project->GetCollisionMap().Clear();
+		RefreshAll();
+	}
+}
+
 void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())

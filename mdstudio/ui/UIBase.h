@@ -69,24 +69,25 @@
 #define wxID_BTN_COL_TILES_CREATE 1021
 #define wxID_BTN_COL_TILES_DELETE 1022
 #define wxID_BTN_COL_TILES_CLEANUP 1023
-#define wxID_BTN_GAME_OBJ_TYPES 1024
-#define wxID_BTN_CANCEL 1025
-#define wxID_TOOL_SELECTTILE 1026
-#define wxID_TOOL_PAINT 1027
-#define wxID_TOOL_TILEPICKER 1028
-#define wxID_TOOL_FLIPX 1029
-#define wxID_TOOL_FLIPY 1030
-#define wxID_TOOL_FILL 1031
-#define wxID_TOOL_CLONE 1032
-#define wxID_TOOL_SELECTSTAMP 1033
-#define wxID_TOOL_STAMP 1034
-#define wxID_TOOL_STAMPPICKER 1035
-#define wxID_TOOL_CREATESTAMP 1036
-#define wxID_TOOL_REMOVESTAMP 1037
-#define wxID_TOOL_PAINTCOLLISIONPIXEL 1038
-#define wxID_TOOL_GENERATETERRAIN 1039
-#define wxID_TOOL_PLACEGAMEOBJ 1040
-#define wxID_TOOL_REMOVEGAMEOBJ 1041
+#define wxID_BTN_COL_MAP_CLEAR 1024
+#define wxID_BTN_GAME_OBJ_TYPES 1025
+#define wxID_BTN_CANCEL 1026
+#define wxID_TOOL_SELECTTILE 1027
+#define wxID_TOOL_PAINT 1028
+#define wxID_TOOL_TILEPICKER 1029
+#define wxID_TOOL_FLIPX 1030
+#define wxID_TOOL_FLIPY 1031
+#define wxID_TOOL_FILL 1032
+#define wxID_TOOL_CLONE 1033
+#define wxID_TOOL_SELECTSTAMP 1034
+#define wxID_TOOL_STAMP 1035
+#define wxID_TOOL_STAMPPICKER 1036
+#define wxID_TOOL_CREATESTAMP 1037
+#define wxID_TOOL_REMOVESTAMP 1038
+#define wxID_TOOL_PAINTCOLLISIONPIXEL 1039
+#define wxID_TOOL_GENERATETERRAIN 1040
+#define wxID_TOOL_PLACEGAMEOBJ 1041
+#define wxID_TOOL_REMOVEGAMEOBJ 1042
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -141,6 +142,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnColTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnColMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnGameObjTypes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	

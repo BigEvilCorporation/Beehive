@@ -15,19 +15,8 @@
 
 CollisionTile::CollisionTile()
 {
-	m_index = 0;
 	m_hash = 0;
 	m_heightmap.resize(tileWidth);
-}
-
-void CollisionTile::SetIndex(u32 index)
-{
-	m_index = index;
-}
-
-u32 CollisionTile::GetIndex() const
-{
-	return m_index;
 }
 
 void CollisionTile::CopyHeights(const CollisionTile& tile)
@@ -61,7 +50,6 @@ s8 CollisionTile::GetHeight(int x) const
 
 void CollisionTile::Serialise(ion::io::Archive& archive)
 {
-	archive.Serialise(m_index, "index");
 	archive.Serialise(m_hash, "hash");
 	archive.Serialise(m_heightmap, "heightMap");
 }
@@ -88,16 +76,17 @@ void CollisionTile::Export(std::stringstream& stream) const
 void CollisionTile::Export(ion::io::File& file) const
 {
 	//1 byte per width
-	for(int x = 0; x < tileWidth; x += 2)
+	for(int x = 0; x < tileWidth; x++)
 	{
-		s8 byte = GetHeight(x);;
+		s8 byte = GetHeight(x);
 		file.Write(&byte, sizeof(s8));
 	}
 }
 
-void CollisionTile::CalculateHash()
+u64 CollisionTile::CalculateHash()
 {
 	m_hash = ion::Hash64((const u8*)&m_heightmap[0], tileWidth);
+	return m_hash;
 }
 
 u64 CollisionTile::GetHash() const

@@ -20,7 +20,6 @@ CollisionTileId CollisionTileset::AddCollisionTile()
 {
 	CollisionTileId index = m_tiles.size();
 	m_tiles.push_back(CollisionTile());
-	m_tiles[index].SetIndex(index);
 	m_tiles[index].CalculateHash();
 	AddToHashMap(index);
 	return index;
@@ -28,8 +27,8 @@ CollisionTileId CollisionTileset::AddCollisionTile()
 
 void CollisionTileset::PopBackCollisionTile()
 {
-	m_tiles.pop_back();
 	RemoveFromHashMap(m_tiles.size() - 1);
+	m_tiles.pop_back();
 }
 
 void CollisionTileset::HashChanged(CollisionTileId tileId)
