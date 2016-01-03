@@ -92,7 +92,7 @@ void CollisionMap::Export(const Project& project, std::stringstream& stream) con
 {
 	//Use default tile if there is one, else use first tile
 	u32 defaultTileId = project.GetDefaultCollisionTile();
-	if(defaultTileId == InvalidTileId)
+	if(defaultTileId == InvalidCollisionTileId)
 	{
 		defaultTileId = 0;
 	}
