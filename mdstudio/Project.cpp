@@ -115,6 +115,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_tileset, "tileset");
 	archive.Serialise(m_backgroundTile, "backgroundTile");
 	archive.Serialise(m_collisionTileset, "collisionTileset");
+	archive.Serialise(m_collisionTileset, "defaultCollisionTile");
 	archive.Serialise(m_map, "map");
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_stamps, "stamps");
