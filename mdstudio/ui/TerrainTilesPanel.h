@@ -8,13 +8,13 @@
 
 #include "ViewPanel.h"
 
-class CollisionTilesPanel : public ViewPanel
+class TerrainTilesPanel : public ViewPanel
 {
-	static const float s_CollisionTileSize;
+	static const float s_TerrainTileSize;
 
 public:
-	CollisionTilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
-	virtual ~CollisionTilesPanel();
+	TerrainTilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	virtual ~TerrainTilesPanel();
 
 	//Events
 	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
@@ -28,7 +28,7 @@ public:
 
 protected:
 
-	//Mouse click or changed CollisionTile callback
+	//Mouse click or changed TerrainTile callback
 	virtual void OnMouseTileEvent(int buttonBits, int x, int y);
 
 	//Render callback
@@ -50,14 +50,14 @@ private:
 	//Create canvas and grid
 	void InitPanel(int numCols, int numRows);
 
-	//Paint all CollisionTiles to canvas
-	void PaintCollisionTiles();
+	//Paint all TerrainTiles to canvas
+	void PaintCollisionTerrainTiles();
 
 	//Paint single collision tile to canvas
-	void PaintCollisionTile(TileId tileId, int x, int y);
+	void PaintCollisionTerrainTile(TileId tileId, int x, int y);
 
 	//Fill selection with single collision tile
-	void FillCollisionTiles(CollisionTileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
+	void FillTerrainTiles(TerrainTileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
 
 	//Render canvas
 	void RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
@@ -71,13 +71,13 @@ private:
 	//Reset scroll
 	void ScrollToTop();
 
-	//Current/hover CollisionTile
-	CollisionTileId m_selectedCollisionTile;
-	CollisionTileId m_hoverCollisionTile;
+	//Current/hover TerrainTile
+	TerrainTileId m_selectedTerrainTile;
+	TerrainTileId m_hoverTerrainTile;
 
 	//Current/hover stamp pos
-	ion::Vector2i m_selectedCollisionTilePos;
-	ion::Vector2i m_hoverCollisionTilePos;
+	ion::Vector2i m_selectedTerrainTilePos;
+	ion::Vector2i m_hoverTerrainTilePos;
 
 	//Rendering primitives
 	ion::render::Quad* m_selectionPrimitive;

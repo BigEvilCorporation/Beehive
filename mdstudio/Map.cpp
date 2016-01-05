@@ -57,12 +57,12 @@ void Map::Resize(int width, int height)
 {
 	//Create new tile array
 	std::vector<TileDesc> tiles;
-	std::vector<CollisionTileId> collisionTiles;
+	std::vector<TerrainTileId> TerrainTiles;
 
 	//Set new size
 	int size = width * height;
 	tiles.resize(size);
-	collisionTiles.resize(size);
+	TerrainTiles.resize(size);
 
 	//Fill with invalid tile
 	TileDesc blankTile;

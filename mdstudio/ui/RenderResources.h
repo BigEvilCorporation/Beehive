@@ -29,14 +29,16 @@ public:
 	{
 		eMaterialFlatColour,
 		eMaterialTileset,
-		eMaterialCollisionTileset,
+		eMaterialCollisionTypes,
+		eMaterialTerrainTileset,
 		eMaterialMax
 	};
 
 	enum TextureType
 	{
 		eTextureTileset,
-		eTextureCollisionTileset,
+		eTextureCollisionTypes,
+		eTextureTerrainTileset,
 		eTextureMax
 	};
 
@@ -66,20 +68,26 @@ public:
 	//Create and redraw tileset texture
 	void CreateTilesetTexture();
 
-	//Create and redraw collision tileset texture
-	void CreateCollisionTilesTexture();
+	//Create and redraw terrain tileset texture
+	void CreateTerrainTilesTexture();
+
+	//Create and redraw collision texture
+	void CreateCollisionTypesTexture();
 
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
 
-	//Get collision tileset UV coords for collision tile
-	void GetCollisionTileTexCoords(CollisionTileId tileId, ion::render::TexCoord texCoords[4]) const;
+	//Get terrain tileset UV coords for collision type
+	void GetCollisionTypeTexCoords(u16 collisionFlags, ion::render::TexCoord texCoords[4]) const;
+
+	//Get terrain tileset UV coords for terrain tile
+	void GetTerrainTileTexCoords(TerrainTileId tileId, ion::render::TexCoord texCoords[4]) const;
 
 	//Edit tileset texture pixel
 	void SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx);
 
-	//Edit collision tileset texture height
-	void SetCollisionTileHeight(CollisionTileId tileId, int x, s8 height);
+	//Edit terrain tileset texture height
+	void SetTerrainTileHeight(TerrainTileId terrainTileId, int x, s8 height);
 
 	//Get resources
 	ion::render::Material* GetMaterial(MaterialType type) { return m_materials[type]; }
@@ -99,14 +107,14 @@ private:
 	//Tileset size sq
 	u32 m_tilesetSizeSq;
 
-	//Collision tileset size sq
-	u32 m_collisionTilesetSizeSq;
+	//terrain tileset size sq
+	u32 m_terrainTilesetSizeSq;
 
 	//Tileset texture cell size sq
 	float m_cellSizeTexSpaceSq;
 
-	//Collision tileset texture cell size sq
-	float m_cellSizeCollisionTilesetTexSpaceSq;
+	//terrain tileset texture cell size sq
+	float m_cellSizeTerrainTilesetTexSpaceSq;
 
 	//Current project
 	Project* m_project;

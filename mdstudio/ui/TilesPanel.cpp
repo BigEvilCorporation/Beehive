@@ -125,7 +125,7 @@ void TilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 		m_mainWindow->RefreshPanel(MainWindow::ePanelTileEditor);
 
 		//Refresh collision tile editor panel
-		m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionTileEditor);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelTerrainTileEditor);
 	}
 
 	if(buttonBits & eMouseRight)

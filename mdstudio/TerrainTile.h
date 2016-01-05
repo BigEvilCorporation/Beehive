@@ -9,16 +9,23 @@
 #include <io/Archive.h>
 #include <sstream>
 
-typedef u32 CollisionTileId;
-static const CollisionTileId InvalidCollisionTileId = 0xFFFFFFFF;
+enum eCollisionTileFlags
+{
+	eCollisionTileFlagSolid = (1 << 13),
 
-class CollisionTile
+	eCollisionTileFlagAll = eCollisionTileFlagSolid
+};
+
+typedef u32 TerrainTileId;
+static const TerrainTileId InvalidTerrainTileId = (~eCollisionTileFlagAll & 0xFFFF);
+
+class TerrainTile
 {
 public:
 	static const int tileWidth = 8;
 	static const int tileHeight = 8;
 
-	CollisionTile();
+	TerrainTile();
 
 	u64 CalculateHash();
 	u64 GetHash() const;
@@ -28,7 +35,7 @@ public:
 	s8 GetHeight(int x) const;
 
 	void GetHeights(s8 heights[tileWidth]) const;
-	void CopyHeights(const CollisionTile& tile);
+	void CopyHeights(const TerrainTile& tile);
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;

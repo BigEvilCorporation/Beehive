@@ -14,15 +14,15 @@
 Project::Project()
 {
 	m_paintColour = 0;
-	m_paintCollisionTile = InvalidCollisionTileId;
+	m_paintTerrainTile = InvalidTerrainTileId;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
 	m_backgroundTile = InvalidTileId;
-	m_defaultCollisionTile = InvalidCollisionTileId;
+	m_defaultTerrainTile = InvalidTerrainTileId;
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
-	m_collisionTilesInvalidated = true;
+	m_terrainTilesInvalidated = true;
 	m_stampsInvalidated = true;
 	m_name = "untitled";
 	m_gridSize = 1;
@@ -37,11 +37,11 @@ Project::Project()
 void Project::Clear()
 {
 	m_paintColour = 0;
-	m_paintCollisionTile = InvalidCollisionTileId;
+	m_paintTerrainTile = InvalidTerrainTileId;
 	m_paintTile = InvalidTileId;
 	m_eraseTile = InvalidTileId;
 	m_backgroundTile = InvalidTileId;
-	m_defaultCollisionTile = InvalidCollisionTileId;
+	m_defaultTerrainTile = InvalidTerrainTileId;
 	m_paintStamp = InvalidStampId;
 	m_mapInvalidated = true;
 	m_tilesInvalidated = true;
@@ -114,8 +114,8 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_paletteSlots, "paletteSlots");
 	archive.Serialise(m_tileset, "tileset");
 	archive.Serialise(m_backgroundTile, "backgroundTile");
-	archive.Serialise(m_collisionTileset, "collisionTileset");
-	archive.Serialise(m_collisionTileset, "defaultCollisionTile");
+	archive.Serialise(m_terrainTileset, "terrainTileset");
+	archive.Serialise(m_defaultTerrainTile, "defaultTerrainTile");
 	archive.Serialise(m_map, "map");
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_stamps, "stamps");
@@ -546,129 +546,129 @@ int Project::GetStampCount() const
 	return m_stamps.size();
 }
 
-void Project::DeleteCollisionTile(CollisionTileId collisionTileId)
+void Project::DeleteTerrainTile(TerrainTileId terrainTileId)
 {
-	CollisionTileId swapCollisionTileId = (CollisionTileId)m_collisionTileset.GetCount() - 1;
+	TerrainTileId swapTerrainTileId = (TerrainTileId)m_terrainTileset.GetCount() - 1;
 
-	//Find all uses of collision tile  on map, set blank
+	//Find all uses of terrain tile on map, set blank
 	for(int x = 0; x < m_collisionMap.GetWidth(); x++)
 	{
 		for(int y = 0; y < m_collisionMap.GetHeight(); y++)
 		{
-			CollisionTileId currCollisionTileId = m_collisionMap.GetCollisionTile(x, y);
-			if(currCollisionTileId == collisionTileId)
+			TerrainTileId currTerrainTileId = m_collisionMap.GetTerrainTile(x, y);
+			if(currTerrainTileId == terrainTileId)
 			{
 				//Referencing deleted tile, set as invalid
-				m_collisionMap.SetCollisionTile(x, y, InvalidCollisionTileId);
+				m_collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
 			}
-			else if(currCollisionTileId == swapCollisionTileId)
+			else if(currTerrainTileId == swapTerrainTileId)
 			{
 				//Referencing swap tile, set new id
-				m_collisionMap.SetCollisionTile(x, y, collisionTileId);
+				m_collisionMap.SetTerrainTile(x, y, terrainTileId);
 			}
 		}
 	}
 
-	if(m_collisionTileset.GetCount() > 0)
+	if(m_terrainTileset.GetCount() > 0)
 	{
-		//Swap CollisionTiles
-		CollisionTile* collisionTile1 = m_collisionTileset.GetCollisionTile(collisionTileId);
-		CollisionTile* collisionTile2 = m_collisionTileset.GetCollisionTile((CollisionTileId)m_collisionTileset.GetCount() - 1);
-		ion::debug::Assert(collisionTile1 && collisionTile2, "Project::DeleteCollisionTile() - Invalid CollisionTile");
+		//Swap terrain tile
+		TerrainTile* terrainTile1 = m_terrainTileset.GetTerrainTile(terrainTileId);
+		TerrainTile* terrainTile2 = m_terrainTileset.GetTerrainTile((TerrainTileId)m_terrainTileset.GetCount() - 1);
+		ion::debug::Assert(terrainTile1 && terrainTile2, "Project::DeleteTerrainTile() - Invalid terrain tile");
 
-		CollisionTile tmpCollisionTile;
-		tmpCollisionTile = *collisionTile1;
-		*collisionTile1 = *collisionTile2;
-		*collisionTile2 = tmpCollisionTile;
+		TerrainTile tmpTerrainTile;
+		tmpTerrainTile = *terrainTile1;
+		*terrainTile1 = *terrainTile2;
+		*terrainTile2 = tmpTerrainTile;
 
-		//Erase last CollisionTile
-		m_collisionTileset.PopBackCollisionTile();
+		//Erase last terrain tile
+		m_terrainTileset.PopBackTerrainTile();
 	}
 
-	//Clear paint CollisionTile
-	SetPaintCollisionTile(InvalidCollisionTileId);
+	//Clear paint terrain tile
+	SetPaintTerrainTile(InvalidTerrainTileId);
 }
 
-void Project::SwapCollisionTiles(CollisionTileId tileId1, CollisionTileId tileId2)
+void Project::SwapTerrainTiles(TerrainTileId tileId1, TerrainTileId tileId2)
 {
 
 }
 
-void Project::SetDefaultCollisionTile(CollisionTileId tileId)
+void Project::SetDefaultTerrainTile(TerrainTileId tileId)
 {
-	m_defaultCollisionTile = tileId;
+	m_defaultTerrainTile = tileId;
 }
 
-int Project::CleanupCollisionTiles()
+int Project::CleanupTerrainTiles()
 {
 	//Backup default collision tile
-	CollisionTile* defaultTile = (m_defaultCollisionTile != InvalidCollisionTileId) ? GetCollisionTileset().GetCollisionTile(m_defaultCollisionTile) : NULL;
+	TerrainTile* defaultTile = (m_defaultTerrainTile != InvalidTerrainTileId) ? GetTerrainTileset().GetTerrainTile(m_defaultTerrainTile) : NULL;
 	u64 defaultTileHash = defaultTile ? defaultTile->CalculateHash() : 0;
 
-	std::set<CollisionTileId> usedCollisionTiles;
+	std::set<TerrainTileId> usedTerrainTiles;
 
-	//Collect all used CollisionTile ids from map
+	//Collect all used TerrainTile ids from map
 	for(int x = 0; x < m_map.GetWidth(); x++)
 	{
 		for(int y = 0; y < m_map.GetHeight(); y++)
 		{
-			CollisionTileId collisionTileId = m_collisionMap.GetCollisionTile(x, y);
+			TerrainTileId terrainTileId = m_collisionMap.GetTerrainTile(x, y);
 
 			//Ignore default tile
-			if(collisionTileId != m_defaultCollisionTile)
+			if(terrainTileId != m_defaultTerrainTile)
 			{
-				usedCollisionTiles.insert(collisionTileId);
+				usedTerrainTiles.insert(terrainTileId);
 			}
 		}
 	}
 
-	std::set<CollisionTileId> unusedCollisionTiles;
+	std::set<TerrainTileId> unusedTerrainTiles;
 
-	for(CollisionTileId i = 0; i < m_collisionTileset.GetCount(); i++)
+	for(TerrainTileId i = 0; i < m_terrainTileset.GetCount(); i++)
 	{
-		if(usedCollisionTiles.find(i) == usedCollisionTiles.end())
+		if(usedTerrainTiles.find(i) == usedTerrainTiles.end())
 		{
-			unusedCollisionTiles.insert(i);
+			unusedTerrainTiles.insert(i);
 		}
 	}
 
-	if(unusedCollisionTiles.size() > 0)
+	if(unusedTerrainTiles.size() > 0)
 	{
 		std::stringstream message;
-		message << "Found " << unusedCollisionTiles.size() << " unused collision tiles, delete?";
+		message << "Found " << unusedTerrainTiles.size() << " unused collision tiles, delete?";
 
 		if(wxMessageBox(message.str().c_str(), "Delete unused collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			//Delete in reverse, popping from back
-			for(std::set<CollisionTileId>::const_reverse_iterator it = unusedCollisionTiles.rbegin(), end = unusedCollisionTiles.rend(); it != end; ++it)
+			for(std::set<TerrainTileId>::const_reverse_iterator it = unusedTerrainTiles.rbegin(), end = unusedTerrainTiles.rend(); it != end; ++it)
 			{
-				DeleteCollisionTile(*it);
+				DeleteTerrainTile(*it);
 			}
 		}
 	}
 
-	//Calculate hashes for all CollisionTiles
+	//Calculate hashes for all TerrainTiles
 	struct Duplicate
 	{
-		CollisionTileId original;
-		CollisionTileId duplicate;
+		TerrainTileId original;
+		TerrainTileId duplicate;
 	};
 
-	std::map<u64, CollisionTileId> collisionTileMap;
+	std::map<u64, TerrainTileId> terrainTileMap;
 	std::vector<Duplicate> duplicates;
 
-	for(int i = 0; i < m_collisionTileset.GetCount(); i++)
+	for(int i = 0; i < m_terrainTileset.GetCount(); i++)
 	{
-		CollisionTile* collisionTile = m_collisionTileset.GetCollisionTile(i);
+		TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(i);
 
-		collisionTile->CalculateHash();
-		u64 hash = collisionTile->GetHash();
+		terrainTile->CalculateHash();
+		u64 hash = terrainTile->GetHash();
 		bool duplicateFound = false;
 
 		if(hash != defaultTileHash)
 		{
-			std::map<u64, CollisionTileId>::iterator it = collisionTileMap.find(hash);
-			if(it != collisionTileMap.end())
+			std::map<u64, TerrainTileId>::iterator it = terrainTileMap.find(hash);
+			if(it != terrainTileMap.end())
 			{
 				Duplicate duplicate;
 				duplicate.original = it->second;
@@ -679,7 +679,7 @@ int Project::CleanupCollisionTiles()
 
 			if(!duplicateFound)
 			{
-				collisionTileMap.insert(std::make_pair(hash, i));
+				terrainTileMap.insert(std::make_pair(hash, i));
 			}
 		}
 	}
@@ -698,10 +698,10 @@ int Project::CleanupCollisionTiles()
 				{
 					for(int y = 0; y < m_collisionMap.GetHeight(); y++)
 					{
-						if(m_collisionMap.GetCollisionTile(x, y) == duplicates[i].duplicate)
+						if(m_collisionMap.GetTerrainTile(x, y) == duplicates[i].duplicate)
 						{
 							//Replace duplicate with original
-							m_collisionMap.SetCollisionTile(x, y, duplicates[i].original);
+							m_collisionMap.SetTerrainTile(x, y, duplicates[i].original);
 						}
 					}
 				}
@@ -710,7 +710,7 @@ int Project::CleanupCollisionTiles()
 			//Delete duplicates (in reverse, popping from back)
 			for(int i = duplicates.size() - 1; i >= 0; --i)
 			{
-				DeleteCollisionTile(duplicates[i].duplicate);
+				DeleteTerrainTile(duplicates[i].duplicate);
 			}
 		}
 	}
@@ -718,10 +718,10 @@ int Project::CleanupCollisionTiles()
 	//Find and set default tile
 	if(defaultTile)
 	{
-		m_defaultCollisionTile = m_collisionTileset.FindDuplicate(*defaultTile);
+		m_defaultTerrainTile = m_terrainTileset.FindDuplicate(*defaultTile);
 	}
 
-	return unusedCollisionTiles.size() + duplicates.size();
+	return unusedTerrainTiles.size() + duplicates.size();
 }
 
 void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
@@ -729,7 +729,7 @@ void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 	const int tileWidth = 8;
 	const int tileHeight = 8;
 
-	std::map<TileId, CollisionTileId> generatedTiles;
+	std::map<TileId, TerrainTileId> generatedTiles;
 
 	for(int i = 0; i < graphicTiles.size(); i++)
 	{
@@ -743,10 +743,10 @@ void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 			if(const Tile* graphicTile = m_tileset.GetTile(graphicTileId))
 			{
 				//Check if already generated
-				std::map<TileId, CollisionTileId>::iterator it = generatedTiles.find(graphicTileId);
+				std::map<TileId, TerrainTileId>::iterator it = generatedTiles.find(graphicTileId);
 				if(it != generatedTiles.end())
 				{
-					m_collisionMap.SetCollisionTile(position.x, position.y, it->second);
+					m_collisionMap.SetTerrainTile(position.x, position.y, it->second);
 				}
 				else
 				{
@@ -781,25 +781,25 @@ void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 						if(spaceForTerrain)
 						{
 							//Add new collision tile
-							CollisionTileId collisionTileId = m_collisionTileset.AddCollisionTile();
-							CollisionTile* collisionTile = m_collisionTileset.GetCollisionTile(collisionTileId);
+							TerrainTileId terrainTileId = m_terrainTileset.AddTerrainTile();
+							TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(terrainTileId);
 
 							//Create collision tile from height map
 							for(int x = 0; x < tileWidth; x++)
 							{
 								if(heightMap[x] > 0)
 								{
-									collisionTile->SetHeight(x, heightMap[x] - 1);
+									terrainTile->SetHeight(x, heightMap[x] - 1);
 								}
 							}
 
 							//TODO: Find duplicate
 
 							//Set on map
-							m_collisionMap.SetCollisionTile(position.x, position.y, collisionTileId);
+							m_collisionMap.SetTerrainTile(position.x, position.y, terrainTileId);
 
 							//Add to cache
-							generatedTiles.insert(std::make_pair(graphicTileId, collisionTileId));
+							generatedTiles.insert(std::make_pair(graphicTileId, terrainTileId));
 						}
 					}
 				}
@@ -952,14 +952,14 @@ u8 Project::GetPaintColour() const
 	return m_paintColour;
 }
 
-void Project::SetPaintCollisionTile(CollisionTileId tile)
+void Project::SetPaintTerrainTile(TerrainTileId tile)
 {
-	m_paintCollisionTile = tile;
+	m_paintTerrainTile = tile;
 }
 
-CollisionTileId Project::GetPaintCollisionTile() const
+TerrainTileId Project::GetPaintTerrainTile() const
 {
-	return m_paintCollisionTile;
+	return m_paintTerrainTile;
 }
 
 void Project::SetPaintTile(TileId tile)
@@ -1455,7 +1455,7 @@ bool Project::ExportTiles(const std::string& filename, bool binary) const
 	return false;
 }
 
-bool Project::ExportCollisionTiles(const std::string& filename, bool binary) const
+bool Project::ExportTerrainTiles(const std::string& filename, bool binary) const
 {
 	u32 binarySize = 0;
 
@@ -1468,7 +1468,7 @@ bool Project::ExportCollisionTiles(const std::string& filename, bool binary) con
 		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
 		if(binaryFile.IsOpen())
 		{
-			m_collisionTileset.Export(binaryFile);
+			m_terrainTileset.Export(binaryFile);
 			binarySize = binaryFile.GetSize();
 		}
 		else
@@ -1486,23 +1486,23 @@ bool Project::ExportCollisionTiles(const std::string& filename, bool binary) con
 		if(binary)
 		{
 			//Export size of binary file
-			stream << "collisiontiles_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+			stream << "TerrainTiles_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
 		}
 		else
 		{
 			//Export label, data and size as inline text
-			stream << "collisiontiles_" << m_name << ":" << std::endl;
+			stream << "TerrainTiles_" << m_name << ":" << std::endl;
 
-			m_collisionTileset.Export(stream);
+			m_terrainTileset.Export(stream);
 
 			stream << std::endl;
-			stream << "collisiontiles_" << m_name << "_end" << std::endl;
-			stream << "collisiontiles_" << m_name << "_size_b\tequ (collisiontiles_" << m_name << "_end-collisiontiles_" << m_name << ")\t; Size in bytes" << std::endl;
+			stream << "TerrainTiles_" << m_name << "_end" << std::endl;
+			stream << "TerrainTiles_" << m_name << "_size_b\tequ (TerrainTiles_" << m_name << "_end-TerrainTiles_" << m_name << ")\t; Size in bytes" << std::endl;
 		}
 
-		stream << "collisiontiles_" << m_name << "_size_w\tequ (collisiontiles_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
-		stream << "collisiontiles_" << m_name << "_size_l\tequ (collisiontiles_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
-		stream << "collisiontiles_" << m_name << "_size_t\tequ (collisiontiles_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
+		stream << "TerrainTiles_" << m_name << "_size_w\tequ (TerrainTiles_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "TerrainTiles_" << m_name << "_size_l\tequ (TerrainTiles_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << "TerrainTiles_" << m_name << "_size_t\tequ (TerrainTiles_" << m_name << "_size_b/32)\t; Size in tiles" << std::endl;
 
 		file.Write(stream.str().c_str(), stream.str().size());
 

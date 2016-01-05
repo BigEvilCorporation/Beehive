@@ -8,13 +8,13 @@
 
 #include "ViewPanel.h"
 
-class CollisionEditorPanel : public ViewPanel
+class TerrainTileEditorPanel : public ViewPanel
 {
 	static const float s_defaultZoom;
 
 public:
-	CollisionEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
-	virtual ~CollisionEditorPanel();
+	TerrainTileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	virtual ~TerrainTileEditorPanel();
 
 	//Events
 	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);

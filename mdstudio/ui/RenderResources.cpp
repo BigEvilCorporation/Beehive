@@ -11,7 +11,7 @@
 RenderResources::RenderResources()
 {
 	m_tilesetSizeSq = 1;
-	m_collisionTilesetSizeSq = 1;
+	m_terrainTilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
 	m_project = NULL;
 
@@ -58,11 +58,17 @@ RenderResources::RenderResources()
 	m_materials[eMaterialTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
 	m_materials[eMaterialTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
-	//Setup textured collision tileset material
-	m_materials[eMaterialCollisionTileset]->AddDiffuseMap(m_textures[eTextureCollisionTileset]);
-	m_materials[eMaterialCollisionTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialCollisionTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
-	m_materials[eMaterialCollisionTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+	//Setup textured collision types material
+	m_materials[eMaterialCollisionTypes]->AddDiffuseMap(m_textures[eTextureCollisionTypes]);
+	m_materials[eMaterialCollisionTypes]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialCollisionTypes]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
+	m_materials[eMaterialCollisionTypes]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+
+	//Setup textured terrain tileset material
+	m_materials[eMaterialTerrainTileset]->AddDiffuseMap(m_textures[eTextureTerrainTileset]);
+	m_materials[eMaterialTerrainTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialTerrainTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
+	m_materials[eMaterialTerrainTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
@@ -162,34 +168,34 @@ void RenderResources::CreateTilesetTexture()
 	delete data;
 }
 
-void RenderResources::CreateCollisionTilesTexture()
+void RenderResources::CreateTerrainTilesTexture()
 {
 	const int tileWidth = 8;
 	const int tileHeight = 8;
 	const int blankRowHeight = 8;
 
-	const CollisionTileset& tileset = m_project->GetCollisionTileset();
+	const TerrainTileset& tileset = m_project->GetTerrainTileset();
 
 	u32 numTiles = tileset.GetCount() + 1;
-	m_collisionTilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
-	u32 textureWidth = m_collisionTilesetSizeSq * tileWidth;
-	u32 textureHeight = m_collisionTilesetSizeSq * tileHeight;
+	m_terrainTilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
+	u32 textureWidth = m_terrainTilesetSizeSq * tileWidth;
+	u32 textureHeight = m_terrainTilesetSizeSq * tileHeight;
 	u32 bytesPerPixel = 4;
 	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
-	m_cellSizeCollisionTilesetTexSpaceSq = 1.0f / (float)m_collisionTilesetSizeSq;
+	m_cellSizeTerrainTilesetTexSpaceSq = 1.0f / (float)m_terrainTilesetSizeSq;
 
 	u8* data = new u8[textureSize];
 	ion::memory::MemSet(data, 0, textureSize);
 
-	const ion::Colour setColour(1.0f, 0.0f, 0.0f, 0.7f);
+	const ion::Colour setColour(0.0f, 1.0f, 0.0f, 0.7f);
 	const ion::Colour unsetColour(0.0f, 0.0f, 0.0f, 0.0f);
 
 	for(int i = 0; i < tileset.GetCount(); i++)
 	{
-		const CollisionTile& tile = *tileset.GetCollisionTile(i);
+		const TerrainTile& tile = *tileset.GetTerrainTile(i);
 
-		u32 x = i % m_collisionTilesetSizeSq;
-		u32 y = i / m_collisionTilesetSizeSq;
+		u32 x = i % m_terrainTilesetSizeSq;
+		u32 y = i / m_terrainTilesetSizeSq;
 		
 		for(int pixelX = 0; pixelX < 8; pixelX++)
 		{
@@ -213,10 +219,55 @@ void RenderResources::CreateCollisionTilesTexture()
 		}
 	}
 
-	m_textures[eTextureCollisionTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
-	m_textures[eTextureCollisionTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureCollisionTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureCollisionTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_textures[eTextureTerrainTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureTerrainTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureTerrainTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureTerrainTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
+
+	delete data;
+}
+
+void RenderResources::CreateCollisionTypesTexture()
+{
+	const int numCollisionTypes = 4;
+
+	u32 collisionTexSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes)));
+	u32 textureWidth = collisionTexSizeSq;
+	u32 textureHeight = collisionTexSizeSq;
+	u32 bytesPerPixel = 4;
+	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+
+	u8* data = new u8[textureSize];
+	ion::memory::MemSet(data, 0, textureSize);
+
+	const ion::Colour colours[numCollisionTypes] =
+	{
+		ion::Colour(0.0f, 0.0f, 0.0f, 0.0f),
+		ion::Colour(1.0f, 0.0f, 0.0f, 0.7f),
+		ion::Colour(0.0f, 0.0f, 1.0f, 0.7f),
+		ion::Colour(0.0f, 1.0f, 0.0f, 0.7f),
+	};
+
+	for(int i = 0; i < numCollisionTypes; i++)
+	{
+		u32 x = i % collisionTexSizeSq;
+		u32 y = i / collisionTexSizeSq;
+
+		const ion::Colour& colour = colours[i];
+
+		u32 pixelIdx = (y * textureWidth) + x;
+		u32 dataOffset = pixelIdx * bytesPerPixel;
+		ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+		data[dataOffset] = colour.r * 255;
+		data[dataOffset + 1] = colour.g * 255;
+		data[dataOffset + 2] = colour.b * 255;
+		data[dataOffset + 3] = colour.a * 255;
+	}
+
+	m_textures[eTextureCollisionTypes]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureCollisionTypes]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionTypes]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::eWrapClamp);
 
 	delete data;
 }
@@ -283,29 +334,66 @@ void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texC
 	}
 }
 
-void RenderResources::GetCollisionTileTexCoords(CollisionTileId tileId, ion::render::TexCoord texCoords[4]) const
+void RenderResources::GetCollisionTypeTexCoords(u16 collisionFlags, ion::render::TexCoord texCoords[4]) const
 {
-	if(tileId == InvalidTileId)
+	const int numCollisionTypes = 4;
+
+	u32 collisionTexSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes)));
+	float cellSizeCollisionTexSpaceSq = 1.0f / (float)collisionTexSizeSq;
+
+	//TODO: Only allows for one flag type
+	int cellX = 0;
+	int cellY = 0;
+
+	if(collisionFlags & eCollisionTileFlagSolid)
+	{
+		cellX = 1;
+	}
+	
+	ion::Vector2 textureBottomLeft(cellSizeCollisionTexSpaceSq * cellX, cellSizeCollisionTexSpaceSq * cellY);
+
+	float top = textureBottomLeft.y + cellSizeCollisionTexSpaceSq;
+	float left = textureBottomLeft.x;
+	float bottom = textureBottomLeft.y;
+	float right = textureBottomLeft.x + cellSizeCollisionTexSpaceSq;
+
+	//Top left
+	texCoords[0].x = left;
+	texCoords[0].y = top;
+	//Bottom left
+	texCoords[1].x = left;
+	texCoords[1].y = bottom;
+	//Bottom right
+	texCoords[2].x = right;
+	texCoords[2].y = bottom;
+	//Top right
+	texCoords[3].x = right;
+	texCoords[3].y = top;
+}
+
+void RenderResources::GetTerrainTileTexCoords(TerrainTileId tileId, ion::render::TexCoord texCoords[4]) const
+{
+	if(tileId == InvalidTerrainTileId)
 	{
 		//Use default tile if there is one
-		tileId = m_project->GetDefaultCollisionTile();
+		tileId = m_project->GetDefaultTerrainTile();
 
-		if(tileId == InvalidTileId)
+		if(tileId == InvalidTerrainTileId)
 		{
 			//If no default tile, use blank tile
-			tileId = (m_collisionTilesetSizeSq * m_collisionTilesetSizeSq) - 1;
+			tileId = (m_terrainTilesetSizeSq * m_terrainTilesetSizeSq) - 1;
 		}
 	}
 
 	//Map tile to X/Y on tileset texture
-	int tilesetX = (tileId % m_collisionTilesetSizeSq);
-	int tilesetY = (tileId / m_collisionTilesetSizeSq);
-	ion::Vector2 textureBottomLeft(m_cellSizeCollisionTilesetTexSpaceSq * tilesetX, m_cellSizeCollisionTilesetTexSpaceSq * tilesetY);
+	int tilesetX = (tileId % m_terrainTilesetSizeSq);
+	int tilesetY = (tileId / m_terrainTilesetSizeSq);
+	ion::Vector2 textureBottomLeft(m_cellSizeTerrainTilesetTexSpaceSq * tilesetX, m_cellSizeTerrainTilesetTexSpaceSq * tilesetY);
 	
-	float top = textureBottomLeft.y + m_cellSizeCollisionTilesetTexSpaceSq;
+	float top = textureBottomLeft.y + m_cellSizeTerrainTilesetTexSpaceSq;
 	float left = textureBottomLeft.x;
 	float bottom = textureBottomLeft.y;
-	float right = textureBottomLeft.x + m_cellSizeCollisionTilesetTexSpaceSq;
+	float right = textureBottomLeft.x + m_cellSizeTerrainTilesetTexSpaceSq;
 	
 	//Top left
 	texCoords[0].x = left;
@@ -348,27 +436,27 @@ void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pix
 	}
 }
 
-void RenderResources::SetCollisionTileHeight(CollisionTileId tileId, int x, s8 height)
+void RenderResources::SetTerrainTileHeight(TerrainTileId terrainTileId, int x, s8 height)
 {
-	if(m_project && m_textures[eTextureCollisionTileset])
+	if(m_project && m_textures[eTextureTerrainTileset])
 	{
-		if(CollisionTile* tile = m_project->GetCollisionTileset().GetCollisionTile(tileId))
+		if(TerrainTile* tile = m_project->GetTerrainTileset().GetTerrainTile(terrainTileId))
 		{
-			ion::Colour setColour(1.0f, 0.0f, 0.0f, 0.7f);
+			ion::Colour setColour(0.0f, 1.0f, 0.0f, 0.7f);
 			ion::Colour unsetColour(0.0f, 0.0f, 0.0f, 0.0f);
 
 			const int tileWidth = 8;
 			const int tileHeight = 8;
 
-			const u32 tileX = tileId % m_collisionTilesetSizeSq;
-			const u32 tileY = tileId / m_collisionTilesetSizeSq;
+			const u32 tileX = terrainTileId % m_terrainTilesetSizeSq;
+			const u32 tileY = terrainTileId / m_terrainTilesetSizeSq;
 
 			//Draw all pixels up to height
 			for(int y = 0; y < tileHeight; y++)
 			{
 				const ion::Colour& colour = (y < height) ? setColour : unsetColour;
 				ion::Vector2i pixelPos((tileX * tileWidth) + x, (tileY * tileHeight) + y);
-				m_textures[eTextureCollisionTileset]->SetPixel(pixelPos, colour);
+				m_textures[eTextureTerrainTileset]->SetPixel(pixelPos, colour);
 			}
 		}
 	}
