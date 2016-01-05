@@ -15,6 +15,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	
 	m_currentTool = eToolPaintTile;
 	m_tempStamp = NULL;
+	m_terrainCanvasPrimitive = NULL;
 	m_collisionCanvasPrimitive = NULL;
 	m_stampPreviewPrimitive = NULL;
 	m_stampPastePos.x = -1;
@@ -142,25 +143,56 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				break;
 			}
 
-			case eToolPaintCollisionTile:
+			case eToolPaintTerrainTile:
 			{
 				//If clicking/dragging, paint collision tile
 				if(buttonBits & eMouseLeft)
 				{
 					//Get tile ID to paint
-					CollisionTileId tileId = m_project->GetPaintCollisionTile();
+					TerrainTileId tileId = m_project->GetPaintTerrainTile();
 
-					if(tileId != InvalidCollisionTileId)
+					if(tileId != InvalidTerrainTileId)
 					{
 						//Get collision map
 						CollisionMap& collisionMap = m_project->GetCollisionMap();
 
 						//Set on map
-						collisionMap.SetCollisionTile(x, y, tileId);
+						collisionMap.SetTerrainTile(x, y, tileId);
 
 						//Paint to canvas
-						PaintCollisionTile(tileId, x, y_inv);
+						PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
 					}
+				}
+
+				break;
+			}
+
+			case eToolPaintCollisionSolid:
+			{
+				//If clicking/dragging, paint solid collision tile
+				if(buttonBits & eMouseLeft)
+				{
+					//Get collision map
+					CollisionMap& collisionMap = m_project->GetCollisionMap();
+
+					//Set solid tile
+					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) | eCollisionTileFlagSolid;
+					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
+
+					//Paint to canvas
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
+				}
+				else if(buttonBits & eMouseRight)
+				{
+					//Get collision map
+					CollisionMap& collisionMap = m_project->GetCollisionMap();
+
+					//Clear solid tile
+					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) & ~eCollisionTileFlagSolid;
+					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
+
+					//Paint to canvas
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
 				}
 
 				break;
@@ -300,7 +332,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 				if(buttonBits & eMouseRight)
 				{
-					if(m_hoverStamp != InvalidTileId)
+					if(m_hoverStamp != InvalidStampId)
 					{
 						//Right-click menu
 						wxMenu contextMenu;
@@ -355,7 +387,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					m_mainWindow->RedrawPanel(MainWindow::ePanelTileEditor);
 
 					//Refresh collision tile edit panel
-					m_mainWindow->RedrawPanel(MainWindow::ePanelCollisionTileEditor);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTileEditor);
 				}
 
 				//TODO: Update tileset panel selection + toolbox button state
@@ -541,39 +573,39 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 
 	switch(m_currentTool)
 	{
-		case eToolPaintCollisionPixel:
+		case eToolPaintCollisionTerrain:
 		{
 			if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 			{
 				//Get collision map
 				CollisionMap& collisionMap = m_project->GetCollisionMap();
 
-				//Get collision tileset
-				CollisionTileset& collisionTileset = m_project->GetCollisionTileset();
+				//Get terrain tileset
+				TerrainTileset& TerrainTileset = m_project->GetTerrainTileset();
 
 				//Get pixel tile under cursor
-				CollisionTileId tileId = collisionMap.GetCollisionTile(x, y);
+				TerrainTileId tileId = collisionMap.GetTerrainTile(x, y);
 
-				if(tileId == InvalidCollisionTileId)
+				if(tileId == InvalidTerrainTileId)
 				{
 					//Create new collision tile
-					tileId = collisionTileset.AddCollisionTile();
+					tileId = TerrainTileset.AddTerrainTile();
 
 					//Set on map
-					collisionMap.SetCollisionTile(x, y, tileId);
+					collisionMap.SetTerrainTile(x, y, tileId);
 
 					//Paint to canvas
-					PaintCollisionTile(tileId, x, y_inv);
+					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
 
-					//Invalidate collision tileset
-					m_project->InvalidateCollisionTiles(true);
+					//Invalidate terrain tileset
+					m_project->InvalidateTerrainTiles(true);
 
-					//Refresh collision tileset texture
-					m_mainWindow->RefreshCollisionTileset();
+					//Refresh terrain tileset texture
+					m_mainWindow->RefreshTerrainTileset();
 				}
 
 				//Get collision tile
-				if(CollisionTile* collisionTile = collisionTileset.GetCollisionTile(tileId))
+				if(TerrainTile* terrainTile = TerrainTileset.GetTerrainTile(tileId))
 				{
 					//Get pixel offset into tile
 					const int tileSize = 8;
@@ -584,18 +616,18 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 					{
 						//Set height at X
 						const int height = tileHeight - pixelY;
-						collisionTile->SetHeight(pixelX, height);
+						terrainTile->SetHeight(pixelX, height);
 
 						//Set height on collision tile texture
-						m_renderResources.SetCollisionTileHeight(tileId, pixelX, height);
+						m_renderResources.SetTerrainTileHeight(tileId, pixelX, height);
 					}
 					else
 					{
 						//Clear height at X
-						collisionTile->ClearHeight(pixelX);
+						terrainTile->ClearHeight(pixelX);
 
 						//Clear height on collision tile texture
-						m_renderResources.SetCollisionTileHeight(tileId, pixelX, 0);
+						m_renderResources.SetTerrainTileHeight(tileId, pixelX, 0);
 					}
 					
 
@@ -603,11 +635,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 					Refresh();
 
 					//Refresh collision panels
-					m_mainWindow->RedrawPanel(MainWindow::ePanelCollisionTiles);
-					m_mainWindow->RedrawPanel(MainWindow::ePanelCollisionTileEditor);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTiles);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTileEditor);
 				}
 
-				m_project->InvalidateCollisionTiles(false);
+				m_project->InvalidateTerrainTiles(false);
 			}
 
 			break;
@@ -629,6 +661,11 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	//Render collision map
 	RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
+	//Render terrain map
+	RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
 
 	z += zOffset;
 
@@ -722,7 +759,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		}
 
 		//If collision tilset invalidated
-		if(m_project->CollisionTilesAreInvalidated())
+		if(m_project->TerrainTilesAreInvalidated())
 		{
 			//Redraw collision map
 			PaintCollisionMap(m_project->GetCollisionMap());
@@ -734,10 +771,14 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 void MapPanel::CreateCollisionCanvas(int width, int height)
 {
-	//Create rendering primitive
+	//Create rendering primitives
+	if(m_terrainCanvasPrimitive)
+		delete m_terrainCanvasPrimitive;
+
 	if(m_collisionCanvasPrimitive)
 		delete m_collisionCanvasPrimitive;
 
+	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
 	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
 }
 
@@ -781,9 +822,9 @@ void MapPanel::SetTool(ToolType tool)
 
 		case eToolGenerateTerrain:
 			m_project->GenerateTerrain(m_selectedTiles);
-			m_mainWindow->RefreshCollisionTileset();
+			m_mainWindow->RefreshTerrainTileset();
 			m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
-			m_mainWindow->RefreshPanel(MainWindow::ePanelCollisionTiles);
+			m_mainWindow->RefreshPanel(MainWindow::ePanelTerrainTiles);
 			break;
 
 
@@ -954,13 +995,31 @@ void MapPanel::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion:
 	//No depth test (stops grid cells Z fighting)
 	renderer.SetDepthTest(ion::render::Renderer::Always);
 
-	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialCollisionTileset);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialCollisionTypes);
 
 	//Draw map
 	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
+	material->Unbind();
+	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+
+	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+}
+
+void MapPanel::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	//No depth test (stops grid cells Z fighting)
+	renderer.SetDepthTest(ion::render::Renderer::Always);
+
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
+
+	//Draw map
+	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
 	material->Unbind();
 	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 
@@ -1311,25 +1370,30 @@ void MapPanel::PaintCollisionMap(const CollisionMap& map)
 	{
 		for(int x = 0; x < mapWidth; x++)
 		{
-			//Get tile
-			CollisionTileId tileId = map.GetCollisionTile(x, y);
+			//Get terrain tile and collision flags
+			TerrainTileId terrainTileId = map.GetTerrainTile(x, y);
+			u16 collisionFlags = map.GetCollisionTileFlags(x, y);
 
 			//Invert Y for OpenGL
 			int yInv = mapHeight - 1 - y;
 
 			//Paint tile
-			PaintCollisionTile(tileId, x, yInv);
+			PaintCollisionTile(terrainTileId, collisionFlags, x, yInv);
 		}
 	}
 }
 
-void MapPanel::PaintCollisionTile(TileId tileId, int x, int y)
+void MapPanel::PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y)
 {
 	if(m_project)
 	{
-		//Set texture coords for cell
+		//Set texture coords for terrain cell
 		ion::render::TexCoord coords[4];
-		m_renderResources.GetCollisionTileTexCoords(tileId, coords);
+		m_renderResources.GetTerrainTileTexCoords(terrainTileId, coords);
+		m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+
+		//Set texture coords for collision cell
+		m_renderResources.GetCollisionTypeTexCoords(collisionFlags, coords);
 		m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 	}
 }

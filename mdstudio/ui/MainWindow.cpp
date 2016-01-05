@@ -132,16 +132,16 @@ void MainWindow::SetProject(Project* project)
 			delete m_tileEditorPanel;
 		}
 
-		if(m_collisionTilesPanel)
+		if(m_terrainTilesPanel)
 		{
-			m_auiManager.DetachPane(m_collisionTilesPanel);
-			delete m_collisionTilesPanel;
+			m_auiManager.DetachPane(m_terrainTilesPanel);
+			delete m_terrainTilesPanel;
 		}
 
-		if(m_collisionEditorPanel)
+		if(m_TerrainTileEditorPanel)
 		{
-			m_auiManager.DetachPane(m_collisionEditorPanel);
-			delete m_collisionEditorPanel;
+			m_auiManager.DetachPane(m_TerrainTileEditorPanel);
+			delete m_TerrainTileEditorPanel;
 		}
 
 		if(m_gameObjectTypePanel)
@@ -160,13 +160,13 @@ void MainWindow::SetProject(Project* project)
 
 			//Recreate tileset/collision set textures, and tile index cache
 			RefreshTileset();
-			RefreshCollisionTileset();
+			RefreshTerrainTileset();
 
 			//Open bottom panels
 			ShowPanelPalettes();
 			ShowPanelTiles();
-			ShowPanelCollisionEditor();
-			ShowPanelCollisionTiles();
+			ShowPanelTerrainEditor();
+			ShowPanelTerrainTiles();
 			ShowPanelTileEditor();
 
 			//Open left panels
@@ -198,11 +198,11 @@ void MainWindow::SetPanelCaptions()
 		m_auiManager.Update();
 	}
 
-	if(m_collisionTilesPanel.get())
+	if(m_terrainTilesPanel.get())
 	{
-		wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(m_collisionTilesPanel.get());
+		wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(m_terrainTilesPanel.get());
 		wxString caption;
-		caption << "Collision Tileset " << "(" << m_project->GetCollisionTileset().GetCount() << ")";
+		caption << "Terrain Tileset " << "(" << m_project->GetTerrainTileset().GetCount() << ")";
 		paneInfo.Caption(caption);
 		m_auiManager.Update();
 	}
@@ -266,11 +266,11 @@ void MainWindow::ShowPanelTiles()
 	}
 }
 
-void MainWindow::ShowPanelCollisionTiles()
+void MainWindow::ShowPanelTerrainTiles()
 {
 	if(m_project.get())
 	{
-		if(!m_collisionTilesPanel)
+		if(!m_terrainTilesPanel)
 		{
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
@@ -280,16 +280,16 @@ void MainWindow::ShowPanelCollisionTiles()
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 
-			m_collisionTilesPanel = new CollisionTilesPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
-			m_auiManager.AddPane(m_collisionTilesPanel, paneInfo);
-			m_collisionTilesPanel->Show();
+			m_terrainTilesPanel = new TerrainTilesPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_terrainTilesPanel, paneInfo);
+			m_terrainTilesPanel->Show();
 
-			m_collisionTilesPanel->SetProject(m_project.get());
+			m_terrainTilesPanel->SetProject(m_project.get());
 		}
 
-		if(!m_collisionTilesPanel->IsShown())
+		if(!m_terrainTilesPanel->IsShown())
 		{
-			m_collisionTilesPanel->Show();
+			m_terrainTilesPanel->Show();
 		}
 
 		SetPanelCaptions();
@@ -382,10 +382,10 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINTCOLLISIONPIXEL);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_GENERATETERRAIN);
 	}
 
 	if(!m_toolboxPanel->IsShown())
@@ -425,11 +425,11 @@ void MainWindow::ShowPanelTileEditor()
 	}
 }
 
-void MainWindow::ShowPanelCollisionEditor()
+void MainWindow::ShowPanelTerrainEditor()
 {
 	if(m_project.get())
 	{
-		if(!m_collisionEditorPanel)
+		if(!m_TerrainTileEditorPanel)
 		{
 			wxSize clientSize = GetClientSize();
 
@@ -441,17 +441,17 @@ void MainWindow::ShowPanelCollisionEditor()
 			paneInfo.Caption("Collision Tile");
 			paneInfo.CaptionVisible(true);
 
-			m_collisionEditorPanel = new CollisionEditorPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
-			m_auiManager.AddPane(m_collisionEditorPanel, paneInfo);
-			m_collisionEditorPanel->Show();
+			m_TerrainTileEditorPanel = new TerrainTileEditorPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_TerrainTileEditorPanel, paneInfo);
+			m_TerrainTileEditorPanel->Show();
 			m_auiManager.Update();
 
-			m_collisionEditorPanel->SetProject(m_project.get());
+			m_TerrainTileEditorPanel->SetProject(m_project.get());
 		}
 
-		if(!m_collisionEditorPanel->IsShown())
+		if(!m_TerrainTileEditorPanel->IsShown())
 		{
-			m_collisionEditorPanel->Show();
+			m_TerrainTileEditorPanel->Show();
 		}
 	}
 }
@@ -513,7 +513,7 @@ void MainWindow::RefreshAll()
 	{
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
-		m_project->InvalidateCollisionTiles(true);
+		m_project->InvalidateTerrainTiles(true);
 		m_project->InvalidateStamps(true);
 	}
 
@@ -523,7 +523,7 @@ void MainWindow::RefreshAll()
 	{
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
-		m_project->InvalidateCollisionTiles(false);
+		m_project->InvalidateTerrainTiles(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -531,7 +531,7 @@ void MainWindow::RefreshAll()
 void MainWindow::RedrawAll()
 {
 	RefreshTileset();
-	RefreshCollisionTileset();
+	RefreshTerrainTileset();
 	SetPanelCaptions();
 
 	if(m_palettesPanel)
@@ -549,11 +549,11 @@ void MainWindow::RedrawAll()
 	if(m_tileEditorPanel)
 		m_tileEditorPanel->Refresh();
 
-	if(m_collisionTilesPanel)
-		m_collisionTilesPanel->Refresh();
+	if(m_terrainTilesPanel)
+		m_terrainTilesPanel->Refresh();
 
-	if(m_collisionEditorPanel)
-		m_collisionEditorPanel->Refresh();
+	if(m_TerrainTileEditorPanel)
+		m_TerrainTileEditorPanel->Refresh();
 
 	if(m_gameObjectTypePanel)
 		m_gameObjectTypePanel->Refresh();
@@ -568,12 +568,13 @@ void MainWindow::RefreshTileset()
 	}
 }
 
-void MainWindow::RefreshCollisionTileset()
+void MainWindow::RefreshTerrainTileset()
 {
 	if(m_project.get())
 	{
 		//Recreate collision set texture
-		m_renderResources->CreateCollisionTilesTexture();
+		m_renderResources->CreateCollisionTypesTexture();
+		m_renderResources->CreateTerrainTilesTexture();
 	}
 }
 
@@ -584,7 +585,7 @@ void MainWindow::RefreshPanel(Panel panel)
 	{
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
-		m_project->InvalidateCollisionTiles(true);
+		m_project->InvalidateTerrainTiles(true);
 		m_project->InvalidateStamps(true);
 
 	}
@@ -596,7 +597,7 @@ void MainWindow::RefreshPanel(Panel panel)
 	{
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
-		m_project->InvalidateCollisionTiles(false);
+		m_project->InvalidateTerrainTiles(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -621,17 +622,17 @@ void MainWindow::RedrawPanel(Panel panel)
 		if(m_palettesPanel)
 			m_palettesPanel->Refresh();
 		break;
-	case ePanelCollisionTiles:
-		if(m_collisionTilesPanel)
-			m_collisionTilesPanel->Refresh();
+	case ePanelTerrainTiles:
+		if(m_terrainTilesPanel)
+			m_terrainTilesPanel->Refresh();
 		break;
 	case ePanelTileEditor:
 		if(m_tileEditorPanel)
 			m_tileEditorPanel->Refresh();
 		break;
-	case ePanelCollisionTileEditor:
-		if(m_collisionEditorPanel)
-			m_collisionEditorPanel->Refresh();
+	case ePanelTerrainTileEditor:
+		if(m_TerrainTileEditorPanel)
+			m_TerrainTileEditorPanel->Refresh();
 		break;
 	case ePanelGameObjectTypes:
 		if(m_gameObjectTypePanel)
@@ -716,7 +717,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerPalettes->SetPath(m_project->m_exportFilenames.palettes);
 		dialog.m_filePickerTileset->SetPath(m_project->m_exportFilenames.tileset);
 		dialog.m_filePickerMap->SetPath(m_project->m_exportFilenames.map);
-		dialog.m_filePickerCollisionTiles->SetPath(m_project->m_exportFilenames.collisionTiles);
+		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.TerrainTiles);
 		dialog.m_filePickerCollisionMap->SetPath(m_project->m_exportFilenames.collisionMap);
 		dialog.m_filePickerGameObj->SetPath(m_project->m_exportFilenames.gameObjects);
 
@@ -728,7 +729,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.palettes = dialog.m_filePickerPalettes->GetPath();
 			m_project->m_exportFilenames.tileset = dialog.m_filePickerTileset->GetPath();
 			m_project->m_exportFilenames.map = dialog.m_filePickerMap->GetPath();
-			m_project->m_exportFilenames.collisionTiles = dialog.m_filePickerCollisionTiles->GetPath();
+			m_project->m_exportFilenames.TerrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.collisionMap = dialog.m_filePickerCollisionMap->GetPath();
 			m_project->m_exportFilenames.gameObjects = dialog.m_filePickerGameObj->GetPath();
 
@@ -741,8 +742,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkMap->GetValue())
 				m_project->ExportMap(m_project->m_exportFilenames.map, dialog.m_btnBinary->GetValue());
 
-			if(dialog.m_chkCollisionTiles->GetValue())
-				m_project->ExportCollisionTiles(m_project->m_exportFilenames.collisionTiles, dialog.m_btnBinary->GetValue());
+			if(dialog.m_chkTerrainTiles->GetValue())
+				m_project->ExportTerrainTiles(m_project->m_exportFilenames.TerrainTiles, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkCollisionMap->GetValue())
 				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
@@ -809,7 +810,7 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 			RefreshTileset();
 
 			//Refresh collison tileset
-			RefreshCollisionTileset();
+			RefreshTerrainTileset();
 
 			//Refresh whole application
 			RefreshAll();
@@ -887,7 +888,7 @@ void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		if(m_project->CleanupCollisionTiles())
+		if(m_project->CleanupTerrainTiles())
 		{
 			RefreshAll();
 		}
@@ -899,20 +900,20 @@ void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 	if(m_project.get())
 	{
 		//Add new collision tile
-		CollisionTileId tileId = m_project->GetCollisionTileset().AddCollisionTile();
+		TerrainTileId tileId = m_project->GetTerrainTileset().AddTerrainTile();
 
 		//Recreate tileset texture
-		RefreshCollisionTileset();
+		RefreshTerrainTileset();
 
 		//Set as current paint collision tile
-		m_project->SetPaintCollisionTile(tileId);
+		m_project->SetPaintTerrainTile(tileId);
 
 		//Set paint tool
-		SetMapTool(eToolPaintCollisionTile);
+		SetMapTool(eToolPaintTerrainTile);
 
 		//Refresh collision tiles and collision tile editor panels
-		RefreshPanel(ePanelCollisionTiles);
-		RefreshPanel(ePanelCollisionTileEditor);
+		RefreshPanel(ePanelTerrainTiles);
+		RefreshPanel(ePanelTerrainTileEditor);
 	}
 }
 
@@ -920,17 +921,17 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		CollisionTileId tileId = m_project->GetPaintCollisionTile();
-		if(tileId != InvalidTileId)
+		TerrainTileId tileId = m_project->GetPaintTerrainTile();
+		if(tileId != InvalidTerrainTileId && tileId != m_project->GetDefaultTerrainTile())
 		{
 			CollisionMap& map = m_project->GetCollisionMap();
-			CollisionTileset& tileset = m_project->GetCollisionTileset();
+			TerrainTileset& tileset = m_project->GetTerrainTileset();
 
 			//Delete tile
-			m_project->DeleteCollisionTile(tileId);
+			m_project->DeleteTerrainTile(tileId);
 
 			//Recreate tileset texture
-			RefreshCollisionTileset();
+			RefreshTerrainTileset();
 
 			//Revert to select tool
 			SetMapTool(eToolSelectTiles);
@@ -1032,9 +1033,9 @@ void MainWindow::OnBtnShowOutlines(wxCommandEvent& event)
 	}
 }
 
-void MainWindow::OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnTerrainTileEdit(wxRibbonButtonBarEvent& event)
 {
-	ShowPanelCollisionEditor();
+	ShowPanelTerrainEditor();
 }
 
 void MainWindow::OnBtnGameObjTypes(wxRibbonButtonBarEvent& event)
@@ -1064,8 +1065,11 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 		case wxID_TOOL_STAMP:
 			m_mapPanel->SetTool(eToolPaintStamp);
 			break;
-		case wxID_TOOL_PAINTCOLLISIONPIXEL:
-			m_mapPanel->SetTool(eToolPaintCollisionPixel);
+		case wxID_TOOL_COL_PAINTTERRAIN:
+			m_mapPanel->SetTool(eToolPaintCollisionTerrain);
+			break;
+		case wxID_TOOL_COL_PAINTSOLID:
+			m_mapPanel->SetTool(eToolPaintCollisionSolid);
 			break;
 		case wxID_TOOL_TILEPICKER:
 			m_mapPanel->SetTool(eToolTilePicker);
@@ -1096,9 +1100,6 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_REMOVEGAMEOBJ:
 			m_mapPanel->SetTool(eToolRemoveGameObject);
-			break;
-		case wxID_TOOL_GENERATETERRAIN:
-			m_mapPanel->SetTool(eToolGenerateTerrain);
 			break;
 		}
 	}

@@ -84,8 +84,8 @@
 #define wxID_TOOL_STAMPPICKER 1036
 #define wxID_TOOL_CREATESTAMP 1037
 #define wxID_TOOL_REMOVESTAMP 1038
-#define wxID_TOOL_PAINTCOLLISIONPIXEL 1039
-#define wxID_TOOL_GENERATETERRAIN 1040
+#define wxID_TOOL_COL_PAINTTERRAIN 1039
+#define wxID_TOOL_COL_PAINTSOLID 1040
 #define wxID_TOOL_PLACEGAMEOBJ 1041
 #define wxID_TOOL_REMOVEGAMEOBJ 1042
 
@@ -206,7 +206,7 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolRemoveStamp;
 		wxStaticText* m_staticText13;
 		wxBitmapButton* m_toolPaintCollisionPixel;
-		wxBitmapButton* m_toolGenerateTerrain;
+		wxBitmapButton* m_toolPaintCollisionSolid;
 		wxStaticText* m_staticText14;
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
@@ -262,8 +262,8 @@ class ExportDialog : public wxDialog
 		wxFilePickerCtrl* m_filePickerTileset;
 		wxCheckBox* m_chkMap;
 		wxFilePickerCtrl* m_filePickerMap;
-		wxCheckBox* m_chkCollisionTiles;
-		wxFilePickerCtrl* m_filePickerCollisionTiles;
+		wxCheckBox* m_chkTerrainTiles;
+		wxFilePickerCtrl* m_filePickerTerrainTiles;
 		wxCheckBox* m_chkCollisionMap;
 		wxFilePickerCtrl* m_filePickerCollisionMap;
 		wxCheckBox* m_chkGameObj;

@@ -20,8 +20,8 @@
 #include "StampsPanel.h"
 #include "MapPanel.h"
 #include "TileEditorPanel.h"
-#include "CollisionTilesPanel.h"
-#include "CollisionEditorPanel.h"
+#include "TerrainTilesPanel.h"
+#include "TerrainTileEditorPanel.h"
 #include "GameObjectTypePanel.h"
 #include "GameObjectTypeDialog.h"
 
@@ -39,8 +39,8 @@ public:
 		ePanelTiles,
 		ePanelPalettes,
 		ePanelTileEditor,
-		ePanelCollisionTiles,
-		ePanelCollisionTileEditor,
+		ePanelTerrainTiles,
+		ePanelTerrainTileEditor,
 		ePanelGameObjectTypes
 	};
 
@@ -53,8 +53,8 @@ public:
 	void ShowPanelStamps();
 	void ShowPanelMap();
 	void ShowPanelTileEditor();
-	void ShowPanelCollisionTiles();
-	void ShowPanelCollisionEditor();
+	void ShowPanelTerrainTiles();
+	void ShowPanelTerrainEditor();
 	void ShowPanelGameObjectTypes();
 
 	//Open toolbox
@@ -75,8 +75,8 @@ public:
 	//Refresh tileset
 	void RefreshTileset();
 
-	//Refresh collision tileset
-	void RefreshCollisionTileset();
+	//Refresh terrain tileset
+	void RefreshTerrainTileset();
 
 protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
@@ -101,7 +101,7 @@ protected:
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 	virtual void OnBtnShowOutlines(wxCommandEvent& event);
-	virtual void OnBtnCollisionTileEdit(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnTerrainTileEdit(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGameObjTypes(wxRibbonButtonBarEvent& event);
 
 	void OnBtnTool(wxCommandEvent& event);
@@ -123,8 +123,8 @@ private:
 	wxWeakRef<TilesPanel> m_tilesPanel;
 	wxWeakRef<StampsPanel> m_stampsPanel;
 	wxWeakRef<TileEditorPanel> m_tileEditorPanel;
-	wxWeakRef<CollisionTilesPanel> m_collisionTilesPanel;
-	wxWeakRef<CollisionEditorPanel> m_collisionEditorPanel;
+	wxWeakRef<TerrainTilesPanel> m_terrainTilesPanel;
+	wxWeakRef<TerrainTileEditorPanel> m_TerrainTileEditorPanel;
 	wxWeakRef<GameObjectTypesPanel> m_gameObjectTypePanel;
 
 	ProjectPtr m_project;

@@ -36,8 +36,8 @@
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
-#include "../FormBuilderProj/tool_genterrain.xpm"
 #include "../FormBuilderProj/tool_paintcolpixel.xpm"
+#include "../FormBuilderProj/tool_paintcolwall.xpm"
 #include "../FormBuilderProj/tool_paintstamp.xpm"
 #include "../FormBuilderProj/tool_painttile.xpm"
 #include "../FormBuilderProj/tool_picker.xpm"
@@ -333,15 +333,15 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	fgSizer8->SetFlexibleDirection( wxBOTH );
 	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_toolPaintCollisionPixel = new wxBitmapButton( this, wxID_TOOL_PAINTCOLLISIONPIXEL, wxBitmap( tool_paintcolpixel_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolPaintCollisionPixel->SetToolTip( wxT("Paint Collision Pixel") );
+	m_toolPaintCollisionPixel = new wxBitmapButton( this, wxID_TOOL_COL_PAINTTERRAIN, wxBitmap( tool_paintcolpixel_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintCollisionPixel->SetToolTip( wxT("Paint Terrain (direct to map)") );
 	
 	fgSizer8->Add( m_toolPaintCollisionPixel, 0, wxALL, 5 );
 	
-	m_toolGenerateTerrain = new wxBitmapButton( this, wxID_TOOL_GENERATETERRAIN, wxBitmap( tool_genterrain_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolGenerateTerrain->SetToolTip( wxT("Paint Collision Pixel") );
+	m_toolPaintCollisionSolid = new wxBitmapButton( this, wxID_TOOL_COL_PAINTSOLID, wxBitmap( tool_paintcolwall_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintCollisionSolid->SetToolTip( wxT("Paint Solid Wall/Ceiling") );
 	
-	fgSizer8->Add( m_toolGenerateTerrain, 0, wxALL, 5 );
+	fgSizer8->Add( m_toolPaintCollisionSolid, 0, wxALL, 5 );
 	
 	
 	bSizer16->Add( fgSizer8, 1, wxEXPAND, 5 );
@@ -442,12 +442,12 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
 	
-	m_chkCollisionTiles = new wxCheckBox( this, wxID_ANY, wxT("Export collision tiles:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkCollisionTiles->SetValue(true); 
-	fgSizer3->Add( m_chkCollisionTiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_chkTerrainTiles = new wxCheckBox( this, wxID_ANY, wxT("Export terrain tiles:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTerrainTiles->SetValue(true); 
+	fgSizer3->Add( m_chkTerrainTiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_filePickerCollisionTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer3->Add( m_filePickerCollisionTiles, 0, wxALL|wxEXPAND, 5 );
+	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer3->Add( m_filePickerTerrainTiles, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkCollisionMap = new wxCheckBox( this, wxID_ANY, wxT("Export collision map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkCollisionMap->SetValue(true); 

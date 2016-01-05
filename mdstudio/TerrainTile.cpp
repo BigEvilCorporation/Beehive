@@ -11,50 +11,50 @@
 #include <string>
 #include <iomanip>
 
-#include "CollisionTile.h"
+#include "TerrainTile.h"
 
-CollisionTile::CollisionTile()
+TerrainTile::TerrainTile()
 {
 	m_hash = 0;
 	m_heightmap.resize(tileWidth);
 }
 
-void CollisionTile::CopyHeights(const CollisionTile& tile)
+void TerrainTile::CopyHeights(const TerrainTile& tile)
 {
 	m_heightmap = tile.m_heightmap;
 }
 
-void CollisionTile::GetHeights(s8 heights[tileWidth]) const
+void TerrainTile::GetHeights(s8 heights[tileWidth]) const
 {
 	ion::memory::MemCopy(heights, &m_heightmap[0], tileWidth);
 }
 
-void CollisionTile::SetHeight(int x, s8 height)
+void TerrainTile::SetHeight(int x, s8 height)
 {
 	ion::debug::Assert(x < tileWidth, "Out of range");
 	ion::debug::Assert(height >= -tileHeight && height <= tileHeight, "Out of range");
 	m_heightmap[x] = height;
 }
 
-void CollisionTile::ClearHeight(int x)
+void TerrainTile::ClearHeight(int x)
 {
 	ion::debug::Assert(x < tileWidth, "Out of range");
 	m_heightmap[x] = 0;
 }
 
-s8 CollisionTile::GetHeight(int x) const
+s8 TerrainTile::GetHeight(int x) const
 {
 	ion::debug::Assert(x < tileWidth, "Out of range");
 	return m_heightmap[x];
 }
 
-void CollisionTile::Serialise(ion::io::Archive& archive)
+void TerrainTile::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_hash, "hash");
 	archive.Serialise(m_heightmap, "heightMap");
 }
 
-void CollisionTile::Export(std::stringstream& stream) const
+void TerrainTile::Export(std::stringstream& stream) const
 {
 	stream << std::hex << std::setfill('0') << std::uppercase;
 
@@ -73,7 +73,7 @@ void CollisionTile::Export(std::stringstream& stream) const
 	stream << std::dec;
 }
 
-void CollisionTile::Export(ion::io::File& file) const
+void TerrainTile::Export(ion::io::File& file) const
 {
 	//1 byte per width
 	for(int x = 0; x < tileWidth; x++)
@@ -83,13 +83,13 @@ void CollisionTile::Export(ion::io::File& file) const
 	}
 }
 
-u64 CollisionTile::CalculateHash()
+u64 TerrainTile::CalculateHash()
 {
 	m_hash = ion::Hash64((const u8*)&m_heightmap[0], tileWidth);
 	return m_hash;
 }
 
-u64 CollisionTile::GetHash() const
+u64 TerrainTile::GetHash() const
 {
 	return m_hash;
 }

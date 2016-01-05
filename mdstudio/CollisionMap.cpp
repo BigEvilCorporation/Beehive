@@ -24,7 +24,7 @@ void CollisionMap::Clear()
 	{
 		for(int y = 0; y < m_height; y++)
 		{
-			SetCollisionTile(x, y, InvalidCollisionTileId);
+			SetTerrainTile(x, y, InvalidTerrainTileId);
 		}
 	}
 }
@@ -34,6 +34,11 @@ void CollisionMap::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_width, "width");
 	archive.Serialise(m_height, "height");
 	archive.Serialise(m_collisionTiles, "collisionTiles");
+
+	for(int i = 0; i < m_collisionTiles.size(); i++)
+	{
+		m_collisionTiles[i] &= s_collisionTileTerrainIdMask;
+	}
 }
 
 int CollisionMap::GetWidth() const
@@ -49,14 +54,14 @@ int CollisionMap::GetHeight() const
 void CollisionMap::Resize(int width, int height)
 {
 	//Create new tile array
-	std::vector<CollisionTileId> collisionTiles;
+	std::vector<TerrainTileId> terrainTiles;
 
 	//Set new size
 	int size = width * height;
-	collisionTiles.resize(size);
+	terrainTiles.resize(size);
 
 	//Fill with invalid tile
-	std::fill(collisionTiles.begin(), collisionTiles.end(), InvalidCollisionTileId);
+	std::fill(terrainTiles.begin(), terrainTiles.end(), InvalidTerrainTileId);
 
 	//Copy tiles
 	for(int x = 0; x < min(width, m_width); x++)
@@ -64,35 +69,53 @@ void CollisionMap::Resize(int width, int height)
 		for(int y = 0; y < min(height, m_height); y++)
 		{
 			int tileIdx = (y * width) + x;
-			collisionTiles[tileIdx] = GetCollisionTile(x, y);
+			terrainTiles[tileIdx] = GetTerrainTile(x, y);
 		}
 	}
 	
 	//Set new
-	m_collisionTiles = collisionTiles;
+	m_collisionTiles = terrainTiles;
 	m_width = width;
 	m_height = height;
 }
 
-void CollisionMap::SetCollisionTile(int x, int y, CollisionTileId tile)
+void CollisionMap::SetTerrainTile(int x, int y, TerrainTileId tile)
 {
-	int tileIdx = (y * m_width) + x;
+	u32 tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
-	m_collisionTiles[tileIdx] = tile;
+	u32& entry = m_collisionTiles[tileIdx];
+	entry &= ~s_collisionTileTerrainIdMask;
+	entry |= tileIdx;
 }
 
-CollisionTileId CollisionMap::GetCollisionTile(int x, int y) const
+TerrainTileId CollisionMap::GetTerrainTile(int x, int y) const
+{
+	u32 tileIdx = (y * m_width) + x;
+	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
+	return m_collisionTiles[tileIdx] & s_collisionTileTerrainIdMask;
+}
+
+void CollisionMap::SetCollisionTileFlags(int x, int y, u16 flags)
 {
 	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
-	return m_collisionTiles[tileIdx];
+	u32& entry = m_collisionTiles[tileIdx];
+	entry &= ~s_collisionTileFlagMask;
+	entry |= flags;
+}
+
+u16 CollisionMap::GetCollisionTileFlags(int x, int y) const
+{
+	int tileIdx = (y * m_width) + x;
+	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
+	return m_collisionTiles[tileIdx] & s_collisionTileFlagMask;
 }
 
 void CollisionMap::Export(const Project& project, std::stringstream& stream) const
 {
 	//Use default tile if there is one, else use first tile
-	u32 defaultTileId = project.GetDefaultCollisionTile();
-	if(defaultTileId == InvalidCollisionTileId)
+	u32 defaultTileId = project.GetDefaultTerrainTile();
+	if(defaultTileId == InvalidTerrainTileId)
 	{
 		defaultTileId = 0;
 	}
@@ -106,12 +129,14 @@ void CollisionMap::Export(const Project& project, std::stringstream& stream) con
 
 		for(int x = 0; x < m_width; x++)
 		{
-			CollisionTileId tileId = m_collisionTiles[(y * m_width) + x];
+			TerrainTileId tileId = GetTerrainTile(x, y);
+			u16 tileFlags = GetCollisionTileFlags(x, y);
 
 			//If blank tile, use default tile
-			u32 tileIndex = (tileId == InvalidCollisionTileId) ? defaultTileId : tileId;
+			u32 tileIndex = (tileId == InvalidTerrainTileId) ? defaultTileId : tileId;
 
-			stream << "0x" << std::setw(4) << (u32)tileIndex;
+			u16 word = (u16)tileIndex | tileFlags;
+			stream << "0x" << std::setw(4) << (u32)word;
 
 			if(x < (m_width - 1))
 				stream << ",";
@@ -126,8 +151,8 @@ void CollisionMap::Export(const Project& project, std::stringstream& stream) con
 void CollisionMap::Export(const Project& project, ion::io::File& file) const
 {
 	//Use default tile if there is one, else use first tile
-	u32 defaultTileId = project.GetDefaultCollisionTile();
-	if(defaultTileId == InvalidTileId)
+	u32 defaultTileId = project.GetDefaultTerrainTile();
+	if(defaultTileId == InvalidTerrainTileId)
 	{
 		defaultTileId = 0;
 	}
@@ -136,12 +161,13 @@ void CollisionMap::Export(const Project& project, ion::io::File& file) const
 	{
 		for(int x = 0; x < m_width; x++)
 		{
-			CollisionTileId tileId = m_collisionTiles[(y * m_width) + x];
+			TerrainTileId tileId = GetTerrainTile(x, y);
+			u16 tileFlags = GetCollisionTileFlags(x, y);
 
 			//If blank tile, use default tile
-			u32 tileIndex = (tileId == InvalidCollisionTileId) ? defaultTileId : tileId;
+			u32 tileIndex = (tileId == InvalidTerrainTileId) ? defaultTileId : tileId;
 
-			u16 word = (u16)tileIndex;
+			u16 word = (u16)tileIndex | tileFlags;
 			ion::memory::EndianSwap(word);
 			file.Write(&word, sizeof(u16));
 		}

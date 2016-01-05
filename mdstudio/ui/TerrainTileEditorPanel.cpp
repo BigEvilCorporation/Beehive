@@ -4,13 +4,13 @@
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
 
-#include "CollisionEditorPanel.h"
+#include "TerrainTileEditorPanel.h"
 #include "MainWindow.h"
 #include <ion/renderer/Texture.h>
 
-const float CollisionEditorPanel::s_defaultZoom = 3.0f;
+const float TerrainTileEditorPanel::s_defaultZoom = 3.0f;
 
-CollisionEditorPanel::CollisionEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+TerrainTileEditorPanel::TerrainTileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	//No panning
@@ -27,23 +27,23 @@ CollisionEditorPanel::CollisionEditorPanel(MainWindow* mainWindow, ion::render::
 	CreateGrid(s_tileWidth, s_tileHeight, s_tileWidth, s_tileHeight);
 }
 
-CollisionEditorPanel::~CollisionEditorPanel()
+TerrainTileEditorPanel::~TerrainTileEditorPanel()
 {
 	delete m_tilePrimitive;
 	delete m_collisionPrimitive;
 }
 
-void CollisionEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+void TerrainTileEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 {
 	ViewPanel::OnMouse(event, mouseDelta);
 }
 
-void CollisionEditorPanel::OnKeyboard(wxKeyEvent& event)
+void TerrainTileEditorPanel::OnKeyboard(wxKeyEvent& event)
 {
 	ViewPanel::OnKeyboard(event);
 }
 
-void CollisionEditorPanel::OnResize(wxSizeEvent& event)
+void TerrainTileEditorPanel::OnResize(wxSizeEvent& event)
 {
 	ViewPanel::OnResize(event);
 	CentreCamera();
@@ -51,7 +51,7 @@ void CollisionEditorPanel::OnResize(wxSizeEvent& event)
 	Refresh();
 }
 
-void CollisionEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
+void TerrainTileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
 	const int tileHeight = 8;
 
@@ -59,8 +59,8 @@ void CollisionEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 	{
 		if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 		{
-			CollisionTileId tileId = m_project->GetPaintCollisionTile();
-			if(CollisionTile* tile = m_project->GetCollisionTileset().GetCollisionTile(tileId))
+			TerrainTileId tileId = m_project->GetPaintTerrainTile();
+			if(TerrainTile* tile = m_project->GetTerrainTileset().GetTerrainTile(tileId))
 			{
 				if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
 				{
@@ -73,7 +73,7 @@ void CollisionEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						tile->SetHeight(x, height);
 
 						//Draw on collision tile
-						m_renderResources.SetCollisionTileHeight(tileId, x, height);
+						m_renderResources.SetTerrainTileHeight(tileId, x, height);
 					}
 					else
 					{
@@ -81,12 +81,12 @@ void CollisionEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						tile->ClearHeight(x);
 
 						//Clear collision tile
-						m_renderResources.SetCollisionTileHeight(tileId, x, 0);
+						m_renderResources.SetTerrainTileHeight(tileId, x, 0);
 					}
 
 					//Refresh collision panels
-					m_mainWindow->RedrawPanel(MainWindow::ePanelCollisionTiles);
-					m_mainWindow->RedrawPanel(MainWindow::ePanelCollisionTileEditor);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTiles);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTileEditor);
 					m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
 				}
 			}
@@ -94,7 +94,7 @@ void CollisionEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 	}
 }
 
-void CollisionEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
+void TerrainTileEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
 	RenderTile(renderer, cameraInverseMtx, projectionMtx, z);
 
@@ -110,12 +110,12 @@ void CollisionEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::
 	}
 }
 
-void CollisionEditorPanel::SetProject(Project* project)
+void TerrainTileEditorPanel::SetProject(Project* project)
 {
 	ViewPanel::SetProject(project);
 }
 
-void CollisionEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
+void TerrainTileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	ViewPanel::Refresh(eraseBackground, rect);
 
@@ -128,7 +128,7 @@ void CollisionEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	}
 }
 
-void CollisionEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+void TerrainTileEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//Draw tile
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
@@ -138,10 +138,10 @@ void CollisionEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion
 	material->Unbind();
 }
 
-void CollisionEditorPanel::RenderCollision(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+void TerrainTileEditorPanel::RenderCollision(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//Draw collision tile
-	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialCollisionTileset);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
 	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
@@ -150,14 +150,14 @@ void CollisionEditorPanel::RenderCollision(ion::render::Renderer& renderer, cons
 	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 }
 
-void CollisionEditorPanel::PaintTile()
+void TerrainTileEditorPanel::PaintTile()
 {
 	ion::render::TexCoord texCoords[4];
 	m_renderResources.GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
 	m_tilePrimitive->SetTexCoords(texCoords);
 }
 
-void CollisionEditorPanel::PaintCollision()
+void TerrainTileEditorPanel::PaintCollision()
 {
 	if(m_project)
 	{
@@ -166,7 +166,7 @@ void CollisionEditorPanel::PaintCollision()
 
 		//Set tex coords
 		ion::render::TexCoord texCoords[4];
-		m_renderResources.GetCollisionTileTexCoords(m_project->GetPaintCollisionTile(), texCoords);
+		m_renderResources.GetTerrainTileTexCoords(m_project->GetPaintTerrainTile(), texCoords);
 		m_collisionPrimitive->SetTexCoords(texCoords);
 	}
 }

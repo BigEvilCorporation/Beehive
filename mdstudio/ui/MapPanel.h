@@ -57,6 +57,7 @@ private:
 	void RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
@@ -67,7 +68,7 @@ private:
 	void PaintCollisionMap(const CollisionMap& map);
 
 	//Paint collision tile to canvas
-	void PaintCollisionTile(CollisionTileId tileId, int x, int y);
+	void PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y);
 
 	//Create stamp preview primitive
 	void CreateStampPreview(Stamp* stamp);
@@ -79,6 +80,7 @@ private:
 	void OnContextMenuClick(wxCommandEvent& event);
 
 	//Rendering primitives
+	ion::render::Chessboard* m_terrainCanvasPrimitive;
 	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
 

@@ -4,59 +4,59 @@
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
 
-#include "CollisionTileset.h"
+#include "TerrainTileset.h"
 #include <ion/core/cryptography/Hash.h>
 
-CollisionTileset::CollisionTileset()
+TerrainTileset::TerrainTileset()
 {
 }
 
-void CollisionTileset::Clear()
+void TerrainTileset::Clear()
 {
 	m_tiles.clear();
 }
 
-CollisionTileId CollisionTileset::AddCollisionTile()
+TerrainTileId TerrainTileset::AddTerrainTile()
 {
-	CollisionTileId index = m_tiles.size();
-	m_tiles.push_back(CollisionTile());
+	TerrainTileId index = m_tiles.size();
+	m_tiles.push_back(TerrainTile());
 	m_tiles[index].CalculateHash();
 	AddToHashMap(index);
 	return index;
 }
 
-void CollisionTileset::PopBackCollisionTile()
+void TerrainTileset::PopBackTerrainTile()
 {
 	RemoveFromHashMap(m_tiles.size() - 1);
 	m_tiles.pop_back();
 }
 
-void CollisionTileset::HashChanged(CollisionTileId tileId)
+void TerrainTileset::HashChanged(TerrainTileId tileId)
 {
 	RemoveFromHashMap(tileId);
 	m_tiles[tileId].CalculateHash();
 	AddToHashMap(tileId);
 }
 
-void CollisionTileset::AddToHashMap(CollisionTileId tileId)
+void TerrainTileset::AddToHashMap(TerrainTileId tileId)
 {
 	m_hashMap.insert(std::make_pair(m_tiles[tileId].GetHash(), tileId));
 }
 
-void CollisionTileset::RemoveFromHashMap(CollisionTileId tileId)
+void TerrainTileset::RemoveFromHashMap(TerrainTileId tileId)
 {
 	m_hashMap.erase(m_tiles[tileId].GetHash());
 }
 
-void CollisionTileset::CalculateHash(const CollisionTile& tile, u64& hash) const
+void TerrainTileset::CalculateHash(const TerrainTile& tile, u64& hash) const
 {
-	s8 heights[CollisionTile::tileWidth];
+	s8 heights[TerrainTile::tileWidth];
 	tile.GetHeights(heights);
 
-	hash = ion::Hash64((const u8*)heights, CollisionTile::tileWidth);
+	hash = ion::Hash64((const u8*)heights, TerrainTile::tileWidth);
 }
 
-CollisionTileId CollisionTileset::FindDuplicate(const CollisionTile& tile) const
+TerrainTileId TerrainTileset::FindDuplicate(const TerrainTile& tile) const
 {
 	//Calculate hash
 	u64 hash;
@@ -70,14 +70,14 @@ CollisionTileId CollisionTileset::FindDuplicate(const CollisionTile& tile) const
 		return it->second;
 	}
 
-	return InvalidCollisionTileId;
+	return InvalidTerrainTileId;
 }
 
-CollisionTile* CollisionTileset::GetCollisionTile(CollisionTileId tileId)
+TerrainTile* TerrainTileset::GetTerrainTile(TerrainTileId tileId)
 {
-	CollisionTile* tile = NULL;
+	TerrainTile* tile = NULL;
 
-	if(tileId != InvalidCollisionTileId && tileId < m_tiles.size())
+	if(tileId != InvalidTerrainTileId && tileId < m_tiles.size())
 	{
 		tile = &m_tiles[tileId];
 	}
@@ -85,11 +85,11 @@ CollisionTile* CollisionTileset::GetCollisionTile(CollisionTileId tileId)
 	return tile;
 }
 
-const CollisionTile* CollisionTileset::GetCollisionTile(CollisionTileId tileId) const
+const TerrainTile* TerrainTileset::GetTerrainTile(TerrainTileId tileId) const
 {
-	const CollisionTile* tile = NULL;
+	const TerrainTile* tile = NULL;
 
-	if(tileId != InvalidCollisionTileId && tileId < m_tiles.size())
+	if(tileId != InvalidTerrainTileId && tileId < m_tiles.size())
 	{
 		tile = &m_tiles[tileId];
 	}
@@ -97,18 +97,18 @@ const CollisionTile* CollisionTileset::GetCollisionTile(CollisionTileId tileId) 
 	return tile;
 }
 
-int CollisionTileset::GetCount() const
+int TerrainTileset::GetCount() const
 {
 	return m_tiles.size();
 }
 
-void CollisionTileset::Serialise(ion::io::Archive& archive)
+void TerrainTileset::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_tiles, "tiles");
 	archive.Serialise(m_hashMap, "hashMap");
 }
 
-void CollisionTileset::Export(std::stringstream& stream) const
+void TerrainTileset::Export(std::stringstream& stream) const
 {
 	for(int i = 0; i < m_tiles.size(); i++)
 	{
@@ -117,7 +117,7 @@ void CollisionTileset::Export(std::stringstream& stream) const
 	}
 }
 
-void CollisionTileset::Export(ion::io::File& file) const
+void TerrainTileset::Export(ion::io::File& file) const
 {
 	for(int i = 0; i < m_tiles.size(); i++)
 	{

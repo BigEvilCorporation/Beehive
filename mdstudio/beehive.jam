@@ -17,10 +17,6 @@ local SRC =
 	BMPReader.h
 	CollisionMap.cpp
 	CollisionMap.h
-	CollisionTile.cpp
-	CollisionTile.h
-	CollisionTileset.cpp
-	CollisionTileset.h
 	GameObject.cpp
 	GameObject.h
 	Map.cpp
@@ -31,6 +27,10 @@ local SRC =
 	Project.h
 	Stamp.cpp
 	Stamp.h
+	TerrainTile.cpp
+	TerrainTile.h
+	TerrainTileset.cpp
+	TerrainTileset.h
 	Tile.cpp
 	Tile.h
 	Tileset.cpp
@@ -39,10 +39,6 @@ local SRC =
 	ui/Dialogs.h
 	ui/MainWindow.cpp
 	ui/MainWindow.h
-	ui/CollisionEditorPanel.cpp
-	ui/CollisionEditorPanel.h
-	ui/CollisionTilesPanel.cpp
-	ui/CollisionTilesPanel.h
 	ui/GameObjectTypePanel.cpp
 	ui/GameObjectTypePanel.h
 	ui/GameObjectTypeDialog.cpp
@@ -55,6 +51,10 @@ local SRC =
 	ui/PalettesPanel.h
 	ui/StampsPanel.cpp
 	ui/StampsPanel.h
+	ui/TerrainTileEditorPanel.cpp
+	ui/TerrainTileEditorPanel.h
+	ui/TerrainTilesPanel.cpp
+	ui/TerrainTilesPanel.h
 	ui/TileEditorPanel.cpp
 	ui/TileEditorPanel.h
 	ui/TilesPanel.cpp

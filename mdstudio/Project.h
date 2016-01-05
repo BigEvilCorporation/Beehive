@@ -17,8 +17,8 @@
 #include "Tile.h"
 #include "Tileset.h"
 #include "CollisionMap.h"
-#include "CollisionTile.h"
-#include "CollisionTileset.h"
+#include "TerrainTile.h"
+#include "TerrainTileset.h"
 #include "GameObject.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
@@ -68,9 +68,9 @@ public:
 	Tileset& GetTileset() { return m_tileset; }
 	const Tileset& GetTileset() const { return m_tileset; }
 
-	//Get collision tileset
-	CollisionTileset& GetCollisionTileset() { return m_collisionTileset; }
-	const CollisionTileset& GetCollisionTileset() const { return m_collisionTileset; }
+	//Get terrain tileset
+	TerrainTileset& GetTerrainTileset() { return m_terrainTileset; }
+	const TerrainTileset& GetTerrainTileset() const { return m_terrainTileset; }
 
 	//Get palette
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
@@ -101,11 +101,11 @@ public:
 	int GetStampCount() const;
 
 	//Collision tiles
-	void DeleteCollisionTile(CollisionTileId tileId);
-	void SwapCollisionTiles(CollisionTileId tileId1, CollisionTileId tileId2);
-	void SetDefaultCollisionTile(CollisionTileId tileId);
-	CollisionTileId GetDefaultCollisionTile() const { return m_defaultCollisionTile; }
-	int CleanupCollisionTiles();
+	void DeleteTerrainTile(TerrainTileId tileId);
+	void SwapTerrainTiles(TerrainTileId tileId1, TerrainTileId tileId2);
+	void SetDefaultTerrainTile(TerrainTileId tileId);
+	TerrainTileId GetDefaultTerrainTile() const { return m_defaultTerrainTile; }
+	int CleanupTerrainTiles();
 
 	//Terrain generation from graphic tiles
 	void GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles);
@@ -124,8 +124,8 @@ public:
 	u8 GetPaintColour() const;
 
 	//Set current collision tile used for painting
-	void SetPaintCollisionTile(CollisionTileId tile);
-	CollisionTileId GetPaintCollisionTile() const;
+	void SetPaintTerrainTile(TerrainTileId tile);
+	TerrainTileId GetPaintTerrainTile() const;
 
 	//Set current tile used for painting
 	void SetPaintTile(TileId tile);
@@ -157,11 +157,11 @@ public:
 
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
-	void InvalidateCollisionTiles(bool invalidate) { m_collisionTilesInvalidated = invalidate; }
+	void InvalidateTerrainTiles(bool invalidate) { m_terrainTilesInvalidated = invalidate; }
 	void InvalidateStamps(bool invalidate) { m_stampsInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
 	bool TilesAreInvalidated() const { return m_tilesInvalidated; }
-	bool CollisionTilesAreInvalidated() const { return m_collisionTilesInvalidated; }
+	bool TerrainTilesAreInvalidated() const { return m_terrainTilesInvalidated; }
 	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
 	//Import bitmap
@@ -171,7 +171,7 @@ public:
 	bool ExportPalettes(const std::string& filename) const;
 	bool ExportTiles(const std::string& filename, bool binary) const;
 	bool ExportMap(const std::string& filename, bool binary) const;
-	bool ExportCollisionTiles(const std::string& filename, bool binary) const;
+	bool ExportTerrainTiles(const std::string& filename, bool binary) const;
 	bool ExportCollisionMap(const std::string& filename, bool binary) const;
 	bool ExportGameObjects(const std::string& filename) const;
 
@@ -184,7 +184,7 @@ public:
 		std::string palettes;
 		std::string tileset;
 		std::string map;
-		std::string collisionTiles;
+		std::string TerrainTiles;
 		std::string collisionMap;
 		std::string gameObjects;
 
@@ -193,7 +193,7 @@ public:
 			archive.Serialise(palettes, "exportFNamePalettes");
 			archive.Serialise(tileset, "exportFNameTileset");
 			archive.Serialise(map, "exportFNameMap");
-			archive.Serialise(collisionTiles, "exportFNameCollisionTiles");
+			archive.Serialise(TerrainTiles, "exportFNameTerrainTiles");
 			archive.Serialise(collisionMap, "exportFNameCollisionMap");
 			archive.Serialise(gameObjects, "exportFNameGameObjects");
 		}
@@ -228,8 +228,8 @@ private:
 	//Tileset
 	Tileset m_tileset;
 
-	//Collision tileset
-	CollisionTileset m_collisionTileset;
+	//terrain tileset
+	TerrainTileset m_terrainTileset;
 
 	//Map
 	Map m_map;
@@ -255,7 +255,7 @@ private:
 	u8 m_paintColour;
 
 	//Collision tile used for painting
-	CollisionTileId m_paintCollisionTile;
+	TerrainTileId m_paintTerrainTile;
 
 	//Tile used for painting
 	TileId m_paintTile;
@@ -272,8 +272,8 @@ private:
 	//Background tile (replaced InvalidTileId on export)
 	TileId m_backgroundTile;
 
-	//Default collision tile (replaces InvalidCollisionTileId on export)
-	CollisionTileId m_defaultCollisionTile;
+	//Default collision tile (replaces InvalidTerrainTileId on export)
+	TerrainTileId m_defaultTerrainTile;
 
 	//Grid
 	int m_gridSize;
@@ -286,6 +286,6 @@ private:
 	//Map needs redraw
 	bool m_mapInvalidated;
 	bool m_tilesInvalidated;
-	bool m_collisionTilesInvalidated;
+	bool m_terrainTilesInvalidated;
 	bool m_stampsInvalidated;
 };

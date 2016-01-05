@@ -13,7 +13,7 @@
 #include <maths/Vector.h>
 
 #include "Tile.h"
-#include "CollisionTile.h"
+#include "TerrainTile.h"
 #include "Stamp.h"
 #include "GameObject.h"
 
