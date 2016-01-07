@@ -63,6 +63,12 @@ TerrainTileId TerrainTileset::FindDuplicate(const TerrainTile& tile) const
 	CalculateHash(tile, hash);
 
 	//Find duplicate
+	return FindDuplicate(hash);
+}
+
+TerrainTileId TerrainTileset::FindDuplicate(u64 hash) const
+{
+	//Find duplicate
 	HashMap::const_iterator it = m_hashMap.find(hash);
 
 	if(it != m_hashMap.end())

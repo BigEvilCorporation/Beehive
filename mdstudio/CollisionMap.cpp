@@ -85,7 +85,7 @@ void CollisionMap::SetTerrainTile(int x, int y, TerrainTileId tile)
 	ion::debug::Assert(tileIdx < (m_width * m_height), "Out of range");
 	u32& entry = m_collisionTiles[tileIdx];
 	entry &= ~s_collisionTileTerrainIdMask;
-	entry |= tileIdx;
+	entry |= tile;
 }
 
 TerrainTileId CollisionMap::GetTerrainTile(int x, int y) const
