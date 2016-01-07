@@ -571,18 +571,27 @@ void Project::DeleteTerrainTile(TerrainTileId terrainTileId)
 
 	if(m_terrainTileset.GetCount() > 0)
 	{
-		//Swap terrain tile
-		TerrainTile* terrainTile1 = m_terrainTileset.GetTerrainTile(terrainTileId);
-		TerrainTile* terrainTile2 = m_terrainTileset.GetTerrainTile((TerrainTileId)m_terrainTileset.GetCount() - 1);
-		ion::debug::Assert(terrainTile1 && terrainTile2, "Project::DeleteTerrainTile() - Invalid terrain tile");
+		if(swapTerrainTileId != terrainTileId)
+		{
+			//Swap terrain tile
+			TerrainTile* terrainTile1 = m_terrainTileset.GetTerrainTile(terrainTileId);
+			TerrainTile* terrainTile2 = m_terrainTileset.GetTerrainTile(swapTerrainTileId);
+			ion::debug::Assert(terrainTile1 && terrainTile2, "Project::DeleteTerrainTile() - Invalid terrain tile");
 
-		TerrainTile tmpTerrainTile;
-		tmpTerrainTile = *terrainTile1;
-		*terrainTile1 = *terrainTile2;
-		*terrainTile2 = tmpTerrainTile;
+			TerrainTile tmpTerrainTile;
+			tmpTerrainTile = *terrainTile1;
+			*terrainTile1 = *terrainTile2;
+			*terrainTile2 = tmpTerrainTile;
+		}
 
 		//Erase last terrain tile
 		m_terrainTileset.PopBackTerrainTile();
+
+		if(swapTerrainTileId != terrainTileId)
+		{
+			//Id belonging to swapped hash has changed, reinsert into hash map
+			m_terrainTileset.HashChanged(terrainTileId);
+		}
 	}
 
 	//Clear paint terrain tile
@@ -613,14 +622,12 @@ int Project::CleanupTerrainTiles()
 		for(int y = 0; y < m_map.GetHeight(); y++)
 		{
 			TerrainTileId terrainTileId = m_collisionMap.GetTerrainTile(x, y);
-
-			//Ignore default tile
-			if(terrainTileId != m_defaultTerrainTile)
-			{
-				usedTerrainTiles.insert(terrainTileId);
-			}
+			usedTerrainTiles.insert(terrainTileId);
 		}
 	}
+
+	//Always add default tile
+	usedTerrainTiles.insert(m_defaultTerrainTile);
 
 	std::set<TerrainTileId> unusedTerrainTiles;
 
@@ -716,9 +723,9 @@ int Project::CleanupTerrainTiles()
 	}
 
 	//Find and set default tile
-	if(defaultTile)
+	if(defaultTileHash)
 	{
-		m_defaultTerrainTile = m_terrainTileset.FindDuplicate(*defaultTile);
+		m_defaultTerrainTile = m_terrainTileset.FindDuplicate(defaultTileHash);
 	}
 
 	return unusedTerrainTiles.size() + duplicates.size();

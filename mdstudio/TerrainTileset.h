@@ -27,6 +27,7 @@ public:
 	void PopBackTerrainTile();
 	void HashChanged(TerrainTileId tileId);
 	TerrainTileId FindDuplicate(const TerrainTile& tile) const;
+	TerrainTileId FindDuplicate(u64 hash) const;
 
 	TerrainTile* GetTerrainTile(TerrainTileId tileId);
 	const TerrainTile* GetTerrainTile(TerrainTileId tileId) const;
