@@ -58,36 +58,38 @@
 #define wxID_BTN_TOOLS_STAMPS 1010
 #define wxID_BTN_TOOLS_PALETTES 1011
 #define wxID_BTN_TOOLS_GAMEOBJS 1012
-#define wxID_BTN_MAP_CLEAR 1013
-#define wxID_BTN_MAP_RESIZE 1014
-#define wxID_BTN_TILES_IMPORT 1015
-#define wxID_BTN_TILES_CREATE 1016
-#define wxID_BTN_TILES_DELETE 1017
-#define wxID_BTN_TILES_CLEANUP 1018
-#define wxID_BTN_STAMPS_CREATE 1019
-#define wxID_BTN_STAMPS_DELETE 1020
-#define wxID_BTN_COL_TILES_CREATE 1021
-#define wxID_BTN_COL_TILES_DELETE 1022
-#define wxID_BTN_COL_TILES_CLEANUP 1023
-#define wxID_BTN_COL_MAP_CLEAR 1024
-#define wxID_BTN_GAME_OBJ_TYPES 1025
-#define wxID_BTN_CANCEL 1026
-#define wxID_TOOL_SELECTTILE 1027
-#define wxID_TOOL_PAINT 1028
-#define wxID_TOOL_TILEPICKER 1029
-#define wxID_TOOL_FLIPX 1030
-#define wxID_TOOL_FLIPY 1031
-#define wxID_TOOL_FILL 1032
-#define wxID_TOOL_CLONE 1033
-#define wxID_TOOL_SELECTSTAMP 1034
-#define wxID_TOOL_STAMP 1035
-#define wxID_TOOL_STAMPPICKER 1036
-#define wxID_TOOL_CREATESTAMP 1037
-#define wxID_TOOL_REMOVESTAMP 1038
-#define wxID_TOOL_COL_PAINTTERRAIN 1039
-#define wxID_TOOL_COL_PAINTSOLID 1040
-#define wxID_TOOL_PLACEGAMEOBJ 1041
-#define wxID_TOOL_REMOVEGAMEOBJ 1042
+#define wxID_BTN_TOOLS_GAMEOBJPARAMS 1013
+#define wxID_BTN_MAP_CLEAR 1014
+#define wxID_BTN_MAP_RESIZE 1015
+#define wxID_BTN_TILES_IMPORT 1016
+#define wxID_BTN_TILES_CREATE 1017
+#define wxID_BTN_TILES_DELETE 1018
+#define wxID_BTN_TILES_CLEANUP 1019
+#define wxID_BTN_STAMPS_CREATE 1020
+#define wxID_BTN_STAMPS_DELETE 1021
+#define wxID_BTN_COL_TILES_CREATE 1022
+#define wxID_BTN_COL_TILES_DELETE 1023
+#define wxID_BTN_COL_TILES_CLEANUP 1024
+#define wxID_BTN_COL_MAP_CLEAR 1025
+#define wxID_BTN_GAME_OBJ_TYPES 1026
+#define wxID_BTN_CANCEL 1027
+#define wxID_TOOL_SELECTTILE 1028
+#define wxID_TOOL_PAINT 1029
+#define wxID_TOOL_TILEPICKER 1030
+#define wxID_TOOL_FLIPX 1031
+#define wxID_TOOL_FLIPY 1032
+#define wxID_TOOL_FILL 1033
+#define wxID_TOOL_CLONE 1034
+#define wxID_TOOL_SELECTSTAMP 1035
+#define wxID_TOOL_STAMP 1036
+#define wxID_TOOL_STAMPPICKER 1037
+#define wxID_TOOL_CREATESTAMP 1038
+#define wxID_TOOL_REMOVESTAMP 1039
+#define wxID_TOOL_COL_PAINTTERRAIN 1040
+#define wxID_TOOL_COL_PAINTSOLID 1041
+#define wxID_TOOL_SELECTGAMEOBJ 1042
+#define wxID_TOOL_PLACEGAMEOBJ 1043
+#define wxID_TOOL_REMOVEGAMEOBJ 1044
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -133,6 +135,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsGameObjs( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnToolsGameObjParams( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapResize( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -208,12 +211,13 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolPaintCollisionPixel;
 		wxBitmapButton* m_toolPaintCollisionSolid;
 		wxStaticText* m_staticText14;
+		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
 	
 	public:
 		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 121,559 ), long style = wxTAB_TRAVERSAL ); 
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 121,571 ), long style = wxTAB_TRAVERSAL ); 
 		~MapToolbox();
 	
 };
@@ -367,6 +371,41 @@ class GameObjTypeDialogBase : public wxDialog
 		
 		GameObjTypeDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Game Object Types"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 973,667 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~GameObjTypeDialogBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GameObjParamsPanelBase
+///////////////////////////////////////////////////////////////////////////////
+class GameObjParamsPanelBase : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxToolBar* m_toolBar1;
+		wxToolBarToolBase* m_toolAddVariable; 
+		wxToolBarToolBase* m_toolRemoveVariable; 
+		wxListCtrl* m_listVariables;
+		wxStaticText* m_staticText6;
+		wxTextCtrl* m_textVariableName;
+		wxStaticText* m_staticText7;
+		wxChoice* m_choiceSize;
+		wxStaticText* m_staticText8;
+		wxTextCtrl* m_textValue;
+		wxButton* m_btnApply;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
+		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnApplyChanges( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 747,512 ), long style = wxTAB_TRAVERSAL ); 
+		~GameObjParamsPanelBase();
 	
 };
 

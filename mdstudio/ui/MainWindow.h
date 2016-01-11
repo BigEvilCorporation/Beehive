@@ -22,8 +22,9 @@
 #include "TileEditorPanel.h"
 #include "TerrainTilesPanel.h"
 #include "TerrainTileEditorPanel.h"
-#include "GameObjectTypePanel.h"
 #include "GameObjectTypeDialog.h"
+#include "GameObjectTypePanel.h"
+#include "GameObjectParamsPanel.h"
 
 #include "../Project.h"
 
@@ -41,7 +42,8 @@ public:
 		ePanelTileEditor,
 		ePanelTerrainTiles,
 		ePanelTerrainTileEditor,
-		ePanelGameObjectTypes
+		ePanelGameObjectTypes,
+		ePanelGameObjectParams
 	};
 
 	MainWindow();
@@ -56,12 +58,16 @@ public:
 	void ShowPanelTerrainTiles();
 	void ShowPanelTerrainEditor();
 	void ShowPanelGameObjectTypes();
+	void ShowPanelGameObjectParams();
 
 	//Open toolbox
 	void ShowPanelToolbox();
 
 	//Set current map editing tool
 	void SetMapTool(ToolType tool);
+
+	//Set selected game object
+	void SetSelectedGameObject(GameObject* gameObject);
 
 	//Sync project settings and their respective UI widget states
 	void SyncSettingsWidgets();
@@ -96,6 +102,7 @@ protected:
 	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event) { event.Skip(); }
 	virtual void OnBtnToolsPalettes(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnToolsGameObjParams(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
@@ -126,6 +133,7 @@ private:
 	wxWeakRef<TerrainTilesPanel> m_terrainTilesPanel;
 	wxWeakRef<TerrainTileEditorPanel> m_TerrainTileEditorPanel;
 	wxWeakRef<GameObjectTypesPanel> m_gameObjectTypePanel;
+	wxWeakRef<GameObjectParamsPanel> m_gameObjectParamsPanel;
 
 	ProjectPtr m_project;
 

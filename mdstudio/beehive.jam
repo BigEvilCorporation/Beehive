@@ -39,6 +39,8 @@ local SRC =
 	ui/Dialogs.h
 	ui/MainWindow.cpp
 	ui/MainWindow.h
+	ui/GameObjectParamsPanel.cpp
+	ui/GameObjectParamsPanel.h
 	ui/GameObjectTypePanel.cpp
 	ui/GameObjectTypePanel.h
 	ui/GameObjectTypeDialog.cpp

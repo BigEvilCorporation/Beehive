@@ -34,12 +34,12 @@ private:
 	void PopulateTypeList();
 	void PopulateTypeFields(GameObjectType* gameObjType);
 	void PopulateVarsList(GameObjectType* gameObjType);
-	void PopulateVarsFields(GameObjectType::Variable* variable);
+	void PopulateVarsFields(GameObjectVariable* variable);
 
 	MainWindow& m_mainWindow;
 	Project& m_project;
 	GameObjectTypeId m_currentTypeId;
-	GameObjectType::Variable* m_currentVariable;
+	GameObjectVariable* m_currentVariable;
 
 	std::map<u32, GameObjectTypeId> m_gameObjIndexMap;
 };

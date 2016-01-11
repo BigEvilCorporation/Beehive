@@ -111,6 +111,7 @@ public:
 	//Place game object on map
 	GameObjectId PlaceGameObject(int x, int y, const GameObjectType& objectType);
 	GameObjectId FindGameObject(int x, int y, ion::Vector2i& topLeft) const;
+	GameObject* GetGameObject(GameObjectId gameObjectId);
 	void RemoveGameObject(int x, int y);
 	const TGameObjectPosMap& GetGameObjects() const;
 
