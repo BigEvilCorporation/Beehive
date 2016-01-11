@@ -234,10 +234,9 @@ GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
 	{
 		for(std::vector<GameObjectMapEntry>::const_reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec && !gameObjectId; ++itVec)
 		{
+			ion::Vector2i size(itVec->m_size.x / 8, itVec->m_size.y / 8);
 			topLeft = itVec->m_position;
-			size = itVec->m_size;
-
-			bottomRight = topLeft + size;
+			ion::Vector2i bottomRight = topLeft + size;
 
 			if(x >= topLeft.x && y >= topLeft.y
 				&& x < bottomRight.x && y < bottomRight.y)
@@ -252,13 +251,16 @@ GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
 
 GameObject* Map::GetGameObject(GameObjectId gameObjectId)
 {
-	for(TGameObjectPosMap::iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap; ++itMap)
+	if(gameObjectId != InvalidGameObjectId)
 	{
-		for(std::vector<GameObjectMapEntry>::iterator it = itMap->second.begin(), end = itMap->second.end(); it != end; ++it)
+		for(TGameObjectPosMap::iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap; ++itMap)
 		{
-			if(it->m_gameObject.GetId() == gameObjectId)
+			for(std::vector<GameObjectMapEntry>::iterator it = itMap->second.begin(), end = itMap->second.end(); it != end; ++it)
 			{
-				return &it->m_gameObject;
+				if(it->m_gameObject.GetId() == gameObjectId)
+				{
+					return &it->m_gameObject;
+				}
 			}
 		}
 	}
@@ -268,17 +270,13 @@ GameObject* Map::GetGameObject(GameObjectId gameObjectId)
 
 void Map::RemoveGameObject(int x, int y)
 {
-	ion::Vector2i size;
-	ion::Vector2i bottomRight;
-
 	for(TGameObjectPosMap::iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap; ++itMap)
 	{
 		for(std::vector<GameObjectMapEntry>::reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec; ++itVec)
 		{
+			ion::Vector2i size(itVec->m_size.x / 8, itVec->m_size.y / 8);
 			ion::Vector2i topLeft = itVec->m_position;
-			ion::Vector2i size = itVec->m_size;
-
-			bottomRight = topLeft + size;
+			ion::Vector2i bottomRight = topLeft + size;
 
 			if(x >= topLeft.x && y >= topLeft.y
 				&& x < bottomRight.x && y < bottomRight.y)

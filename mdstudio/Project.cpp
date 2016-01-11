@@ -907,18 +907,28 @@ void Project::RemoveGameObjectType(GameObjectTypeId typeId)
 GameObjectType* Project::GetGameObjectType(GameObjectTypeId typeId)
 {
 	GameObjectType* gameObjectType = NULL;
-	TGameObjectTypeMap::iterator it = m_gameObjectTypes.find(typeId);
-	if(it != m_gameObjectTypes.end())
-		gameObjectType = &it->second;
+
+	if(typeId != InvalidGameObjectTypeId)
+	{
+		TGameObjectTypeMap::iterator it = m_gameObjectTypes.find(typeId);
+		if(it != m_gameObjectTypes.end())
+			gameObjectType = &it->second;
+	}
+	
 	return gameObjectType;
 }
 
 const GameObjectType* Project::GetGameObjectType(GameObjectTypeId typeId) const
 {
 	const GameObjectType* gameObjectType = NULL;
-	TGameObjectTypeMap::const_iterator it = m_gameObjectTypes.find(typeId);
-	if(it != m_gameObjectTypes.end())
-		gameObjectType = &it->second;
+
+	if(typeId != InvalidGameObjectTypeId)
+	{
+		TGameObjectTypeMap::const_iterator it = m_gameObjectTypes.find(typeId);
+		if(it != m_gameObjectTypes.end())
+			gameObjectType = &it->second;
+	}
+
 	return gameObjectType;
 }
 
