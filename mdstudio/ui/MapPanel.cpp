@@ -474,6 +474,24 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				break;
 			}
 
+			case eToolSelectGameObject:
+			{
+				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+				{
+					ion::Vector2i topLeft;
+					GameObjectId gameObjectId = m_project->GetMap().FindGameObject(x, y, topLeft);
+					if(GameObject* gameObject = m_project->GetMap().GetGameObject(gameObjectId))
+					{
+						m_mainWindow->SetSelectedGameObject(gameObject);
+
+						m_previewGameObjectType = gameObject->GetTypeId();
+						m_previewGameObjectPos.x = topLeft.x;
+						m_previewGameObjectPos.y = topLeft.y;
+					}
+				}
+				break;
+			}
+
 			case eToolPlaceGameObject:
 			{
 				m_previewGameObjectType = m_project->GetPaintGameObjectType();

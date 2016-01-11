@@ -21,13 +21,13 @@ GameObjectType::GameObjectType(u32 id)
 	m_dimensions.y = 16;
 }
 
-GameObjectType::Variable& GameObjectType::AddVariable()
+GameObjectVariable& GameObjectType::AddVariable()
 {
-	m_variables.push_back(Variable());
+	m_variables.push_back(GameObjectVariable());
 	return m_variables[m_variables.size() - 1];
 }
 
-void GameObjectType::RemoveVariable(GameObjectType::Variable& variable)
+void GameObjectType::RemoveVariable(GameObjectVariable& variable)
 {
 	for(int i = 0; i < m_variables.size(); i++)
 	{
@@ -40,7 +40,7 @@ void GameObjectType::RemoveVariable(GameObjectType::Variable& variable)
 	}
 }
 
-GameObjectType::Variable* GameObjectType::GetVariable(u32 index)
+GameObjectVariable* GameObjectType::GetVariable(u32 index)
 {
 	ion::debug::Assert(index < m_variables.size(), "GameObjectType::GetVariable() - out of range");
 	return &m_variables[index];
@@ -67,43 +67,96 @@ GameObject::GameObject(GameObjectId objectId, GameObjectTypeId typeId, const ion
 	m_position = position;
 }
 
+GameObjectVariable& GameObject::AddVariable()
+{
+	m_variables.push_back(GameObjectVariable());
+	return m_variables[m_variables.size() - 1];
+}
+
+void GameObject::RemoveVariable(GameObjectVariable& variable)
+{
+	for(int i = 0; i < m_variables.size(); i++)
+	{
+		if(m_variables[i].m_name == variable.m_name)
+		{
+			std::swap(variable, m_variables.back());
+			m_variables.pop_back();
+			return;
+		}
+	}
+}
+
+GameObjectVariable* GameObject::GetVariable(u32 index)
+{
+	ion::debug::Assert(index < m_variables.size(), "GameObject::GetVariable() - out of range");
+	return &m_variables[index];
+}
+
 void GameObject::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_objectId, "objectId");
 	archive.Serialise(m_typeId, "typeId");
 	archive.Serialise(m_position, "position");
+	archive.Serialise(m_variables, "variables");
 }
 
-void GameObject::Export(std::stringstream& stream, const GameObjectType& objectType) const
+void GameObject::Export(std::stringstream& stream, const GameObjectType& gameObjectType) const
 {
-	stream << objectType.GetName().c_str() << "_" << (u32)m_objectId << ":" << std::endl;
-	stream << '\t' << "jsr " << objectType.GetName() << "Init" << std::endl;
+	stream << gameObjectType.GetName().c_str() << "_" << (u32)m_objectId << ":" << std::endl;
+	stream << '\t' << "jsr " << gameObjectType.GetName() << "Init" << std::endl;
 
-	const std::vector<GameObjectType::Variable>& variables = objectType.GetVariables();
+	const std::vector<GameObjectVariable>& templateVariables = gameObjectType.GetVariables();
 
-	for(int i = 0; i < variables.size(); i++)
+	for(int i = 0; i < templateVariables.size(); i++)
 	{
 		//"move.[s] #[value], [name](a0)"
 
 		stream << '\t';
 
-		switch(variables[i].m_size)
+		switch(templateVariables[i].m_size)
 		{
-		case GameObjectType::eSizeByte:
+		case eSizeByte:
 			stream << "move.b ";
 			break;
-		case GameObjectType::eSizeWord:
+		case eSizeWord:
 			stream << "move.w ";
 			break;
-		case GameObjectType::eSizeLong:
+		case eSizeLong:
 			stream << "move.l ";
 			break;
 		}
 
-		std::string valueString = variables[i].m_value;
+		std::string valueString = templateVariables[i].m_value;
 		ParseValueTokens(valueString);
 
-		stream << "#" << valueString << ", " << variables[i].m_name << "(a0)" << std::endl;
+		stream << "#" << valueString << ", " << templateVariables[i].m_name << "(a0)" << std::endl;
+	}
+
+	const std::vector<GameObjectVariable>& instanceVariables = GetVariables();
+
+	for(int i = 0; i < instanceVariables.size(); i++)
+	{
+		//"move.[s] #[value], [name](a0)"
+
+		stream << '\t';
+
+		switch(instanceVariables[i].m_size)
+		{
+		case eSizeByte:
+			stream << "move.b ";
+			break;
+		case eSizeWord:
+			stream << "move.w ";
+			break;
+		case eSizeLong:
+			stream << "move.l ";
+			break;
+		}
+
+		std::string valueString = instanceVariables[i].m_value;
+		ParseValueTokens(valueString);
+
+		stream << "#" << valueString << ", " << instanceVariables[i].m_name << "(a0)" << std::endl;
 	}
 }
 

@@ -384,6 +384,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
 	}
@@ -486,11 +487,49 @@ void MainWindow::ShowPanelGameObjectTypes()
 	}
 }
 
+void MainWindow::ShowPanelGameObjectParams()
+{
+	if(m_project.get())
+	{
+		if(!m_gameObjectParamsPanel)
+		{
+			wxSize clientSize = GetClientSize();
+
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.Float();
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Bottom();
+			paneInfo.Caption("Game Object Params");
+			paneInfo.CaptionVisible(true);
+
+			m_gameObjectParamsPanel = new GameObjectParamsPanel(*this, *m_project.get(), m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_gameObjectParamsPanel, paneInfo);
+			m_gameObjectParamsPanel->Show();
+			m_auiManager.Update();
+		}
+
+		if(!m_gameObjectParamsPanel->IsShown())
+		{
+			m_gameObjectParamsPanel->Show();
+		}
+	}
+}
+
 void MainWindow::SetMapTool(ToolType tool)
 {
 	if(m_mapPanel)
 	{
 		m_mapPanel->SetTool(tool);
+	}
+}
+
+void MainWindow::SetSelectedGameObject(GameObject* gameObject)
+{
+	if(m_gameObjectParamsPanel)
+	{
+		m_gameObjectParamsPanel->SetGameObject(gameObject);
 	}
 }
 
@@ -962,6 +1001,11 @@ void MainWindow::OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event)
 	ShowPanelGameObjectTypes();
 }
 
+void MainWindow::OnBtnToolsGameObjParams(wxRibbonButtonBarEvent& event)
+{
+	ShowPanelGameObjectParams();
+}
+
 void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
@@ -1094,6 +1138,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_REMOVESTAMP:
 			m_mapPanel->SetTool(eToolRemoveStamp);
+			break;
+		case wxID_TOOL_SELECTGAMEOBJ:
+			m_mapPanel->SetTool(eToolSelectGameObject);
 			break;
 		case wxID_TOOL_PLACEGAMEOBJ:
 			m_mapPanel->SetTool(eToolPlaceGameObject);

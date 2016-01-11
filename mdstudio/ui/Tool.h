@@ -31,6 +31,7 @@ enum ToolType
 	eToolStampPicker,
 	eToolFlipX,
 	eToolFlipY,
+	eToolSelectGameObject,
 	eToolPlaceGameObject,
 	eToolRemoveGameObject,
 	eToolGenerateTerrain

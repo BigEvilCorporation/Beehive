@@ -103,13 +103,13 @@ void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
 			switch(m_choiceSize->GetSelection())
 			{
 			case 0:
-				m_currentVariable->m_size = GameObjectType::eSizeByte;
+				m_currentVariable->m_size = eSizeByte;
 				break;
 			case 1:
-				m_currentVariable->m_size = GameObjectType::eSizeWord;
+				m_currentVariable->m_size = eSizeWord;
 				break;
 			case 2:
-				m_currentVariable->m_size = GameObjectType::eSizeLong;
+				m_currentVariable->m_size = eSizeLong;
 				break;
 			default:
 				ion::debug::Error("GameObjectTypeDialog::OnVariableSizeChanged() - Bad size");
@@ -199,7 +199,7 @@ void GameObjectTypeDialog::PopulateVarsList(GameObjectType* gameObjType)
 
 	if(gameObjType)
 	{
-		const std::vector<GameObjectType::Variable>& variables = gameObjType->GetVariables();
+		const std::vector<GameObjectVariable>& variables = gameObjType->GetVariables();
 
 		for(int i = 0; i < variables.size(); i++)
 		{
@@ -211,13 +211,13 @@ void GameObjectTypeDialog::PopulateVarsList(GameObjectType* gameObjType)
 			
 			switch(variables[i].m_size)
 			{
-			case GameObjectType::eSizeByte:
+			case eSizeByte:
 				sizeText = "Byte";
 				break;
-			case GameObjectType::eSizeWord:
+			case eSizeWord:
 				sizeText = "Word";
 				break;
-			case GameObjectType::eSizeLong:
+			case eSizeLong:
 				sizeText = "Long";
 				break;
 			}
@@ -229,7 +229,7 @@ void GameObjectTypeDialog::PopulateVarsList(GameObjectType* gameObjType)
 	}
 }
 
-void GameObjectTypeDialog::PopulateVarsFields(GameObjectType::Variable* variable)
+void GameObjectTypeDialog::PopulateVarsFields(GameObjectVariable* variable)
 {
 	if(variable)
 	{
@@ -240,13 +240,13 @@ void GameObjectTypeDialog::PopulateVarsFields(GameObjectType::Variable* variable
 
 		switch(variable->m_size)
 		{
-		case GameObjectType::eSizeByte:
+		case eSizeByte:
 			choice = 0;
 			break;
-		case GameObjectType::eSizeWord:
+		case eSizeWord:
 			choice = 1;
 			break;
-		case GameObjectType::eSizeLong:
+		case eSizeLong:
 			choice = 2;
 			break;
 		}

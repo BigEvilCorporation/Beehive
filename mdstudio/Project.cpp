@@ -1237,38 +1237,36 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 
 					//If closest palette has enough space to merge
 					bool merged = false;
-					if(closestPaletteColourMatches > 0)
+
+					int closestPaletteUsedColours = 0;
+					int importedPaletteUsedColours = 0;
+
+					for(int i = 0; i < Palette::coloursPerPalette; i++)
 					{
-						int closestPaletteUsedColours = 0;
-						int importedPaletteUsedColours = 0;
-
-						for(int i = 0; i < Palette::coloursPerPalette; i++)
+						if(m_palettes[closestPaletteId].IsColourUsed(i))
 						{
-							if(m_palettes[closestPaletteId].IsColourUsed(i))
-							{
-								closestPaletteUsedColours++;
-							}
+							closestPaletteUsedColours++;
 						}
+					}
 
-						for(int i = 0; i < Palette::coloursPerPalette; i++)
+					for(int i = 0; i < Palette::coloursPerPalette; i++)
+					{
+						if(importedPalette.IsColourUsed(i))
 						{
-							if(importedPalette.IsColourUsed(i))
-							{
-								importedPaletteUsedColours++;
-							}
+							importedPaletteUsedColours++;
 						}
+					}
 
-						int spareColours = Palette::coloursPerPalette - closestPaletteUsedColours;
-						int requiredNewColours = importedPaletteUsedColours - closestPaletteColourMatches;
+					int spareColours = Palette::coloursPerPalette - closestPaletteUsedColours;
+					int requiredNewColours = importedPaletteUsedColours - closestPaletteColourMatches;
 
-						if(spareColours >= requiredNewColours)
+					if(spareColours >= requiredNewColours)
+					{
+						//Merge palettes
+						if(MergePalettes(m_palettes[closestPaletteId], importedPalette))
 						{
-							//Merge palettes
-							if(MergePalettes(m_palettes[closestPaletteId], importedPalette))
-							{
-								paletteId = closestPaletteId;
-								merged = true;
-							}
+							paletteId = closestPaletteId;
+							merged = true;
 						}
 					}
 					
