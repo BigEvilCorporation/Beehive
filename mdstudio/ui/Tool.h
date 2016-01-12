@@ -22,6 +22,7 @@ enum ToolType
 	eToolPaintTerrainTile,
 	eToolPaintCollisionTerrain,
 	eToolPaintCollisionSolid,
+	eToolDeleteTerrainTile,
 	eToolPaintStamp,
 	eToolClone,
 	eToolCreateStamp,

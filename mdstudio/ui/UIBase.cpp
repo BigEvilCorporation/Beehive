@@ -33,6 +33,7 @@
 #include "../FormBuilderProj/tool_createstamp.xpm"
 #include "../FormBuilderProj/tool_deletegameobj.xpm"
 #include "../FormBuilderProj/tool_deletestamp.xpm"
+#include "../FormBuilderProj/tool_deleteterraintile.xpm"
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
@@ -347,6 +348,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer8->Add( m_toolPaintCollisionSolid, 0, wxALL, 5 );
 	
+	m_toolDeleteTerrainTile = new wxBitmapButton( this, wxID_TOOL_COL_DELETETERRTILE, wxBitmap( tool_deleteterraintile_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolDeleteTerrainTile->SetToolTip( wxT("Delete Terrain Tile") );
+	
+	fgSizer8->Add( m_toolDeleteTerrainTile, 0, wxALL, 5 );
+	
 	
 	bSizer16->Add( fgSizer8, 1, wxEXPAND, 5 );
 	
@@ -360,7 +366,7 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	fgSizer9->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
 	m_toolSelectGameObject = new wxBitmapButton( this, wxID_TOOL_SELECTGAMEOBJ, wxBitmap( tool_selectgameobj_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolSelectGameObject->SetToolTip( wxT("Place Game Object") );
+	m_toolSelectGameObject->SetToolTip( wxT("Select Game Object") );
 	
 	fgSizer9->Add( m_toolSelectGameObject, 0, wxALL, 5 );
 	

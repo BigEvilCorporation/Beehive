@@ -87,9 +87,10 @@
 #define wxID_TOOL_REMOVESTAMP 1039
 #define wxID_TOOL_COL_PAINTTERRAIN 1040
 #define wxID_TOOL_COL_PAINTSOLID 1041
-#define wxID_TOOL_SELECTGAMEOBJ 1042
-#define wxID_TOOL_PLACEGAMEOBJ 1043
-#define wxID_TOOL_REMOVEGAMEOBJ 1044
+#define wxID_TOOL_COL_DELETETERRTILE 1042
+#define wxID_TOOL_SELECTGAMEOBJ 1043
+#define wxID_TOOL_PLACEGAMEOBJ 1044
+#define wxID_TOOL_REMOVEGAMEOBJ 1045
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -210,6 +211,7 @@ class MapToolbox : public wxPanel
 		wxStaticText* m_staticText13;
 		wxBitmapButton* m_toolPaintCollisionPixel;
 		wxBitmapButton* m_toolPaintCollisionSolid;
+		wxBitmapButton* m_toolDeleteTerrainTile;
 		wxStaticText* m_staticText14;
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;

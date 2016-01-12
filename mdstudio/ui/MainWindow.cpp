@@ -384,6 +384,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRTILE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
@@ -1114,6 +1115,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_COL_PAINTSOLID:
 			m_mapPanel->SetTool(eToolPaintCollisionSolid);
+			break;
+		case wxID_TOOL_COL_DELETETERRTILE:
+			m_mapPanel->SetTool(eToolDeleteTerrainTile);
 			break;
 		case wxID_TOOL_TILEPICKER:
 			m_mapPanel->SetTool(eToolTilePicker);
