@@ -144,24 +144,22 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			}
 
 			case eToolPaintTerrainTile:
+			case eToolDeleteTerrainTile:
 			{
 				//If clicking/dragging, paint collision tile
 				if(buttonBits & eMouseLeft)
 				{
 					//Get tile ID to paint
-					TerrainTileId tileId = m_project->GetPaintTerrainTile();
+					TerrainTileId tileId = (m_currentTool == eToolPaintTerrainTile) ? m_project->GetPaintTerrainTile() : InvalidTerrainTileId;
 
-					if(tileId != InvalidTerrainTileId)
-					{
-						//Get collision map
-						CollisionMap& collisionMap = m_project->GetCollisionMap();
+					//Get collision map
+					CollisionMap& collisionMap = m_project->GetCollisionMap();
 
-						//Set on map
-						collisionMap.SetTerrainTile(x, y, tileId);
+					//Set on map
+					collisionMap.SetTerrainTile(x, y, tileId);
 
-						//Paint to canvas
-						PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
-					}
+					//Paint to canvas
+					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
 				}
 
 				break;
