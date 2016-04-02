@@ -34,11 +34,6 @@ void CollisionMap::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_width, "width");
 	archive.Serialise(m_height, "height");
 	archive.Serialise(m_collisionTiles, "collisionTiles");
-
-	for(int i = 0; i < m_collisionTiles.size(); i++)
-	{
-		m_collisionTiles[i] &= s_collisionTileTerrainIdMask;
-	}
 }
 
 int CollisionMap::GetWidth() const

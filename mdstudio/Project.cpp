@@ -1668,10 +1668,10 @@ bool Project::ExportGameObjects(const std::string& filename) const
 			u32 count = (gameObjIt != gameObjMap.end()) ? gameObjIt->second.size() : 0;
 			
 			//Export game object count
-			stream << "gameobjects_" << gameObjectType.GetName() << "_count equ " << count << std::endl;
+			stream << "gameobjects_" << m_name << "_" << gameObjectType.GetName() << "_count equ " << count << std::endl;
 
 			//Export game object init sunroutine
-			stream << "LoadGameObjects_" << gameObjectType.GetName() << ":" << std::endl;
+			stream << "LoadGameObjects_" << m_name << "_" << gameObjectType.GetName() << ":" << std::endl;
 
 			//Export all game objects of this type
 			if(gameObjIt != gameObjMap.end())

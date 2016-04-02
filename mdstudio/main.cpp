@@ -4,11 +4,14 @@
 // (c) 2015 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
 
+#include <windows.h>
 #include "Beehive.h"
 #include "core/time/Time.h"
 
 int main(char** args, int numargs)
 {
+	SetDllDirectoryA("bin");
+
 	Beehive app;
 	
 	if(app.Initialise())

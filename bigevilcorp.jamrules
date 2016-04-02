@@ -152,6 +152,7 @@ rule ApplyWin32SDK TARGET
 		shell32.lib
 		uuid.lib
 		ole32.lib
+		delayimp.lib
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(WIN32_LIBS) ;
@@ -237,6 +238,13 @@ rule ApplySDLSDK TARGET
 		SDL2_image_d.lib
 		;
 
+
+	C.LinkFlags $(TARGET) :
+		/DelayLoad:SDL2.dll
+		/DelayLoad:SDL2main.dll
+		/DelayLoad:SDL2_image.dll
+		;
+
 	C.LinkPrebuiltLibraries $(TARGET) : $(SDL_LIBS) ;
 }
 
@@ -248,6 +256,11 @@ rule ApplyCgSDK TARGET
 	local CG_LIBS =
 		cg.lib
 		cgGL.lib
+		;
+
+	C.LinkFlags $(TARGET) :
+		/DelayLoad:cg.dll
+		/DelayLoad:cgGL.dll
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(CG_LIBS) ;
