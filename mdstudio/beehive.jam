@@ -5,6 +5,7 @@ ApplyIonIncludes beehive ;
 ApplyIonCore beehive ;
 ApplyIonIo beehive ;
 ApplyIonRenderer beehive : opengl ;
+ApplyIonGameKit beehive ;
 
 ApplyWxSDK beehive ;
 

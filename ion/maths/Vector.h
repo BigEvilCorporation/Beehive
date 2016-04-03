@@ -30,6 +30,7 @@ namespace ion
 		TVector2<T> operator /(const TVector2<T> &Vector) const;
 		TVector2<T> operator +(const TVector2<T> &Vector) const;
 		TVector2<T> operator -(const TVector2<T> &Vector) const;
+		void operator +=(const TVector2<T> &Vector);
 
 		T GetLength() const;
 		T Dot(const TVector2<T>& vector) const;
@@ -151,6 +152,12 @@ namespace ion
 	template <typename T> TVector2<T> TVector2<T>::operator -(const TVector2<T> &Vector) const
 	{
 		return TVector2<T>(x - Vector.x, y - Vector.y);
+	}
+
+	template <typename T> void TVector2<T>::operator +=(const TVector2<T> &Vector)
+	{
+		x += Vector.x;
+		y += Vector.y;
 	}
 
 	template <typename T> T TVector2<T>::GetLength() const

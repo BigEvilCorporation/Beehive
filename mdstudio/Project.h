@@ -11,6 +11,8 @@
 #include <vector>
 #include <set>
 
+#include <ion/gamekit/Bezier.h>
+
 #include "Map.h"
 #include "Palette.h"
 #include "Stamp.h"
@@ -106,6 +108,9 @@ public:
 	void SetDefaultTerrainTile(TerrainTileId tileId);
 	TerrainTileId GetDefaultTerrainTile() const { return m_defaultTerrainTile; }
 	int CleanupTerrainTiles();
+
+	//Collision beziers
+	void AddTerrainBezier(const ion::gamekit::BezierCurve& bezier);
 
 	//Terrain generation from graphic tiles
 	void GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles);

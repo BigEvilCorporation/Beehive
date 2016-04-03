@@ -18,6 +18,8 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	m_terrainCanvasPrimitive = NULL;
 	m_collisionCanvasPrimitive = NULL;
 	m_stampPreviewPrimitive = NULL;
+	m_primitiveBezier = NULL;
+	m_primitiveBezierControls = NULL;
 	m_stampPastePos.x = -1;
 	m_stampPastePos.y = -1;
 	m_previewGameObjectType = InvalidGameObjectTypeId;
@@ -589,6 +591,29 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 
 	switch(m_currentTool)
 	{
+		case eToolSelectTiles:
+		{
+			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+			{
+				m_bezier.AddPoint(ion::Vector2(mousePos.x, (mapHeight * 8) - mousePos.y), ion::Vector2(0.0f, 10.0f));
+
+				if(m_primitiveBezier)
+				{
+					delete m_primitiveBezier;
+				}
+
+				if(m_primitiveBezierControls)
+				{
+					delete m_primitiveBezierControls;
+				}
+
+				m_primitiveBezier = m_renderResources.CreateBezierPrimitive(m_bezier);
+				m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(m_bezier);
+			}
+
+			break;
+		}
+
 		case eToolPaintCollisionTerrain:
 		{
 			if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
@@ -709,6 +734,14 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	RenderGameObjectPreview(renderer, cameraInverseMtx, projectionMtx, z);
 
 	z += zOffset;
+
+	//Render collision curves
+	if(m_primitiveBezier)
+	{
+		RenderCollisionCurves(renderer, cameraInverseMtx, projectionMtx, z);
+
+		z += zOffset;
+	}
 
 	//Render grid
 	if(m_project->GetShowGrid())
@@ -1020,6 +1053,28 @@ void MapPanel::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion:
 	renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
 	material->Unbind();
 	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+
+	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+}
+
+void MapPanel::RenderCollisionCurves(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	//No depth test (stops grid cells Z fighting)
+	renderer.SetDepthTest(ion::render::Renderer::Always);
+
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+
+	//Draw curves
+	material->SetDiffuseColour(ion::Colour(1.0f, 0.0f, 0.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_primitiveBezier->GetVertexBuffer());
+	material->Unbind();
+
+	//Draw curve control handles
+	material->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_primitiveBezierControls->GetVertexBuffer());
+	material->Unbind();
 
 	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 }

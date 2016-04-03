@@ -39,6 +39,18 @@ namespace ion
 			Material* mMaterial;
 		};
 
+		class LineSegments : public Primitive
+		{
+		public:
+			LineSegments(const std::vector<Vector3>& points);
+		};
+
+		class LineStrip : public Primitive
+		{
+		public:
+			LineStrip(const std::vector<Vector3>& points);
+		};
+
 		class Quad : public Primitive
 		{
 		public:

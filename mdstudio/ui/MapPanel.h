@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <ion/gamekit/Bezier.h>
 #include "ViewPanel.h"
 
 class MapPanel : public ViewPanel
@@ -57,6 +58,7 @@ private:
 	void RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderCollisionCurves(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
@@ -83,6 +85,10 @@ private:
 	ion::render::Chessboard* m_terrainCanvasPrimitive;
 	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
+	ion::render::Primitive* m_primitiveBezier;
+	ion::render::Primitive* m_primitiveBezierControls;
+
+	ion::gamekit::BezierCurve m_bezier;
 
 	//Current tool
 	ToolType m_currentTool;

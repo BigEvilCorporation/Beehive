@@ -423,6 +423,10 @@ namespace ion
 				drawPattern = GL_LINES;
 				break;
 
+			case VertexBuffer::LineStrip:
+				drawPattern = GL_LINE_STRIP;
+				break;
+
 			case VertexBuffer::Triangles:
 				drawPattern = GL_TRIANGLES;
 				break;
@@ -432,7 +436,7 @@ namespace ion
 				break;
 
 			default:
-				debug::Error("Invalid number of vertices");
+				debug::Error("Invalid vertex pattern");
 			}
 
 			//Draw

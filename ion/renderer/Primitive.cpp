@@ -30,6 +30,24 @@ namespace ion
 
 		}
 
+		LineSegments::LineSegments(const std::vector<Vector3>& points)
+			: Primitive(VertexBuffer::Lines)
+		{
+			for(int i = 0; i < points.size(); i++)
+			{
+				mVertexBuffer.AddVertex(points[i], Vector3(0.0f, 0.0f, 1.0f), TexCoord(0.0f, 1.0f));
+			}
+		}
+
+		LineStrip::LineStrip(const std::vector<Vector3>& points)
+			: Primitive(VertexBuffer::LineStrip)
+		{
+			for(int i = 0; i < points.size(); i++)
+			{
+				mVertexBuffer.AddVertex(points[i], Vector3(0.0f, 0.0f, 1.0f), TexCoord(0.0f, 1.0f));
+			}
+		}
+
 		Quad::Quad(Axis axis, const Vector2& halfExtents)
 			: Primitive(VertexBuffer::Triangles)
 		{

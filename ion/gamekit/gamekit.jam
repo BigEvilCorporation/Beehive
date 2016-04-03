@@ -8,12 +8,14 @@ ApplyIonIo gamekit ;
 ApplyIonRenderer gamekit ;
 
 local SRC = 
-	StateManager.cpp
-	StateManager.h
+	Bezier.cpp
+	Bezier.h
 	CameraController.cpp
 	CameraController.h
 	CameraThirdPerson.cpp
 	CameraThirdPerson.h
+	StateManager.cpp
+	StateManager.h
 	;
 
 AutoSourceGroup gamekit : $(SRC) ;
