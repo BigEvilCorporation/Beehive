@@ -21,7 +21,7 @@ namespace ion
 		class VertexBuffer
 		{
 		public:
-			enum Pattern { Lines, Triangles, Quads };
+			enum Pattern { Lines, LineStrip, Triangles, Quads };
 
 			VertexBuffer(Pattern pattern);
 			~VertexBuffer();

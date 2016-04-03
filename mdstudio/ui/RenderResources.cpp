@@ -474,3 +474,41 @@ ion::Matrix4 RenderResources::CalcBoxMatrix(const ion::Vector2i& position, const
 
 	return matrix;
 }
+
+ion::render::Primitive* RenderResources::CreateBezierPrimitive(const ion::gamekit::BezierCurve& bezier)
+{
+	const float granularity = 1.0f;
+	const int maxPoints = bezier.GetNumPoints();
+	const int numPoints = ion::maths::Floor((float)maxPoints / granularity);
+	std::vector<ion::Vector2> points2d;
+	std::vector<ion::Vector3> points3d;
+	points2d.reserve(numPoints);
+	points3d.reserve(numPoints);
+	bezier.GetPositions(points2d, 0.0f, 1.0f, 100); // numPoints);
+
+	for(int i = 0; i < points2d.size(); i++)
+	{
+		points3d.push_back(ion::Vector3(points2d[i].x, points2d[i].y, 0.0f));
+	}
+
+	return new ion::render::LineStrip(points3d);
+}
+
+ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion::gamekit::BezierCurve& bezier)
+{
+	std::vector<ion::Vector3> points;
+	points.reserve(bezier.GetNumPoints() * 2);
+
+	for(int i = 0; i < bezier.GetNumPoints(); i++)
+	{
+		ion::Vector2 position;
+		ion::Vector2 control;
+
+		bezier.GetPoint(i, position, control);
+		control += position;
+		points.push_back(ion::Vector3(position.x, position.y, 0.0f));
+		points.push_back(ion::Vector3(control.x, control.y, 0.0f));
+	}
+
+	return new ion::render::LineSegments(points);
+}
