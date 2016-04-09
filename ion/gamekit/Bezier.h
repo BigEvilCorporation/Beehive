@@ -17,10 +17,10 @@ namespace ion
 		class BezierCurve
 		{
 		public:
-			int AddPoint(const Vector2& position, const Vector2& control);
+			int AddPoint(const Vector2& position, const Vector2& controlA, const Vector2& controlB);
 			void RemovePoint(int index);
-			void SetPoint(int index, const Vector2& position, const Vector2& control);
-			void GetPoint(int index, Vector2& position, Vector2& control) const;
+			void SetPoint(int index, const Vector2& position, const Vector2& controlA, const Vector2& controlB);
+			void GetPoint(int index, Vector2& position, Vector2& controlA, Vector2& controlB) const;
 			int GetNumPoints() const;
 
 			Vector2 GetPosition(float time) const;

@@ -595,22 +595,22 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 		{
 			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 			{
-				m_bezier.AddPoint(ion::Vector2(mousePos.x, (mapHeight * 8) - mousePos.y), ion::Vector2(0.0f, 10.0f));
-
+				m_bezier.AddPoint(ion::Vector2(mousePos.x, (mapHeight * 8) - mousePos.y), ion::Vector2(0.0f, -10.0f), ion::Vector2(0.0f, 10.0f));
+		
 				if(m_primitiveBezier)
 				{
 					delete m_primitiveBezier;
 				}
-
+		
 				if(m_primitiveBezierControls)
 				{
 					delete m_primitiveBezierControls;
 				}
-
+		
 				m_primitiveBezier = m_renderResources.CreateBezierPrimitive(m_bezier);
 				m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(m_bezier);
 			}
-
+		
 			break;
 		}
 
