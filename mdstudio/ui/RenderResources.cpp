@@ -497,17 +497,22 @@ ion::render::Primitive* RenderResources::CreateBezierPrimitive(const ion::gameki
 ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion::gamekit::BezierCurve& bezier)
 {
 	std::vector<ion::Vector3> points;
-	points.reserve(bezier.GetNumPoints() * 2);
+	points.reserve(bezier.GetNumPoints() * 4);
 
 	for(int i = 0; i < bezier.GetNumPoints(); i++)
 	{
 		ion::Vector2 position;
-		ion::Vector2 control;
+		ion::Vector2 controlA;
+		ion::Vector2 controlB;
 
-		bezier.GetPoint(i, position, control);
-		control += position;
+		bezier.GetPoint(i, position, controlA, controlB);
+		controlA += position;
+		controlB += position;
+
 		points.push_back(ion::Vector3(position.x, position.y, 0.0f));
-		points.push_back(ion::Vector3(control.x, control.y, 0.0f));
+		points.push_back(ion::Vector3(controlA.x, controlA.y, 0.0f));
+		points.push_back(ion::Vector3(position.x, position.y, 0.0f));
+		points.push_back(ion::Vector3(controlB.x, controlB.y, 0.0f));
 	}
 
 	return new ion::render::LineSegments(points);
