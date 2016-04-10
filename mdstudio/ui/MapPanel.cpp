@@ -654,31 +654,44 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 					}
 				}
 
-				if((m_currentBezierControlIdx != -1) && (buttonBits & eMouseLeft))
+				if((m_currentBezierControlIdx != -1))
 				{
-					//Control point is under cursor, and left button is held
-					m_currentBezier->GetPoint(m_currentBezierControlIdx, position, controlA, controlB);
-
-					//Set new point/control handle position
-					switch(m_currentBezierControlHndl)
+					if(buttonBits & eMouseLeft)
 					{
-					case eBezierPosition:
-						position = mousePosF;
-						break;
-					case eBezierControlA:
-						controlA = mousePosF - position;
-						break;
-					case eBezierControlB:
-						controlB = mousePosF - position;
-						break;
+						//Control point is under cursor, and left button is held
+						m_currentBezier->GetPoint(m_currentBezierControlIdx, position, controlA, controlB);
+
+						//Set new point/control handle position
+						switch(m_currentBezierControlHndl)
+						{
+						case eBezierPosition:
+							position = mousePosF;
+							break;
+						case eBezierControlA:
+							controlA = mousePosF - position;
+							break;
+						case eBezierControlB:
+							controlB = mousePosF - position;
+							break;
+						}
+
+						//Set new preview pos
+						m_currentBezierControlPos = mousePosF;
+
+						//Set new point
+						m_currentBezier->SetPoint(m_currentBezierControlIdx, position, controlA, controlB);
+						redraw = true;
 					}
-
-					//Set new preview pos
-					m_currentBezierControlPos = mousePosF;
-
-					//Set new point
-					m_currentBezier->SetPoint(m_currentBezierControlIdx, position, controlA, controlB);
-					redraw = true;
+					else if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
+					{
+						//Control point is under cursor, and right button was clicked
+						if(m_currentBezierControlHndl == eBezierPosition)
+						{
+							//Delete point
+							m_currentBezier->RemovePoint(m_currentBezierControlIdx);
+							redraw = true;
+						}
+					}
 				}
 			}
 
@@ -691,36 +704,43 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 					if(!m_currentBezier)
 					{
 						m_currentBezier = m_project->AddTerrainBezier();
-						m_primitiveBeziers.push_back(NULL);
 					}
 
 					const float defaultControlLen = 10.0f;
 					m_currentBezier->AddPoint(ion::Vector2(mousePos.x, (mapHeight * 8) - mousePos.y), ion::Vector2(0.0f, defaultControlLen), ion::Vector2(0.0f, -defaultControlLen));
 					redraw = true;
 				}
-				else if(buttonBits & eMouseRight)
+				else if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
 				{
-					//Finalise bezier
-					delete m_primitiveBezierControls;
-					m_primitiveBezierControls = NULL;
-					m_currentBezier = NULL;
+					if(m_currentBezier)
+					{
+						//Finalise bezier
+						delete m_primitiveBezierControls;
+						m_primitiveBezierControls = NULL;
+						m_currentBezier = NULL;
+					}
 				}
 			}
 
-			if(redraw)
+			if(m_currentBezier && redraw)
 			{
-				if(m_primitiveBeziers.back())
+				if(m_primitiveBeziers.size() > 0)
 				{
 					delete m_primitiveBeziers.back();
+					m_primitiveBeziers.pop_back();
 				}
 
 				if(m_primitiveBezierControls)
 				{
 					delete m_primitiveBezierControls;
+					m_primitiveBezierControls = NULL;
 				}
 
-				m_primitiveBeziers.back() = m_renderResources.CreateBezierPrimitive(*m_currentBezier);
-				m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(*m_currentBezier, boxHalfExtents);
+				if(m_currentBezier->GetNumPoints() > 0)
+				{
+					m_primitiveBeziers.push_back(m_renderResources.CreateBezierPrimitive(*m_currentBezier));
+					m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(*m_currentBezier, boxHalfExtents);
+				}
 
 				//Refresh this panel
 				Refresh();
@@ -1142,6 +1162,9 @@ void MapPanel::ResetToolData()
 
 	//Invalidate game object preview
 	m_previewGameObjectType = InvalidGameObjectTypeId;
+
+	//Invalidate bezier handle
+	m_currentBezierControlIdx = -1;
 
 	//Delete clipboard stamp
 	if(m_tempStamp)

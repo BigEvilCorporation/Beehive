@@ -23,7 +23,7 @@ namespace ion
 		void BezierPath::RemovePoint(int index)
 		{
 			ion::debug::Assert(index < GetNumPoints(), "Out of range");
-			m_controlPoints.erase(m_controlPoints.begin() + index, m_controlPoints.begin() + index + 2);
+			m_controlPoints.erase(m_controlPoints.begin() + (index * 3), m_controlPoints.begin() + (index * 3) + 3);
 		}
 
 		void BezierPath::SetPoint(int index, const Vector2& position, const Vector2& controlA, const Vector2& controlB)
