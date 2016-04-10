@@ -706,7 +706,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 				CollisionMap& collisionMap = m_project->GetCollisionMap();
 
 				//Get terrain tileset
-				TerrainTileset& TerrainTileset = m_project->GetTerrainTileset();
+				TerrainTileset& terrainTileset = m_project->GetTerrainTileset();
 
 				//Get pixel tile under cursor
 				TerrainTileId tileId = collisionMap.GetTerrainTile(x, y);
@@ -714,7 +714,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 				if(tileId == InvalidTerrainTileId)
 				{
 					//Create new collision tile
-					tileId = TerrainTileset.AddTerrainTile();
+					tileId = terrainTileset.AddTerrainTile();
 
 					//Set on map
 					collisionMap.SetTerrainTile(x, y, tileId);
@@ -730,7 +730,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 				}
 
 				//Get collision tile
-				if(TerrainTile* terrainTile = TerrainTileset.GetTerrainTile(tileId))
+				if(TerrainTile* terrainTile = terrainTileset.GetTerrainTile(tileId))
 				{
 					//Get pixel offset into tile
 					const int tileSize = 8;

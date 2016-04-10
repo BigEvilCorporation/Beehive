@@ -107,13 +107,16 @@ public:
 	void SwapTerrainTiles(TerrainTileId tileId1, TerrainTileId tileId2);
 	void SetDefaultTerrainTile(TerrainTileId tileId);
 	TerrainTileId GetDefaultTerrainTile() const { return m_defaultTerrainTile; }
-	int CleanupTerrainTiles();
+	int CleanupTerrainTiles(bool prompt);
 
 	//Collision beziers
 	ion::gamekit::BezierPath* AddTerrainBezier();
 	ion::gamekit::BezierPath* GetTerrainBezier(u32 index);
 	void RemoveTerrainBezier(u32 index);
 	int GetNumTerrainBeziers() const;
+
+	//Terrain generation from bezier paths
+	void GenerateTerrainFromBeziers();
 
 	//Terrain generation from graphic tiles
 	void GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles);

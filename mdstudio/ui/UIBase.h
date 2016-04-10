@@ -71,27 +71,28 @@
 #define wxID_BTN_COL_TILES_DELETE 1023
 #define wxID_BTN_COL_TILES_CLEANUP 1024
 #define wxID_BTN_COL_MAP_CLEAR 1025
-#define wxID_BTN_GAME_OBJ_TYPES 1026
-#define wxID_BTN_CANCEL 1027
-#define wxID_TOOL_SELECTTILE 1028
-#define wxID_TOOL_PAINT 1029
-#define wxID_TOOL_TILEPICKER 1030
-#define wxID_TOOL_FLIPX 1031
-#define wxID_TOOL_FLIPY 1032
-#define wxID_TOOL_FILL 1033
-#define wxID_TOOL_CLONE 1034
-#define wxID_TOOL_SELECTSTAMP 1035
-#define wxID_TOOL_STAMP 1036
-#define wxID_TOOL_STAMPPICKER 1037
-#define wxID_TOOL_CREATESTAMP 1038
-#define wxID_TOOL_REMOVESTAMP 1039
-#define wxID_TOOL_COL_PAINTTERRAIN 1040
-#define wxID_TOOL_COL_PAINTSOLID 1041
-#define wxID_TOOL_COL_DELETETERRTILE 1042
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1043
-#define wxID_TOOL_SELECTGAMEOBJ 1044
-#define wxID_TOOL_PLACEGAMEOBJ 1045
-#define wxID_TOOL_REMOVEGAMEOBJ 1046
+#define wxID_BTN_COL_GEN_BEZIER 1026
+#define wxID_BTN_GAME_OBJ_TYPES 1027
+#define wxID_BTN_CANCEL 1028
+#define wxID_TOOL_SELECTTILE 1029
+#define wxID_TOOL_PAINT 1030
+#define wxID_TOOL_TILEPICKER 1031
+#define wxID_TOOL_FLIPX 1032
+#define wxID_TOOL_FLIPY 1033
+#define wxID_TOOL_FILL 1034
+#define wxID_TOOL_CLONE 1035
+#define wxID_TOOL_SELECTSTAMP 1036
+#define wxID_TOOL_STAMP 1037
+#define wxID_TOOL_STAMPPICKER 1038
+#define wxID_TOOL_CREATESTAMP 1039
+#define wxID_TOOL_REMOVESTAMP 1040
+#define wxID_TOOL_COL_PAINTTERRAIN 1041
+#define wxID_TOOL_COL_PAINTSOLID 1042
+#define wxID_TOOL_COL_DELETETERRTILE 1043
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1044
+#define wxID_TOOL_SELECTGAMEOBJ 1045
+#define wxID_TOOL_PLACEGAMEOBJ 1046
+#define wxID_TOOL_REMOVEGAMEOBJ 1047
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -148,6 +149,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnColTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnColGenTerrainBezier( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnGameObjTypes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		
 	
