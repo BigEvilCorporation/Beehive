@@ -385,6 +385,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRTILE);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_ADDTERRAINBEZIER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
@@ -554,6 +555,7 @@ void MainWindow::RefreshAll()
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
 		m_project->InvalidateTerrainTiles(true);
+		m_project->InvalidateTerrainBeziers(true);
 		m_project->InvalidateStamps(true);
 	}
 
@@ -564,6 +566,7 @@ void MainWindow::RefreshAll()
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
 		m_project->InvalidateTerrainTiles(false);
+		m_project->InvalidateTerrainBeziers(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -626,6 +629,7 @@ void MainWindow::RefreshPanel(Panel panel)
 		m_project->InvalidateMap(true);
 		m_project->InvalidateTiles(true);
 		m_project->InvalidateTerrainTiles(true);
+		m_project->InvalidateTerrainBeziers(true);
 		m_project->InvalidateStamps(true);
 
 	}
@@ -638,6 +642,7 @@ void MainWindow::RefreshPanel(Panel panel)
 		m_project->InvalidateMap(false);
 		m_project->InvalidateTiles(false);
 		m_project->InvalidateTerrainTiles(false);
+		m_project->InvalidateTerrainBeziers(false);
 		m_project->InvalidateStamps(false);
 	}
 }
@@ -1118,6 +1123,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_COL_DELETETERRTILE:
 			m_mapPanel->SetTool(eToolDeleteTerrainTile);
+			break;
+		case wxID_TOOL_COL_ADDTERRAINBEZIER:
+			m_mapPanel->SetTool(eToolDrawTerrainBezier);
 			break;
 		case wxID_TOOL_TILEPICKER:
 			m_mapPanel->SetTool(eToolTilePicker);

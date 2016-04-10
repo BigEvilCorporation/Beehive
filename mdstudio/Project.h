@@ -110,7 +110,10 @@ public:
 	int CleanupTerrainTiles();
 
 	//Collision beziers
-	void AddTerrainBezier(const ion::gamekit::BezierCurve& bezier);
+	ion::gamekit::BezierPath* AddTerrainBezier();
+	ion::gamekit::BezierPath* GetTerrainBezier(u32 index);
+	void RemoveTerrainBezier(u32 index);
+	int GetNumTerrainBeziers() const;
 
 	//Terrain generation from graphic tiles
 	void GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles);
@@ -163,10 +166,12 @@ public:
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
 	void InvalidateTerrainTiles(bool invalidate) { m_terrainTilesInvalidated = invalidate; }
+	void InvalidateTerrainBeziers(bool invalidate) { m_terrainBeziersInvalidated = invalidate; }
 	void InvalidateStamps(bool invalidate) { m_stampsInvalidated = invalidate; }
 	bool MapIsInvalidated() const { return m_mapInvalidated; }
 	bool TilesAreInvalidated() const { return m_tilesInvalidated; }
 	bool TerrainTilesAreInvalidated() const { return m_terrainTilesInvalidated; }
+	bool TerrainBeziersAreInvalidated() const { return m_terrainBeziersInvalidated; }
 	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
 	//Import bitmap
@@ -242,6 +247,9 @@ private:
 	//Collision map
 	CollisionMap m_collisionMap;
 
+	//Terrain beziers
+	std::vector<ion::gamekit::BezierPath> m_terrainBeziers;
+
 	//Active palettes
 	std::vector<Palette> m_palettes;
 
@@ -292,5 +300,6 @@ private:
 	bool m_mapInvalidated;
 	bool m_tilesInvalidated;
 	bool m_terrainTilesInvalidated;
+	bool m_terrainBeziersInvalidated;
 	bool m_stampsInvalidated;
 };

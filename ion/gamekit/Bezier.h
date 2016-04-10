@@ -9,12 +9,13 @@
 
 #include <vector>
 #include <maths/Vector.h>
+#include <io/Archive.h>
 
 namespace ion
 {
 	namespace gamekit
 	{
-		class BezierCurve
+		class BezierPath
 		{
 		public:
 			int AddPoint(const Vector2& position, const Vector2& controlA, const Vector2& controlB);
@@ -22,9 +23,12 @@ namespace ion
 			void SetPoint(int index, const Vector2& position, const Vector2& controlA, const Vector2& controlB);
 			void GetPoint(int index, Vector2& position, Vector2& controlA, Vector2& controlB) const;
 			int GetNumPoints() const;
+			int GetNumCurves() const;
 
 			Vector2 GetPosition(float time) const;
 			int GetPositions(std::vector<Vector2>& positions, float startTime, float endTime, int numPositions) const;
+
+			void Serialise(io::Archive& archive);
 
 		private:
 			Vector2 CalculatePosition(const Vector2 controlPoints[4], float time) const;

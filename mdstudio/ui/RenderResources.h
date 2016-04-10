@@ -98,8 +98,8 @@ public:
 
 	//Rendering util functions
 	ion::Matrix4 CalcBoxMatrix(const ion::Vector2i& position, const ion::Vector2i& size, const ion::Vector2i& mapSize, float z);
-	ion::render::Primitive* CreateBezierPrimitive(const ion::gamekit::BezierCurve& bezier);
-	ion::render::Primitive* CreateBezierControlsPrimitive(const ion::gamekit::BezierCurve& bezier);
+	ion::render::Primitive* CreateBezierPrimitive(const ion::gamekit::BezierPath& bezier);
+	ion::render::Primitive* CreateBezierControlsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
 
 private:
 	

@@ -475,7 +475,7 @@ ion::Matrix4 RenderResources::CalcBoxMatrix(const ion::Vector2i& position, const
 	return matrix;
 }
 
-ion::render::Primitive* RenderResources::CreateBezierPrimitive(const ion::gamekit::BezierCurve& bezier)
+ion::render::Primitive* RenderResources::CreateBezierPrimitive(const ion::gamekit::BezierPath& bezier)
 {
 	const float granularity = 1.0f;
 	const int maxPoints = bezier.GetNumPoints();
@@ -494,13 +494,18 @@ ion::render::Primitive* RenderResources::CreateBezierPrimitive(const ion::gameki
 	return new ion::render::LineStrip(points3d);
 }
 
-ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion::gamekit::BezierCurve& bezier)
+ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents)
 {
+	int numPoints = bezier.GetNumPoints();
 	std::vector<ion::Vector3> points;
-	points.reserve(bezier.GetNumPoints() * 4);
+	points.reserve(numPoints * 28);
 
-	for(int i = 0; i < bezier.GetNumPoints(); i++)
+	for(int i = 0; i < numPoints; i++)
 	{
+		//Ignore first and last control handles (they're meaningless)
+		bool drawHandleA = (i != 0);
+		bool drawHandleB = (i != (numPoints - 1));
+
 		ion::Vector2 position;
 		ion::Vector2 controlA;
 		ion::Vector2 controlB;
@@ -509,10 +514,52 @@ ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion
 		controlA += position;
 		controlB += position;
 
-		points.push_back(ion::Vector3(position.x, position.y, 0.0f));
-		points.push_back(ion::Vector3(controlA.x, controlA.y, 0.0f));
-		points.push_back(ion::Vector3(position.x, position.y, 0.0f));
-		points.push_back(ion::Vector3(controlB.x, controlB.y, 0.0f));
+		//Lines
+		if(drawHandleA)
+		{
+			points.push_back(ion::Vector3(position.x, position.y, 0.0f));
+			points.push_back(ion::Vector3(controlA.x, controlA.y, 0.0f));
+		}
+		
+		if(drawHandleB)
+		{
+			points.push_back(ion::Vector3(position.x, position.y, 0.0f));
+			points.push_back(ion::Vector3(controlB.x, controlB.y, 0.0f));
+		}
+
+		//Boxes
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+
+		if(drawHandleA)
+		{
+			points.push_back(ion::Vector3(controlA.x - handleBoxHalfExtents, controlA.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlA.x + handleBoxHalfExtents, controlA.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlA.x - handleBoxHalfExtents, controlA.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlA.x - handleBoxHalfExtents, controlA.y + handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlA.x + handleBoxHalfExtents, controlA.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlA.x + handleBoxHalfExtents, controlA.y + handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlA.x - handleBoxHalfExtents, controlA.y + handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlA.x + handleBoxHalfExtents, controlA.y + handleBoxHalfExtents, 0.0f));
+		}
+
+		if(drawHandleB)
+		{
+			points.push_back(ion::Vector3(controlB.x - handleBoxHalfExtents, controlB.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlB.x + handleBoxHalfExtents, controlB.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlB.x - handleBoxHalfExtents, controlB.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlB.x - handleBoxHalfExtents, controlB.y + handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlB.x + handleBoxHalfExtents, controlB.y - handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlB.x + handleBoxHalfExtents, controlB.y + handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlB.x - handleBoxHalfExtents, controlB.y + handleBoxHalfExtents, 0.0f));
+			points.push_back(ion::Vector3(controlB.x + handleBoxHalfExtents, controlB.y + handleBoxHalfExtents, 0.0f));
+		}
 	}
 
 	return new ion::render::LineSegments(points);
