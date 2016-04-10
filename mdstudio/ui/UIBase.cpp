@@ -36,6 +36,7 @@
 #include "../FormBuilderProj/tool_deletegameobj.xpm"
 #include "../FormBuilderProj/tool_deletestamp.xpm"
 #include "../FormBuilderProj/tool_deleteterraintile.xpm"
+#include "../FormBuilderProj/tool_editterrainbezier.xpm"
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
@@ -414,6 +415,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_toolAddTerrainBezier->SetToolTip( wxT("Add Terrain Bezier") );
 	
 	fgSizer8->Add( m_toolAddTerrainBezier, 0, wxALL, 5 );
+	
+	m_toolEditTerrainBezier1 = new wxBitmapButton( this, wxID_TOOL_COL_EDITTERRAINBEZIER, wxBitmap( tool_editterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolEditTerrainBezier1->SetToolTip( wxT("Edit Terrain Bezier") );
+	
+	fgSizer8->Add( m_toolEditTerrainBezier1, 0, wxALL, 5 );
 	
 	
 	bSizer16->Add( fgSizer8, 1, wxEXPAND, 5 );

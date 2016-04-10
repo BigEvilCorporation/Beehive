@@ -24,6 +24,7 @@ namespace ion
 			void GetPoint(int index, Vector2& position, Vector2& controlA, Vector2& controlB) const;
 			int GetNumPoints() const;
 			int GetNumCurves() const;
+			void GetBounds(Vector2& boundsMin, Vector2& boundsMax) const;
 
 			Vector2 GetPosition(float time) const;
 			int GetPositions(std::vector<Vector2>& positions, float startTime, float endTime, int numPositions) const;
@@ -32,7 +33,10 @@ namespace ion
 
 		private:
 			Vector2 CalculatePosition(const Vector2 controlPoints[4], float time) const;
+			void CalculateBounds();
 			std::vector<Vector2> m_controlPoints;
+			Vector2 m_boundsMin;
+			Vector2 m_boundsMax;
 		};
 	}
 }

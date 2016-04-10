@@ -17,6 +17,7 @@ namespace ion
 			m_controlPoints.push_back(position + controlA);
 			m_controlPoints.push_back(position);
 			m_controlPoints.push_back(position + controlB);
+			CalculateBounds();
 			return m_controlPoints.size() / 3;
 		}
 
@@ -24,6 +25,7 @@ namespace ion
 		{
 			ion::debug::Assert(index < GetNumPoints(), "Out of range");
 			m_controlPoints.erase(m_controlPoints.begin() + (index * 3), m_controlPoints.begin() + (index * 3) + 3);
+			CalculateBounds();
 		}
 
 		void BezierPath::SetPoint(int index, const Vector2& position, const Vector2& controlA, const Vector2& controlB)
@@ -32,6 +34,7 @@ namespace ion
 			m_controlPoints[(index * 3) + 0] = position + controlA;
 			m_controlPoints[(index * 3) + 1] = position;
 			m_controlPoints[(index * 3) + 2] = position + controlB;
+			CalculateBounds();
 		}
 
 		void BezierPath::GetPoint(int index, Vector2& position, Vector2& controlA, Vector2& controlB) const
@@ -53,6 +56,12 @@ namespace ion
 		int BezierPath::GetNumPoints() const
 		{
 			return m_controlPoints.size() / 3;
+		}
+
+		void BezierPath::GetBounds(Vector2& boundsMin, Vector2& boundsMax) const
+		{
+			boundsMin = m_boundsMin;
+			boundsMax = m_boundsMax;
 		}
 
 		Vector2 BezierPath::GetPosition(float time) const
@@ -123,9 +132,33 @@ namespace ion
 			return position;
 		}
 
+		void BezierPath::CalculateBounds()
+		{
+			m_boundsMin.x = maths::FLOAT_MAX;
+			m_boundsMin.y = maths::FLOAT_MAX;
+			m_boundsMax.x = maths::FLOAT_MIN;
+			m_boundsMax.y = maths::FLOAT_MIN;
+
+			for(int i = 0; i < GetNumPoints(); i++)
+			{
+				const Vector2& point = m_controlPoints[(i * 3) + 1];
+
+				if(point.x > m_boundsMax.x)
+					m_boundsMax.x = point.x;
+				if(point.x < m_boundsMin.x)
+					m_boundsMin.x = point.x;
+				if(point.y > m_boundsMax.y)
+					m_boundsMax.y = point.y;
+				if(point.y < m_boundsMin.y)
+					m_boundsMin.y = point.y;
+			}
+		}
+
 		void BezierPath::Serialise(io::Archive& archive)
 		{
 			archive.Serialise(m_controlPoints, "controlPoints");
+			archive.Serialise(m_boundsMin, "boundsMin");
+			archive.Serialise(m_boundsMax, "boundsMax");
 		}
 	}
 }
