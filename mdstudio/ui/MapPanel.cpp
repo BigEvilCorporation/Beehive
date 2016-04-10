@@ -19,6 +19,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	m_collisionCanvasPrimitive = NULL;
 	m_stampPreviewPrimitive = NULL;
 	m_primitiveBezierControls = NULL;
+	m_highlightedBezier = NULL;
 	m_currentBezier = NULL;
 	m_currentBezierControlIdx = -1;
 	m_stampPastePos.x = -1;
@@ -588,6 +589,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 	const int tileHeight = 8;
 
 	//Invert for OpenGL
+	ion::Vector2 mousePosF((float)mousePos.x, (float)(mapHeight * 8) - (float)mousePos.y);
 	int y_inv = (mapHeight - 1 - y);
 
 	switch(m_currentTool)
@@ -603,8 +605,6 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 				ion::Vector2 position;
 				ion::Vector2 controlA;
 				ion::Vector2 controlB;
-
-				ion::Vector2 mousePosF((float)mousePos.x, (float)(mapHeight * 8) - (float)mousePos.y);
 
 				if(!(m_prevMouseBits & eMouseLeft))
 				{
@@ -687,7 +687,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 						//Control point is under cursor, and right button was clicked
 						if(m_currentBezierControlHndl == eBezierPosition)
 						{
-							//Delete point
+							//Remove point
 							m_currentBezier->RemovePoint(m_currentBezierControlIdx);
 							redraw = true;
 						}
@@ -712,40 +712,61 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 				}
 				else if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
 				{
-					if(m_currentBezier)
+					//Finalise bezier
+					m_currentBezier = NULL;
+					redraw = true;
+				}
+			}
+
+			if(redraw)
+			{
+				//Invalidate beziers and refresh this panel
+				m_project->InvalidateTerrainBeziers(true);
+				Refresh();
+				m_project->InvalidateTerrainBeziers(false);
+			}
+		
+			break;
+		}
+
+		case eToolSelectTerrainBezier:
+		{
+			m_currentBezier = NULL;
+			m_highlightedBezier = NULL;
+
+			//Find bezier under cursor
+			for(int i = 0; i < m_project->GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL; i++)
+			{
+				ion::gamekit::BezierPath* bezier = m_project->GetTerrainBezier(i);
+
+				ion::Vector2 boundsMin;
+				ion::Vector2 boundsMax;
+
+				bezier->GetBounds(boundsMin, boundsMax);
+
+				if(ion::maths::PointInsideBox(mousePosF, boundsMin, boundsMax))
+				{
+					if(buttonBits & eMouseLeft)
 					{
-						//Finalise bezier
-						delete m_primitiveBezierControls;
-						m_primitiveBezierControls = NULL;
-						m_currentBezier = NULL;
+						//Set current bezier
+						m_currentBezier = bezier;
+
+						//Set bezier draw tool
+						m_currentTool = eToolDrawTerrainBezier;
+
+						//Invalidate beziers and refresh this panel
+						m_project->InvalidateTerrainBeziers(true);
+						Refresh();
+						m_project->InvalidateTerrainBeziers(false);
+					}
+					else
+					{
+						//Set highlighted bezier
+						m_highlightedBezier = bezier;
 					}
 				}
 			}
 
-			if(m_currentBezier && redraw)
-			{
-				if(m_primitiveBeziers.size() > 0)
-				{
-					delete m_primitiveBeziers.back();
-					m_primitiveBeziers.pop_back();
-				}
-
-				if(m_primitiveBezierControls)
-				{
-					delete m_primitiveBezierControls;
-					m_primitiveBezierControls = NULL;
-				}
-
-				if(m_currentBezier->GetNumPoints() > 0)
-				{
-					m_primitiveBeziers.push_back(m_renderResources.CreateBezierPrimitive(*m_currentBezier));
-					m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(*m_currentBezier, boxHalfExtents);
-				}
-
-				//Refresh this panel
-				Refresh();
-			}
-		
 			break;
 		}
 
@@ -870,8 +891,8 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	z += zOffset;
 
-	//Render collision curves
-	RenderCollisionCurves(renderer, cameraInverseMtx, projectionMtx, z);
+	//Render collision bezier paths
+	RenderCollisionBeziers(renderer, cameraInverseMtx, projectionMtx, z);
 
 	z += zOffset;
 
@@ -1163,7 +1184,9 @@ void MapPanel::ResetToolData()
 	//Invalidate game object preview
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 
-	//Invalidate bezier handle
+	//Invalidate bezier
+	m_currentBezier = NULL;
+	m_highlightedBezier = NULL;
 	m_currentBezierControlIdx = -1;
 
 	//Delete clipboard stamp
@@ -1204,9 +1227,9 @@ void MapPanel::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion:
 	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 }
 
-void MapPanel::RenderCollisionCurves(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	//No depth test (stops grid cells Z fighting)
+	//No depth test
 	renderer.SetDepthTest(ion::render::Renderer::Always);
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
@@ -1221,16 +1244,20 @@ void MapPanel::RenderCollisionCurves(ion::render::Renderer& renderer, const ion:
 	bezierMatrix.SetTranslation(ion::Vector3(-(mapWidth * tileWidth) / 2.0f, -(mapHeight * tileHeight) / 2.0f, z));
 
 	//Draw curves
-	material->SetDiffuseColour(ion::Colour(1.0f, 0.0f, 0.0f, 1.0f));
-	material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
-	renderer.SetLineWidth(3.0f);
-
-	for(int i = 0; i < m_primitiveBeziers.size(); i++)
+	if(m_primitiveBeziers.size() > 0)
 	{
-		renderer.DrawVertexBuffer(m_primitiveBeziers[i]->GetVertexBuffer());
-	}
+		material->SetDiffuseColour(ion::Colour(1.0f, 0.0f, 0.0f, 1.0f));
+		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.SetLineWidth(3.0f);
 
-	material->Unbind();
+		for(int i = 0; i < m_primitiveBeziers.size(); i++)
+		{
+			renderer.DrawVertexBuffer(m_primitiveBeziers[i]->GetVertexBuffer());
+		}
+
+		renderer.SetLineWidth(1.0f);
+		material->Unbind();
+	}
 
 	//Draw curve control handles
 	if(m_primitiveBezierControls)
@@ -1239,6 +1266,7 @@ void MapPanel::RenderCollisionCurves(ion::render::Renderer& renderer, const ion:
 		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(2.0f);
 		renderer.DrawVertexBuffer(m_primitiveBezierControls->GetVertexBuffer());
+		renderer.SetLineWidth(1.0f);
 		material->Unbind();
 	}
 
@@ -1269,7 +1297,38 @@ void MapPanel::RenderCollisionCurves(ion::render::Renderer& renderer, const ion:
 		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 	}
 
-	renderer.SetLineWidth(1.0f);
+	//Draw selected bezier
+	if(m_highlightedBezier)
+	{
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
+
+		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		material->SetDiffuseColour(colour);
+
+		ion::Vector2 boundsMin;
+		ion::Vector2 boundsMax;
+
+		m_highlightedBezier->GetBounds(boundsMin, boundsMax);
+
+		ion::Vector2 size = boundsMax - boundsMin;
+
+		const float x = boundsMin.x + (size.x / 2.0f);
+		const float y = boundsMin.y + (size.y / 2.0f);
+
+		ion::Vector3 previewScale(size.x / (float)tileWidth, size.y / (float)tileWidth, 1.0f);
+		ion::Matrix4 previewMtx;
+		ion::Vector3 previewPos(x, y, z);
+		previewMtx.SetTranslation(previewPos);
+		previewMtx.SetScale(previewScale);
+
+		material->Bind(previewMtx * bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+		material->Unbind();
+
+		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	}
+
 	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
 }
 
@@ -1672,10 +1731,21 @@ void MapPanel::PaintTerrainBeziers(Project& project)
 
 	m_primitiveBeziers.clear();
 
+	if(m_primitiveBezierControls)
+	{
+		delete m_primitiveBezierControls;
+		m_primitiveBezierControls = NULL;
+	}
+
 	for(int i = 0; i < project.GetNumTerrainBeziers(); i++)
 	{
 		ion::gamekit::BezierPath* bezier = project.GetTerrainBezier(i);
 		m_primitiveBeziers.push_back(m_renderResources.CreateBezierPrimitive(*bezier));
+	}
+
+	if(m_currentBezier && m_currentBezier->GetNumPoints() > 0)
+	{
+		m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(*m_currentBezier, 4.0f);
 	}
 }
 
