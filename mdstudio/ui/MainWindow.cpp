@@ -933,10 +933,17 @@ void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		if(wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
+		DialogTerrainGen dialog(this);
+
+		if(dialog.ShowModal() == wxID_OK)
 		{
-			m_project->GenerateTerrainFromBeziers();
-			RefreshAll();
+			int granularity = dialog.m_spinCtrlGranularity->GetValue();
+
+			if(wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
+			{
+				m_project->GenerateTerrainFromBeziers(granularity);
+				RefreshAll();
+			}
 		}
 	}
 }

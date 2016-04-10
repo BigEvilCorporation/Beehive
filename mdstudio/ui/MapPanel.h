@@ -92,8 +92,6 @@ private:
 	std::vector<ion::render::Primitive*> m_primitiveBeziers;
 	ion::render::Primitive* m_primitiveBezierControls;
 
-	ion::gamekit::BezierPath* m_currentBezier;
-
 	//Current tool
 	ToolType m_currentTool;
 
@@ -145,4 +143,18 @@ private:
 	//Current preview gameobj
 	GameObjectTypeId m_previewGameObjectType;
 	ion::Vector2i m_previewGameObjectPos;
+
+	///TERRAIN BEZIER tool
+	///////////////////////////////////////////////////
+	enum eBezierModifyHandle
+	{
+		eBezierPosition,
+		eBezierControlA,
+		eBezierControlB
+	};
+
+	ion::gamekit::BezierPath* m_currentBezier;
+	int m_currentBezierControlIdx;
+	eBezierModifyHandle m_currentBezierControlHndl;
+	ion::Vector2 m_currentBezierControlPos;
 };

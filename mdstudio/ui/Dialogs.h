@@ -16,6 +16,14 @@ public:
 	virtual void OnBtnCancel(wxCommandEvent& event) { EndModal(wxID_CANCEL); }
 };
 
+class DialogTerrainGen : public DialogTerrainGenBase
+{
+public:
+	DialogTerrainGen(wxWindow* parent) : DialogTerrainGenBase(parent) {}
+	virtual void OnBtnOk(wxCommandEvent& event) { EndModal(wxID_OK); }
+	virtual void OnBtnCancel(wxCommandEvent& event) { EndModal(wxID_CANCEL); }
+};
+
 class ImportDialog : public ImportDialogBase
 {
 public:

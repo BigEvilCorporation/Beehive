@@ -190,6 +190,31 @@ class DialogMapSizeBase : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class DialogTerrainGenBase
+///////////////////////////////////////////////////////////////////////////////
+class DialogTerrainGenBase : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_text1;
+		wxButton* m_buttonOk;
+		wxButton* m_buttonCancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		wxSpinCtrl* m_spinCtrlGranularity;
+		
+		DialogTerrainGenBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Generate Terrain"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogTerrainGenBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class MapToolbox
 ///////////////////////////////////////////////////////////////////////////////
 class MapToolbox : public wxPanel 
