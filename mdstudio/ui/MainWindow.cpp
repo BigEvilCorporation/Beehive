@@ -929,11 +929,23 @@ void MainWindow::OnBtnColMapClear(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		if(wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
+		{
+			m_project->GenerateTerrainFromBeziers();
+			RefreshAll();
+		}
+	}
+}
+
 void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		if(m_project->CleanupTerrainTiles())
+		if(m_project->CleanupTerrainTiles(true))
 		{
 			RefreshAll();
 		}

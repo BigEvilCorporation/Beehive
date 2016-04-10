@@ -609,7 +609,7 @@ void Project::SetDefaultTerrainTile(TerrainTileId tileId)
 	m_defaultTerrainTile = tileId;
 }
 
-int Project::CleanupTerrainTiles()
+int Project::CleanupTerrainTiles(bool prompt)
 {
 	//Backup default collision tile
 	TerrainTile* defaultTile = (m_defaultTerrainTile != InvalidTerrainTileId) ? GetTerrainTileset().GetTerrainTile(m_defaultTerrainTile) : NULL;
@@ -645,7 +645,7 @@ int Project::CleanupTerrainTiles()
 		std::stringstream message;
 		message << "Found " << unusedTerrainTiles.size() << " unused collision tiles, delete?";
 
-		if(wxMessageBox(message.str().c_str(), "Delete unused collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		if(!prompt || wxMessageBox(message.str().c_str(), "Delete unused collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			//Delete in reverse, popping from back
 			for(std::set<TerrainTileId>::const_reverse_iterator it = unusedTerrainTiles.rbegin(), end = unusedTerrainTiles.rend(); it != end; ++it)
@@ -697,7 +697,7 @@ int Project::CleanupTerrainTiles()
 		std::stringstream message;
 		message << "Found " << duplicates.size() << " duplicate collision tiles, delete?";
 
-		if(wxMessageBox(message.str().c_str(), "Delete duplicate collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		if(!prompt || wxMessageBox(message.str().c_str(), "Delete duplicate collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			for(int i = 0; i < duplicates.size(); i++)
 			{
@@ -753,6 +753,70 @@ void Project::RemoveTerrainBezier(u32 index)
 int Project::GetNumTerrainBeziers() const
 {
 	return m_terrainBeziers.size();
+}
+
+void Project::GenerateTerrainFromBeziers()
+{
+	//Clear all terrain tiles
+	m_terrainTileset.Clear();
+
+	//Clear all terrain map entries
+	for(int x = 0; x < m_collisionMap.GetWidth(); x++)
+	{
+		for(int y = 0; y < m_collisionMap.GetHeight(); y++)
+		{
+			m_collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
+		}
+	}
+
+	const int tileSize = 8;
+	const int granularity = 1000;
+	const int mapHeightPixels = (m_collisionMap.GetHeight() * 8);
+
+	//Follow paths, generate terrain height tiles
+	for(int i = 0; i < m_terrainBeziers.size(); i++)
+	{
+		const int maxPoints = m_terrainBeziers[i].GetNumPoints();
+		std::vector<ion::Vector2> points;
+		points.reserve(maxPoints);
+		m_terrainBeziers[i].GetPositions(points, 0.0f, 1.0f, granularity);
+
+		for(int posIdx = 0; posIdx < points.size(); posIdx++)
+		{
+			//Get position
+			const ion::Vector2 pixelPos(points[posIdx].x, (float)mapHeightPixels - points[posIdx].y);
+			const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileSize), ion::maths::Floor(pixelPos.y / (float)tileSize));
+
+			//Get tile under cursor
+			TerrainTileId tileId = m_collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
+
+			if(tileId == InvalidTerrainTileId)
+			{
+				//Create new collision tile
+				tileId = m_terrainTileset.AddTerrainTile();
+
+				//Set on map
+				m_collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
+			}
+
+			//Get collision tile
+			if(TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(tileId))
+			{
+				//Get pixel offset into tile
+				int pixelX = pixelPos.x - (tilePos.x * tileSize);
+				int pixelY = pixelPos.y - (tilePos.y * tileSize);
+
+				//Set height at X
+				const int height = tileSize - pixelY;
+				terrainTile->SetHeight(pixelX, height);
+			}
+		}
+	}
+
+	//Remove duplicates
+	CleanupTerrainTiles(false);
+
+	InvalidateTerrainTiles(false);
 }
 
 void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
