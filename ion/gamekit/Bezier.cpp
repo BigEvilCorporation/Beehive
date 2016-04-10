@@ -12,7 +12,7 @@ namespace ion
 {
 	namespace gamekit
 	{
-		int BezierCurve::AddPoint(const Vector2& position, const Vector2& controlA, const Vector2& controlB)
+		int BezierPath::AddPoint(const Vector2& position, const Vector2& controlA, const Vector2& controlB)
 		{
 			m_controlPoints.push_back(position + controlA);
 			m_controlPoints.push_back(position);
@@ -20,13 +20,13 @@ namespace ion
 			return m_controlPoints.size() / 3;
 		}
 
-		void BezierCurve::RemovePoint(int index)
+		void BezierPath::RemovePoint(int index)
 		{
 			ion::debug::Assert(index < GetNumPoints(), "Out of range");
 			m_controlPoints.erase(m_controlPoints.begin() + index, m_controlPoints.begin() + index + 2);
 		}
 
-		void BezierCurve::SetPoint(int index, const Vector2& position, const Vector2& controlA, const Vector2& controlB)
+		void BezierPath::SetPoint(int index, const Vector2& position, const Vector2& controlA, const Vector2& controlB)
 		{
 			ion::debug::Assert(index < GetNumPoints(), "Out of range");
 			m_controlPoints[(index * 3) + 0] = position + controlA;
@@ -34,7 +34,7 @@ namespace ion
 			m_controlPoints[(index * 3) + 2] = position + controlB;
 		}
 
-		void BezierCurve::GetPoint(int index, Vector2& position, Vector2& controlA, Vector2& controlB) const
+		void BezierPath::GetPoint(int index, Vector2& position, Vector2& controlA, Vector2& controlB) const
 		{
 			ion::debug::Assert(index < GetNumPoints(), "Out of range");
 			controlA = m_controlPoints[(index * 3) + 0];
@@ -44,12 +44,18 @@ namespace ion
 			controlB -= position;
 		}
 
-		int BezierCurve::GetNumPoints() const
+		int BezierPath::GetNumCurves() const
+		{
+			int numControlPoints = m_controlPoints.size();
+			return (numControlPoints > 3) ? ((numControlPoints - 3) / 3) : 0;
+		}
+
+		int BezierPath::GetNumPoints() const
 		{
 			return m_controlPoints.size() / 3;
 		}
 
-		Vector2 BezierCurve::GetPosition(float time) const
+		Vector2 BezierPath::GetPosition(float time) const
 		{
 			if(m_controlPoints.size() == 0)
 			{
@@ -64,13 +70,13 @@ namespace ion
 				ion::debug::Assert(time >= 0.0f && time <= 1.0f, "Out of range");
 
 				//Get curve index (points in groups of 3, skipping first)
-				int curveIndex = maths::Floor(((float)(m_controlPoints.size() - 4) / 3.0f) * time);
+				int curveIndex = maths::Floor(((float)(m_controlPoints.size() - 3) / 3.0f) * time);
 
 				//Skip first point control A (it's meanlingless)
 				int pointIndex = (curveIndex * 3) + 1;
 
 				//Calculate time within current curve
-				float totalTime = (float)(m_controlPoints.size() - 4) / 3.0f;
+				float totalTime = (m_controlPoints.size() - 3) / 3.0f;
 				float segmentTime = maths::Fmod(time * totalTime, 1.0f);
 
 				//Prev point pos/controlB + next point controlA/pos
@@ -79,7 +85,7 @@ namespace ion
 			}
 		}
 
-		int BezierCurve::GetPositions(std::vector<Vector2>& positions, float startTime, float endTime, int numPositions) const
+		int BezierPath::GetPositions(std::vector<Vector2>& positions, float startTime, float endTime, int numPositions) const
 		{
 			if(m_controlPoints.size() == 0)
 			{
@@ -91,7 +97,7 @@ namespace ion
 			}
 			else
 			{
-				for(int i = 0; i < numPositions + 1; i++)
+				for(int i = 0; i < numPositions; i++)
 				{
 					float time = startTime + ((endTime - startTime) * ((float)i / (float)numPositions));
 					positions.push_back(GetPosition(time));
@@ -101,7 +107,7 @@ namespace ion
 			return positions.size();
 		}
 
-		Vector2 BezierCurve::CalculatePosition(const Vector2 controlPoints[4], float time) const
+		Vector2 BezierPath::CalculatePosition(const Vector2 controlPoints[4], float time) const
 		{
 			const float timeSq = time * time;
 			const float timeCb = timeSq * time;
@@ -115,6 +121,11 @@ namespace ion
 			position += controlPoints[3] * timeCb;
 
 			return position;
+		}
+
+		void BezierPath::Serialise(io::Archive& archive)
+		{
+			archive.Serialise(m_controlPoints, "controlPoints");
 		}
 	}
 }

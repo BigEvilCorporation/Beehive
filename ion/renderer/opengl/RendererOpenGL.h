@@ -48,6 +48,7 @@ namespace ion
 			virtual void SetAlphaBlending(AlphaBlendType alphaBlendType);
 			virtual void SetFaceCulling(CullingMode cullingMode);
 			virtual void SetDepthTest(DepthTest depthTest);
+			virtual void SetLineWidth(float width);
 
 			//Vertex buffer drawing
 			virtual void DrawVertexBuffer(const VertexBuffer& vertexBuffer);

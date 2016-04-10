@@ -399,6 +399,11 @@ namespace ion
 			}
 		}
 
+		void RendererOpenGL::SetLineWidth(float width)
+		{
+			glLineWidth(width);
+		}
+
 		void RendererOpenGL::DrawVertexBuffer(const VertexBuffer& vertexBuffer)
 		{
 			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");

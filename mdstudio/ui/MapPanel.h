@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <ion/maths/Geometry.h>
 #include <ion/gamekit/Bezier.h>
 #include "ViewPanel.h"
 
@@ -72,6 +73,9 @@ private:
 	//Paint collision tile to canvas
 	void PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y);
 
+	//Paint terrain beziers
+	void PaintTerrainBeziers(Project& project);
+
 	//Create stamp preview primitive
 	void CreateStampPreview(Stamp* stamp);
 
@@ -85,10 +89,10 @@ private:
 	ion::render::Chessboard* m_terrainCanvasPrimitive;
 	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
-	ion::render::Primitive* m_primitiveBezier;
+	std::vector<ion::render::Primitive*> m_primitiveBeziers;
 	ion::render::Primitive* m_primitiveBezierControls;
 
-	ion::gamekit::BezierCurve m_bezier;
+	ion::gamekit::BezierPath* m_currentBezier;
 
 	//Current tool
 	ToolType m_currentTool;

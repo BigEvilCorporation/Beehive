@@ -118,6 +118,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_defaultTerrainTile, "defaultTerrainTile");
 	archive.Serialise(m_map, "map");
 	archive.Serialise(m_collisionMap, "collisionMap");
+	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
@@ -729,6 +730,29 @@ int Project::CleanupTerrainTiles()
 	}
 
 	return unusedTerrainTiles.size() + duplicates.size();
+}
+
+ion::gamekit::BezierPath* Project::AddTerrainBezier()
+{
+	m_terrainBeziers.push_back(ion::gamekit::BezierPath());
+	return &m_terrainBeziers.back();
+}
+
+ion::gamekit::BezierPath* Project::GetTerrainBezier(u32 index)
+{
+	ion::debug::Assert(index < m_terrainBeziers.size(), "Out of range");
+	return &m_terrainBeziers[index];
+}
+
+void Project::RemoveTerrainBezier(u32 index)
+{
+	ion::debug::Assert(index < m_terrainBeziers.size(), "Out of range");
+	m_terrainBeziers.erase(m_terrainBeziers.begin() + index);
+}
+
+int Project::GetNumTerrainBeziers() const
+{
+	return m_terrainBeziers.size();
 }
 
 void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)

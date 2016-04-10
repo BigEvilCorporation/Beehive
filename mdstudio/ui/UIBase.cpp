@@ -29,6 +29,7 @@
 #include "../FormBuilderProj/showoutlines.xpm"
 #include "../FormBuilderProj/stampspanel.xpm"
 #include "../FormBuilderProj/tilespanel.xpm"
+#include "../FormBuilderProj/tool_addterrainbezier.xpm"
 #include "../FormBuilderProj/tool_clone.xpm"
 #include "../FormBuilderProj/tool_createstamp.xpm"
 #include "../FormBuilderProj/tool_deletegameobj.xpm"
@@ -352,6 +353,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_toolDeleteTerrainTile->SetToolTip( wxT("Delete Terrain Tile") );
 	
 	fgSizer8->Add( m_toolDeleteTerrainTile, 0, wxALL, 5 );
+	
+	m_toolAddTerrainBezier = new wxBitmapButton( this, wxID_TOOL_COL_ADDTERRAINBEZIER, wxBitmap( tool_addterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolAddTerrainBezier->SetToolTip( wxT("Delete Terrain Tile") );
+	
+	fgSizer8->Add( m_toolAddTerrainBezier, 0, wxALL, 5 );
 	
 	
 	bSizer16->Add( fgSizer8, 1, wxEXPAND, 5 );
