@@ -245,6 +245,58 @@ DialogMapSizeBase::~DialogMapSizeBase()
 	
 }
 
+DialogTerrainGenBase::DialogTerrainGenBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_text1 = new wxStaticText( this, wxID_ANY, wxT("Granularity:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text1->Wrap( -1 );
+	bSizer3->Add( m_text1, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_spinCtrlGranularity = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100000, 1000 );
+	bSizer3->Add( m_spinCtrlGranularity, 0, wxALL, 5 );
+	
+	
+	bSizer2->Add( bSizer3, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_buttonOk = new wxButton( this, wxID_BTN_CANCEL, wxT("&Ok"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_buttonOk, 0, wxALIGN_RIGHT, 5 );
+	
+	m_buttonCancel = new wxButton( this, wxID_BTN_CANCEL, wxT("&Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_buttonCancel, 0, wxALIGN_RIGHT, 5 );
+	
+	
+	bSizer2->Add( bSizer4, 1, wxALIGN_RIGHT, 5 );
+	
+	
+	this->SetSizer( bSizer2 );
+	this->Layout();
+	bSizer2->Fit( this );
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonOk->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogTerrainGenBase::OnBtnOk ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogTerrainGenBase::OnBtnCancel ), NULL, this );
+}
+
+DialogTerrainGenBase::~DialogTerrainGenBase()
+{
+	// Disconnect Events
+	m_buttonOk->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogTerrainGenBase::OnBtnOk ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogTerrainGenBase::OnBtnCancel ), NULL, this );
+	
+}
+
 MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
 	wxBoxSizer* bSizer16;
@@ -359,7 +411,7 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	fgSizer8->Add( m_toolDeleteTerrainTile, 0, wxALL, 5 );
 	
 	m_toolAddTerrainBezier = new wxBitmapButton( this, wxID_TOOL_COL_ADDTERRAINBEZIER, wxBitmap( tool_addterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolAddTerrainBezier->SetToolTip( wxT("Delete Terrain Tile") );
+	m_toolAddTerrainBezier->SetToolTip( wxT("Add Terrain Bezier") );
 	
 	fgSizer8->Add( m_toolAddTerrainBezier, 0, wxALL, 5 );
 	

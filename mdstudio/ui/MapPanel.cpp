@@ -20,6 +20,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	m_stampPreviewPrimitive = NULL;
 	m_primitiveBezierControls = NULL;
 	m_currentBezier = NULL;
+	m_currentBezierControlIdx = -1;
 	m_stampPastePos.x = -1;
 	m_stampPastePos.y = -1;
 	m_previewGameObjectType = InvalidGameObjectTypeId;
@@ -596,66 +597,93 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 			const float boxHalfExtents = 4.0f;
 
 			//Check if touching an existing control handle
-			bool touchingHandle = false;
 			bool redraw = false;
 			if(m_currentBezier)
 			{
 				ion::Vector2 position;
 				ion::Vector2 controlA;
 				ion::Vector2 controlB;
-				u32 pointIndex = 0;
 
 				ion::Vector2 mousePosF((float)mousePos.x, (float)(mapHeight * 8) - (float)mousePos.y);
 
-				const int numPoints = m_currentBezier->GetNumPoints();
-
-				for(int i = 0; i < numPoints && !touchingHandle; i++)
+				if(!(m_prevMouseBits & eMouseLeft))
 				{
-					//Ignore first and last control handles (not drawn)
-					bool modifyHandleA = (i != 0);
-					bool modifyHandleB = (i != (numPoints-1));
+					//Not previously clicking, determine control point under cursor
+					m_currentBezierControlIdx = -1;
+					const int numPoints = m_currentBezier->GetNumPoints();
 
-					m_currentBezier->GetPoint(i, position, controlA, controlB);
+					for(int i = 0; i < numPoints && m_currentBezierControlIdx == -1; i++)
+					{
+						//Ignore first and last control handles (not drawn)
+						bool modifyHandleA = (i != 0);
+						bool modifyHandleB = (i != (numPoints - 1));
 
-					const ion::Vector2 boxMinP(position.x - boxHalfExtents, position.y - boxHalfExtents);
-					const ion::Vector2 boxMaxP(position.x + boxHalfExtents, position.y + boxHalfExtents);
-					const ion::Vector2 boxMinA(controlA.x + position.x - boxHalfExtents, controlA.y + position.y - boxHalfExtents);
-					const ion::Vector2 boxMaxA(controlA.x + position.x + boxHalfExtents, controlA.y + position.y + boxHalfExtents);
-					const ion::Vector2 boxMinB(controlB.x + position.x - boxHalfExtents, controlB.y + position.y - boxHalfExtents);
-					const ion::Vector2 boxMaxB(controlB.x + position.x + boxHalfExtents, controlB.y + position.y + boxHalfExtents);
+						m_currentBezier->GetPoint(i, position, controlA, controlB);
 
-					if(ion::maths::PointInsideBox(mousePosF, boxMinP, boxMaxP))
-					{
-						//Touching position handle
-						position = mousePosF;
-						pointIndex = i;
-						touchingHandle = true;
-					}
-					else if(modifyHandleA && ion::maths::PointInsideBox(mousePosF, boxMinA, boxMaxA))
-					{
-						//Touching control A handle
-						controlA = mousePosF - position;
-						pointIndex = i;
-						touchingHandle = true;
-					}
-					else if(modifyHandleB && ion::maths::PointInsideBox(mousePosF, boxMinB, boxMaxB))
-					{
-						//Touching control B handle
-						controlB = mousePosF - position;
-						pointIndex = i;
-						touchingHandle = true;
+						const ion::Vector2 boxMinP(position.x - boxHalfExtents, position.y - boxHalfExtents);
+						const ion::Vector2 boxMaxP(position.x + boxHalfExtents, position.y + boxHalfExtents);
+						const ion::Vector2 boxMinA(controlA.x + position.x - boxHalfExtents, controlA.y + position.y - boxHalfExtents);
+						const ion::Vector2 boxMaxA(controlA.x + position.x + boxHalfExtents, controlA.y + position.y + boxHalfExtents);
+						const ion::Vector2 boxMinB(controlB.x + position.x - boxHalfExtents, controlB.y + position.y - boxHalfExtents);
+						const ion::Vector2 boxMaxB(controlB.x + position.x + boxHalfExtents, controlB.y + position.y + boxHalfExtents);
+
+						if(ion::maths::PointInsideBox(mousePosF, boxMinP, boxMaxP))
+						{
+							//Touching position handle
+							m_currentBezierControlPos = position;
+							m_currentBezierControlIdx = i;
+							m_currentBezierControlHndl = eBezierPosition;
+						}
+						else if(modifyHandleA && ion::maths::PointInsideBox(mousePosF, boxMinA, boxMaxA))
+						{
+							//Touching control A handle
+							m_currentBezierControlPos = controlA + position;
+							m_currentBezierControlIdx = i;
+							m_currentBezierControlHndl = eBezierControlA;
+						}
+						else if(modifyHandleB && ion::maths::PointInsideBox(mousePosF, boxMinB, boxMaxB))
+						{
+							//Touching control B handle
+							m_currentBezierControlPos = controlB + position;
+							m_currentBezierControlIdx = i;
+							m_currentBezierControlHndl = eBezierControlB;
+						}
+
+						//Refresh this panel to redraw preview
+						Refresh();
 					}
 				}
 
-				if(touchingHandle && (buttonBits & eMouseLeft))
+				if((m_currentBezierControlIdx != -1) && (buttonBits & eMouseLeft))
 				{
-					//Move
-					m_currentBezier->SetPoint(pointIndex, position, controlA, controlB);
+					//Control point is under cursor, and left button is held
+					m_currentBezier->GetPoint(m_currentBezierControlIdx, position, controlA, controlB);
+
+					//Set new point/control handle position
+					switch(m_currentBezierControlHndl)
+					{
+					case eBezierPosition:
+						position = mousePosF;
+						break;
+					case eBezierControlA:
+						controlA = mousePosF - position;
+						break;
+					case eBezierControlB:
+						controlB = mousePosF - position;
+						break;
+					}
+
+					//Set new preview pos
+					m_currentBezierControlPos = mousePosF;
+
+					//Set new point
+					m_currentBezier->SetPoint(m_currentBezierControlIdx, position, controlA, controlB);
 					redraw = true;
 				}
 			}
 
-			if(!touchingHandle)
+			//If not handling a control point
+			if(m_currentBezierControlIdx == -1)
 			{
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
@@ -693,6 +721,9 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 
 				m_primitiveBeziers.back() = m_renderResources.CreateBezierPrimitive(*m_currentBezier);
 				m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(*m_currentBezier, boxHalfExtents);
+
+				//Refresh this panel
+				Refresh();
 			}
 		
 			break;
@@ -1186,6 +1217,33 @@ void MapPanel::RenderCollisionCurves(ion::render::Renderer& renderer, const ion:
 		renderer.SetLineWidth(2.0f);
 		renderer.DrawVertexBuffer(m_primitiveBezierControls->GetVertexBuffer());
 		material->Unbind();
+	}
+
+	//Draw selected handle
+	if(m_currentBezierControlIdx != -1)
+	{
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
+
+		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		material->SetDiffuseColour(colour);
+
+		const float x = m_currentBezierControlPos.x;
+		const float y = m_currentBezierControlPos.y;
+		const float width = 2;
+		const float height = 2;
+
+		ion::Vector3 previewScale(width, height, 1.0f);
+		ion::Matrix4 previewMtx;
+		ion::Vector3 previewPos(x, y, z);
+		previewMtx.SetTranslation(previewPos);
+		//previewMtx.SetScale(previewScale);
+
+		material->Bind(previewMtx * bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+		material->Unbind();
+
+		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
 	}
 
 	renderer.SetLineWidth(1.0f);

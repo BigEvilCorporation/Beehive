@@ -755,7 +755,7 @@ int Project::GetNumTerrainBeziers() const
 	return m_terrainBeziers.size();
 }
 
-void Project::GenerateTerrainFromBeziers()
+void Project::GenerateTerrainFromBeziers(int granularity)
 {
 	//Clear all terrain tiles
 	m_terrainTileset.Clear();
@@ -770,7 +770,6 @@ void Project::GenerateTerrainFromBeziers()
 	}
 
 	const int tileSize = 8;
-	const int granularity = 1000;
 	const int mapHeightPixels = (m_collisionMap.GetHeight() * 8);
 
 	//Follow paths, generate terrain height tiles

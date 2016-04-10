@@ -116,7 +116,7 @@ public:
 	int GetNumTerrainBeziers() const;
 
 	//Terrain generation from bezier paths
-	void GenerateTerrainFromBeziers();
+	void GenerateTerrainFromBeziers(int granularity);
 
 	//Terrain generation from graphic tiles
 	void GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles);
