@@ -769,6 +769,10 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 		}
 	}
 
+	//Create blank tile, use as default
+	TerrainTileId blankTileId = m_terrainTileset.AddTerrainTile();
+	SetDefaultTerrainTile(blankTileId);
+
 	const int tileSize = 8;
 	const int mapHeightPixels = (m_collisionMap.GetHeight() * 8);
 
@@ -814,6 +818,9 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 
 	//Remove duplicates
 	CleanupTerrainTiles(false);
+
+	//Reset default terrain tile
+	SetDefaultTerrainTile(blankTileId);
 
 	InvalidateTerrainTiles(false);
 }
