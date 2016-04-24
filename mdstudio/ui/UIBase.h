@@ -10,6 +10,8 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
+class SpriteCanvas;
+
 #include <wx/string.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
@@ -117,6 +119,8 @@ class MainWindowBase : public wxFrame
 		wxRibbonButtonBar* m_ribbonButtonBarMap;
 		wxRibbonPanel* m_ribbonPanelTiles;
 		wxRibbonButtonBar* m_ribbonButtonBarTiles;
+		wxRibbonPanel* m_ribbonPanelSprites;
+		wxRibbonButtonBar* m_ribbonButtonBarSprites;
 		wxRibbonPanel* m_ribbonPanelStamps;
 		wxRibbonButtonBar* m_ribbonButtonBarStamps;
 		wxRibbonPanel* m_ribbonPanelCollision;
@@ -146,6 +150,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnSpritesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -250,7 +255,7 @@ class MapToolbox : public wxPanel
 	
 	public:
 		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 121,571 ), long style = wxTAB_TRAVERSAL ); 
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 124,627 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
 		~MapToolbox();
 	
 };
@@ -351,6 +356,44 @@ class ImportDialogBase : public wxDialog
 		
 		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,309 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ImportDialogBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImportDialogSpriteBase
+///////////////////////////////////////////////////////////////////////////////
+class ImportDialogSpriteBase : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText8;
+		wxFilePickerCtrl* m_filePicker;
+		wxStaticText* m_staticText24;
+		wxTextCtrl* m_textName;
+		SpriteCanvas* m_canvas;
+		wxStaticText* m_staticText21;
+		wxSpinCtrl* m_spinWidthCells;
+		wxStaticText* m_staticText22;
+		wxSpinCtrl* m_spinHeightCells;
+		wxStaticText* m_staticText23;
+		wxSpinCtrl* m_spinCellCount;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2OK;
+		wxButton* m_sdbSizer2Cancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnFileOpened( wxFileDirPickerEvent& event ) { event.Skip(); }
+		virtual void OnSpinWidthCells( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnSpinHeightCells( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnSpinCellCount( wxSpinEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		wxCheckBox* m_chkImportWholePalette;
+		
+		ImportDialogSpriteBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+		~ImportDialogSpriteBase();
 	
 };
 

@@ -16,7 +16,7 @@
 
 #include <wx/event.h>
 #include <wx/panel.h>
-#include "wx/glcanvas.h"
+#include <wx/glcanvas.h>
 #include <wx/dc.h>
 #include <wx/dcclient.h>
 #include <wx/dcbuffer.h>

@@ -7,6 +7,11 @@
 #pragma once
 
 #include "UIBase.h"
+#include "RenderResources.h"
+
+#include <ion/renderer/Renderer.h>
+
+#include <wx/glcanvas.h>
 
 class DialogMapSize : public DialogMapSizeBase
 {
@@ -27,36 +32,20 @@ public:
 class ImportDialog : public ImportDialogBase
 {
 public:
-	ImportDialog(wxWindow* parent)
-		: ImportDialogBase(parent)
-	{
-
-	}
+	ImportDialog(wxWindow* parent);
 
 	wxArrayString m_paths;
 
 protected:
-	virtual void OnBtnBrowse(wxCommandEvent& event)
-	{
-		wxFileDialog dialog(this, _("Open BMP files"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
-		if(dialog.ShowModal() == wxID_OK)
-		{
-			dialog.GetPaths(m_paths);
+	virtual void OnBtnBrowse(wxCommandEvent& event);
+};
 
-			if(m_paths.size() == 0)
-			{
-				m_filenames->Clear();
-			}
-			else if(m_paths.size() == 1)
-			{
-				m_filenames->SetValue(m_paths[0]);
-			}
-			else
-			{
-				char text[128] = { 0 };
-				sprintf(text, "(%u) BMP files", m_paths.size());
-				m_filenames->SetValue(wxString(text));
-			}
-		}
-	}
+class ImportDialogSprite : public ImportDialogSpriteBase
+{
+public:
+	ImportDialogSprite(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
+	virtual void OnFileOpened(wxFileDirPickerEvent& event);
+	virtual void OnSpinWidthCells(wxSpinEvent& event);
+	virtual void OnSpinHeightCells(wxSpinEvent& event);
+	virtual void OnSpinCellCount(wxSpinEvent& event);
 };

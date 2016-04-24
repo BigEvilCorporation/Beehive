@@ -899,7 +899,7 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	//Render grid
 	if(m_project->GetShowGrid())
 	{
-		RenderGrid(m_renderer, cameraInverseMtx, projectionMtx, z);
+		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 
 		z += zOffset;
 	}
