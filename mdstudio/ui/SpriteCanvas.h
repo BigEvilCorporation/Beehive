@@ -4,6 +4,8 @@
 // (c) 2016 Matt Phillips, Big Evil Corporation
 ///////////////////////////////////////////////////////
 
+#pragma once
+
 #include "UIBase.h"
 #include "RenderResources.h"
 
