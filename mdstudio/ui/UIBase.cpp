@@ -5,6 +5,8 @@
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
+#include "SpriteCanvas.h"
+
 #include "UIBase.h"
 
 #include "../FormBuilderProj/add_16_16.xpm"
@@ -96,6 +98,9 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_CREATE, wxT("New"), wxBitmap( newtile_xpm ), wxEmptyString);
 	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_DELETE, wxT("Delete"), wxBitmap( deletetile_xpm ), wxEmptyString);
 	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_CLEANUP, wxT("Cleanup"), wxBitmap( deleteunusedtiles_xpm ), wxEmptyString);
+	m_ribbonPanelSprites = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Sprites") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
+	m_ribbonButtonBarSprites = new wxRibbonButtonBar( m_ribbonPanelSprites, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_ribbonButtonBarSprites->AddButton( wxID_BTN_TILES_IMPORT, wxT("Import"), wxBitmap( importtiles_xpm ), wxEmptyString);
 	m_ribbonPanelStamps = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Stamps") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarStamps = new wxRibbonButtonBar( m_ribbonPanelStamps, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_CREATE, wxT("Create"), wxBitmap( newstamp_xpm ), wxEmptyString);
@@ -144,6 +149,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
 	this->Connect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
 	this->Connect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
+	this->Connect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpritesImport ) );
 	this->Connect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Connect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
 	this->Connect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );
@@ -174,6 +180,7 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
 	this->Disconnect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
 	this->Disconnect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
+	this->Disconnect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpritesImport ) );
 	this->Disconnect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Disconnect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
 	this->Disconnect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );
@@ -688,6 +695,127 @@ ImportDialogBase::~ImportDialogBase()
 {
 	// Disconnect Events
 	m_btnSelectFiles->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ImportDialogBase::OnBtnBrowse ), NULL, this );
+	
+}
+
+ImportDialogSpriteBase::ImportDialogSpriteBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer10;
+	bSizer10 = new wxBoxSizer( wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizer14;
+	fgSizer14 = new wxFlexGridSizer( 3, 1, 0, 0 );
+	fgSizer14->AddGrowableCol( 0 );
+	fgSizer14->AddGrowableRow( 1 );
+	fgSizer14->SetFlexibleDirection( wxBOTH );
+	fgSizer14->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	wxFlexGridSizer* fgSizer15;
+	fgSizer15 = new wxFlexGridSizer( 2, 2, 0, 0 );
+	fgSizer15->SetFlexibleDirection( wxBOTH );
+	fgSizer15->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticText8 = new wxStaticText( this, wxID_ANY, wxT("Bitmap:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText8->Wrap( -1 );
+	fgSizer15->Add( m_staticText8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
+	fgSizer15->Add( m_filePicker, 1, wxALL|wxEXPAND, 5 );
+	
+	m_staticText24 = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText24->Wrap( -1 );
+	fgSizer15->Add( m_staticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textName = new wxTextCtrl( this, wxID_ANY, wxT("Sprite001"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_textName->SetMaxLength( 64 ); 
+	fgSizer15->Add( m_textName, 1, wxALL|wxEXPAND, 5 );
+	
+	
+	fgSizer14->Add( fgSizer15, 1, wxEXPAND, 5 );
+	
+	wxFlexGridSizer* fgSizer13;
+	fgSizer13 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer13->AddGrowableCol( 0 );
+	fgSizer13->AddGrowableRow( 0 );
+	fgSizer13->SetFlexibleDirection( wxBOTH );
+	fgSizer13->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_canvas = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	fgSizer13->Add( m_canvas, 1, wxEXPAND | wxALL, 5 );
+	
+	wxFlexGridSizer* fgSizer12;
+	fgSizer12 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer12->SetFlexibleDirection( wxBOTH );
+	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_chkImportWholePalette = new wxCheckBox( this, wxID_ANY, wxT("Import whole palette"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkImportWholePalette->SetValue(true); 
+	fgSizer12->Add( m_chkImportWholePalette, 0, wxALL, 5 );
+	
+	
+	fgSizer12->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_staticText21 = new wxStaticText( this, wxID_ANY, wxT("Width (cells):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText21->Wrap( -1 );
+	fgSizer12->Add( m_staticText21, 0, wxALL, 5 );
+	
+	m_spinWidthCells = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 4 );
+	fgSizer12->Add( m_spinWidthCells, 0, wxALL, 5 );
+	
+	m_staticText22 = new wxStaticText( this, wxID_ANY, wxT("Height (cells):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText22->Wrap( -1 );
+	fgSizer12->Add( m_staticText22, 0, wxALL, 5 );
+	
+	m_spinHeightCells = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 4 );
+	fgSizer12->Add( m_spinHeightCells, 0, wxALL, 5 );
+	
+	m_staticText23 = new wxStaticText( this, wxID_ANY, wxT("Max cells:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText23->Wrap( -1 );
+	fgSizer12->Add( m_staticText23, 0, wxALL, 5 );
+	
+	m_spinCellCount = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 1 );
+	fgSizer12->Add( m_spinCellCount, 0, wxALL, 5 );
+	
+	
+	fgSizer13->Add( fgSizer12, 1, wxEXPAND, 5 );
+	
+	
+	fgSizer14->Add( fgSizer13, 1, wxEXPAND, 5 );
+	
+	m_sdbSizer2 = new wxStdDialogButtonSizer();
+	m_sdbSizer2OK = new wxButton( this, wxID_OK );
+	m_sdbSizer2->AddButton( m_sdbSizer2OK );
+	m_sdbSizer2Cancel = new wxButton( this, wxID_CANCEL );
+	m_sdbSizer2->AddButton( m_sdbSizer2Cancel );
+	m_sdbSizer2->Realize();
+	
+	fgSizer14->Add( m_sdbSizer2, 1, wxALIGN_RIGHT, 5 );
+	
+	
+	bSizer10->Add( fgSizer14, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer10 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_filePicker->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteBase::OnFileOpened ), NULL, this );
+	m_spinWidthCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinWidthCells ), NULL, this );
+	m_spinHeightCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinHeightCells ), NULL, this );
+	m_spinCellCount->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinCellCount ), NULL, this );
+}
+
+ImportDialogSpriteBase::~ImportDialogSpriteBase()
+{
+	// Disconnect Events
+	m_filePicker->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteBase::OnFileOpened ), NULL, this );
+	m_spinWidthCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinWidthCells ), NULL, this );
+	m_spinHeightCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinHeightCells ), NULL, this );
+	m_spinCellCount->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinCellCount ), NULL, this );
 	
 }
 

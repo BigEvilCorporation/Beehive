@@ -866,6 +866,17 @@ void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
 	}
 }
 
+void MainWindow::OnBtnSpritesImport(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		ImportDialogSprite dialog(this, *m_renderer, *m_context, *m_renderResources);
+		if(dialog.ShowModal() == wxID_OK)
+		{
+		}
+	}
+}
+
 void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())

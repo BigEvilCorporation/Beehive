@@ -37,6 +37,7 @@ local SRC =
 	Tileset.cpp
 	Tileset.h
 
+	ui/Dialogs.cpp
 	ui/Dialogs.h
 	ui/MainWindow.cpp
 	ui/MainWindow.h
@@ -52,6 +53,8 @@ local SRC =
 	ui/ViewPanel.h
 	ui/PalettesPanel.cpp
 	ui/PalettesPanel.h
+	ui/SpriteCanvas.cpp
+	ui/SpriteCanvas.h
 	ui/StampsPanel.cpp
 	ui/StampsPanel.h
 	ui/TerrainTileEditorPanel.cpp
