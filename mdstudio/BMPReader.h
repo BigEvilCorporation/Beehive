@@ -6,6 +6,8 @@
 // Reader for indexed 16 colour, 4bpp BMP files
 ///////////////////////////////////////////////////////
 
+#pragma once
+
 #include <string>
 
 #include <core/Types.h>

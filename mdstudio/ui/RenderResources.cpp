@@ -70,6 +70,12 @@ RenderResources::RenderResources()
 	m_materials[eMaterialTerrainTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
 	m_materials[eMaterialTerrainTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
+	//Setup textured sprite material
+	m_materials[eMaterialSprite]->AddDiffuseMap(m_textures[eTextureSpritePreview]);
+	m_materials[eMaterialSprite]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialSprite]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
+	m_materials[eMaterialSprite]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
 	m_colours[eColourSelected] = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
@@ -270,6 +276,40 @@ void RenderResources::CreateCollisionTypesTexture()
 	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::eWrapClamp);
 
 	delete data;
+}
+
+ion::render::Texture* RenderResources::CreateSpritePreviewTexture(const BMPReader& reader)
+{
+	u32 textureWidth = reader.GetWidth();
+	u32 textureHeight = reader.GetHeight();
+	u32 bytesPerPixel = 3;
+	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+
+	u8* data = new u8[textureSize];
+	ion::memory::MemSet(data, 0, textureSize);
+
+	for(int x = 0; x < textureWidth; x++)
+	{
+		for(int y = 0; y < textureHeight; y++)
+		{
+			const Colour& colour = reader.GetPixel(x, y);
+
+			u32 pixelIdx = (y * textureWidth) + x;
+			u32 dataOffset = pixelIdx * bytesPerPixel;
+			ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+			data[dataOffset] = colour.GetRed() * 255;
+			data[dataOffset + 1] = colour.GetGreen() * 255;
+			data[dataOffset + 2] = colour.GetBlue() * 255;
+		}
+	}
+
+	m_textures[eTextureSpritePreview]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureSpritePreview]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureSpritePreview]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureSpritePreview]->SetWrapping(ion::render::Texture::eWrapClamp);
+
+	delete data;
+	return m_textures[eTextureSpritePreview];
 }
 
 void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const

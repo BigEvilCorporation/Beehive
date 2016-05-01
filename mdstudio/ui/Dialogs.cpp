@@ -7,6 +7,10 @@
 #include "Dialogs.h"
 #include "SpriteCanvas.h"
 
+#include "../BMPReader.h"
+
+#include <wx/msgdlg.h>
+
 ImportDialog::ImportDialog(wxWindow* parent) : ImportDialogBase(parent)
 {
 
@@ -36,7 +40,9 @@ void ImportDialog::OnBtnBrowse(wxCommandEvent& event)
 	}
 }
 
-ImportDialogSprite::ImportDialogSprite(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources) : ImportDialogSpriteBase(parent)
+ImportDialogSprite::ImportDialogSprite(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
+	: ImportDialogSpriteBase(parent)
+	, m_renderResources(renderResources)
 {
 	m_canvas->SetupRendering(&renderer, &glContext, &renderResources);
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
@@ -44,7 +50,20 @@ ImportDialogSprite::ImportDialogSprite(wxWindow* parent, ion::render::Renderer& 
 
 void ImportDialogSprite::OnFileOpened(wxFileDirPickerEvent& event)
 {
+	BMPReader reader;
+	if(reader.Read(event.GetPath().GetData().AsChar()))
+	{
+		if(reader.GetWidth() % 8 != 0 || reader.GetHeight() % 8 != 0)
+		{
+			if(wxMessageBox("Bitmap width/height is not multiple of 8, image will be truncated", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
+			{
+				return;
+			}
+		}
 
+		//Create texture from bitmap
+		m_canvas->SetPreview(m_renderResources.CreateSpritePreviewTexture(reader));
+	}
 }
 
 void ImportDialogSprite::OnSpinWidthCells(wxSpinEvent& event)

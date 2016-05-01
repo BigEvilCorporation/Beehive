@@ -16,7 +16,7 @@ class Sprite
 public:
 	Sprite();
 
-	void ImportBitmap(const std::string& filename, int widthCells, int heightCells, int maxCells);
+	bool ImportBitmap(const std::string& filename, int widthCells, int heightCells, int maxCells);
 
 	const SpriteFrame& GetFrame(int index) const;
 	int GetNumFrames() const;

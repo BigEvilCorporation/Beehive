@@ -48,4 +48,7 @@ public:
 	virtual void OnSpinWidthCells(wxSpinEvent& event);
 	virtual void OnSpinHeightCells(wxSpinEvent& event);
 	virtual void OnSpinCellCount(wxSpinEvent& event);
+
+private:
+	RenderResources& m_renderResources;
 };
