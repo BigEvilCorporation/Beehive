@@ -14,6 +14,7 @@
 #include <ion/renderer/Texture.h>
 
 #include "../Project.h"
+#include "../BMPReader.h"
 
 class RenderResources
 {
@@ -31,6 +32,7 @@ public:
 		eMaterialTileset,
 		eMaterialCollisionTypes,
 		eMaterialTerrainTileset,
+		eMaterialSprite,
 		eMaterialMax
 	};
 
@@ -39,6 +41,7 @@ public:
 		eTextureTileset,
 		eTextureCollisionTypes,
 		eTextureTerrainTileset,
+		eTextureSpritePreview,
 		eTextureMax
 	};
 
@@ -73,6 +76,9 @@ public:
 
 	//Create and redraw collision texture
 	void CreateCollisionTypesTexture();
+
+	//Create sprite preview texture
+	ion::render::Texture* CreateSpritePreviewTexture(const BMPReader& reader);
 
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;

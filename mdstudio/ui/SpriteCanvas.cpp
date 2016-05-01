@@ -11,6 +11,7 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
 {
 	m_gridPrimitive = NULL;
+	m_previewTexture = NULL;
 
 	//Set viewport clear colour
 	m_viewport.SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
@@ -36,7 +37,29 @@ void SpriteCanvas::SetupRendering(ion::render::Renderer* renderer, wxGLContext* 
 void SpriteCanvas::SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells)
 {
 	m_spriteSheetDimentionsCells = spriteSheetDimentionsCells;
-	CreateGrid(m_panelSize.x, m_panelSize.y, m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
+
+	if(m_previewTexture)
+	{
+		CreateGrid(m_previewTexture->GetWidth(), m_previewTexture->GetHeight(), m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
+	}
+	
+	Refresh();
+}
+
+void SpriteCanvas::SetPreview(ion::render::Texture* previewTexture)
+{
+	if(m_previewTexture)
+	{
+		delete m_previewTexture;
+	}
+
+	m_previewTexture = previewTexture;
+
+	if(m_previewTexture)
+	{
+		CreateGrid(m_previewTexture->GetWidth(), m_previewTexture->GetHeight(), m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
+	}
+
 	Refresh();
 }
 
@@ -66,9 +89,6 @@ void SpriteCanvas::OnResize(wxSizeEvent& event)
 		{
 			m_prevPanelSize = m_panelSize;
 			m_viewport.Resize(m_panelSize.x, m_panelSize.y);
-
-			//Recreate grid
-			CreateGrid(m_panelSize.x, m_panelSize.y, m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
 			
 			//Centre camera
 			ion::Vector3 cameraPos(-(m_panelSize.x / 2.0f), -(m_panelSize.y / 2.0f), 0.0f);
@@ -81,6 +101,10 @@ void SpriteCanvas::OnResize(wxSizeEvent& event)
 
 void SpriteCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
+	//Render preview
+	RenderPreview(renderer, cameraInverseMtx, projectionMtx, z);
+	z += zOffset;
+
 	//Render grid
 	RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	z += zOffset;
@@ -91,19 +115,44 @@ void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion:
 
 }
 
+void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	if(m_previewTexture)
+	{
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialSprite);
+		ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+
+		ion::Matrix4 boxMtx;
+		ion::Vector3 boxScale(m_previewTexture->GetWidth() / 8.0f, m_previewTexture->GetHeight() / 8.0f, 0.0f);
+		//ion::Vector3 boxScale(m_panelSize.x / 8.0f, m_panelSize.y / 8.0f, 0.0f);
+		ion::Vector3 boxPos(0.0f, 0.0f, z);
+
+		boxMtx.SetTranslation(boxPos);
+		boxMtx.SetScale(boxScale);
+
+		//gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
+		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+		material->Unbind();
+	}
+}
+
 void SpriteCanvas::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	//Draw grid
-	ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialFlatColour);
-	const ion::Colour& colour = m_renderResources->GetColour(RenderResources::eColourGrid);
+	if(m_gridPrimitive)
+	{
+		//Draw grid
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialFlatColour);
+		const ion::Colour& colour = m_renderResources->GetColour(RenderResources::eColourGrid);
 
-	ion::Matrix4 gridMtx;
-	gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
-	//gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
-	material->SetDiffuseColour(colour);
-	material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
-	renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
-	material->Unbind();
+		ion::Matrix4 gridMtx;
+		gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
+		//gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
+		material->SetDiffuseColour(colour);
+		material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
+		material->Unbind();
+	}
 }
 
 void SpriteCanvas::EventHandlerPaint(wxPaintEvent& event)

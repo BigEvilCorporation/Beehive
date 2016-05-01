@@ -25,6 +25,7 @@ public:
 
 	void SetupRendering(ion::render::Renderer* renderer, wxGLContext* glContext, RenderResources* renderResources);
 	void SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells);
+	void SetPreview(ion::render::Texture* previewTexture);
 
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
@@ -44,6 +45,7 @@ private:
 
 	//Rendering
 	void RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
 	//Rendering resources
@@ -54,6 +56,9 @@ private:
 
 	//Rendering primitives
 	ion::render::Grid* m_gridPrimitive;
+
+	//Preview texture
+	ion::render::Texture* m_previewTexture;
 
 	//Panel size (pixels)
 	ion::Vector2i m_panelSize;

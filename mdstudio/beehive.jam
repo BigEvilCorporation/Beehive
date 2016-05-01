@@ -26,6 +26,8 @@ local SRC =
 	Palette.h
 	Project.cpp
 	Project.h
+	Sprite.cpp
+	Sprite.h
 	Stamp.cpp
 	Stamp.h
 	TerrainTile.cpp
