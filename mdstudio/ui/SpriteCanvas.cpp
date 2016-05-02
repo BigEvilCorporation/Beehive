@@ -12,6 +12,8 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 {
 	m_gridPrimitive = NULL;
 	m_previewTexture = NULL;
+	m_cameraZoom = 1.0f;
+	m_gridColour = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
 
 	//Set viewport clear colour
 	m_viewport.SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
@@ -19,6 +21,7 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	//Subscribe to events
 	Bind(wxEVT_PAINT, &SpriteCanvas::EventHandlerPaint, this, GetId());
 	Bind(wxEVT_SIZE, &SpriteCanvas::EventHandlerResize, this, GetId());
+	Bind(wxEVT_MOUSEWHEEL, &SpriteCanvas::EventHandlerMouse, this, GetId());
 }
 
 SpriteCanvas::~SpriteCanvas()
@@ -48,11 +51,6 @@ void SpriteCanvas::SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteShee
 
 void SpriteCanvas::SetPreview(ion::render::Texture* previewTexture)
 {
-	if(m_previewTexture)
-	{
-		delete m_previewTexture;
-	}
-
 	m_previewTexture = previewTexture;
 
 	if(m_previewTexture)
@@ -60,6 +58,12 @@ void SpriteCanvas::SetPreview(ion::render::Texture* previewTexture)
 		CreateGrid(m_previewTexture->GetWidth(), m_previewTexture->GetHeight(), m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
 	}
 
+	Refresh();
+}
+
+void SpriteCanvas::SetGridColour(const ion::Colour& colour)
+{
+	m_gridColour = colour;
 	Refresh();
 }
 
@@ -99,6 +103,32 @@ void SpriteCanvas::OnResize(wxSizeEvent& event)
 	Refresh();
 }
 
+void SpriteCanvas::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+{
+	if(event.GetWheelRotation() != 0)
+	{
+		//Zoom camera
+		int wheelDelta = event.GetWheelRotation();
+		float zoomSpeed = 1.0f;
+
+		//Reduce speed for <1.0f
+		if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
+		{
+			zoomSpeed = 0.2f;
+		}
+
+		//One notch at a time
+		if(wheelDelta > 0)
+			m_cameraZoom += zoomSpeed;
+		else if(wheelDelta < 0)
+			m_cameraZoom -= zoomSpeed;
+
+		m_cameraZoom = ion::maths::Clamp(m_cameraZoom, 0.1f, 10.0f);
+
+		Refresh();
+	}
+}
+
 void SpriteCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
 	//Render preview
@@ -123,8 +153,7 @@ void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Mat
 		ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 
 		ion::Matrix4 boxMtx;
-		ion::Vector3 boxScale(m_previewTexture->GetWidth() / 8.0f, m_previewTexture->GetHeight() / 8.0f, 0.0f);
-		//ion::Vector3 boxScale(m_panelSize.x / 8.0f, m_panelSize.y / 8.0f, 0.0f);
+		ion::Vector3 boxScale((m_previewTexture->GetWidth() / 8.0f) * m_cameraZoom, (m_previewTexture->GetHeight() / 8.0f) * m_cameraZoom, 0.0f);
 		ion::Vector3 boxPos(0.0f, 0.0f, z);
 
 		boxMtx.SetTranslation(boxPos);
@@ -143,12 +172,11 @@ void SpriteCanvas::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix
 	{
 		//Draw grid
 		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialFlatColour);
-		const ion::Colour& colour = m_renderResources->GetColour(RenderResources::eColourGrid);
 
 		ion::Matrix4 gridMtx;
 		gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
-		//gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
-		material->SetDiffuseColour(colour);
+		gridMtx.SetScale(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+		material->SetDiffuseColour(m_gridColour);
 		material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
 		material->Unbind();
@@ -182,5 +210,16 @@ void SpriteCanvas::EventHandlerPaint(wxPaintEvent& event)
 void SpriteCanvas::EventHandlerResize(wxSizeEvent& event)
 {
 	OnResize(event);
+	event.Skip();
+}
+
+void SpriteCanvas::EventHandlerMouse(wxMouseEvent& event)
+{
+	//Get mouse delta
+	ion::Vector2 mousePosScreenSpace(event.GetX(), event.GetY());
+	ion::Vector2 mouseDelta = mousePosScreenSpace - m_mousePrevPos;
+	m_mousePrevPos = mousePosScreenSpace;
+
+	OnMouse(event, mouseDelta);
 	event.Skip();
 }

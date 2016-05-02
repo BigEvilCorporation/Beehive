@@ -40,6 +40,7 @@ class SpriteCanvas;
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/radiobut.h>
+#include <wx/clrpicker.h>
 #include <wx/toolbar.h>
 #include <wx/listctrl.h>
 #include <wx/statline.h>
@@ -372,6 +373,8 @@ class ImportDialogSpriteBase : public wxDialog
 		wxStaticText* m_staticText24;
 		wxTextCtrl* m_textName;
 		SpriteCanvas* m_canvas;
+		wxStaticText* m_staticText241;
+		wxColourPickerCtrl* m_gridColourPicker;
 		wxStaticText* m_staticText21;
 		wxSpinCtrl* m_spinWidthCells;
 		wxStaticText* m_staticText22;
@@ -384,6 +387,7 @@ class ImportDialogSpriteBase : public wxDialog
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnFileOpened( wxFileDirPickerEvent& event ) { event.Skip(); }
+		virtual void OnGridColourChanged( wxColourPickerEvent& event ) { event.Skip(); }
 		virtual void OnSpinWidthCells( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpinHeightCells( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpinCellCount( wxSpinEvent& event ) { event.Skip(); }

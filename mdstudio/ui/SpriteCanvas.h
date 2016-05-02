@@ -26,10 +26,12 @@ public:
 	void SetupRendering(ion::render::Renderer* renderer, wxGLContext* glContext, RenderResources* renderResources);
 	void SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells);
 	void SetPreview(ion::render::Texture* previewTexture);
+	void SetGridColour(const ion::Colour& colour);
 
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 	virtual void OnResize(wxSizeEvent& event);
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
 
 protected:
 	//Render callback
@@ -39,6 +41,7 @@ private:
 	//Event handlers
 	void EventHandlerPaint(wxPaintEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
+	void EventHandlerMouse(wxMouseEvent& event);
 
 	//Primitive creation
 	void CreateGrid(int width, int height, int cellsX, int cellsY);
@@ -54,6 +57,10 @@ private:
 	ion::render::Viewport m_viewport;
 	RenderResources* m_renderResources;
 
+	//Mouse
+	ion::Vector2 m_mousePrevPos;
+	float m_cameraZoom;
+
 	//Rendering primitives
 	ion::render::Grid* m_gridPrimitive;
 
@@ -68,4 +75,7 @@ private:
 
 	//Sprite sheet cells
 	ion::Vector2i m_spriteSheetDimentionsCells;
+
+	//Grid colour
+	ion::Colour m_gridColour;
 };

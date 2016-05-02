@@ -297,9 +297,9 @@ ion::render::Texture* RenderResources::CreateSpritePreviewTexture(const BMPReade
 			u32 pixelIdx = (y * textureWidth) + x;
 			u32 dataOffset = pixelIdx * bytesPerPixel;
 			ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
-			data[dataOffset] = colour.GetRed() * 255;
-			data[dataOffset + 1] = colour.GetGreen() * 255;
-			data[dataOffset + 2] = colour.GetBlue() * 255;
+			data[dataOffset] = colour.GetRed();
+			data[dataOffset + 1] = colour.GetGreen();
+			data[dataOffset + 2] = colour.GetBlue();
 		}
 	}
 

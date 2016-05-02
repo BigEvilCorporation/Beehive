@@ -45,6 +45,7 @@ class ImportDialogSprite : public ImportDialogSpriteBase
 public:
 	ImportDialogSprite(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual void OnFileOpened(wxFileDirPickerEvent& event);
+	virtual void OnGridColourChanged(wxColourPickerEvent& event);
 	virtual void OnSpinWidthCells(wxSpinEvent& event);
 	virtual void OnSpinHeightCells(wxSpinEvent& event);
 	virtual void OnSpinCellCount(wxSpinEvent& event);
