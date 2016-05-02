@@ -66,6 +66,12 @@ void ImportDialogSprite::OnFileOpened(wxFileDirPickerEvent& event)
 	}
 }
 
+void ImportDialogSprite::OnGridColourChanged(wxColourPickerEvent& event)
+{
+	ion::Colour colour((float)event.GetColour().Red() / 255.0f, (float)event.GetColour().Green() / 255.0f, (float)event.GetColour().Blue() / 255.0f);
+	m_canvas->SetGridColour(colour);
+}
+
 void ImportDialogSprite::OnSpinWidthCells(wxSpinEvent& event)
 {
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));

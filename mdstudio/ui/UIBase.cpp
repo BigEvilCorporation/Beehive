@@ -754,8 +754,18 @@ ImportDialogSpriteBase::ImportDialogSpriteBase( wxWindow* parent, wxWindowID id,
 	m_chkImportWholePalette->SetValue(true); 
 	fgSizer12->Add( m_chkImportWholePalette, 0, wxALL, 5 );
 	
+	wxGridSizer* gSizer1;
+	gSizer1 = new wxGridSizer( 0, 2, 0, 0 );
 	
-	fgSizer12->Add( 0, 0, 1, wxEXPAND, 5 );
+	m_staticText241 = new wxStaticText( this, wxID_ANY, wxT("Grid colour:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText241->Wrap( -1 );
+	gSizer1->Add( m_staticText241, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	
+	m_gridColourPicker = new wxColourPickerCtrl( this, wxID_ANY, wxColour( 0, 0, 0 ), wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	gSizer1->Add( m_gridColourPicker, 0, wxALL, 5 );
+	
+	
+	fgSizer12->Add( gSizer1, 1, wxEXPAND, 5 );
 	
 	m_staticText21 = new wxStaticText( this, wxID_ANY, wxT("Width (cells):"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText21->Wrap( -1 );
@@ -804,6 +814,7 @@ ImportDialogSpriteBase::ImportDialogSpriteBase( wxWindow* parent, wxWindowID id,
 	
 	// Connect Events
 	m_filePicker->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteBase::OnFileOpened ), NULL, this );
+	m_gridColourPicker->Connect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( ImportDialogSpriteBase::OnGridColourChanged ), NULL, this );
 	m_spinWidthCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinWidthCells ), NULL, this );
 	m_spinHeightCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinHeightCells ), NULL, this );
 	m_spinCellCount->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinCellCount ), NULL, this );
@@ -813,6 +824,7 @@ ImportDialogSpriteBase::~ImportDialogSpriteBase()
 {
 	// Disconnect Events
 	m_filePicker->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteBase::OnFileOpened ), NULL, this );
+	m_gridColourPicker->Disconnect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( ImportDialogSpriteBase::OnGridColourChanged ), NULL, this );
 	m_spinWidthCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinWidthCells ), NULL, this );
 	m_spinHeightCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinHeightCells ), NULL, this );
 	m_spinCellCount->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinCellCount ), NULL, this );
