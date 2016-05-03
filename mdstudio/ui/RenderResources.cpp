@@ -278,7 +278,7 @@ void RenderResources::CreateCollisionTypesTexture()
 	delete data;
 }
 
-ion::render::Texture* RenderResources::CreateSpritePreviewTexture(const BMPReader& reader)
+void RenderResources::CreateSpritePreviewTexture(const BMPReader& reader)
 {
 	u32 textureWidth = reader.GetWidth();
 	u32 textureHeight = reader.GetHeight();
@@ -309,7 +309,11 @@ ion::render::Texture* RenderResources::CreateSpritePreviewTexture(const BMPReade
 	m_textures[eTextureSpritePreview]->SetWrapping(ion::render::Texture::eWrapClamp);
 
 	delete data;
-	return m_textures[eTextureSpritePreview];
+}
+
+ion::render::Texture* RenderResources::CreateSpritePreviewTexture(const Sprite& sprite)
+{
+	return NULL;
 }
 
 void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const
@@ -603,4 +607,162 @@ ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion
 	}
 
 	return new ion::render::LineSegments(points);
+}
+
+RenderResources::SpriteRenderResources::SpriteRenderResources()
+{
+	m_primitive = NULL;
+}
+
+void RenderResources::SpriteRenderResources::Load(const Sprite& sprite, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader)
+{
+	m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)sprite.GetWidthTiles() * 4.0f, (float)sprite.GetHeightTiles() * 4.0f), sprite.GetWidthTiles(), sprite.GetHeightTiles(), true);
+
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	u32 widthTiles = sprite.GetWidthTiles();
+	u32 heightTiles = sprite.GetHeightTiles();
+	u32 textureWidth = widthTiles * tileWidth;
+	u32 textureHeight = heightTiles * tileHeight;
+	u32 bytesPerPixel = 4;
+	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+
+	const Palette& palette = sprite.GetPalette();
+
+	for(int i = 0; i < sprite.GetNumFrames(); i++)
+	{
+		//Get sprite frame
+		const SpriteFrame& spriteFrame = sprite.GetFrame(i);
+
+		//Create new render frame
+		Frame renderFrame;
+
+		//Create tileset texture for frame
+		renderFrame.texture = ion::render::Texture::Create();
+
+		u8* data = new u8[textureSize];
+		ion::memory::MemSet(data, 0, textureSize);
+
+		for(int tileX = 0; tileX < sprite.GetWidthTiles(); tileX++)
+		{
+			for(int tileY = 0; tileY < sprite.GetHeightTiles(); tileY++)
+			{
+				//Genesis sprite order = column major
+				const Tile& tile = spriteFrame[(tileX * heightTiles) + tileY];
+
+				//Invert Y for OpenGL
+				int tileY_inv = sprite.GetHeightTiles() - 1 - tileY;
+
+				//Paint tile to texture
+				for(int pixelY = 0; pixelY < 8; pixelY++)
+				{
+					for(int pixelX = 0; pixelX < 8; pixelX++)
+					{
+						//Invert Y for OpenGL
+						int pixelY_OGL = tileHeight - 1 - pixelY;
+
+						u8 colourIdx = tile.GetPixelColour(pixelX, pixelY_OGL);
+
+						const Colour& colour = palette.GetColour(colourIdx);
+
+						int destPixelX = (tileX * tileWidth) + pixelX;
+						int destPixelY = (tileY_inv * tileHeight) + pixelY;
+						u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+						u32 dataOffset = pixelIdx * bytesPerPixel;
+						ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+						data[dataOffset] = colour.GetRed();
+						data[dataOffset + 1] = colour.GetGreen();
+						data[dataOffset + 2] = colour.GetBlue();
+						data[dataOffset + 3] = colourIdx > 0 ? 255 : 0;
+					}
+				}
+
+				//Set UV coords on primitive
+				ion::render::TexCoord coords[4];
+				ion::Vector2 textureBottomLeft((1.0f / (float)widthTiles) * tileX, (1.0f / (float)heightTiles) * tileY);
+
+				float top = textureBottomLeft.y + (1.0f / (float)heightTiles);
+				float left = textureBottomLeft.x;
+				float bottom = textureBottomLeft.y;
+				float right = textureBottomLeft.x + (1.0f / (float)widthTiles);
+
+				//Top left
+				coords[0].x = left;
+				coords[0].y = top;
+				//Bottom left
+				coords[1].x = left;
+				coords[1].y = bottom;
+				//Bottom right
+				coords[2].x = right;
+				coords[2].y = bottom;
+				//Top right
+				coords[3].x = right;
+				coords[3].y = top;
+
+				m_primitive->SetTexCoords((tileY * widthTiles) + tileX, coords);
+			}
+		}
+
+		renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+		renderFrame.texture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+		renderFrame.texture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+		renderFrame.texture->SetWrapping(ion::render::Texture::eWrapClamp);
+
+		//Create material
+		renderFrame.material = new ion::render::Material();
+		renderFrame.material->AddDiffuseMap(renderFrame.texture);
+		renderFrame.material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+		renderFrame.material->SetVertexShader(vertexShader);
+		renderFrame.material->SetPixelShader(pixelshader);
+
+		//Insert frame
+		m_frames.push_back(renderFrame);
+
+		delete data;
+	}
+}
+
+RenderResources::SpriteRenderResources::~SpriteRenderResources()
+{
+	for(int i = 0; i < m_frames.size(); i++)
+	{
+		delete m_frames[i].material;
+		delete m_frames[i].texture;
+	}
+
+	if(m_primitive)
+	{
+		delete m_primitive;
+	}
+}
+
+void RenderResources::CreateSpriteResources(const Project& project)
+{
+	m_spriteRenderResources.clear();
+
+	for(TSpriteMap::const_iterator it = project.SpritesBegin(), end = project.SpritesEnd(); it != end; ++it)
+	{
+		CreateSpriteResources(it->first, it->second);
+	}
+}
+
+void RenderResources::CreateSpriteResources(SpriteId spriteId, const Sprite& sprite)
+{
+	m_spriteRenderResources.erase(spriteId);
+	std::pair<std::map<SpriteId, SpriteRenderResources>::iterator, bool> it = m_spriteRenderResources.insert(std::make_pair(spriteId, SpriteRenderResources()));
+	it.first->second.Load(sprite, m_pixelShaders[eShaderFlatTextured], m_vertexShaders[eShaderFlatTextured]);
+}
+
+RenderResources::SpriteRenderResources* RenderResources::GetSpriteResources(SpriteId spriteId)
+{
+	SpriteRenderResources* spriteResources = NULL;
+
+	std::map<SpriteId, SpriteRenderResources>::iterator it = m_spriteRenderResources.find(spriteId);
+	if(it != m_spriteRenderResources.end())
+	{
+		spriteResources = &it->second;
+	}
+
+	return spriteResources;
 }

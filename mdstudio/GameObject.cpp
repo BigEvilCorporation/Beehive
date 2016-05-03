@@ -11,12 +11,14 @@
 GameObjectType::GameObjectType()
 {
 	m_id = InvalidGameObjectTypeId;
+	m_previewSprite = InvalidSpriteId;
 }
 
 GameObjectType::GameObjectType(u32 id)
 {
 	m_id = id;
 	m_name = "GameObj_";
+	m_previewSprite = InvalidSpriteId;
 	m_dimensions.x = 16;
 	m_dimensions.y = 16;
 }
@@ -50,6 +52,7 @@ void GameObjectType::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_id, "id");
 	archive.Serialise(m_name, "name");
+	archive.Serialise(m_previewSprite, "previewSprite");
 	archive.Serialise(m_variables, "variables");
 	archive.Serialise(m_dimensions, "dimensions");
 }

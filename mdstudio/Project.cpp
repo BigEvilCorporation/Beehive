@@ -120,6 +120,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
+	archive.Serialise(m_sprites, "sprites");
 	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
@@ -472,6 +473,63 @@ int Project::CleanupTiles()
 	}
 
 	return unusedTiles.size() + duplicates.size();
+}
+
+SpriteId Project::CreateSprite()
+{
+	SpriteId spriteId = ion::GenerateUUID64();
+	m_sprites.insert(std::make_pair(spriteId, Sprite()));
+	return spriteId;
+}
+
+void Project::DeleteSprite(SpriteId spriteId)
+{
+	TSpriteMap::iterator it = m_sprites.find(spriteId);
+	if(it != m_sprites.end())
+	{
+		m_sprites.erase(it);
+	}
+}
+
+Sprite* Project::GetSprite(SpriteId spriteId)
+{
+	Sprite* sprite = NULL;
+
+	TSpriteMap::iterator it = m_sprites.find(spriteId);
+	if(it != m_sprites.end())
+	{
+		sprite = &it->second;
+	}
+
+	return sprite;
+}
+
+const Sprite* Project::GetSprite(SpriteId spriteId) const
+{
+	const Sprite* sprite = NULL;
+
+	TSpriteMap::const_iterator it = m_sprites.find(spriteId);
+	if(it != m_sprites.end())
+	{
+		sprite = &it->second;
+	}
+
+	return sprite;
+}
+
+const TSpriteMap::const_iterator Project::SpritesBegin() const
+{
+	return m_sprites.begin();
+}
+
+const TSpriteMap::const_iterator Project::SpritesEnd() const
+{
+	return m_sprites.end();
+}
+
+int Project::GetSpriteCount() const
+{
+	return m_sprites.size();
 }
 
 StampId Project::AddStamp(int width, int height)
@@ -1408,18 +1466,15 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 				{
 					for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 					{
-						for(int i = 0; i < Palette::coloursPerPalette; i++)
+						int colourIdx = 0;
+						if(!palette.GetNearestColourIdx(pixels[(pixelY * tileWidth) + pixelX], Palette::eExact, colourIdx))
 						{
-							int colourIdx = 0;
-							if(!palette.GetNearestColourIdx(pixels[(pixelY * tileWidth) + pixelX], Palette::eExact, colourIdx))
-							{
-								//Shouldn't reach here - palette should have been validated
-								wxMessageBox("Error mapping colour indices", "Error", wxOK | wxICON_ERROR);
-								return false;
-							}
-
-							tile.SetPixelColour(pixelX, pixelY, colourIdx);
+							//Shouldn't reach here - palette should have been validated
+							wxMessageBox("Error mapping colour indices", "Error", wxOK | wxICON_ERROR);
+							return false;
 						}
+
+						tile.SetPixelColour(pixelX, pixelY, colourIdx);
 					}
 				}
 

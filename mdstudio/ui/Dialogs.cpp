@@ -62,7 +62,9 @@ void ImportDialogSprite::OnFileOpened(wxFileDirPickerEvent& event)
 		}
 
 		//Create texture from bitmap
-		m_canvas->SetPreview(m_renderResources.CreateSpritePreviewTexture(reader));
+		m_renderResources.CreateSpritePreviewTexture(reader);
+
+		m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(reader.GetWidth(), reader.GetHeight()));
 	}
 }
 
@@ -75,11 +77,13 @@ void ImportDialogSprite::OnGridColourChanged(wxColourPickerEvent& event)
 void ImportDialogSprite::OnSpinWidthCells(wxSpinEvent& event)
 {
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
+	m_spinCellCount->SetValue(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
 }
 
 void ImportDialogSprite::OnSpinHeightCells(wxSpinEvent& event)
 {
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
+	m_spinCellCount->SetValue(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
 }
 
 void ImportDialogSprite::OnSpinCellCount(wxSpinEvent& event)

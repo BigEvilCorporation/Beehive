@@ -36,6 +36,7 @@ public:
 
 	int GetPaletteSize() const;
 
+	u8 GetColourIndex(int x, int y) const;
 	Colour GetPixel(int x, int y) const;
 	Colour GetPaletteEntry(int index) const;
 

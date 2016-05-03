@@ -15,6 +15,7 @@
 
 #include "Map.h"
 #include "Palette.h"
+#include "Sprite.h"
 #include "Stamp.h"
 #include "Tile.h"
 #include "Tileset.h"
@@ -24,6 +25,7 @@
 #include "GameObject.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
+typedef std::map<SpriteId, Sprite> TSpriteMap;
 typedef std::map<GameObjectTypeId, GameObjectType> TGameObjectTypeMap;
 
 class Project
@@ -92,6 +94,15 @@ public:
 	void SetBackgroundTile(TileId tileId);
 	TileId GetBackgroundTile() const { return m_backgroundTile; }
 	int CleanupTiles();
+
+	//Sprites
+	SpriteId CreateSprite();
+	void DeleteSprite(SpriteId spriteId);
+	Sprite* GetSprite(SpriteId spriteId);
+	const Sprite* GetSprite(SpriteId SpriteId) const;
+	const TSpriteMap::const_iterator SpritesBegin() const;
+	const TSpriteMap::const_iterator SpritesEnd() const;
+	int GetSpriteCount() const;
 
 	//Stamps
 	StampId AddStamp(int width, int height);
@@ -262,6 +273,9 @@ private:
 	//Stamps
 	TStampMap m_stamps;
 	StampId m_nextFreeStampId;
+
+	//Sprites
+	std::map<SpriteId, Sprite> m_sprites;
 
 	//Game object types
 	TGameObjectTypeMap m_gameObjectTypes;

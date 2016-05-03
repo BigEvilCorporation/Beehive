@@ -71,12 +71,12 @@ void GameObjectTypeDialog::OnSelectGameObjType(wxCommandEvent& event)
 {
 	m_currentTypeId = m_gameObjIndexMap[event.GetInt()];
 
-	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
-	{
-		PopulateTypeFields(gameObjType);
-		PopulateVarsList(gameObjType);
-		PopulateVarsFields(NULL);
-	}
+if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+{
+	PopulateTypeFields(gameObjType);
+	PopulateVarsList(gameObjType);
+	PopulateVarsFields(NULL);
+}
 }
 
 void GameObjectTypeDialog::OnSelectVariable(wxListEvent& event)
@@ -94,6 +94,17 @@ void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
 	{
 		gameObjType->SetName(m_textGameObjName->GetValue().c_str().AsChar());
 		gameObjType->SetDimensions(ion::Vector2i(m_spinWidth->GetValue(), m_spinHeight->GetValue()));
+
+		SpriteId prevSprite = gameObjType->GetPreviewSprite();
+
+		if(m_spriteCache.size() > 0)
+		{
+			int spriteIndex = m_choiceSprites->GetCurrentSelection();
+			if(spriteIndex >= 0 && spriteIndex < m_spriteCache.size())
+			{
+				gameObjType->SetPreviewSprite(m_spriteCache[spriteIndex]);
+			}
+		}
 
 		if(m_currentVariable)
 		{
@@ -120,6 +131,7 @@ void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
 		PopulateTypeList();
 		PopulateVarsList(gameObjType);
 		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
+		m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
 	}
 }
 
@@ -168,10 +180,23 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_textGameObjName->SetValue(gameObjType->GetName());
 		m_spinWidth->SetValue(gameObjType->GetDimensions().x);
 		m_spinHeight->SetValue(gameObjType->GetDimensions().y);
+
+		m_choiceSprites->Clear();
+		m_spriteCache.clear();
+
+		for(TSpriteMap::const_iterator it = m_project.SpritesBegin(), end = m_project.SpritesEnd(); it != end; ++it)
+		{
+			//Store by index
+			m_spriteCache.push_back(it->first);
+
+			//Add to list
+			m_choiceSprites->AppendString(it->second.GetName());
+		}
 	}
 	else
 	{
 		m_textGameObjName->SetValue("");
+		m_choiceSprites->Clear();
 		m_spinWidth->SetValue(1);
 		m_spinHeight->SetValue(1);
 	}

@@ -750,40 +750,30 @@ ImportDialogSpriteBase::ImportDialogSpriteBase( wxWindow* parent, wxWindowID id,
 	fgSizer12->SetFlexibleDirection( wxBOTH );
 	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_chkImportWholePalette = new wxCheckBox( this, wxID_ANY, wxT("Import whole palette"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkImportWholePalette->SetValue(true); 
-	fgSizer12->Add( m_chkImportWholePalette, 0, wxALL, 5 );
-	
-	wxGridSizer* gSizer1;
-	gSizer1 = new wxGridSizer( 0, 2, 0, 0 );
-	
 	m_staticText241 = new wxStaticText( this, wxID_ANY, wxT("Grid colour:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText241->Wrap( -1 );
-	gSizer1->Add( m_staticText241, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	fgSizer12->Add( m_staticText241, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_gridColourPicker = new wxColourPickerCtrl( this, wxID_ANY, wxColour( 0, 0, 0 ), wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
-	gSizer1->Add( m_gridColourPicker, 0, wxALL, 5 );
-	
-	
-	fgSizer12->Add( gSizer1, 1, wxEXPAND, 5 );
+	fgSizer12->Add( m_gridColourPicker, 0, wxALL, 5 );
 	
 	m_staticText21 = new wxStaticText( this, wxID_ANY, wxT("Width (cells):"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText21->Wrap( -1 );
-	fgSizer12->Add( m_staticText21, 0, wxALL, 5 );
+	fgSizer12->Add( m_staticText21, 0, wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_spinWidthCells = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 4 );
 	fgSizer12->Add( m_spinWidthCells, 0, wxALL, 5 );
 	
 	m_staticText22 = new wxStaticText( this, wxID_ANY, wxT("Height (cells):"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText22->Wrap( -1 );
-	fgSizer12->Add( m_staticText22, 0, wxALL, 5 );
+	fgSizer12->Add( m_staticText22, 0, wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_spinHeightCells = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 4 );
 	fgSizer12->Add( m_spinHeightCells, 0, wxALL, 5 );
 	
 	m_staticText23 = new wxStaticText( this, wxID_ANY, wxT("Max cells:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText23->Wrap( -1 );
-	fgSizer12->Add( m_staticText23, 0, wxALL, 5 );
+	fgSizer12->Add( m_staticText23, 0, wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_spinCellCount = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 1 );
 	fgSizer12->Add( m_spinCellCount, 0, wxALL, 5 );
@@ -884,6 +874,15 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	
 	m_textGameObjName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), 0 );
 	fgSizer5->Add( m_textGameObjName, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText25 = new wxStaticText( this, wxID_ANY, wxT("Preview Sprite:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText25->Wrap( -1 );
+	fgSizer5->Add( m_staticText25, 0, wxALIGN_RIGHT|wxALL, 5 );
+	
+	wxArrayString m_choiceSpritesChoices;
+	m_choiceSprites = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceSpritesChoices, 0 );
+	m_choiceSprites->SetSelection( 0 );
+	fgSizer5->Add( m_choiceSprites, 0, wxALL, 5 );
 	
 	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("Dimensions:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText9->Wrap( -1 );
