@@ -15,6 +15,7 @@
 
 #include "MainWindow.h"
 #include "Dialogs.h"
+#include "SpriteEditorDialog.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "MapPanel.h"
@@ -871,6 +872,15 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 
 			SetStatusText("Import complete");
 		}
+	}
+}
+
+void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		SpriteEditorDialog dialog(this, *m_renderer, *m_context, *m_renderResources);
+		dialog.ShowModal();
 	}
 }
 
