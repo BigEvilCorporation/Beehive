@@ -24,8 +24,8 @@ public:
 	virtual ~SpriteCanvas();
 
 	void SetupRendering(ion::render::Renderer* renderer, wxGLContext* glContext, RenderResources* renderResources);
+	void SetSpriteSheetDimentionsPixels(const ion::Vector2i& spriteSheetDimentions);
 	void SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells);
-	void SetPreview(ion::render::Texture* previewTexture);
 	void SetGridColour(const ion::Colour& colour);
 
 	//Refresh panel
@@ -64,16 +64,14 @@ private:
 	//Rendering primitives
 	ion::render::Grid* m_gridPrimitive;
 
-	//Preview texture
-	ion::render::Texture* m_previewTexture;
-
 	//Panel size (pixels)
 	ion::Vector2i m_panelSize;
 
 	//Prev panel size (for filtering resize events)
 	ion::Vector2i m_prevPanelSize;
 
-	//Sprite sheet cells
+	//Sprite sheet dimentions
+	ion::Vector2i m_spriteSheetDimentions;
 	ion::Vector2i m_spriteSheetDimentionsCells;
 
 	//Grid colour

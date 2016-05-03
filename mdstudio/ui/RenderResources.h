@@ -14,6 +14,7 @@
 #include <ion/renderer/Texture.h>
 
 #include "../Project.h"
+#include "../Sprite.h"
 #include "../BMPReader.h"
 
 class RenderResources
@@ -78,7 +79,8 @@ public:
 	void CreateCollisionTypesTexture();
 
 	//Create sprite preview texture
-	ion::render::Texture* CreateSpritePreviewTexture(const BMPReader& reader);
+	void CreateSpritePreviewTexture(const BMPReader& reader);
+	ion::render::Texture* CreateSpritePreviewTexture(const Sprite& sprite);
 
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
@@ -107,6 +109,29 @@ public:
 	ion::render::Primitive* CreateBezierPrimitive(const ion::gamekit::BezierPath& bezier);
 	ion::render::Primitive* CreateBezierControlsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
 
+	//Sprite rendering
+	class SpriteRenderResources
+	{
+	public:
+		SpriteRenderResources();
+		~SpriteRenderResources();
+
+		void Load(const Sprite& sprite, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader);
+
+		struct Frame
+		{
+			ion::render::Texture* texture;
+			ion::render::Material* material;
+		};
+
+		ion::render::Chessboard* m_primitive;
+		std::vector<Frame> m_frames;
+	};
+
+	void CreateSpriteResources(const Project& project);
+	void CreateSpriteResources(SpriteId spriteId, const Sprite& sprite);
+	SpriteRenderResources* GetSpriteResources(SpriteId spriteId);
+
 private:
 	
 	//Map tile IDs to indices
@@ -134,4 +159,7 @@ private:
 	ion::render::Material* m_materials[eMaterialMax];
 	ion::render::Primitive* m_primitives[ePrimitiveMax];
 	ion::Colour m_colours[eColourMax];
+
+	//Sprites
+	std::map<SpriteId, SpriteRenderResources> m_spriteRenderResources;
 };

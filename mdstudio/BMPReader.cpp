@@ -117,6 +117,24 @@ int BMPReader::GetPaletteSize() const
 	return m_paletteSize;
 }
 
+u8 BMPReader::GetColourIndex(int x, int y) const
+{
+	ion::debug::Assert(x < m_width && y < m_height, "Out of range");
+
+	u32 pixelOffset = (((m_height - y - 1) * m_width) + x);
+	u32 byteOffset = (pixelOffset & 0xFFFFFFFE) / 2;
+	u8 colourIndex = m_data[byteOffset];
+
+	if(pixelOffset & 1)
+		colourIndex &= 0x0F;
+	else
+		colourIndex = colourIndex >> 4;
+
+	ion::debug::Assert(colourIndex < m_paletteSize, "Out of range");
+
+	return colourIndex;
+}
+
 Colour BMPReader::GetPaletteEntry(int index) const
 {
 	ion::debug::Assert(index < m_paletteSize, "Out of range");

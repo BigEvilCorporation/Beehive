@@ -158,9 +158,10 @@ void MainWindow::SetProject(Project* project)
 			//Set render resources project
 			m_renderResources->SetProject(project);
 
-			//Recreate tileset/collision set textures, and tile index cache
+			//Recreate tileset/collision set/sprite textures, and tile index cache
 			RefreshTileset();
 			RefreshTerrainTileset();
+			RefreshSprites();
 
 			//Open bottom panels
 			ShowPanelPalettes();
@@ -622,6 +623,13 @@ void MainWindow::RefreshTerrainTileset()
 	}
 }
 
+void MainWindow::RefreshSprites()
+{
+	if(m_project.get())
+	{
+		m_renderResources->CreateSpriteResources(*m_project.get());
+	}
+}
 
 void MainWindow::RefreshPanel(Panel panel)
 {
@@ -779,31 +787,31 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.collisionMap = dialog.m_filePickerCollisionMap->GetPath();
 			m_project->m_exportFilenames.gameObjects = dialog.m_filePickerGameObj->GetPath();
 
-			if(dialog.m_chkPalettes->GetValue())
-				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
+if(dialog.m_chkPalettes->GetValue())
+m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
 
-			if(dialog.m_chkTileset->GetValue())
-				m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
+if(dialog.m_chkTileset->GetValue())
+m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
 
-			if(dialog.m_chkMap->GetValue())
-				m_project->ExportMap(m_project->m_exportFilenames.map, dialog.m_btnBinary->GetValue());
+if(dialog.m_chkMap->GetValue())
+m_project->ExportMap(m_project->m_exportFilenames.map, dialog.m_btnBinary->GetValue());
 
-			if(dialog.m_chkTerrainTiles->GetValue())
-				m_project->ExportTerrainTiles(m_project->m_exportFilenames.TerrainTiles, dialog.m_btnBinary->GetValue());
+if(dialog.m_chkTerrainTiles->GetValue())
+m_project->ExportTerrainTiles(m_project->m_exportFilenames.TerrainTiles, dialog.m_btnBinary->GetValue());
 
-			if(dialog.m_chkCollisionMap->GetValue())
-				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
+if(dialog.m_chkCollisionMap->GetValue())
+m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
 
-			if(dialog.m_chkGameObj->GetValue())
-				m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
+if(dialog.m_chkGameObj->GetValue())
+m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
 
-			SetStatusText("Export complete");
-			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
+SetStatusText("Export complete");
+wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
 		}
 	}
 }
 
-void MainWindow::OnBtnTilesImport( wxRibbonButtonBarEvent& event )
+void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
@@ -873,6 +881,24 @@ void MainWindow::OnBtnSpritesImport(wxRibbonButtonBarEvent& event)
 		ImportDialogSprite dialog(this, *m_renderer, *m_context, *m_renderResources);
 		if(dialog.ShowModal() == wxID_OK)
 		{
+			//Create new sprite
+			SpriteId spriteId = m_project->CreateSprite();
+			Sprite* sprite = m_project->GetSprite(spriteId);
+
+			//Import bitmap
+			if(sprite->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
+			{
+				//Create render resources
+				m_renderResources->CreateSpriteResources(spriteId, *sprite);
+
+				wxMessageBox("Sprite imported successfully", "Success", wxOK);
+			}
+			else
+			{
+				//Failed, remove sprite
+				wxMessageBox("Error importing sprite", "Error", wxOK);
+				m_project->DeleteSprite(spriteId);
+			}
 		}
 	}
 }

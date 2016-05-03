@@ -10,6 +10,7 @@
 
 #include "UIBase.h"
 #include "../GameObject.h"
+#include "../Sprite.h"
 
 class MainWindow;
 class Project;
@@ -42,4 +43,5 @@ private:
 	GameObjectVariable* m_currentVariable;
 
 	std::map<u32, GameObjectTypeId> m_gameObjIndexMap;
+	std::vector<SpriteId> m_spriteCache;
 };

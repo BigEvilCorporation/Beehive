@@ -11,7 +11,6 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
 {
 	m_gridPrimitive = NULL;
-	m_previewTexture = NULL;
 	m_cameraZoom = 1.0f;
 	m_gridColour = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -37,26 +36,20 @@ void SpriteCanvas::SetupRendering(ion::render::Renderer* renderer, wxGLContext* 
 	SetCurrent(*glContext);
 }
 
-void SpriteCanvas::SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells)
+void SpriteCanvas::SetSpriteSheetDimentionsPixels(const ion::Vector2i& spriteSheetDimentions)
 {
-	m_spriteSheetDimentionsCells = spriteSheetDimentionsCells;
+	m_spriteSheetDimentions = spriteSheetDimentions;
 
-	if(m_previewTexture)
-	{
-		CreateGrid(m_previewTexture->GetWidth(), m_previewTexture->GetHeight(), m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
-	}
+	CreateGrid(m_spriteSheetDimentions.x, m_spriteSheetDimentions.y, m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
 	
 	Refresh();
 }
 
-void SpriteCanvas::SetPreview(ion::render::Texture* previewTexture)
+void SpriteCanvas::SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells)
 {
-	m_previewTexture = previewTexture;
+	m_spriteSheetDimentionsCells = spriteSheetDimentionsCells;
 
-	if(m_previewTexture)
-	{
-		CreateGrid(m_previewTexture->GetWidth(), m_previewTexture->GetHeight(), m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
-	}
+	CreateGrid(m_spriteSheetDimentions.x, m_spriteSheetDimentions.y, m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
 
 	Refresh();
 }
@@ -147,23 +140,20 @@ void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion:
 
 void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	if(m_previewTexture)
-	{
-		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialSprite);
-		ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+	ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialSprite);
+	ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 
-		ion::Matrix4 boxMtx;
-		ion::Vector3 boxScale((m_previewTexture->GetWidth() / 8.0f) * m_cameraZoom, (m_previewTexture->GetHeight() / 8.0f) * m_cameraZoom, 0.0f);
-		ion::Vector3 boxPos(0.0f, 0.0f, z);
+	ion::Matrix4 boxMtx;
+	ion::Vector3 boxScale((m_spriteSheetDimentions.x / 8.0f) * m_cameraZoom, (m_spriteSheetDimentions.y / 8.0f) * m_cameraZoom, 0.0f);
+	ion::Vector3 boxPos(0.0f, 0.0f, z);
 
-		boxMtx.SetTranslation(boxPos);
-		boxMtx.SetScale(boxScale);
+	boxMtx.SetTranslation(boxPos);
+	boxMtx.SetScale(boxScale);
 
-		//gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
-		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
-		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-		material->Unbind();
-	}
+	//gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
+	material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+	material->Unbind();
 }
 
 void SpriteCanvas::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

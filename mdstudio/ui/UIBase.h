@@ -43,8 +43,8 @@ class SpriteCanvas;
 #include <wx/clrpicker.h>
 #include <wx/toolbar.h>
 #include <wx/listctrl.h>
-#include <wx/statline.h>
 #include <wx/choice.h>
+#include <wx/statline.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -369,18 +369,13 @@ class ImportDialogSpriteBase : public wxDialog
 	
 	protected:
 		wxStaticText* m_staticText8;
-		wxFilePickerCtrl* m_filePicker;
 		wxStaticText* m_staticText24;
-		wxTextCtrl* m_textName;
 		SpriteCanvas* m_canvas;
 		wxStaticText* m_staticText241;
 		wxColourPickerCtrl* m_gridColourPicker;
 		wxStaticText* m_staticText21;
-		wxSpinCtrl* m_spinWidthCells;
 		wxStaticText* m_staticText22;
-		wxSpinCtrl* m_spinHeightCells;
 		wxStaticText* m_staticText23;
-		wxSpinCtrl* m_spinCellCount;
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 		wxButton* m_sdbSizer2Cancel;
@@ -394,7 +389,11 @@ class ImportDialogSpriteBase : public wxDialog
 		
 	
 	public:
-		wxCheckBox* m_chkImportWholePalette;
+		wxFilePickerCtrl* m_filePicker;
+		wxTextCtrl* m_textName;
+		wxSpinCtrl* m_spinWidthCells;
+		wxSpinCtrl* m_spinHeightCells;
+		wxSpinCtrl* m_spinCellCount;
 		
 		ImportDialogSpriteBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
 		~ImportDialogSpriteBase();
@@ -418,6 +417,8 @@ class GameObjTypeDialogBase : public wxDialog
 		wxListCtrl* m_listVariables;
 		wxStaticText* m_staticText10;
 		wxTextCtrl* m_textGameObjName;
+		wxStaticText* m_staticText25;
+		wxChoice* m_choiceSprites;
 		wxStaticText* m_staticText9;
 		wxSpinCtrl* m_spinWidth;
 		wxSpinCtrl* m_spinHeight;
