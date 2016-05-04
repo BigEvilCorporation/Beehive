@@ -742,9 +742,12 @@ void RenderResources::CreateSpriteSheetResources(const Project& project)
 {
 	m_spriteSheetRenderResources.clear();
 
-	for(TSpriteSheetMap::const_iterator it = project.SpriteSheetsBegin(), end = project.SpriteSheetsEnd(); it != end; ++it)
+	for(TActorMap::const_iterator actorIt = project.ActorsBegin(), actorEnd = project.ActorsEnd(); actorIt != actorEnd; ++actorIt)
 	{
-		CreateSpriteSheetResources(it->first, it->second);
+		for(TSpriteSheetMap::const_iterator it = actorIt->second.SpriteSheetsBegin(), end = actorIt->second.SpriteSheetsEnd(); it != end; ++it)
+		{
+			CreateSpriteSheetResources(it->first, it->second);
+		}
 	}
 }
 

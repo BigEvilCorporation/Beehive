@@ -97,7 +97,6 @@ protected:
 	virtual void OnBtnTilesDelete(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesCleanup(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnSpriteEditor(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnSpritesImport(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColTilesCreate(wxRibbonButtonBarEvent& event);

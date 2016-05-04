@@ -184,13 +184,16 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_choiceSprites->Clear();
 		m_spriteSheetCache.clear();
 
-		for(TSpriteSheetMap::const_iterator it = m_project.SpriteSheetsBegin(), end = m_project.SpriteSheetsEnd(); it != end; ++it)
+		for(TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
 		{
-			//Store by index
-			m_spriteSheetCache.push_back(it->first);
+			for(TSpriteSheetMap::const_iterator itSprite = it->second.SpriteSheetsBegin(), endSprite = it->second.SpriteSheetsEnd(); itSprite != endSprite; ++itSprite)
+			{
+				//Store by index
+				m_spriteSheetCache.push_back(itSprite->first);
 
-			//Add to list
-			m_choiceSprites->AppendString(it->second.GetName());
+				//Add to list
+				m_choiceSprites->AppendString(itSprite->second.GetName());
+			}
 		}
 	}
 	else

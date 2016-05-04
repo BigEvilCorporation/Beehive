@@ -120,7 +120,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
-	archive.Serialise(m_spriteSheets, "spriteSheets");
+	archive.Serialise(m_actors, "actors");
 	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
@@ -475,61 +475,61 @@ int Project::CleanupTiles()
 	return unusedTiles.size() + duplicates.size();
 }
 
-SpriteSheetId Project::CreateSpriteSheet()
+ActorId Project::CreateActor()
 {
-	SpriteSheetId spriteSheetId = ion::GenerateUUID64();
-	m_spriteSheets.insert(std::make_pair(spriteSheetId, SpriteSheet()));
-	return spriteSheetId;
+	ActorId actorId = ion::GenerateUUID64();
+	m_actors.insert(std::make_pair(actorId, Actor()));
+	return actorId;
 }
 
-void Project::DeleteSpriteSheet(SpriteSheetId spriteSheetId)
+void Project::DeleteActor(ActorId actorId)
 {
-	TSpriteSheetMap::iterator it = m_spriteSheets.find(spriteSheetId);
-	if(it != m_spriteSheets.end())
+	TActorMap::iterator it = m_actors.find(actorId);
+	if(it != m_actors.end())
 	{
-		m_spriteSheets.erase(it);
+		m_actors.erase(it);
 	}
 }
 
-SpriteSheet* Project::GetSpriteSheet(SpriteSheetId spriteSheetId)
+Actor* Project::GetActor(ActorId actorId)
 {
-	SpriteSheet* spriteSheet = NULL;
+	Actor* actor = NULL;
 
-	TSpriteSheetMap::iterator it = m_spriteSheets.find(spriteSheetId);
-	if(it != m_spriteSheets.end())
+	TActorMap::iterator it = m_actors.find(actorId);
+	if(it != m_actors.end())
 	{
-		spriteSheet = &it->second;
+		actor = &it->second;
 	}
 
-	return spriteSheet;
+	return actor;
 }
 
-const SpriteSheet* Project::GetSpriteSheet(SpriteSheetId spriteSheetId) const
+const Actor* Project::GetActor(ActorId actorId) const
 {
-	const SpriteSheet* spriteSheet = NULL;
+	const Actor* actor = NULL;
 
-	TSpriteSheetMap::const_iterator it = m_spriteSheets.find(spriteSheetId);
-	if(it != m_spriteSheets.end())
+	TActorMap::const_iterator it = m_actors.find(actorId);
+	if(it != m_actors.end())
 	{
-		spriteSheet = &it->second;
+		actor = &it->second;
 	}
 
-	return spriteSheet;
+	return actor;
 }
 
-const TSpriteSheetMap::const_iterator Project::SpriteSheetsBegin() const
+const TActorMap::const_iterator Project::ActorsBegin() const
 {
-	return m_spriteSheets.begin();
+	return m_actors.begin();
 }
 
-const TSpriteSheetMap::const_iterator Project::SpriteSheetsEnd() const
+const TActorMap::const_iterator Project::ActorsEnd() const
 {
-	return m_spriteSheets.end();
+	return m_actors.end();
 }
 
-int Project::GetSpriteSheetCount() const
+int Project::GetActorCount() const
 {
-	return m_spriteSheets.size();
+	return m_actors.size();
 }
 
 StampId Project::AddStamp(int width, int height)

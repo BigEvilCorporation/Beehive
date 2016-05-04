@@ -71,6 +71,8 @@ void ImportDialogSpriteSheet::OnFileOpened(wxFileDirPickerEvent& event)
 		m_renderResources.CreateSpriteSheetPreviewTexture(reader);
 
 		m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(reader.GetWidth(), reader.GetHeight()));
+
+		m_textName->SetValue(m_filePicker->GetFileName().GetName());
 	}
 }
 
