@@ -53,9 +53,11 @@ bool Sprite::ImportBitmap(const std::string& filename, const std::string& name, 
 		m_heightTiles = spriteSheetHeightTiles / heightFrames;
 	
 		//For each frame
-		for(int frameY = 0; frameY < heightFrames; frameY++)
+		u32 frameCount = 0;
+
+		for(int frameY = 0; frameY < heightFrames && frameCount < maxFrames; frameY++)
 		{
-			for(int frameX = 0; frameX < widthFrames; frameX++)
+			for(int frameX = 0; frameX < widthFrames && frameCount < maxFrames; frameX++)
 			{
 				//Create new frame
 				SpriteFrame frame;
@@ -88,6 +90,8 @@ bool Sprite::ImportBitmap(const std::string& filename, const std::string& name, 
 
 				//Add frame
 				m_frames.push_back(frame);
+
+				frameCount++;
 			}
 		}
 
@@ -119,6 +123,11 @@ SpriteAnimId Sprite::AddAnimation()
 	SpriteAnimId animId = ion::GenerateUUID64();
 	m_animations.insert(std::make_pair(animId, SpriteAnimation()));
 	return animId;
+}
+
+void Sprite::DeleteAnimation(SpriteAnimId animId)
+{
+	m_animations.erase(animId);
 }
 
 SpriteAnimation* Sprite::GetAnimation(SpriteAnimId animId)
@@ -168,6 +177,7 @@ void Sprite::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_frames, "frames");
+	archive.Serialise(m_animations, "animations");
 	archive.Serialise(m_palette, "palette");
 	archive.Serialise(m_widthTiles, "width");
 	archive.Serialise(m_heightTiles, "height");

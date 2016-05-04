@@ -20,3 +20,12 @@ const std::string& SpriteAnimation::GetName() const
 {
 	return m_name;
 }
+
+void SpriteAnimation::Serialise(ion::io::Archive& archive)
+{
+	ion::render::Animation::Serialise(archive);
+
+	archive.Serialise(m_name, "name");
+	archive.Serialise(m_trackSpriteFrame, "trackSpriteFrame");
+	archive.Serialise(m_trackPosition, "trackPosition");
+}

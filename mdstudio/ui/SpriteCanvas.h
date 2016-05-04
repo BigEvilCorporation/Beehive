@@ -28,7 +28,7 @@ public:
 	void SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells);
 	void SetGridColour(const ion::Colour& colour);
 
-	void SetDrawPreview(bool drawPreview);
+	void SetDrawPreview(bool drawPreview, u32 maxFrames);
 	void SetDrawGrid(bool drawGrid);
 	void SetDrawSprite(SpriteId sprite, u32 frame);
 
@@ -62,9 +62,10 @@ private:
 	RenderResources* m_renderResources;
 
 	bool m_drawPreview;
-	bool m_drawGrid;
+	u32 m_drawPreviewMaxFrames;
 	SpriteId m_drawSprite;
 	u32 m_drawSpriteFrame;
+	bool m_drawGrid;
 
 	//Mouse
 	ion::Vector2 m_mousePrevPos;

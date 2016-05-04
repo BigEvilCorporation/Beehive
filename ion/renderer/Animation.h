@@ -8,6 +8,7 @@
 #pragma once
 
 #include "maths/matrix.h"
+#include "io/Archive.h"
 
 #include <vector>
 
@@ -59,6 +60,9 @@ namespace ion
 			void SetPlaybackDirection(PlaybackDirection direction);
 			PlaybackDirection GetPlaybackDirection() const;
 
+			//Serialise
+			void Serialise(io::Archive& archive);
+
 		protected:
 			//Apply new animation frame
 			virtual void ApplyFrame(float frame) {}
@@ -77,10 +81,14 @@ namespace ion
 		template <class T> class Keyframe
 		{
 		public:
+			Keyframe();
 			Keyframe(float time, const T& value);
 
 			float GetTime() const;
 			const T GetValue() const;
+
+			//Serialise
+			void Serialise(io::Archive& archive);
 
 		private:
 			float mTime;
@@ -113,6 +121,9 @@ namespace ion
 			void SetBlendMode(BlendMode blendMode);
 			BlendMode GetBlendMode() const { return mBlendMode };
 
+			//Serialise
+			void Serialise(io::Archive& archive);
+
 		private:
 			std::vector< Keyframe<T> > mKeyframes;
 			BlendMode mBlendMode;
@@ -140,6 +151,10 @@ namespace ion
 		//Inline functions
 		///////////////////////////////////////////////////
 
+		template <class T> Keyframe<T>::Keyframe()
+		{
+		}
+
 		template <class T> Keyframe<T>::Keyframe(float time, const T& value)
 		{
 			mTime = time;
@@ -154,6 +169,12 @@ namespace ion
 		template <class T> const T Keyframe<T>::GetValue() const
 		{
 			return mValue;
+		}
+
+		template <class T> void Keyframe<T>::Serialise(io::Archive& archive)
+		{
+			archive.Serialise(mTime, "time");
+			archive.Serialise(mValue, "value");
 		}
 
 		template <class T> AnimationTrack<T>::AnimationTrack()
@@ -242,6 +263,12 @@ namespace ion
 		template <class T> void AnimationTrack<T>::SetBlendMode(BlendMode blendMode)
 		{
 			mBlendMode = blendMode;
+		}
+
+		template <class T> void AnimationTrack<T>::Serialise(io::Archive& archive)
+		{
+			archive.Serialise(mKeyframes, "keyframes");
+			archive.Serialise((int&)mBlendMode, "blendMode");
 		}
 	}
 }

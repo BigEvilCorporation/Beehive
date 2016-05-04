@@ -172,6 +172,17 @@ namespace ion
 			return mPlaybackDirection;
 		}
 
+		void Animation::Serialise(io::Archive& archive)
+		{
+			archive.Serialise(mLength, "length");
+			archive.Serialise(mCurrentFrame, "currentFrame");
+			archive.Serialise(mPreviousFrame, "previousFrame");
+			archive.Serialise(mPlaybackSpeed, "playbackSpeed");
+			archive.Serialise((int&)mState, "state");
+			archive.Serialise((int&)mPlaybackBehaviour, "playbackBehaviour");
+			archive.Serialise((int&)mPlaybackDirection, "playbackDirection");
+		}
+
 		const float AnimationTrackFloat::GetValue(float time) const
 		{
 			float floatValue = 0.0f;

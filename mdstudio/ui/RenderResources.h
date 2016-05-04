@@ -130,6 +130,7 @@ public:
 
 	void CreateSpriteResources(const Project& project);
 	void CreateSpriteResources(SpriteId spriteId, const Sprite& sprite);
+	void DeleteSpriteRenderResources(SpriteId spriteId);
 	SpriteRenderResources* GetSpriteResources(SpriteId spriteId);
 
 private:
