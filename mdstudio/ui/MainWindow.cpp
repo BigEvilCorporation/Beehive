@@ -879,7 +879,7 @@ void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		SpriteEditorDialog dialog(this, *m_renderer, *m_context, *m_renderResources);
+		SpriteEditorDialog dialog(this, *m_project, *m_renderer, *m_context, *m_renderResources);
 		dialog.ShowModal();
 	}
 }
