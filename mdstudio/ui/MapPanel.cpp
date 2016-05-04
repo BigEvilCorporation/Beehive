@@ -1391,23 +1391,23 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 				material->Unbind();
 
-				if(gameObjectType->GetPreviewSprite() != InvalidSpriteId)
+				if(gameObjectType->GetPreviewSpriteSheet() != InvalidSpriteSheetId)
 				{
-					//Render sprite
-					RenderResources::SpriteRenderResources* spriteResources = m_renderResources.GetSpriteResources(gameObjectType->GetPreviewSprite());
-					ion::debug::Assert(spriteResources, "MapPanel::RenderGameObjects() - Missing sprite render resources");
-					ion::debug::Assert(spriteResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - Sprite contains no frames");
+					//Render spriteSheet
+					RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheet());
+					ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
+					ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
 
-					ion::render::Primitive* spritePrimitive = spriteResources->m_primitive;
-					ion::render::Material* spriteMaterial = spriteResources->m_frames[0].material;
-					spriteMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+					ion::render::Primitive* spriteSheetPrimitive = spriteSheetResources->m_primitive;
+					ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[0].material;
+					spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
-					ion::Matrix4 spriteMtx;
-					spriteMtx.SetTranslation(pos);
+					ion::Matrix4 spriteSheetMtx;
+					spriteSheetMtx.SetTranslation(pos);
 
-					spriteMaterial->Bind(spriteMtx, cameraInverseMtx, projectionMtx);
-					renderer.DrawVertexBuffer(spritePrimitive->GetVertexBuffer(), spritePrimitive->GetIndexBuffer());
-					spriteMaterial->Unbind();
+					spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
+					renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
+					spriteSheetMaterial->Unbind();
 				}
 			}
 		}
@@ -1449,23 +1449,23 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 
-		if(gameObjectType->GetPreviewSprite() != InvalidSpriteId)
+		if(gameObjectType->GetPreviewSpriteSheet() != InvalidSpriteSheetId)
 		{
-			//Render sprite
-			RenderResources::SpriteRenderResources* spriteResources = m_renderResources.GetSpriteResources(gameObjectType->GetPreviewSprite());
-			ion::debug::Assert(spriteResources, "MapPanel::RenderGameObjects() - Missing sprite render resources");
-			ion::debug::Assert(spriteResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - Sprite contains no frames");
+			//Render spriteSheet
+			RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheet());
+			ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
+			ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
 
-			ion::render::Primitive* spritePrimitive = spriteResources->m_primitive;
-			ion::render::Material* spriteMaterial = spriteResources->m_frames[0].material;
-			spriteMaterial->SetDiffuseColour(colour);
+			ion::render::Primitive* spriteSheetPrimitive = spriteSheetResources->m_primitive;
+			ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[0].material;
+			spriteSheetMaterial->SetDiffuseColour(colour);
 
-			ion::Matrix4 spriteMtx;
-			spriteMtx.SetTranslation(previewPos);
+			ion::Matrix4 spriteSheetMtx;
+			spriteSheetMtx.SetTranslation(previewPos);
 
-			spriteMaterial->Bind(spriteMtx, cameraInverseMtx, projectionMtx);
-			renderer.DrawVertexBuffer(spritePrimitive->GetVertexBuffer(), spritePrimitive->GetIndexBuffer());
-			spriteMaterial->Unbind();
+			spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
+			renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
+			spriteSheetMaterial->Unbind();
 		}
 
 		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);

@@ -120,7 +120,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
-	archive.Serialise(m_sprites, "sprites");
+	archive.Serialise(m_spriteSheets, "spriteSheets");
 	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
@@ -475,61 +475,61 @@ int Project::CleanupTiles()
 	return unusedTiles.size() + duplicates.size();
 }
 
-SpriteId Project::CreateSprite()
+SpriteSheetId Project::CreateSpriteSheet()
 {
-	SpriteId spriteId = ion::GenerateUUID64();
-	m_sprites.insert(std::make_pair(spriteId, Sprite()));
-	return spriteId;
+	SpriteSheetId spriteSheetId = ion::GenerateUUID64();
+	m_spriteSheets.insert(std::make_pair(spriteSheetId, SpriteSheet()));
+	return spriteSheetId;
 }
 
-void Project::DeleteSprite(SpriteId spriteId)
+void Project::DeleteSpriteSheet(SpriteSheetId spriteSheetId)
 {
-	TSpriteMap::iterator it = m_sprites.find(spriteId);
-	if(it != m_sprites.end())
+	TSpriteSheetMap::iterator it = m_spriteSheets.find(spriteSheetId);
+	if(it != m_spriteSheets.end())
 	{
-		m_sprites.erase(it);
+		m_spriteSheets.erase(it);
 	}
 }
 
-Sprite* Project::GetSprite(SpriteId spriteId)
+SpriteSheet* Project::GetSpriteSheet(SpriteSheetId spriteSheetId)
 {
-	Sprite* sprite = NULL;
+	SpriteSheet* spriteSheet = NULL;
 
-	TSpriteMap::iterator it = m_sprites.find(spriteId);
-	if(it != m_sprites.end())
+	TSpriteSheetMap::iterator it = m_spriteSheets.find(spriteSheetId);
+	if(it != m_spriteSheets.end())
 	{
-		sprite = &it->second;
+		spriteSheet = &it->second;
 	}
 
-	return sprite;
+	return spriteSheet;
 }
 
-const Sprite* Project::GetSprite(SpriteId spriteId) const
+const SpriteSheet* Project::GetSpriteSheet(SpriteSheetId spriteSheetId) const
 {
-	const Sprite* sprite = NULL;
+	const SpriteSheet* spriteSheet = NULL;
 
-	TSpriteMap::const_iterator it = m_sprites.find(spriteId);
-	if(it != m_sprites.end())
+	TSpriteSheetMap::const_iterator it = m_spriteSheets.find(spriteSheetId);
+	if(it != m_spriteSheets.end())
 	{
-		sprite = &it->second;
+		spriteSheet = &it->second;
 	}
 
-	return sprite;
+	return spriteSheet;
 }
 
-const TSpriteMap::const_iterator Project::SpritesBegin() const
+const TSpriteSheetMap::const_iterator Project::SpriteSheetsBegin() const
 {
-	return m_sprites.begin();
+	return m_spriteSheets.begin();
 }
 
-const TSpriteMap::const_iterator Project::SpritesEnd() const
+const TSpriteSheetMap::const_iterator Project::SpriteSheetsEnd() const
 {
-	return m_sprites.end();
+	return m_spriteSheets.end();
 }
 
-int Project::GetSpriteCount() const
+int Project::GetSpriteSheetCount() const
 {
-	return m_sprites.size();
+	return m_spriteSheets.size();
 }
 
 StampId Project::AddStamp(int width, int height)

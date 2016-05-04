@@ -9664,12 +9664,12 @@
             <property name="id">wxID_ANY</property>
             <property name="maximum_size"></property>
             <property name="minimum_size"></property>
-            <property name="name">ImportDialogSpriteBase</property>
+            <property name="name">ImportDialogSpriteSheetBase</property>
             <property name="pos"></property>
             <property name="size">816,656</property>
             <property name="style">wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU</property>
             <property name="subclass"></property>
-            <property name="title">Import Sprite</property>
+            <property name="title">Import Sprite Sheet</property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
             <property name="window_name"></property>
@@ -10060,7 +10060,7 @@
                                         <property name="validator_style">wxFILTER_NONE</property>
                                         <property name="validator_type">wxDefaultValidator</property>
                                         <property name="validator_variable"></property>
-                                        <property name="value">Sprite001</property>
+                                        <property name="value">SpriteSheet001</property>
                                         <property name="window_extra_style"></property>
                                         <property name="window_name"></property>
                                         <property name="window_style"></property>
@@ -10940,12 +10940,12 @@
             <property name="id">wxID_ANY</property>
             <property name="maximum_size"></property>
             <property name="minimum_size"></property>
-            <property name="name">SpriteEditorDialogBase</property>
+            <property name="name">SpriteAnimEditorDialogBase</property>
             <property name="pos"></property>
             <property name="size">1208,828</property>
             <property name="style">wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU</property>
             <property name="subclass"></property>
-            <property name="title">Sprite Editor</property>
+            <property name="title">Sprite and Animation Editor</property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
             <property name="window_name"></property>
@@ -11105,7 +11105,7 @@
                                                         <property name="gripper">0</property>
                                                         <property name="hidden">0</property>
                                                         <property name="id">wxID_ANY</property>
-                                                        <property name="label">Sprites:</property>
+                                                        <property name="label">Sprite Sheets:</property>
                                                         <property name="max_size"></property>
                                                         <property name="maximize_button">0</property>
                                                         <property name="maximum_size"></property>
@@ -11279,7 +11279,7 @@
                                                         <property name="minimize_button">0</property>
                                                         <property name="minimum_size"></property>
                                                         <property name="moveable">1</property>
-                                                        <property name="name">m_listSprites</property>
+                                                        <property name="name">m_listSpriteSheets</property>
                                                         <property name="pane_border">1</property>
                                                         <property name="pane_position"></property>
                                                         <property name="pane_size"></property>
@@ -11310,7 +11310,7 @@
                                                         <event name="OnLeftDClick"></event>
                                                         <event name="OnLeftDown"></event>
                                                         <event name="OnLeftUp"></event>
-                                                        <event name="OnListBox">OnSpriteSelected</event>
+                                                        <event name="OnListBox">OnSpriteSheetSelected</event>
                                                         <event name="OnListBoxDClick"></event>
                                                         <event name="OnMiddleDClick"></event>
                                                         <event name="OnMiddleDown"></event>
@@ -11474,7 +11474,7 @@
                                                                         <property name="minimize_button">0</property>
                                                                         <property name="minimum_size"></property>
                                                                         <property name="moveable">1</property>
-                                                                        <property name="name">m_btnImportSprite</property>
+                                                                        <property name="name">m_btnImportSpriteSheet</property>
                                                                         <property name="pane_border">1</property>
                                                                         <property name="pane_position"></property>
                                                                         <property name="pane_size"></property>
@@ -11495,7 +11495,7 @@
                                                                         <property name="window_extra_style"></property>
                                                                         <property name="window_name"></property>
                                                                         <property name="window_style"></property>
-                                                                        <event name="OnButtonClick">OnBtnSpriteImport</event>
+                                                                        <event name="OnButtonClick">OnBtnSpriteSheetImport</event>
                                                                         <event name="OnChar"></event>
                                                                         <event name="OnEnterWindow"></event>
                                                                         <event name="OnEraseBackground"></event>
@@ -11562,7 +11562,7 @@
                                                                         <property name="minimize_button">0</property>
                                                                         <property name="minimum_size"></property>
                                                                         <property name="moveable">1</property>
-                                                                        <property name="name">m_btnExportSprite</property>
+                                                                        <property name="name">m_btnExportSpriteSheet</property>
                                                                         <property name="pane_border">1</property>
                                                                         <property name="pane_position"></property>
                                                                         <property name="pane_size"></property>
@@ -11583,7 +11583,7 @@
                                                                         <property name="window_extra_style"></property>
                                                                         <property name="window_name"></property>
                                                                         <property name="window_style"></property>
-                                                                        <event name="OnButtonClick">OnButtonSpriteExport</event>
+                                                                        <event name="OnButtonClick">OnButtonSpriteSheetExport</event>
                                                                         <event name="OnChar"></event>
                                                                         <event name="OnEnterWindow"></event>
                                                                         <event name="OnEraseBackground"></event>

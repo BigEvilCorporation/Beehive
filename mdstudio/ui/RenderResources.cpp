@@ -70,11 +70,11 @@ RenderResources::RenderResources()
 	m_materials[eMaterialTerrainTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
 	m_materials[eMaterialTerrainTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
-	//Setup textured sprite material
-	m_materials[eMaterialSprite]->AddDiffuseMap(m_textures[eTextureSpritePreview]);
-	m_materials[eMaterialSprite]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialSprite]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
-	m_materials[eMaterialSprite]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+	//Setup textured spriteSheet material
+	m_materials[eMaterialSpriteSheet]->AddDiffuseMap(m_textures[eTextureSpriteSheetPreview]);
+	m_materials[eMaterialSpriteSheet]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialSpriteSheet]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
+	m_materials[eMaterialSpriteSheet]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
 
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
@@ -279,7 +279,7 @@ void RenderResources::CreateCollisionTypesTexture()
 	delete data;
 }
 
-void RenderResources::CreateSpritePreviewTexture(const BMPReader& reader)
+void RenderResources::CreateSpriteSheetPreviewTexture(const BMPReader& reader)
 {
 	u32 textureWidth = reader.GetWidth();
 	u32 textureHeight = reader.GetHeight();
@@ -304,15 +304,15 @@ void RenderResources::CreateSpritePreviewTexture(const BMPReader& reader)
 		}
 	}
 
-	m_textures[eTextureSpritePreview]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
-	m_textures[eTextureSpritePreview]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureSpritePreview]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureSpritePreview]->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_textures[eTextureSpriteSheetPreview]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureSpriteSheetPreview]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureSpriteSheetPreview]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
+	m_textures[eTextureSpriteSheetPreview]->SetWrapping(ion::render::Texture::eWrapClamp);
 
 	delete data;
 }
 
-ion::render::Texture* RenderResources::CreateSpritePreviewTexture(const Sprite& sprite)
+ion::render::Texture* RenderResources::CreateSpriteSheetPreviewTexture(const SpriteSheet& spriteSheet)
 {
 	return NULL;
 }
@@ -610,31 +610,31 @@ ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion
 	return new ion::render::LineSegments(points);
 }
 
-RenderResources::SpriteRenderResources::SpriteRenderResources()
+RenderResources::SpriteSheetRenderResources::SpriteSheetRenderResources()
 {
 	m_primitive = NULL;
 }
 
-void RenderResources::SpriteRenderResources::Load(const Sprite& sprite, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader)
+void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader)
 {
-	m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)sprite.GetWidthTiles() * 4.0f, (float)sprite.GetHeightTiles() * 4.0f), sprite.GetWidthTiles(), sprite.GetHeightTiles(), true);
+	m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)spriteSheet.GetWidthTiles() * 4.0f, (float)spriteSheet.GetHeightTiles() * 4.0f), spriteSheet.GetWidthTiles(), spriteSheet.GetHeightTiles(), true);
 
 	const int tileWidth = 8;
 	const int tileHeight = 8;
 
-	u32 widthTiles = sprite.GetWidthTiles();
-	u32 heightTiles = sprite.GetHeightTiles();
+	u32 widthTiles = spriteSheet.GetWidthTiles();
+	u32 heightTiles = spriteSheet.GetHeightTiles();
 	u32 textureWidth = widthTiles * tileWidth;
 	u32 textureHeight = heightTiles * tileHeight;
 	u32 bytesPerPixel = 4;
 	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
 
-	const Palette& palette = sprite.GetPalette();
+	const Palette& palette = spriteSheet.GetPalette();
 
-	for(int i = 0; i < sprite.GetNumFrames(); i++)
+	for(int i = 0; i < spriteSheet.GetNumFrames(); i++)
 	{
-		//Get sprite frame
-		const SpriteFrame& spriteFrame = sprite.GetFrame(i);
+		//Get spriteSheet frame
+		const SpriteSheetFrame& spriteSheetFrame = spriteSheet.GetFrame(i);
 
 		//Create new render frame
 		Frame renderFrame;
@@ -645,15 +645,15 @@ void RenderResources::SpriteRenderResources::Load(const Sprite& sprite, ion::ren
 		u8* data = new u8[textureSize];
 		ion::memory::MemSet(data, 0, textureSize);
 
-		for(int tileX = 0; tileX < sprite.GetWidthTiles(); tileX++)
+		for(int tileX = 0; tileX < spriteSheet.GetWidthTiles(); tileX++)
 		{
-			for(int tileY = 0; tileY < sprite.GetHeightTiles(); tileY++)
+			for(int tileY = 0; tileY < spriteSheet.GetHeightTiles(); tileY++)
 			{
-				//Genesis sprite order = column major
-				const Tile& tile = spriteFrame[(tileX * heightTiles) + tileY];
+				//Genesis spriteSheet order = column major
+				const Tile& tile = spriteSheetFrame[(tileX * heightTiles) + tileY];
 
 				//Invert Y for OpenGL
-				int tileY_inv = sprite.GetHeightTiles() - 1 - tileY;
+				int tileY_inv = spriteSheet.GetHeightTiles() - 1 - tileY;
 
 				//Paint tile to texture
 				for(int pixelY = 0; pixelY < 8; pixelY++)
@@ -724,7 +724,7 @@ void RenderResources::SpriteRenderResources::Load(const Sprite& sprite, ion::ren
 	}
 }
 
-RenderResources::SpriteRenderResources::~SpriteRenderResources()
+RenderResources::SpriteSheetRenderResources::~SpriteSheetRenderResources()
 {
 	for(int i = 0; i < m_frames.size(); i++)
 	{
@@ -738,37 +738,37 @@ RenderResources::SpriteRenderResources::~SpriteRenderResources()
 	}
 }
 
-void RenderResources::CreateSpriteResources(const Project& project)
+void RenderResources::CreateSpriteSheetResources(const Project& project)
 {
-	m_spriteRenderResources.clear();
+	m_spriteSheetRenderResources.clear();
 
-	for(TSpriteMap::const_iterator it = project.SpritesBegin(), end = project.SpritesEnd(); it != end; ++it)
+	for(TSpriteSheetMap::const_iterator it = project.SpriteSheetsBegin(), end = project.SpriteSheetsEnd(); it != end; ++it)
 	{
-		CreateSpriteResources(it->first, it->second);
+		CreateSpriteSheetResources(it->first, it->second);
 	}
 }
 
-void RenderResources::CreateSpriteResources(SpriteId spriteId, const Sprite& sprite)
+void RenderResources::CreateSpriteSheetResources(SpriteSheetId spriteSheetId, const SpriteSheet& spriteSheet)
 {
-	m_spriteRenderResources.erase(spriteId);
-	std::pair<std::map<SpriteId, SpriteRenderResources>::iterator, bool> it = m_spriteRenderResources.insert(std::make_pair(spriteId, SpriteRenderResources()));
-	it.first->second.Load(sprite, m_pixelShaders[eShaderFlatTextured], m_vertexShaders[eShaderFlatTextured]);
+	m_spriteSheetRenderResources.erase(spriteSheetId);
+	std::pair<std::map<SpriteSheetId, SpriteSheetRenderResources>::iterator, bool> it = m_spriteSheetRenderResources.insert(std::make_pair(spriteSheetId, SpriteSheetRenderResources()));
+	it.first->second.Load(spriteSheet, m_pixelShaders[eShaderFlatTextured], m_vertexShaders[eShaderFlatTextured]);
 }
 
-void RenderResources::DeleteSpriteRenderResources(SpriteId spriteId)
+void RenderResources::DeleteSpriteSheetRenderResources(SpriteSheetId spriteSheetId)
 {
-	m_spriteRenderResources.erase(spriteId);
+	m_spriteSheetRenderResources.erase(spriteSheetId);
 }
 
-RenderResources::SpriteRenderResources* RenderResources::GetSpriteResources(SpriteId spriteId)
+RenderResources::SpriteSheetRenderResources* RenderResources::GetSpriteSheetResources(SpriteSheetId spriteSheetId)
 {
-	SpriteRenderResources* spriteResources = NULL;
+	SpriteSheetRenderResources* spriteSheetResources = NULL;
 
-	std::map<SpriteId, SpriteRenderResources>::iterator it = m_spriteRenderResources.find(spriteId);
-	if(it != m_spriteRenderResources.end())
+	std::map<SpriteSheetId, SpriteSheetRenderResources>::iterator it = m_spriteSheetRenderResources.find(spriteSheetId);
+	if(it != m_spriteSheetRenderResources.end())
 	{
-		spriteResources = &it->second;
+		spriteSheetResources = &it->second;
 	}
 
-	return spriteResources;
+	return spriteSheetResources;
 }

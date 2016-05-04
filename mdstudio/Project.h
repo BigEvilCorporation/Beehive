@@ -15,7 +15,7 @@
 
 #include "Map.h"
 #include "Palette.h"
-#include "Sprite.h"
+#include "SpriteSheet.h"
 #include "Stamp.h"
 #include "Tile.h"
 #include "Tileset.h"
@@ -25,7 +25,7 @@
 #include "GameObject.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
-typedef std::map<SpriteId, Sprite> TSpriteMap;
+typedef std::map<SpriteSheetId, SpriteSheet> TSpriteSheetMap;
 typedef std::map<GameObjectTypeId, GameObjectType> TGameObjectTypeMap;
 
 class Project
@@ -41,7 +41,7 @@ public:
 		eBMPImportClearMap		= (1 << 2),
 		eBMPImportDrawToMap		= (1 << 3),
 		eBMPImportToStamp		= (1 << 4),
-		eBMPImportToSprite		= (1 << 5),
+		eBMPImportToSpriteSheet		= (1 << 5),
 		eBMPImportWholePalette	= (1 << 6),
 		eBMPImportInsertBGTile	= (1 << 7),
 	};
@@ -95,14 +95,14 @@ public:
 	TileId GetBackgroundTile() const { return m_backgroundTile; }
 	int CleanupTiles();
 
-	//Sprites
-	SpriteId CreateSprite();
-	void DeleteSprite(SpriteId spriteId);
-	Sprite* GetSprite(SpriteId spriteId);
-	const Sprite* GetSprite(SpriteId SpriteId) const;
-	const TSpriteMap::const_iterator SpritesBegin() const;
-	const TSpriteMap::const_iterator SpritesEnd() const;
-	int GetSpriteCount() const;
+	//SpriteSheets
+	SpriteSheetId CreateSpriteSheet();
+	void DeleteSpriteSheet(SpriteSheetId spriteSheetId);
+	SpriteSheet* GetSpriteSheet(SpriteSheetId spriteSheetId);
+	const SpriteSheet* GetSpriteSheet(SpriteSheetId SpriteSheetId) const;
+	const TSpriteSheetMap::const_iterator SpriteSheetsBegin() const;
+	const TSpriteSheetMap::const_iterator SpriteSheetsEnd() const;
+	int GetSpriteSheetCount() const;
 
 	//Stamps
 	StampId AddStamp(int width, int height);
@@ -274,8 +274,8 @@ private:
 	TStampMap m_stamps;
 	StampId m_nextFreeStampId;
 
-	//Sprites
-	std::map<SpriteId, Sprite> m_sprites;
+	//SpriteSheets
+	std::map<SpriteSheetId, SpriteSheet> m_spriteSheets;
 
 	//Game object types
 	TGameObjectTypeMap m_gameObjectTypes;

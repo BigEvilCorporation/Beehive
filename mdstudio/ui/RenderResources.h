@@ -14,7 +14,7 @@
 #include <ion/renderer/Texture.h>
 
 #include "../Project.h"
-#include "../Sprite.h"
+#include "../SpriteSheet.h"
 #include "../BMPReader.h"
 
 class RenderResources
@@ -33,7 +33,7 @@ public:
 		eMaterialTileset,
 		eMaterialCollisionTypes,
 		eMaterialTerrainTileset,
-		eMaterialSprite,
+		eMaterialSpriteSheet,
 		eMaterialMax
 	};
 
@@ -42,7 +42,7 @@ public:
 		eTextureTileset,
 		eTextureCollisionTypes,
 		eTextureTerrainTileset,
-		eTextureSpritePreview,
+		eTextureSpriteSheetPreview,
 		eTextureMax
 	};
 
@@ -79,9 +79,9 @@ public:
 	//Create and redraw collision texture
 	void CreateCollisionTypesTexture();
 
-	//Create sprite preview texture
-	void CreateSpritePreviewTexture(const BMPReader& reader);
-	ion::render::Texture* CreateSpritePreviewTexture(const Sprite& sprite);
+	//Create spriteSheet preview texture
+	void CreateSpriteSheetPreviewTexture(const BMPReader& reader);
+	ion::render::Texture* CreateSpriteSheetPreviewTexture(const SpriteSheet& spriteSheet);
 
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
@@ -110,14 +110,14 @@ public:
 	ion::render::Primitive* CreateBezierPrimitive(const ion::gamekit::BezierPath& bezier);
 	ion::render::Primitive* CreateBezierControlsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
 
-	//Sprite rendering
-	class SpriteRenderResources
+	//SpriteSheet rendering
+	class SpriteSheetRenderResources
 	{
 	public:
-		SpriteRenderResources();
-		~SpriteRenderResources();
+		SpriteSheetRenderResources();
+		~SpriteSheetRenderResources();
 
-		void Load(const Sprite& sprite, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader);
+		void Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader);
 
 		struct Frame
 		{
@@ -129,10 +129,10 @@ public:
 		std::vector<Frame> m_frames;
 	};
 
-	void CreateSpriteResources(const Project& project);
-	void CreateSpriteResources(SpriteId spriteId, const Sprite& sprite);
-	void DeleteSpriteRenderResources(SpriteId spriteId);
-	SpriteRenderResources* GetSpriteResources(SpriteId spriteId);
+	void CreateSpriteSheetResources(const Project& project);
+	void CreateSpriteSheetResources(SpriteSheetId spriteSheetId, const SpriteSheet& spriteSheet);
+	void DeleteSpriteSheetRenderResources(SpriteSheetId spriteSheetId);
+	SpriteSheetRenderResources* GetSpriteSheetResources(SpriteSheetId spriteSheetId);
 
 private:
 	
@@ -162,6 +162,6 @@ private:
 	ion::render::Primitive* m_primitives[ePrimitiveMax];
 	ion::Colour m_colours[eColourMax];
 
-	//Sprites
-	std::map<SpriteId, SpriteRenderResources> m_spriteRenderResources;
+	//SpriteSheets
+	std::map<SpriteSheetId, SpriteSheetRenderResources> m_spriteSheetRenderResources;
 };

@@ -11,14 +11,14 @@
 GameObjectType::GameObjectType()
 {
 	m_id = InvalidGameObjectTypeId;
-	m_previewSprite = InvalidSpriteId;
+	m_previewSpriteSheet = InvalidSpriteSheetId;
 }
 
 GameObjectType::GameObjectType(u32 id)
 {
 	m_id = id;
 	m_name = "GameObj_";
-	m_previewSprite = InvalidSpriteId;
+	m_previewSpriteSheet = InvalidSpriteSheetId;
 	m_dimensions.x = 16;
 	m_dimensions.y = 16;
 }
@@ -52,7 +52,7 @@ void GameObjectType::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_id, "id");
 	archive.Serialise(m_name, "name");
-	archive.Serialise(m_previewSprite, "previewSprite");
+	archive.Serialise(m_previewSpriteSheet, "previewSpriteSheet");
 	archive.Serialise(m_variables, "variables");
 	archive.Serialise(m_dimensions, "dimensions");
 }
@@ -168,15 +168,15 @@ void GameObject::ParseValueTokens(std::string& valueString) const
 	const int tileWidth = 8;
 	const int tileHeight = 8;
 	const int screenToWorldSpaceShift = 8;
-	const int spriteBorderX = 128;
-	const int spriteBorderY = 128;
+	const int spriteSheetBorderX = 128;
+	const int spriteSheetBorderY = 128;
 
 	const std::string worldPosXString("&WORLDPOSX");
 
 	std::string::size_type worldPosXStart = valueString.find(worldPosXString);
 	if(worldPosXStart != std::string::npos)
 	{
-		u32 worldPosX = ((m_position.x * tileWidth) + spriteBorderX) << screenToWorldSpaceShift;
+		u32 worldPosX = ((m_position.x * tileWidth) + spriteSheetBorderX) << screenToWorldSpaceShift;
 
 		std::stringstream hexStream;
 		hexStream << "0x" << std::hex << std::setfill('0') << std::setw(8) << worldPosX;
@@ -189,7 +189,7 @@ void GameObject::ParseValueTokens(std::string& valueString) const
 	std::string::size_type worldPosYStart = valueString.find(worldPosYString);
 	if(worldPosYStart != std::string::npos)
 	{
-		u32 worldPosY = ((m_position.y * tileHeight) + spriteBorderY) << screenToWorldSpaceShift;
+		u32 worldPosY = ((m_position.y * tileHeight) + spriteSheetBorderY) << screenToWorldSpaceShift;
 
 		std::stringstream hexStream;
 		hexStream << "0x" << std::hex << std::setfill('0') << std::setw(8) << worldPosY;

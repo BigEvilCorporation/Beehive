@@ -387,9 +387,9 @@ class ImportDialogBase : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class ImportDialogSpriteBase
+/// Class ImportDialogSpriteSheetBase
 ///////////////////////////////////////////////////////////////////////////////
-class ImportDialogSpriteBase : public wxDialog 
+class ImportDialogSpriteSheetBase : public wxDialog 
 {
 	private:
 	
@@ -421,25 +421,25 @@ class ImportDialogSpriteBase : public wxDialog
 		wxSpinCtrl* m_spinHeightCells;
 		wxSpinCtrl* m_spinCellCount;
 		
-		ImportDialogSpriteBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
-		~ImportDialogSpriteBase();
+		ImportDialogSpriteSheetBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite Sheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+		~ImportDialogSpriteSheetBase();
 	
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class SpriteEditorDialogBase
+/// Class SpriteAnimEditorDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class SpriteEditorDialogBase : public wxDialog 
+class SpriteAnimEditorDialogBase : public wxDialog 
 {
 	private:
 	
 	protected:
 		wxStaticText* m_staticText38;
 		wxStaticText* m_staticText39;
-		wxListBox* m_listSprites;
+		wxListBox* m_listSpriteSheets;
 		wxListBox* m_listAnimations;
-		wxButton* m_btnImportSprite;
-		wxButton* m_btnExportSprite;
+		wxButton* m_btnImportSpriteSheet;
+		wxButton* m_btnExportSpriteSheet;
 		wxButton* m_btnDeleteSprite;
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
@@ -451,10 +451,10 @@ class SpriteEditorDialogBase : public wxDialog
 		wxSpinCtrl* m_spinCtrlSpeed;
 		
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnSpriteSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSpriteSheetSelected( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnAnimSelected( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnSpriteImport( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnButtonSpriteExport( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnSpriteSheetImport( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonSpriteSheetExport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonSpriteDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
@@ -466,8 +466,8 @@ class SpriteEditorDialogBase : public wxDialog
 	
 	public:
 		
-		SpriteEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1208,828 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
-		~SpriteEditorDialogBase();
+		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1208,828 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+		~SpriteAnimEditorDialogBase();
 	
 };
 
