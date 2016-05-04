@@ -46,6 +46,8 @@ ImportDialogSprite::ImportDialogSprite(wxWindow* parent, ion::render::Renderer& 
 {
 	m_canvas->SetupRendering(&renderer, &glContext, &renderResources);
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
+	m_canvas->SetDrawGrid(true);
+	m_canvas->SetDrawPreview(true);
 }
 
 void ImportDialogSprite::OnFileOpened(wxFileDirPickerEvent& event)

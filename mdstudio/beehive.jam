@@ -28,6 +28,8 @@ local SRC =
 	Project.h
 	Sprite.cpp
 	Sprite.h
+	SpriteAnimation.cpp
+	SpriteAnimation.h
 	Stamp.cpp
 	Stamp.h
 	TerrainTile.cpp

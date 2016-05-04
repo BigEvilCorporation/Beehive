@@ -28,6 +28,10 @@ public:
 	void SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells);
 	void SetGridColour(const ion::Colour& colour);
 
+	void SetDrawPreview(bool drawPreview);
+	void SetDrawGrid(bool drawGrid);
+	void SetDrawSprite(SpriteId sprite, u32 frame);
+
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 	virtual void OnResize(wxSizeEvent& event);
@@ -47,7 +51,7 @@ private:
 	void CreateGrid(int width, int height, int cellsX, int cellsY);
 
 	//Rendering
-	void RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderSprite(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
@@ -56,6 +60,11 @@ private:
 	ion::render::Camera m_camera;
 	ion::render::Viewport m_viewport;
 	RenderResources* m_renderResources;
+
+	bool m_drawPreview;
+	bool m_drawGrid;
+	SpriteId m_drawSprite;
+	u32 m_drawSpriteFrame;
 
 	//Mouse
 	ion::Vector2 m_mousePrevPos;

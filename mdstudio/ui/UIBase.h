@@ -34,10 +34,10 @@ class SpriteCanvas;
 #include <wx/spinctrl.h>
 #include <wx/button.h>
 #include <wx/dialog.h>
-#include <wx/bmpbuttn.h>
-#include <wx/listbox.h>
 #include <wx/textctrl.h>
 #include <wx/checkbox.h>
+#include <wx/bmpbuttn.h>
+#include <wx/listbox.h>
 #include <wx/filepicker.h>
 #include <wx/radiobut.h>
 #include <wx/clrpicker.h>
@@ -197,6 +197,28 @@ class DialogMapSizeBase : public wxDialog
 		
 		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~DialogMapSizeBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DialogNewAnim
+///////////////////////////////////////////////////////////////////////////////
+class DialogNewAnim : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_text1;
+		wxStdDialogButtonSizer* m_sdbSizer4;
+		wxButton* m_sdbSizer4OK;
+		wxButton* m_sdbSizer4Cancel;
+	
+	public:
+		wxTextCtrl* m_textName;
+		wxCheckBox* m_chkAutoGenerate;
+		
+		DialogNewAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogNewAnim();
 	
 };
 

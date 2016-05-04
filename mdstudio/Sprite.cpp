@@ -74,8 +74,8 @@ bool Sprite::ImportBitmap(const std::string& filename, const std::string& name, 
 							for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 							{
 								//Read pixel
-								int sourcePixelX = (tileX * tileWidth) + pixelX;
-								int sourcePixelY = (tileY * tileHeight) + pixelY;
+								int sourcePixelX = (frameX * m_widthTiles * tileWidth) + (tileX * tileWidth) + pixelX;
+								int sourcePixelY = (frameY * m_heightTiles * tileHeight) + (tileY * tileHeight) + pixelY;
 								u8 colourIndex = reader.GetColourIndex(sourcePixelX, sourcePixelY);
 								tile.SetPixelColour(pixelX, pixelY, colourIndex);
 							}
@@ -85,6 +85,7 @@ bool Sprite::ImportBitmap(const std::string& filename, const std::string& name, 
 						frame.push_back(tile);
 					}
 				}
+
 				//Add frame
 				m_frames.push_back(frame);
 			}
@@ -111,6 +112,41 @@ const SpriteFrame& Sprite::GetFrame(int index) const
 int Sprite::GetNumFrames() const
 {
 	return m_frames.size();
+}
+
+SpriteAnimId Sprite::AddAnimation()
+{
+	SpriteAnimId animId = ion::GenerateUUID64();
+	m_animations.insert(std::make_pair(animId, SpriteAnimation()));
+	return animId;
+}
+
+SpriteAnimation* Sprite::GetAnimation(SpriteAnimId animId)
+{
+	SpriteAnimation* anim = NULL;
+
+	TSpriteAnimMap::iterator it = m_animations.find(animId);
+	if(it != m_animations.end())
+	{
+		anim = &it->second;
+	}
+
+	return anim;
+}
+
+int Sprite::GetNumAnimations() const
+{
+	return m_animations.size();
+}
+
+TSpriteAnimMap::const_iterator Sprite::AnimationsBegin() const
+{
+	return m_animations.begin();
+}
+
+TSpriteAnimMap::const_iterator Sprite::AnimationsEnd() const
+{
+	return m_animations.end();
 }
 
 u8 Sprite::GetWidthTiles() const
