@@ -884,35 +884,6 @@ void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnSpritesImport(wxRibbonButtonBarEvent& event)
-{
-	if(m_project.get())
-	{
-		ImportDialogSpriteSheet dialog(this, *m_renderer, *m_context, *m_renderResources);
-		if(dialog.ShowModal() == wxID_OK)
-		{
-			//Create new spriteSheet
-			SpriteSheetId spriteSheetId = m_project->CreateSpriteSheet();
-			SpriteSheet* spriteSheet = m_project->GetSpriteSheet(spriteSheetId);
-
-			//Import bitmap
-			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
-			{
-				//Create render resources
-				m_renderResources->CreateSpriteSheetResources(spriteSheetId, *spriteSheet);
-
-				wxMessageBox("Sprite sheet imported successfully", "Success", wxOK);
-			}
-			else
-			{
-				//Failed, remove spriteSheet
-				wxMessageBox("Error importing sprite heet", "Error", wxOK);
-				m_project->DeleteSpriteSheet(spriteSheetId);
-			}
-		}
-	}
-}
-
 void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())

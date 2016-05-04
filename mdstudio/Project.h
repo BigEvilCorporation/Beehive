@@ -16,6 +16,7 @@
 #include "Map.h"
 #include "Palette.h"
 #include "SpriteSheet.h"
+#include "Actor.h"
 #include "Stamp.h"
 #include "Tile.h"
 #include "Tileset.h"
@@ -25,7 +26,7 @@
 #include "GameObject.h"
 
 typedef std::map<StampId, Stamp> TStampMap;
-typedef std::map<SpriteSheetId, SpriteSheet> TSpriteSheetMap;
+typedef std::map<ActorId, Actor> TActorMap;
 typedef std::map<GameObjectTypeId, GameObjectType> TGameObjectTypeMap;
 
 class Project
@@ -95,14 +96,14 @@ public:
 	TileId GetBackgroundTile() const { return m_backgroundTile; }
 	int CleanupTiles();
 
-	//SpriteSheets
-	SpriteSheetId CreateSpriteSheet();
-	void DeleteSpriteSheet(SpriteSheetId spriteSheetId);
-	SpriteSheet* GetSpriteSheet(SpriteSheetId spriteSheetId);
-	const SpriteSheet* GetSpriteSheet(SpriteSheetId SpriteSheetId) const;
-	const TSpriteSheetMap::const_iterator SpriteSheetsBegin() const;
-	const TSpriteSheetMap::const_iterator SpriteSheetsEnd() const;
-	int GetSpriteSheetCount() const;
+	//Actors
+	ActorId CreateActor();
+	void DeleteActor(ActorId actorId);
+	Actor* GetActor(ActorId actorId);
+	const Actor* GetActor(ActorId actorId) const;
+	const TActorMap::const_iterator ActorsBegin() const;
+	const TActorMap::const_iterator ActorsEnd() const;
+	int GetActorCount() const;
 
 	//Stamps
 	StampId AddStamp(int width, int height);
@@ -274,8 +275,8 @@ private:
 	TStampMap m_stamps;
 	StampId m_nextFreeStampId;
 
-	//SpriteSheets
-	std::map<SpriteSheetId, SpriteSheet> m_spriteSheets;
+	//Actors
+	std::map<ActorId, Actor> m_actors;
 
 	//Game object types
 	TGameObjectTypeMap m_gameObjectTypes;

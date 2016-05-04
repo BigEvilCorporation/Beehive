@@ -70,36 +70,35 @@ class SpriteCanvas;
 #define wxID_BTN_TILES_DELETE 1018
 #define wxID_BTN_TILES_CLEANUP 1019
 #define wxID_BTN_SPRITE_EDITOR 1020
-#define wxID_BTN_SPRITE_IMPORT 1021
-#define wxID_BTN_STAMPS_CREATE 1022
-#define wxID_BTN_STAMPS_DELETE 1023
-#define wxID_BTN_COL_TILES_CREATE 1024
-#define wxID_BTN_COL_TILES_DELETE 1025
-#define wxID_BTN_COL_TILES_CLEANUP 1026
-#define wxID_BTN_COL_MAP_CLEAR 1027
-#define wxID_BTN_COL_GEN_BEZIER 1028
-#define wxID_BTN_GAME_OBJ_TYPES 1029
-#define wxID_BTN_CANCEL 1030
-#define wxID_TOOL_SELECTTILE 1031
-#define wxID_TOOL_PAINT 1032
-#define wxID_TOOL_TILEPICKER 1033
-#define wxID_TOOL_FLIPX 1034
-#define wxID_TOOL_FLIPY 1035
-#define wxID_TOOL_FILL 1036
-#define wxID_TOOL_CLONE 1037
-#define wxID_TOOL_SELECTSTAMP 1038
-#define wxID_TOOL_STAMP 1039
-#define wxID_TOOL_STAMPPICKER 1040
-#define wxID_TOOL_CREATESTAMP 1041
-#define wxID_TOOL_REMOVESTAMP 1042
-#define wxID_TOOL_COL_PAINTTERRAIN 1043
-#define wxID_TOOL_COL_PAINTSOLID 1044
-#define wxID_TOOL_COL_DELETETERRTILE 1045
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1046
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1047
-#define wxID_TOOL_SELECTGAMEOBJ 1048
-#define wxID_TOOL_PLACEGAMEOBJ 1049
-#define wxID_TOOL_REMOVEGAMEOBJ 1050
+#define wxID_BTN_STAMPS_CREATE 1021
+#define wxID_BTN_STAMPS_DELETE 1022
+#define wxID_BTN_COL_TILES_CREATE 1023
+#define wxID_BTN_COL_TILES_DELETE 1024
+#define wxID_BTN_COL_TILES_CLEANUP 1025
+#define wxID_BTN_COL_MAP_CLEAR 1026
+#define wxID_BTN_COL_GEN_BEZIER 1027
+#define wxID_BTN_GAME_OBJ_TYPES 1028
+#define wxID_BTN_CANCEL 1029
+#define wxID_TOOL_SELECTTILE 1030
+#define wxID_TOOL_PAINT 1031
+#define wxID_TOOL_TILEPICKER 1032
+#define wxID_TOOL_FLIPX 1033
+#define wxID_TOOL_FLIPY 1034
+#define wxID_TOOL_FILL 1035
+#define wxID_TOOL_CLONE 1036
+#define wxID_TOOL_SELECTSTAMP 1037
+#define wxID_TOOL_STAMP 1038
+#define wxID_TOOL_STAMPPICKER 1039
+#define wxID_TOOL_CREATESTAMP 1040
+#define wxID_TOOL_REMOVESTAMP 1041
+#define wxID_TOOL_COL_PAINTTERRAIN 1042
+#define wxID_TOOL_COL_PAINTSOLID 1043
+#define wxID_TOOL_COL_DELETETERRTILE 1044
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1045
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1046
+#define wxID_TOOL_SELECTGAMEOBJ 1047
+#define wxID_TOOL_PLACEGAMEOBJ 1048
+#define wxID_TOOL_REMOVEGAMEOBJ 1049
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -155,7 +154,6 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteEditor( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-		virtual void OnBtnSpritesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -219,6 +217,27 @@ class DialogNewAnim : public wxDialog
 		
 		DialogNewAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~DialogNewAnim();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DialogNewActor
+///////////////////////////////////////////////////////////////////////////////
+class DialogNewActor : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_text1;
+		wxStdDialogButtonSizer* m_sdbSizer4;
+		wxButton* m_sdbSizer4OK;
+		wxButton* m_sdbSizer4Cancel;
+	
+	public:
+		wxTextCtrl* m_textName;
+		
+		DialogNewActor( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Actor/Prop"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,99 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogNewActor();
 	
 };
 
@@ -434,12 +453,16 @@ class SpriteAnimEditorDialogBase : public wxDialog
 	private:
 	
 	protected:
+		wxStaticText* m_staticText36;
 		wxStaticText* m_staticText38;
 		wxStaticText* m_staticText39;
+		wxListBox* m_listActors;
 		wxListBox* m_listSpriteSheets;
 		wxListBox* m_listAnimations;
+		wxButton* m_btnNewActor;
+		wxButton* m_btnDeleteActor;
+		wxButton* m_btnActorExport;
 		wxButton* m_btnImportSpriteSheet;
-		wxButton* m_btnExportSpriteSheet;
 		wxButton* m_btnDeleteSprite;
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
@@ -451,10 +474,13 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxSpinCtrl* m_spinCtrlSpeed;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnActorSelected( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteSheetSelected( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnAnimSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnActorNew( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnActorDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnActorExport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetImport( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnButtonSpriteSheetExport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonSpriteDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
