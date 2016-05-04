@@ -40,10 +40,10 @@ protected:
 	virtual void OnBtnBrowse(wxCommandEvent& event);
 };
 
-class ImportDialogSprite : public ImportDialogSpriteBase
+class ImportDialogSpriteSheet : public ImportDialogSpriteSheetBase
 {
 public:
-	ImportDialogSprite(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
+	ImportDialogSpriteSheet(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual void OnFileOpened(wxFileDirPickerEvent& event);
 	virtual void OnGridColourChanged(wxColourPickerEvent& event);
 	virtual void OnSpinWidthCells(wxSpinEvent& event);

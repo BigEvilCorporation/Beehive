@@ -755,7 +755,7 @@ ImportDialogBase::~ImportDialogBase()
 	
 }
 
-ImportDialogSpriteBase::ImportDialogSpriteBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+ImportDialogSpriteSheetBase::ImportDialogSpriteSheetBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
@@ -785,7 +785,7 @@ ImportDialogSpriteBase::ImportDialogSpriteBase( wxWindow* parent, wxWindowID id,
 	m_staticText24->Wrap( -1 );
 	fgSizer15->Add( m_staticText24, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_textName = new wxTextCtrl( this, wxID_ANY, wxT("Sprite001"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_textName = new wxTextCtrl( this, wxID_ANY, wxT("SpriteSheet001"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_textName->SetMaxLength( 64 ); 
 	fgSizer15->Add( m_textName, 1, wxALL|wxEXPAND, 5 );
 	
@@ -860,25 +860,25 @@ ImportDialogSpriteBase::ImportDialogSpriteBase( wxWindow* parent, wxWindowID id,
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_filePicker->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteBase::OnFileOpened ), NULL, this );
-	m_gridColourPicker->Connect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( ImportDialogSpriteBase::OnGridColourChanged ), NULL, this );
-	m_spinWidthCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinWidthCells ), NULL, this );
-	m_spinHeightCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinHeightCells ), NULL, this );
-	m_spinCellCount->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinCellCount ), NULL, this );
+	m_filePicker->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteSheetBase::OnFileOpened ), NULL, this );
+	m_gridColourPicker->Connect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( ImportDialogSpriteSheetBase::OnGridColourChanged ), NULL, this );
+	m_spinWidthCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteSheetBase::OnSpinWidthCells ), NULL, this );
+	m_spinHeightCells->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteSheetBase::OnSpinHeightCells ), NULL, this );
+	m_spinCellCount->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteSheetBase::OnSpinCellCount ), NULL, this );
 }
 
-ImportDialogSpriteBase::~ImportDialogSpriteBase()
+ImportDialogSpriteSheetBase::~ImportDialogSpriteSheetBase()
 {
 	// Disconnect Events
-	m_filePicker->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteBase::OnFileOpened ), NULL, this );
-	m_gridColourPicker->Disconnect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( ImportDialogSpriteBase::OnGridColourChanged ), NULL, this );
-	m_spinWidthCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinWidthCells ), NULL, this );
-	m_spinHeightCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinHeightCells ), NULL, this );
-	m_spinCellCount->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteBase::OnSpinCellCount ), NULL, this );
+	m_filePicker->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( ImportDialogSpriteSheetBase::OnFileOpened ), NULL, this );
+	m_gridColourPicker->Disconnect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( ImportDialogSpriteSheetBase::OnGridColourChanged ), NULL, this );
+	m_spinWidthCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteSheetBase::OnSpinWidthCells ), NULL, this );
+	m_spinHeightCells->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteSheetBase::OnSpinHeightCells ), NULL, this );
+	m_spinCellCount->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( ImportDialogSpriteSheetBase::OnSpinCellCount ), NULL, this );
 	
 }
 
-SpriteEditorDialogBase::SpriteEditorDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
@@ -920,7 +920,7 @@ SpriteEditorDialogBase::SpriteEditorDialogBase( wxWindow* parent, wxWindowID id,
 	fgSizer25->SetFlexibleDirection( wxBOTH );
 	fgSizer25->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_staticText38 = new wxStaticText( this, wxID_ANY, wxT("Sprites:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText38 = new wxStaticText( this, wxID_ANY, wxT("Sprite Sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText38->Wrap( -1 );
 	fgSizer25->Add( m_staticText38, 0, wxALL, 5 );
 	
@@ -928,8 +928,8 @@ SpriteEditorDialogBase::SpriteEditorDialogBase( wxWindow* parent, wxWindowID id,
 	m_staticText39->Wrap( -1 );
 	fgSizer25->Add( m_staticText39, 0, wxALL, 5 );
 	
-	m_listSprites = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 ); 
-	fgSizer25->Add( m_listSprites, 0, wxALL|wxEXPAND, 5 );
+	m_listSpriteSheets = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 ); 
+	fgSizer25->Add( m_listSpriteSheets, 0, wxALL|wxEXPAND, 5 );
 	
 	m_listAnimations = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 ); 
 	fgSizer25->Add( m_listAnimations, 0, wxALL|wxEXPAND, 5 );
@@ -940,11 +940,11 @@ SpriteEditorDialogBase::SpriteEditorDialogBase( wxWindow* parent, wxWindowID id,
 	wxBoxSizer* bSizer25;
 	bSizer25 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_btnImportSprite = new wxButton( this, wxID_ANY, wxT("Import..."), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer25->Add( m_btnImportSprite, 0, wxALL, 5 );
+	m_btnImportSpriteSheet = new wxButton( this, wxID_ANY, wxT("Import..."), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer25->Add( m_btnImportSpriteSheet, 0, wxALL, 5 );
 	
-	m_btnExportSprite = new wxButton( this, wxID_ANY, wxT("Export..."), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer25->Add( m_btnExportSprite, 0, wxALL, 5 );
+	m_btnExportSpriteSheet = new wxButton( this, wxID_ANY, wxT("Export..."), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer25->Add( m_btnExportSpriteSheet, 0, wxALL, 5 );
 	
 	
 	bSizer26->Add( bSizer25, 1, wxEXPAND, 5 );
@@ -1021,49 +1021,49 @@ SpriteEditorDialogBase::SpriteEditorDialogBase( wxWindow* parent, wxWindowID id,
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_listSprites->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteEditorDialogBase::OnSpriteSelected ), NULL, this );
-	m_listAnimations->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteEditorDialogBase::OnAnimSelected ), NULL, this );
-	m_btnImportSprite->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnSpriteImport ), NULL, this );
-	m_btnExportSprite->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnButtonSpriteExport ), NULL, this );
-	m_btnDeleteSprite->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnButtonSpriteDelete ), NULL, this );
-	m_btnNewAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnAnimNew ), NULL, this );
-	m_btnDeleteAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnAnimDelete ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_btnPlay->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnPlay ), NULL, this );
-	m_btnStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnStop ), NULL, this );
-	m_spinCtrlSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( SpriteEditorDialogBase::OnSpinSpeedChange ), NULL, this );
+	m_listSpriteSheets->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnSpriteSheetSelected ), NULL, this );
+	m_listAnimations->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnAnimSelected ), NULL, this );
+	m_btnImportSpriteSheet->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetImport ), NULL, this );
+	m_btnExportSpriteSheet->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnButtonSpriteSheetExport ), NULL, this );
+	m_btnDeleteSprite->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnButtonSpriteDelete ), NULL, this );
+	m_btnNewAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimNew ), NULL, this );
+	m_btnDeleteAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimDelete ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_btnPlay->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnPlay ), NULL, this );
+	m_btnStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnStop ), NULL, this );
+	m_spinCtrlSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( SpriteAnimEditorDialogBase::OnSpinSpeedChange ), NULL, this );
 }
 
-SpriteEditorDialogBase::~SpriteEditorDialogBase()
+SpriteAnimEditorDialogBase::~SpriteAnimEditorDialogBase()
 {
 	// Disconnect Events
-	m_listSprites->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteEditorDialogBase::OnSpriteSelected ), NULL, this );
-	m_listAnimations->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteEditorDialogBase::OnAnimSelected ), NULL, this );
-	m_btnImportSprite->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnSpriteImport ), NULL, this );
-	m_btnExportSprite->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnButtonSpriteExport ), NULL, this );
-	m_btnDeleteSprite->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnButtonSpriteDelete ), NULL, this );
-	m_btnNewAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnAnimNew ), NULL, this );
-	m_btnDeleteAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnAnimDelete ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_sliderTimeline->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( SpriteEditorDialogBase::OnSliderMove ), NULL, this );
-	m_btnPlay->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnPlay ), NULL, this );
-	m_btnStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteEditorDialogBase::OnBtnStop ), NULL, this );
-	m_spinCtrlSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( SpriteEditorDialogBase::OnSpinSpeedChange ), NULL, this );
+	m_listSpriteSheets->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnSpriteSheetSelected ), NULL, this );
+	m_listAnimations->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnAnimSelected ), NULL, this );
+	m_btnImportSpriteSheet->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetImport ), NULL, this );
+	m_btnExportSpriteSheet->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnButtonSpriteSheetExport ), NULL, this );
+	m_btnDeleteSprite->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnButtonSpriteDelete ), NULL, this );
+	m_btnNewAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimNew ), NULL, this );
+	m_btnDeleteAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimDelete ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_btnPlay->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnPlay ), NULL, this );
+	m_btnStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnStop ), NULL, this );
+	m_spinCtrlSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( SpriteAnimEditorDialogBase::OnSpinSpeedChange ), NULL, this );
 	
 }
 

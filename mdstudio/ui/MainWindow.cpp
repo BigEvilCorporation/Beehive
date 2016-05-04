@@ -15,7 +15,7 @@
 
 #include "MainWindow.h"
 #include "Dialogs.h"
-#include "SpriteEditorDialog.h"
+#include "SpriteAnimEditorDialog.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "MapPanel.h"
@@ -159,10 +159,10 @@ void MainWindow::SetProject(Project* project)
 			//Set render resources project
 			m_renderResources->SetProject(project);
 
-			//Recreate tileset/collision set/sprite textures, and tile index cache
+			//Recreate tileset/collision set/spriteSheet textures, and tile index cache
 			RefreshTileset();
 			RefreshTerrainTileset();
-			RefreshSprites();
+			RefreshSpriteSheets();
 
 			//Open bottom panels
 			ShowPanelPalettes();
@@ -624,11 +624,11 @@ void MainWindow::RefreshTerrainTileset()
 	}
 }
 
-void MainWindow::RefreshSprites()
+void MainWindow::RefreshSpriteSheets()
 {
 	if(m_project.get())
 	{
-		m_renderResources->CreateSpriteResources(*m_project.get());
+		m_renderResources->CreateSpriteSheetResources(*m_project.get());
 	}
 }
 
@@ -826,7 +826,7 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkImportToStamp->GetValue())
 				flags |= Project::eBMPImportToStamp;
 			if(dialog.m_chkImportToSprite->GetValue())
-				flags |= Project::eBMPImportToSprite;
+				flags |= Project::eBMPImportToSpriteSheet;
 			if(dialog.m_chkInsertBGTile->GetValue())
 				flags |= Project::eBMPImportInsertBGTile;
 
@@ -879,7 +879,7 @@ void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		SpriteEditorDialog dialog(this, *m_project, *m_renderer, *m_context, *m_renderResources);
+		SpriteAnimEditorDialog dialog(this, *m_project, *m_renderer, *m_context, *m_renderResources);
 		dialog.ShowModal();
 	}
 }
@@ -888,26 +888,26 @@ void MainWindow::OnBtnSpritesImport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		ImportDialogSprite dialog(this, *m_renderer, *m_context, *m_renderResources);
+		ImportDialogSpriteSheet dialog(this, *m_renderer, *m_context, *m_renderResources);
 		if(dialog.ShowModal() == wxID_OK)
 		{
-			//Create new sprite
-			SpriteId spriteId = m_project->CreateSprite();
-			Sprite* sprite = m_project->GetSprite(spriteId);
+			//Create new spriteSheet
+			SpriteSheetId spriteSheetId = m_project->CreateSpriteSheet();
+			SpriteSheet* spriteSheet = m_project->GetSpriteSheet(spriteSheetId);
 
 			//Import bitmap
-			if(sprite->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
+			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
 			{
 				//Create render resources
-				m_renderResources->CreateSpriteResources(spriteId, *sprite);
+				m_renderResources->CreateSpriteSheetResources(spriteSheetId, *spriteSheet);
 
-				wxMessageBox("Sprite imported successfully", "Success", wxOK);
+				wxMessageBox("Sprite sheet imported successfully", "Success", wxOK);
 			}
 			else
 			{
-				//Failed, remove sprite
-				wxMessageBox("Error importing sprite", "Error", wxOK);
-				m_project->DeleteSprite(spriteId);
+				//Failed, remove spriteSheet
+				wxMessageBox("Error importing sprite heet", "Error", wxOK);
+				m_project->DeleteSpriteSheet(spriteSheetId);
 			}
 		}
 	}

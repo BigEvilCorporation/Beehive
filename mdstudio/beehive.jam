@@ -26,8 +26,8 @@ local SRC =
 	Palette.h
 	Project.cpp
 	Project.h
-	Sprite.cpp
-	Sprite.h
+	SpriteSheet.cpp
+	SpriteSheet.h
 	SpriteAnimation.cpp
 	SpriteAnimation.h
 	Stamp.cpp
@@ -59,8 +59,8 @@ local SRC =
 	ui/PalettesPanel.h
 	ui/SpriteCanvas.cpp
 	ui/SpriteCanvas.h
-	ui/SpriteEditorDialog.cpp
-	ui/SpriteEditorDialog.h
+	ui/SpriteAnimEditorDialog.cpp
+	ui/SpriteAnimEditorDialog.h
 	ui/StampsPanel.cpp
 	ui/StampsPanel.h
 	ui/TerrainTileEditorPanel.cpp

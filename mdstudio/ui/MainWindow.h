@@ -84,8 +84,8 @@ public:
 	//Refresh terrain tileset
 	void RefreshTerrainTileset();
 
-	//Refresh sprites
-	void RefreshSprites();
+	//Refresh sprite sheets
+	void RefreshSpriteSheets();
 
 protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);

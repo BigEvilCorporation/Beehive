@@ -95,14 +95,14 @@ void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
 		gameObjType->SetName(m_textGameObjName->GetValue().c_str().AsChar());
 		gameObjType->SetDimensions(ion::Vector2i(m_spinWidth->GetValue(), m_spinHeight->GetValue()));
 
-		SpriteId prevSprite = gameObjType->GetPreviewSprite();
+		SpriteSheetId prevSpriteSheet = gameObjType->GetPreviewSpriteSheet();
 
-		if(m_spriteCache.size() > 0)
+		if(m_spriteSheetCache.size() > 0)
 		{
-			int spriteIndex = m_choiceSprites->GetCurrentSelection();
-			if(spriteIndex >= 0 && spriteIndex < m_spriteCache.size())
+			int spriteSheetIndex = m_choiceSprites->GetCurrentSelection();
+			if(spriteSheetIndex >= 0 && spriteSheetIndex < m_spriteSheetCache.size())
 			{
-				gameObjType->SetPreviewSprite(m_spriteCache[spriteIndex]);
+				gameObjType->SetPreviewSpriteSheet(m_spriteSheetCache[spriteSheetIndex]);
 			}
 		}
 
@@ -182,12 +182,12 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_spinHeight->SetValue(gameObjType->GetDimensions().y);
 
 		m_choiceSprites->Clear();
-		m_spriteCache.clear();
+		m_spriteSheetCache.clear();
 
-		for(TSpriteMap::const_iterator it = m_project.SpritesBegin(), end = m_project.SpritesEnd(); it != end; ++it)
+		for(TSpriteSheetMap::const_iterator it = m_project.SpriteSheetsBegin(), end = m_project.SpriteSheetsEnd(); it != end; ++it)
 		{
 			//Store by index
-			m_spriteCache.push_back(it->first);
+			m_spriteSheetCache.push_back(it->first);
 
 			//Add to list
 			m_choiceSprites->AppendString(it->second.GetName());

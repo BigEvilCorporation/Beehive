@@ -40,8 +40,8 @@ void ImportDialog::OnBtnBrowse(wxCommandEvent& event)
 	}
 }
 
-ImportDialogSprite::ImportDialogSprite(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
-	: ImportDialogSpriteBase(parent)
+ImportDialogSpriteSheet::ImportDialogSpriteSheet(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
+	: ImportDialogSpriteSheetBase(parent)
 	, m_renderResources(renderResources)
 {
 	m_canvas->SetupRendering(&renderer, &glContext, &renderResources);
@@ -54,7 +54,7 @@ ImportDialogSprite::ImportDialogSprite(wxWindow* parent, ion::render::Renderer& 
 	m_canvas->SetDrawPreview(true, m_spinCellCount->GetValue());
 }
 
-void ImportDialogSprite::OnFileOpened(wxFileDirPickerEvent& event)
+void ImportDialogSpriteSheet::OnFileOpened(wxFileDirPickerEvent& event)
 {
 	BMPReader reader;
 	if(reader.Read(event.GetPath().GetData().AsChar()))
@@ -68,19 +68,19 @@ void ImportDialogSprite::OnFileOpened(wxFileDirPickerEvent& event)
 		}
 
 		//Create texture from bitmap
-		m_renderResources.CreateSpritePreviewTexture(reader);
+		m_renderResources.CreateSpriteSheetPreviewTexture(reader);
 
 		m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(reader.GetWidth(), reader.GetHeight()));
 	}
 }
 
-void ImportDialogSprite::OnGridColourChanged(wxColourPickerEvent& event)
+void ImportDialogSpriteSheet::OnGridColourChanged(wxColourPickerEvent& event)
 {
 	ion::Colour colour((float)event.GetColour().Red() / 255.0f, (float)event.GetColour().Green() / 255.0f, (float)event.GetColour().Blue() / 255.0f);
 	m_canvas->SetGridColour(colour);
 }
 
-void ImportDialogSprite::OnSpinWidthCells(wxSpinEvent& event)
+void ImportDialogSpriteSheet::OnSpinWidthCells(wxSpinEvent& event)
 {
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
 	m_spinCellCount->SetValue(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
@@ -88,7 +88,7 @@ void ImportDialogSprite::OnSpinWidthCells(wxSpinEvent& event)
 	m_canvas->SetDrawPreview(true, m_spinCellCount->GetValue());
 }
 
-void ImportDialogSprite::OnSpinHeightCells(wxSpinEvent& event)
+void ImportDialogSpriteSheet::OnSpinHeightCells(wxSpinEvent& event)
 {
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
 	m_spinCellCount->SetValue(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
@@ -96,7 +96,7 @@ void ImportDialogSprite::OnSpinHeightCells(wxSpinEvent& event)
 	m_canvas->SetDrawPreview(true, m_spinCellCount->GetValue());
 }
 
-void ImportDialogSprite::OnSpinCellCount(wxSpinEvent& event)
+void ImportDialogSpriteSheet::OnSpinCellCount(wxSpinEvent& event)
 {
 	m_canvas->SetDrawPreview(true, m_spinCellCount->GetValue());
 }

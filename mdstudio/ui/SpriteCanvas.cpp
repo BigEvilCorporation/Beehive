@@ -16,8 +16,8 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	m_drawPreview = false;
 	m_drawPreviewMaxFrames = 0;
 	m_drawGrid = false;
-	m_drawSprite = InvalidSpriteId;
-	m_drawSpriteFrame = 0;
+	m_drawSpriteSheet = InvalidSpriteSheetId;
+	m_drawSpriteSheetFrame = 0;
 
 	//Set viewport clear colour
 	m_viewport.SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
@@ -78,10 +78,10 @@ void SpriteCanvas::SetDrawGrid(bool drawGrid)
 	Refresh();
 }
 
-void SpriteCanvas::SetDrawSprite(SpriteId sprite, u32 frame)
+void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame)
 {
-	m_drawSprite = sprite;
-	m_drawSpriteFrame = frame;
+	m_drawSpriteSheet = spriteSheet;
+	m_drawSpriteSheetFrame = frame;
 	Refresh();
 }
 
@@ -153,8 +153,8 @@ void SpriteCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4&
 	RenderPreview(renderer, cameraInverseMtx, projectionMtx, z);
 	z += zOffset;
 
-	//Render Sprite
-	RenderSprite(renderer, cameraInverseMtx, projectionMtx, z);
+	//Render SpriteSheet
+	RenderSpriteSheet(renderer, cameraInverseMtx, projectionMtx, z);
 	z += zOffset;
 
 	//Render grid
@@ -162,17 +162,17 @@ void SpriteCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4&
 	z += zOffset;
 }
 
-void SpriteCanvas::RenderSprite(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	if(m_drawSprite != InvalidSpriteId)
+	if(m_drawSpriteSheet != InvalidSpriteSheetId)
 	{
-		//Render sprite
-		RenderResources::SpriteRenderResources* spriteResources = m_renderResources->GetSpriteResources(m_drawSprite);
-		ion::debug::Assert(spriteResources, "SpriteCanvas::RenderSprite() - Missing sprite render resources");
-		ion::debug::Assert(spriteResources->m_frames.size() > m_drawSpriteFrame, "SpriteCanvas::RenderSprite() - Invalid frame");
+		//Render spriteSheet
+		RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources->GetSpriteSheetResources(m_drawSpriteSheet);
+		ion::debug::Assert(spriteSheetResources, "SpriteCanvas::RenderSpriteSheet() - Missing spriteSheet render resources");
+		ion::debug::Assert(spriteSheetResources->m_frames.size() > m_drawSpriteSheetFrame, "SpriteCanvas::RenderSpriteSheet() - Invalid frame");
 
-		ion::render::Primitive* primitive = spriteResources->m_primitive;
-		ion::render::Material* material = spriteResources->m_frames[m_drawSpriteFrame].material;
+		ion::render::Primitive* primitive = spriteSheetResources->m_primitive;
+		ion::render::Material* material = spriteSheetResources->m_frames[m_drawSpriteSheetFrame].material;
 		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 		ion::Matrix4 boxMtx;
@@ -192,7 +192,7 @@ void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Mat
 {
 	if(m_drawPreview)
 	{
-		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialSprite);
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialSpriteSheet);
 		ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 
 		ion::Matrix4 boxMtx;

@@ -11,34 +11,34 @@ namespace ion
 {
 	namespace render
 	{
-		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const std::string& spriteSheet, io::ResourceManager& resourceManager)
+		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteGridSizeX, int spriteGridSizeY, const std::string& sprite, io::ResourceManager& resourceManager)
 		{
 			mRenderType = renderType;
 			mSize = size;
 			mDrawDepth = drawDepth;
-			mSpriteSheetGridSizeX = spriteSheetGridSizeX;
-			mSpriteSheetGridSizeY = spriteSheetGridSizeY;
+			mSpriteSheetGridSizeX = spriteGridSizeX;
+			mSpriteSheetGridSizeY = spriteGridSizeY;
 			mCurrentFrame = 0;
 			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
 
 			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
 			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
-			mSpriteSheet = resourceManager.GetResource<Texture>(spriteSheet);
+			mSpriteSheet = resourceManager.GetResource<Texture>(sprite);
 		}
 
-		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteSheetGridSizeX, int spriteSheetGridSizeY, const io::ResourceHandle<Texture>& spriteSheet, io::ResourceManager& resourceManager)
+		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteGridSizeX, int spriteGridSizeY, const io::ResourceHandle<Texture>& sprite, io::ResourceManager& resourceManager)
 		{
 			mRenderType = renderType;
 			mSize = size;
 			mDrawDepth = drawDepth;
-			mSpriteSheetGridSizeX = spriteSheetGridSizeX;
-			mSpriteSheetGridSizeY = spriteSheetGridSizeY;
+			mSpriteSheetGridSizeX = spriteGridSizeX;
+			mSpriteSheetGridSizeY = spriteGridSizeY;
 			mCurrentFrame = 0;
 			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
 
 			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
 			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
-			mSpriteSheet = spriteSheet;
+			mSpriteSheet = sprite;
 		}
 
 		Sprite::~Sprite()

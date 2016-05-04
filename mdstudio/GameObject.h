@@ -12,7 +12,7 @@
 #include <sstream>
 #include <string>
 
-#include "Sprite.h"
+#include "SpriteSheet.h"
 
 typedef u32 GameObjectTypeId;
 typedef u32 GameObjectId;
@@ -59,8 +59,8 @@ public:
 	void SetName(const std::string& name) { m_name = name; }
 	const std::string& GetName() const { return m_name; }
 
-	void SetPreviewSprite(SpriteId spriteId) { m_previewSprite = spriteId;  }
-	SpriteId GetPreviewSprite() const { return m_previewSprite; }
+	void SetPreviewSpriteSheet(SpriteSheetId spriteSheetId) { m_previewSpriteSheet = spriteSheetId;  }
+	SpriteSheetId GetPreviewSpriteSheet() const { return m_previewSpriteSheet; }
 
 	const ion::Vector2i& GetDimensions() const { return m_dimensions; }
 	void SetDimensions(const ion::Vector2i& dimensions) { m_dimensions = dimensions; }
@@ -75,7 +75,7 @@ public:
 private:
 	GameObjectTypeId m_id;
 	std::string m_name;
-	SpriteId m_previewSprite;
+	SpriteSheetId m_previewSpriteSheet;
 	std::vector<GameObjectVariable> m_variables;
 	ion::Vector2i m_dimensions;
 };

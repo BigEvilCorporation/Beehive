@@ -30,7 +30,7 @@ public:
 
 	void SetDrawPreview(bool drawPreview, u32 maxFrames);
 	void SetDrawGrid(bool drawGrid);
-	void SetDrawSprite(SpriteId sprite, u32 frame);
+	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame);
 
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
@@ -51,7 +51,7 @@ private:
 	void CreateGrid(int width, int height, int cellsX, int cellsY);
 
 	//Rendering
-	void RenderSprite(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
@@ -63,8 +63,8 @@ private:
 
 	bool m_drawPreview;
 	u32 m_drawPreviewMaxFrames;
-	SpriteId m_drawSprite;
-	u32 m_drawSpriteFrame;
+	SpriteSheetId m_drawSpriteSheet;
+	u32 m_drawSpriteSheetFrame;
 	bool m_drawGrid;
 
 	//Mouse
@@ -80,7 +80,7 @@ private:
 	//Prev panel size (for filtering resize events)
 	ion::Vector2i m_prevPanelSize;
 
-	//Sprite sheet dimentions
+	//SpriteSheet sheet dimentions
 	ion::Vector2i m_spriteSheetDimentions;
 	ion::Vector2i m_spriteSheetDimentionsCells;
 
