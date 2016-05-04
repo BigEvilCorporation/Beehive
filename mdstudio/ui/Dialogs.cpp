@@ -48,6 +48,10 @@ ImportDialogSprite::ImportDialogSprite(wxWindow* parent, ion::render::Renderer& 
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
 	m_canvas->SetDrawGrid(true);
 	m_canvas->SetDrawPreview(true, 0);
+
+	m_spinCellCount->SetValue(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
+	m_spinCellCount->SetMax(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
+	m_canvas->SetDrawPreview(true, m_spinCellCount->GetValue());
 }
 
 void ImportDialogSprite::OnFileOpened(wxFileDirPickerEvent& event)
@@ -80,6 +84,7 @@ void ImportDialogSprite::OnSpinWidthCells(wxSpinEvent& event)
 {
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
 	m_spinCellCount->SetValue(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
+	m_spinCellCount->SetMax(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
 	m_canvas->SetDrawPreview(true, m_spinCellCount->GetValue());
 }
 
@@ -87,6 +92,7 @@ void ImportDialogSprite::OnSpinHeightCells(wxSpinEvent& event)
 {
 	m_canvas->SetSpriteSheetDimentionsCells(ion::Vector2i(m_spinWidthCells->GetValue(), m_spinHeightCells->GetValue()));
 	m_spinCellCount->SetValue(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
+	m_spinCellCount->SetMax(m_spinWidthCells->GetValue() * m_spinHeightCells->GetValue());
 	m_canvas->SetDrawPreview(true, m_spinCellCount->GetValue());
 }
 

@@ -1273,7 +1273,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 	//Draw selected handle
 	if(m_currentBezierControlIdx != -1)
 	{
-		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
 		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
@@ -1300,7 +1300,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 	//Draw selected bezier
 	if(m_highlightedBezier)
 	{
-		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
 		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
@@ -1360,7 +1360,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	const float tileWidth = 8.0f;
 	const float tileHeight = 8.0f;
 
-	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
@@ -1420,7 +1420,7 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 {
 	if(const GameObjectType* gameObjectType = m_project->GetGameObjectType(m_previewGameObjectType))
 	{
-		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
@@ -1482,7 +1482,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 		const float tileWidth = 8.0f;
 		const float tileHeight = 8.0f;
 
-		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
 		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
 
@@ -1512,7 +1512,7 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 	const float tileWidth = 8.0f;
 	const float tileHeight = 8.0f;
 
-	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
@@ -1675,7 +1675,7 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 			boxMtx.SetTranslation(boxPos);
 			boxMtx.SetScale(boxScale);
 
-			ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+			ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 			ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
 

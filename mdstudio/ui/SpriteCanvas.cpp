@@ -46,7 +46,7 @@ void SpriteCanvas::SetSpriteSheetDimentionsPixels(const ion::Vector2i& spriteShe
 	m_spriteSheetDimentions = spriteSheetDimentions;
 
 	CreateGrid(m_spriteSheetDimentions.x, m_spriteSheetDimentions.y, m_spriteSheetDimentionsCells.x, m_spriteSheetDimentionsCells.y);
-	
+
 	Refresh();
 }
 
@@ -196,7 +196,7 @@ void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Mat
 		ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 
 		ion::Matrix4 boxMtx;
-		ion::Vector3 boxScale((m_spriteSheetDimentions.x / 8.0f) * m_cameraZoom, (m_spriteSheetDimentions.y / 8.0f) * m_cameraZoom, 0.0f);
+		ion::Vector3 boxScale(m_spriteSheetDimentions.x * m_cameraZoom, m_spriteSheetDimentions.y * m_cameraZoom, 0.0f);
 		ion::Vector3 boxPos(0.0f, 0.0f, z);
 
 		boxMtx.SetTranslation(boxPos);
@@ -223,9 +223,9 @@ void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Mat
 			for(int i = firstFrame; i < lastFrame; i++)
 			{
 				int frameX = m_spriteSheetDimentionsCells.x - 1 - (i % m_spriteSheetDimentionsCells.x);
-				int frameY = i / m_spriteSheetDimentionsCells.y;
+				int frameY = i / m_spriteSheetDimentionsCells.x;
 
-				boxScale = ion::Vector3(frameWidth / 8.0f, frameHeight / 8.0f, 0.0f);
+				boxScale = ion::Vector3(frameWidth, frameHeight, 0.0f);
 				boxPos = ion::Vector3((sheetWidth / 2.0f) - (frameWidth / 2.0f) - (frameX * frameWidth), (sheetHeight / 2.0f) - (frameHeight / 2.0f) - (frameY * frameHeight), z);
 
 				boxMtx.SetTranslation(boxPos);

@@ -84,7 +84,8 @@ RenderResources::RenderResources()
 	m_colours[eColourGrid] = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
 
 	//Create primitives
-	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
+	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(0.5f, 0.5f));
+	m_primitives[ePrimitiveTileQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
 	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(4.0f, 4.0f));
 }
 
