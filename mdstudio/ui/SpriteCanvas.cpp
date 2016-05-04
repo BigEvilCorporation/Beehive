@@ -14,6 +14,7 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	m_cameraZoom = 1.0f;
 	m_gridColour = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
 	m_drawPreview = false;
+	m_drawPreviewMaxFrames = 0;
 	m_drawGrid = false;
 	m_drawSprite = InvalidSpriteId;
 	m_drawSpriteFrame = 0;
@@ -64,9 +65,10 @@ void SpriteCanvas::SetGridColour(const ion::Colour& colour)
 	Refresh();
 }
 
-void SpriteCanvas::SetDrawPreview(bool drawPreview)
+void SpriteCanvas::SetDrawPreview(bool drawPreview, u32 maxFrames)
 {
 	m_drawPreview = drawPreview;
+	m_drawPreviewMaxFrames = maxFrames;
 	Refresh();
 }
 
@@ -200,10 +202,40 @@ void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Mat
 		boxMtx.SetTranslation(boxPos);
 		boxMtx.SetScale(boxScale);
 
-		//gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
 		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
+
+		if(m_drawPreviewMaxFrames > 0)
+		{
+			//Grey out invalid frames
+			material = m_renderResources->GetMaterial(RenderResources::eMaterialFlatColour);
+			material->SetDiffuseColour(ion::Colour(0.3f, 0.3f, 0.3f));
+
+			int lastFrame = m_spriteSheetDimentionsCells.x * m_spriteSheetDimentionsCells.y;
+			int firstFrame = m_drawPreviewMaxFrames;
+
+			float frameWidth = (m_spriteSheetDimentions.x / m_spriteSheetDimentionsCells.x) * m_cameraZoom;
+			float frameHeight = (m_spriteSheetDimentions.y / m_spriteSheetDimentionsCells.y) * m_cameraZoom;
+			float sheetWidth = m_spriteSheetDimentions.x * m_cameraZoom;
+			float sheetHeight = m_spriteSheetDimentions.y * m_cameraZoom;
+
+			for(int i = firstFrame; i < lastFrame; i++)
+			{
+				int frameX = m_spriteSheetDimentionsCells.x - 1 - (i % m_spriteSheetDimentionsCells.x);
+				int frameY = i / m_spriteSheetDimentionsCells.y;
+
+				boxScale = ion::Vector3(frameWidth / 8.0f, frameHeight / 8.0f, 0.0f);
+				boxPos = ion::Vector3((sheetWidth / 2.0f) - (frameWidth / 2.0f) - (frameX * frameWidth), (sheetHeight / 2.0f) - (frameHeight / 2.0f) - (frameY * frameHeight), z);
+
+				boxMtx.SetTranslation(boxPos);
+				boxMtx.SetScale(boxScale);
+
+				material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+				renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+				material->Unbind();
+			}
+		}
 	}
 }
 

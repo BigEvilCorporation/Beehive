@@ -754,6 +754,11 @@ void RenderResources::CreateSpriteResources(SpriteId spriteId, const Sprite& spr
 	it.first->second.Load(sprite, m_pixelShaders[eShaderFlatTextured], m_vertexShaders[eShaderFlatTextured]);
 }
 
+void RenderResources::DeleteSpriteRenderResources(SpriteId spriteId)
+{
+	m_spriteRenderResources.erase(spriteId);
+}
+
 RenderResources::SpriteRenderResources* RenderResources::GetSpriteResources(SpriteId spriteId)
 {
 	SpriteRenderResources* spriteResources = NULL;

@@ -30,6 +30,7 @@ public:
 	int GetNumFrames() const;
 
 	SpriteAnimId AddAnimation();
+	void DeleteAnimation(SpriteAnimId animId);
 	SpriteAnimation* GetAnimation(SpriteAnimId animId);
 	int GetNumAnimations() const;
 	TSpriteAnimMap::const_iterator AnimationsBegin() const;

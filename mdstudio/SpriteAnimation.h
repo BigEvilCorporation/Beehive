@@ -12,6 +12,7 @@
 #include <ion/renderer/Animation.h>
 
 typedef ion::UUID64 SpriteAnimId;
+static const SpriteAnimId InvalidSpriteAnimId = 0;
 
 //Keyframes
 typedef ion::render::Keyframe<int> AnimKeyframeSpriteFrame;
@@ -54,6 +55,8 @@ public:
 
 	void SetName(const std::string& name);
 	const std::string& GetName() const;
+
+	void Serialise(ion::io::Archive& archive);
 
 	AnimTrackSpriteFrame m_trackSpriteFrame;
 	AnimTrackPosition m_trackPosition;
