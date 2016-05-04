@@ -59,6 +59,7 @@ public:
 	enum PrimitiveType
 	{
 		ePrimitiveUnitQuad,
+		ePrimitiveTileQuad,
 		ePrimitiveUnitLineQuad,
 		ePrimitiveMax
 	};
