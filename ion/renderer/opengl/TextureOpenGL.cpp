@@ -8,6 +8,7 @@
 #pragma once
 
 #include "core/debug/Debug.h"
+#include "core/memory/Memory.h"
 #include "renderer/OpenGL/TextureOpenGL.h"
 #include "renderer/OpenGL/RendererOpenGL.h"
 
@@ -148,6 +149,27 @@ namespace ion
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
+		void TextureOpenGL::GetPixels(const ion::Vector2i& position, const ion::Vector2i& size, Format format, BitsPerPixel bitsPerPixel, u8* data) const
+		{
+			const u32 bytesPerPixel = (u32)bitsPerPixel / 8;
+			const u32 bufferSize = size.x * size.y * bytesPerPixel;
+			u8* buffer = new u8[bufferSize];
+			u8* dest = data;
+			u32 lineSize = size.x * bytesPerPixel;
+
+			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
+			glGetTexImage(GL_TEXTURE_2D, 0, GetOpenGLMode(format, bitsPerPixel), GL_UNSIGNED_BYTE, buffer);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			for(int y = position.y; y < size.y; y++)
+			{
+				u8* source = buffer + (size.x * y) + position.x;
+				
+				memory::MemCopy(dest, source, lineSize);
+				dest += lineSize;
+			}
+		}
+
 		void TextureOpenGL::SetMinifyFilter(Filter filter)
 		{
 			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
@@ -225,14 +247,6 @@ namespace ion
 		{
 			switch(bitsPerPixel)
 			{
-			case eBPP4:
-				switch(format)
-				{
-				case eRGB: return GL_RGB4;
-				case eRGBA: return GL_RGBA4;
-				default: break;
-				}
-				break;
 			case eBPP8:
 				switch(format)
 				{

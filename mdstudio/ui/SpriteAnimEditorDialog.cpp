@@ -9,6 +9,12 @@
 #include "Dialogs.h"
 
 #include <wx/msgdlg.h>
+#include <wx/imaglist.h>
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#include <GL/wglext.h>
 
 SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
 	: SpriteAnimEditorDialogBase(parent)
@@ -329,6 +335,43 @@ void SpriteAnimEditorDialog::PopulateAnimList(const SpriteSheet& spriteSheet)
 	}
 }
 
+void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetId, const SpriteAnimation& anim)
+{
+	m_listSpriteFrames->ClearAll();
+
+	RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
+	u32 numKeyframes = anim.m_trackSpriteFrame.GetNumKeyframes();
+
+	if(numKeyframes > 0 && spriteResources->m_frames.size() > 0)
+	{
+		ion::render::Texture* texture0 = spriteResources->m_frames[0].texture;
+		wxImageList* imageList = new wxImageList(texture0->GetWidth(), texture0->GetHeight(), numKeyframes);
+
+		for(int i = 0; i < numKeyframes; i++)
+		{
+			m_listSpriteFrames->InsertColumn(i, "");
+			m_listSpriteFrames->SetColumnWidth(i, texture0->GetWidth());
+
+			int frame = anim.m_trackSpriteFrame.GetKeyframe(i).GetValue();
+
+			ion::render::Texture* texture = spriteResources->m_frames[frame].texture;
+
+			wxImage* image = new wxImage(texture->GetWidth(), texture->GetHeight());
+			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::eRGB, ion::render::Texture::eBPP24, image->GetData());
+
+			wxBitmap bitmap(*image);
+
+			imageList->Add(bitmap);
+
+			m_listSpriteFrames->SetImageList(imageList, wxIMAGE_LIST_SMALL);
+			wxListItem item;
+			item.SetId(wxNewId());
+			item.SetImage(i);
+			m_listSpriteFrames->SetColumn(i, item);
+		}
+	}
+}
+
 void SpriteAnimEditorDialog::SelectActor(int index)
 {
 	if(m_selectedAnim)
@@ -395,6 +438,8 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 				m_selectedAnimId = m_animCache[index];
 				m_selectedAnim = m_selectedSpriteSheet->GetAnimation(m_selectedAnimId);
 				ion::debug::Assert(m_selectedAnim, "SpriteAnimEditorDialog::OnAnimSelected() - Invalid animation ID");
+
+				PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
 			}
 		}
 	}

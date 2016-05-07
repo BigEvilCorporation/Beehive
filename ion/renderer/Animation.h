@@ -107,6 +107,12 @@ namespace ion
 			//Add new keyframe
 			void AddKeyframe(const Keyframe<T>& keyframe);
 
+			//Get keyframe
+			const Keyframe<T>& GetKeyframe(int index) const;
+
+			//Get num keyframes
+			int GetNumKeyframes() const;
+
 			//Get blended value at time
 			virtual const T GetValue(float time) const = 0;
 
@@ -189,6 +195,17 @@ namespace ion
 		template <class T> void AnimationTrack<T>::AddKeyframe(const Keyframe<T>& keyframe)
 		{
 			mKeyframes.push_back(keyframe);
+		}
+
+		template <class T> const Keyframe<T>& AnimationTrack<T>::GetKeyframe(int index) const
+		{
+			debug::Assert(index < GetNumKeyframes(), "AnimationTrack::GetKeyframe() - Index out of range");
+			return mKeyframes[index];
+		}
+
+		template <class T> int AnimationTrack<T>::GetNumKeyframes() const
+		{
+			return mKeyframes.size();
 		}
 
 		template <class T> float AnimationTrack<T>::GetLength() const

@@ -43,7 +43,8 @@ private:
 	void PopulateActorList();
 	void PopulateSpriteSheetList(const Actor& actor);
 	void PopulateAnimList(const SpriteSheet& spriteSheet);
-
+	void PopulateKeyframes(const SpriteSheetId& spriteSheetId, const SpriteAnimation& anim);
+		 
 	void SelectActor(int index);
 	void SelectSpriteSheet(int index);
 	void SelectAnimation(int index);

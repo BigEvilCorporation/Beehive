@@ -32,7 +32,6 @@ namespace ion
 
 			enum BitsPerPixel
 			{
-				eBPP4 = 4,
 				eBPP8 = 8,
 				eBPP16 = 16,
 				eBPP24 = 24,
@@ -69,6 +68,7 @@ namespace ion
 			virtual void SetWrapping(Wrapping wrapping) = 0;
 
 			virtual void SetPixel(const ion::Vector2i& position, const Colour& colour) = 0;
+			virtual void GetPixels(const ion::Vector2i& position, const ion::Vector2i& size, Format format, BitsPerPixel bitsPerPixel, u8* data) const = 0;
 
 			//Serialise
 			static void RegisterSerialiseType(io::Archive& archive);

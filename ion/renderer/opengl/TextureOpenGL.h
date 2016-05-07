@@ -39,6 +39,7 @@ namespace ion
 			virtual void SetWrapping(Wrapping wrapping);
 
 			virtual void SetPixel(const ion::Vector2i& position, const Colour& colour);
+			virtual void GetPixels(const ion::Vector2i& position, const ion::Vector2i& size, Format format, BitsPerPixel bitsPerPixel, u8* data) const;
 
 		protected:
 			virtual bool Load();
