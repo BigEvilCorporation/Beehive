@@ -217,11 +217,9 @@ namespace ion
 			{
 				float timeA = keyframeA->GetTime();
 				float timeB = keyframeB->GetTime();
+				float lerpTime = maths::UnLerp(timeA, timeB, time);
 
-				if((timeB - timeA) >= 0.5f)
-					intValue = keyframeB->GetValue();
-				else
-					intValue = keyframeA->GetValue();
+				intValue = (int)maths::Round(maths::Lerp((float)keyframeA->GetValue(), (float)keyframeB->GetValue(), lerpTime));
 			}
 
 			return intValue;

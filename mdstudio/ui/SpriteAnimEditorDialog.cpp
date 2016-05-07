@@ -218,6 +218,7 @@ void SpriteAnimEditorDialog::OnSliderMove(wxScrollEvent& event)
 
 		m_selectedAnim->SetFrame(time);
 		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame);
+		m_listSpriteFrames->SetItemState(frame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 }
 
@@ -337,37 +338,59 @@ void SpriteAnimEditorDialog::PopulateAnimList(const SpriteSheet& spriteSheet)
 
 void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetId, const SpriteAnimation& anim)
 {
+	//Clear existing list
 	m_listSpriteFrames->ClearAll();
 
-	RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
-	u32 numKeyframes = anim.m_trackSpriteFrame.GetNumKeyframes();
+	//Get sprite resources
+	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
+
+	const u32 numKeyframes = anim.m_trackSpriteFrame.GetNumKeyframes();
 
 	if(numKeyframes > 0 && spriteResources->m_frames.size() > 0)
 	{
-		ion::render::Texture* texture0 = spriteResources->m_frames[0].texture;
+		//Create new image list based on size of first texture
+		const ion::render::Texture* texture0 = spriteResources->m_frames[0].texture;
 		wxImageList* imageList = new wxImageList(texture0->GetWidth(), texture0->GetHeight(), numKeyframes);
+
+		//Set image list
+		m_listSpriteFrames->SetImageList(imageList, wxIMAGE_LIST_SMALL);
+
+		const float iconAspect = (float)texture0->GetWidth() / (float)texture0->GetHeight();
+		const int iconHeight = 64;
+		const int iconWidth = 128; // iconHeight * iconAspect;
+		const int iconBorder = 2;
 
 		for(int i = 0; i < numKeyframes; i++)
 		{
+			//Insert new column
 			m_listSpriteFrames->InsertColumn(i, "");
-			m_listSpriteFrames->SetColumnWidth(i, texture0->GetWidth());
+			m_listSpriteFrames->SetColumnWidth(i, iconWidth + iconBorder);
 
-			int frame = anim.m_trackSpriteFrame.GetKeyframe(i).GetValue();
+			//Get keyframe
+			const int frame = anim.m_trackSpriteFrame.GetKeyframe(i).GetValue();
+			 
+			//Fetch texture, convert to wxImage
+			const ion::render::Texture* texture = spriteResources->m_frames[frame].texture;
+			wxImage image(texture->GetWidth(), texture->GetHeight());
+			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::eRGB, ion::render::Texture::eBPP24, image.GetData());
 
-			ion::render::Texture* texture = spriteResources->m_frames[frame].texture;
+			//Invert Y for OpenGL
+			image = image.Mirror(false);
 
-			wxImage* image = new wxImage(texture->GetWidth(), texture->GetHeight());
-			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::eRGB, ion::render::Texture::eBPP24, image->GetData());
+			//Scale
+			image.Rescale(iconWidth, iconHeight);
 
-			wxBitmap bitmap(*image);
+			//To bitmap
+			wxBitmap bitmap(image);
 
+			//Add to image list
 			imageList->Add(bitmap);
 
-			m_listSpriteFrames->SetImageList(imageList, wxIMAGE_LIST_SMALL);
+			//Create new item
 			wxListItem item;
-			item.SetId(wxNewId());
+			item.SetId(i);
 			item.SetImage(i);
-			m_listSpriteFrames->SetColumn(i, item);
+			m_listSpriteFrames->InsertItem(item);
 		}
 	}
 }
@@ -457,5 +480,6 @@ void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 		m_selectedAnim->Update(delta);
 		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame);
 		m_sliderTimeline->SetValue((int)ion::maths::Round(lerpTime * 100.0f));
+		m_listSpriteFrames->SetItemState(frame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 }
