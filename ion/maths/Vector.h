@@ -37,7 +37,7 @@ namespace ion
 		T Dot(const TVector2<T>& vector) const;
 
 		//Interpolation with another vector, with a given weight
-		TVector2<T> Lerp(const TVector2<T> &Vector, T Weight) const;
+		TVector2<T> Lerp(const TVector2<T> &Vector, float Weight) const;
 
 		//Serialisation
 		void Serialise(io::Archive& archive);
@@ -177,7 +177,7 @@ namespace ion
 		return (x * vector.x + y * vector.y);
 	}
 
-	template <typename T> TVector2<T> TVector2<T>::Lerp(const TVector2<T>& Vector, T Weight) const
+	template <typename T> TVector2<T> TVector2<T>::Lerp(const TVector2<T>& Vector, float Weight) const
 	{
 		TVector2<T> Result;
 

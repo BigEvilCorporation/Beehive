@@ -1036,11 +1036,15 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	fgSizer13->Add( fgSizer24, 1, wxEXPAND, 5 );
 	
 	wxFlexGridSizer* fgSizer12;
-	fgSizer12 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer12 = new wxFlexGridSizer( 3, 1, 0, 0 );
 	fgSizer12->AddGrowableCol( 0 );
 	fgSizer12->AddGrowableRow( 0 );
+	fgSizer12->AddGrowableRow( 1 );
 	fgSizer12->SetFlexibleDirection( wxBOTH );
 	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_listSpriteFrames = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON|wxLC_REPORT );
+	fgSizer12->Add( m_listSpriteFrames, 0, wxALL|wxEXPAND, 5 );
 	
 	m_sliderTimeline = new wxSlider( this, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
 	fgSizer12->Add( m_sliderTimeline, 0, wxALL|wxEXPAND, 5 );
@@ -1076,6 +1080,7 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	
 	this->SetSizer( bSizer10 );
 	this->Layout();
+	bSizer10->Fit( this );
 	
 	this->Centre( wxBOTH );
 	
