@@ -163,7 +163,7 @@ namespace ion
 
 			for(int y = position.y; y < size.y; y++)
 			{
-				u8* source = buffer + (size.x * y) + position.x;
+				u8* source = buffer + (((size.x * y) + position.x) * bytesPerPixel);
 				
 				memory::MemCopy(dest, source, lineSize);
 				dest += lineSize;
