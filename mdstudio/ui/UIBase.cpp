@@ -1035,19 +1035,43 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	
 	fgSizer13->Add( fgSizer24, 1, wxEXPAND, 5 );
 	
-	wxFlexGridSizer* fgSizer12;
-	fgSizer12 = new wxFlexGridSizer( 4, 1, 0, 0 );
-	fgSizer12->AddGrowableCol( 0 );
-	fgSizer12->AddGrowableRow( 0 );
-	fgSizer12->AddGrowableRow( 1 );
-	fgSizer12->SetFlexibleDirection( wxBOTH );
-	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	wxFlexGridSizer* m_sizerTimeline;
+	m_sizerTimeline = new wxFlexGridSizer( 3, 1, 0, 0 );
+	m_sizerTimeline->AddGrowableCol( 0 );
+	m_sizerTimeline->AddGrowableRow( 0 );
+	m_sizerTimeline->SetFlexibleDirection( wxBOTH );
+	m_sizerTimeline->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_listSpriteFrames = new wxListCtrl( this, wxID_LST_SPRITEFRAMES, wxDefaultPosition, wxDefaultSize, wxLC_SINGLE_SEL|wxLC_SMALL_ICON );
-	fgSizer12->Add( m_listSpriteFrames, 0, wxALL|wxEXPAND, 5 );
+	m_gridTimeline = new wxGrid( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL );
+	
+	// Grid
+	m_gridTimeline->CreateGrid( 1, 1 );
+	m_gridTimeline->EnableEditing( false );
+	m_gridTimeline->EnableGridLines( true );
+	m_gridTimeline->EnableDragGridSize( false );
+	m_gridTimeline->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridTimeline->SetColSize( 0, 128 );
+	m_gridTimeline->EnableDragColMove( false );
+	m_gridTimeline->EnableDragColSize( false );
+	m_gridTimeline->SetColLabelSize( 0 );
+	m_gridTimeline->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridTimeline->SetRowSize( 0, 64 );
+	m_gridTimeline->EnableDragRowSize( false );
+	m_gridTimeline->SetRowLabelSize( 0 );
+	m_gridTimeline->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridTimeline->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	m_sizerTimeline->Add( m_gridTimeline, 0, wxALL|wxEXPAND, 5 );
 	
 	m_sliderTimeline = new wxSlider( this, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	fgSizer12->Add( m_sliderTimeline, 0, wxALL|wxEXPAND, 5 );
+	m_sizerTimeline->Add( m_sliderTimeline, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer28;
 	bSizer28 = new wxBoxSizer( wxHORIZONTAL );
@@ -1066,10 +1090,10 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	bSizer28->Add( m_spinCtrlSpeed, 0, wxALL, 5 );
 	
 	
-	fgSizer12->Add( bSizer28, 1, wxEXPAND, 5 );
+	m_sizerTimeline->Add( bSizer28, 1, wxEXPAND, 5 );
 	
 	
-	fgSizer13->Add( fgSizer12, 1, wxEXPAND, 5 );
+	fgSizer13->Add( m_sizerTimeline, 1, wxEXPAND, 5 );
 	
 	
 	fgSizer14->Add( fgSizer13, 1, wxEXPAND, 5 );
@@ -1080,7 +1104,6 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	
 	this->SetSizer( bSizer10 );
 	this->Layout();
-	bSizer10->Fit( this );
 	
 	this->Centre( wxBOTH );
 	

@@ -41,9 +41,10 @@ class SpriteCanvas;
 #include <wx/filepicker.h>
 #include <wx/radiobut.h>
 #include <wx/clrpicker.h>
-#include <wx/listctrl.h>
+#include <wx/grid.h>
 #include <wx/slider.h>
 #include <wx/toolbar.h>
+#include <wx/listctrl.h>
 #include <wx/choice.h>
 #include <wx/statline.h>
 
@@ -99,7 +100,6 @@ class SpriteCanvas;
 #define wxID_TOOL_SELECTGAMEOBJ 1047
 #define wxID_TOOL_PLACEGAMEOBJ 1048
 #define wxID_TOOL_REMOVEGAMEOBJ 1049
-#define wxID_LST_SPRITEFRAMES 1050
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -468,7 +468,7 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
 		SpriteCanvas* m_canvas;
-		wxListCtrl* m_listSpriteFrames;
+		wxGrid* m_gridTimeline;
 		wxSlider* m_sliderTimeline;
 		wxBitmapButton* m_btnPlay;
 		wxBitmapButton* m_btnStop;
@@ -494,7 +494,7 @@ class SpriteAnimEditorDialogBase : public wxDialog
 	
 	public:
 		
-		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
 		~SpriteAnimEditorDialogBase();
 	
 };
