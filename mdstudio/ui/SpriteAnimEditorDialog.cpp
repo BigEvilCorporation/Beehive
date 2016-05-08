@@ -29,12 +29,18 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& projec
 	m_selectedSpriteSheet = NULL;
 	m_selectedAnim = NULL;
 
+	m_draggingTimelineItem = -1;
+	m_dragImage = NULL;
+
 	m_canvas->SetupRendering(&renderer, &glContext, &renderResources);
 
 	PopulateActorList();
 
 	//Subscribe to events
 	Bind(wxEVT_TIMER, &SpriteAnimEditorDialog::EventHandlerTimer, this, m_timer.GetId());
+	m_listSpriteFrames->Bind(wxEVT_COMMAND_LIST_BEGIN_DRAG, &SpriteAnimEditorDialog::EventHandlerDragTimelineBegin, this, m_listSpriteFrames->GetId());
+	m_listSpriteFrames->Bind(wxEVT_MOTION, &SpriteAnimEditorDialog::EventHandlerDragTimelineMove, this, m_listSpriteFrames->GetId());
+	m_listSpriteFrames->Bind(wxEVT_LEFT_UP, &SpriteAnimEditorDialog::EventHandlerDragTimelineEnd, this, m_listSpriteFrames->GetId());
 }
 
 void SpriteAnimEditorDialog::OnActorSelected(wxCommandEvent& event)
@@ -178,12 +184,12 @@ void SpriteAnimEditorDialog::OnBtnAnimNew(wxCommandEvent& event)
 
 			if(dialog.m_chkAutoGenerate->GetValue())
 			{
-				for(int i = 0; i < m_selectedSpriteSheet->GetNumFrames(); i++)
+				for(u32 i = 0; i < m_selectedSpriteSheet->GetNumFrames(); i++)
 				{
 					anim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, i));
 				}
 
-				anim->SetLength((float)m_selectedSpriteSheet->GetNumFrames());
+				anim->SetLength((float)m_selectedSpriteSheet->GetNumFrames() );
 			}
 
 			//Populate list
@@ -350,15 +356,16 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 	{
 		//Create new image list based on size of first texture
 		const ion::render::Texture* texture0 = spriteResources->m_frames[0].texture;
-		wxImageList* imageList = new wxImageList(texture0->GetWidth(), texture0->GetHeight(), numKeyframes);
-
-		//Set image list
-		m_listSpriteFrames->SetImageList(imageList, wxIMAGE_LIST_SMALL);
 
 		const float iconAspect = (float)texture0->GetWidth() / (float)texture0->GetHeight();
 		const int iconHeight = 64;
-		const int iconWidth = 128; // iconHeight * iconAspect;
+		const int iconWidth = iconHeight * iconAspect;
 		const int iconBorder = 2;
+
+		wxImageList* imageList = new wxImageList(iconWidth, iconHeight, numKeyframes);
+
+		//Set image list
+		m_listSpriteFrames->SetImageList(imageList, wxIMAGE_LIST_SMALL);
 
 		for(int i = 0; i < numKeyframes; i++)
 		{
@@ -405,6 +412,10 @@ void SpriteAnimEditorDialog::SelectActor(int index)
 	m_selectedActorId = InvalidActorId;
 	m_selectedActor = NULL;
 
+	m_listSpriteSheets->Clear();
+	m_listAnimations->Clear();
+	m_listSpriteFrames->ClearAll();
+
 	if(m_actorCache.size() > 0)
 	{
 		if(index >= 0 && index < m_actorCache.size())
@@ -426,6 +437,9 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 
 	m_selectedSpriteSheetId = InvalidSpriteSheetId;
 	m_selectedSpriteSheet = NULL;
+
+	m_listAnimations->Clear();
+	m_listSpriteFrames->ClearAll();
 
 	if(m_selectedActor && m_spriteSheetCache.size() > 0)
 	{
@@ -451,6 +465,8 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 
 	m_selectedAnimId = InvalidSpriteAnimId;
 	m_selectedAnim = NULL;
+
+	m_listSpriteFrames->ClearAll();
 
 	if(m_selectedSpriteSheet)
 	{
@@ -481,5 +497,126 @@ void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame);
 		m_sliderTimeline->SetValue((int)ion::maths::Round(lerpTime * 100.0f));
 		m_listSpriteFrames->SetItemState(frame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	}
+}
+
+void SpriteAnimEditorDialog::EventHandlerDragTimelineBegin(wxListEvent& event)
+{
+	m_draggingTimelineItem = event.GetIndex();
+
+	if(m_selectedAnim && m_draggingTimelineItem >= 0)
+	{
+		wxImageList* imageList = m_listSpriteFrames->GetImageList(wxIMAGE_LIST_SMALL);
+		if(imageList)
+		{
+			m_dragImage = new wxDragImage(imageList->GetBitmap(m_draggingTimelineItem));
+			m_dragImage->BeginDrag(wxPoint(0,0), m_listSpriteFrames, m_listSpriteFrames);
+			m_dragImage->Show();
+
+			m_dragDropKeyframeList.clear();
+
+			//Backup all keyframes and list entry rects
+			for(int i = 0; i < m_listSpriteFrames->GetItemCount(); i++)
+			{
+				wxRect rect;
+				m_listSpriteFrames->GetItemRect(i, rect);
+
+				u32 frame = m_selectedAnim->m_trackSpriteFrame.GetKeyframe(i).GetValue();
+
+				m_dragDropKeyframeList.push_back(std::make_pair(frame, rect));
+			}
+
+			m_dragDropTarget = -1;
+			m_dragDropTargetPrev = -1;
+		}
+	}
+}
+
+void SpriteAnimEditorDialog::EventHandlerDragTimelineMove(wxMouseEvent& event)
+{
+	if(m_dragImage)
+	{
+		wxPoint position = event.GetPosition();
+
+		m_dragImage->Move(position);
+
+		if(m_dragDropKeyframeList.size() > 0)
+		{
+			m_dragDropTarget = -1;
+
+			if(position.x < m_dragDropKeyframeList.front().second.GetLeft())
+			{
+				//Drag target is left of first item
+				m_dragDropTarget = 0;
+			}
+			else if(position.x > m_dragDropKeyframeList.back().second.GetRight())
+			{
+				//Drag target is right of last item
+				m_dragDropTarget = m_dragDropKeyframeList.size();
+			}
+			else
+			{
+				for(int i = 0; i < m_dragDropKeyframeList.size() - 1 && m_dragDropTarget == -1; i++)
+				{
+					int posMin = m_dragDropKeyframeList[i].second.GetRight();
+					int posMax = m_dragDropKeyframeList[i + 1].second.GetLeft();
+
+					if(position.x > posMin && position.x < posMax)
+					{
+						//Drop target is between item i and item i+1
+						m_dragDropTarget = i + 1;
+					}
+				}
+			}
+
+			if(m_dragDropTarget != m_dragDropTargetPrev)
+			{
+				//Drop target changed
+				m_dragDropTargetPrev = m_dragDropTarget;
+			}
+		}
+	}
+}
+
+void SpriteAnimEditorDialog::EventHandlerDragTimelineEnd(wxMouseEvent& event)
+{
+	if(m_dragImage)
+	{
+		m_dragImage->Hide();
+		m_dragImage->EndDrag();
+		delete m_dragImage;
+		m_dragImage = NULL;
+
+		if(m_dragDropTarget != -1 && m_dragDropTarget != m_draggingTimelineItem)
+		{
+			//Valid drop target, insert into list
+			m_dragDropKeyframeList.insert(m_dragDropKeyframeList.begin() + m_dragDropTarget, m_dragDropKeyframeList[m_draggingTimelineItem]);
+
+			//If original item was after drop target in list, its index will have incremented
+			if(m_draggingTimelineItem >= m_dragDropTarget)
+			{
+				m_draggingTimelineItem++;
+			}
+
+			//Delete original
+			m_dragDropKeyframeList.erase(m_dragDropKeyframeList.begin() + m_draggingTimelineItem);
+
+			//Re-populate animation
+			m_selectedAnim->m_trackSpriteFrame.Clear();
+
+			for(int i = 0; i < m_dragDropKeyframeList.size(); i++)
+			{
+				m_selectedAnim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, m_dragDropKeyframeList[i].first));
+			}
+
+			//Set new anim length
+			m_selectedAnim->SetLength((float)m_dragDropKeyframeList.size());
+
+			//Re-populate keyframe timeline
+			PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
+		}
+
+		m_draggingTimelineItem = -1;
+		m_dragDropKeyframeList.clear();
 	}
 }

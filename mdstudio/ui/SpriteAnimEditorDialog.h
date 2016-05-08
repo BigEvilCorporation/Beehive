@@ -15,6 +15,7 @@
 
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
+#include <wx/dragimag.h>
 
 class SpriteAnimEditorDialog : public SpriteAnimEditorDialogBase
 {
@@ -22,6 +23,9 @@ public:
 	SpriteAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 
 	void EventHandlerTimer(wxTimerEvent& event);
+	void EventHandlerDragTimelineBegin(wxListEvent& event);
+	void EventHandlerDragTimelineMove(wxMouseEvent& event);
+	void EventHandlerDragTimelineEnd(wxMouseEvent& event);
 
 protected:
 	virtual void OnActorSelected(wxCommandEvent& event);
@@ -66,4 +70,11 @@ private:
 	std::vector<SpriteAnimId> m_animCache;
 
 	wxTimer m_timer;
+
+	//Drag and drop
+	int m_draggingTimelineItem;
+	int m_dragDropTarget;
+	int m_dragDropTargetPrev;
+	wxDragImage* m_dragImage;
+	std::vector<std::pair<u32, wxRect>> m_dragDropKeyframeList;
 };

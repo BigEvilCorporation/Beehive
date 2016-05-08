@@ -113,6 +113,9 @@ namespace ion
 			//Get num keyframes
 			int GetNumKeyframes() const;
 
+			//Clear all keyframes
+			void Clear();
+
 			//Get blended value at time
 			virtual const T GetValue(float time) const = 0;
 
@@ -208,13 +211,18 @@ namespace ion
 			return mKeyframes.size();
 		}
 
+		template <class T> void AnimationTrack<T>::Clear()
+		{
+			mKeyframes.clear();
+		}
+
 		template <class T> float AnimationTrack<T>::GetLength() const
 		{
 			float lastTime = 0.0f;
 
 			if(mKeyframes.size() > 0)
 			{
-				lastTime = mKeyframes[mKeyframes.size() - 1].GetTime();
+				lastTime = mKeyframes.back().GetTime();
 			}
 
 			return lastTime;
@@ -230,18 +238,25 @@ namespace ion
 
 				if(mKeyframes.size() > 1)
 				{
-					idealKeyframe = NULL;
-
-					const Keyframe<T>* prevKeyframe = &mKeyframes[0];
-
-					for(unsigned int i = 1; i < mKeyframes.size() && !idealKeyframe; i++)
+					if(time >= GetLength())
 					{
-						if(time >= prevKeyframe->GetTime() && time <= mKeyframes[i].GetTime())
-						{
-							idealKeyframe = prevKeyframe;
-						}
+						idealKeyframe = &mKeyframes.back();
+					}
+					else
+					{
+						idealKeyframe = NULL;
 
-						prevKeyframe = &mKeyframes[i];
+						const Keyframe<T>* prevKeyframe = &mKeyframes[0];
+
+						for(unsigned int i = 1; i < mKeyframes.size() && !idealKeyframe; i++)
+						{
+							if(time >= prevKeyframe->GetTime() && time <= mKeyframes[i].GetTime())
+							{
+								idealKeyframe = prevKeyframe;
+							}
+
+							prevKeyframe = &mKeyframes[i];
+						}
 					}
 				}
 			}
@@ -259,17 +274,24 @@ namespace ion
 
 				if(mKeyframes.size() > 1)
 				{
-					idealKeyframe = NULL;
-					const Keyframe<T>* prevKeyframe = &mKeyframes[0];
-
-					for(unsigned int i = 1; i < mKeyframes.size() && !idealKeyframe; i++)
+					if(time >= GetLength())
 					{
-						if(time >= prevKeyframe->GetTime() && time <= mKeyframes[i].GetTime())
-						{
-							idealKeyframe = &mKeyframes[i];
-						}
+						idealKeyframe = &mKeyframes.back();
+					}
+					else
+					{
+						idealKeyframe = NULL;
+						const Keyframe<T>* prevKeyframe = &mKeyframes[0];
 
-						prevKeyframe = &mKeyframes[i];
+						for(unsigned int i = 1; i < mKeyframes.size() && !idealKeyframe; i++)
+						{
+							if(time >= prevKeyframe->GetTime() && time <= mKeyframes[i].GetTime())
+							{
+								idealKeyframe = &mKeyframes[i];
+							}
+
+							prevKeyframe = &mKeyframes[i];
+						}
 					}
 				}
 			}

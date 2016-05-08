@@ -15,11 +15,25 @@ typedef ion::UUID64 SpriteAnimId;
 static const SpriteAnimId InvalidSpriteAnimId = 0;
 
 //Keyframes
-typedef ion::render::Keyframe<int> AnimKeyframeSpriteFrame;
+typedef ion::render::Keyframe<u32> AnimKeyframeSpriteFrame;
 typedef ion::render::Keyframe<ion::Vector2i> AnimKeyframePosition;
 
 //Tracks
-typedef ion::render::AnimationTrackInt AnimTrackSpriteFrame;
+class AnimTrackSpriteFrame : public ion::render::AnimationTrack<u32>
+{
+public:
+	const u32 AnimTrackSpriteFrame::GetValue(float time) const
+	{
+		u32 intValue = 0;
+
+		if(const ion::render::Keyframe<u32>* keyframeA = GetPrevKeyframe(time))
+		{
+			intValue = keyframeA->GetValue();
+		}
+
+		return intValue;
+	}
+};
 
 class AnimTrackPosition : public ion::render::AnimationTrack<ion::Vector2i>
 {
