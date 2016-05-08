@@ -99,6 +99,7 @@ class SpriteCanvas;
 #define wxID_TOOL_SELECTGAMEOBJ 1047
 #define wxID_TOOL_PLACEGAMEOBJ 1048
 #define wxID_TOOL_REMOVEGAMEOBJ 1049
+#define wxID_LST_SPRITEFRAMES 1050
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
