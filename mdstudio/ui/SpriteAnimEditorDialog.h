@@ -16,14 +16,33 @@
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
 #include <wx/dragimag.h>
+#include <wx/weakref.h>
+
+class GridCellBitmapRenderer : public wxGridCellStringRenderer
+{
+public:
+	GridCellBitmapRenderer(wxImageList* imageList);
+	virtual ~GridCellBitmapRenderer();
+	void SetImageList(wxImageList* imageList);
+	wxImageList* GetImageList() const;
+	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
+
+private:
+	wxImageList* m_imageList;
+};
 
 class SpriteAnimEditorDialog : public SpriteAnimEditorDialogBase
 {
 public:
+	static const int s_iconHeight = 64;
+	static const int s_iconBorderX = 16;
+	static const int s_iconBorderY = 2;
+
 	SpriteAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
+	virtual ~SpriteAnimEditorDialog();
 
 	void EventHandlerTimer(wxTimerEvent& event);
-	void EventHandlerDragTimelineBegin(wxListEvent& event);
+	void EventHandlerDragTimelineBegin(wxGridEvent& event);
 	void EventHandlerDragTimelineMove(wxMouseEvent& event);
 	void EventHandlerDragTimelineEnd(wxMouseEvent& event);
 
@@ -71,10 +90,16 @@ private:
 
 	wxTimer m_timer;
 
+	//Timeline
+	wxSharedPtr<wxImageList> m_timelineImageList;
+
 	//Drag and drop
 	int m_draggingTimelineItem;
 	int m_dragDropTarget;
 	int m_dragDropTargetPrev;
 	wxDragImage* m_dragImage;
 	std::vector<std::pair<u32, wxRect>> m_dragDropKeyframeList;
+
+	//System scrollbar height
+	int m_scrollbarHeight;
 };

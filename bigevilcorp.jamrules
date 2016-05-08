@@ -313,7 +313,7 @@ rule ApplyWxSDK TARGET
 		wxbase30ud.lib
 		wxbase30ud_net.lib
 		wxbase30ud_xml.lib
-		wxmsw30u_adv.lib
+		wxmsw30ud_adv.lib
 		wxmsw30ud_aui.lib
 		wxmsw30ud_core.lib
 		wxmsw30ud_gl.lib
