@@ -38,13 +38,23 @@ public:
 	static const int s_iconBorderX = 16;
 	static const int s_iconBorderY = 2;
 
+	enum ContextMenu
+	{
+		eMenuDeleteKeyframe = 1
+	};
+
 	SpriteAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual ~SpriteAnimEditorDialog();
 
 	void EventHandlerTimer(wxTimerEvent& event);
+	void EventHandlerDragFrameListBegin(wxGridEvent& event);
+	void EventHandlerDragFrameListMove(wxMouseEvent& event);
+	void EventHandlerDragFrameListEnd(wxMouseEvent& event);
 	void EventHandlerDragTimelineBegin(wxGridEvent& event);
 	void EventHandlerDragTimelineMove(wxMouseEvent& event);
 	void EventHandlerDragTimelineEnd(wxMouseEvent& event);
+	void EventHandlerTimelineRightClick(wxGridEvent& event);
+	void EventHandlerContextMenuClick(wxCommandEvent& event);
 
 protected:
 	virtual void OnActorSelected(wxCommandEvent& event);
@@ -65,6 +75,7 @@ protected:
 private:
 	void PopulateActorList();
 	void PopulateSpriteSheetList(const Actor& actor);
+	void PopulateSpriteFrames(const SpriteSheetId& spriteSheetId);
 	void PopulateAnimList(const SpriteSheet& spriteSheet);
 	void PopulateKeyframes(const SpriteSheetId& spriteSheetId, const SpriteAnimation& anim);
 		 
@@ -90,15 +101,22 @@ private:
 
 	wxTimer m_timer;
 
+	//Sprite frame list
+	wxSharedPtr<wxImageList> m_spriteFrameImageList;
+
 	//Timeline
 	wxSharedPtr<wxImageList> m_timelineImageList;
 
 	//Drag and drop
+	int m_draggingSpriteFrameItem;
 	int m_draggingTimelineItem;
 	int m_dragDropTarget;
 	int m_dragDropTargetPrev;
 	wxDragImage* m_dragImage;
 	std::vector<std::pair<u32, wxRect>> m_dragDropKeyframeList;
+
+	//Right-click menu
+	int m_contextMenuKeyframeIndex;
 
 	//System scrollbar height
 	int m_scrollbarHeight;
