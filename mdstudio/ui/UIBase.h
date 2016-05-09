@@ -468,6 +468,9 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
 		SpriteCanvas* m_canvas;
+		wxStaticText* m_staticText33;
+		wxGrid* m_gridSpriteFrames;
+		wxStaticText* m_staticText32;
 		wxGrid* m_gridTimeline;
 		wxSlider* m_sliderTimeline;
 		wxBitmapButton* m_btnPlay;

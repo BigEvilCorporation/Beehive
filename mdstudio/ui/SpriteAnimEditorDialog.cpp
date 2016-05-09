@@ -11,6 +11,7 @@
 #include <wx/msgdlg.h>
 #include <wx/imaglist.h>
 #include <wx/dc.h>
+#include <wx/menu.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -30,6 +31,7 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& projec
 	m_selectedSpriteSheet = NULL;
 	m_selectedAnim = NULL;
 
+	m_draggingSpriteFrameItem = -1;
 	m_draggingTimelineItem = -1;
 	m_dragImage = NULL;
 
@@ -39,16 +41,28 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& projec
 
 	//Subscribe to events
 	Bind(wxEVT_TIMER, &SpriteAnimEditorDialog::EventHandlerTimer, this, m_timer.GetId());
+	m_gridSpriteFrames->Bind(wxEVT_GRID_CELL_BEGIN_DRAG, &SpriteAnimEditorDialog::EventHandlerDragFrameListBegin, this, m_gridSpriteFrames->GetId());
+	m_gridSpriteFrames->Bind(wxEVT_MOTION, &SpriteAnimEditorDialog::EventHandlerDragFrameListMove, this, m_gridSpriteFrames->GetId());
+	m_gridSpriteFrames->Bind(wxEVT_LEFT_UP, &SpriteAnimEditorDialog::EventHandlerDragFrameListEnd, this, m_gridSpriteFrames->GetId());
 	m_gridTimeline->Bind(wxEVT_GRID_CELL_BEGIN_DRAG, &SpriteAnimEditorDialog::EventHandlerDragTimelineBegin, this, m_gridTimeline->GetId());
 	m_gridTimeline->Bind(wxEVT_MOTION, &SpriteAnimEditorDialog::EventHandlerDragTimelineMove, this, m_gridTimeline->GetId());
 	m_gridTimeline->Bind(wxEVT_LEFT_UP, &SpriteAnimEditorDialog::EventHandlerDragTimelineEnd, this, m_gridTimeline->GetId());
+	m_gridTimeline->Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &SpriteAnimEditorDialog::EventHandlerTimelineRightClick, this, m_gridTimeline->GetId());
 
 	//Get system scrollbar height
 	m_scrollbarHeight = wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y, m_gridTimeline);
 
 	//Default timeline size
+	m_gridSpriteFrames->SetMinSize(wxSize(m_gridSpriteFrames->GetMinSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
+	m_gridSpriteFrames->SetMaxSize(wxSize(m_gridSpriteFrames->GetMaxSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
 	m_gridTimeline->SetMinSize(wxSize(m_gridTimeline->GetMinSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
 	m_gridTimeline->SetMaxSize(wxSize(m_gridTimeline->GetMaxSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
+
+	m_gridSpriteFrames->DisableDragColMove();
+	m_gridSpriteFrames->DisableDragColSize();
+	m_gridSpriteFrames->DisableDragGridSize();
+	m_gridSpriteFrames->DisableDragRowSize();
+	m_gridSpriteFrames->EnableDragCell(true);
 
 	m_gridTimeline->DisableDragColMove();
 	m_gridTimeline->DisableDragColSize();
@@ -363,10 +377,73 @@ void SpriteAnimEditorDialog::PopulateAnimList(const SpriteSheet& spriteSheet)
 	}
 }
 
+void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteSheetId)
+{
+	//Get sprite resources
+	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
+
+	int numFrames = spriteResources->m_frames.size();
+
+	if(numFrames > 0)
+	{
+		//Create new image list based on size of first texture
+		const ion::render::Texture* texture0 = spriteResources->m_frames[0].texture;
+
+		const float iconAspect = (float)texture0->GetWidth() / (float)texture0->GetHeight();
+		const int iconWidth = s_iconHeight * iconAspect;
+
+		m_spriteFrameImageList = new wxImageList(iconWidth, s_iconHeight, numFrames);
+
+		//Create timeline cells
+		if(m_gridSpriteFrames->GetNumberCols() < numFrames)
+		{
+			m_gridSpriteFrames->AppendCols(numFrames - m_gridSpriteFrames->GetNumberCols());
+		}
+
+		//Reset timeline row height
+		m_gridSpriteFrames->SetRowSize(0, s_iconHeight + (s_iconBorderY * 2));
+		m_gridSpriteFrames->DisableRowResize(0);
+
+		for(int i = 0; i < numFrames; i++)
+		{
+			//Setup column
+			m_gridSpriteFrames->SetColSize(i, iconWidth + (s_iconBorderX * 2));
+			m_gridSpriteFrames->DisableColResize(i);
+			m_gridSpriteFrames->SetCellRenderer(0, i, new GridCellBitmapRenderer(m_spriteFrameImageList.get()));
+
+			//Fetch texture, convert to wxImage
+			const ion::render::Texture* texture = spriteResources->m_frames[i].texture;
+			wxImage image(texture->GetWidth(), texture->GetHeight());
+			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::eRGB, ion::render::Texture::eBPP24, image.GetData());
+
+			//Invert Y for OpenGL
+			image = image.Mirror(false);
+
+			//Scale
+			image.Rescale(iconWidth, s_iconHeight);
+
+			//To bitmap
+			wxBitmap bitmap(image);
+
+			//Add to image list
+			m_spriteFrameImageList->Add(bitmap);
+		}
+
+		//Set sprite frame list height
+		m_gridSpriteFrames->SetMinSize(wxSize(m_gridSpriteFrames->GetMinSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
+		m_gridSpriteFrames->SetMaxSize(wxSize(m_gridSpriteFrames->GetMaxSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
+		m_gridSpriteFrames->GetContainingSizer()->Layout();
+		m_gridSpriteFrames->Refresh();
+	}
+}
+
 void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetId, const SpriteAnimation& anim)
 {
 	//Get sprite resources
 	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
+
+	//Clear existing
+	m_gridTimeline->DeleteCols(0, m_gridTimeline->GetNumberCols());
 
 	const u32 numKeyframes = anim.m_trackSpriteFrame.GetNumKeyframes();
 
@@ -381,10 +458,7 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 		m_timelineImageList = new wxImageList(iconWidth, s_iconHeight, numKeyframes);
 
 		//Create timeline cells
-		if(m_gridTimeline->GetNumberCols() < numKeyframes)
-		{
-			m_gridTimeline->AppendCols(numKeyframes - m_gridTimeline->GetNumberCols());
-		}
+		m_gridTimeline->AppendCols(numKeyframes);
 		
 		//Reset timeline row height
 		m_gridTimeline->SetRowSize(0, s_iconHeight + (s_iconBorderY * 2));
@@ -475,6 +549,7 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 			m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(m_selectedSpriteSheet->GetWidthTiles() * 8, m_selectedSpriteSheet->GetHeightTiles() * 8));
 			m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, 0);
 
+			PopulateSpriteFrames(m_selectedSpriteSheetId);
 			PopulateAnimList(*m_selectedSpriteSheet);
 		}
 	}
@@ -524,6 +599,136 @@ void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 	}
 }
 
+void SpriteAnimEditorDialog::EventHandlerDragFrameListBegin(wxGridEvent& event)
+{
+	m_draggingSpriteFrameItem = event.GetCol();
+
+	wxImageList* imageList = m_timelineImageList.get();
+	if(imageList)
+	{
+		if(m_draggingSpriteFrameItem >= 0 && m_draggingSpriteFrameItem < imageList->GetImageCount())
+		{
+			m_dragImage = new wxDragImage(imageList->GetBitmap(m_draggingSpriteFrameItem));
+			m_dragImage->BeginDrag(wxPoint(0, 0), m_gridSpriteFrames, m_gridTimeline);
+			m_dragImage->Show();
+
+			m_dragDropKeyframeList.clear();
+
+			if(m_selectedAnim)
+			{
+				//Backup all keyframes and list entry rects
+				for(int i = 0; i < imageList->GetImageCount(); i++)
+				{
+					wxRect rect = m_gridTimeline->CellToRect(0, i);
+
+					u32 frame = m_selectedAnim->m_trackSpriteFrame.GetKeyframe(i).GetValue();
+
+					m_dragDropKeyframeList.push_back(std::make_pair(frame, rect));
+				}
+			}
+
+			m_dragDropTarget = -1;
+			m_dragDropTargetPrev = -1;
+		}
+	}
+}
+
+void SpriteAnimEditorDialog::EventHandlerDragFrameListMove(wxMouseEvent& event)
+{
+	if(m_dragImage && m_draggingSpriteFrameItem >= 0)
+	{
+		//Get mouse position relative to drag source
+		wxPoint position = event.GetPosition();
+
+		m_dragImage->Move(position);
+
+		if(m_dragDropKeyframeList.size() > 0)
+		{
+			m_dragDropTarget = -1;
+
+			//Get mouse position relative to timeline grid
+			position += m_gridSpriteFrames->GetPosition();
+			position -= m_gridTimeline->GetPosition();
+
+			//Check within timeline bounds
+			if(position.y >= 0 && position.y <= m_gridTimeline->GetSize().GetHeight())
+			{
+				//Offset scroll
+				int pixelsPerScrollUnitX = 0;
+				int pixelsPerScrollUnitY = 0;
+				m_gridTimeline->GetScrollPixelsPerUnit(&pixelsPerScrollUnitX, &pixelsPerScrollUnitY);
+				position.x += m_gridTimeline->GetViewStart().x * pixelsPerScrollUnitX;
+
+				if(position.x < m_dragDropKeyframeList.front().second.GetLeft() + (m_dragDropKeyframeList.front().second.GetWidth() / 2))
+				{
+					//Drag target is left of first item
+					m_dragDropTarget = 0;
+				}
+				else if(position.x > m_dragDropKeyframeList.back().second.GetRight() - (m_dragDropKeyframeList.back().second.GetWidth() / 2))
+				{
+					//Drag target is right of last item
+					m_dragDropTarget = m_dragDropKeyframeList.size();
+				}
+				else
+				{
+					for(int i = 0; i < m_dragDropKeyframeList.size() - 1 && m_dragDropTarget == -1; i++)
+					{
+						int posMin = m_dragDropKeyframeList[i].second.GetRight() - (m_dragDropKeyframeList[i].second.GetWidth() / 2);
+						int posMax = m_dragDropKeyframeList[i + 1].second.GetLeft() + (m_dragDropKeyframeList[i + 1].second.GetWidth() / 2);
+
+						if(position.x > posMin && position.x < posMax)
+						{
+							//Drop target is between item i and item i+1
+							m_dragDropTarget = i + 1;
+						}
+					}
+				}
+
+				if(m_dragDropTarget != m_dragDropTargetPrev)
+				{
+					//Drop target changed
+					m_dragDropTargetPrev = m_dragDropTarget;
+				}
+			}
+		}
+	}
+}
+
+void SpriteAnimEditorDialog::EventHandlerDragFrameListEnd(wxMouseEvent& event)
+{
+	if(m_dragImage)
+	{
+		m_dragImage->Hide();
+		m_dragImage->EndDrag();
+		delete m_dragImage;
+		m_dragImage = NULL;
+
+		if(m_draggingSpriteFrameItem >= 0 && m_dragDropTarget >= 0)
+		{
+			//Valid drop target, insert into animation
+			m_dragDropKeyframeList.insert(m_dragDropKeyframeList.begin() + m_dragDropTarget, std::make_pair(m_draggingSpriteFrameItem, wxRect()));
+
+			//Re-populate animation
+			m_selectedAnim->m_trackSpriteFrame.Clear();
+
+			for(int i = 0; i < m_dragDropKeyframeList.size(); i++)
+			{
+				m_selectedAnim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, m_dragDropKeyframeList[i].first));
+			}
+
+			//Set new anim length
+			m_selectedAnim->SetLength((float)m_dragDropKeyframeList.size());
+
+			//Re-populate keyframe timeline
+			PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
+		}
+
+		m_draggingSpriteFrameItem = -1;
+		m_draggingTimelineItem = -1;
+		m_dragDropKeyframeList.clear();
+	}
+}
+
 void SpriteAnimEditorDialog::EventHandlerDragTimelineBegin(wxGridEvent& event)
 {
 	m_draggingTimelineItem = event.GetCol();
@@ -557,7 +762,7 @@ void SpriteAnimEditorDialog::EventHandlerDragTimelineBegin(wxGridEvent& event)
 
 void SpriteAnimEditorDialog::EventHandlerDragTimelineMove(wxMouseEvent& event)
 {
-	if(m_dragImage)
+	if(m_dragImage && m_draggingTimelineItem >= 0)
 	{
 		wxPoint position = event.GetPosition();
 
@@ -567,35 +772,45 @@ void SpriteAnimEditorDialog::EventHandlerDragTimelineMove(wxMouseEvent& event)
 		{
 			m_dragDropTarget = -1;
 
-			if(position.x < m_dragDropKeyframeList.front().second.GetLeft() + (m_dragDropKeyframeList.front().second.GetWidth() / 2))
+			//Check within timeline bounds
+			if(position.y >= 0 && position.y <= m_gridTimeline->GetSize().GetHeight())
 			{
-				//Drag target is left of first item
-				m_dragDropTarget = 0;
-			}
-			else if(position.x > m_dragDropKeyframeList.back().second.GetRight() - (m_dragDropKeyframeList.back().second.GetWidth() / 2))
-			{
-				//Drag target is right of last item
-				m_dragDropTarget = m_dragDropKeyframeList.size();
-			}
-			else
-			{
-				for(int i = 0; i < m_dragDropKeyframeList.size() - 1 && m_dragDropTarget == -1; i++)
-				{
-					int posMin = m_dragDropKeyframeList[i].second.GetRight() - (m_dragDropKeyframeList[i].second.GetWidth() / 2);
-					int posMax = m_dragDropKeyframeList[i + 1].second.GetLeft() + (m_dragDropKeyframeList[i + 1].second.GetWidth() / 2);
+				//Offset scroll
+				int pixelsPerScrollUnitX = 0;
+				int pixelsPerScrollUnitY = 0;
+				m_gridTimeline->GetScrollPixelsPerUnit(&pixelsPerScrollUnitX, &pixelsPerScrollUnitY);
+				position.x += m_gridTimeline->GetViewStart().x * pixelsPerScrollUnitX;
 
-					if(position.x > posMin && position.x < posMax)
+				if(position.x < m_dragDropKeyframeList.front().second.GetLeft() + (m_dragDropKeyframeList.front().second.GetWidth() / 2))
+				{
+					//Drag target is left of first item
+					m_dragDropTarget = 0;
+				}
+				else if(position.x > m_dragDropKeyframeList.back().second.GetRight() - (m_dragDropKeyframeList.back().second.GetWidth() / 2))
+				{
+					//Drag target is right of last item
+					m_dragDropTarget = m_dragDropKeyframeList.size();
+				}
+				else
+				{
+					for(int i = 0; i < m_dragDropKeyframeList.size() - 1 && m_dragDropTarget == -1; i++)
 					{
-						//Drop target is between item i and item i+1
-						m_dragDropTarget = i + 1;
+						int posMin = m_dragDropKeyframeList[i].second.GetRight() - (m_dragDropKeyframeList[i].second.GetWidth() / 2);
+						int posMax = m_dragDropKeyframeList[i + 1].second.GetLeft() + (m_dragDropKeyframeList[i + 1].second.GetWidth() / 2);
+
+						if(position.x > posMin && position.x < posMax)
+						{
+							//Drop target is between item i and item i+1
+							m_dragDropTarget = i + 1;
+						}
 					}
 				}
-			}
 
-			if(m_dragDropTarget != m_dragDropTargetPrev)
-			{
-				//Drop target changed
-				m_dragDropTargetPrev = m_dragDropTarget;
+				if(m_dragDropTarget != m_dragDropTargetPrev)
+				{
+					//Drop target changed
+					m_dragDropTargetPrev = m_dragDropTarget;
+				}
 			}
 		}
 	}
@@ -610,7 +825,7 @@ void SpriteAnimEditorDialog::EventHandlerDragTimelineEnd(wxMouseEvent& event)
 		delete m_dragImage;
 		m_dragImage = NULL;
 
-		if(m_dragDropTarget != -1 && m_dragDropTarget != m_draggingTimelineItem)
+		if(m_draggingTimelineItem >= 0 && m_dragDropTarget  >= 0 && m_dragDropTarget != m_draggingTimelineItem)
 		{
 			//Valid drop target, insert into list
 			m_dragDropKeyframeList.insert(m_dragDropKeyframeList.begin() + m_dragDropTarget, m_dragDropKeyframeList[m_draggingTimelineItem]);
@@ -639,8 +854,53 @@ void SpriteAnimEditorDialog::EventHandlerDragTimelineEnd(wxMouseEvent& event)
 			PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
 		}
 
+		m_draggingSpriteFrameItem = -1;
 		m_draggingTimelineItem = -1;
 		m_dragDropKeyframeList.clear();
+	}
+}
+
+void SpriteAnimEditorDialog::EventHandlerTimelineRightClick(wxGridEvent& event)
+{
+	if(m_selectedAnim)
+	{
+		//Right-click menu
+		m_contextMenuKeyframeIndex = event.GetCol();
+
+		wxMenu contextMenu;
+		contextMenu.Append(eMenuDeleteKeyframe, wxString("Delete keyframe"));
+		contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&SpriteAnimEditorDialog::EventHandlerContextMenuClick, NULL, this);
+		PopupMenu(&contextMenu);
+	}
+}
+
+void SpriteAnimEditorDialog::EventHandlerContextMenuClick(wxCommandEvent& event)
+{
+	if(m_selectedAnim)
+	{
+		if(event.GetId() == eMenuDeleteKeyframe)
+		{
+			//Rebuild animation
+			std::vector<u32> keyframes;
+
+			for(int i = 0; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
+			{
+				if(i != m_contextMenuKeyframeIndex)
+				{
+					keyframes.push_back(m_selectedAnim->m_trackSpriteFrame.GetKeyframe(i).GetValue());
+				}
+			}
+
+			m_selectedAnim->m_trackSpriteFrame.Clear();
+
+			for(int i = 0; i < keyframes.size(); i++)
+			{
+				m_selectedAnim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, keyframes[i]));
+			}
+
+			//Re-populate keyframe view
+			PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
+		}
 	}
 }
 

@@ -1036,11 +1036,48 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	fgSizer13->Add( fgSizer24, 1, wxEXPAND, 5 );
 	
 	wxFlexGridSizer* m_sizerTimeline;
-	m_sizerTimeline = new wxFlexGridSizer( 3, 1, 0, 0 );
+	m_sizerTimeline = new wxFlexGridSizer( 4, 1, 0, 0 );
 	m_sizerTimeline->AddGrowableCol( 0 );
-	m_sizerTimeline->AddGrowableRow( 0 );
+	m_sizerTimeline->AddGrowableRow( 1 );
+	m_sizerTimeline->AddGrowableRow( 3 );
 	m_sizerTimeline->SetFlexibleDirection( wxBOTH );
 	m_sizerTimeline->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticText33 = new wxStaticText( this, wxID_ANY, wxT("Sprite Sheet:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText33->Wrap( -1 );
+	m_sizerTimeline->Add( m_staticText33, 0, wxALL, 5 );
+	
+	m_gridSpriteFrames = new wxGrid( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL );
+	
+	// Grid
+	m_gridSpriteFrames->CreateGrid( 1, 1 );
+	m_gridSpriteFrames->EnableEditing( false );
+	m_gridSpriteFrames->EnableGridLines( true );
+	m_gridSpriteFrames->EnableDragGridSize( false );
+	m_gridSpriteFrames->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridSpriteFrames->SetColSize( 0, 128 );
+	m_gridSpriteFrames->EnableDragColMove( false );
+	m_gridSpriteFrames->EnableDragColSize( false );
+	m_gridSpriteFrames->SetColLabelSize( 0 );
+	m_gridSpriteFrames->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridSpriteFrames->SetRowSize( 0, 64 );
+	m_gridSpriteFrames->EnableDragRowSize( false );
+	m_gridSpriteFrames->SetRowLabelSize( 0 );
+	m_gridSpriteFrames->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridSpriteFrames->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	m_sizerTimeline->Add( m_gridSpriteFrames, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText32 = new wxStaticText( this, wxID_ANY, wxT("Timeline:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText32->Wrap( -1 );
+	m_sizerTimeline->Add( m_staticText32, 0, wxALL, 5 );
 	
 	m_gridTimeline = new wxGrid( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL );
 	
