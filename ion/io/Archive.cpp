@@ -85,7 +85,7 @@ namespace ion
 					mStream.Seek(block->startPos);
 
 					//Seek to each child of current block in turn, checking tag
-					while(block->header.tag != tag && block->startPos + block->header.size < parentBlockEndPos)
+					while(block->header.tag != tag && block->header.size && block->startPos + block->header.size < parentBlockEndPos)
 					{
 						//Record start pos
 						block->startPos = mStream.GetPosition();

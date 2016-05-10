@@ -182,3 +182,20 @@ void SpriteSheet::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_widthTiles, "width");
 	archive.Serialise(m_heightTiles, "height");
 }
+
+void SpriteSheet::Export(std::stringstream& stream) const
+{
+	for(std::vector<SpriteSheetFrame>::const_iterator it = m_frames.begin(), end = m_frames.end(); it != end; ++it)
+	{
+		for(int i = 0; i < it->size(); i++)
+		{
+			(*it)[i].Export(stream);
+			stream << std::endl;
+		}
+	}
+}
+
+void SpriteSheet::Export(ion::io::File& file) const
+{
+
+}

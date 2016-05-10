@@ -775,6 +775,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.TerrainTiles);
 		dialog.m_filePickerCollisionMap->SetPath(m_project->m_exportFilenames.collisionMap);
 		dialog.m_filePickerGameObj->SetPath(m_project->m_exportFilenames.gameObjects);
+		dialog.m_dirPickerSprites->SetPath(m_project->m_exportFilenames.sprites);
 
 		if(dialog.ShowModal() == wxID_OK)
 		{
@@ -787,27 +788,31 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.TerrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.collisionMap = dialog.m_filePickerCollisionMap->GetPath();
 			m_project->m_exportFilenames.gameObjects = dialog.m_filePickerGameObj->GetPath();
+			m_project->m_exportFilenames.sprites = dialog.m_dirPickerSprites->GetPath();
 
-if(dialog.m_chkPalettes->GetValue())
-m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
+			if(dialog.m_chkPalettes->GetValue())
+				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
 
-if(dialog.m_chkTileset->GetValue())
-m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
+			if(dialog.m_chkTileset->GetValue())
+				m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
 
-if(dialog.m_chkMap->GetValue())
-m_project->ExportMap(m_project->m_exportFilenames.map, dialog.m_btnBinary->GetValue());
+			if(dialog.m_chkMap->GetValue())
+				m_project->ExportMap(m_project->m_exportFilenames.map, dialog.m_btnBinary->GetValue());
 
-if(dialog.m_chkTerrainTiles->GetValue())
-m_project->ExportTerrainTiles(m_project->m_exportFilenames.TerrainTiles, dialog.m_btnBinary->GetValue());
+			if(dialog.m_chkTerrainTiles->GetValue())
+				m_project->ExportTerrainTiles(m_project->m_exportFilenames.TerrainTiles, dialog.m_btnBinary->GetValue());
 
-if(dialog.m_chkCollisionMap->GetValue())
-m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
+			if(dialog.m_chkCollisionMap->GetValue())
+				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
 
-if(dialog.m_chkGameObj->GetValue())
-m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
+			if(dialog.m_chkGameObj->GetValue())
+				m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
 
-SetStatusText("Export complete");
-wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
+			if(dialog.m_chkSprites->GetValue())
+				m_project->ExportSprites(m_project->m_exportFilenames.sprites, dialog.m_btnBinary->GetValue());
+
+			SetStatusText("Export complete");
+			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
 		}
 	}
 }
@@ -825,8 +830,6 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 
 			if(dialog.m_chkImportToStamp->GetValue())
 				flags |= Project::eBMPImportToStamp;
-			if(dialog.m_chkImportToSprite->GetValue())
-				flags |= Project::eBMPImportToSpriteSheet;
 			if(dialog.m_chkInsertBGTile->GetValue())
 				flags |= Project::eBMPImportInsertBGTile;
 

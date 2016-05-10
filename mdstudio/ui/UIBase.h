@@ -357,13 +357,15 @@ class ExportDialog : public wxDialog
 		wxFilePickerCtrl* m_filePickerCollisionMap;
 		wxCheckBox* m_chkGameObj;
 		wxFilePickerCtrl* m_filePickerGameObj;
+		wxCheckBox* m_chkSprites;
+		wxDirPickerCtrl* m_dirPickerSprites;
 		wxRadioButton* m_btnText;
 		wxRadioButton* m_btnBinary;
 		wxStdDialogButtonSizer* m_buttons;
 		wxButton* m_buttonsOK;
 		wxButton* m_buttonsCancel;
 		
-		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 548,311 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 788,495 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ExportDialog();
 	
 };
@@ -395,13 +397,12 @@ class ImportDialogBase : public wxDialog
 		wxCheckBox* m_chkInsertBGTile;
 		wxCheckBox* m_chkPaintToMap;
 		wxCheckBox* m_chkImportToStamp;
-		wxCheckBox* m_chkImportToSprite;
 		wxCheckBox* m_chkPalette1;
 		wxCheckBox* m_chkPalette2;
 		wxCheckBox* m_chkPalette3;
 		wxCheckBox* m_chkPalette4;
 		
-		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 478,309 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 512,393 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ImportDialogBase();
 	
 };

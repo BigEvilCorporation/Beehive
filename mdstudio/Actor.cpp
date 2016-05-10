@@ -77,3 +77,34 @@ void Actor::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_spriteSheets, "spriteSheets");
 }
+
+void Actor::Export(std::stringstream& stream) const
+{
+	for(TSpriteSheetMap::const_iterator it = m_spriteSheets.begin(), end = m_spriteSheets.end(); it != end; ++it)
+	{
+		std::stringstream label;
+		label << "spritesheet_" << m_name << "_" << it->second.GetName();
+
+		//AnimFrame_NymnWalk equ((*-Tiles_Nymn) / tiles_nymn_size_b)
+
+		stream << label.str() << ":" << std::endl << std::endl;
+
+		it->second.Export(stream);
+
+		stream << std::endl;
+
+		stream << label.str() << "_end" << std::endl;
+		stream << label.str() << "_size_b\tequ (" << label.str() << "_end-" << label.str() << ")\t; Size in bytes" << std::endl;
+		stream << label.str() << "_size_w\tequ (" << label.str() << "_size_b/2)\t; Size in words" << std::endl;
+		stream << label.str() << "_size_l\tequ (" << label.str() << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << label.str() << "_size_t\tequ (" << label.str() << "_size_b/32)\t; Size in tiles" << std::endl;
+		//stream << label.str() << "_tileid\tequ (" << ;
+
+		stream << std::endl << std::endl;
+	}
+}
+
+void Actor::Export(ion::io::File& file) const
+{
+
+}

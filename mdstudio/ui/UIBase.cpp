@@ -650,6 +650,13 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerGameObj, 0, wxALL|wxEXPAND, 5 );
 	
+	m_chkSprites = new wxCheckBox( this, wxID_ANY, wxT("Export sprites:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSprites->SetValue(true); 
+	fgSizer3->Add( m_chkSprites, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_dirPickerSprites = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer3->Add( m_dirPickerSprites, 0, wxALL|wxEXPAND, 5 );
+	
 	wxBoxSizer* bSizer16;
 	bSizer16 = new wxBoxSizer( wxHORIZONTAL );
 	
@@ -740,9 +747,6 @@ ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	
 	m_chkImportToStamp = new wxCheckBox( this, wxID_ANY, wxT("Import as new stamp"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer13->Add( m_chkImportToStamp, 0, wxALL, 5 );
-	
-	m_chkImportToSprite = new wxCheckBox( this, wxID_ANY, wxT("Import as new sprite"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer13->Add( m_chkImportToSprite, 0, wxALL, 5 );
 	
 	
 	bSizer12->Add( bSizer13, 1, wxEXPAND, 5 );
@@ -1036,7 +1040,7 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	fgSizer13->Add( fgSizer24, 1, wxEXPAND, 5 );
 	
 	wxFlexGridSizer* m_sizerTimeline;
-	m_sizerTimeline = new wxFlexGridSizer( 4, 1, 0, 0 );
+	m_sizerTimeline = new wxFlexGridSizer( 6, 1, 0, 0 );
 	m_sizerTimeline->AddGrowableCol( 0 );
 	m_sizerTimeline->AddGrowableRow( 1 );
 	m_sizerTimeline->AddGrowableRow( 3 );
