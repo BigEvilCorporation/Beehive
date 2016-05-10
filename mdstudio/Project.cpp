@@ -1844,3 +1844,35 @@ bool Project::ExportGameObjects(const std::string& filename) const
 
 	return false;
 }
+
+bool Project::ExportSprites(const std::string& directory, bool binary) const
+{
+	for(TActorMap::const_iterator it = m_actors.begin(), end = m_actors.end(); it != end; ++it)
+	{
+		if(binary)
+		{
+
+		}
+		else
+		{
+			std::stringstream filename;
+			filename << directory << "\\" << it->second.GetName() << ".ASM";
+
+			ion::io::File file(filename.str(), ion::io::File::OpenWrite);
+			if(file.IsOpen())
+			{
+				std::stringstream stream;
+				WriteFileHeader(stream);
+				stream << "actor_" << it->second.GetName() << ":" << std::endl << std::endl;
+
+				it->second.Export(stream);
+
+				file.Write(stream.str().c_str(), stream.str().size());
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+}

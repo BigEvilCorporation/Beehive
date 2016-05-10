@@ -638,59 +638,13 @@ void SpriteAnimEditorDialog::EventHandlerDragFrameListMove(wxMouseEvent& event)
 	if(m_dragImage && m_draggingSpriteFrameItem >= 0)
 	{
 		//Get mouse position relative to drag source
-		wxPoint position = event.GetPosition();
+		wxPoint positionSource = event.GetPosition();
 
-		m_dragImage->Move(position);
+		//Get mouse position relative to timeline grid
+		wxPoint positionTarget = positionSource + m_gridSpriteFrames->GetPosition();
+		positionTarget -= m_gridTimeline->GetPosition();
 
-		if(m_dragDropKeyframeList.size() > 0)
-		{
-			m_dragDropTarget = -1;
-
-			//Get mouse position relative to timeline grid
-			position += m_gridSpriteFrames->GetPosition();
-			position -= m_gridTimeline->GetPosition();
-
-			//Check within timeline bounds
-			if(position.y >= 0 && position.y <= m_gridTimeline->GetSize().GetHeight())
-			{
-				//Offset scroll
-				int pixelsPerScrollUnitX = 0;
-				int pixelsPerScrollUnitY = 0;
-				m_gridTimeline->GetScrollPixelsPerUnit(&pixelsPerScrollUnitX, &pixelsPerScrollUnitY);
-				position.x += m_gridTimeline->GetViewStart().x * pixelsPerScrollUnitX;
-
-				if(position.x < m_dragDropKeyframeList.front().second.GetLeft() + (m_dragDropKeyframeList.front().second.GetWidth() / 2))
-				{
-					//Drag target is left of first item
-					m_dragDropTarget = 0;
-				}
-				else if(position.x > m_dragDropKeyframeList.back().second.GetRight() - (m_dragDropKeyframeList.back().second.GetWidth() / 2))
-				{
-					//Drag target is right of last item
-					m_dragDropTarget = m_dragDropKeyframeList.size();
-				}
-				else
-				{
-					for(int i = 0; i < m_dragDropKeyframeList.size() - 1 && m_dragDropTarget == -1; i++)
-					{
-						int posMin = m_dragDropKeyframeList[i].second.GetRight() - (m_dragDropKeyframeList[i].second.GetWidth() / 2);
-						int posMax = m_dragDropKeyframeList[i + 1].second.GetLeft() + (m_dragDropKeyframeList[i + 1].second.GetWidth() / 2);
-
-						if(position.x > posMin && position.x < posMax)
-						{
-							//Drop target is between item i and item i+1
-							m_dragDropTarget = i + 1;
-						}
-					}
-				}
-
-				if(m_dragDropTarget != m_dragDropTargetPrev)
-				{
-					//Drop target changed
-					m_dragDropTargetPrev = m_dragDropTarget;
-				}
-			}
-		}
+		FindAndDrawDropTarget(positionSource, positionTarget);
 	}
 }
 
@@ -768,51 +722,7 @@ void SpriteAnimEditorDialog::EventHandlerDragTimelineMove(wxMouseEvent& event)
 
 		m_dragImage->Move(position);
 
-		if(m_dragDropKeyframeList.size() > 0)
-		{
-			m_dragDropTarget = -1;
-
-			//Check within timeline bounds
-			if(position.y >= 0 && position.y <= m_gridTimeline->GetSize().GetHeight())
-			{
-				//Offset scroll
-				int pixelsPerScrollUnitX = 0;
-				int pixelsPerScrollUnitY = 0;
-				m_gridTimeline->GetScrollPixelsPerUnit(&pixelsPerScrollUnitX, &pixelsPerScrollUnitY);
-				position.x += m_gridTimeline->GetViewStart().x * pixelsPerScrollUnitX;
-
-				if(position.x < m_dragDropKeyframeList.front().second.GetLeft() + (m_dragDropKeyframeList.front().second.GetWidth() / 2))
-				{
-					//Drag target is left of first item
-					m_dragDropTarget = 0;
-				}
-				else if(position.x > m_dragDropKeyframeList.back().second.GetRight() - (m_dragDropKeyframeList.back().second.GetWidth() / 2))
-				{
-					//Drag target is right of last item
-					m_dragDropTarget = m_dragDropKeyframeList.size();
-				}
-				else
-				{
-					for(int i = 0; i < m_dragDropKeyframeList.size() - 1 && m_dragDropTarget == -1; i++)
-					{
-						int posMin = m_dragDropKeyframeList[i].second.GetRight() - (m_dragDropKeyframeList[i].second.GetWidth() / 2);
-						int posMax = m_dragDropKeyframeList[i + 1].second.GetLeft() + (m_dragDropKeyframeList[i + 1].second.GetWidth() / 2);
-
-						if(position.x > posMin && position.x < posMax)
-						{
-							//Drop target is between item i and item i+1
-							m_dragDropTarget = i + 1;
-						}
-					}
-				}
-
-				if(m_dragDropTarget != m_dragDropTargetPrev)
-				{
-					//Drop target changed
-					m_dragDropTargetPrev = m_dragDropTarget;
-				}
-			}
-		}
+		FindAndDrawDropTarget(position, position);
 	}
 }
 
@@ -904,9 +814,99 @@ void SpriteAnimEditorDialog::EventHandlerContextMenuClick(wxCommandEvent& event)
 	}
 }
 
+void SpriteAnimEditorDialog::FindAndDrawDropTarget(wxPoint mousePosDropSource, wxPoint mousePosDropTarget)
+{
+	m_dragImage->Move(mousePosDropSource);
+
+	if(m_dragDropKeyframeList.size() > 0)
+	{
+		m_dragDropTarget = -1;
+
+		//Check within timeline bounds
+		if(mousePosDropTarget.y >= 0 && mousePosDropTarget.y <= m_gridTimeline->GetSize().GetHeight())
+		{
+			//Offset scroll
+			int pixelsPerScrollUnitX = 0;
+			int pixelsPerScrollUnitY = 0;
+			m_gridTimeline->GetScrollPixelsPerUnit(&pixelsPerScrollUnitX, &pixelsPerScrollUnitY);
+			wxPoint scrollOffset(m_gridTimeline->GetViewStart().x * pixelsPerScrollUnitX, m_gridTimeline->GetViewStart().y * pixelsPerScrollUnitY);
+			mousePosDropTarget.x += scrollOffset.x;
+
+			if(mousePosDropTarget.x < m_dragDropKeyframeList.front().second.GetLeft() + (m_dragDropKeyframeList.front().second.GetWidth() / 2))
+			{
+				//Drag target is left of first item
+				m_dragDropTarget = 0;
+			}
+			else if(mousePosDropTarget.x > m_dragDropKeyframeList.back().second.GetRight() - (m_dragDropKeyframeList.back().second.GetWidth() / 2))
+			{
+				//Drag target is right of last item
+				m_dragDropTarget = m_dragDropKeyframeList.size();
+			}
+			else
+			{
+				for(int i = 0; i < m_dragDropKeyframeList.size() - 1 && m_dragDropTarget == -1; i++)
+				{
+					int posMin = m_dragDropKeyframeList[i].second.GetRight() - (m_dragDropKeyframeList[i].second.GetWidth() / 2);
+					int posMax = m_dragDropKeyframeList[i + 1].second.GetLeft() + (m_dragDropKeyframeList[i + 1].second.GetWidth() / 2);
+
+					if(mousePosDropTarget.x > posMin && mousePosDropTarget.x < posMax)
+					{
+						//Drop target is between item i and item i+1
+						m_dragDropTarget = i + 1;
+					}
+				}
+			}
+
+			if(m_dragDropTarget != m_dragDropTargetPrev)
+			{
+				//De-select previous cell
+				if(m_dragDropTargetPrev >= 0)
+				{
+					int drawIndex = (m_dragDropTargetPrev == m_dragDropKeyframeList.size()) ? m_dragDropTargetPrev - 1 : m_dragDropTargetPrev;
+					GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, drawIndex);
+					cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeNone);
+
+					wxRect refreshRect = m_dragDropKeyframeList[drawIndex].second;
+					refreshRect.Offset(-scrollOffset);
+					m_gridTimeline->Refresh(true, &refreshRect);
+				}
+
+				//Set selected cell
+				if(m_dragDropTarget >= 0)
+				{
+					if(m_dragDropTarget == m_dragDropKeyframeList.size())
+					{
+						//Far right of last cell
+						GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, m_dragDropTarget - 1);
+						cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeRight);
+
+						wxRect refreshRect = m_dragDropKeyframeList[m_dragDropTarget - 1].second;
+						refreshRect.Offset(-scrollOffset);
+						m_gridTimeline->Refresh(true, &refreshRect);
+					}
+					else
+					{
+						//Left of current cell
+						GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, m_dragDropTarget);
+						cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeLeft);
+
+						wxRect refreshRect = m_dragDropKeyframeList[m_dragDropTarget].second;
+						refreshRect.Offset(-scrollOffset);
+						m_gridTimeline->Refresh(true, &refreshRect);
+					}
+				}
+
+				//Drop target changed
+				m_dragDropTargetPrev = m_dragDropTarget;
+			}
+		}
+	}
+}
+
 GridCellBitmapRenderer::GridCellBitmapRenderer(wxImageList* imageList)
 {
 	m_imageList = imageList;
+	m_selectionEdge = eDrawSelectionEdgeNone;
 }
 
 GridCellBitmapRenderer::~GridCellBitmapRenderer()
@@ -924,6 +924,11 @@ wxImageList* GridCellBitmapRenderer::GetImageList() const
 	return m_imageList;
 }
 
+void GridCellBitmapRenderer::SetDrawSelectionEdge(SelectionEdge selectionEdge)
+{
+	m_selectionEdge = selectionEdge;
+}
+
 void GridCellBitmapRenderer::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected)
 {
 	wxGridCellStringRenderer::Draw(grid, attr, dc, rect, row, col, isSelected);
@@ -931,5 +936,21 @@ void GridCellBitmapRenderer::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, 
 	if(m_imageList && col < m_imageList->GetImageCount())
 	{
 		dc.DrawBitmap(m_imageList->GetBitmap(col), rect.x + SpriteAnimEditorDialog::s_iconBorderX, rect.y + SpriteAnimEditorDialog::s_iconBorderY);
+	}
+
+	const int penWidth = 4;
+
+	wxPen pen;
+	pen.SetColour(wxColour(0, 0, 0, 255));
+	pen.SetWidth(penWidth);
+	dc.SetPen(pen);
+
+	if(m_selectionEdge == eDrawSelectionEdgeLeft)
+	{
+		dc.DrawLine(rect.x + (penWidth / 2), rect.y, rect.x + (penWidth / 2), rect.y + rect.GetHeight());
+	}
+	else if(m_selectionEdge == eDrawSelectionEdgeRight)
+	{
+		dc.DrawLine(rect.x + rect.GetWidth() - (penWidth / 2), rect.y, rect.x + rect.GetWidth() - (penWidth / 2), rect.y + rect.GetHeight());
 	}
 }

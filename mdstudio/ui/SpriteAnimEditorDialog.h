@@ -21,14 +21,26 @@
 class GridCellBitmapRenderer : public wxGridCellStringRenderer
 {
 public:
+	enum SelectionEdge
+	{
+		eDrawSelectionEdgeNone,
+		eDrawSelectionEdgeLeft,
+		eDrawSelectionEdgeRight
+	};
+
 	GridCellBitmapRenderer(wxImageList* imageList);
 	virtual ~GridCellBitmapRenderer();
+
 	void SetImageList(wxImageList* imageList);
 	wxImageList* GetImageList() const;
+
+	void SetDrawSelectionEdge(SelectionEdge selectionEdge);
+
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 
 private:
 	wxImageList* m_imageList;
+	SelectionEdge m_selectionEdge;
 };
 
 class SpriteAnimEditorDialog : public SpriteAnimEditorDialogBase
@@ -82,6 +94,8 @@ private:
 	void SelectActor(int index);
 	void SelectSpriteSheet(int index);
 	void SelectAnimation(int index);
+
+	void FindAndDrawDropTarget(wxPoint mousePosDropSource, wxPoint mousePosDropTarget);
 
 	Project& m_project;
 	ion::render::Renderer& m_renderer;
