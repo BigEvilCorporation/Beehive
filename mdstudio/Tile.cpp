@@ -106,6 +106,12 @@ void Tile::Export(ion::io::File& file) const
 	}
 }
 
+u32 Tile::GetBinarySize() const
+{
+	//4 bits per pixel
+	return (tileWidth * tileHeight) / 2;
+}
+
 void Tile::CalculateHash()
 {
 	m_hash = ion::Hash64(&m_pixels[0], pixelsPerTile);

@@ -187,10 +187,32 @@ void SpriteSheet::Export(std::stringstream& stream) const
 {
 	for(std::vector<SpriteSheetFrame>::const_iterator it = m_frames.begin(), end = m_frames.end(); it != end; ++it)
 	{
-		for(int i = 0; i < it->size(); i++)
+		//Split into subsprites
+		const int subSpriteWidthTiles = 4;
+		const int subSpriteHeightTiles = 4;
+
+		const int widthSubSprites = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
+		const int heightSubSprites = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
+
+		//Subsprites column major
+		for(int subSprX = 0; subSprX < widthSubSprites; subSprX++)
 		{
-			(*it)[i].Export(stream);
-			stream << std::endl;
+			for(int subSprY = 0; subSprY < heightSubSprites; subSprY++)
+			{
+				int subSprOffsetY = m_widthTiles * subSpriteHeightTiles * subSprY;
+				int subSprOffsetX = subSpriteWidthTiles * subSprX;
+				int topLeft = subSprOffsetY + subSprOffsetX;
+
+				//Tiles already sorted into column major
+				for(int y = 0; y < ion::maths::Min(subSpriteHeightTiles, m_heightTiles - (subSpriteHeightTiles * subSprY)); y++)
+				{
+					for(int x = 0; x < ion::maths::Min(subSpriteWidthTiles, m_widthTiles - (subSpriteWidthTiles * subSprX)); x++)
+					{
+						(*it)[topLeft + (x * subSpriteHeightTiles) + y].Export(stream);
+						stream << std::endl;
+					}
+				}
+			}
 		}
 	}
 }
@@ -198,4 +220,19 @@ void SpriteSheet::Export(std::stringstream& stream) const
 void SpriteSheet::Export(ion::io::File& file) const
 {
 
+}
+
+u32 SpriteSheet::GetBinarySize() const
+{
+	u32 size = 0;
+
+	for(std::vector<SpriteSheetFrame>::const_iterator it = m_frames.begin(), end = m_frames.end(); it != end; ++it)
+	{
+		for(int i = 0; i < it->size(); i++)
+		{
+			size += (*it)[i].GetBinarySize();
+		}
+	}
+
+	return size;
 }

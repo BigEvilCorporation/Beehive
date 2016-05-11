@@ -76,7 +76,7 @@ protected:
 	virtual void OnBtnActorDelete(wxCommandEvent& event);
 	virtual void OnBtnActorExport(wxCommandEvent& event);
 	virtual void OnBtnSpriteSheetImport(wxCommandEvent& event);
-	virtual void OnButtonSpriteSheetDelete(wxCommandEvent& event);
+	virtual void OnBtnSpriteSheetDelete(wxCommandEvent& event);
 	virtual void OnBtnAnimNew(wxCommandEvent& event);
 	virtual void OnBtnAnimDelete(wxCommandEvent& event);
 	virtual void OnSliderMove(wxScrollEvent& event);

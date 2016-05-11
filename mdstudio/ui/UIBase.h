@@ -487,7 +487,7 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		virtual void OnBtnActorDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnActorExport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetImport( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnButtonSpriteDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnSpriteSheetDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSliderMove( wxScrollEvent& event ) { event.Skip(); }

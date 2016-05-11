@@ -182,7 +182,7 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)
 	}
 }
 
-void SpriteAnimEditorDialog::OnButtonSpriteSheetDelete(wxCommandEvent& event)
+void SpriteAnimEditorDialog::OnBtnSpriteSheetDelete(wxCommandEvent& event)
 {
 	if(m_selectedSpriteSheetId != InvalidSpriteSheetId)
 	{
