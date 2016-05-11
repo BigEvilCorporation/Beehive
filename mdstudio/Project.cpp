@@ -1863,10 +1863,7 @@ bool Project::ExportSprites(const std::string& directory, bool binary) const
 			{
 				std::stringstream stream;
 				WriteFileHeader(stream);
-				stream << "actor_" << it->second.GetName() << ":" << std::endl << std::endl;
-
 				it->second.Export(stream);
-
 				file.Write(stream.str().c_str(), stream.str().size());
 
 				return true;

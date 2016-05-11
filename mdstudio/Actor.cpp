@@ -80,25 +80,42 @@ void Actor::Serialise(ion::io::Archive& archive)
 
 void Actor::Export(std::stringstream& stream) const
 {
+	u32 frameIndex = 0;
+
+	stream << "actor_" << m_name << ":" << std::endl << std::endl;
+
+	//Export sprite sheet size headers
 	for(TSpriteSheetMap::const_iterator it = m_spriteSheets.begin(), end = m_spriteSheets.end(); it != end; ++it)
 	{
 		std::stringstream label;
 		label << "spritesheet_" << m_name << "_" << it->second.GetName();
 
-		//AnimFrame_NymnWalk equ((*-Tiles_Nymn) / tiles_nymn_size_b)
+		u32 size = it->second.GetBinarySize();
+
+		stream << std::hex << std::setfill('0') << std::uppercase;
+		stream << label.str() << "_frameoffset\tequ 0x" << frameIndex << "\t; Offset to first frame in sprite sheet" << std::endl;
+		stream << label.str() << "_size_b\t\tequ 0x" << size << "\t; Size in bytes" << std::endl;
+		stream << label.str() << "_size_w\t\tequ 0x" << size/2 << "\t; Size in words" << std::endl;
+		stream << label.str() << "_size_l\t\tequ 0x" << size/4 << "\t; Size in longwords" << std::endl;
+		stream << label.str() << "_size_t\t\tequ 0x" << size/32 << "\t; Size in tiles" << std::endl;
+		stream << std::dec;
+
+		stream << std::endl << std::endl;
+
+		frameIndex += it->second.GetNumFrames();
+	}
+
+	stream << "spritesheets_" << m_name << ":" << std::endl << std::endl;
+
+	//Export sprite sheet tile data
+	for(TSpriteSheetMap::const_iterator it = m_spriteSheets.begin(), end = m_spriteSheets.end(); it != end; ++it)
+	{
+		std::stringstream label;
+		label << "spritesheet_" << m_name << "_" << it->second.GetName();
 
 		stream << label.str() << ":" << std::endl << std::endl;
 
 		it->second.Export(stream);
-
-		stream << std::endl;
-
-		stream << label.str() << "_end" << std::endl;
-		stream << label.str() << "_size_b\tequ (" << label.str() << "_end-" << label.str() << ")\t; Size in bytes" << std::endl;
-		stream << label.str() << "_size_w\tequ (" << label.str() << "_size_b/2)\t; Size in words" << std::endl;
-		stream << label.str() << "_size_l\tequ (" << label.str() << "_size_b/4)\t; Size in longwords" << std::endl;
-		stream << label.str() << "_size_t\tequ (" << label.str() << "_size_b/32)\t; Size in tiles" << std::endl;
-		//stream << label.str() << "_tileid\tequ (" << ;
 
 		stream << std::endl << std::endl;
 	}

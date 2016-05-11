@@ -40,6 +40,7 @@ public:
 	void Serialise(ion::io::Archive& archive);
 	void Export(std::stringstream& stream) const;
 	void Export(ion::io::File& file) const;
+	u32 GetBinarySize() const;
 
 private:
 	PaletteId m_palette;
