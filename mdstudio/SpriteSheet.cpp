@@ -183,7 +183,7 @@ void SpriteSheet::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_heightTiles, "height");
 }
 
-void SpriteSheet::Export(std::stringstream& stream) const
+void SpriteSheet::ExportTiles(std::stringstream& stream) const
 {
 	for(std::vector<SpriteSheetFrame>::const_iterator it = m_frames.begin(), end = m_frames.end(); it != end; ++it)
 	{
@@ -199,16 +199,17 @@ void SpriteSheet::Export(std::stringstream& stream) const
 		{
 			for(int subSprY = 0; subSprY < heightSubSprites; subSprY++)
 			{
-				int subSprOffsetY = m_widthTiles * subSpriteHeightTiles * subSprY;
-				int subSprOffsetX = subSpriteWidthTiles * subSprX;
+				int subSprOffsetY = subSpriteHeightTiles * subSprY;
+				int subSprOffsetX = m_heightTiles * subSpriteWidthTiles * subSprX;
 				int topLeft = subSprOffsetY + subSprOffsetX;
 
-				//Tiles already sorted into column major
-				for(int y = 0; y < ion::maths::Min(subSpriteHeightTiles, m_heightTiles - (subSpriteHeightTiles * subSprY)); y++)
+				//Tiles column major
+				for(int x = 0; x < ion::maths::Min(subSpriteWidthTiles, m_widthTiles - (subSpriteWidthTiles * subSprX)); x++)
 				{
-					for(int x = 0; x < ion::maths::Min(subSpriteWidthTiles, m_widthTiles - (subSpriteWidthTiles * subSprX)); x++)
+					for(int y = 0; y < ion::maths::Min(subSpriteHeightTiles, m_heightTiles - (subSpriteHeightTiles * subSprY)); y++)
 					{
-						(*it)[topLeft + (x * subSpriteHeightTiles) + y].Export(stream);
+						(*it)[topLeft + (x * m_heightTiles) + y].Export(stream);
+
 						stream << std::endl;
 					}
 				}
@@ -217,12 +218,42 @@ void SpriteSheet::Export(std::stringstream& stream) const
 	}
 }
 
-void SpriteSheet::Export(ion::io::File& file) const
+void SpriteSheet::ExportTiles(ion::io::File& file) const
 {
 
 }
 
-u32 SpriteSheet::GetBinarySize() const
+void SpriteSheet::ExportAnims(std::stringstream& stream, const std::string& actorName) const
+{
+	stream << std::hex << std::setfill('0') << std::uppercase;
+
+	for(TSpriteAnimMap::const_iterator it = m_animations.begin(), end = m_animations.end(); it != end; ++it)
+	{
+		std::stringstream label;
+		label << "spriteanim_" << actorName << "_" << it->second.GetName();
+		
+		stream << label.str() << ":" << std::endl;
+		stream << label.str() << "_numframes: equ 0x" << it->second.m_trackSpriteFrame.GetNumKeyframes() << std::endl;
+		stream << label.str() << "_speed: equ 0x" << it->second.GetSpeed() << std::endl;
+
+		stream << label.str() << "_track_frames:" << std::endl;
+		it->second.m_trackSpriteFrame.Export(stream);
+
+		stream << label.str() << "_track_posx:" << std::endl;
+		it->second.m_trackPosition.Export(stream);
+
+		stream << std::endl << "\tEven" << std::endl;
+	}
+
+	stream << std::dec;
+}
+
+void SpriteSheet::ExportAnims(ion::io::File& file) const
+{
+
+}
+
+u32 SpriteSheet::GetBinarySizeTiles() const
 {
 	u32 size = 0;
 

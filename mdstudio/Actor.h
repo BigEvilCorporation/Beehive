@@ -32,8 +32,10 @@ public:
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream) const;
-	void Export(ion::io::File& file) const;
+	void ExportSpriteSheets(std::stringstream& stream) const;
+	void ExportSpriteAnims(std::stringstream& stream) const;
+	void ExportSpriteSheets(ion::io::File& file) const;
+	void ExportSpriteAnims(ion::io::File& file) const;
 
 private:
 	std::string m_name;

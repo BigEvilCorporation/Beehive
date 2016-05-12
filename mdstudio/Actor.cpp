@@ -78,7 +78,7 @@ void Actor::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_spriteSheets, "spriteSheets");
 }
 
-void Actor::Export(std::stringstream& stream) const
+void Actor::ExportSpriteSheets(std::stringstream& stream) const
 {
 	u32 frameIndex = 0;
 
@@ -90,7 +90,7 @@ void Actor::Export(std::stringstream& stream) const
 		std::stringstream label;
 		label << "spritesheet_" << m_name << "_" << it->second.GetName();
 
-		u32 size = it->second.GetBinarySize();
+		u32 size = it->second.GetBinarySizeTiles();
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
 		stream << label.str() << "_frameoffset\tequ 0x" << frameIndex << "\t; Offset to first frame in sprite sheet" << std::endl;
@@ -115,13 +115,30 @@ void Actor::Export(std::stringstream& stream) const
 
 		stream << label.str() << ":" << std::endl << std::endl;
 
-		it->second.Export(stream);
+		it->second.ExportTiles(stream);
 
 		stream << std::endl << std::endl;
 	}
 }
 
-void Actor::Export(ion::io::File& file) const
+void Actor::ExportSpriteSheets(ion::io::File& file) const
+{
+
+}
+
+void Actor::ExportSpriteAnims(std::stringstream& stream) const
+{
+	stream << "spriteanims_" << m_name << ":" << std::endl << std::endl;
+
+	//Export sprite anim data
+	for(TSpriteSheetMap::const_iterator it = m_spriteSheets.begin(), end = m_spriteSheets.end(); it != end; ++it)
+	{
+		it->second.ExportAnims(stream, m_name);
+		stream << std::endl;
+	}
+}
+
+void Actor::ExportSpriteAnims(ion::io::File& file) const
 {
 
 }

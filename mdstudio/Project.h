@@ -199,7 +199,8 @@ public:
 	bool ExportTerrainTiles(const std::string& filename, bool binary) const;
 	bool ExportCollisionMap(const std::string& filename, bool binary) const;
 	bool ExportGameObjects(const std::string& filename) const;
-	bool ExportSprites(const std::string& directory, bool binary) const;
+	bool ExportSpriteSheets(const std::string& directory, bool binary) const;
+	bool ExportSpriteAnims(const std::string& directory, bool binary) const;
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
@@ -213,7 +214,8 @@ public:
 		std::string TerrainTiles;
 		std::string collisionMap;
 		std::string gameObjects;
-		std::string sprites;
+		std::string spriteSheets;
+		std::string spriteAnims;
 
 		void Serialise(ion::io::Archive& archive)
 		{
@@ -223,7 +225,8 @@ public:
 			archive.Serialise(TerrainTiles, "exportFNameTerrainTiles");
 			archive.Serialise(collisionMap, "exportFNameCollisionMap");
 			archive.Serialise(gameObjects, "exportFNameGameObjects");
-			archive.Serialise(sprites, "exportDirSprites");
+			archive.Serialise(spriteSheets, "exportDirSpriteSheets");
+			archive.Serialise(spriteAnims, "exportDirSpriteAnims");
 		}
 	};
 	
