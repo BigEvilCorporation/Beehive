@@ -284,7 +284,10 @@ void SpriteAnimEditorDialog::OnBtnStop(wxCommandEvent& event)
 
 void SpriteAnimEditorDialog::OnSpinSpeedChange(wxSpinEvent& event)
 {
-
+	if(m_selectedAnim)
+	{
+		m_selectedAnim->SetSpeed(event.GetValue());
+	}
 }
 
 void SpriteAnimEditorDialog::PopulateActorList()
@@ -578,6 +581,8 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 				ion::debug::Assert(m_selectedAnim, "SpriteAnimEditorDialog::OnAnimSelected() - Invalid animation ID");
 
 				PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
+
+				m_spinCtrlSpeed->SetValue(m_selectedAnim->GetSpeed());
 			}
 		}
 	}
@@ -587,7 +592,9 @@ void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		float delta = (float)event.GetInterval() * ((float)m_spinCtrlSpeed->GetValue() / 100.0f);
+		float frameRate = 24.0f;
+		float frameRateMul = 1.0f / (frameRate / 10.0f);
+		float delta = (float)event.GetInterval() * ((float)m_spinCtrlSpeed->GetValue() / 100.0f) * frameRateMul;
 		float time = m_selectedAnim->GetFrame();
 		float lerpTime = ion::maths::UnLerp(0.0f, m_selectedAnim->GetLength(), time);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);

@@ -775,7 +775,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.TerrainTiles);
 		dialog.m_filePickerCollisionMap->SetPath(m_project->m_exportFilenames.collisionMap);
 		dialog.m_filePickerGameObj->SetPath(m_project->m_exportFilenames.gameObjects);
-		dialog.m_dirPickerSprites->SetPath(m_project->m_exportFilenames.sprites);
+		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
+		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
 
 		if(dialog.ShowModal() == wxID_OK)
 		{
@@ -788,7 +789,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.TerrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.collisionMap = dialog.m_filePickerCollisionMap->GetPath();
 			m_project->m_exportFilenames.gameObjects = dialog.m_filePickerGameObj->GetPath();
-			m_project->m_exportFilenames.sprites = dialog.m_dirPickerSprites->GetPath();
+			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
+			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
 
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
@@ -808,8 +810,11 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkGameObj->GetValue())
 				m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
 
-			if(dialog.m_chkSprites->GetValue())
-				m_project->ExportSprites(m_project->m_exportFilenames.sprites, dialog.m_btnBinary->GetValue());
+			if(dialog.m_chkSpriteSheets->GetValue())
+				m_project->ExportSpriteSheets(m_project->m_exportFilenames.spriteSheets, dialog.m_btnBinary->GetValue());
+
+			if(dialog.m_chkSpriteAnims->GetValue())
+				m_project->ExportSpriteAnims(m_project->m_exportFilenames.spriteAnims, dialog.m_btnBinary->GetValue());
 
 			SetStatusText("Export complete");
 			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);

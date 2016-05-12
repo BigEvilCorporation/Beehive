@@ -11,6 +11,8 @@
 #include <ion/core/cryptography/UUID.h>
 #include <ion/renderer/Animation.h>
 
+#include <sstream>
+
 typedef ion::UUID64 SpriteAnimId;
 static const SpriteAnimId InvalidSpriteAnimId = 0;
 
@@ -32,6 +34,27 @@ public:
 		}
 
 		return intValue;
+	}
+
+	void Export(std::stringstream& stream) const
+	{
+		stream << "\tdc.b ";
+
+		for(int i = 0; i < GetNumKeyframes(); i++)
+		{
+			u32 value = GetKeyframe(i).GetValue();
+			stream << "0x" << value;
+
+			if(i < GetNumKeyframes() - 1)
+				stream << ", ";
+		}
+
+		stream << std::endl;
+	}
+
+	void Export(ion::io::File& file) const
+	{
+
 	}
 };
 
@@ -60,6 +83,16 @@ public:
 
 		return result;
 	}
+
+	void Export(std::stringstream& stream) const
+	{
+
+	}
+
+	void Export(ion::io::File& file) const
+	{
+
+	}
 };
 
 class SpriteAnimation : public ion::render::Animation
@@ -70,6 +103,9 @@ public:
 	void SetName(const std::string& name);
 	const std::string& GetName() const;
 
+	void SetSpeed(int speed);
+	int GetSpeed() const;
+
 	void Serialise(ion::io::Archive& archive);
 
 	AnimTrackSpriteFrame m_trackSpriteFrame;
@@ -77,4 +113,5 @@ public:
 
 private:
 	std::string m_name;
+	int m_speed;
 };

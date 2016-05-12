@@ -650,12 +650,19 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerGameObj, 0, wxALL|wxEXPAND, 5 );
 	
-	m_chkSprites = new wxCheckBox( this, wxID_ANY, wxT("Export sprites:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkSprites->SetValue(true); 
-	fgSizer3->Add( m_chkSprites, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	m_chkSpriteSheets = new wxCheckBox( this, wxID_ANY, wxT("Export sprite sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpriteSheets->SetValue(true); 
+	fgSizer3->Add( m_chkSpriteSheets, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
-	m_dirPickerSprites = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer3->Add( m_dirPickerSprites, 0, wxALL|wxEXPAND, 5 );
+	m_dirPickerSpriteSheets = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer3->Add( m_dirPickerSpriteSheets, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkSpriteAnims = new wxCheckBox( this, wxID_ANY, wxT("Export sprite animations:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpriteAnims->SetValue(true); 
+	fgSizer3->Add( m_chkSpriteAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_dirPickerSpriteAnims = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer3->Add( m_dirPickerSpriteAnims, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer16;
 	bSizer16 = new wxBoxSizer( wxHORIZONTAL );

@@ -42,9 +42,11 @@ public:
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream) const;
-	void Export(ion::io::File& file) const;
-	u32 GetBinarySize() const;
+	void ExportTiles(std::stringstream& stream) const;
+	void ExportTiles(ion::io::File& file) const;
+	void ExportAnims(std::stringstream& stream, const std::string& actorName) const;
+	void ExportAnims(ion::io::File& file) const;
+	u32 GetBinarySizeTiles() const;
 
 private:
 	std::string m_name;

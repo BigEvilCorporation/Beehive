@@ -1845,7 +1845,7 @@ bool Project::ExportGameObjects(const std::string& filename) const
 	return false;
 }
 
-bool Project::ExportSprites(const std::string& directory, bool binary) const
+bool Project::ExportSpriteSheets(const std::string& directory, bool binary) const
 {
 	for(TActorMap::const_iterator it = m_actors.begin(), end = m_actors.end(); it != end; ++it)
 	{
@@ -1863,7 +1863,36 @@ bool Project::ExportSprites(const std::string& directory, bool binary) const
 			{
 				std::stringstream stream;
 				WriteFileHeader(stream);
-				it->second.Export(stream);
+				it->second.ExportSpriteSheets(stream);
+				file.Write(stream.str().c_str(), stream.str().size());
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
+bool Project::ExportSpriteAnims(const std::string& directory, bool binary) const
+{
+	for(TActorMap::const_iterator it = m_actors.begin(), end = m_actors.end(); it != end; ++it)
+	{
+		if(binary)
+		{
+
+		}
+		else
+		{
+			std::stringstream filename;
+			filename << directory << "\\" << it->second.GetName() << ".ASM";
+
+			ion::io::File file(filename.str(), ion::io::File::OpenWrite);
+			if(file.IsOpen())
+			{
+				std::stringstream stream;
+				WriteFileHeader(stream);
+				it->second.ExportSpriteAnims(stream);
 				file.Write(stream.str().c_str(), stream.str().size());
 
 				return true;
