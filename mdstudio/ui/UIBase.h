@@ -359,6 +359,8 @@ class ExportDialog : public wxDialog
 		wxFilePickerCtrl* m_filePickerGameObj;
 		wxCheckBox* m_chkSpriteSheets;
 		wxDirPickerCtrl* m_dirPickerSpriteSheets;
+		wxCheckBox* m_chkSpritePalettes;
+		wxDirPickerCtrl* m_dirPickerSpritePalettes;
 		wxCheckBox* m_chkSpriteAnims;
 		wxDirPickerCtrl* m_dirPickerSpriteAnims;
 		wxRadioButton* m_btnText;
@@ -367,7 +369,7 @@ class ExportDialog : public wxDialog
 		wxButton* m_buttonsOK;
 		wxButton* m_buttonsCancel;
 		
-		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 788,555 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 788,606 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ExportDialog();
 	
 };

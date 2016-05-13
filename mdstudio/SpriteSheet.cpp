@@ -168,6 +168,88 @@ u8 SpriteSheet::GetHeightTiles() const
 	return m_heightTiles;
 }
 
+void SpriteSheet::GetWidthSubsprites(u8& total, u8& whole, u8& remainder) const
+{
+	total = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
+	whole = m_widthTiles / subSpriteWidthTiles;
+	remainder = m_widthTiles % subSpriteWidthTiles;
+}
+
+void SpriteSheet::GetHeightSubsprites(u8& total, u8& whole, u8& remainder) const
+{
+	total = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
+	whole = m_heightTiles / subSpriteHeightTiles;
+	remainder = m_heightTiles % subSpriteHeightTiles;
+}
+
+void SpriteSheet::GetSubspriteDimensions(std::vector<ion::Vector2i>& dimensions) const
+{
+	int width = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
+	int height = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
+
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	for(int x = 0; x < width; x++)
+	{
+		for(int y = 0; y < height; y++)
+		{
+			int subSprWidth = ion::maths::Min(subSpriteWidthTiles, m_widthTiles - (subSpriteWidthTiles * x));
+			int subSprHeight = ion::maths::Min(subSpriteHeightTiles, m_heightTiles - (subSpriteHeightTiles * y));
+			dimensions.push_back(ion::Vector2i(subSprWidth, subSprHeight));
+		}
+	}
+}
+
+void SpriteSheet::GetSubspritePosOffsets(std::vector<ion::Vector2i>& offsets) const
+{
+	int width = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
+	int height = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
+
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	for(int x = 0; x < width; x++)
+	{
+		for(int y = 0; y < height; y++)
+		{
+			int subSprX = (x * subSpriteWidthTiles * tileWidth);
+			int subSprY = (y * subSpriteHeightTiles * tileHeight);
+			offsets.push_back(ion::Vector2i(subSprX, subSprY));
+		}
+	}
+}
+
+void SpriteSheet::GetSubspritePosOffsetsFlippedX(std::vector<ion::Vector2i>& offsets) const
+{
+	int width = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
+	int height = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
+
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	for(int x = 0; x < width; x++)
+	{
+		for(int y = 0; y < height; y++)
+		{
+			int subSprWidth = ion::maths::Min(subSpriteWidthTiles, m_widthTiles - (subSpriteWidthTiles * x));
+			int subSprX = (m_widthTiles - (subSprWidth + (x * subSpriteWidthTiles))) * tileWidth;
+			int subSprY = (y * subSpriteHeightTiles * tileHeight);
+			offsets.push_back(ion::Vector2i(subSprX, subSprY));
+		}
+	}
+}
+
+void SpriteSheet::GetSubspritePosOffsetsFlippedY(std::vector<ion::Vector2i>& offsets) const
+{
+
+}
+
+void SpriteSheet::GetSubspritePosOffsetsFlippedXY(std::vector<ion::Vector2i>& offsets) const
+{
+
+}
+
 const Palette& SpriteSheet::GetPalette() const
 {
 	return m_palette;
@@ -188,9 +270,6 @@ void SpriteSheet::ExportTiles(std::stringstream& stream) const
 	for(std::vector<SpriteSheetFrame>::const_iterator it = m_frames.begin(), end = m_frames.end(); it != end; ++it)
 	{
 		//Split into subsprites
-		const int subSpriteWidthTiles = 4;
-		const int subSpriteHeightTiles = 4;
-
 		const int widthSubSprites = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
 		const int heightSubSprites = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
 
@@ -251,6 +330,11 @@ void SpriteSheet::ExportAnims(std::stringstream& stream, const std::string& acto
 void SpriteSheet::ExportAnims(ion::io::File& file) const
 {
 
+}
+
+void SpriteSheet::ExportPalette(std::stringstream& stream) const
+{
+	m_palette.Export(stream);
 }
 
 u32 SpriteSheet::GetBinarySizeTiles() const

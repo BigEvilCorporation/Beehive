@@ -201,6 +201,7 @@ public:
 	bool ExportGameObjects(const std::string& filename) const;
 	bool ExportSpriteSheets(const std::string& directory, bool binary) const;
 	bool ExportSpriteAnims(const std::string& directory, bool binary) const;
+	bool ExportSpritePalettes(const std::string& directory) const;
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
@@ -216,6 +217,7 @@ public:
 		std::string gameObjects;
 		std::string spriteSheets;
 		std::string spriteAnims;
+		std::string spritePalettes;
 
 		void Serialise(ion::io::Archive& archive)
 		{
@@ -227,6 +229,7 @@ public:
 			archive.Serialise(gameObjects, "exportFNameGameObjects");
 			archive.Serialise(spriteSheets, "exportDirSpriteSheets");
 			archive.Serialise(spriteAnims, "exportDirSpriteAnims");
+			archive.Serialise(spritePalettes, "exportDirSpritePalettes");
 		}
 	};
 	

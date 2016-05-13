@@ -21,6 +21,9 @@ static const SpriteSheetId InvalidSpriteSheetId = 0;
 class SpriteSheet
 {
 public:
+	static const int subSpriteWidthTiles = 4;
+	static const int subSpriteHeightTiles = 4;
+
 	SpriteSheet();
 
 	bool ImportBitmap(const std::string& filename, const std::string& name, int widthCells, int heightCells, int maxCells);
@@ -38,6 +41,17 @@ public:
 
 	u8 GetWidthTiles() const;
 	u8 GetHeightTiles() const;
+
+	void GetWidthSubsprites(u8& total, u8& whole, u8& remainder) const;
+	void GetHeightSubsprites(u8& total, u8& whole, u8& remainder) const;
+
+	void GetSubspriteDimensions(std::vector<ion::Vector2i>& dimensions) const;
+
+	void GetSubspritePosOffsets(std::vector<ion::Vector2i>& offsets) const;
+	void GetSubspritePosOffsetsFlippedX(std::vector<ion::Vector2i>& offsets) const;
+	void GetSubspritePosOffsetsFlippedY(std::vector<ion::Vector2i>& offsets) const;
+	void GetSubspritePosOffsetsFlippedXY(std::vector<ion::Vector2i>& offsets) const;
+
 	const Palette& GetPalette() const;
 
 	//Serialise
@@ -46,6 +60,7 @@ public:
 	void ExportTiles(ion::io::File& file) const;
 	void ExportAnims(std::stringstream& stream, const std::string& actorName) const;
 	void ExportAnims(ion::io::File& file) const;
+	void ExportPalette(std::stringstream& stream) const;
 	u32 GetBinarySizeTiles() const;
 
 private:
