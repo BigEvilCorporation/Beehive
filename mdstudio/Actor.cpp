@@ -1,5 +1,9 @@
 #include "Actor.h"
 
+#define HEX1(val) std::hex << std::setfill('0') << std::setw(1) << std::uppercase << (int)##val
+#define HEX2(val) std::hex << std::setfill('0') << std::setw(2) << std::uppercase << (int)##val
+#define HEX4(val) std::hex << std::setfill('0') << std::setw(4) << std::uppercase << (int)##val
+
 Actor::Actor()
 {
 
@@ -84,6 +88,82 @@ void Actor::ExportSpriteSheets(std::stringstream& stream) const
 
 	stream << "actor_" << m_name << ":" << std::endl << std::endl;
 
+	//Export sprite dimensions header
+	if(m_spriteSheets.size() > 0)
+	{
+		const SpriteSheet& spriteSheet = m_spriteSheets.begin()->second;
+
+		std::stringstream label;
+		label << "sprite_" << m_name;
+
+		u8 widthTotal;
+		u8 widthWhole;
+		u8 widthRemainder;
+		u8 heightTotal;
+		u8 heightWhole;
+		u8 heightRemainder;
+
+		std::vector<ion::Vector2i> subSprDimensionsTiles;
+
+		std::vector<ion::Vector2i> subSprOffsetsUnflipped;
+		std::vector<ion::Vector2i> subSprOffsetsFlippedX;
+
+		spriteSheet.GetWidthSubsprites(widthTotal, widthWhole, widthRemainder);
+		spriteSheet.GetHeightSubsprites(heightTotal, heightWhole, heightRemainder);
+		spriteSheet.GetSubspriteDimensions(subSprDimensionsTiles);
+		spriteSheet.GetSubspritePosOffsets(subSprOffsetsUnflipped);
+		spriteSheet.GetSubspritePosOffsetsFlippedX(subSprOffsetsFlippedX);
+
+		int sizeTiles = spriteSheet.GetWidthTiles() * spriteSheet.GetHeightTiles();
+
+		stream << label.str() << "_size_b\t\tequ 0x" << HEX4(sizeTiles * 32) << "\t; Size in bytes" << std::endl;
+		stream << label.str() << "_size_t\t\tequ 0x" << HEX4(sizeTiles) << "\t; Size in tiles" << std::endl;
+		stream << label.str() << "_size_subsprites\t\tequ 0x" << HEX4(widthTotal * heightTotal) << "\t; Size in subsprites" << std::endl;
+		stream << label.str() << "_widthheight_subsprites\t\tequ 0x" << HEX2(widthTotal) << HEX2(heightTotal) << "\t; Width/height (bb) in subsprites" << std::endl;
+
+		stream << std::endl;
+
+		stream << "; Subsprite offsets from 0,0 (in pixels) - unflipped (bb) and flipped X (bb)" << std::endl;
+		stream << label.str() << "_subsprite_pos_offsets:" << std::endl;
+
+		for(int i = 0; i < subSprOffsetsUnflipped.size(); i++)
+		{
+			stream << "\tdc.w 0x"
+				<< HEX2(subSprOffsetsUnflipped[i].x)
+				<< HEX2(subSprOffsetsUnflipped[i].y)
+				<< ", 0x"
+				<< HEX2(subSprOffsetsFlippedX[i].x)
+				<< HEX2(subSprOffsetsFlippedX[i].y)
+				<< std::endl;
+		}
+
+		stream << "\tEven" << std::endl << std::endl;
+
+		stream << "; Subsprite dimension bits (for sprite descs)" << std::endl;
+		stream << label.str() << "_subsprite_dimensions_bits:" << std::endl;
+
+		for(int i = 0; i < subSprDimensionsTiles.size(); i++)
+		{
+			u8 bits = ((subSprDimensionsTiles[i].x - 1) << 2) | (subSprDimensionsTiles[i].y - 1);
+			stream << "\tdc.b 0x" << HEX1(bits) << std::endl;
+		}
+
+		stream << "\tEven" << std::endl << std::endl;
+
+		stream << "; Num tiles per subsprite (for sprite descs)" << std::endl;
+		stream << label.str() << "_numtiles_per_subsprite:" << std::endl;
+
+		for(int i = 0; i < subSprDimensionsTiles.size(); i++)
+		{
+			stream << "\tdc.b 0x" << HEX2(subSprDimensionsTiles[i].x * subSprDimensionsTiles[i].y) << std::endl;
+		}
+
+		stream << "\tEven" << std::endl << std::endl;
+
+		stream << std::dec;
+		stream <<  std::endl;
+	}
+
 	//Export sprite sheet size headers
 	for(TSpriteSheetMap::const_iterator it = m_spriteSheets.begin(), end = m_spriteSheets.end(); it != end; ++it)
 	{
@@ -92,12 +172,11 @@ void Actor::ExportSpriteSheets(std::stringstream& stream) const
 
 		u32 size = it->second.GetBinarySizeTiles();
 
-		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << label.str() << "_frameoffset\tequ 0x" << frameIndex << "\t; Offset to first frame in sprite sheet" << std::endl;
-		stream << label.str() << "_size_b\t\tequ 0x" << size << "\t; Size in bytes" << std::endl;
-		stream << label.str() << "_size_w\t\tequ 0x" << size/2 << "\t; Size in words" << std::endl;
-		stream << label.str() << "_size_l\t\tequ 0x" << size/4 << "\t; Size in longwords" << std::endl;
-		stream << label.str() << "_size_t\t\tequ 0x" << size/32 << "\t; Size in tiles" << std::endl;
+		stream << label.str() << "_frameoffset\tequ 0x" << HEX2(frameIndex) << "\t; Offset to first frame in sprite sheet" << std::endl;
+		stream << label.str() << "_size_b\t\tequ 0x" << HEX2(size) << "\t; Size in bytes" << std::endl;
+		stream << label.str() << "_size_w\t\tequ 0x" << HEX2(size/2) << "\t; Size in words" << std::endl;
+		stream << label.str() << "_size_l\t\tequ 0x" << HEX2(size/4) << "\t; Size in longwords" << std::endl;
+		stream << label.str() << "_size_t\t\tequ 0x" << HEX2(size/32) << "\t; Size in tiles" << std::endl;
 		stream << std::dec;
 
 		stream << std::endl << std::endl;
@@ -141,4 +220,14 @@ void Actor::ExportSpriteAnims(std::stringstream& stream) const
 void Actor::ExportSpriteAnims(ion::io::File& file) const
 {
 
+}
+
+void Actor::ExportSpritePalettes(std::stringstream& stream) const
+{
+	if(m_spriteSheets.size() > 0)
+	{
+		stream << "palette_" << m_name << ":" << std::endl;
+		m_spriteSheets.begin()->second.ExportPalette(stream);
+		stream << std::endl;
+	}
 }

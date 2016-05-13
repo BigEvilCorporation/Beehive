@@ -608,14 +608,14 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_txtProjectName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer3->Add( m_txtProjectName, 0, wxALL|wxEXPAND, 5 );
 	
-	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export map palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkPalettes->SetValue(true); 
 	fgSizer3->Add( m_chkPalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer3->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
 	
-	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export map tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkTileset->SetValue(true); 
 	fgSizer3->Add( m_chkTileset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
@@ -656,6 +656,13 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	m_dirPickerSpriteSheets = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer3->Add( m_dirPickerSpriteSheets, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkSpritePalettes = new wxCheckBox( this, wxID_ANY, wxT("Export sprite palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpritePalettes->SetValue(true); 
+	fgSizer3->Add( m_chkSpritePalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_dirPickerSpritePalettes = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer3->Add( m_dirPickerSpritePalettes, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkSpriteAnims = new wxCheckBox( this, wxID_ANY, wxT("Export sprite animations:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkSpriteAnims->SetValue(true); 

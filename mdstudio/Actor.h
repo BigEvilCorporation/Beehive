@@ -34,6 +34,7 @@ public:
 	void Serialise(ion::io::Archive& archive);
 	void ExportSpriteSheets(std::stringstream& stream) const;
 	void ExportSpriteAnims(std::stringstream& stream) const;
+	void ExportSpritePalettes(std::stringstream& stream) const;
 	void ExportSpriteSheets(ion::io::File& file) const;
 	void ExportSpriteAnims(ion::io::File& file) const;
 

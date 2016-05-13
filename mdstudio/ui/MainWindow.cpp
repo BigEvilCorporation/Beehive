@@ -777,6 +777,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerGameObj->SetPath(m_project->m_exportFilenames.gameObjects);
 		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
 		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
+		dialog.m_dirPickerSpritePalettes->SetPath(m_project->m_exportFilenames.spritePalettes);
 
 		if(dialog.ShowModal() == wxID_OK)
 		{
@@ -791,6 +792,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.gameObjects = dialog.m_filePickerGameObj->GetPath();
 			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
 			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
+			m_project->m_exportFilenames.spritePalettes = dialog.m_dirPickerSpritePalettes->GetPath();
 
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
@@ -815,6 +817,9 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			if(dialog.m_chkSpriteAnims->GetValue())
 				m_project->ExportSpriteAnims(m_project->m_exportFilenames.spriteAnims, dialog.m_btnBinary->GetValue());
+
+			if(dialog.m_chkSpritePalettes->GetValue())
+				m_project->ExportSpritePalettes(m_project->m_exportFilenames.spritePalettes);
 
 			SetStatusText("Export complete");
 			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
