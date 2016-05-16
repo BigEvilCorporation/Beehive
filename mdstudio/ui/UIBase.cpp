@@ -90,6 +90,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_PALETTES, wxT("Palettes"), wxBitmap( palettespanel_xpm ), wxEmptyString);
 	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_GAMEOBJS, wxT("Objects"), wxBitmap( gameobjpanel_xpm ), wxEmptyString);
 	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_GAMEOBJPARAMS, wxT("Object Params"), wxBitmap( gameobjpanel_xpm ), wxEmptyString);
+	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_TIMELINE, wxT("Animation Timeline"), wxBitmap( gameobjpanel_xpm ), wxEmptyString);
 	m_ribbonPanelMap = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Map") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarMap = new wxRibbonButtonBar( m_ribbonPanelMap, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_CLEAR, wxT("Clear Map"), wxBitmap( clearmap_xpm ), wxEmptyString);
@@ -145,6 +146,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TOOLS_PALETTES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsPalettes ) );
 	this->Connect( wxID_BTN_TOOLS_GAMEOBJS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjs ) );
 	this->Connect( wxID_BTN_TOOLS_GAMEOBJPARAMS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjParams ) );
+	this->Connect( wxID_BTN_TOOLS_TIMELINE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsTimeline ) );
 	this->Connect( wxID_BTN_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapClear ) );
 	this->Connect( wxID_BTN_MAP_RESIZE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapResize ) );
 	this->Connect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
@@ -176,6 +178,7 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TOOLS_PALETTES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsPalettes ) );
 	this->Disconnect( wxID_BTN_TOOLS_GAMEOBJS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjs ) );
 	this->Disconnect( wxID_BTN_TOOLS_GAMEOBJPARAMS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjParams ) );
+	this->Disconnect( wxID_BTN_TOOLS_TIMELINE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsTimeline ) );
 	this->Disconnect( wxID_BTN_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapClear ) );
 	this->Disconnect( wxID_BTN_MAP_RESIZE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapResize ) );
 	this->Disconnect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
@@ -1500,4 +1503,81 @@ GameObjParamsPanelBase::~GameObjParamsPanelBase()
 	m_choiceSize->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnVariableSizeChanged ), NULL, this );
 	m_btnApply->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnBtnApplyChanges ), NULL, this );
 	
+}
+
+TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	wxFlexGridSizer* fgSizer24;
+	fgSizer24 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer24->AddGrowableRow( 1 );
+	fgSizer24->SetFlexibleDirection( wxBOTH );
+	fgSizer24->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_toolBarAnimation = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL ); 
+	wxArrayString m_choiceAnimsChoices;
+	m_choiceAnims = new wxChoice( m_toolBarAnimation, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceAnimsChoices, 0 );
+	m_choiceAnims->SetSelection( 0 );
+	m_toolBarAnimation->AddControl( m_choiceAnims );
+	m_toolAddAnim = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxT("New Animation"), wxEmptyString, NULL ); 
+	
+	m_toolDeleteAnim = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxT("Delete Animation"), wxEmptyString, NULL ); 
+	
+	m_toolBarAnimation->AddSeparator(); 
+	
+	m_toolKeyframe = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxT("Keyframe"), wxEmptyString, NULL ); 
+	
+	m_toolBarAnimation->AddSeparator(); 
+	
+	m_toolPlay = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxT("Play"), wxEmptyString, NULL ); 
+	
+	m_toolStop = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxT("Stop"), wxEmptyString, NULL ); 
+	
+	m_toolRewind = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxT("Rewind"), wxEmptyString, NULL ); 
+	
+	m_toolBarAnimation->AddSeparator(); 
+	
+	m_toolIsolateObject = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_CHECK, wxT("Isolate Object"), wxEmptyString, NULL ); 
+	
+	m_staticText34 = new wxStaticText( m_toolBarAnimation, wxID_ANY, wxT("Speed:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText34->Wrap( -1 );
+	m_toolBarAnimation->AddControl( m_staticText34 );
+	m_spinSpeed = new wxSpinCtrl( m_toolBarAnimation, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1000, 0 );
+	m_toolBarAnimation->AddControl( m_spinSpeed );
+	m_toolBarAnimation->Realize(); 
+	
+	fgSizer24->Add( m_toolBarAnimation, 0, wxEXPAND, 5 );
+	
+	m_gridTimeline = new wxGrid( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	
+	// Grid
+	m_gridTimeline->CreateGrid( 5, 5 );
+	m_gridTimeline->EnableEditing( true );
+	m_gridTimeline->EnableGridLines( true );
+	m_gridTimeline->EnableDragGridSize( false );
+	m_gridTimeline->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridTimeline->EnableDragColMove( false );
+	m_gridTimeline->EnableDragColSize( true );
+	m_gridTimeline->SetColLabelSize( 0 );
+	m_gridTimeline->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridTimeline->EnableDragRowSize( true );
+	m_gridTimeline->SetRowLabelSize( 80 );
+	m_gridTimeline->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridTimeline->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	fgSizer24->Add( m_gridTimeline, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	this->SetSizer( fgSizer24 );
+	this->Layout();
+}
+
+TimelinePanelBase::~TimelinePanelBase()
+{
 }

@@ -25,6 +25,7 @@
 #include "GameObjectTypeDialog.h"
 #include "GameObjectTypePanel.h"
 #include "GameObjectParamsPanel.h"
+#include "TimelinePanel.h"
 
 #include "../Project.h"
 
@@ -59,6 +60,7 @@ public:
 	void ShowPanelTerrainEditor();
 	void ShowPanelGameObjectTypes();
 	void ShowPanelGameObjectParams();
+	void ShowPanelTimeline();
 
 	//Open toolbox
 	void ShowPanelToolbox();
@@ -108,6 +110,7 @@ protected:
 	virtual void OnBtnToolsPalettes(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsGameObjParams(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnToolsTimeline(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
@@ -139,6 +142,7 @@ private:
 	wxWeakRef<TerrainTileEditorPanel> m_TerrainTileEditorPanel;
 	wxWeakRef<GameObjectTypesPanel> m_gameObjectTypePanel;
 	wxWeakRef<GameObjectParamsPanel> m_gameObjectParamsPanel;
+	wxWeakRef<TimelinePanel> m_timelinePanel;
 
 	ProjectPtr m_project;
 

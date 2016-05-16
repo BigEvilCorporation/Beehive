@@ -16,6 +16,8 @@ local SRC =
 
 	Actor.cpp
 	Actor.h
+	Animation.cpp
+	Animation.h
 	BMPReader.cpp
 	BMPReader.h
 	CollisionMap.cpp
@@ -73,6 +75,8 @@ local SRC =
 	ui/TileEditorPanel.h
 	ui/TilesPanel.cpp
 	ui/TilesPanel.h
+	ui/TimelinePanel.cpp
+	ui/TimelinePanel.h
 	ui/Tool.h
 	ui/ToolSelectStamp.cpp
 	ui/ToolSelectStamp.h

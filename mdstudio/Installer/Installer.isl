@@ -346,51 +346,35 @@
 		<row><td>ISX_DEFAULTCOMPONENT3</td><td>{74E7B56C-484F-4660-B80A-D5C2565C723E}</td><td>PROGRAMS</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT4</td><td>{C26FCE19-2AFA-4425-8438-B3F3A6D8D7DA}</td><td>CG</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT5</td><td>{ADDD9067-2475-4A13-AE85-EEFF200DA0E3}</td><td>PROJECTS</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>SDL2.dll</td><td>{13A89E5C-D17B-4056-B5C5-0BF7A58422A5}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>SDL2_image.dll</td><td>{A902EE55-E1C5-42ED-A64F-7C85088844D1}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2_image.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>beehive.release.exe</td><td>{97D491CC-85F4-4A1D-BF79-761D54F1523F}</td><td>INSTALLDIR</td><td>2</td><td/><td>beehive.release.exe</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>cg.dll</td><td>{DE0BDDC5-FD22-4497-8D3A-185F888CAD01}</td><td>INSTALLDIR</td><td>2</td><td/><td>cg.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>cgD3D10.dll</td><td>{786CC797-D850-47F5-99F1-4997A67EC7A4}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d10.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>cgD3D11.dll</td><td>{5CD5AC09-A97C-42B0-BB89-6D62893C8ECB}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d11.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>cgD3D9.dll</td><td>{8EC5CDE0-BBFF-4F8E-95B2-3DEB5992088E}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d9.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>cgGL.dll</td><td>{C7694A3A-BDEF-4A9F-A5CA-8DE22D6EDEBC}</td><td>INSTALLDIR</td><td>2</td><td/><td>cggl.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>libjpeg_9.dll</td><td>{94375653-83BB-4002-BB09-FAA7BB9E50AE}</td><td>INSTALLDIR</td><td>2</td><td/><td>libjpeg_9.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>libpng16_16.dll</td><td>{CFB85C49-AAEF-4D4E-8DE8-23C21000D125}</td><td>INSTALLDIR</td><td>2</td><td/><td>libpng16_16.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>libtiff_5.dll</td><td>{60A16932-696D-4957-AE88-5B0323C901A3}</td><td>INSTALLDIR</td><td>2</td><td/><td>libtiff_5.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>libwebp_4.dll</td><td>{2E594163-408D-478C-BC13-A7A406E86A7F}</td><td>INSTALLDIR</td><td>2</td><td/><td>libwebp_4.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxbase30u_net_vc120.dll</td><td>{DE47FBCF-1D5E-4419-8B4C-35F6660F207A}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30u_net_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxbase30u_vc120.dll</td><td>{C7208B3F-E929-4AD1-9EA1-93C8CD90399E}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30u_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxbase30u_xml_vc120.dll</td><td>{B44C6C02-8D37-4334-BB5D-2301D1CE6575}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30u_xml_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxbase30ud_net_vc120.dll</td><td>{38F0DFB0-00C3-468C-A87B-CF63BE003C3A}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30ud_net_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxbase30ud_vc120.dll</td><td>{D8D97924-7BEB-4F6E-96C8-A9A906FDF8A9}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30ud_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxbase30ud_xml_vc120.dll</td><td>{765C5818-E58F-4828-8876-060BECF01A61}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30ud_xml_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_adv_vc120.dll</td><td>{24FB8577-8947-4C25-A6F9-3BE6F1E572E5}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_adv_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_aui_vc120.dll</td><td>{AE37A745-9C6F-4EAA-B291-75109518BD32}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_aui_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_core_vc120.dll</td><td>{A9880726-3C16-4C71-9F9F-16CA201BD328}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_core_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_gl_vc120.dll</td><td>{FD845AE6-938F-4657-975D-E4D4E0B6F5A5}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_gl_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_html_vc120.dll</td><td>{3AB71A9A-2EBA-4876-93F8-5F0337E57EF0}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_html_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_media_vc120.dll</td><td>{A3D40183-1D40-4233-84E0-744AE4063100}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_media_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_propgrid_vc120.dll</td><td>{446DE90D-9345-4A66-90CF-8EA947E8F60E}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_propgrid_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_qa_vc120.dll</td><td>{D5D728B2-948C-4486-975F-8803681C1EDA}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_qa_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_ribbon_vc120.dll</td><td>{CDE83E49-52A2-4CF7-942B-BCB891F81267}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_ribbon_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_richtext_vc120.dll</td><td>{2814BA66-51B3-4397-B1F0-D5DD9E1F5169}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_richtext_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_stc_vc120.dll</td><td>{FA60DD63-DF4F-4852-A2A4-C6D9F232E1E6}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_stc_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_webview_vc120.dll</td><td>{9AC4EFB9-06EE-4238-AC7B-FD7330592E2D}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_webview_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30u_xrc_vc120.dll</td><td>{6BF22B7B-9CCD-4CF0-9ABB-6E0C2CBECE2F}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_xrc_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_adv_vc120.dll</td><td>{0D5EA77F-7043-489A-8C3E-9513FF4D4C89}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_adv_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_aui_vc120.dll</td><td>{2DFAC57F-BC07-4392-9E38-85FF643FCFA0}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_aui_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_core_vc120.dll</td><td>{68BC8441-2E31-4B33-B83B-9A1E4586FF95}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_core_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_gl_vc120.dll</td><td>{FBBB1369-0621-489A-B5F5-751CBAD52B0D}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_gl_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_html_vc120.dll</td><td>{5072ADD5-94C9-4690-926F-49EE8871A276}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_html_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_media_vc120.dll</td><td>{A68240D3-608C-4DA8-963C-1E4FBC403DA4}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_media_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_propgrid_vc120.dll</td><td>{F1F5A71A-D37D-48C1-9818-C0E6537613C1}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_propgrid_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_qa_vc120.dll</td><td>{01F928A0-DDE6-437E-B4C3-4DC7AC7E0F87}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_qa_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_ribbon_vc120.dll</td><td>{92FBC8EC-ACA8-4D80-B1EC-F1654CF86D15}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_ribbon_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_richtext_vc120.dll</td><td>{D922199A-CD83-487D-86F3-70CDE5632ACC}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_richtext_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_stc_vc120.dll</td><td>{CF9F66D7-B8EF-4054-88EB-748B320563EB}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_stc_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_webview_vc120.dll</td><td>{66F7F3E6-E063-4175-B2A5-EDBF85E34EFC}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_webview_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>wxmsw30ud_xrc_vc120.dll</td><td>{86CDAE0B-5065-4DE3-951D-BC37247AF66D}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30ud_xrc_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>zlib1.dll</td><td>{F47AE2A2-9599-474A-940A-3649AD7AA9F0}</td><td>INSTALLDIR</td><td>2</td><td/><td>zlib1.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>SDL2.dll</td><td>{175CBA99-54CF-4ECD-85DE-E18665A706B8}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>SDL2_image.dll</td><td>{E5729EF0-247D-48C3-AB6D-DEBB2872CF60}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2_image.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>beehive.release.exe</td><td>{A24C5E5F-6F01-4364-BD25-9BEBE0C8EFC7}</td><td>INSTALLDIR</td><td>2</td><td/><td>beehive.release.exe</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>cg.dll</td><td>{B5048B4A-1BFE-42BF-8CA3-734D1F7FCD48}</td><td>INSTALLDIR</td><td>2</td><td/><td>cg.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>cgD3D10.dll</td><td>{5D5ADCF2-977C-41D3-A947-F5FF360E8172}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d10.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>cgD3D11.dll</td><td>{7EA325CB-BEB8-4BDB-B1DB-7C733A9AE830}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d11.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>cgD3D9.dll</td><td>{ABF6FFF3-66FF-486E-89C3-34E1C59F6A70}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d9.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>cgGL.dll</td><td>{2C9A8672-BD56-43FB-A29B-6A18F5BD5DA8}</td><td>INSTALLDIR</td><td>2</td><td/><td>cggl.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>libjpeg_9.dll</td><td>{0E71390C-B074-4B1D-B7FC-FE550F34F526}</td><td>INSTALLDIR</td><td>2</td><td/><td>libjpeg_9.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>libpng16_16.dll</td><td>{78AAB52F-87D9-493C-814A-8C3F868B2A4D}</td><td>INSTALLDIR</td><td>2</td><td/><td>libpng16_16.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>libtiff_5.dll</td><td>{C5C24387-9B33-404A-8273-7B6121E304E4}</td><td>INSTALLDIR</td><td>2</td><td/><td>libtiff_5.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>libwebp_4.dll</td><td>{BBD0FA04-3C00-47A3-AE74-0086A9523388}</td><td>INSTALLDIR</td><td>2</td><td/><td>libwebp_4.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxbase30u_net_vc120.dll</td><td>{728ED293-FE40-487F-BE6D-DAD20AF05D84}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30u_net_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxbase30u_vc120.dll</td><td>{E94CE90C-1ADF-4E57-A5E2-176FF5C5D5E8}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30u_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxbase30u_xml_vc120.dll</td><td>{EBDCA49E-AF2C-44DD-BC77-4D2FE7EE8EB5}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxbase30u_xml_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_adv_vc120.dll</td><td>{94519021-3975-4EF6-B6ED-27C9BCDCDC93}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_adv_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_aui_vc120.dll</td><td>{5B2715AE-DFA7-40BE-9837-3E86671D01BA}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_aui_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_core_vc120.dll</td><td>{2C1295DB-574A-471F-93F7-AA5420E63F6A}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_core_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_gl_vc120.dll</td><td>{C2114622-0C70-4488-8737-FBC551B678CA}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_gl_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_html_vc120.dll</td><td>{CB9E3D2A-E44F-42B2-A0AD-5915168B3153}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_html_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_media_vc120.dll</td><td>{CB5788C5-118E-4440-B069-A5735DA74948}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_media_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_propgrid_vc120.dll</td><td>{0D8C8C0B-16D0-4847-A394-86E8EAA2A2C1}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_propgrid_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_qa_vc120.dll</td><td>{C672C991-926A-4A6E-8BBC-5D1B090CF3E7}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_qa_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_ribbon_vc120.dll</td><td>{0C07EA53-D210-49D9-ADA5-E136D4982829}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_ribbon_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_richtext_vc120.dll</td><td>{01F00684-5D83-44D1-B837-396D730B60D7}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_richtext_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_stc_vc120.dll</td><td>{106B20D2-F22D-4A4D-B7CF-710F9FD8FF3B}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_stc_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_webview_vc120.dll</td><td>{9E8F8857-3EDF-45EE-930A-01917612F1DE}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_webview_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>wxmsw30u_xrc_vc120.dll</td><td>{8BC6FD9E-9379-40D8-BD16-8145A0748EA7}</td><td>INSTALLDIR</td><td>2</td><td/><td>wxmsw30u_xrc_vc120.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>zlib1.dll</td><td>{E1DDDF3F-400E-4477-8340-54C725F1ADA3}</td><td>INSTALLDIR</td><td>2</td><td/><td>zlib1.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
 	<table name="Condition">
@@ -1942,9 +1926,6 @@
 		<row><td>AlwaysInstall</td><td>wxbase30u_net_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>wxbase30u_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>wxbase30u_xml_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxbase30ud_net_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxbase30ud_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxbase30ud_xml_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>wxmsw30u_adv_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>wxmsw30u_aui_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>wxmsw30u_core_vc120.dll</td></row>
@@ -1958,19 +1939,6 @@
 		<row><td>AlwaysInstall</td><td>wxmsw30u_stc_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>wxmsw30u_webview_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>wxmsw30u_xrc_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_adv_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_aui_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_core_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_gl_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_html_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_media_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_propgrid_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_qa_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_ribbon_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_richtext_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_stc_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_webview_vc120.dll</td></row>
-		<row><td>AlwaysInstall</td><td>wxmsw30ud_xrc_vc120.dll</td></row>
 		<row><td>AlwaysInstall</td><td>zlib1.dll</td></row>
 	</table>
 
@@ -1986,68 +1954,53 @@
 		<col def="S255">ISBuildSourcePath</col>
 		<col def="I4">ISAttributes</col>
 		<col def="S72">ISComponentSubFolder_</col>
-		<row><td>beehive.release.exe</td><td>beehive.release.exe</td><td>BEEHIV~1.EXE|beehive.release.exe</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.exe</td><td>1</td><td/></row>
-		<row><td>beehive.release.exe.manifest</td><td>ISX_DEFAULTCOMPONENT</td><td>BEEHIV~1.MAN|beehive.release.exe.manifest</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.exe.manifest</td><td>1</td><td/></row>
-		<row><td>cg.dll</td><td>cg.dll</td><td>cg.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\cg.dll</td><td>1</td><td/></row>
-		<row><td>cgd3d10.dll</td><td>cgD3D10.dll</td><td>cgD3D10.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\cgD3D10.dll</td><td>1</td><td/></row>
-		<row><td>cgd3d11.dll</td><td>cgD3D11.dll</td><td>cgD3D11.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\cgD3D11.dll</td><td>1</td><td/></row>
-		<row><td>cgd3d9.dll</td><td>cgD3D9.dll</td><td>cgD3D9.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\cgD3D9.dll</td><td>1</td><td/></row>
-		<row><td>cggl.dll</td><td>cgGL.dll</td><td>cgGL.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\cgGL.dll</td><td>1</td><td/></row>
-		<row><td>default.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>DEFAUL~1.CGF|default.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\programs\cg\default.cgfx</td><td>1</td><td/></row>
-		<row><td>default.ion.material</td><td>ISX_DEFAULTCOMPONENT1</td><td>DEFAUL~1.MAT|default.ion.material</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\materials\default.ion.material</td><td>1</td><td/></row>
-		<row><td>default_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>DEFAUL~1.SHA|default_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\default_p.ion.shader</td><td>1</td><td/></row>
-		<row><td>default_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>DEFAUL~1.SHA|default_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\default_v.ion.shader</td><td>1</td><td/></row>
-		<row><td>flat.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>FLAT~1.CGF|flat.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\programs\cg\flat.cgfx</td><td>1</td><td/></row>
-		<row><td>flat_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLAT_P~1.SHA|flat_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\flat_p.ion.shader</td><td>1</td><td/></row>
-		<row><td>flat_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLAT_V~1.SHA|flat_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\flat_v.ion.shader</td><td>1</td><td/></row>
-		<row><td>flattextured.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>FLATTE~1.CGF|flattextured.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\programs\cg\flattextured.cgfx</td><td>1</td><td/></row>
-		<row><td>flattextured_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLATTE~1.SHA|flattextured_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\flattextured_p.ion.shader</td><td>1</td><td/></row>
-		<row><td>flattextured_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLATTE~1.SHA|flattextured_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\flattextured_v.ion.shader</td><td>1</td><td/></row>
-		<row><td>fur.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>FUR~1.CGF|fur.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\programs\cg\fur.cgfx</td><td>1</td><td/></row>
-		<row><td>green.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>GREEN~1.CGF|green.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\programs\cg\green.cgfx</td><td>1</td><td/></row>
-		<row><td>libjpeg_9.dll</td><td>libjpeg_9.dll</td><td>LIBJPE~1.DLL|libjpeg-9.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\libjpeg-9.dll</td><td>1</td><td/></row>
-		<row><td>libpng16_16.dll</td><td>libpng16_16.dll</td><td>LIBPNG~1.DLL|libpng16-16.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\libpng16-16.dll</td><td>1</td><td/></row>
-		<row><td>libtiff_5.dll</td><td>libtiff_5.dll</td><td>LIBTIF~1.DLL|libtiff-5.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\libtiff-5.dll</td><td>1</td><td/></row>
-		<row><td>libwebp_4.dll</td><td>libwebp_4.dll</td><td>LIBWEB~1.DLL|libwebp-4.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\libwebp-4.dll</td><td>1</td><td/></row>
-		<row><td>sdl2.dll</td><td>SDL2.dll</td><td>SDL2.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\SDL2.dll</td><td>1</td><td/></row>
-		<row><td>sdl2_image.dll</td><td>SDL2_image.dll</td><td>SDL2_I~1.DLL|SDL2_image.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\SDL2_image.dll</td><td>1</td><td/></row>
-		<row><td>sprite.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>SPRITE~1.CGF|sprite.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\programs\cg\sprite.cgfx</td><td>1</td><td/></row>
-		<row><td>sprite_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>SPRITE~1.SHA|sprite_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\sprite_p.ion.shader</td><td>1</td><td/></row>
-		<row><td>sprite_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>SPRITE~1.SHA|sprite_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\shaders\sprite_v.ion.shader</td><td>1</td><td/></row>
-		<row><td>welcome.bee</td><td>ISX_DEFAULTCOMPONENT5</td><td>welcome.bee</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\projects\welcome.bee</td><td>1</td><td/></row>
-		<row><td>wxbase30u_net_vc120.dll</td><td>wxbase30u_net_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_net_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxbase30u_net_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxbase30u_vc120.dll</td><td>wxbase30u_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxbase30u_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxbase30u_xml_vc120.dll</td><td>wxbase30u_xml_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_xml_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxbase30u_xml_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxbase30ud_net_vc120.dll</td><td>wxbase30ud_net_vc120.dll</td><td>WXBASE~1.DLL|wxbase30ud_net_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxbase30ud_net_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxbase30ud_vc120.dll</td><td>wxbase30ud_vc120.dll</td><td>WXBASE~1.DLL|wxbase30ud_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxbase30ud_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxbase30ud_xml_vc120.dll</td><td>wxbase30ud_xml_vc120.dll</td><td>WXBASE~1.DLL|wxbase30ud_xml_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxbase30ud_xml_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_adv_vc120.dll</td><td>wxmsw30u_adv_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_adv_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_adv_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_aui_vc120.dll</td><td>wxmsw30u_aui_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_aui_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_aui_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_core_vc120.dll</td><td>wxmsw30u_core_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_core_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_core_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_gl_vc120.dll</td><td>wxmsw30u_gl_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_gl_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_gl_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_html_vc120.dll</td><td>wxmsw30u_html_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_html_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_html_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_media_vc120.dll</td><td>wxmsw30u_media_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_media_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_media_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_propgrid_vc120.dll</td><td>wxmsw30u_propgrid_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_propgrid_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_propgrid_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_qa_vc120.dll</td><td>wxmsw30u_qa_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_qa_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_qa_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_ribbon_vc120.dll</td><td>wxmsw30u_ribbon_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_ribbon_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_ribbon_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_richtext_vc120.dll</td><td>wxmsw30u_richtext_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_richtext_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_richtext_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_stc_vc120.dll</td><td>wxmsw30u_stc_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_stc_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_stc_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_webview_vc120.dll</td><td>wxmsw30u_webview_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_webview_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_webview_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30u_xrc_vc120.dll</td><td>wxmsw30u_xrc_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_xrc_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30u_xrc_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_adv_vc120.dll</td><td>wxmsw30ud_adv_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_adv_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_adv_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_aui_vc120.dll</td><td>wxmsw30ud_aui_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_aui_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_aui_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_core_vc120.dll</td><td>wxmsw30ud_core_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_core_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_core_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_gl_vc120.dll</td><td>wxmsw30ud_gl_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_gl_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_gl_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_html_vc120.dll</td><td>wxmsw30ud_html_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_html_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_html_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_media_vc120.dll</td><td>wxmsw30ud_media_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_media_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_media_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_propgrid_vc120.dll</td><td>wxmsw30ud_propgrid_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_propgrid_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_propgrid_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_qa_vc120.dll</td><td>wxmsw30ud_qa_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_qa_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_qa_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_ribbon_vc120.dll</td><td>wxmsw30ud_ribbon_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_ribbon_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_ribbon_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_richtext_vc120.dll</td><td>wxmsw30ud_richtext_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_richtext_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_richtext_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_stc_vc120.dll</td><td>wxmsw30ud_stc_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_stc_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_stc_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_webview_vc120.dll</td><td>wxmsw30ud_webview_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_webview_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_webview_vc120.dll</td><td>1</td><td/></row>
-		<row><td>wxmsw30ud_xrc_vc120.dll</td><td>wxmsw30ud_xrc_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30ud_xrc_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\wxmsw30ud_xrc_vc120.dll</td><td>1</td><td/></row>
-		<row><td>zlib1.dll</td><td>zlib1.dll</td><td>zlib1.dll</td><td>0</td><td/><td/><td/><td>1</td><td>D:\Work\BigEvilCorporation\Repositories\bigevilcorporationhd\mdstudio\bin\zlib1.dll</td><td>1</td><td/></row>
+		<row><td>beehive.release.exe</td><td>beehive.release.exe</td><td>BEEHIV~1.EXE|beehive.release.exe</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.exe</td><td>1</td><td/></row>
+		<row><td>beehive.release.exe.manifest</td><td>ISX_DEFAULTCOMPONENT</td><td>BEEHIV~1.MAN|beehive.release.exe.manifest</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.exe.manifest</td><td>1</td><td/></row>
+		<row><td>beehive.release.pdb</td><td>ISX_DEFAULTCOMPONENT</td><td>BEEHIV~1.PDB|beehive.release.pdb</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.pdb</td><td>1</td><td/></row>
+		<row><td>cg.dll</td><td>cg.dll</td><td>cg.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\cg.dll</td><td>1</td><td/></row>
+		<row><td>cgd3d10.dll</td><td>cgD3D10.dll</td><td>cgD3D10.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\cgD3D10.dll</td><td>1</td><td/></row>
+		<row><td>cgd3d11.dll</td><td>cgD3D11.dll</td><td>cgD3D11.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\cgD3D11.dll</td><td>1</td><td/></row>
+		<row><td>cgd3d9.dll</td><td>cgD3D9.dll</td><td>cgD3D9.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\cgD3D9.dll</td><td>1</td><td/></row>
+		<row><td>cggl.dll</td><td>cgGL.dll</td><td>cgGL.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\cgGL.dll</td><td>1</td><td/></row>
+		<row><td>default.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>DEFAUL~1.CGF|default.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\programs\cg\default.cgfx</td><td>1</td><td/></row>
+		<row><td>default.ion.material</td><td>ISX_DEFAULTCOMPONENT1</td><td>DEFAUL~1.MAT|default.ion.material</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\materials\default.ion.material</td><td>1</td><td/></row>
+		<row><td>default_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>DEFAUL~1.SHA|default_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\default_p.ion.shader</td><td>1</td><td/></row>
+		<row><td>default_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>DEFAUL~1.SHA|default_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\default_v.ion.shader</td><td>1</td><td/></row>
+		<row><td>flat.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>FLAT~1.CGF|flat.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\programs\cg\flat.cgfx</td><td>1</td><td/></row>
+		<row><td>flat_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLAT_P~1.SHA|flat_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\flat_p.ion.shader</td><td>1</td><td/></row>
+		<row><td>flat_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLAT_V~1.SHA|flat_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\flat_v.ion.shader</td><td>1</td><td/></row>
+		<row><td>flattextured.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>FLATTE~1.CGF|flattextured.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\programs\cg\flattextured.cgfx</td><td>1</td><td/></row>
+		<row><td>flattextured_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLATTE~1.SHA|flattextured_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\flattextured_p.ion.shader</td><td>1</td><td/></row>
+		<row><td>flattextured_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>FLATTE~1.SHA|flattextured_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\flattextured_v.ion.shader</td><td>1</td><td/></row>
+		<row><td>fur.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>FUR~1.CGF|fur.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\programs\cg\fur.cgfx</td><td>1</td><td/></row>
+		<row><td>green.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>GREEN~1.CGF|green.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\programs\cg\green.cgfx</td><td>1</td><td/></row>
+		<row><td>libjpeg_9.dll</td><td>libjpeg_9.dll</td><td>LIBJPE~1.DLL|libjpeg-9.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\libjpeg-9.dll</td><td>1</td><td/></row>
+		<row><td>libpng16_16.dll</td><td>libpng16_16.dll</td><td>LIBPNG~1.DLL|libpng16-16.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\libpng16-16.dll</td><td>1</td><td/></row>
+		<row><td>libtiff_5.dll</td><td>libtiff_5.dll</td><td>LIBTIF~1.DLL|libtiff-5.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\libtiff-5.dll</td><td>1</td><td/></row>
+		<row><td>libwebp_4.dll</td><td>libwebp_4.dll</td><td>LIBWEB~1.DLL|libwebp-4.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\libwebp-4.dll</td><td>1</td><td/></row>
+		<row><td>sdl2.dll</td><td>SDL2.dll</td><td>SDL2.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\SDL2.dll</td><td>1</td><td/></row>
+		<row><td>sdl2_image.dll</td><td>SDL2_image.dll</td><td>SDL2_I~1.DLL|SDL2_image.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\SDL2_image.dll</td><td>1</td><td/></row>
+		<row><td>sprite.cgfx</td><td>ISX_DEFAULTCOMPONENT4</td><td>SPRITE~1.CGF|sprite.cgfx</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\programs\cg\sprite.cgfx</td><td>1</td><td/></row>
+		<row><td>sprite_p.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>SPRITE~1.SHA|sprite_p.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\sprite_p.ion.shader</td><td>1</td><td/></row>
+		<row><td>sprite_v.ion.shader</td><td>ISX_DEFAULTCOMPONENT2</td><td>SPRITE~1.SHA|sprite_v.ion.shader</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\shaders\sprite_v.ion.shader</td><td>1</td><td/></row>
+		<row><td>welcome.bee</td><td>ISX_DEFAULTCOMPONENT5</td><td>welcome.bee</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\projects\welcome.bee</td><td>1</td><td/></row>
+		<row><td>wxbase30u_net_vc120.dll</td><td>wxbase30u_net_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_net_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxbase30u_net_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxbase30u_vc120.dll</td><td>wxbase30u_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxbase30u_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxbase30u_xml_vc120.dll</td><td>wxbase30u_xml_vc120.dll</td><td>WXBASE~1.DLL|wxbase30u_xml_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxbase30u_xml_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_adv_vc120.dll</td><td>wxmsw30u_adv_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_adv_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_adv_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_aui_vc120.dll</td><td>wxmsw30u_aui_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_aui_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_aui_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_core_vc120.dll</td><td>wxmsw30u_core_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_core_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_core_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_gl_vc120.dll</td><td>wxmsw30u_gl_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_gl_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_gl_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_html_vc120.dll</td><td>wxmsw30u_html_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_html_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_html_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_media_vc120.dll</td><td>wxmsw30u_media_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_media_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_media_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_propgrid_vc120.dll</td><td>wxmsw30u_propgrid_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_propgrid_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_propgrid_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_qa_vc120.dll</td><td>wxmsw30u_qa_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_qa_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_qa_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_ribbon_vc120.dll</td><td>wxmsw30u_ribbon_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_ribbon_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_ribbon_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_richtext_vc120.dll</td><td>wxmsw30u_richtext_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_richtext_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_richtext_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_stc_vc120.dll</td><td>wxmsw30u_stc_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_stc_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_stc_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_webview_vc120.dll</td><td>wxmsw30u_webview_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_webview_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_webview_vc120.dll</td><td>1</td><td/></row>
+		<row><td>wxmsw30u_xrc_vc120.dll</td><td>wxmsw30u_xrc_vc120.dll</td><td>WXMSW3~1.DLL|wxmsw30u_xrc_vc120.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\wxmsw30u_xrc_vc120.dll</td><td>1</td><td/></row>
+		<row><td>zlib1.dll</td><td>zlib1.dll</td><td>zlib1.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\Matt\Documents\bigevilcorporationhd\mdstudio\bin\zlib1.dll</td><td>1</td><td/></row>
 	</table>
 
 	<table name="FileSFPCatalog">
@@ -2197,51 +2150,35 @@
 		<row><td>ISX_DEFAULTCOMPONENT3</td><td/><td/><td>_32EA8C99_9477_4550_885B_D482FB8DB70E_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT4</td><td/><td/><td>_B78CFD4A_53C0_498D_92CC_BC15CB1B6A3D_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT5</td><td/><td/><td>_919CEE5C_40A3_4B10_B0C9_59E2B51D936C_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>SDL2.dll</td><td/><td/><td>_E91395C3_0D1A_49E2_8201_396C70694831_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>SDL2_image.dll</td><td/><td/><td>_C979CD38_85FB_469A_ABA2_F5365A9F6748_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>beehive.release.exe</td><td/><td/><td>_00E3B51A_888A_4603_B5C5_06341D3E074C_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>cg.dll</td><td/><td/><td>_BE03B846_13F2_4884_A8CC_D5617B24E287_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>cgD3D10.dll</td><td/><td/><td>_B607E6C0_19EB_479F_8756_3DD253CF88A2_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>cgD3D11.dll</td><td/><td/><td>_8CF7563F_4A38_4C0A_9FD1_DAEE133724E2_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>cgD3D9.dll</td><td/><td/><td>_2D442A7C_DAB3_44AD_9947_3F77CF09BA39_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>cgGL.dll</td><td/><td/><td>_3B5C066E_A75E_4662_9359_EAC7D442C4BA_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>libjpeg_9.dll</td><td/><td/><td>_6660CD50_D6BF_4DBB_9577_5B02EE44C0F2_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>libpng16_16.dll</td><td/><td/><td>_AA04390D_31D3_4D2C_B94F_BAC251888794_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>libtiff_5.dll</td><td/><td/><td>_6227B1EA_5013_4954_A488_5CB7E3D11A0E_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>libwebp_4.dll</td><td/><td/><td>_835CD4F6_E753_4EF6_8D56_395133CEE327_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxbase30u_net_vc120.dll</td><td/><td/><td>_E0468B64_03D4_4CDC_8E73_DC82D0C58FF4_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxbase30u_vc120.dll</td><td/><td/><td>_07ED8E3E_4356_4A08_848F_B2E3427F6D49_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxbase30u_xml_vc120.dll</td><td/><td/><td>_CA9E2011_F7E2_45DC_860B_37F28DAB0DF4_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxbase30ud_net_vc120.dll</td><td/><td/><td>_FBD92576_5B8C_4C1D_AA76_EEC7FB659EA7_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxbase30ud_vc120.dll</td><td/><td/><td>_AAC4D25A_0DFD_49BB_B7E2_2583E90798C2_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxbase30ud_xml_vc120.dll</td><td/><td/><td>_78B0FF56_C676_4FF4_8F3B_07061DCDE9E0_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_adv_vc120.dll</td><td/><td/><td>_DD2065B5_2D6F_43F1_B917_07021B023B2D_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_aui_vc120.dll</td><td/><td/><td>_5F3B6E12_70EC_4FC1_8EC2_686AFAFDC4D3_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_core_vc120.dll</td><td/><td/><td>_BF69DCF0_57EC_4A95_AEB9_57975E40B959_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_gl_vc120.dll</td><td/><td/><td>_436FB121_22C5_4A91_AB06_F60C6DE57EA5_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_html_vc120.dll</td><td/><td/><td>_2EEA9FBF_70CC_4300_AEB3_4352D4EA4B74_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_media_vc120.dll</td><td/><td/><td>_9F4BED10_C5EB_4F3C_B51E_E6E1CAC55FA0_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_propgrid_vc120.dll</td><td/><td/><td>_2975AED6_F916_4C27_8B52_3DA9F4569C34_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_qa_vc120.dll</td><td/><td/><td>_F9940110_8422_4887_8D68_19C2C45E9965_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_ribbon_vc120.dll</td><td/><td/><td>_0B8CB828_C986_4C82_9808_ECFED386A3FB_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_richtext_vc120.dll</td><td/><td/><td>_2AFFB2B6_2184_48E0_9B16_2C2321877239_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_stc_vc120.dll</td><td/><td/><td>_352C5CAD_87FF_4913_BC09_1C00E4CB014A_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_webview_vc120.dll</td><td/><td/><td>_FEC810F3_6FBB_49B6_A021_6EB6530E008C_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30u_xrc_vc120.dll</td><td/><td/><td>_8AD257AF_DB88_45DC_BFAB_5456B306C752_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_adv_vc120.dll</td><td/><td/><td>_9EDA789A_346D_4E13_8FF8_51B14A8FD667_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_aui_vc120.dll</td><td/><td/><td>_1618860B_A7A0_45BA_AC8B_D520DBC25689_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_core_vc120.dll</td><td/><td/><td>_E60036B1_462B_4667_AE50_3FD2B0600B65_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_gl_vc120.dll</td><td/><td/><td>_100289BE_FC85_471F_8D38_2DB3660147BA_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_html_vc120.dll</td><td/><td/><td>_21B7DCFC_4BC4_4DCB_A226_5E83BE2D00D8_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_media_vc120.dll</td><td/><td/><td>_8101878C_8640_45DF_B2B1_1202B73A7DD8_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_propgrid_vc120.dll</td><td/><td/><td>_D42FF39D_DE38_4196_BB30_E6022E91F9A3_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_qa_vc120.dll</td><td/><td/><td>_06F59F63_F668_46D9_942F_93A0D5272FD1_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_ribbon_vc120.dll</td><td/><td/><td>_67342E40_0C3E_4ACB_8755_E6A5F614BD11_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_richtext_vc120.dll</td><td/><td/><td>_07C17C60_73A7_48A5_A68D_FB2B9FABE857_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_stc_vc120.dll</td><td/><td/><td>_7D524076_6CCA_4FE6_8BC1_3FE9E28CDEF2_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_webview_vc120.dll</td><td/><td/><td>_CB1CAA2F_7EE1_4992_8BAA_F57CBF209EDE_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>wxmsw30ud_xrc_vc120.dll</td><td/><td/><td>_A4ABBB96_057E_4748_989D_E420C042F0DD_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>zlib1.dll</td><td/><td/><td>_81CBF55D_05D6_4649_9060_5E913AC51F71_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>SDL2.dll</td><td/><td/><td>_C4F29349_DFAB_4515_BFF8_775E77776028_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>SDL2_image.dll</td><td/><td/><td>_F1651E40_3DA6_47B0_99D5_F464F4CF664F_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>beehive.release.exe</td><td/><td/><td>_8AEC2C86_1CB3_4A34_AABE_F849FB11D7C0_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>cg.dll</td><td/><td/><td>_AB36460E_5783_46C9_82DD_5FBE12D770C2_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>cgD3D10.dll</td><td/><td/><td>_1B0BF601_F7CE_483C_ADE7_03B92FEC54F8_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>cgD3D11.dll</td><td/><td/><td>_CB8B9BCA_6F50_4230_A0BA_BC6F237A27B0_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>cgD3D9.dll</td><td/><td/><td>_FD828AA3_6CFC_45B0_80E8_8A21F98C5D54_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>cgGL.dll</td><td/><td/><td>_3BB4AAC5_1DC3_4129_A72B_5140D250311D_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>libjpeg_9.dll</td><td/><td/><td>_DEBEB35C_69BB_447C_9B86_6C5AD398FE1E_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>libpng16_16.dll</td><td/><td/><td>_94E62EFA_C7B1_4EE9_B50C_307FA8B0962D_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>libtiff_5.dll</td><td/><td/><td>_0DCABD95_D7B5_4306_9766_999577A6539A_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>libwebp_4.dll</td><td/><td/><td>_B64CC458_11BA_4D09_AB43_EC72F8485BA2_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxbase30u_net_vc120.dll</td><td/><td/><td>_773264ED_8440_40B2_AD28_F97D7FD91F2B_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxbase30u_vc120.dll</td><td/><td/><td>_AEB097A1_7CFD_42FE_A4A4_3DE6DFC68A4F_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxbase30u_xml_vc120.dll</td><td/><td/><td>_11F78E4F_02B5_4AAD_BDD1_ED0FA127B1DD_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_adv_vc120.dll</td><td/><td/><td>_6C15C1DB_E9AF_4708_9A9C_3DEE4FF0E597_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_aui_vc120.dll</td><td/><td/><td>_1CC7B374_BE74_46F1_BF2E_4BFFE17A9DC7_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_core_vc120.dll</td><td/><td/><td>_B6AD6C0E_4370_44A6_9D72_C774FE7B78F6_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_gl_vc120.dll</td><td/><td/><td>_0156BA95_590C_41D4_BA3B_08E31DA8A2A2_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_html_vc120.dll</td><td/><td/><td>_24AA7EB1_E786_479F_B141_8F70DC15FFC9_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_media_vc120.dll</td><td/><td/><td>_8309810D_BBE6_4A7A_A239_7DE8F1C583B4_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_propgrid_vc120.dll</td><td/><td/><td>_9112E0FB_CBA0_40CE_B14C_058AFA80458B_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_qa_vc120.dll</td><td/><td/><td>_FD138E23_498C_4908_91AC_2F2A5655B29E_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_ribbon_vc120.dll</td><td/><td/><td>_30F6159F_001E_4C0B_9A41_58B98960D13E_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_richtext_vc120.dll</td><td/><td/><td>_4D38D500_85EA_4F1D_B064_CEEF54A43153_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_stc_vc120.dll</td><td/><td/><td>_0094E1C8_912F_4B9F_B224_F51151CE9866_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_webview_vc120.dll</td><td/><td/><td>_E587D1C8_C6F1_469B_A370_85169C0D75C2_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>wxmsw30u_xrc_vc120.dll</td><td/><td/><td>_ED4F21AC_644E_4910_88C5_1CF3D4ACA2F0_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>zlib1.dll</td><td/><td/><td>_A78574E6_3CEE_44A8_BC6F_F87704B75EB2_FILTER</td><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="ISCustomActionReference">
@@ -3676,6 +3613,7 @@
 		<row><td>IDS_SHORTCUT_DISPLAY_NAME1</td><td>1033</td><td>Launch |Built</td><td>0</td><td/><td>-224189655</td></row>
 		<row><td>IDS_SHORTCUT_DISPLAY_NAME2</td><td>1033</td><td>LAUNCH~1.EXE|Launch beehive.release.exe</td><td>0</td><td/><td>-224177111</td></row>
 		<row><td>IDS_SHORTCUT_DISPLAY_NAME3</td><td>1033</td><td>LAUNCH~1.EXE|Launch beehive.release.exe</td><td>0</td><td/><td>-459066443</td></row>
+		<row><td>IDS_SHORTCUT_DISPLAY_NAME4</td><td>1033</td><td>LAUNCH~1.EXE|Launch beehive.release.exe</td><td>0</td><td/><td>1923351722</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO</td><td>1033</td><td>From the list of servers below, select the database server you would like to target.</td><td>0</td><td/><td>-224169367</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_DB</td><td>1033</td><td>From the list of catalog names below, select the database catalog you would like to target.</td><td>0</td><td/><td>-224169367</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_TEMPLATE</td><td>1033</td><td>[IS_SQLBROWSE_INTRO]</td><td>0</td><td/><td>-224169367</td></row>
@@ -4078,6 +4016,7 @@
 		<row><td>ARPPRODUCTICON.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\setupicon.ico</td><td>0</td></row>
 		<row><td>beehive.release.ex_1AA91AFAFEFF45409EAA0392814D97C6.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>beehive.release.ex_5F1AA3CD5BAF4DEEBBB1B3D109A72F11.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
+		<row><td>beehive.release.ex_70FC1A0A87DD4168B68B2AA5BA0D6D51.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 	</table>
 
 	<table name="IniFile">
@@ -4750,7 +4689,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="S255">ISComments</col>
 		<col def="S255">ISShortcutName</col>
 		<col def="I4">ISAttributes</col>
-		<row><td>beehive.release.exe</td><td>beehive</td><td>##IDS_SHORTCUT_DISPLAY_NAME3##</td><td>beehive.release.exe</td><td>AlwaysInstall</td><td/><td/><td/><td>beehive.release.ex_5F1AA3CD5BAF4DEEBBB1B3D109A72F11.exe</td><td>0</td><td>1</td><td>INSTALLDIR</td><td/><td/><td/><td/><td/><td/><td/></row>
+		<row><td>beehive.release.exe</td><td>beehive</td><td>##IDS_SHORTCUT_DISPLAY_NAME4##</td><td>beehive.release.exe</td><td>AlwaysInstall</td><td/><td/><td/><td>beehive.release.ex_70FC1A0A87DD4168B68B2AA5BA0D6D51.exe</td><td>0</td><td>1</td><td>INSTALLDIR</td><td/><td/><td/><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="Signature">

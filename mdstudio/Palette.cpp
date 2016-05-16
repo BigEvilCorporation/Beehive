@@ -61,9 +61,13 @@ bool Colour::operator == (const Colour& rhs) const
 
 u16 Colour::ToVDPFormat() const
 {
-	u8 rNybble = (u8)(((float)GetRed()	/ (float)0xFF) * (float)0xE);
-	u8 gNybble = (u8)(((float)GetGreen() / (float)0xFF) * (float)0xE);
-	u8 bNybble = (u8)(((float)GetBlue() / (float)0xFF) * (float)0xE);
+	//u8 rNybble = (u8)(((float)GetRed()	/ (float)0xFF) * (float)0xE);
+	//u8 gNybble = (u8)(((float)GetGreen() / (float)0xFF) * (float)0xE);
+	//u8 bNybble = (u8)(((float)GetBlue() / (float)0xFF) * (float)0xE);
+
+	u8 rNybble = (u8)(GetRed() >> 5) << 1;
+	u8 gNybble = (u8)(GetGreen() >> 5) << 1;
+	u8 bNybble = (u8)(GetBlue() >> 5) << 1;
 
 	u16 mdValue = bNybble << 8 | gNybble << 4 | rNybble;
 	return mdValue;

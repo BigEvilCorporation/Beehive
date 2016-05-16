@@ -13,6 +13,7 @@
 
 #include <ion/gamekit/Bezier.h>
 
+#include "Types.h"
 #include "Map.h"
 #include "Palette.h"
 #include "SpriteSheet.h"
@@ -27,6 +28,7 @@
 
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<ActorId, Actor> TActorMap;
+typedef std::map<AnimationId, Animation> TAnimationMap;
 typedef std::map<GameObjectTypeId, GameObjectType> TGameObjectTypeMap;
 
 class Project
@@ -104,6 +106,15 @@ public:
 	const TActorMap::const_iterator ActorsBegin() const;
 	const TActorMap::const_iterator ActorsEnd() const;
 	int GetActorCount() const;
+
+	//Animations
+	AnimationId CreateAnimation();
+	void DeleteAnimation(AnimationId animationId);
+	Animation* GetAnimation(AnimationId animationId);
+	const Animation* GetAnimation(AnimationId animationId) const;
+	const TAnimationMap::const_iterator AnimationsBegin() const;
+	const TAnimationMap::const_iterator AnimationsEnd() const;
+	int GetAnimationCount() const;
 
 	//Stamps
 	StampId AddStamp(int width, int height);
@@ -286,6 +297,9 @@ private:
 
 	//Actors
 	std::map<ActorId, Actor> m_actors;
+
+	//Animations
+	TAnimationMap m_animations;
 
 	//Game object types
 	TGameObjectTypeMap m_gameObjectTypes;

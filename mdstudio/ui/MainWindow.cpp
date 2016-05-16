@@ -151,6 +151,18 @@ void MainWindow::SetProject(Project* project)
 			delete m_gameObjectTypePanel;
 		}
 
+		if(m_gameObjectParamsPanel)
+		{
+			m_auiManager.DetachPane(m_gameObjectParamsPanel);
+			delete m_gameObjectParamsPanel;
+		}
+
+		if(m_timelinePanel)
+		{
+			m_auiManager.DetachPane(m_timelinePanel);
+			delete m_timelinePanel;
+		}
+
 		//Delete previous, set new
 		m_project.reset(project);
 
@@ -518,6 +530,36 @@ void MainWindow::ShowPanelGameObjectParams()
 		if(!m_gameObjectParamsPanel->IsShown())
 		{
 			m_gameObjectParamsPanel->Show();
+		}
+	}
+}
+
+void MainWindow::ShowPanelTimeline()
+{
+	if(m_project.get())
+	{
+		if(!m_timelinePanel)
+		{
+			wxSize clientSize = GetClientSize();
+
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.Float();
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(600, 300);
+			paneInfo.Bottom();
+			paneInfo.Caption("Animation Timeline");
+			paneInfo.CaptionVisible(true);
+
+			m_timelinePanel = new TimelinePanel(*this, *m_project.get(), *m_renderer, *m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_timelinePanel, paneInfo);
+			m_timelinePanel->Show();
+			m_auiManager.Update();
+		}
+
+		if(!m_timelinePanel->IsShown())
+		{
+			m_timelinePanel->Show();
 		}
 	}
 }
@@ -1061,6 +1103,11 @@ void MainWindow::OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event)
 void MainWindow::OnBtnToolsGameObjParams(wxRibbonButtonBarEvent& event)
 {
 	ShowPanelGameObjectParams();
+}
+
+void MainWindow::OnBtnToolsTimeline(wxRibbonButtonBarEvent& event)
+{
+	ShowPanelTimeline();
 }
 
 void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)

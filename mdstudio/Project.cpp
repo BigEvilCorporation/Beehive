@@ -121,6 +121,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_actors, "actors");
+	archive.Serialise(m_animations, "animations");
 	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
@@ -530,6 +531,63 @@ const TActorMap::const_iterator Project::ActorsEnd() const
 int Project::GetActorCount() const
 {
 	return m_actors.size();
+}
+
+AnimationId Project::CreateAnimation()
+{
+	AnimationId animationId = ion::GenerateUUID64();
+	m_animations.insert(std::make_pair(animationId, Animation()));
+	return animationId;
+}
+
+void Project::DeleteAnimation(AnimationId animationId)
+{
+	TAnimationMap::iterator it = m_animations.find(animationId);
+	if(it != m_animations.end())
+	{
+		m_animations.erase(it);
+	}
+}
+
+Animation* Project::GetAnimation(AnimationId animationId)
+{
+	Animation* animation = NULL;
+
+	TAnimationMap::iterator it = m_animations.find(animationId);
+	if(it != m_animations.end())
+	{
+		animation = &it->second;
+	}
+
+	return animation;
+}
+
+const Animation* Project::GetAnimation(AnimationId animationId) const
+{
+	const Animation* animation = NULL;
+
+	TAnimationMap::const_iterator it = m_animations.find(animationId);
+	if(it != m_animations.end())
+	{
+		animation = &it->second;
+	}
+
+	return animation;
+}
+
+const TAnimationMap::const_iterator Project::AnimationsBegin() const
+{
+	return m_animations.begin();
+}
+
+const TAnimationMap::const_iterator Project::AnimationsEnd() const
+{
+	return m_animations.end();
+}
+
+int Project::GetAnimationCount() const
+{
+	return m_animations.size();
 }
 
 StampId Project::AddStamp(int width, int height)
@@ -1259,7 +1317,7 @@ bool Project::MergePalettes(Palette& dest, const Palette& source)
 			int colourIdx = 0;
 			if(!dest.GetNearestColourIdx(sourceColour, Palette::eExact, colourIdx))
 			{
-				if(!dest.AddColour(sourceColour))
+				if(dest.AddColour(sourceColour) < 0)
 				{
 					return false;
 				}
@@ -1917,10 +1975,12 @@ bool Project::ExportSpritePalettes(const std::string& directory) const
 			WriteFileHeader(stream);
 			it->second.ExportSpritePalettes(stream);
 			file.Write(stream.str().c_str(), stream.str().size());
-
-			return true;
 		}
-
-		return false;
+		else
+		{
+			return false;
+		}
 	}
+
+	return true;
 }

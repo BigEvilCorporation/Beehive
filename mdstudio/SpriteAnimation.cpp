@@ -40,3 +40,69 @@ void SpriteAnimation::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_trackSpriteFrame, "trackSpriteFrame");
 	archive.Serialise(m_trackPosition, "trackPosition");
 }
+
+const u32 AnimTrackSpriteFrame::GetValue(float time) const
+{
+	u32 intValue = 0;
+
+	if(const ion::render::Keyframe<u32>* keyframeA = GetPrevKeyframe(time))
+	{
+		intValue = keyframeA->GetValue();
+	}
+
+	return intValue;
+}
+
+void AnimTrackSpriteFrame::Export(std::stringstream& stream) const
+{
+	stream << "\tdc.b ";
+
+	for(int i = 0; i < GetNumKeyframes(); i++)
+	{
+		u32 value = GetKeyframe(i).GetValue();
+		stream << "0x" << value;
+
+		if(i < GetNumKeyframes() - 1)
+			stream << ", ";
+	}
+
+	stream << std::endl;
+}
+
+void AnimTrackSpriteFrame::Export(ion::io::File& file) const
+{
+
+}
+
+const ion::Vector2i AnimTrackSpritePosition::GetValue(float time) const
+{
+	ion::Vector2i result;
+
+	const AnimKeyframePosition* keyframeA = GetPrevKeyframe(time);
+	const AnimKeyframePosition* keyframeB = GetNextKeyframe(time);
+
+	if(keyframeA && keyframeB)
+	{
+		float timeA = keyframeA->GetTime();
+		float timeB = keyframeB->GetTime();
+
+		float lerpTime = ion::maths::UnLerp(timeA, timeB, time);
+
+		const ion::Vector2i& vectorA = keyframeA->GetValue();
+		const ion::Vector2i& vectorB = keyframeB->GetValue();
+
+		result = vectorA.Lerp(vectorB, lerpTime);
+	}
+
+	return result;
+}
+
+void AnimTrackSpritePosition::Export(std::stringstream& stream) const
+{
+
+}
+
+void AnimTrackSpritePosition::Export(ion::io::File& file) const
+{
+
+}
