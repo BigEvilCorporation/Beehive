@@ -64,42 +64,43 @@ class SpriteCanvas;
 #define wxID_BTN_TOOLS_PALETTES 1011
 #define wxID_BTN_TOOLS_GAMEOBJS 1012
 #define wxID_BTN_TOOLS_GAMEOBJPARAMS 1013
-#define wxID_BTN_MAP_CLEAR 1014
-#define wxID_BTN_MAP_RESIZE 1015
-#define wxID_BTN_TILES_IMPORT 1016
-#define wxID_BTN_TILES_CREATE 1017
-#define wxID_BTN_TILES_DELETE 1018
-#define wxID_BTN_TILES_CLEANUP 1019
-#define wxID_BTN_SPRITE_EDITOR 1020
-#define wxID_BTN_STAMPS_CREATE 1021
-#define wxID_BTN_STAMPS_DELETE 1022
-#define wxID_BTN_COL_TILES_CREATE 1023
-#define wxID_BTN_COL_TILES_DELETE 1024
-#define wxID_BTN_COL_TILES_CLEANUP 1025
-#define wxID_BTN_COL_MAP_CLEAR 1026
-#define wxID_BTN_COL_GEN_BEZIER 1027
-#define wxID_BTN_GAME_OBJ_TYPES 1028
-#define wxID_BTN_CANCEL 1029
-#define wxID_TOOL_SELECTTILE 1030
-#define wxID_TOOL_PAINT 1031
-#define wxID_TOOL_TILEPICKER 1032
-#define wxID_TOOL_FLIPX 1033
-#define wxID_TOOL_FLIPY 1034
-#define wxID_TOOL_FILL 1035
-#define wxID_TOOL_CLONE 1036
-#define wxID_TOOL_SELECTSTAMP 1037
-#define wxID_TOOL_STAMP 1038
-#define wxID_TOOL_STAMPPICKER 1039
-#define wxID_TOOL_CREATESTAMP 1040
-#define wxID_TOOL_REMOVESTAMP 1041
-#define wxID_TOOL_COL_PAINTTERRAIN 1042
-#define wxID_TOOL_COL_PAINTSOLID 1043
-#define wxID_TOOL_COL_DELETETERRTILE 1044
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1045
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1046
-#define wxID_TOOL_SELECTGAMEOBJ 1047
-#define wxID_TOOL_PLACEGAMEOBJ 1048
-#define wxID_TOOL_REMOVEGAMEOBJ 1049
+#define wxID_BTN_TOOLS_TIMELINE 1014
+#define wxID_BTN_MAP_CLEAR 1015
+#define wxID_BTN_MAP_RESIZE 1016
+#define wxID_BTN_TILES_IMPORT 1017
+#define wxID_BTN_TILES_CREATE 1018
+#define wxID_BTN_TILES_DELETE 1019
+#define wxID_BTN_TILES_CLEANUP 1020
+#define wxID_BTN_SPRITE_EDITOR 1021
+#define wxID_BTN_STAMPS_CREATE 1022
+#define wxID_BTN_STAMPS_DELETE 1023
+#define wxID_BTN_COL_TILES_CREATE 1024
+#define wxID_BTN_COL_TILES_DELETE 1025
+#define wxID_BTN_COL_TILES_CLEANUP 1026
+#define wxID_BTN_COL_MAP_CLEAR 1027
+#define wxID_BTN_COL_GEN_BEZIER 1028
+#define wxID_BTN_GAME_OBJ_TYPES 1029
+#define wxID_BTN_CANCEL 1030
+#define wxID_TOOL_SELECTTILE 1031
+#define wxID_TOOL_PAINT 1032
+#define wxID_TOOL_TILEPICKER 1033
+#define wxID_TOOL_FLIPX 1034
+#define wxID_TOOL_FLIPY 1035
+#define wxID_TOOL_FILL 1036
+#define wxID_TOOL_CLONE 1037
+#define wxID_TOOL_SELECTSTAMP 1038
+#define wxID_TOOL_STAMP 1039
+#define wxID_TOOL_STAMPPICKER 1040
+#define wxID_TOOL_CREATESTAMP 1041
+#define wxID_TOOL_REMOVESTAMP 1042
+#define wxID_TOOL_COL_PAINTTERRAIN 1043
+#define wxID_TOOL_COL_PAINTSOLID 1044
+#define wxID_TOOL_COL_DELETETERRTILE 1045
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1046
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1047
+#define wxID_TOOL_SELECTGAMEOBJ 1048
+#define wxID_TOOL_PLACEGAMEOBJ 1049
+#define wxID_TOOL_REMOVEGAMEOBJ 1050
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -148,6 +149,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnToolsPalettes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsGameObjs( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsGameObjParams( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnToolsTimeline( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapResize( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -594,6 +596,34 @@ class GameObjParamsPanelBase : public wxPanel
 		
 		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 747,512 ), long style = wxTAB_TRAVERSAL ); 
 		~GameObjParamsPanelBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class TimelinePanelBase
+///////////////////////////////////////////////////////////////////////////////
+class TimelinePanelBase : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxToolBar* m_toolBarAnimation;
+		wxChoice* m_choiceAnims;
+		wxToolBarToolBase* m_toolAddAnim; 
+		wxToolBarToolBase* m_toolDeleteAnim; 
+		wxToolBarToolBase* m_toolKeyframe; 
+		wxToolBarToolBase* m_toolPlay; 
+		wxToolBarToolBase* m_toolStop; 
+		wxToolBarToolBase* m_toolRewind; 
+		wxToolBarToolBase* m_toolIsolateObject; 
+		wxStaticText* m_staticText34;
+		wxSpinCtrl* m_spinSpeed;
+		wxGrid* m_gridTimeline;
+	
+	public:
+		
+		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,324 ), long style = wxTAB_TRAVERSAL ); 
+		~TimelinePanelBase();
 	
 };
 

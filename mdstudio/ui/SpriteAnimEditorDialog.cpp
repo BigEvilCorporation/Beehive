@@ -385,6 +385,9 @@ void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteShe
 	//Get sprite resources
 	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
 
+	//Clear existing
+	m_gridSpriteFrames->DeleteCols(0, m_gridSpriteFrames->GetNumberCols());
+
 	int numFrames = spriteResources->m_frames.size();
 
 	if(numFrames > 0)
@@ -397,11 +400,8 @@ void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteShe
 
 		m_spriteFrameImageList = new wxImageList(iconWidth, s_iconHeight, numFrames);
 
-		//Create timeline cells
-		if(m_gridSpriteFrames->GetNumberCols() < numFrames)
-		{
-			m_gridSpriteFrames->AppendCols(numFrames - m_gridSpriteFrames->GetNumberCols());
-		}
+		//Create cells
+		m_gridSpriteFrames->AppendCols(numFrames);
 
 		//Reset timeline row height
 		m_gridSpriteFrames->SetRowSize(0, s_iconHeight + (s_iconBorderY * 2));

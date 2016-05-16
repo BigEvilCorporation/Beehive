@@ -104,7 +104,6 @@ void Actor::ExportSpriteSheets(std::stringstream& stream) const
 		u8 heightRemainder;
 
 		std::vector<ion::Vector2i> subSprDimensionsTiles;
-
 		std::vector<ion::Vector2i> subSprOffsetsUnflipped;
 		std::vector<ion::Vector2i> subSprOffsetsFlippedX;
 

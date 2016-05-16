@@ -362,7 +362,7 @@ rule ApplyWxSDK TARGET
 		;
 
 	C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_DEBUG) : debug ;
-	C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_RELEASE) : release ;
+	#C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_RELEASE) : release ;
 }
 
 #################################################

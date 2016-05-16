@@ -6,30 +6,23 @@
 
 #pragma once
 
+#include "Types.h"
+
 #include <ion/core/Types.h>
 #include <ion/maths/Vector.h>
-#include <ion/core/cryptography/UUID.h>
 #include <ion/renderer/Animation.h>
 
-#include <sstream>
-
-#include "Types.h"
-#include "Animation.h"
-
 //Keyframes
-typedef ion::render::Keyframe<u32> AnimKeyframeSpriteFrame;
-typedef ion::render::Keyframe<ion::Vector2i> AnimKeyframeSpritePosition;
+typedef ion::render::Keyframe<ion::Vector2i> AnimKeyframePosition;
 
-//Tracks
-class AnimTrackSpriteFrame : public ion::render::AnimationTrack<u32>
+enum AnimationTracks
 {
-public:
-	const u32 AnimTrackSpriteFrame::GetValue(float time) const;
-	void Export(std::stringstream& stream) const;
-	void Export(ion::io::File& file) const;
+	eTrackPosition,
+
+	eTrackCount
 };
 
-class AnimTrackSpritePosition : public ion::render::AnimationTrack<ion::Vector2i>
+class AnimTrackPosition : public ion::render::AnimationTrack<ion::Vector2i>
 {
 public:
 	virtual const ion::Vector2i GetValue(float time) const;
@@ -37,11 +30,22 @@ public:
 	void Export(ion::io::File& file) const;
 };
 
-class SpriteAnimation : public ion::render::Animation
+class AnimationActor
 {
 public:
-	SpriteAnimation();
+	AnimationActor(GameObjectId gameObjectId);
 
+	GameObjectId GetGameObjectId() const;
+
+	AnimTrackPosition m_trackPosition;
+
+private:
+	GameObjectId m_gameObjectId;
+};
+
+class Animation : public ion::render::Animation
+{
+public:
 	void SetName(const std::string& name);
 	const std::string& GetName() const;
 
@@ -49,9 +53,6 @@ public:
 	int GetSpeed() const;
 
 	void Serialise(ion::io::Archive& archive);
-
-	AnimTrackSpriteFrame m_trackSpriteFrame;
-	AnimTrackSpritePosition m_trackPosition;
 
 private:
 	std::string m_name;

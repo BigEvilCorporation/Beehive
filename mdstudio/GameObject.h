@@ -14,11 +14,7 @@
 
 #include "SpriteSheet.h"
 
-typedef u32 GameObjectTypeId;
-typedef u32 GameObjectId;
-
-static const GameObjectTypeId InvalidGameObjectTypeId = 0;
-static const GameObjectTypeId InvalidGameObjectId = 0;
+#include "Types.h"
 
 enum GameObjectVariableSize
 {
