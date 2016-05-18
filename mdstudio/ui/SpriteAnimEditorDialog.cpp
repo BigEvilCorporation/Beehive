@@ -221,7 +221,7 @@ void SpriteAnimEditorDialog::OnBtnAnimNew(wxCommandEvent& event)
 			{
 				for(u32 i = 0; i < m_selectedSpriteSheet->GetNumFrames(); i++)
 				{
-					anim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, i));
+					anim->m_trackSpriteFrame.InsertKeyframe(AnimKeyframeSpriteFrame((float)i, i));
 				}
 
 				anim->SetLength((float)m_selectedSpriteSheet->GetNumFrames() );
@@ -674,7 +674,7 @@ void SpriteAnimEditorDialog::EventHandlerDragFrameListEnd(wxMouseEvent& event)
 
 			for(int i = 0; i < m_dragDropKeyframeList.size(); i++)
 			{
-				m_selectedAnim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, m_dragDropKeyframeList[i].first));
+				m_selectedAnim->m_trackSpriteFrame.InsertKeyframe(AnimKeyframeSpriteFrame((float)i, m_dragDropKeyframeList[i].first));
 			}
 
 			//Set new anim length
@@ -761,7 +761,7 @@ void SpriteAnimEditorDialog::EventHandlerDragTimelineEnd(wxMouseEvent& event)
 
 			for(int i = 0; i < m_dragDropKeyframeList.size(); i++)
 			{
-				m_selectedAnim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, m_dragDropKeyframeList[i].first));
+				m_selectedAnim->m_trackSpriteFrame.InsertKeyframe(AnimKeyframeSpriteFrame((float)i, m_dragDropKeyframeList[i].first));
 			}
 
 			//Set new anim length
@@ -812,7 +812,7 @@ void SpriteAnimEditorDialog::EventHandlerContextMenuClick(wxCommandEvent& event)
 
 			for(int i = 0; i < keyframes.size(); i++)
 			{
-				m_selectedAnim->m_trackSpriteFrame.AddKeyframe(AnimKeyframeSpriteFrame((float)i, keyframes[i]));
+				m_selectedAnim->m_trackSpriteFrame.InsertKeyframe(AnimKeyframeSpriteFrame((float)i, keyframes[i]));
 			}
 
 			//Re-populate keyframe view

@@ -28,7 +28,7 @@ StampsPanel::~StampsPanel()
 
 }
 
-void StampsPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+void StampsPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
 	ViewPanel::OnMouse(event, mouseDelta);
 

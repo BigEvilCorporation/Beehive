@@ -100,6 +100,7 @@ void GameObject::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_objectId, "objectId");
 	archive.Serialise(m_typeId, "typeId");
 	archive.Serialise(m_position, "position");
+	archive.Serialise(m_drawOffset, "drawOffset");
 	archive.Serialise(m_variables, "variables");
 }
 

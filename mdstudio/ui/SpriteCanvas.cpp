@@ -121,7 +121,7 @@ void SpriteCanvas::OnResize(wxSizeEvent& event)
 	Refresh();
 }
 
-void SpriteCanvas::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+void SpriteCanvas::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
 	if(event.GetWheelRotation() != 0)
 	{
@@ -289,8 +289,8 @@ void SpriteCanvas::EventHandlerResize(wxSizeEvent& event)
 void SpriteCanvas::EventHandlerMouse(wxMouseEvent& event)
 {
 	//Get mouse delta
-	ion::Vector2 mousePosScreenSpace(event.GetX(), event.GetY());
-	ion::Vector2 mouseDelta = mousePosScreenSpace - m_mousePrevPos;
+	ion::Vector2i mousePosScreenSpace(event.GetX(), event.GetY());
+	ion::Vector2i mouseDelta = mousePosScreenSpace - m_mousePrevPos;
 	m_mousePrevPos = mousePosScreenSpace;
 
 	OnMouse(event, mouseDelta);

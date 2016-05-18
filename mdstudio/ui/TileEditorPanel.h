@@ -17,7 +17,7 @@ public:
 	virtual ~TileEditorPanel();
 
 	//Events
-	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta);
 	virtual void OnKeyboard(wxKeyEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 

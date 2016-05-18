@@ -550,6 +550,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer9->Add( m_toolPlaceGameObject, 0, wxALL, 5 );
 	
+	m_toolMoveGameObject = new wxBitmapButton( this, wxID_TOOL_MOVEGAMEOBJ, wxBitmap( tool_selectgameobj_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolMoveGameObject->SetToolTip( wxT("Move Game Object") );
+	
+	fgSizer9->Add( m_toolMoveGameObject, 0, wxALL, 5 );
+	
 	m_toolRemoveGameObject = new wxBitmapButton( this, wxID_TOOL_REMOVEGAMEOBJ, wxBitmap( tool_deletegameobj_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolRemoveGameObject->SetToolTip( wxT("Remove Game Object") );
 	
@@ -1509,6 +1514,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 {
 	wxFlexGridSizer* fgSizer24;
 	fgSizer24 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer24->AddGrowableCol( 0 );
 	fgSizer24->AddGrowableRow( 1 );
 	fgSizer24->SetFlexibleDirection( wxBOTH );
 	fgSizer24->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
@@ -1559,7 +1565,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	// Columns
 	m_gridTimeline->EnableDragColMove( false );
 	m_gridTimeline->EnableDragColSize( true );
-	m_gridTimeline->SetColLabelSize( 0 );
+	m_gridTimeline->SetColLabelSize( 30 );
 	m_gridTimeline->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Rows
@@ -1573,11 +1579,50 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	m_gridTimeline->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
 	fgSizer24->Add( m_gridTimeline, 0, wxALL|wxEXPAND, 5 );
 	
+	m_sliderTimeline = new wxSlider( this, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	fgSizer24->Add( m_sliderTimeline, 0, wxALL|wxEXPAND, 5 );
+	
 	
 	this->SetSizer( fgSizer24 );
 	this->Layout();
+	
+	// Connect Events
+	this->Connect( m_toolAddAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolAddAnim ) );
+	this->Connect( m_toolDeleteAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolDeleteAnim ) );
+	this->Connect( m_toolKeyframe->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframe ) );
+	this->Connect( m_toolPlay->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolPlay ) );
+	this->Connect( m_toolStop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStop ) );
+	this->Connect( m_toolRewind->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolRewind ) );
+	this->Connect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
 }
 
 TimelinePanelBase::~TimelinePanelBase()
 {
+	// Disconnect Events
+	this->Disconnect( m_toolAddAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolAddAnim ) );
+	this->Disconnect( m_toolDeleteAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolDeleteAnim ) );
+	this->Disconnect( m_toolKeyframe->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframe ) );
+	this->Disconnect( m_toolPlay->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolPlay ) );
+	this->Disconnect( m_toolStop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStop ) );
+	this->Disconnect( m_toolRewind->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolRewind ) );
+	this->Disconnect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
+	
 }

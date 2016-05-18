@@ -85,6 +85,10 @@ public:
 	GameObjectId GetId() const { return m_objectId; }
 	GameObjectTypeId GetTypeId() const { return m_typeId; }
 
+	const ion::Vector2i& GetPosition() const { return m_position; }
+	const ion::Vector2i& GetDrawOffset() const { return m_drawOffset; }
+	void SetDrawOffset(const ion::Vector2i& offset) { m_drawOffset = offset; }
+
 	GameObjectVariable& AddVariable();
 	void RemoveVariable(GameObjectVariable& variable);
 	GameObjectVariable* GetVariable(u32 index);
@@ -99,5 +103,6 @@ private:
 	GameObjectId m_objectId;
 	GameObjectTypeId m_typeId;
 	ion::Vector2i m_position;
+	ion::Vector2i m_drawOffset;
 	std::vector<GameObjectVariable> m_variables;
 };
