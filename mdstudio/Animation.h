@@ -33,9 +33,12 @@ public:
 class AnimationActor
 {
 public:
+	AnimationActor();
 	AnimationActor(GameObjectId gameObjectId);
 
 	GameObjectId GetGameObjectId() const;
+
+	void Serialise(ion::io::Archive& archive);
 
 	AnimTrackPosition m_trackPosition;
 
@@ -43,18 +46,25 @@ private:
 	GameObjectId m_gameObjectId;
 };
 
+typedef std::map<GameObjectId, AnimationActor> TAnimActorMap;
+
 class Animation : public ion::render::Animation
 {
 public:
 	void SetName(const std::string& name);
 	const std::string& GetName() const;
 
-	void SetSpeed(int speed);
-	int GetSpeed() const;
+	void AddActor(GameObjectId actorId);
+	void RemoveActor(GameObjectId actorId);
+	AnimationActor* GetActor(GameObjectId actorId);
+	const AnimationActor* GetActor(GameObjectId actorId) const;
+	TAnimActorMap::iterator ActorsBegin();
+	TAnimActorMap::iterator ActorsEnd();
+	int GetActorCount() const;
 
 	void Serialise(ion::io::Archive& archive);
 
 private:
 	std::string m_name;
-	int m_speed;
+	TAnimActorMap m_actors;
 };

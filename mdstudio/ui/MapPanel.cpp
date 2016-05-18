@@ -34,7 +34,7 @@ MapPanel::~MapPanel()
 	ResetToolData();
 }
 
-void MapPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+void MapPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
 	ViewPanel::OnMouse(event, mouseDelta);
 }
@@ -478,17 +478,33 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 			case eToolSelectGameObject:
 			{
+				ion::Vector2i topLeft;
+				m_hoverGameObject = m_project->GetMap().FindGameObject(x, y, topLeft);
+
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
-					ion::Vector2i topLeft;
-					GameObjectId gameObjectId = m_project->GetMap().FindGameObject(x, y, topLeft);
-					if(GameObject* gameObject = m_project->GetMap().GetGameObject(gameObjectId))
+					m_selectedGameObject = m_hoverGameObject;
+
+					if(GameObject* gameObject = m_project->GetMap().GetGameObject(m_hoverGameObject))
 					{
 						m_mainWindow->SetSelectedGameObject(gameObject);
 
 						m_previewGameObjectType = gameObject->GetTypeId();
 						m_previewGameObjectPos.x = topLeft.x;
 						m_previewGameObjectPos.y = topLeft.y;
+					}
+				}
+
+				if(buttonBits & eMouseRight)
+				{
+					if(m_hoverGameObject != InvalidGameObjectId)
+					{
+						//Right-click menu
+						wxMenu contextMenu;
+
+						contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
+						contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
+						PopupMenu(&contextMenu);
 					}
 				}
 				break;
@@ -575,9 +591,21 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 			m_hoverStamp = InvalidStampId;
 		}
 	}
+	else if(event.GetId() == eContextMenuGameObjAddToAnim)
+	{
+		if(m_hoverGameObject != InvalidGameObjectId)
+		{
+			AnimationId animId = m_mainWindow->GetSelectedAnimation();
+			Animation* anim = m_project->GetAnimation(animId);
+			if(anim)
+			{
+				anim->AddActor(m_hoverGameObject);
+			}
+		}
+	}
 }
 
-void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, int y)
+void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int x, int y)
 {
 	Map& map = m_project->GetMap();
 	Tileset& tileset = m_project->GetTileset();
@@ -839,6 +867,27 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, 
 				m_project->InvalidateTerrainTiles(false);
 			}
 
+			break;
+		}
+
+		case eToolMoveGameObject:
+		{
+			if(buttonBits & eMouseLeft)
+			{
+				ion::Vector2i topLeft;
+				m_hoverGameObject = m_project->GetMap().FindGameObject(x, y, topLeft);
+
+				if(m_hoverGameObject != InvalidGameObjectId)
+				{
+					GameObject* gameObject = m_project->GetMap().GetGameObject(m_hoverGameObject);
+					if(gameObject)
+					{
+						gameObject->SetDrawOffset(gameObject->GetDrawOffset() + mouseDelta);
+						Refresh();
+					}
+				}
+			}
+			
 			break;
 		}
 	}
@@ -1182,6 +1231,8 @@ void MapPanel::ResetToolData()
 	m_selectedStamp = InvalidStampId;
 
 	//Invalidate game object preview
+	m_hoverGameObject = InvalidGameObjectId;
+	m_selectedGameObject = InvalidGameObjectId;
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 
 	//Invalidate bezier
@@ -1383,6 +1434,9 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				ion::Matrix4 mtx;
 				ion::Vector3 pos(floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
 					floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
+
+				pos.x += itVec->m_gameObject.GetDrawOffset().x;
+				pos.y -= itVec->m_gameObject.GetDrawOffset().y;
 
 				mtx.SetTranslation(pos);
 				mtx.SetScale(scale);

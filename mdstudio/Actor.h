@@ -8,9 +8,6 @@
 
 #include "SpriteSheet.h"
 
-typedef ion::UUID64 ActorId;
-static const ActorId InvalidActorId = 0;
-
 typedef std::map<SpriteSheetId, SpriteSheet> TSpriteSheetMap;
 
 class Actor

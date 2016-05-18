@@ -18,7 +18,7 @@ public:
 	virtual ~MapPanel();
 
 	//Events
-	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta);
 	virtual void OnKeyboard(wxKeyEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
@@ -36,7 +36,7 @@ protected:
 	virtual void OnMouseTileEvent(int buttonBits, int x, int y);
 
 	//Mouse click or changed pixel callback
-	virtual void OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, int y);
+	virtual void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int x, int y);
 
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
@@ -46,7 +46,8 @@ private:
 	enum ContextMenuItems
 	{
 		eContextMenuDeleteStamp,
-		eContextMenuBakeStamp
+		eContextMenuBakeStamp,
+		eContextMenuGameObjAddToAnim,
 	};
 
 	//Create collision canvas
@@ -108,6 +109,10 @@ private:
 	ion::Vector2i m_hoverStampPos;
 	ion::Vector2i m_selectedStampPos;
 	u32 m_hoverStampFlags;
+
+	//Selected game object
+	GameObjectId m_hoverGameObject;
+	GameObjectId m_selectedGameObject;
 
 	//Multiple (CTRL) selection
 	bool m_multipleSelection;

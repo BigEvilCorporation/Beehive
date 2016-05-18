@@ -33,7 +33,7 @@ TerrainTileEditorPanel::~TerrainTileEditorPanel()
 	delete m_collisionPrimitive;
 }
 
-void TerrainTileEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+void TerrainTileEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
 	ViewPanel::OnMouse(event, mouseDelta);
 }

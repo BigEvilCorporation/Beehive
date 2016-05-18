@@ -32,7 +32,7 @@ TileEditorPanel::~TileEditorPanel()
 	delete m_tilePrimitive;
 }
 
-void TileEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+void TileEditorPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
 	ViewPanel::OnMouse(event, mouseDelta);
 }

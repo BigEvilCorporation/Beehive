@@ -47,8 +47,8 @@ ViewPanel::~ViewPanel()
 void ViewPanel::EventHandlerMouse(wxMouseEvent& event)
 {
 	//Get mouse delta
-	ion::Vector2 mousePosScreenSpace(event.GetX(), event.GetY());
-	ion::Vector2 mouseDelta = mousePosScreenSpace - m_mousePrevPos;
+	ion::Vector2i mousePosScreenSpace(event.GetX(), event.GetY());
+	ion::Vector2i mouseDelta = mousePosScreenSpace - m_mousePrevPos;
 	m_mousePrevPos = mousePosScreenSpace;
 
 	OnMouse(event, mouseDelta);
@@ -235,7 +235,7 @@ void ViewPanel::FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, i
 	}
 }
 
-void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
+void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
 	if(m_project)
 	{
@@ -287,7 +287,7 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta)
 		if((buttonBits != m_prevMouseBits) || (mousePixelPosCanvas.x != m_prevMouseOverPixelPos.x) || (mousePixelPosCanvas.y != m_prevMouseOverPixelPos.y))
 		{
 			//Mouse button clicked or changed pixel pos
-			OnMousePixelEvent(mousePixelPosCanvas, buttonBits, x, y);
+			OnMousePixelEvent(mousePixelPosCanvas, mouseDelta, buttonBits, x, y);
 			m_prevMouseOverPixelPos = mousePixelPosCanvas;
 		}
 

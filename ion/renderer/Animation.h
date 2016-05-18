@@ -87,6 +87,8 @@ namespace ion
 			float GetTime() const;
 			const T GetValue() const;
 
+			bool operator < (const Keyframe& rhs) const;
+
 			//Serialise
 			void Serialise(io::Archive& archive);
 
@@ -105,7 +107,7 @@ namespace ion
 			virtual ~AnimationTrack();
 
 			//Add new keyframe
-			void AddKeyframe(const Keyframe<T>& keyframe);
+			void InsertKeyframe(const Keyframe<T>& keyframe);
 
 			//Get keyframe
 			const Keyframe<T>& GetKeyframe(int index) const;
@@ -180,6 +182,11 @@ namespace ion
 			return mValue;
 		}
 
+		template <class T> bool Keyframe<T>::operator < (const Keyframe& rhs) const
+		{
+			return mTime < rhs.mTime;
+		}
+
 		template <class T> void Keyframe<T>::Serialise(io::Archive& archive)
 		{
 			archive.Serialise(mTime, "time");
@@ -195,9 +202,9 @@ namespace ion
 		{
 		}
 
-		template <class T> void AnimationTrack<T>::AddKeyframe(const Keyframe<T>& keyframe)
+		template <class T> void AnimationTrack<T>::InsertKeyframe(const Keyframe<T>& keyframe)
 		{
-			mKeyframes.push_back(keyframe);
+			mKeyframes.insert(std::upper_bound(mKeyframes.begin(), mKeyframes.end(), keyframe), keyframe);
 		}
 
 		template <class T> const Keyframe<T>& AnimationTrack<T>::GetKeyframe(int index) const

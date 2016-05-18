@@ -100,7 +100,8 @@ class SpriteCanvas;
 #define wxID_TOOL_COL_EDITTERRAINBEZIER 1047
 #define wxID_TOOL_SELECTGAMEOBJ 1048
 #define wxID_TOOL_PLACEGAMEOBJ 1049
-#define wxID_TOOL_REMOVEGAMEOBJ 1050
+#define wxID_TOOL_MOVEGAMEOBJ 1050
+#define wxID_TOOL_REMOVEGAMEOBJ 1051
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -300,11 +301,12 @@ class MapToolbox : public wxPanel
 		wxStaticText* m_staticText14;
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
+		wxBitmapButton* m_toolMoveGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
 	
 	public:
 		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 124,627 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 124,722 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
 		~MapToolbox();
 	
 };
@@ -619,6 +621,18 @@ class TimelinePanelBase : public wxPanel
 		wxStaticText* m_staticText34;
 		wxSpinCtrl* m_spinSpeed;
 		wxGrid* m_gridTimeline;
+		wxSlider* m_sliderTimeline;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnToolAddAnim( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolDeleteAnim( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframe( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolPlay( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolStop( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolRewind( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSliderTimelineChange( wxScrollEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		

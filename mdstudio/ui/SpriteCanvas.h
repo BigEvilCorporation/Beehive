@@ -35,7 +35,7 @@ public:
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 	virtual void OnResize(wxSizeEvent& event);
-	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta);
 
 protected:
 	//Render callback
@@ -68,7 +68,7 @@ private:
 	bool m_drawGrid;
 
 	//Mouse
-	ion::Vector2 m_mousePrevPos;
+	ion::Vector2i m_mousePrevPos;
 	float m_cameraZoom;
 
 	//Rendering primitives

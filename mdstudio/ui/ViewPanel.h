@@ -49,7 +49,7 @@ public:
 
 protected:
 	//Event callbacks
-	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2& mouseDelta);
+	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta);
 	virtual void OnKeyboard(wxKeyEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
@@ -57,7 +57,7 @@ protected:
 	virtual void OnMouseTileEvent(int buttonBits, int x, int y) {}
 
 	//Mouse click or changed pixel callback
-	virtual void OnMousePixelEvent(ion::Vector2i mousePos, int buttonBits, int x, int y) {}
+	virtual void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int x, int y) {}
 
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset) {}
@@ -112,7 +112,7 @@ protected:
 	float m_cameraPanSpeed;
 
 	//Mouse
-	ion::Vector2 m_mousePrevPos;
+	ion::Vector2i m_mousePrevPos;
 	ion::Vector2i m_prevMouseOverTilePos;
 	ion::Vector2i m_prevMouseOverPixelPos;
 	int m_prevMouseBits;

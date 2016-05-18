@@ -6,9 +6,96 @@
 
 #include "Animation.h"
 
+void Animation::SetName(const std::string& name)
+{
+	m_name = name;
+}
+
+const std::string& Animation::GetName() const
+{
+	return m_name;
+}
+
+void Animation::AddActor(GameObjectId actorId)
+{
+	m_actors.insert(std::make_pair(actorId, AnimationActor(actorId)));
+}
+
+void Animation::RemoveActor(GameObjectId actorId)
+{
+	std::map<GameObjectId, AnimationActor>::iterator it = m_actors.find(actorId);
+	if(it != m_actors.end())
+	{
+		m_actors.erase(it);
+	}
+}
+
+AnimationActor* Animation::GetActor(GameObjectId actorId)
+{
+	AnimationActor* actor = NULL;
+
+	std::map<GameObjectId, AnimationActor>::iterator it = m_actors.find(actorId);
+	if(it != m_actors.end())
+	{
+		actor = &it->second;
+	}
+
+	return actor;
+}
+
+const AnimationActor* Animation::GetActor(GameObjectId actorId) const
+{
+	const AnimationActor* actor = NULL;
+
+	std::map<GameObjectId, AnimationActor>::const_iterator it = m_actors.find(actorId);
+	if(it != m_actors.end())
+	{
+		actor = &it->second;
+	}
+
+	return actor;
+}
+
+TAnimActorMap::iterator Animation::ActorsBegin()
+{
+	return m_actors.begin();
+}
+
+TAnimActorMap::iterator Animation::ActorsEnd()
+{
+	return m_actors.end();
+}
+
+int Animation::GetActorCount() const
+{
+	return m_actors.size();
+}
+
 void Animation::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_name);
+	archive.Serialise(m_actors);
+}
 
+AnimationActor::AnimationActor()
+{
+
+}
+
+AnimationActor::AnimationActor(GameObjectId gameObjectId)
+{
+	m_gameObjectId = gameObjectId;
+}
+
+GameObjectId AnimationActor::GetGameObjectId() const
+{
+	return m_gameObjectId;
+}
+
+void AnimationActor::Serialise(ion::io::Archive& archive)
+{
+	archive.Serialise(m_gameObjectId);
+	archive.Serialise(m_trackPosition);
 }
 
 const ion::Vector2i AnimTrackPosition::GetValue(float time) const

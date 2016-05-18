@@ -36,6 +36,7 @@ enum ToolType
 	eToolFlipY,
 	eToolSelectGameObject,
 	eToolPlaceGameObject,
+	eToolMoveGameObject,
 	eToolRemoveGameObject,
 	eToolGenerateTerrain
 };

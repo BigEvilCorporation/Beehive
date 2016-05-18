@@ -71,6 +71,9 @@ public:
 	//Set selected game object
 	void SetSelectedGameObject(GameObject* gameObject);
 
+	//Get selected animation
+	AnimationId GetSelectedAnimation();
+
 	//Sync project settings and their respective UI widget states
 	void SyncSettingsWidgets();
 
