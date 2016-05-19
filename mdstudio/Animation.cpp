@@ -6,6 +6,11 @@
 
 #include "Animation.h"
 
+Animation::Animation()
+{
+
+}
+
 void Animation::SetName(const std::string& name)
 {
 	m_name = name;
@@ -73,6 +78,8 @@ int Animation::GetActorCount() const
 
 void Animation::Serialise(ion::io::Archive& archive)
 {
+	ion::render::Animation::Serialise(archive);
+
 	archive.Serialise(m_name);
 	archive.Serialise(m_actors);
 }

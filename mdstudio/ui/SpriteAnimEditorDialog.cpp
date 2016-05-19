@@ -207,7 +207,7 @@ void SpriteAnimEditorDialog::OnBtnAnimNew(wxCommandEvent& event)
 {
 	if(m_selectedSpriteSheet)
 	{
-		DialogNewAnim dialog(this);
+		DialogNewSpriteAnim dialog(this);
 		dialog.m_textName->SetValue(m_selectedSpriteSheet->GetName());
 
 		if(dialog.ShowModal() == wxID_OK)

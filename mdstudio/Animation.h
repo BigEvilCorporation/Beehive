@@ -51,6 +51,8 @@ typedef std::map<GameObjectId, AnimationActor> TAnimActorMap;
 class Animation : public ion::render::Animation
 {
 public:
+	Animation();
+
 	void SetName(const std::string& name);
 	const std::string& GetName() const;
 

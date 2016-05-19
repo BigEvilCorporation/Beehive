@@ -86,8 +86,17 @@ public:
 	GameObjectTypeId GetTypeId() const { return m_typeId; }
 
 	const ion::Vector2i& GetPosition() const { return m_position; }
-	const ion::Vector2i& GetDrawOffset() const { return m_drawOffset; }
-	void SetDrawOffset(const ion::Vector2i& offset) { m_drawOffset = offset; }
+
+	//Animation
+	//TODO: Poll from current anim+track during rendering, don't store here
+	const ion::Vector2i& GetAnimDrawOffset() const { return m_animDrawOffset; }
+	void SetAnimDrawOffset(const ion::Vector2i& offset) { m_animDrawOffset = offset; }
+
+	SpriteAnimId GetSpriteAnim() const { return m_spriteAnimId; }
+	void SetSpriteAnim(SpriteAnimId animId) { m_spriteAnimId = animId; }
+
+	u32 GetSpriteAnimFrame() const { return m_spriteAnimFrame; }
+	void SetSpriteAnimFrame(u32 frame) { m_spriteAnimFrame = frame; }
 
 	GameObjectVariable& AddVariable();
 	void RemoveVariable(GameObjectVariable& variable);
@@ -103,6 +112,11 @@ private:
 	GameObjectId m_objectId;
 	GameObjectTypeId m_typeId;
 	ion::Vector2i m_position;
-	ion::Vector2i m_drawOffset;
 	std::vector<GameObjectVariable> m_variables;
+
+	//Animation
+	//TODO: Poll from current anim+track during rendering, don't store here
+	ion::Vector2i m_animDrawOffset;
+	SpriteAnimId m_spriteAnimId;
+	u32 m_spriteAnimFrame;
 };

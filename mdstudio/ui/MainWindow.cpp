@@ -404,6 +404,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVEGAMEOBJ);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_ANIMATEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
 	}
 
@@ -590,6 +591,14 @@ AnimationId MainWindow::GetSelectedAnimation()
 	else
 	{
 		return InvalidAnimationId;
+	}
+}
+
+void MainWindow::SetSelectedAnimObject(GameObjectId gameObjectId)
+{
+	if(m_timelinePanel)
+	{
+		m_timelinePanel->SetCurrentActor(gameObjectId);
 	}
 }
 
@@ -1273,6 +1282,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_MOVEGAMEOBJ:
 			m_mapPanel->SetTool(eToolMoveGameObject);
+			break;
+		case wxID_TOOL_ANIMATEGAMEOBJ:
+			m_mapPanel->SetTool(eToolAnimateGameObject);
 			break;
 		case wxID_TOOL_REMOVEGAMEOBJ:
 			m_mapPanel->SetTool(eToolRemoveGameObject);

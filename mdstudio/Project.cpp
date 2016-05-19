@@ -1923,13 +1923,15 @@ bool Project::ExportSpriteSheets(const std::string& directory, bool binary) cons
 				WriteFileHeader(stream);
 				it->second.ExportSpriteSheets(stream);
 				file.Write(stream.str().c_str(), stream.str().size());
-
-				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
-
-		return false;
 	}
+
+	return true;
 }
 
 bool Project::ExportSpriteAnims(const std::string& directory, bool binary) const
@@ -1952,13 +1954,15 @@ bool Project::ExportSpriteAnims(const std::string& directory, bool binary) const
 				WriteFileHeader(stream);
 				it->second.ExportSpriteAnims(stream);
 				file.Write(stream.str().c_str(), stream.str().size());
-
-				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
-
-		return false;
 	}
+
+	return true;
 }
 
 bool Project::ExportSpritePalettes(const std::string& directory) const
