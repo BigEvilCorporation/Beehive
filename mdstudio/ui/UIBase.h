@@ -65,43 +65,45 @@ class SpriteCanvas;
 #define wxID_BTN_TOOLS_GAMEOBJS 1012
 #define wxID_BTN_TOOLS_GAMEOBJPARAMS 1013
 #define wxID_BTN_TOOLS_TIMELINE 1014
-#define wxID_BTN_MAP_CLEAR 1015
-#define wxID_BTN_MAP_RESIZE 1016
-#define wxID_BTN_TILES_IMPORT 1017
-#define wxID_BTN_TILES_CREATE 1018
-#define wxID_BTN_TILES_DELETE 1019
-#define wxID_BTN_TILES_CLEANUP 1020
-#define wxID_BTN_SPRITE_EDITOR 1021
-#define wxID_BTN_STAMPS_CREATE 1022
-#define wxID_BTN_STAMPS_DELETE 1023
-#define wxID_BTN_COL_TILES_CREATE 1024
-#define wxID_BTN_COL_TILES_DELETE 1025
-#define wxID_BTN_COL_TILES_CLEANUP 1026
-#define wxID_BTN_COL_MAP_CLEAR 1027
-#define wxID_BTN_COL_GEN_BEZIER 1028
-#define wxID_BTN_GAME_OBJ_TYPES 1029
-#define wxID_BTN_CANCEL 1030
-#define wxID_TOOL_SELECTTILE 1031
-#define wxID_TOOL_PAINT 1032
-#define wxID_TOOL_TILEPICKER 1033
-#define wxID_TOOL_FLIPX 1034
-#define wxID_TOOL_FLIPY 1035
-#define wxID_TOOL_FILL 1036
-#define wxID_TOOL_CLONE 1037
-#define wxID_TOOL_SELECTSTAMP 1038
-#define wxID_TOOL_STAMP 1039
-#define wxID_TOOL_STAMPPICKER 1040
-#define wxID_TOOL_CREATESTAMP 1041
-#define wxID_TOOL_REMOVESTAMP 1042
-#define wxID_TOOL_COL_PAINTTERRAIN 1043
-#define wxID_TOOL_COL_PAINTSOLID 1044
-#define wxID_TOOL_COL_DELETETERRTILE 1045
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1046
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1047
-#define wxID_TOOL_SELECTGAMEOBJ 1048
-#define wxID_TOOL_PLACEGAMEOBJ 1049
-#define wxID_TOOL_MOVEGAMEOBJ 1050
-#define wxID_TOOL_REMOVEGAMEOBJ 1051
+#define wxID_BTN_TOOLS_SPRITEANIM 1015
+#define wxID_BTN_MAP_CLEAR 1016
+#define wxID_BTN_MAP_RESIZE 1017
+#define wxID_BTN_TILES_IMPORT 1018
+#define wxID_BTN_TILES_CREATE 1019
+#define wxID_BTN_TILES_DELETE 1020
+#define wxID_BTN_TILES_CLEANUP 1021
+#define wxID_BTN_SPRITE_EDITOR 1022
+#define wxID_BTN_STAMPS_CREATE 1023
+#define wxID_BTN_STAMPS_DELETE 1024
+#define wxID_BTN_COL_TILES_CREATE 1025
+#define wxID_BTN_COL_TILES_DELETE 1026
+#define wxID_BTN_COL_TILES_CLEANUP 1027
+#define wxID_BTN_COL_MAP_CLEAR 1028
+#define wxID_BTN_COL_GEN_BEZIER 1029
+#define wxID_BTN_GAME_OBJ_TYPES 1030
+#define wxID_BTN_CANCEL 1031
+#define wxID_TOOL_SELECTTILE 1032
+#define wxID_TOOL_PAINT 1033
+#define wxID_TOOL_TILEPICKER 1034
+#define wxID_TOOL_FLIPX 1035
+#define wxID_TOOL_FLIPY 1036
+#define wxID_TOOL_FILL 1037
+#define wxID_TOOL_CLONE 1038
+#define wxID_TOOL_SELECTSTAMP 1039
+#define wxID_TOOL_STAMP 1040
+#define wxID_TOOL_STAMPPICKER 1041
+#define wxID_TOOL_CREATESTAMP 1042
+#define wxID_TOOL_REMOVESTAMP 1043
+#define wxID_TOOL_COL_PAINTTERRAIN 1044
+#define wxID_TOOL_COL_PAINTSOLID 1045
+#define wxID_TOOL_COL_DELETETERRTILE 1046
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1047
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1048
+#define wxID_TOOL_SELECTGAMEOBJ 1049
+#define wxID_TOOL_PLACEGAMEOBJ 1050
+#define wxID_TOOL_MOVEGAMEOBJ 1051
+#define wxID_TOOL_ANIMATEGAMEOBJ 1052
+#define wxID_TOOL_REMOVEGAMEOBJ 1053
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -151,6 +153,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnToolsGameObjs( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsGameObjParams( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsTimeline( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnToolsSpriteAnim( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapResize( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -203,6 +206,28 @@ class DialogMapSizeBase : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class DialogNewSpriteAnim
+///////////////////////////////////////////////////////////////////////////////
+class DialogNewSpriteAnim : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_text1;
+		wxStdDialogButtonSizer* m_sdbSizer4;
+		wxButton* m_sdbSizer4OK;
+		wxButton* m_sdbSizer4Cancel;
+	
+	public:
+		wxTextCtrl* m_textName;
+		wxCheckBox* m_chkAutoGenerate;
+		
+		DialogNewSpriteAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New sprite animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogNewSpriteAnim();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class DialogNewAnim
 ///////////////////////////////////////////////////////////////////////////////
 class DialogNewAnim : public wxDialog 
@@ -217,9 +242,8 @@ class DialogNewAnim : public wxDialog
 	
 	public:
 		wxTextCtrl* m_textName;
-		wxCheckBox* m_chkAutoGenerate;
 		
-		DialogNewAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		DialogNewAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~DialogNewAnim();
 	
 };
@@ -302,11 +326,12 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolMoveGameObject;
+		wxBitmapButton* m_toolAnimateGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
 	
 	public:
 		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 124,722 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 124,757 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
 		~MapToolbox();
 	
 };
@@ -613,20 +638,24 @@ class TimelinePanelBase : public wxPanel
 		wxChoice* m_choiceAnims;
 		wxToolBarToolBase* m_toolAddAnim; 
 		wxToolBarToolBase* m_toolDeleteAnim; 
-		wxToolBarToolBase* m_toolKeyframe; 
+		wxToolBarToolBase* m_toolKeyframeActor; 
+		wxToolBarToolBase* m_toolKeyframeAll; 
 		wxToolBarToolBase* m_toolPlay; 
 		wxToolBarToolBase* m_toolStop; 
 		wxToolBarToolBase* m_toolRewind; 
 		wxToolBarToolBase* m_toolIsolateObject; 
 		wxStaticText* m_staticText34;
 		wxSpinCtrl* m_spinSpeed;
+		wxStaticText* m_textCurrentActor;
 		wxGrid* m_gridTimeline;
 		wxSlider* m_sliderTimeline;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnSelectAnimation( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolAddAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolDeleteAnim( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnToolKeyframe( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframeActor( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframeAll( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolPlay( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRewind( wxCommandEvent& event ) { event.Skip(); }
@@ -638,6 +667,24 @@ class TimelinePanelBase : public wxPanel
 		
 		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,324 ), long style = wxTAB_TRAVERSAL ); 
 		~TimelinePanelBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SpriteAnimPanelBase
+///////////////////////////////////////////////////////////////////////////////
+class SpriteAnimPanelBase : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxListBox* m_listSpriteAnims;
+		wxSlider* m_sliderTimeline;
+	
+	public:
+		
+		SpriteAnimPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,130 ), long style = wxTAB_TRAVERSAL ); 
+		~SpriteAnimPanelBase();
 	
 };
 

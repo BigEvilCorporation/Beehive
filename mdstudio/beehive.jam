@@ -65,6 +65,8 @@ local SRC =
 	ui/SpriteCanvas.h
 	ui/SpriteAnimEditorDialog.cpp
 	ui/SpriteAnimEditorDialog.h
+	ui/SpriteAnimPanel.cpp
+	ui/SpriteAnimPanel.h
 	ui/StampsPanel.cpp
 	ui/StampsPanel.h
 	ui/TerrainTileEditorPanel.cpp

@@ -235,7 +235,7 @@ GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
 		for(std::vector<GameObjectMapEntry>::const_reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec && !gameObjectId; ++itVec)
 		{
 			ion::Vector2i size(itVec->m_size.x / 8, itVec->m_size.y / 8);
-			ion::Vector2i drawOffset(ion::maths::Round((float)itVec->m_gameObject.GetDrawOffset().x / 8.0f), ion::maths::Round((float)itVec->m_gameObject.GetDrawOffset().y / 8.0f));
+			ion::Vector2i drawOffset(ion::maths::Round((float)itVec->m_gameObject.GetAnimDrawOffset().x / 8.0f), ion::maths::Round((float)itVec->m_gameObject.GetAnimDrawOffset().y / 8.0f));
 			topLeft = itVec->m_position + drawOffset;
 			ion::Vector2i bottomRight = topLeft + size;
 

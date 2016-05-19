@@ -68,6 +68,9 @@ GameObject::GameObject(GameObjectId objectId, GameObjectTypeId typeId, const ion
 	m_objectId = objectId;
 	m_typeId = typeId;
 	m_position = position;
+
+	m_spriteAnimId = 0;
+	m_spriteAnimFrame = 0;
 }
 
 GameObjectVariable& GameObject::AddVariable()
@@ -100,7 +103,6 @@ void GameObject::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_objectId, "objectId");
 	archive.Serialise(m_typeId, "typeId");
 	archive.Serialise(m_position, "position");
-	archive.Serialise(m_drawOffset, "drawOffset");
 	archive.Serialise(m_variables, "variables");
 }
 

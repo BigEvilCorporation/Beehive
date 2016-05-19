@@ -477,6 +477,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			}
 
 			case eToolSelectGameObject:
+			case eToolAnimateGameObject:
 			{
 				ion::Vector2i topLeft;
 				m_hoverGameObject = m_project->GetMap().FindGameObject(x, y, topLeft);
@@ -489,22 +490,30 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					{
 						m_mainWindow->SetSelectedGameObject(gameObject);
 
+						if(m_currentTool == eToolAnimateGameObject)
+						{
+							m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
+						}
+
 						m_previewGameObjectType = gameObject->GetTypeId();
 						m_previewGameObjectPos.x = topLeft.x;
 						m_previewGameObjectPos.y = topLeft.y;
 					}
 				}
 
-				if(buttonBits & eMouseRight)
+				if(m_currentTool == eToolAnimateGameObject)
 				{
-					if(m_hoverGameObject != InvalidGameObjectId)
+					if(buttonBits & eMouseRight)
 					{
-						//Right-click menu
-						wxMenu contextMenu;
+						if(m_hoverGameObject != InvalidGameObjectId)
+						{
+							//Right-click menu
+							wxMenu contextMenu;
 
-						contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
-						contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
-						PopupMenu(&contextMenu);
+							contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
+							contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
+							PopupMenu(&contextMenu);
+						}
 					}
 				}
 				break;
@@ -870,7 +879,28 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			break;
 		}
 
-		case eToolMoveGameObject:
+		//case eToolMoveGameObject:
+		//{
+		//	if(buttonBits & eMouseLeft)
+		//	{
+		//		ion::Vector2i topLeft;
+		//		m_hoverGameObject = m_project->GetMap().FindGameObject(x, y, topLeft);
+		//
+		//		if(m_hoverGameObject != InvalidGameObjectId)
+		//		{
+		//			GameObject* gameObject = m_project->GetMap().GetGameObject(m_hoverGameObject);
+		//			if(gameObject)
+		//			{
+		//				gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
+		//				Refresh();
+		//			}
+		//		}
+		//	}
+		//	
+		//	break;
+		//}
+
+		case eToolAnimateGameObject:
 		{
 			if(buttonBits & eMouseLeft)
 			{
@@ -882,12 +912,12 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					GameObject* gameObject = m_project->GetMap().GetGameObject(m_hoverGameObject);
 					if(gameObject)
 					{
-						gameObject->SetDrawOffset(gameObject->GetDrawOffset() + mouseDelta);
+						gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
 						Refresh();
 					}
 				}
 			}
-			
+
 			break;
 		}
 	}
@@ -1435,8 +1465,8 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				ion::Vector3 pos(floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
 					floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
 
-				pos.x += itVec->m_gameObject.GetDrawOffset().x;
-				pos.y -= itVec->m_gameObject.GetDrawOffset().y;
+				pos.x += itVec->m_gameObject.GetAnimDrawOffset().x;
+				pos.y -= itVec->m_gameObject.GetAnimDrawOffset().y;
 
 				mtx.SetTranslation(pos);
 				mtx.SetScale(scale);
