@@ -896,38 +896,42 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 	for(int i = 0; i < m_terrainBeziers.size(); i++)
 	{
 		const int maxPoints = m_terrainBeziers[i].GetNumPoints();
-		std::vector<ion::Vector2> points;
-		points.reserve(maxPoints);
-		m_terrainBeziers[i].GetPositions(points, 0.0f, 1.0f, granularity);
 
-		for(int posIdx = 0; posIdx < points.size(); posIdx++)
+		if(maxPoints > 0)
 		{
-			//Get position
-			const ion::Vector2 pixelPos(points[posIdx].x, (float)mapHeightPixels - points[posIdx].y);
-			const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileSize), ion::maths::Floor(pixelPos.y / (float)tileSize));
+			std::vector<ion::Vector2> points;
+			points.reserve(maxPoints);
+			m_terrainBeziers[i].GetPositions(points, 0.0f, 1.0f, granularity);
 
-			//Get tile under cursor
-			TerrainTileId tileId = m_collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
-
-			if(tileId == InvalidTerrainTileId)
+			for(int posIdx = 0; posIdx < points.size(); posIdx++)
 			{
-				//Create new collision tile
-				tileId = m_terrainTileset.AddTerrainTile();
+				//Get position
+				const ion::Vector2 pixelPos(points[posIdx].x, (float)mapHeightPixels - points[posIdx].y);
+				const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileSize), ion::maths::Floor(pixelPos.y / (float)tileSize));
 
-				//Set on map
-				m_collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
-			}
+				//Get tile under cursor
+				TerrainTileId tileId = m_collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
 
-			//Get collision tile
-			if(TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(tileId))
-			{
-				//Get pixel offset into tile
-				int pixelX = pixelPos.x - (tilePos.x * tileSize);
-				int pixelY = pixelPos.y - (tilePos.y * tileSize);
+				if(tileId == InvalidTerrainTileId)
+				{
+					//Create new collision tile
+					tileId = m_terrainTileset.AddTerrainTile();
 
-				//Set height at X
-				const int height = tileSize - pixelY;
-				terrainTile->SetHeight(pixelX, height);
+					//Set on map
+					m_collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
+				}
+
+				//Get collision tile
+				if(TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(tileId))
+				{
+					//Get pixel offset into tile
+					int pixelX = pixelPos.x - (tilePos.x * tileSize);
+					int pixelY = pixelPos.y - (tilePos.y * tileSize);
+
+					//Set height at X
+					const int height = tileSize - pixelY;
+					terrainTile->SetHeight(pixelX, height);
+				}
 			}
 		}
 	}
