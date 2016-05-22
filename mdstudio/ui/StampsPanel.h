@@ -39,7 +39,9 @@ private:
 
 	enum MenuItems
 	{
-		eMenuDeleteStamp
+		eMenuDeleteStamp,
+		eMenuSetStampLowDrawPrio,
+		eMenuSetStampHighDrawPrio,
 	};
 
 	//Paint all stamps using position map to canvas
