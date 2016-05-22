@@ -154,6 +154,8 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			wxMenu contextMenu;
 
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
+			contextMenu.Append(eMenuSetStampLowDrawPrio, wxString("Set stamp low draw priority"));
+			contextMenu.Append(eMenuSetStampHighDrawPrio, wxString("Set stamp high draw priority"));
 			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampsPanel::OnContextMenuClick, NULL, this);
 			PopupMenu(&contextMenu);
 		}
@@ -176,6 +178,34 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 
 		//Refresh
 		m_mainWindow->RefreshAll();
+	}
+	else if(event.GetId() == eMenuSetStampLowDrawPrio)
+	{
+		Stamp* stamp = m_project->GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			for(int x = 0; x < stamp->GetWidth(); x++)
+			{
+				for(int y = 0; y < stamp->GetHeight(); y++)
+				{
+					stamp->SetTileFlags(x, y, stamp->GetTileFlags(x, y) & ~Map::eHighPlane);
+				}
+			}
+		}
+	}
+	else if(event.GetId() == eMenuSetStampHighDrawPrio)
+	{
+		Stamp* stamp = m_project->GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			for(int x = 0; x < stamp->GetWidth(); x++)
+			{
+				for(int y = 0; y < stamp->GetHeight(); y++)
+				{
+					stamp->SetTileFlags(x, y, stamp->GetTileFlags(x, y) | Map::eHighPlane);
+				}
+			}
+		}
 	}
 }
 

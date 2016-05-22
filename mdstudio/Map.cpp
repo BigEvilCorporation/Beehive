@@ -360,11 +360,11 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
 
 			//Generate components
-			u16 tileIndex = tileId & 0x7FF;							//Bottom 11 bits (index from 0)
-			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;	//12th bit
-			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;	//13th bit
-			u16 palette = (tile->GetPaletteId() & 0x3) << 13;		//14th and 15th bits
-			u16 plane = 1 << 15;									//16th bit
+			u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
+			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
+			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
+			u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
+			u16 plane = (tileDesc.m_flags & eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
 
 			//Generate word
 			u16 word = tileIndex | flipV | flipH | palette;
@@ -425,14 +425,14 @@ void Map::Export(const Project& project, ion::io::File& file) const
 			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
 
 			//Generate components
-			u16 tileIndex = tileId & 0x7FF;							//Bottom 11 bits (index from 0)
-			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;	//12th bit
-			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;	//13th bit
-			u16 palette = (tile->GetPaletteId() & 0x3) << 13;		//14th and 15th bits
-			u16 plane = 1 << 15;									//16th bit
+			u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
+			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
+			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
+			u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
+			u16 plane = (tileDesc.m_flags & eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
 
 			//Generate word
-			u16 word = tileIndex | flipV | flipH | palette;
+			u16 word = tileIndex | flipV | flipH | palette | plane;
 
 			//Endian flip
 			ion::memory::EndianSwap(word);
