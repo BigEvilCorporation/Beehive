@@ -33,7 +33,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 
-	void Resize(int w, int h);
+	void Resize(int w, int h, bool shiftRight);
 
 	//Set collision tile on CollisionMap
 	void SetTerrainTile(int x, int y, TerrainTileId tile);

@@ -15,7 +15,7 @@ Map::Map()
 	m_width = 0;
 	m_height = 0;
 	m_nextFreeGameObjectId = 1;
-	Resize(defaultWidth, defaultHeight);
+	Resize(defaultWidth, defaultHeight, false);
 }
 
 void Map::Clear()
@@ -53,7 +53,7 @@ int Map::GetHeight() const
 	return m_height;
 }
 
-void Map::Resize(int width, int height)
+void Map::Resize(int width, int height, bool shiftRight)
 {
 	//Create new tile array
 	std::vector<TileDesc> tiles;
@@ -74,9 +74,31 @@ void Map::Resize(int width, int height)
 	{
 		for(int y = 0; y < min(height, m_height); y++)
 		{
-			int tileIdx = (y * width) + x;
-			tiles[tileIdx].m_id = GetTile(x, y);
-			tiles[tileIdx].m_flags = GetTileFlags(x, y);
+			int destTileIdx = (y * width) + x;
+			if(shiftRight && width > m_width)
+				destTileIdx += (width - m_width);
+
+			tiles[destTileIdx].m_id = GetTile(x, y);
+			tiles[destTileIdx].m_flags = GetTileFlags(x, y);
+		}
+	}
+
+	if(shiftRight && width > m_width)
+	{
+		//Shift stamps
+		for(TStampPosMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+		{
+			it->m_position.x += (width - m_width);
+		}
+
+		//Shift game objects
+		for(TGameObjectPosMap::iterator it = m_gameObjects.begin(), end = m_gameObjects.end(); it != end; ++it)
+		{
+			for(int i = 0; i < it->second.size(); i++)
+			{
+				it->second[i].m_position.x += (width - m_width);
+				it->second[i].m_gameObject.SetPosition(it->second[i].m_position);
+			}
 		}
 	}
 	

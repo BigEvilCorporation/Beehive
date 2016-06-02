@@ -14,7 +14,7 @@ CollisionMap::CollisionMap()
 {
 	m_width = 0;
 	m_height = 0;
-	Resize(defaultWidth, defaultHeight);
+	Resize(defaultWidth, defaultHeight, false);
 }
 
 void CollisionMap::Clear()
@@ -46,7 +46,7 @@ int CollisionMap::GetHeight() const
 	return m_height;
 }
 
-void CollisionMap::Resize(int width, int height)
+void CollisionMap::Resize(int width, int height, bool shiftRight)
 {
 	//Create new tile array
 	std::vector<TerrainTileId> terrainTiles;
@@ -63,8 +63,11 @@ void CollisionMap::Resize(int width, int height)
 	{
 		for(int y = 0; y < min(height, m_height); y++)
 		{
-			int tileIdx = (y * width) + x;
-			terrainTiles[tileIdx] = GetTerrainTile(x, y);
+			int destTileIdx = (y * width) + x;
+			if(shiftRight && width > m_width)
+				destTileIdx += (width - m_width);
+
+			terrainTiles[destTileIdx] = GetTerrainTile(x, y);
 		}
 	}
 	

@@ -1160,15 +1160,45 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 		{
 			int width = dialog.m_spinCtrlWidth->GetValue();
 			int height = dialog.m_spinCtrlHeight->GetValue();
+			bool shiftRight = true;
 
 			if(width > 0 && width <= 10000 && height > 0 && height <= 10000)
 			{
 				//Resize map
-				map.Resize(width, height);
-				collisionMap.Resize(width, height);
+				map.Resize(width, height, shiftRight);
+				collisionMap.Resize(width, height, shiftRight);
+
+				if(shiftRight && width > originalWidth)
+				{
+					//Move terrain beziers
+					for(int i = 0; i < m_project->GetNumTerrainBeziers(); i++)
+					{
+						ion::gamekit::BezierPath* bezier = m_project->GetTerrainBezier(i);
+						if(bezier)
+						{
+							for(int j = 0; j < bezier->GetNumPoints(); j++)
+							{
+								ion::Vector2 position;
+								ion::Vector2 controlA;
+								ion::Vector2 controlB;
+								bezier->GetPoint(j, position, controlA, controlB);
+
+								position.x += (width - originalWidth) * 8.0f;
+
+								bezier->SetPoint(j, position, controlA, controlB);
+							}
+
+						}
+					}
+
+					//Repaint all
+					m_project->InvalidateTerrainBeziers(true);
+				}
 
 				//Refresh map panel
 				RefreshPanel(ePanelMap);
+
+				m_project->InvalidateTerrainBeziers(false);
 			}
 		}
 	}
