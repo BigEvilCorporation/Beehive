@@ -86,6 +86,7 @@ public:
 	GameObjectTypeId GetTypeId() const { return m_typeId; }
 
 	const ion::Vector2i& GetPosition() const { return m_position; }
+	void SetPosition(const ion::Vector2i& position) { m_position = position; }
 
 	//Animation
 	//TODO: Poll from current anim+track during rendering, don't store here

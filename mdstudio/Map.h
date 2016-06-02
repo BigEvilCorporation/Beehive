@@ -89,7 +89,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 
-	void Resize(int w, int h);
+	void Resize(int w, int h, bool shiftRight);
 
 	//Set tile on map
 	void SetTile(int x, int y, TileId tile);

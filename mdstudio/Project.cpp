@@ -1379,8 +1379,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		if(importFlags & eBMPImportDrawToMap)
 		{
 			//Grow map if necessary
-			m_map.Resize(max(m_map.GetWidth(), tilesWidth), max(m_map.GetHeight(), tilesHeight));
-			m_collisionMap.Resize(max(m_collisionMap.GetWidth(), tilesWidth), max(m_collisionMap.GetHeight(), tilesHeight));
+			m_map.Resize(max(m_map.GetWidth(), tilesWidth), max(m_map.GetHeight(), tilesHeight), false);
+			m_collisionMap.Resize(max(m_collisionMap.GetWidth(), tilesWidth), max(m_collisionMap.GetHeight(), tilesHeight), false);
 		}
 
 		Stamp* stamp = NULL;
