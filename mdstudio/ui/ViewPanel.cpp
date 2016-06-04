@@ -163,7 +163,7 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 				int sourceY = (flipFlags & Map::eFlipY) ? (height - 1 - stampY) : stampY;
 
 				TileId tileId = stamp.GetTile(sourceX, sourceY);
-				u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
+				u32 tileFlags = stamp.GetTileFlags(sourceX, sourceY);
 				tileFlags ^= flipFlags;
 				int canvasX = stampX + x;
 				int canvasY = stampY + y;

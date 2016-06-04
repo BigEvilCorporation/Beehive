@@ -108,7 +108,6 @@ void GameObject::Serialise(ion::io::Archive& archive)
 
 void GameObject::Export(std::stringstream& stream, const GameObjectType& gameObjectType) const
 {
-	stream << gameObjectType.GetName().c_str() << "_" << (u32)m_objectId << ":" << std::endl;
 	stream << '\t' << "jsr " << gameObjectType.GetName() << "Init" << std::endl;
 
 	const std::vector<GameObjectVariable>& templateVariables = gameObjectType.GetVariables();
