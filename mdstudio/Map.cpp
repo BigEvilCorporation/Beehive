@@ -171,7 +171,7 @@ void Map::BakeStamp(std::vector<TileDesc>& tiles, int x, int y, const Stamp& sta
 			TileId tileId = stamp.GetTile(sourceX, sourceY);
 			if(tileId != InvalidTileId)
 			{
-				u32 tileFlags = stamp.GetTileFlags(stampX, stampY);
+				u32 tileFlags = stamp.GetTileFlags(sourceX, sourceY);
 				tileFlags ^= flipFlags;
 
 				int mapX = stampX + x;
