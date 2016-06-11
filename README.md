@@ -9,7 +9,7 @@ Beehive: A complete content tool for the SEGA Mega Drive (and soon to be more)
 
 Beehive (and all other ion::engine projects) use the JamPlus build system (see https://github.com/jamplus/jamplus).
 JamPlus includes support for XCode and other IDEs, but the .sh files need fetching from JamPlus source and I haven't
-used it in a long time so, mileage may vary.
+used it in a long time so mileage may vary.
 
 ///////////////////////////////////////////////////////
 // DEPENDENCIES
