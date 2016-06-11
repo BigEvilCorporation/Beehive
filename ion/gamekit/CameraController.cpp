@@ -13,7 +13,7 @@ namespace ion
 	{
 		CameraController::CameraController()
 		{
-			mCamera = NULL;
+			m_camera = NULL;
 		}
 
 		CameraController::~CameraController()
@@ -22,12 +22,12 @@ namespace ion
 
 		void CameraController::SetCurrentCamera(ion::render::Camera* camera)
 		{
-			mCamera = camera;
+			m_camera = camera;
 		}
 
 		ion::render::Camera* CameraController::GetCurrentCamera() const
 		{
-			return mCamera;
+			return m_camera;
 		}
 	}
 }

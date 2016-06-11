@@ -36,11 +36,11 @@ namespace ion
 		protected:
 			Resource(ResourceManager& resourceManager, const std::string& filename);
 
-			ResourceManager& mResourceManager;
-			std::string mFilename;
+			ResourceManager& m_resourceManager;
+			std::string m_filename;
 
-			u32 mResourceCount;
-			bool mIsLoaded;
+			u32 m_resourceCount;
+			bool m_isLoaded;
 
 			friend class ResourceManager;
 		};
@@ -51,26 +51,26 @@ namespace ion
 			ResourceT(ResourceManager& resourceManager, const std::string& filename)
 				: Resource(resourceManager, filename)
 			{
-				mResourceObject = NULL;
+				m_resourceObject = NULL;
 			}
 
 			ResourceT(ResourceManager& resourceManager, const std::string& filename, T* resourceObject)
 				: Resource(resourceManager, filename)
 			{
-				mResourceObject = resourceObject;
-				mIsLoaded = true;
+				m_resourceObject = resourceObject;
+				m_isLoaded = true;
 			}
 
 			virtual ~ResourceT() {}
 
 			virtual bool Load();
 			virtual void Unload();
-			virtual bool IsLoaded() { return mIsLoaded; }
+			virtual bool IsLoaded() { return m_isLoaded; }
 
-			T* Get() const { return mResourceObject; }
+			T* Get() const { return m_resourceObject; }
 
 		protected:
-			T* mResourceObject;
+			T* m_resourceObject;
 		};
 	}
 }
@@ -90,39 +90,39 @@ namespace ion
 		template <class T> bool ResourceT<T>::Load()
 		{
 			//Prepend directory
-			std::string fullPath = mResourceManager.GetResourceDirectory<T>();
+			std::string fullPath = m_resourceManager.GetResourceDirectory<T>();
 			fullPath += "/";
-			fullPath += mFilename;
+			fullPath += m_filename;
 
 			//Create and open scene file stream for reading
-			File file(fullPath, File::OpenRead);
+			File file(fullPath, File::eOpenRead);
 
 			if(file.IsOpen())
 			{
 				//Create archive for serialising in
-				Archive archiveIn(file, Archive::In, &mResourceManager);
+				Archive archiveIn(file, Archive::eIn, &m_resourceManager);
 
 				//Register pointer type
 				T::RegisterSerialiseType(archiveIn);
 
 				//Serialise pointer
-				archiveIn.Serialise(mResourceObject);
+				archiveIn.Serialise(m_resourceObject);
 
 				//Close file
 				file.Close();
 
 				//Loaded
-				mIsLoaded = true;
+				m_isLoaded = true;
 			}
 
-			return mIsLoaded;
+			return m_isLoaded;
 		}
 
 		template <class T> void ResourceT<T>::Unload()
 		{
-			mIsLoaded = false;
-			delete mResourceObject;
-			mResourceObject = NULL;
+			m_isLoaded = false;
+			delete m_resourceObject;
+			m_resourceObject = NULL;
 		}
 	}
 }

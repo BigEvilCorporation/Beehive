@@ -24,20 +24,20 @@ namespace ion
 		TVector2(const TVector2<T>& vector);
 		T operator [](int index) const;
 
-		TVector2<T> operator *(T Scalar) const;
-		TVector2<T> operator /(T Scalar) const;
-		TVector2<T> operator *(const TVector2<T> &Vector) const;
-		TVector2<T> operator /(const TVector2<T> &Vector) const;
-		TVector2<T> operator +(const TVector2<T> &Vector) const;
-		TVector2<T> operator -(const TVector2<T> &Vector) const;
-		void operator +=(const TVector2<T> &Vector);
-		void operator -=(const TVector2<T> &Vector);
+		TVector2<T> operator *(T scalar) const;
+		TVector2<T> operator /(T scalar) const;
+		TVector2<T> operator *(const TVector2<T> &vector) const;
+		TVector2<T> operator /(const TVector2<T> &vector) const;
+		TVector2<T> operator +(const TVector2<T> &vector) const;
+		TVector2<T> operator -(const TVector2<T> &vector) const;
+		void operator +=(const TVector2<T> &vector);
+		void operator -=(const TVector2<T> &vector);
 
 		T GetLength() const;
 		T Dot(const TVector2<T>& vector) const;
 
-		//Interpolation with another vector, with a given weight
-		TVector2<T> Lerp(const TVector2<T> &Vector, float Weight) const;
+		//Interpolation with another vector, with a given time
+		TVector2<T> Lerp(const TVector2<T> &vector, float time) const;
 
 		//Serialisation
 		void Serialise(io::Archive& archive);
@@ -54,38 +54,38 @@ namespace ion
 
 		Vector3();
 		Vector3(float X, float Y, float Z);
-		Vector3(float* Float3);
-		Vector3(const Vector3& Vector);
+		Vector3(const float* float3);
+		Vector3(const Vector3& vector);
 		~Vector3();
 
 		void Zero();
 
-		float operator [](int Index) const;
+		float operator [](int index) const;
 
-		Vector3 operator *(float Scalar) const;
-		Vector3 operator *(const Vector3 &Vector) const;
-		Vector3 operator /(const Vector3 &Vector) const;
-		Vector3 operator -(const Vector3 &Vector) const;
-		Vector3 operator +(const Vector3 &Vector) const;
-		Vector3 operator -(float Scalar) const;
-		Vector3 operator +(float Scalar) const;
-		Vector3 operator /(float Scalar) const;
+		Vector3 operator *(float scalar) const;
+		Vector3 operator *(const Vector3 &vector) const;
+		Vector3 operator /(const Vector3 &vector) const;
+		Vector3 operator -(const Vector3 &vector) const;
+		Vector3 operator +(const Vector3 &vector) const;
+		Vector3 operator -(float scalar) const;
+		Vector3 operator +(float scalar) const;
+		Vector3 operator /(float scalar) const;
 
-		void operator +=(const Vector3 &Vector);
-		void operator -=(const Vector3 &Vector);
-		void operator *=(const Vector3 &Vector);
-		void operator *=(float Scalar);
-		bool operator ==(const Vector3 &Vector) const;
+		void operator +=(const Vector3 &vector);
+		void operator -=(const Vector3 &vector);
+		void operator *=(const Vector3 &vector);
+		void operator *=(float scalar);
+		bool operator ==(const Vector3 &vector) const;
 
-		Vector3 Cross(const Vector3 &b) const;
-		float Dot(const Vector3& Vector) const;
+		Vector3 Cross(const Vector3 &vector) const;
+		float Dot(const Vector3& vector) const;
 		Vector3 Normalise() const;
 
 		float GetLength() const;
-		float GetDistance(const Vector3 &v) const;
+		float GetDistance(const Vector3 &vector) const;
 
-		//Interpolation with another vector, with a given weight
-		Vector3 Lerp(const Vector3 &Vector, float Weight) const;
+		//Interpolation with another vector, with a given time
+		Vector3 Lerp(const Vector3 &vector, float time) const;
 
 		//Serialisation
 		void Serialise(io::Archive& archive);

@@ -19,9 +19,9 @@ namespace ion
 		class Animation
 		{
 		public:
-			enum AnimationState { Stopped, Playing };
-			enum PlaybackBehaviour { PlayOnce, Loop };
-			enum PlaybackDirection { Forwards, Backwards };
+			enum AnimationState { eStopped, ePlaying };
+			enum PlaybackBehaviour { ePlayOnce, eLoop };
+			enum PlaybackDirection { eForwards, eBackwards };
 
 			Animation();
 			virtual ~Animation();
@@ -68,14 +68,14 @@ namespace ion
 			virtual void ApplyFrame(float frame) {}
 
 		private:
-			float mLength;
-			float mCurrentFrame;
-			float mPreviousFrame;
-			float mPlaybackSpeed;
+			float m_length;
+			float m_currentFrame;
+			float m_previousFrame;
+			float m_playbackSpeed;
 
-			AnimationState mState;
-			PlaybackBehaviour mPlaybackBehaviour;
-			PlaybackDirection mPlaybackDirection;
+			AnimationState m_state;
+			PlaybackBehaviour m_playbackBehaviour;
+			PlaybackDirection m_playbackDirection;
 		};
 
 		template <class T> class Keyframe
@@ -93,15 +93,15 @@ namespace ion
 			void Serialise(io::Archive& archive);
 
 		private:
-			float mTime;
-			T mValue;
+			float m_time;
+			T m_value;
 		};
 
 		template <class T> class AnimationTrack
 		{
 		public:
 
-			enum BlendMode { Snap, Linear };
+			enum BlendMode { eSnap, eLinear };
 
 			AnimationTrack();
 			virtual ~AnimationTrack();
@@ -130,14 +130,14 @@ namespace ion
 
 			//Set/get blend mode
 			void SetBlendMode(BlendMode blendMode);
-			BlendMode GetBlendMode() const { return mBlendMode };
+			BlendMode GetBlendMode() const { return m_blendMode };
 
 			//Serialise
 			void Serialise(io::Archive& archive);
 
 		private:
-			std::vector< Keyframe<T> > mKeyframes;
-			BlendMode mBlendMode;
+			std::vector< Keyframe<T> > m_keyframes;
+			BlendMode m_blendMode;
 		};
 
 		class AnimationTrackFloat : public AnimationTrack<float>
@@ -168,34 +168,34 @@ namespace ion
 
 		template <class T> Keyframe<T>::Keyframe(float time, const T& value)
 		{
-			mTime = time;
-			mValue = value;
+			m_time = time;
+			m_value = value;
 		}
 
 		template <class T> float Keyframe<T>::GetTime() const
 		{
-			return mTime;
+			return m_time;
 		}
 
 		template <class T> const T Keyframe<T>::GetValue() const
 		{
-			return mValue;
+			return m_value;
 		}
 
 		template <class T> bool Keyframe<T>::operator < (const Keyframe& rhs) const
 		{
-			return mTime < rhs.mTime;
+			return m_time < rhs.m_time;
 		}
 
 		template <class T> void Keyframe<T>::Serialise(io::Archive& archive)
 		{
-			archive.Serialise(mTime, "time");
-			archive.Serialise(mValue, "value");
+			archive.Serialise(m_time, "time");
+			archive.Serialise(m_value, "value");
 		}
 
 		template <class T> AnimationTrack<T>::AnimationTrack()
 		{
-			mBlendMode = Linear;
+			m_blendMode = eLinear;
 		}
 
 		template <class T> AnimationTrack<T>::~AnimationTrack()
@@ -204,32 +204,32 @@ namespace ion
 
 		template <class T> void AnimationTrack<T>::InsertKeyframe(const Keyframe<T>& keyframe)
 		{
-			mKeyframes.insert(std::upper_bound(mKeyframes.begin(), mKeyframes.end(), keyframe), keyframe);
+			m_keyframes.insert(std::upper_bound(m_keyframes.begin(), m_keyframes.end(), keyframe), keyframe);
 		}
 
 		template <class T> const Keyframe<T>& AnimationTrack<T>::GetKeyframe(int index) const
 		{
 			debug::Assert(index < GetNumKeyframes(), "AnimationTrack::GetKeyframe() - Index out of range");
-			return mKeyframes[index];
+			return m_keyframes[index];
 		}
 
 		template <class T> int AnimationTrack<T>::GetNumKeyframes() const
 		{
-			return mKeyframes.size();
+			return m_keyframes.size();
 		}
 
 		template <class T> void AnimationTrack<T>::Clear()
 		{
-			mKeyframes.clear();
+			m_keyframes.clear();
 		}
 
 		template <class T> float AnimationTrack<T>::GetLength() const
 		{
 			float lastTime = 0.0f;
 
-			if(mKeyframes.size() > 0)
+			if(m_keyframes.size() > 0)
 			{
-				lastTime = mKeyframes.back().GetTime();
+				lastTime = m_keyframes.back().GetTime();
 			}
 
 			return lastTime;
@@ -239,30 +239,30 @@ namespace ion
 		{
 			const Keyframe<T>* idealKeyframe = NULL;
 
-			if(mKeyframes.size() > 0)
+			if(m_keyframes.size() > 0)
 			{
-				idealKeyframe = &mKeyframes[0];
+				idealKeyframe = &m_keyframes[0];
 
-				if(mKeyframes.size() > 1)
+				if(m_keyframes.size() > 1)
 				{
 					if(time >= GetLength())
 					{
-						idealKeyframe = &mKeyframes.back();
+						idealKeyframe = &m_keyframes.back();
 					}
 					else
 					{
 						idealKeyframe = NULL;
 
-						const Keyframe<T>* prevKeyframe = &mKeyframes[0];
+						const Keyframe<T>* prevKeyframe = &m_keyframes[0];
 
-						for(unsigned int i = 1; i < mKeyframes.size() && !idealKeyframe; i++)
+						for(unsigned int i = 1; i < m_keyframes.size() && !idealKeyframe; i++)
 						{
-							if(time >= prevKeyframe->GetTime() && time <= mKeyframes[i].GetTime())
+							if(time >= prevKeyframe->GetTime() && time <= m_keyframes[i].GetTime())
 							{
 								idealKeyframe = prevKeyframe;
 							}
 
-							prevKeyframe = &mKeyframes[i];
+							prevKeyframe = &m_keyframes[i];
 						}
 					}
 				}
@@ -275,29 +275,29 @@ namespace ion
 		{
 			const Keyframe<T>* idealKeyframe = NULL;
 
-			if(mKeyframes.size() > 0)
+			if(m_keyframes.size() > 0)
 			{
-				idealKeyframe = &mKeyframes[0];
+				idealKeyframe = &m_keyframes[0];
 
-				if(mKeyframes.size() > 1)
+				if(m_keyframes.size() > 1)
 				{
 					if(time >= GetLength())
 					{
-						idealKeyframe = &mKeyframes.back();
+						idealKeyframe = &m_keyframes.back();
 					}
 					else
 					{
 						idealKeyframe = NULL;
-						const Keyframe<T>* prevKeyframe = &mKeyframes[0];
+						const Keyframe<T>* prevKeyframe = &m_keyframes[0];
 
-						for(unsigned int i = 1; i < mKeyframes.size() && !idealKeyframe; i++)
+						for(unsigned int i = 1; i < m_keyframes.size() && !idealKeyframe; i++)
 						{
-							if(time >= prevKeyframe->GetTime() && time <= mKeyframes[i].GetTime())
+							if(time >= prevKeyframe->GetTime() && time <= m_keyframes[i].GetTime())
 							{
-								idealKeyframe = &mKeyframes[i];
+								idealKeyframe = &m_keyframes[i];
 							}
 
-							prevKeyframe = &mKeyframes[i];
+							prevKeyframe = &m_keyframes[i];
 						}
 					}
 				}
@@ -308,13 +308,13 @@ namespace ion
 
 		template <class T> void AnimationTrack<T>::SetBlendMode(BlendMode blendMode)
 		{
-			mBlendMode = blendMode;
+			m_blendMode = blendMode;
 		}
 
 		template <class T> void AnimationTrack<T>::Serialise(io::Archive& archive)
 		{
-			archive.Serialise(mKeyframes, "keyframes");
-			archive.Serialise((int&)mBlendMode, "blendMode");
+			archive.Serialise(m_keyframes, "keyframes");
+			archive.Serialise((int&)m_blendMode, "blendMode");
 		}
 	}
 }

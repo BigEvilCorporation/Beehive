@@ -27,12 +27,12 @@ namespace ion
 			virtual void Update(float deltaTime);
 
 		private:
-			ion::Vector3 mTargetHeadPosition;
-			ion::Vector3 mTargetFocusPosition;
+			ion::Vector3 m_targetHeadPosition;
+			ion::Vector3 m_targetFocusPosition;
 
-			Vector3 mFocusPosition;
+			Vector3 m_focusPosition;
 
-			float mMoveSpeed;
+			float m_moveSpeed;
 		};
 	}
 }

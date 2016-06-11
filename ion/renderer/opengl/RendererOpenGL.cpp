@@ -56,7 +56,7 @@ namespace ion
 
 		RendererOpenGL::~RendererOpenGL()
 		{
-			delete mShaderManager;
+			delete m_shaderManager;
 		}
 
 		void RendererOpenGL::BindDC(DeviceContext deviceContext)
@@ -149,7 +149,7 @@ namespace ion
 			ClearDepth();
 
 			//Create shader manager
-			mShaderManager = ShaderManager::Create();
+			m_shaderManager = ShaderManager::Create();
 
 			//Unlock context (binds global DC)
 			UnlockGLContext();
@@ -180,16 +180,16 @@ namespace ion
 			//Set perspective mode
 			switch(viewport.GetPerspectiveMode())
 			{
-			case Viewport::Perspective3D:
+			case Viewport::ePerspective3D:
 				//TODO: Expose FOV and near/far
 				gluPerspective(45.0f, aspectRatio, 0.1f, 10000.0f);
 				break;
 
-			case Viewport::Ortho2DNormalised:
+			case Viewport::eOrtho2DNormalised:
 				glOrtho(0.0, 1.0f, 0.0, 1.0f, -1.0, 1.0);
 				break;
 
-			case Viewport::Ortho2DAbsolute:
+			case Viewport::eOrtho2DAbsolute:
 				glOrtho(0.0, width, 0.0, height, -1.0, 1.0);
 				break;
 			}
@@ -331,16 +331,16 @@ namespace ion
 
 			switch(alphaBlendType)
 			{
-			case NoBlend:
+			case eNoBlend:
 				glDisable(GL_BLEND);
 				break;
 
-			case Additive:
+			case eAdditive:
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 				break;
 
-			case Translucent:
+			case eTranslucent:
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				break;
@@ -356,16 +356,16 @@ namespace ion
 
 			switch(cullingMode)
 			{
-			case NoCull:
+			case eNoCull:
 				glDisable(GL_CULL_FACE);
 				break;
 
-			case Clockwise:
+			case eClockwise:
 				glEnable(GL_CULL_FACE);
 				glCullFace(GL_FRONT);
 				break;
 
-			case CounterClockwise:
+			case eCounterClockwise:
 				glEnable(GL_CULL_FACE);
 				glCullFace(GL_BACK);
 				break;
@@ -379,7 +379,7 @@ namespace ion
 		{
 			debug::Assert(m_contextLockStack > 0, "OpenGL context is not locked");
 
-			if(depthTest == Disabled)
+			if(depthTest == eDisabled)
 			{
 				glDisable(GL_DEPTH_TEST);
 			}
@@ -389,10 +389,10 @@ namespace ion
 
 				switch(depthTest)
 				{
-				case Always:
+				case eAlways:
 					glDepthFunc(GL_ALWAYS);
 					break;
-				case LessEqual:
+				case eLessEqual:
 					glDepthFunc(GL_LEQUAL);
 					break;
 				}
@@ -424,19 +424,19 @@ namespace ion
 
 			switch(vertexBuffer.GetPattern())
 			{
-			case VertexBuffer::Lines:
+			case VertexBuffer::eLines:
 				drawPattern = GL_LINES;
 				break;
 
-			case VertexBuffer::LineStrip:
+			case VertexBuffer::eLineStrip:
 				drawPattern = GL_LINE_STRIP;
 				break;
 
-			case VertexBuffer::Triangles:
+			case VertexBuffer::eTriangles:
 				drawPattern = GL_TRIANGLES;
 				break;
 
-			case VertexBuffer::Quads:
+			case VertexBuffer::eQuads:
 				drawPattern = GL_QUADS;
 				break;
 
@@ -478,11 +478,11 @@ namespace ion
 
 			switch(vertexBuffer.GetPattern())
 			{
-			case VertexBuffer::Triangles:
+			case VertexBuffer::eTriangles:
 				drawPattern = GL_TRIANGLES;
 				break;
 
-			case VertexBuffer::Quads:
+			case VertexBuffer::eQuads:
 				drawPattern = GL_QUADS;
 				break;
 

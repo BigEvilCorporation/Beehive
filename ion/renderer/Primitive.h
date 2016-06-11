@@ -30,13 +30,12 @@ namespace ion
 
 			void SetCastShadows(bool shadows);
 
-			const VertexBuffer& GetVertexBuffer() const { return mVertexBuffer; }
-			const IndexBuffer& GetIndexBuffer() const { return mIndexBuffer; }
+			const VertexBuffer& GetVertexBuffer() const { return m_vertexBuffer; }
+			const IndexBuffer& GetIndexBuffer() const { return m_indexBuffer; }
 
 		protected:
-			VertexBuffer mVertexBuffer;
-			IndexBuffer mIndexBuffer;
-			Material* mMaterial;
+			VertexBuffer m_vertexBuffer;
+			IndexBuffer m_indexBuffer;
 		};
 
 		class LineSegments : public Primitive

@@ -1,7 +1,7 @@
-
 #################################################
 ## Apply ion::engine libraries
 #################################################
+
 rule ApplyIonIncludes TARGET
 {
 	C.IncludeDirectories $(TARGET) : $(bigevilcorp) ;
@@ -297,8 +297,15 @@ rule ApplyBulletSDK TARGET
 		LinearMath.lib
 		;
 
-	C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_DEBUG) : debug ;
-	# C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_RELEASE) : release ;
+	if ( debug in $(CONFIG) )
+	{
+		C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_DEBUG) : debug ;
+	}
+
+	if ( release in $(CONFIG) )
+	{
+		C.LinkPrebuiltLibraries $(TARGET) : $(BULLET_LIBS_RELEASE) : release ;
+	}
 }
 
 rule ApplyWxSDK TARGET
@@ -361,8 +368,15 @@ rule ApplyWxSDK TARGET
 		wxzlib.lib
 		;
 
-	C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_DEBUG) : debug ;
-	#C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_RELEASE) : release ;
+	if ( debug in $(CONFIG) )
+	{
+		C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_DEBUG) ;
+	}
+
+	if ( release in $(CONFIG) )
+	{
+		C.LinkPrebuiltLibraries $(TARGET) : $(WX_LIBS_RELEASE) ;
+	}
 }
 
 #################################################

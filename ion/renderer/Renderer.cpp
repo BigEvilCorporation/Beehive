@@ -20,7 +20,7 @@ namespace ion
 	{
 		Renderer::Renderer()
 		{
-			mShaderManager = NULL;
+			m_shaderManager = NULL;
 		}
 
 		Renderer::~Renderer()

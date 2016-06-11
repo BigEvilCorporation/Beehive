@@ -43,12 +43,12 @@ namespace ion
 
 		int XML::GetNumChildren() const
 		{
-			return mChildren.size();
+			return m_children.size();
 		}
 
 		const XML* XML::GetChild(int index) const
 		{
-			return &mChildren[index].second;
+			return &m_children[index].second;
 		}
 
 		const XML* XML::FindChild(const std::string& name) const
@@ -58,11 +58,11 @@ namespace ion
 			std::string nameLower = string::ToLower(name);
 			u32 hash = ion::Hash(nameLower.c_str());
 
-			for(int i = 0; i < mChildren.size() && !child; i++)
+			for(int i = 0; i < m_children.size() && !child; i++)
 			{
-				if(mChildren[i].first == hash)
+				if(m_children[i].first == hash)
 				{
-					child = &mChildren[i].second;
+					child = &m_children[i].second;
 				}
 			}
 
@@ -73,15 +73,15 @@ namespace ion
 		{
 			std::string nameLower = string::ToLower(name);
 			u32 hash = ion::Hash(nameLower.c_str());
-			mChildren.push_back(std::make_pair(hash, XML()));
-			return &mChildren.back().second;
+			m_children.push_back(std::make_pair(hash, XML()));
+			return &m_children.back().second;
 		}
 
 		bool XML::GetAttribute(const std::string& name, std::string& value) const
 		{
 			std::string nameLower = string::ToLower(name);
-			std::map<std::string, std::string>::const_iterator it = mAttributes.find(nameLower);
-			if(it != mAttributes.end())
+			std::map<std::string, std::string>::const_iterator it = m_attributes.find(nameLower);
+			if(it != m_attributes.end())
 			{
 				value = it->second;
 				return true;
@@ -93,8 +93,8 @@ namespace ion
 		bool XML::GetAttribute(const std::string& name, int& value) const
 		{
 			std::string nameLower = string::ToLower(name);
-			std::map<std::string, std::string>::const_iterator it = mAttributes.find(nameLower);
-			if(it != mAttributes.end())
+			std::map<std::string, std::string>::const_iterator it = m_attributes.find(nameLower);
+			if(it != m_attributes.end())
 			{
 				value = atoi(it->second.c_str());
 				return true;
@@ -106,8 +106,8 @@ namespace ion
 		bool XML::GetAttribute(const std::string& name, float& value) const
 		{
 			std::string nameLower = string::ToLower(name);
-			std::map<std::string, std::string>::const_iterator it = mAttributes.find(nameLower);
-			if(it != mAttributes.end())
+			std::map<std::string, std::string>::const_iterator it = m_attributes.find(nameLower);
+			if(it != m_attributes.end())
 			{
 				value = (float)atof(it->second.c_str());
 				return true;
@@ -119,8 +119,8 @@ namespace ion
 		bool XML::GetAttribute(const std::string& name, bool& value) const
 		{
 			std::string nameLower = string::ToLower(name);
-			std::map<std::string, std::string>::const_iterator it = mAttributes.find(nameLower);
-			if(it != mAttributes.end())
+			std::map<std::string, std::string>::const_iterator it = m_attributes.find(nameLower);
+			if(it != m_attributes.end())
 			{
 				std::string valueLower = string::ToLower(it->second);
 				value =  (valueLower == "1" || valueLower == "true") ? true : false;
@@ -133,14 +133,14 @@ namespace ion
 		void XML::SetAttribute(const std::string& name, const std::string& value)
 		{
 			std::string nameLower = string::ToLower(name);
-			mAttributes.insert(std::make_pair(nameLower, value));
+			m_attributes.insert(std::make_pair(nameLower, value));
 		}
 
 		void XML::SetAttribute(const std::string& name, int value)
 		{
 			std::string nameLower = string::ToLower(name);
 			char text[128] = {0};
-			mAttributes.insert(std::make_pair(nameLower, std::string(itoa(value, text, 10))));
+			m_attributes.insert(std::make_pair(nameLower, std::string(itoa(value, text, 10))));
 		}
 
 		void XML::SetAttribute(const std::string& name, float value)
@@ -148,14 +148,14 @@ namespace ion
 			std::string nameLower = string::ToLower(name);
 			char text[128] = {0};
 			sprintf_s(text, 128, "%f", value);
-			mAttributes.insert(std::make_pair(nameLower, std::string(text)));
+			m_attributes.insert(std::make_pair(nameLower, std::string(text)));
 		}
 
 		void XML::SetAttribute(const std::string& name, bool value)
 		{
 			std::string nameLower = string::ToLower(name);
 			char text[4] = {0};
-			mAttributes.insert(std::make_pair(nameLower, value ? "true" : "false"));
+			m_attributes.insert(std::make_pair(nameLower, value ? "true" : "false"));
 		}
 
 		void XML::ParseTinyXmlElement(const tinyxml2::XMLElement& element)
@@ -163,12 +163,12 @@ namespace ion
 			//Parse this
 			const char* text = element.GetText();
 			if(text)
-				mData = text;
+				m_data = text;
 
 			//Parse attributes
 			for(const tinyxml2::XMLAttribute* attribute = element.FirstAttribute(); attribute; attribute = attribute->Next())
 			{
-				mAttributes.insert(std::make_pair(string::ToLower(attribute->Name()), std::string(attribute->Value())));
+				m_attributes.insert(std::make_pair(string::ToLower(attribute->Name()), std::string(attribute->Value())));
 			}
 
 			//Parse children

@@ -26,7 +26,7 @@ namespace ion
 		class Sprite : public Entity
 		{
 		public:
-			enum RenderType { Render2D, Render3D };
+			enum RenderType { eRender2D, eRender3D };
 
 			Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteGridSizeX, int spriteGridSizeY, const std::string& sprite, io::ResourceManager& resourceManager);
 			Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteGridSizeX, int spriteGridSizeY, const io::ResourceHandle<Texture>& sprite, io::ResourceManager& resourceManager);
@@ -40,29 +40,29 @@ namespace ion
 			void Render(Renderer& renderer, Camera& camera);
 
 		protected:
-			io::ResourceHandle<Shader> mVertexShader;
-			io::ResourceHandle<Shader> mPixelShader;
-			io::ResourceHandle<Texture> mSpriteSheet;
+			io::ResourceHandle<Shader> m_vertexShader;
+			io::ResourceHandle<Shader> m_pixelShader;
+			io::ResourceHandle<Texture> m_spriteSheet;
 
 			struct ShaderParams
 			{
-				Shader::ParamHndl<Matrix4> mWorldViewProjMtx;
-				Shader::ParamHndl<Colour> mDiffuseColour;
-				Shader::ParamHndl<Texture> mSpriteSheet;
-				Shader::ParamHndl<Vector2> mSpriteSheetGridSize;
-				Shader::ParamHndl<float> mSpriteAnimFrame;
+				Shader::ParamHndl<Matrix4> m_worldViewProjMtx;
+				Shader::ParamHndl<Colour> m_diffuseColour;
+				Shader::ParamHndl<Texture> m_spriteSheet;
+				Shader::ParamHndl<Vector2> m_spriteSheetGridSize;
+				Shader::ParamHndl<float> m_spriteAnimFrame;
 			};
 
-			ShaderParams mShaderParams;
-			RenderType mRenderType;
-			Vector2 mSize;
-			float mDrawDepth;
-			int mSpriteSheetGridSizeX;
-			int mSpriteSheetGridSizeY;
-			int mCurrentFrame;
-			Colour mColour;
+			ShaderParams m_shaderParams;
+			RenderType m_renderType;
+			Vector2 m_size;
+			float m_drawDepth;
+			int m_spriteSheetGridSizeX;
+			int m_spriteSheetGridSizeY;
+			int m_currentFrame;
+			Colour m_colour;
 
-			Quad* mQuadPrimitive;
+			Quad* m_quadPrimitive;
 		};
 
 		class SpriteAnimation : public Animation
@@ -76,8 +76,8 @@ namespace ion
 			virtual void ApplyFrame(float frame);
 
 		private:
-			Sprite& mSprite;
-			const AnimationTrackInt* mAnimationTrack;
+			Sprite& m_sprite;
+			const AnimationTrackInt* m_animationTrack;
 		};
 	}
 }

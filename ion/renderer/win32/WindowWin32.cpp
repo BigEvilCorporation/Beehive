@@ -67,15 +67,15 @@ namespace ion
 			//Adjust rect to account for window border
 			AdjustWindowRectEx(&windowRect, windowStyle, FALSE, windowStyleEx);
 
-			mWindowWidth = windowRect.right - windowRect.left;
-			mWindowHeight = windowRect.bottom - windowRect.top;
+			m_windowWidth = windowRect.right - windowRect.left;
+			m_windowHeight = windowRect.bottom - windowRect.top;
 
 			//Calculate centre position
-			int x = (desktopWidth / 2) - (mWindowWidth / 2);
-			int y = (desktopHeight / 2) - (mWindowHeight / 2);
+			int x = (desktopWidth / 2) - (m_windowWidth / 2);
+			int y = (desktopHeight / 2) - (m_windowHeight / 2);
 
 			//Create window
-			mWindowHandle = CreateWindowEx(windowStyleEx, windowClassName, title.c_str(), windowStyle, x, y, mWindowWidth, mWindowHeight, NULL, NULL, mhInstance, NULL);
+			mWindowHandle = CreateWindowEx(windowStyleEx, windowClassName, title.c_str(), windowStyle, x, y, m_windowWidth, m_windowHeight, NULL, NULL, mhInstance, NULL);
 
 			if(!mWindowHandle)
 			{

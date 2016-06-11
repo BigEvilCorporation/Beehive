@@ -13,8 +13,8 @@ namespace ion
 	{
 		Texture::Texture()
 		{
-			mWidth = 0;
-			mHeight = 0;
+			m_width = 0;
+			m_height = 0;
 		}
 
 		Texture::Texture(u32 width, u32 height, Format sourceFormat, Format destFormat, BitsPerPixel bitsPerPixel, bool generateMipmaps, const u8* data)
@@ -29,24 +29,24 @@ namespace ion
 
 		void Texture::SetImageFilename(const std::string& filename)
 		{
-			mImageFilename = filename;
+			m_imageFilename = filename;
 		}
 
 		u32 Texture::GetWidth() const
 		{
-			return mWidth;
+			return m_width;
 		}
 
 		u32 Texture::GetHeight() const
 		{
-			return mHeight;
+			return m_height;
 		}
 
 		void Texture::Serialise(io::Archive& archive)
 		{
-			archive.Serialise(mImageFilename);
+			archive.Serialise(m_imageFilename);
 
-			if(archive.GetDirection() == io::Archive::In)
+			if(archive.GetDirection() == io::Archive::eIn)
 			{
 				Load();
 			}

@@ -13,68 +13,68 @@ namespace ion
 	{
 		VertexBuffer::VertexBuffer(Pattern pattern)
 		{
-			mPattern = pattern;
-			mNumVertices = 0;
+			m_pattern = pattern;
+			m_numVertices = 0;
 		}
 
 		VertexBuffer::~VertexBuffer()
 		{
-			mBuffer.clear();
+			m_buffer.clear();
 		}
 
 		int VertexBuffer::GetStrideBytes() const
 		{
-			return (sPositionSize + sNormalSize + sTexCoordSize) * sizeof(float);
+			return (s_positionSize + s_normalSize + s_texCoordSize) * sizeof(float);
 		}
 
 		void VertexBuffer::AddVertex(const Vector3& position, const Vector3& normal, const TexCoord& texCoord)
 		{
-			mBuffer.push_back(position.x);
-			mBuffer.push_back(position.y);
-			mBuffer.push_back(position.z);
+			m_buffer.push_back(position.x);
+			m_buffer.push_back(position.y);
+			m_buffer.push_back(position.z);
 
-			mBuffer.push_back(normal.x);
-			mBuffer.push_back(normal.y);
-			mBuffer.push_back(normal.z);
+			m_buffer.push_back(normal.x);
+			m_buffer.push_back(normal.y);
+			m_buffer.push_back(normal.z);
 
-			mBuffer.push_back(texCoord.x);
-			mBuffer.push_back(texCoord.y);
+			m_buffer.push_back(texCoord.x);
+			m_buffer.push_back(texCoord.y);
 
-			mNumVertices++;
+			m_numVertices++;
 		}
 
 		void VertexBuffer::AddFace(const Face& face)
 		{
 			for(int i = 0; i < 3; i++)
 			{
-				AddVertex(face.mVertices[i], face.mNormals[i], face.mTexCoords[i]);
+				AddVertex(face.m_vertices[i], face.m_normals[i], face.m_texCoords[i]);
 			}
 		}
 
 		void VertexBuffer::Reserve(int size)
 		{
 			int stride = GetStrideBytes();
-			mBuffer.resize(size * stride);
-			mNumVertices = size;
+			m_buffer.resize(size * stride);
+			m_numVertices = size;
 		}
 
 		void VertexBuffer::SetVertex(int vertexIdx, const Vector3& position, const Vector3& normal, const TexCoord& texCoord)
 		{
-			debug::Assert(vertexIdx >= 0 && vertexIdx < mNumVertices, "Bad vertex id");
+			debug::Assert(vertexIdx >= 0 && vertexIdx < m_numVertices, "Bad vertex id");
 
 			int stride = GetStrideBytes() / sizeof(float);
 			int floatIdx = stride * vertexIdx;
 
-			mBuffer[floatIdx  ] = (position.x);
-			mBuffer[floatIdx+1] = (position.y);
-			mBuffer[floatIdx+2] = (position.z);
+			m_buffer[floatIdx  ] = (position.x);
+			m_buffer[floatIdx+1] = (position.y);
+			m_buffer[floatIdx+2] = (position.z);
 
-			mBuffer[floatIdx+3] = (normal.x);
-			mBuffer[floatIdx+4] = (normal.y);
-			mBuffer[floatIdx+5] = (normal.z);
+			m_buffer[floatIdx+3] = (normal.x);
+			m_buffer[floatIdx+4] = (normal.y);
+			m_buffer[floatIdx+5] = (normal.z);
 
-			mBuffer[floatIdx+6] = (texCoord.x);
-			mBuffer[floatIdx+7] = (texCoord.y);
+			m_buffer[floatIdx+6] = (texCoord.x);
+			m_buffer[floatIdx+7] = (texCoord.y);
 		}
 
 		Vertex VertexBuffer::GetVertex(int index) const
@@ -83,20 +83,20 @@ namespace ion
 			int floatIdx = stride * index;
 
 			if(index >= 0 && index < GetNumVerts())
-				return Vertex(mBuffer[floatIdx], mBuffer[floatIdx + 1], mBuffer[floatIdx + 2]);
+				return Vertex(m_buffer[floatIdx], m_buffer[floatIdx + 1], m_buffer[floatIdx + 2]);
 			else
 				return Vertex();
 		}
 
 		Face VertexBuffer::GetFace(int index) const
 		{
-			index *= sPositionSize * 3;
+			index *= s_positionSize * 3;
 
 			if(index >=0 && index < (GetNumVerts() * 3))
 			{
-				return Face(Vertex(mBuffer[index],		mBuffer[index + 1],	mBuffer[index + 2]),
-							Vertex(mBuffer[index + 3],	mBuffer[index + 4],	mBuffer[index + 5]),
-							Vertex(mBuffer[index + 6],	mBuffer[index + 7],	mBuffer[index + 8]));
+				return Face(Vertex(m_buffer[index],		m_buffer[index + 1],	m_buffer[index + 2]),
+							Vertex(m_buffer[index + 3],	m_buffer[index + 4],	m_buffer[index + 5]),
+							Vertex(m_buffer[index + 6],	m_buffer[index + 7],	m_buffer[index + 8]));
 			}
 			else
 				return Face();
@@ -104,22 +104,22 @@ namespace ion
 
 		void VertexBuffer::Clear()
 		{
-			mBuffer.clear();
+			m_buffer.clear();
 		}
 
 		const float* VertexBuffer::GetVertexBuffer() const
 		{
-			return &mBuffer[0];
+			return &m_buffer[0];
 		}
 
 		const float* VertexBuffer::GetNormalBuffer() const
 		{
-			return &mBuffer[0] + sPositionSize;
+			return &m_buffer[0] + s_positionSize;
 		}
 
 		const float* VertexBuffer::GetTexCoordBuffer() const
 		{
-			return &mBuffer[0] + sPositionSize + sNormalSize;
+			return &m_buffer[0] + s_positionSize + s_normalSize;
 		}
 
 		bool VertexBuffer::Lock()

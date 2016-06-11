@@ -20,19 +20,19 @@ namespace ion
 	public:
 
 		Matrix4();
-		Matrix4(float* Float16);
-		Matrix4(const Matrix4 & Mat);
-		Matrix4(const Vector3& Position, const Vector3& Up, const Vector3& Forward);
+		Matrix4(float* float16);
+		Matrix4(const Matrix4& mat);
+		Matrix4(const Vector3& position, const Vector3& up, const Vector3& forward);
 		~Matrix4();
 
 		void SetIdentity();
 
-		void SetTranslation(const Vector3& Pos);
-		void SetRotation(float Angle, const Vector3& Axis);
-		void SetScale(const Vector3& Scale);
-		void SetForward(const Vector3& Forward);
-		void SetRight(const Vector3& Right);
-		void SetUp(const Vector3& Up);
+		void SetTranslation(const Vector3& pos);
+		void SetRotation(float agle, const Vector3& axis);
+		void SetScale(const Vector3& scale);
+		void SetForward(const Vector3& forward);
+		void SetRight(const Vector3& right);
+		void SetUp(const Vector3& up);
 
 		Vector3 GetTranslation() const;
 		Vector3 GetScale() const;
@@ -42,18 +42,18 @@ namespace ion
 
 		Matrix4 GetTranspose() const;
 		Matrix4 GetInverse() const;
-		Matrix4 GetProduct(const Matrix4& Mat) const;
-		Matrix4 GetInterpolated(const Matrix4& Mat, float Time) const;
+		Matrix4 GetProduct(const Matrix4& mat) const;
+		Matrix4 GetInterpolated(const Matrix4& mat, float time) const;
 
-		Vector3 TransformVector(const Vector3& Vector) const;
-		Vector3 RotateVector(const Vector3& Vector) const;
-		Vector3 UnrotateVector(const Vector3& Vector) const;
+		Vector3 TransformVector(const Vector3& vector) const;
+		Vector3 RotateVector(const Vector3& vector) const;
+		Vector3 UnrotateVector(const Vector3& vector) const;
 
-		Vector3 operator *(const Vector3& Vec) const;
-		Matrix4 operator *(const Matrix4& Mat) const;
-		Matrix4 operator *(float Scalar) const;
-		Matrix4 operator +(const Matrix4& Mat) const;
-		Matrix4 operator -(const Matrix4& Mat) const;
+		Vector3 operator *(const Vector3& vec) const;
+		Matrix4 operator *(const Matrix4& mat) const;
+		Matrix4 operator *(float scalar) const;
+		Matrix4 operator +(const Matrix4& mat) const;
+		Matrix4 operator -(const Matrix4& mat) const;
 
 		float* GetAsFloatArray();
 		const float* GetAsFloatArray() const;
@@ -68,7 +68,7 @@ namespace ion
 	protected:
 
 		//The 4x4 matrix
-		float mMatrix[16];
+		float m_matrix[16];
 	};
 }
 

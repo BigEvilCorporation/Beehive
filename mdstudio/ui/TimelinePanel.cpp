@@ -42,7 +42,7 @@ TimelinePanel::~TimelinePanel()
 
 void TimelinePanel::EventHandlerTimer(wxTimerEvent& event)
 {
-	if(m_animation && m_animation->GetState() == ion::render::Animation::Playing)
+	if(m_animation && m_animation->GetState() == ion::render::Animation::ePlaying)
 	{
 		float frameRate = 24.0f;
 		float frameRateMul = 1.0f / (frameRate / 10.0f);
@@ -214,7 +214,7 @@ void TimelinePanel::OnSelectAnimation(wxCommandEvent& event)
 	m_animation = m_project.GetAnimation(m_animationId);
 	if(m_animation)
 	{
-		m_animation->SetState(ion::render::Animation::Stopped);
+		m_animation->SetState(ion::render::Animation::eStopped);
 		PopulateTimeline(*m_animation, NULL);
 	}
 }
@@ -339,7 +339,7 @@ void TimelinePanel::OnToolPlay(wxCommandEvent& event)
 {
 	if(m_animation)
 	{
-		m_animation->SetState(ion::render::Animation::Playing);
+		m_animation->SetState(ion::render::Animation::ePlaying);
 	}
 }
 
@@ -347,7 +347,7 @@ void TimelinePanel::OnToolStop(wxCommandEvent& event)
 {
 	if(m_animation)
 	{
-		m_animation->SetState(ion::render::Animation::Stopped);
+		m_animation->SetState(ion::render::Animation::eStopped);
 	}
 }
 

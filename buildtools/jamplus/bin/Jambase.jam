@@ -298,7 +298,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	    {
 			# TOP not preset.
 
-			# Establishing a new TOP.  In the simplest case,
+			# Establishing a new TOP.  eIn the simplest case,
 			# (SUBDIR_UP/SUBDIR_DOWN/SUBDIR_ROOT unset), it's
 			# merely a certain number of directories down from
 			# the current directory, and FSubDirPath will set
@@ -306,7 +306,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 			# elements of _tokens, because that represents how
 			# far below TOP the current directory sits.
 			#
-			# In the more complicated case, the starting directory
+			# eIn the more complicated case, the starting directory
 			# isn't the directory of jam's invocation but an
 			# location established by previous SubDir call.  The
 			# starting directory is SUBDIR_UP directories up from
@@ -315,7 +315,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 			# SUBDIR_DOWN and SUBDIR_UP represent the path from
 			# the directory of jam's invocation.
 			#
-			# In the most complicated case, the _tokens also
+			# eIn the most complicated case, the _tokens also
 			# represents directories down, because TOP is being
 			# estalished in a directory other than TOP's root.
 			# Hopefully, _tokens and SUBDIR_DOWN represent the

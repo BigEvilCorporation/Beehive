@@ -27,7 +27,7 @@ namespace ion
 			ion::render::Camera* GetCurrentCamera() const;
 
 		private:
-			ion::render::Camera* mCamera;
+			ion::render::Camera* m_camera;
 		};
 	}
 }

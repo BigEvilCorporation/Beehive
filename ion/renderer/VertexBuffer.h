@@ -21,7 +21,7 @@ namespace ion
 		class VertexBuffer
 		{
 		public:
-			enum Pattern { Lines, LineStrip, Triangles, Quads };
+			enum Pattern { eLines, eLineStrip, eTriangles, eQuads };
 
 			VertexBuffer(Pattern pattern);
 			~VertexBuffer();
@@ -44,15 +44,15 @@ namespace ion
 
 			bool Lock();
 			bool Unlock();
-			bool IsLocked() const { return mLocked; }
+			bool IsLocked() const { return m_locked; }
 
-			Pattern GetPattern() const { return mPattern; }
-			int GetNumVerts() const { return mNumVertices; }
+			Pattern GetPattern() const { return m_pattern; }
+			int GetNumVerts() const { return m_numVertices; }
 			int GetStrideBytes() const;
 
-			int GetVertexSize() const { return sPositionSize; }
-			int GetNormalSize() const { return sNormalSize; }
-			int GetTexCoordSize() const { return sTexCoordSize; }
+			int GetVertexSize() const { return s_positionSize; }
+			int GetNormalSize() const { return s_normalSize; }
+			int GetTexCoordSize() const { return s_texCoordSize; }
 
 			int GetFirstVertexOffset() const;
 			int GetFirstNormalOffset() const;
@@ -60,15 +60,15 @@ namespace ion
 
 		protected:
 			//Size of one position, normal and texcoord
-			static const int sPositionSize = 3;
-			static const int sNormalSize = 3;
-			static const int sTexCoordSize = 2;
+			static const int s_positionSize = 3;
+			static const int s_normalSize = 3;
+			static const int s_texCoordSize = 2;
 
-			std::vector<float> mBuffer;
+			std::vector<float> m_buffer;
 
-			Pattern mPattern;
-			int mNumVertices;
-			bool mLocked;
+			Pattern m_pattern;
+			int m_numVertices;
+			bool m_locked;
 		};
 	}
 }

@@ -27,25 +27,25 @@ namespace ion
 
 		File::File()
 		{
-			mOpenMode = OpenRead;
-			mCurrentPosition = 0;
-			mSize = 0;
-			mOpen = false;
+			m_openMode = eOpenRead;
+			m_currentPosition = 0;
+			m_size = 0;
+			m_open = false;
 		}
 
 		File::File(const std::string& filename, File::OpenMode openMode)
 		{
-			mOpenMode = openMode;
-			mCurrentPosition = 0;
-			mSize = 0;
-			mOpen = false;
+			m_openMode = openMode;
+			m_currentPosition = 0;
+			m_size = 0;
+			m_open = false;
 
 			Open(filename, openMode);
 		}
 
 		File::~File()
 		{
-			if(mOpen)
+			if(m_open)
 				Close();
 		}
 
@@ -53,77 +53,77 @@ namespace ion
 		{
 			std::ios::openmode mode = std::ios::binary;
 
-			if(openMode == OpenRead)
+			if(openMode == eOpenRead)
 				mode |= std::ios::in;
-			else if(openMode == OpenWrite)
+			else if(openMode == eOpenWrite)
 				mode |= std::ios::out;
 
-			mStream.open(filename.c_str(), mode);
-			mOpen = mStream.is_open();
-			mOpenMode = openMode;
-			mFilename = filename;
+			m_stream.open(filename.c_str(), mode);
+			m_open = m_stream.is_open();
+			m_openMode = openMode;
+			m_filename = filename;
 
-			if(mOpen)
+			if(m_open)
 			{
 				//Use buffer
-				mStream.rdbuf()->pubsetbuf((char*)m_buffer, s_bufferSize);
+				m_stream.rdbuf()->pubsetbuf((char*)m_buffer, s_bufferSize);
 
 				//Get size (seek to end, get pos, seek back)
-				mStream.seekg(0, std::ios::end);
-				mSize = (u64)mStream.tellg();
-				mStream.seekg(0, std::ios::beg);
+				m_stream.seekg(0, std::ios::end);
+				m_size = (u64)m_stream.tellg();
+				m_stream.seekg(0, std::ios::beg);
 			}
 
-			return mOpen;
+			return m_open;
 		}
 
 		void File::Close()
 		{
-			if(mOpen)
+			if(m_open)
 			{
-				mStream.close();
-				mOpen = false;
+				m_stream.close();
+				m_open = false;
 			}
 		}
 
 		u64 File::Seek(u64 position)
 		{
-			return Seek(position, Start);
+			return Seek(position, eStart);
 		}
 
 		u64 File::Seek(u64 position, SeekMode origin)
 		{
-			if(mOpen && position != mCurrentPosition)
+			if(m_open && position != m_currentPosition)
 			{
 				std::ios_base::seek_dir direction = std::ios_base::cur;
 
-				if(origin == Start)
+				if(origin == eStart)
 				{
 					direction = std::ios_base::beg;
-					position = std::min(position, mSize - 1);
-					mCurrentPosition = position;
+					position = std::min(position, m_size - 1);
+					m_currentPosition = position;
 				}
-				else if(origin == Current)
+				else if(origin == eCurrent)
 				{
-					position = std::min(position, mSize - mCurrentPosition - 1);
-					mCurrentPosition += position;
+					position = std::min(position, m_size - m_currentPosition - 1);
+					m_currentPosition += position;
 				}
 			
-				mStream.seekg(position, direction);
+				m_stream.seekg(position, direction);
 			}
 		
-			return mCurrentPosition;
+			return m_currentPosition;
 		}
 
 		u64 File::Read(void* data, u64 size)
 		{
 			u64 bytesRead = 0;
 
-			if(mOpen)
+			if(m_open)
 			{
-				size = std::min(size, mCurrentPosition + mSize);
-				mStream.read((char*)data, size);
-				mCurrentPosition += size;
+				size = std::min(size, m_currentPosition + m_size);
+				m_stream.read((char*)data, size);
+				m_currentPosition += size;
 				bytesRead = size;
 			}
 
@@ -134,13 +134,13 @@ namespace ion
 		{
 			u64 bytesWritten = 0;
 
-			if(mOpen)
+			if(m_open)
 			{
-				u64 startPosition = (u64)mStream.tellp();
-				mStream.write((const char*)Data, Size);
-				mCurrentPosition = (u64)mStream.tellp();
-				bytesWritten = mCurrentPosition - startPosition;
-				mSize += bytesWritten;
+				u64 startPosition = (u64)m_stream.tellp();
+				m_stream.write((const char*)Data, Size);
+				m_currentPosition = (u64)m_stream.tellp();
+				bytesWritten = m_currentPosition - startPosition;
+				m_size += bytesWritten;
 			}
 
 			return bytesWritten;
@@ -148,27 +148,27 @@ namespace ion
 
 		void File::Flush()
 		{
-			mStream.flush();
+			m_stream.flush();
 		}
 
 		u64 File::GetSize() const
 		{
-			return mSize;
+			return m_size;
 		}
 
 		u64 File::GetPosition() const
 		{
-			return mCurrentPosition;
+			return m_currentPosition;
 		}
 
 		File::OpenMode File::GetOpenMode() const
 		{
-			return mOpenMode;
+			return m_openMode;
 		}
 
 		bool File::IsOpen() const
 		{
-			return mOpen;
+			return m_open;
 		}
 	}
 } //Namespace

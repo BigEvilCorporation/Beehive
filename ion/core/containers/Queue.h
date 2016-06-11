@@ -25,15 +25,15 @@ namespace ion
 		bool IsFull() const;
 
 	private:
-		T mItems[SIZE];
-		u32 mProducerIdx;
-		u32 mConsumerIdx;
+		T m_items[SIZE];
+		u32 m_producerIdx;
+		u32 m_consumerIdx;
 	};
 
 	template <typename T, int SIZE> Queue<T, SIZE>::Queue()
 	{
-		mProducerIdx = 0;
-		mConsumerIdx = 0;
+		m_producerIdx = 0;
+		m_consumerIdx = 0;
 	}
 
 	template <typename T, int SIZE> Queue<T, SIZE>::~Queue()
@@ -43,27 +43,27 @@ namespace ion
 
 	template <typename T, int SIZE> void Queue<T, SIZE>::Push(T& item)
 	{
-		int index = mProducerIdx % SIZE;
-		mItems[index] = item;
-		thread::atomic::Increment(mProducerIdx);
+		int index = m_producerIdx % SIZE;
+		m_items[index] = item;
+		thread::atomic::Increment(m_producerIdx);
 	}
 
 	template <typename T, int SIZE> T Queue<T, SIZE>::Pop()
 	{
-		int index = mConsumerIdx % SIZE;
-		T item = mItems[index];
-		thread::atomic::Increment(mConsumerIdx);
+		int index = m_consumerIdx % SIZE;
+		T item = m_items[index];
+		thread::atomic::Increment(m_consumerIdx);
 
 		return item;
 	}
 
 	template <typename T, int SIZE> bool Queue<T, SIZE>::IsEmpty() const
 	{
-		return mConsumerIdx == mProducerIdx;
+		return m_consumerIdx == m_producerIdx;
 	}
 
 	template <typename T, int SIZE> bool Queue<T, SIZE>::IsFull() const
 	{
-		return (mProducerIdx - mConsumerIdx) == SIZE;
+		return (m_producerIdx - m_consumerIdx) == SIZE;
 	}
 }

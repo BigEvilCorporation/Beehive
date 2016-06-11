@@ -23,18 +23,18 @@ namespace ion
 
 		void Shader::SetProgram(const std::string programFilename, const std::string& entryPoint, ProgramType programtype)
 		{
-			mProgramFilename = programFilename;
-			mEntryPoint = entryPoint;
-			mProgramType = programtype;
+			m_programFilename = programFilename;
+			m_entryPoint = entryPoint;
+			m_programType = programtype;
 		}
 
 		void Shader::Serialise(io::Archive& archive)
 		{
-			archive.Serialise(mProgramFilename);
-			archive.Serialise(mEntryPoint);
-			archive.Serialise((u32&)mProgramType);
+			archive.Serialise(m_programFilename);
+			archive.Serialise(m_entryPoint);
+			archive.Serialise((u32&)m_programType);
 
-			if(archive.GetDirection() == io::Archive::In)
+			if(archive.GetDirection() == io::Archive::eIn)
 			{
 				if(archive.GetResourceManager())
 				{

@@ -18,7 +18,7 @@ namespace ion
 		class Entity
 		{
 		public:
-			enum TransformSpace { Local, World };
+			enum TransformSpace { eLocal, eWorld };
 
 			Entity();
 			virtual ~Entity();
@@ -33,12 +33,12 @@ namespace ion
 			void SetLookAt(const Vector3& position);
 
 			void Move(const Vector3& moveVector);
-			void Pitch(float pitch, TransformSpace transformSpace = Local);
-			void Yaw(float yaw, TransformSpace transformSpace = Local);
-			void Roll(float roll, TransformSpace transformSpace = Local);
+			void Pitch(float pitch, TransformSpace transformSpace = eLocal);
+			void Yaw(float yaw, TransformSpace transformSpace = eLocal);
+			void Roll(float roll, TransformSpace transformSpace = eLocal);
 
 		private:
-			Matrix4 mMatrix;
+			Matrix4 m_matrix;
 		};
 	}
 }

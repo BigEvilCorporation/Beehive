@@ -17,7 +17,7 @@ namespace ion
 	{
 		FileSystem::FileSystem()
 		{
-			mDefaultFileDevice = NULL;
+			m_defaultFileDevice = NULL;
 
 			//Enumerate all file devices
 			EnumerateDevices();
@@ -26,9 +26,9 @@ namespace ion
 		FileSystem::~FileSystem()
 		{
 			//Cleanup file devices
-			for(unsigned int i = 0; i < mFileDevices.size(); i++)
+			for(unsigned int i = 0; i < m_fileDevices.size(); i++)
 			{
-				delete mFileDevices[i];
+				delete m_fileDevices[i];
 			}
 		}
 
@@ -58,26 +58,26 @@ namespace ion
 
 				//Get device type
 				unsigned int winDriveType = GetDriveType(volumeName.c_str());
-				FileDevice::DeviceType deviceType = FileDevice::Fixed;
+				FileDevice::DeviceType deviceType = FileDevice::eFixed;
 
 				bool deviceSupported = true;
 
 				switch(winDriveType)
 				{
 				case DRIVE_REMOVABLE:
-					deviceType = FileDevice::Removable;
+					deviceType = FileDevice::eRemovable;
 					break;
 
 				case DRIVE_FIXED:
-					deviceType = FileDevice::Fixed;
+					deviceType = FileDevice::eFixed;
 					break;
 
 				case DRIVE_REMOTE:
-					deviceType = FileDevice::Network;
+					deviceType = FileDevice::eNetwork;
 					break;
 
 				case DRIVE_CDROM:
-					deviceType = FileDevice::Optical;
+					deviceType = FileDevice::eOptical;
 					break;
 
 				default:
@@ -99,13 +99,13 @@ namespace ion
 						//Check if path is writeable
 						DWORD folderAttributes = GetFileAttributes((LPCSTR)rootPath.c_str());
 
-						FileDevice::AccessType accessType = (folderAttributes & FILE_ATTRIBUTE_READONLY) ? FileDevice::ReadOnly : FileDevice::Writeable;
+						FileDevice::AccessType accessType = (folderAttributes & FILE_ATTRIBUTE_READONLY) ? FileDevice::eReadOnly : FileDevice::eWriteable;
 
 						//Create device
 						FileDevice* device = new FileDevice(rootPath, rootPath, deviceType, accessType);
 
 						//Add device
-						mFileDevices.push_back(device);
+						m_fileDevices.push_back(device);
 
 						//Check if the current working directory is on this volume
 						if(!_stricmp(rootPath.c_str(), workingRoot.c_str()))
@@ -140,12 +140,12 @@ namespace ion
 
 		void FileSystem::SetDefaultFileDevice(FileDevice& device)
 		{
-			mDefaultFileDevice = &device;
+			m_defaultFileDevice = &device;
 		}
 
 		FileDevice* FileSystem::GetDefaultFileDevice()
 		{
-			return mDefaultFileDevice;
+			return m_defaultFileDevice;
 		}
 	}
 }

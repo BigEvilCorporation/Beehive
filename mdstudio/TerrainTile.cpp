@@ -31,20 +31,20 @@ void TerrainTile::GetHeights(s8 heights[tileWidth]) const
 
 void TerrainTile::SetHeight(int x, s8 height)
 {
-	ion::debug::Assert(x < tileWidth, "Out of range");
-	ion::debug::Assert(height >= -tileHeight && height <= tileHeight, "Out of range");
+	ion::debug::Assert(x < tileWidth, "eOut of range");
+	ion::debug::Assert(height >= -tileHeight && height <= tileHeight, "eOut of range");
 	m_heightmap[x] = height;
 }
 
 void TerrainTile::ClearHeight(int x)
 {
-	ion::debug::Assert(x < tileWidth, "Out of range");
+	ion::debug::Assert(x < tileWidth, "eOut of range");
 	m_heightmap[x] = 0;
 }
 
 s8 TerrainTile::GetHeight(int x) const
 {
-	ion::debug::Assert(x < tileWidth, "Out of range");
+	ion::debug::Assert(x < tileWidth, "eOut of range");
 	return m_heightmap[x];
 }
 

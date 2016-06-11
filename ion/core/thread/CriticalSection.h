@@ -29,7 +29,7 @@ namespace ion
 			
 		private:
 			#if defined ION_PLATFORM_WINDOWS
-			CRITICAL_SECTION mCriticalSectionHndl;
+			CRITICAL_SECTION m_criticalSectionHndl;
 			#endif
 		};
 	}

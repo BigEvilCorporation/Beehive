@@ -158,7 +158,7 @@ void RenderResources::CreateTilesetTexture()
 					int destPixelY = (y * tileHeight) + pixelY;
 					u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
 					u32 dataOffset = pixelIdx * bytesPerPixel;
-					ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+					ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
 					data[dataOffset] = colour.GetRed();
 					data[dataOffset + 1] = colour.GetGreen();
 					data[dataOffset + 2] = colour.GetBlue();
@@ -217,7 +217,7 @@ void RenderResources::CreateTerrainTilesTexture()
 				int destPixelY = (y * tileHeight) + pixelY;
 				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
 				u32 dataOffset = pixelIdx * bytesPerPixel;
-				ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+				ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
 				data[dataOffset] = colour.r * 255;
 				data[dataOffset + 1] = colour.g * 255;
 				data[dataOffset + 2] = colour.b * 255;
@@ -264,7 +264,7 @@ void RenderResources::CreateCollisionTypesTexture()
 
 		u32 pixelIdx = (y * textureWidth) + x;
 		u32 dataOffset = pixelIdx * bytesPerPixel;
-		ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+		ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
 		data[dataOffset] = colour.r * 255;
 		data[dataOffset + 1] = colour.g * 255;
 		data[dataOffset + 2] = colour.b * 255;
@@ -297,7 +297,7 @@ void RenderResources::CreateSpriteSheetPreviewTexture(const BMPReader& reader)
 
 			u32 pixelIdx = (y * textureWidth) + x;
 			u32 dataOffset = pixelIdx * bytesPerPixel;
-			ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+			ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
 			data[dataOffset] = colour.GetRed();
 			data[dataOffset + 1] = colour.GetGreen();
 			data[dataOffset + 2] = colour.GetBlue();
@@ -671,7 +671,7 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 						int destPixelY = (tileY_inv * tileHeight) + pixelY;
 						u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
 						u32 dataOffset = pixelIdx * bytesPerPixel;
-						ion::debug::Assert(dataOffset + 2 < textureSize, "Out of bounds");
+						ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
 						data[dataOffset] = colour.GetRed();
 						data[dataOffset + 1] = colour.GetGreen();
 						data[dataOffset + 2] = colour.GetBlue();

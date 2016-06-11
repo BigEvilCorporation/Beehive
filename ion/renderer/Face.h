@@ -22,30 +22,30 @@ namespace ion
 			Face() {}
 			Face(const Vertex& a, const Vertex& b, const Vertex& c)
 			{
-				mVertices[0] = a;
-				mVertices[1] = b;
-				mVertices[2] = c;
+				m_vertices[0] = a;
+				m_vertices[1] = b;
+				m_vertices[2] = c;
 			}
 
 			Face(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC,
 				const Vector3& normalA, const Vector3& normalB, const Vector3& normalC,
 				const TexCoord& texCoordA, const TexCoord& texCoordB, const TexCoord& texCoordC)
 			{
-				mVertices[0] = vertexA;
-				mVertices[1] = vertexB;
-				mVertices[2] = vertexC;
-				mNormals[0] = normalA;
-				mNormals[1] = normalB;
-				mNormals[2] = normalC;
-				mTexCoords[0] = texCoordA;
-				mTexCoords[1] = texCoordB;
-				mTexCoords[2] = texCoordC;
+				m_vertices[0] = vertexA;
+				m_vertices[1] = vertexB;
+				m_vertices[2] = vertexC;
+				m_normals[0] = normalA;
+				m_normals[1] = normalB;
+				m_normals[2] = normalC;
+				m_texCoords[0] = texCoordA;
+				m_texCoords[1] = texCoordB;
+				m_texCoords[2] = texCoordC;
 			}
 
-			Vertex	mVertices[3];
-			Vector3 mNormals[3];
-			TexCoord mTexCoords[3];
-			Vector3 mFaceNormal;
+			Vertex	m_vertices[3];
+			Vector3 m_normals[3];
+			TexCoord m_texCoords[3];
+			Vector3 m_faceNormal;
 		};
 	}
 }

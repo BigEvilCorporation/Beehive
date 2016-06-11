@@ -35,16 +35,16 @@ namespace ion
 		{
 		public:
 			//Alpha blending types
-			enum AlphaBlendType { NoBlend, Additive, Subtractive, Translucent };
+			enum AlphaBlendType { eNoBlend, eAdditive, eSubtractive, eTranslucent };
 
 			//Culling modes
-			enum CullingMode { NoCull, Clockwise, CounterClockwise };
+			enum CullingMode { eNoCull, eClockwise, eCounterClockwise };
 
 			//Depth test type
-			enum DepthTest { Disabled, Always, LessEqual };
+			enum DepthTest { eDisabled, eAlways, eLessEqual };
 
 			//Render vertex pattern type
-			enum VertexPattern { Triangles, Quads };
+			enum VertexPattern { eTriangles, eQuads };
 
 			static Renderer* Create(DeviceContext globalDC);
 
@@ -81,7 +81,7 @@ namespace ion
 		protected:
 			Renderer();
 
-			ShaderManager* mShaderManager;
+			ShaderManager* m_shaderManager;
 		};
 	}
 }

@@ -64,10 +64,10 @@ void Project::Clear()
 
 bool Project::Load(const std::string& filename)
 {
-	ion::io::File file(filename, ion::io::File::OpenRead);
+	ion::io::File file(filename, ion::io::File::eOpenRead);
 	if(file.IsOpen())
 	{
-		ion::io::Archive archive(file, ion::io::Archive::In);
+		ion::io::Archive archive(file, ion::io::Archive::eIn);
 		Serialise(archive);
 
 		InvalidateMap(true);
@@ -95,10 +95,10 @@ bool Project::Load(const std::string& filename)
 
 bool Project::Save(const std::string& filename)
 {
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
-		ion::io::Archive archive(file, ion::io::Archive::Out);
+		ion::io::Archive archive(file, ion::io::Archive::eOut);
 		Serialise(archive);
 		m_filename = filename;
 		return true;
@@ -157,20 +157,20 @@ void Project::SetActivePaletteSlot(PaletteId paletteId, int slotIndex)
 
 void Project::ExportPaletteSlots(const std::string& filename)
 {
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
-		ion::io::Archive archive(file, ion::io::Archive::Out);
+		ion::io::Archive archive(file, ion::io::Archive::eOut);
 		archive.Serialise(m_paletteSlots, "paletteSlots");
 	}
 }
 
 void Project::ImportPaletteSlots(const std::string& filename)
 {
-	ion::io::File file(filename, ion::io::File::OpenRead);
+	ion::io::File file(filename, ion::io::File::eOpenRead);
 	if(file.IsOpen())
 	{
-		ion::io::Archive archive(file, ion::io::Archive::In);
+		ion::io::Archive archive(file, ion::io::Archive::eIn);
 		archive.Serialise(m_paletteSlots, "paletteSlots");
 	}
 }
@@ -856,13 +856,13 @@ ion::gamekit::BezierPath* Project::AddTerrainBezier()
 
 ion::gamekit::BezierPath* Project::GetTerrainBezier(u32 index)
 {
-	ion::debug::Assert(index < m_terrainBeziers.size(), "Out of range");
+	ion::debug::Assert(index < m_terrainBeziers.size(), "eOut of range");
 	return &m_terrainBeziers[index];
 }
 
 void Project::RemoveTerrainBezier(u32 index)
 {
-	ion::debug::Assert(index < m_terrainBeziers.size(), "Out of range");
+	ion::debug::Assert(index < m_terrainBeziers.size(), "eOut of range");
 	m_terrainBeziers.erase(m_terrainBeziers.begin() + index);
 }
 
@@ -1153,10 +1153,10 @@ const TGameObjectTypeMap& Project::GetGameObjectTypes() const
 
 void Project::ExportGameObjectTypes(const std::string& filename)
 {
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
-		ion::io::Archive archive(file, ion::io::Archive::Out);
+		ion::io::Archive archive(file, ion::io::Archive::eOut);
 		archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 		archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjTypeId");
 	}
@@ -1164,10 +1164,10 @@ void Project::ExportGameObjectTypes(const std::string& filename)
 
 void Project::ImportGameObjectTypes(const std::string& filename)
 {
-	ion::io::File file(filename, ion::io::File::OpenRead);
+	ion::io::File file(filename, ion::io::File::eOpenRead);
 	if(file.IsOpen())
 	{
-		ion::io::Archive archive(file, ion::io::Archive::In);
+		ion::io::Archive archive(file, ion::io::Archive::eIn);
 		archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 		archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjTypeId");
 	}
@@ -1603,7 +1603,7 @@ void Project::WriteFileHeader(std::stringstream& stream) const
 
 bool Project::ExportPalettes(const std::string& filename) const
 {
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
@@ -1634,7 +1634,7 @@ bool Project::ExportTiles(const std::string& filename, bool binary) const
 		binaryFilename += ".bin";
 
 		//Export binary data
-		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
 		if(binaryFile.IsOpen())
 		{
 			m_tileset.Export(binaryFile);
@@ -1646,7 +1646,7 @@ bool Project::ExportTiles(const std::string& filename, bool binary) const
 		}
 	}
 
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
@@ -1691,7 +1691,7 @@ bool Project::ExportTerrainTiles(const std::string& filename, bool binary) const
 		binaryFilename += ".bin";
 
 		//Export binary data
-		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
 		if(binaryFile.IsOpen())
 		{
 			m_terrainTileset.Export(binaryFile);
@@ -1703,7 +1703,7 @@ bool Project::ExportTerrainTiles(const std::string& filename, bool binary) const
 		}
 	}
 
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
@@ -1748,7 +1748,7 @@ bool Project::ExportMap(const std::string& filename, bool binary) const
 		binaryFilename += ".bin";
 
 		//Export binary data
-		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
 		if(binaryFile.IsOpen())
 		{
 			m_map.Export(*this, binaryFile);
@@ -1760,7 +1760,7 @@ bool Project::ExportMap(const std::string& filename, bool binary) const
 		}
 	}
 
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
@@ -1809,7 +1809,7 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 		binaryFilename += ".bin";
 
 		//Export binary data
-		ion::io::File binaryFile(binaryFilename, ion::io::File::OpenWrite);
+		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
 		if(binaryFile.IsOpen())
 		{
 			m_collisionMap.Export(*this, binaryFile);
@@ -1821,7 +1821,7 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 		}
 	}
 
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
@@ -1862,7 +1862,7 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 
 bool Project::ExportGameObjects(const std::string& filename) const
 {
-	ion::io::File file(filename, ion::io::File::OpenWrite);
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
@@ -1921,7 +1921,7 @@ bool Project::ExportSpriteSheets(const std::string& directory, bool binary) cons
 			std::stringstream filename;
 			filename << directory << "\\" << it->second.GetName() << ".ASM";
 
-			ion::io::File file(filename.str(), ion::io::File::OpenWrite);
+			ion::io::File file(filename.str(), ion::io::File::eOpenWrite);
 			if(file.IsOpen())
 			{
 				std::stringstream stream;
@@ -1952,7 +1952,7 @@ bool Project::ExportSpriteAnims(const std::string& directory, bool binary) const
 			std::stringstream filename;
 			filename << directory << "\\" << it->second.GetName() << ".ASM";
 
-			ion::io::File file(filename.str(), ion::io::File::OpenWrite);
+			ion::io::File file(filename.str(), ion::io::File::eOpenWrite);
 			if(file.IsOpen())
 			{
 				std::stringstream stream;
@@ -1977,7 +1977,7 @@ bool Project::ExportSpritePalettes(const std::string& directory) const
 		std::stringstream filename;
 		filename << directory << "\\" << it->second.GetName() << ".ASM";
 
-		ion::io::File file(filename.str(), ion::io::File::OpenWrite);
+		ion::io::File file(filename.str(), ion::io::File::eOpenWrite);
 		if(file.IsOpen())
 		{
 			std::stringstream stream;

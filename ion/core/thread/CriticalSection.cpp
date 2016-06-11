@@ -14,35 +14,35 @@ namespace ion
 		CriticalSection::CriticalSection()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			InitializeCriticalSection(&mCriticalSectionHndl);
+			InitializeCriticalSection(&m_criticalSectionHndl);
 			#endif
 		}
 
 		CriticalSection::~CriticalSection()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			DeleteCriticalSection(&mCriticalSectionHndl);
+			DeleteCriticalSection(&m_criticalSectionHndl);
 			#endif
 		}
 
 		bool CriticalSection::TryBegin()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			return TryEnterCriticalSection(&mCriticalSectionHndl) != 0;
+			return TryEnterCriticalSection(&m_criticalSectionHndl) != 0;
 			#endif
 		}
 
 		void CriticalSection::Begin()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			EnterCriticalSection(&mCriticalSectionHndl);
+			EnterCriticalSection(&m_criticalSectionHndl);
 			#endif
 		}
 
 		void CriticalSection::End()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			LeaveCriticalSection(&mCriticalSectionHndl);
+			LeaveCriticalSection(&m_criticalSectionHndl);
 			#endif
 		}
 	}

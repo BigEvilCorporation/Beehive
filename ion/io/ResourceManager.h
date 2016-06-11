@@ -58,12 +58,12 @@ namespace ion
 					Job() {}
 					Job(JobType jobType, Resource& resource)
 					{
-						mJobType = jobType;
-						mResource = &resource;
+						m_jobType = jobType;
+						m_resource = &resource;
 					}
 
-					JobType mJobType;
-					Resource* mResource;
+					JobType m_jobType;
+					Resource* m_resource;
 				};
 
 				WorkerThread();
@@ -75,21 +75,21 @@ namespace ion
 				virtual void Entry();
 
 			private:
-				static const int sJobQueueSize = 1024;
-				Queue<Job, sJobQueueSize> mJobQueue;
-				thread::Semaphore mJobQueueSemaphore;
-				u32 mNumJobsInQueue;
+				static const int s_jobQueueSize = 1024;
+				Queue<Job, s_jobQueueSize> m_jobQueue;
+				thread::Semaphore m_jobQueueSemaphore;
+				u32 m_numJobsInQueue;
 			};
 
 
 			//Directories
-			std::map<std::string, std::string> mDirectoryMap;
+			std::map<std::string, std::string> m_directoryMap;
 
 			//Resources
-			std::map<std::string, Resource*> mResourceMap;
+			std::map<std::string, Resource*> m_resourceMap;
 
 			//Worker thread
-			WorkerThread* mWorkerThread;
+			WorkerThread* m_workerThread;
 
 			friend class Resource;
 		};
@@ -110,11 +110,11 @@ namespace ion
 		template <class T> void ResourceManager::SetResourceDirectory(const std::string& directory)
 		{
 			std::string typeName = typeid(T).name();
-			std::map<std::string, std::string>::iterator it = mDirectoryMap.find(typeName);
+			std::map<std::string, std::string>::iterator it = m_directoryMap.find(typeName);
 
-			if(it == mDirectoryMap.end())
+			if(it == m_directoryMap.end())
 			{
-				std::pair<std::map<std::string, std::string>::iterator, bool> result = mDirectoryMap.insert(std::pair<std::string, std::string>(typeName, directory));
+				std::pair<std::map<std::string, std::string>::iterator, bool> result = m_directoryMap.insert(std::pair<std::string, std::string>(typeName, directory));
 				it = result.first;
 			}
 
@@ -126,9 +126,9 @@ namespace ion
 			std::string directory = "";
 
 			std::string typeName = typeid(T).name();
-			std::map<std::string, std::string>::const_iterator it = mDirectoryMap.find(typeName);
+			std::map<std::string, std::string>::const_iterator it = m_directoryMap.find(typeName);
 
-			if(it != mDirectoryMap.end())
+			if(it != m_directoryMap.end())
 			{
 				directory = it->second;
 			}
@@ -138,11 +138,11 @@ namespace ion
 
 		template <class T> ResourceHandle<T> ResourceManager::GetResource(const std::string& filename)
 		{
-			std::map<std::string, Resource*>::iterator it = mResourceMap.find(filename);
+			std::map<std::string, Resource*>::iterator it = m_resourceMap.find(filename);
 
-			if(it == mResourceMap.end())
+			if(it == m_resourceMap.end())
 			{
-				std::pair<std::map<std::string, Resource*>::iterator, bool> result = mResourceMap.insert(std::pair<std::string, Resource*>(filename, new ResourceT<T>(*this, filename)));
+				std::pair<std::map<std::string, Resource*>::iterator, bool> result = m_resourceMap.insert(std::pair<std::string, Resource*>(filename, new ResourceT<T>(*this, filename)));
 				it = result.first;
 			}
 
@@ -151,11 +151,11 @@ namespace ion
 
 		template <class T> ResourceHandle<T> ResourceManager::AddResource(const std::string& filename, T& resourceObject)
 		{
-			std::map<std::string, Resource*>::iterator it = mResourceMap.find(filename);
+			std::map<std::string, Resource*>::iterator it = m_resourceMap.find(filename);
 
-			if(it == mResourceMap.end())
+			if(it == m_resourceMap.end())
 			{
-				std::pair<std::map<std::string, Resource*>::iterator, bool> result = mResourceMap.insert(std::pair<std::string, Resource*>(filename, new ResourceT<T>(*this, filename, &resourceObject)));
+				std::pair<std::map<std::string, Resource*>::iterator, bool> result = m_resourceMap.insert(std::pair<std::string, Resource*>(filename, new ResourceT<T>(*this, filename, &resourceObject)));
 				it = result.first;
 			}
 			else

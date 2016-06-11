@@ -2,7 +2,7 @@
 Original code by Lee Thomason (www.grinninglizard.com)
 
 This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any
+warranty. eIn no event will the authors be held liable for any
 damages arising from the use of this software.
 
 Permission is granted to anyone to use this software for any
@@ -922,7 +922,7 @@ private:
 };
 
 
-/** In correct XML the declaration is the first entry in the file.
+/** eIn correct XML the declaration is the first entry in the file.
 	@verbatim
 		<?xml version="1.0" standalone="yes"?>
 	@endverbatim

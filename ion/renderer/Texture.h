@@ -81,10 +81,10 @@ namespace ion
 			virtual bool Load() { return false; }
 			virtual void Unload() { }
 
-			u32 mWidth;
-			u32 mHeight;
+			u32 m_width;
+			u32 m_height;
 
-			std::string mImageFilename;
+			std::string m_imageFilename;
 		};
 	}
 }

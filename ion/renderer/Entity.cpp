@@ -24,91 +24,91 @@ namespace ion
 
 		const Matrix4& Entity::GetTransform() const
 		{
-			return mMatrix;
+			return m_matrix;
 		}
 
 		Vector3 Entity::GetPosition() const
 		{
-			return mMatrix.GetTranslation();
+			return m_matrix.GetTranslation();
 		}
 
 		void Entity::SetTransform(const Matrix4& transform)
 		{
-			mMatrix = transform;
+			m_matrix = transform;
 		}
 
 		void Entity::SetPosition(const Vector3& position)
 		{
-			mMatrix.SetTranslation(position);
+			m_matrix.SetTranslation(position);
 		}
 
 		void Entity::SetOrientation(const Quaternion& orientation)
 		{
-			Vector3 translation = mMatrix.GetTranslation();
+			Vector3 translation = m_matrix.GetTranslation();
 			Quaternion normQuat = orientation;
 			normQuat.Normalise();
-			mMatrix = normQuat.ToMatrix();
-			mMatrix.SetTranslation(translation);
+			m_matrix = normQuat.ToMatrix();
+			m_matrix.SetTranslation(translation);
 		}
 
 		void Entity::SetLookAt(const Vector3& position)
 		{
 			Quaternion orientation;
-			orientation.FromLookAt(mMatrix.GetTranslation(), position, ion::Vector3(0.0f, 0.0f, -1.0f));
+			orientation.FromLookAt(m_matrix.GetTranslation(), position, ion::Vector3(0.0f, 0.0f, -1.0f));
 			SetOrientation(orientation);
 		}
 
 		void Entity::Move(const Vector3& moveVector)
 		{
-			mMatrix.SetTranslation(mMatrix.GetTranslation() + mMatrix.RotateVector(moveVector));
+			m_matrix.SetTranslation(m_matrix.GetTranslation() + m_matrix.RotateVector(moveVector));
 		}
 
 		void Entity::Pitch(float pitch, TransformSpace transformSpace)
 		{
 			Quaternion quat;
 
-			if(transformSpace == Local)
+			if(transformSpace == eLocal)
 			{
-				quat.FromAxis(pitch, mMatrix.GetRight());
+				quat.FromAxis(pitch, m_matrix.GetRight());
 			}
 			else
 			{
 				quat.FromAxis(pitch, coordsys::Right);
 			}
 
-			mMatrix = quat.ToMatrix() * mMatrix;
+			m_matrix = quat.ToMatrix() * m_matrix;
 		}
 
 		void Entity::Yaw(float yaw, TransformSpace transformSpace)
 		{
 			Quaternion quat;
 
-			if(transformSpace == Local)
+			if(transformSpace == eLocal)
 			{
-				quat.FromAxis(yaw, mMatrix.GetUp());
+				quat.FromAxis(yaw, m_matrix.GetUp());
 			}
 			else
 			{
 				quat.FromAxis(yaw, coordsys::Up);
 			}
 
-			mMatrix = quat.ToMatrix() * mMatrix;
+			m_matrix = quat.ToMatrix() * m_matrix;
 		}
 
 		void Entity::Roll(float roll, TransformSpace transformSpace)
 		{
 			Quaternion quat;
 
-			if(transformSpace == Local)
+			if(transformSpace == eLocal)
 			{
-				quat.FromAxis(roll, mMatrix.GetForward());
+				quat.FromAxis(roll, m_matrix.GetForward());
 			}
 			else
 			{
 				quat.FromAxis(roll, coordsys::Forward);
 			}
 
-			mMatrix = quat.ToMatrix() * mMatrix;
+			m_matrix = quat.ToMatrix() * m_matrix;
 		}
 	}
 }
