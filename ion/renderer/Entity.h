@@ -1,4 +1,11 @@
 ///////////////////////////////////////////////////
+// (c) 2016 Matt Phillips, Big Evil Corporation
+// http://www.bigevilcorporation.co.uk
+// mattphillips@mail.com
+// @big_evil_corp
+//
+// Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
+//
 // File:		Entity.h
 // Date:		27th November 2013
 // Authors:		Matt Phillips
