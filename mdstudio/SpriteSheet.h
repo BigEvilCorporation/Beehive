@@ -26,7 +26,7 @@ public:
 
 	SpriteSheet();
 
-	bool ImportBitmap(const std::string& filename, const std::string& name, int widthCells, int heightCells, int maxCells);
+	bool ImportBitmap(const std::string& filename, const std::string& name, int tileWidth, int tileHeight, int widthFrames, int heightFrames, int maxFrames);
 
 	const std::string& GetName() const;
 	const SpriteSheetFrame& GetFrame(int index) const;
@@ -45,12 +45,12 @@ public:
 	void GetWidthSubsprites(u8& total, u8& whole, u8& remainder) const;
 	void GetHeightSubsprites(u8& total, u8& whole, u8& remainder) const;
 
-	void GetSubspriteDimensions(std::vector<ion::Vector2i>& dimensions) const;
+	void GetSubspriteDimensions(std::vector<ion::Vector2i>& dimensions, int tileWidth, int tileHeight) const;
 
-	void GetSubspritePosOffsets(std::vector<ion::Vector2i>& offsets) const;
-	void GetSubspritePosOffsetsFlippedX(std::vector<ion::Vector2i>& offsets) const;
-	void GetSubspritePosOffsetsFlippedY(std::vector<ion::Vector2i>& offsets) const;
-	void GetSubspritePosOffsetsFlippedXY(std::vector<ion::Vector2i>& offsets) const;
+	void GetSubspritePosOffsets(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const;
+	void GetSubspritePosOffsetsFlippedX(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const;
+	void GetSubspritePosOffsetsFlippedY(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const;
+	void GetSubspritePosOffsetsFlippedXY(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const;
 
 	const Palette& GetPalette() const;
 

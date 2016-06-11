@@ -116,7 +116,10 @@ void ViewPanel::CreateCanvas(int width, int height)
 	if(m_canvasPrimitive)
 		delete m_canvasPrimitive;
 
-	m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
 	m_canvasSize.x = width;
 	m_canvasSize.y = height;
 }
@@ -126,7 +129,10 @@ void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
 
-	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), cellsX, cellsY);
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), cellsX, cellsY);
 }
 
 void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
@@ -223,8 +229,8 @@ void ViewPanel::FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, i
 
 void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	//Get mouse position in panel space
 	wxClientDC clientDc(this);

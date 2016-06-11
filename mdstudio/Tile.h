@@ -17,11 +17,8 @@ static const TileId InvalidTileId = 0xFFFFFFFF;
 class Tile
 {
 public:
-	static const int tileWidth = 8;
-	static const int tileHeight = 8;
-	static const int pixelsPerTile = tileWidth*tileHeight;
-
 	Tile();
+	Tile(u8 width, u8 height);
 
 	void SetIndex(u32 index);
 	u32 GetIndex() const;
@@ -29,10 +26,13 @@ public:
 	void CalculateHash();
 	u64 GetHash() const;
 
+	u8 GetWidth() const { return m_width; }
+	u8 GetHeight() const { return m_height; }
+
 	void SetPixelColour(int x, int y, u8 colourIdx);
 	u8 GetPixelColour(int x, int y) const;
 	void CopyPixels(const Tile& tile);
-	void GetPixels(u8 pixels[pixelsPerTile]) const;
+	void GetPixels(std::vector<u8>& pixels) const;
 
 	void SetPaletteId(PaletteId palette);
 	PaletteId GetPaletteId() const;
@@ -46,5 +46,7 @@ private:
 	PaletteId m_palette;
 	u32 m_index;
 	u64 m_hash;
+	u8 m_width;
+	u8 m_height;
 	std::vector<u8> m_pixels;
 };

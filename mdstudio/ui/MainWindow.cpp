@@ -47,11 +47,11 @@ MainWindow::MainWindow()
 	//Create renderer (from global DC
 	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
 
-	//Create and load rendering resources
-	m_renderResources = new RenderResources;
+	//Create default Mega Drive project
+	Project* defaultProject = new Project(PlatformConfigs::s_configs[ePlatformMegaDrive]);
 
-	//Create default project
-	Project* defaultProject = new Project();
+	//Create and load rendering resources
+	m_renderResources = new RenderResources(*defaultProject);
 
 	//Open welcome project
 	static bool openWelcomeProject = true;
@@ -163,13 +163,19 @@ void MainWindow::SetProject(Project* project)
 			delete m_timelinePanel;
 		}
 
+		if(m_renderResources)
+		{
+			delete m_renderResources;
+			m_renderResources = NULL;
+		}
+
 		//Delete previous, set new
 		m_project.reset(project);
 
 		if(project)
 		{
-			//Set render resources project
-			m_renderResources->SetProject(project);
+			//Create render resources
+			m_renderResources = new RenderResources(*m_project);
 
 			//Recreate tileset/collision set/spriteSheet textures, and tile index cache
 			RefreshTileset();
@@ -749,7 +755,17 @@ void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
 {
 	if(wxMessageBox("Unsaved changes will be lost, are you sure?", "New Project", wxOK | wxCANCEL) == wxOK)
 	{
-		SetProject(new Project());
+		DialogNewProject dialog(this);
+		if(dialog.ShowModal() == wxID_OK)
+		{
+			PlatformConfig config;
+			config.tileWidth = dialog.m_spinCtrlTileWidth->GetValue();
+			config.tileHeight = dialog.m_spinCtrlTileHeight->GetValue();
+			config.scrollPlaneWidthTiles = dialog.m_spinCtrlMapWidth->GetValue();
+			config.scrollPlaneHeightTiles = dialog.m_spinCtrlMapHeight->GetValue();
+
+			SetProject(new Project(config));
+		}
 	}
 }
 
@@ -760,7 +776,7 @@ void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 	{
 		SetStatusText("Opening...");
 
-		Project* project = new Project();
+		Project* project = new Project(PlatformConfigs::s_configs[ePlatformMegaDrive]);
 
 		if(project->Load(dialog.GetPath().c_str().AsChar()))
 		{
@@ -1135,8 +1151,10 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 		Map& map = m_project->GetMap();
 		CollisionMap& collisionMap = m_project->GetCollisionMap();
 
-		int originalWidth = map.GetWidth();
-		int originalHeight = map.GetHeight();
+		const int originalWidth = map.GetWidth();
+		const int originalHeight = map.GetHeight();
+		const int tileWidth = m_project->GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project->GetPlatformConfig().tileHeight;
 
 		DialogMapSize dialog(this);
 		dialog.m_spinCtrlWidth->SetValue(originalWidth);
@@ -1169,7 +1187,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 								ion::Vector2 controlB;
 								bezier->GetPoint(j, position, controlA, controlB);
 
-								position.x += (width - originalWidth) * 8.0f;
+								position.x += (width - originalWidth) * (float)tileWidth;
 
 								bezier->SetPoint(j, position, controlA, controlB);
 							}

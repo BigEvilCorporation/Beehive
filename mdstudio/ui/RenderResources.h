@@ -64,11 +64,8 @@ public:
 		ePrimitiveMax
 	};
 
-	RenderResources();
+	RenderResources(Project& project);
 	~RenderResources();
-
-	//Set project
-	void SetProject(Project* project) { m_project = project; }
 
 	//Create and redraw tileset texture
 	void CreateTilesetTexture();
@@ -117,7 +114,7 @@ public:
 		SpriteSheetRenderResources();
 		~SpriteSheetRenderResources();
 
-		void Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader);
+		void Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader, Project* project);
 
 		struct Frame
 		{
@@ -152,7 +149,7 @@ private:
 	float m_cellSizeTerrainTilesetTexSpaceSq;
 
 	//Current project
-	Project* m_project;
+	Project& m_project;
 
 	//Resources
 	ion::render::Shader* m_vertexShaders[eShaderMax];

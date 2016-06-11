@@ -18,15 +18,15 @@ SpriteSheet::SpriteSheet()
 	m_heightTiles = 0;
 }
 
-bool SpriteSheet::ImportBitmap(const std::string& filename, const std::string& name, int widthFrames, int heightFrames, int maxFrames)
+bool SpriteSheet::ImportBitmap(const std::string& filename, const std::string& name, int tileWidth, int tileHeight, int widthFrames, int heightFrames, int maxFrames)
 {
 	//Read BMP
 	BMPReader reader;
 	if(reader.Read(filename))
 	{
-		if(reader.GetWidth() % 8 != 0 || reader.GetHeight() % 8 != 0)
+		if(reader.GetWidth() % tileWidth != 0 || reader.GetHeight() % tileHeight != 0)
 		{
-			if(wxMessageBox("Bitmap width/height is not multiple of 8", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
+			if(wxMessageBox("Bitmap width/height is not multiple of target platform tile width/height", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
 			{
 				return false;
 			}
@@ -40,13 +40,10 @@ bool SpriteSheet::ImportBitmap(const std::string& filename, const std::string& n
 		{
 			m_palette.AddColour(reader.GetPaletteEntry(i));
 		}
-
-		const int tileWidth = 8;
-		const int tileHeight = 8;
 	
 		//Get total spriteSheet sheet width/height in tiles
-		int spriteSheetWidthTiles = reader.GetWidth() / 8;
-		int spriteSheetHeightTiles = reader.GetHeight() / 8;
+		int spriteSheetWidthTiles = reader.GetWidth() / tileWidth;
+		int spriteSheetHeightTiles = reader.GetHeight() / tileHeight;
 	
 		//Get frame width/height in tiles
 		m_widthTiles = spriteSheetWidthTiles / widthFrames;
@@ -182,13 +179,10 @@ void SpriteSheet::GetHeightSubsprites(u8& total, u8& whole, u8& remainder) const
 	remainder = m_heightTiles % subSpriteHeightTiles;
 }
 
-void SpriteSheet::GetSubspriteDimensions(std::vector<ion::Vector2i>& dimensions) const
+void SpriteSheet::GetSubspriteDimensions(std::vector<ion::Vector2i>& dimensions, int tileWidth, int tileHeight) const
 {
 	int width = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
 	int height = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
-
-	const int tileWidth = 8;
-	const int tileHeight = 8;
 
 	for(int x = 0; x < width; x++)
 	{
@@ -201,13 +195,10 @@ void SpriteSheet::GetSubspriteDimensions(std::vector<ion::Vector2i>& dimensions)
 	}
 }
 
-void SpriteSheet::GetSubspritePosOffsets(std::vector<ion::Vector2i>& offsets) const
+void SpriteSheet::GetSubspritePosOffsets(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const
 {
 	int width = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
 	int height = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
-
-	const int tileWidth = 8;
-	const int tileHeight = 8;
 
 	for(int x = 0; x < width; x++)
 	{
@@ -220,13 +211,10 @@ void SpriteSheet::GetSubspritePosOffsets(std::vector<ion::Vector2i>& offsets) co
 	}
 }
 
-void SpriteSheet::GetSubspritePosOffsetsFlippedX(std::vector<ion::Vector2i>& offsets) const
+void SpriteSheet::GetSubspritePosOffsetsFlippedX(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const
 {
 	int width = ion::maths::Ceil((float)m_widthTiles / (float)subSpriteWidthTiles);
 	int height = ion::maths::Ceil((float)m_heightTiles / (float)subSpriteHeightTiles);
-
-	const int tileWidth = 8;
-	const int tileHeight = 8;
 
 	for(int x = 0; x < width; x++)
 	{
@@ -240,12 +228,12 @@ void SpriteSheet::GetSubspritePosOffsetsFlippedX(std::vector<ion::Vector2i>& off
 	}
 }
 
-void SpriteSheet::GetSubspritePosOffsetsFlippedY(std::vector<ion::Vector2i>& offsets) const
+void SpriteSheet::GetSubspritePosOffsetsFlippedY(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const
 {
 
 }
 
-void SpriteSheet::GetSubspritePosOffsetsFlippedXY(std::vector<ion::Vector2i>& offsets) const
+void SpriteSheet::GetSubspritePosOffsetsFlippedXY(std::vector<ion::Vector2i>& offsets, int tileWidth, int tileHeight) const
 {
 
 }

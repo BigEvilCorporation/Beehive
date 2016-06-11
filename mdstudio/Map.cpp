@@ -10,12 +10,13 @@
 
 #include <ion/core/memory/Memory.h>
 
-Map::Map()
+Map::Map(const PlatformConfig& platformConfig)
+	: m_platformConfig(platformConfig)
 {
 	m_width = 0;
 	m_height = 0;
 	m_nextFreeGameObjectId = 1;
-	Resize(defaultWidth, defaultHeight, false);
+	Resize(platformConfig.scrollPlaneWidthTiles, platformConfig.scrollPlaneHeightTiles, false);
 }
 
 void Map::Clear()
@@ -55,6 +56,9 @@ int Map::GetHeight() const
 
 void Map::Resize(int width, int height, bool shiftRight)
 {
+	const int tileWidth = m_platformConfig.tileWidth;
+	const int tileHeight = m_platformConfig.tileHeight;
+
 	//Create new tile array
 	std::vector<TileDesc> tiles;
 	std::vector<TerrainTileId> TerrainTiles;
@@ -97,7 +101,7 @@ void Map::Resize(int width, int height, bool shiftRight)
 			for(int i = 0; i < it->second.size(); i++)
 			{
 				it->second[i].m_position.x += (width - m_width);
-				it->second[i].m_gameObject.SetPosition(it->second[i].m_position);
+				it->second[i].m_gameObject.SetPosition(ion::Vector2i(it->second[i].m_position.x * tileWidth, it->second[i].m_position.y * tileHeight));
 			}
 		}
 	}
@@ -239,8 +243,11 @@ GameObjectId Map::PlaceGameObject(int x, int y, const GameObjectType& objectType
 	if(it == m_gameObjects.end())
 		it = m_gameObjects.insert(std::make_pair(objectType.GetId(), std::vector<GameObjectMapEntry>())).first;
 
+	const int tileWidth = m_platformConfig.tileWidth;
+	const int tileHeight = m_platformConfig.tileHeight;
+
 	GameObjectId objectId = m_nextFreeGameObjectId++;
-	GameObject gameObject(objectId, objectType.GetId(), ion::Vector2i(x, y));
+	GameObject gameObject(objectId, objectType.GetId(), ion::Vector2i(x * tileWidth, y * tileHeight));
 	it->second.push_back(GameObjectMapEntry(gameObject, ion::Vector2i(x, y), ion::Vector2i(objectType.GetDimensions().x, objectType.GetDimensions().y)));
 	return objectId;
 }
@@ -251,13 +258,16 @@ GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
 	ion::Vector2i size;
 	ion::Vector2i bottomRight;
 
+	const int tileWidth = m_platformConfig.tileWidth;
+	const int tileHeight = m_platformConfig.tileHeight;
+
 	//Work backwards, find last placed game obj first
 	for(TGameObjectPosMap::const_iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap && !gameObjectId; ++itMap)
 	{
 		for(std::vector<GameObjectMapEntry>::const_reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec && !gameObjectId; ++itVec)
 		{
-			ion::Vector2i size(itVec->m_size.x / 8, itVec->m_size.y / 8);
-			ion::Vector2i drawOffset(ion::maths::Round((float)itVec->m_gameObject.GetAnimDrawOffset().x / 8.0f), ion::maths::Round((float)itVec->m_gameObject.GetAnimDrawOffset().y / 8.0f));
+			ion::Vector2i size(itVec->m_size.x / tileWidth, itVec->m_size.y / tileHeight);
+			ion::Vector2i drawOffset(ion::maths::Round((float)itVec->m_gameObject.GetAnimDrawOffset().x / tileWidth), ion::maths::Round((float)itVec->m_gameObject.GetAnimDrawOffset().y / tileHeight));
 			topLeft = itVec->m_position + drawOffset;
 			ion::Vector2i bottomRight = topLeft + size;
 
@@ -293,11 +303,14 @@ GameObject* Map::GetGameObject(GameObjectId gameObjectId)
 
 void Map::RemoveGameObject(int x, int y)
 {
+	const int tileWidth = m_platformConfig.tileWidth;
+	const int tileHeight = m_platformConfig.tileHeight;
+
 	for(TGameObjectPosMap::iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap; ++itMap)
 	{
 		for(std::vector<GameObjectMapEntry>::reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec; ++itVec)
 		{
-			ion::Vector2i size(itVec->m_size.x / 8, itVec->m_size.y / 8);
+			ion::Vector2i size(itVec->m_size.x / tileWidth, itVec->m_size.y / tileHeight);
 			ion::Vector2i topLeft = itVec->m_position;
 			ion::Vector2i bottomRight = topLeft + size;
 

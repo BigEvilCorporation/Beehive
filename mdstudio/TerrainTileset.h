@@ -13,13 +13,14 @@
 #include <io/Archive.h>
 
 #include "TerrainTile.h"
+#include "PlatformConfig.h"
 
 class TerrainTileset
 {
 	typedef std::map<u64, TerrainTileId> HashMap;
 
 public:
-	TerrainTileset();
+	TerrainTileset(const PlatformConfig& platformConfig);
 
 	void Clear();
 
@@ -42,6 +43,7 @@ private:
 	void RemoveFromHashMap(TerrainTileId tileId);
 	void CalculateHash(const TerrainTile& tile, u64& hash) const;
 	
+	const PlatformConfig& m_platformConfig;
 	std::vector<TerrainTile> m_tiles;
 	HashMap m_hashMap;
 };

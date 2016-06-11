@@ -13,6 +13,16 @@
 
 #include <wx/glcanvas.h>
 
+class DialogNewProject : public DialogNewProjectBase
+{
+public:
+	DialogNewProject(wxWindow* parent);
+	virtual void OnChoicePreset(wxCommandEvent& event);
+	virtual void OnBtnOk(wxCommandEvent& event) { EndModal(wxID_OK); }
+	virtual void OnBtnCancel(wxCommandEvent& event) { EndModal(wxID_CANCEL); }
+	void PopulatePreset(int index);
+};
+
 class DialogMapSize : public DialogMapSizeBase
 {
 public:
@@ -43,7 +53,7 @@ protected:
 class ImportDialogSpriteSheet : public ImportDialogSpriteSheetBase
 {
 public:
-	ImportDialogSpriteSheet(wxWindow* parent, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
+	ImportDialogSpriteSheet(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual void OnFileOpened(wxFileDirPickerEvent& event);
 	virtual void OnGridColourChanged(wxColourPickerEvent& event);
 	virtual void OnSpinWidthCells(wxSpinEvent& event);
@@ -51,5 +61,6 @@ public:
 	virtual void OnSpinCellCount(wxSpinEvent& event);
 
 private:
+	Project& m_project;
 	RenderResources& m_renderResources;
 };

@@ -13,18 +13,22 @@ const float TileEditorPanel::s_defaultZoom = 3.0f;
 
 TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
+	, m_project(project)
 {
 	//No panning
 	EnablePan(false);
 
-	m_canvasSize.x = s_tileWidth;
-	m_canvasSize.y = s_tileHeight;
+	u8 tileWidth = project.GetPlatformConfig().tileWidth;
+	u8 tileHeight = project.GetPlatformConfig().tileWidth;
+
+	m_canvasSize.x = tileWidth;
+	m_canvasSize.y = tileHeight;
 
 	//Create rendering primitive
-	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(s_tileWidth * 4.0f, s_tileHeight * 4.0f));
+	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
 
 	//Create 8x8 grid
-	CreateGrid(s_tileWidth, s_tileHeight, s_tileWidth, s_tileHeight);
+	CreateGrid(tileWidth, tileHeight, tileWidth, tileHeight);
 }
 
 TileEditorPanel::~TileEditorPanel()
@@ -52,7 +56,8 @@ void TileEditorPanel::OnResize(wxSizeEvent& event)
 
 void TileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
-	const int tileHeight = 8;
+	const u8 tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const u8 tileHeight = m_project.GetPlatformConfig().tileWidth;
 
 	if(m_project.GetPaintTile())
 	{
@@ -62,7 +67,7 @@ void TileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 		{
 			if(Tile* tile = m_project.GetTileset().GetTile(tileId))
 			{
-				if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
+				if(x >= 0 && x < tileWidth && y >= 0 && y < tileHeight)
 				{
 					//Get palette
 					Palette* palette = m_project.GetPalette(tile->GetPaletteId());

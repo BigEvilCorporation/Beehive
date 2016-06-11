@@ -14,6 +14,7 @@
 #include <ion/gamekit/Bezier.h>
 
 #include "Types.h"
+#include "PlatformConfig.h"
 #include "Map.h"
 #include "Palette.h"
 #include "SpriteSheet.h"
@@ -49,11 +50,14 @@ public:
 		eBMPImportInsertBGTile	= (1 << 7),
 	};
 
-	Project();
+	Project(PlatformConfig& defaultPatformConfig);
 
 	//Load/save project
 	bool Load(const std::string& filename);
 	bool Save(const std::string& filename);
+
+	//Get platform config
+	const PlatformConfig& GetPlatformConfig() const { return m_platformConfig; }
 
 	//Get/set name
 	const std::string& GetName() const { return m_name; }
@@ -263,6 +267,9 @@ private:
 
 	//Get tile at position (including on stamps)
 	TileId GetTileAtPosition(const ion::Vector2i& position);
+
+	//Platform config
+	PlatformConfig m_platformConfig;
 
 	//Project name
 	std::string m_name;

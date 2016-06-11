@@ -16,15 +16,18 @@ TerrainTileEditorPanel::TerrainTileEditorPanel(MainWindow* mainWindow, Project& 
 	//No panning
 	EnablePan(false);
 
-	m_canvasSize.x = s_tileWidth;
-	m_canvasSize.y = s_tileHeight;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	m_canvasSize.x = tileWidth;
+	m_canvasSize.y = tileHeight;
 
 	//Create rendering primitives
-	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(s_tileWidth * 4.0f, s_tileHeight * 4.0f));
-	m_collisionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(s_tileWidth * 4.0f, s_tileHeight * 4.0f));
+	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
+	m_collisionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
 
 	//Create 8x8 grid
-	CreateGrid(s_tileWidth, s_tileHeight, s_tileWidth, s_tileHeight);
+	CreateGrid(tileWidth, tileHeight, tileWidth, tileHeight);
 }
 
 TerrainTileEditorPanel::~TerrainTileEditorPanel()
@@ -53,14 +56,15 @@ void TerrainTileEditorPanel::OnResize(wxSizeEvent& event)
 
 void TerrainTileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
-	const int tileHeight = 8;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 	{
 		TerrainTileId tileId = m_project.GetPaintTerrainTile();
 		if(TerrainTile* tile = m_project.GetTerrainTileset().GetTerrainTile(tileId))
 		{
-			if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
+			if(x >= 0 && x < tileWidth && y >= 0 && y < tileHeight)
 			{
 				if(buttonBits & eMouseLeft)
 				{
@@ -149,8 +153,8 @@ void TerrainTileEditorPanel::PaintTile()
 
 void TerrainTileEditorPanel::PaintCollision()
 {
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	//Set tex coords
 	ion::render::TexCoord texCoords[4];
