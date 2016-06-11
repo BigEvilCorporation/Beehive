@@ -34,11 +34,8 @@ class MainWindow;
 class ViewPanel : public wxGLCanvas
 {
 public:
-	ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
+	ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~ViewPanel();
-
-	//Set current project
-	virtual void SetProject(Project* project);
 
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
@@ -92,7 +89,7 @@ protected:
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	
 	//Main project
-	Project* m_project;
+	Project& m_project;
 
 	//Main window
 	MainWindow* m_mainWindow;

@@ -13,8 +13,8 @@
 
 const float TerrainTilesPanel::s_TerrainTileSize = 4.0f;
 
-TerrainTilesPanel::TerrainTilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
+TerrainTilesPanel::TerrainTilesPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	m_selectedTerrainTile = InvalidTerrainTileId;
 	m_hoverTerrainTile = InvalidTerrainTileId;
@@ -118,7 +118,7 @@ void TerrainTilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 		m_selectedTerrainTilePos = m_hoverTerrainTilePos;
 
 		//Set as current painting terrain tile
-		m_project->SetPaintTerrainTile(selectedTerrainTile);
+		m_project.SetPaintTerrainTile(selectedTerrainTile);
 
 		//Set terrain tile paint tool
 		m_mainWindow->SetMapTool(eToolPaintTerrainTile);
@@ -155,7 +155,7 @@ void TerrainTilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Mat
 	//Render selected TerrainTile
 	if(m_selectedTerrainTile != InvalidTerrainTileId)
 	{
-		if(TerrainTile* terrainTile = m_project->GetTerrainTileset().GetTerrainTile(m_selectedTerrainTile))
+		if(TerrainTile* terrainTile = m_project.GetTerrainTileset().GetTerrainTile(m_selectedTerrainTile))
 		{
 			ion::Vector2 size(1, 1);
 			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
@@ -168,7 +168,7 @@ void TerrainTilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Mat
 	//Render mouse hover TerrainTile
 	if(m_hoverTerrainTile != InvalidTerrainTileId && m_hoverTerrainTile != m_selectedTerrainTile)
 	{
-		if(TerrainTile* terrainTile = m_project->GetTerrainTileset().GetTerrainTile(m_hoverTerrainTile))
+		if(TerrainTile* terrainTile = m_project.GetTerrainTileset().GetTerrainTile(m_hoverTerrainTile))
 		{
 			ion::Vector2 size(1, 1);
 			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
@@ -179,32 +179,21 @@ void TerrainTilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Mat
 	z += zOffset;
 
 	//Render grid
-	if(m_project->GetShowGrid())
+	if(m_project.GetShowGrid())
 	{
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	}
 }
 
-void TerrainTilesPanel::SetProject(Project* project)
-{
-	ViewPanel::SetProject(project);
-
-	//Refresh
-	Refresh();
-}
-
 void TerrainTilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	if(m_project)
+	//If TerrainTiles invalidated
+	if(m_project.TerrainTilesAreInvalidated())
 	{
-		//If TerrainTiles invalidated
-		if(m_project->TerrainTilesAreInvalidated())
+		if(m_panelSize.x > 8 && m_panelSize.y > 8)
 		{
-			if(m_panelSize.x > 8 && m_panelSize.y > 8)
-			{
-				ion::Vector2i canvasSize = CalcCanvasSize();
-				InitPanel(canvasSize.x, canvasSize.y);
-			}
+			ion::Vector2i canvasSize = CalcCanvasSize();
+			InitPanel(canvasSize.x, canvasSize.y);
 		}
 	}
 
@@ -214,7 +203,7 @@ void TerrainTilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 ion::Vector2i TerrainTilesPanel::CalcCanvasSize()
 {
 	wxSize panelSize = GetClientSize();
-	int numTerrainTiles = m_project->GetTerrainTileset().GetCount();
+	int numTerrainTiles = m_project.GetTerrainTileset().GetCount();
 	int numCols = ion::maths::Ceil((float)panelSize.x / 8.0f / s_TerrainTileSize);
 	int numRows = max(numCols, (int)ion::maths::Ceil((float)numTerrainTiles / (float)numCols / s_TerrainTileSize));
 	return ion::Vector2i(numCols, numRows);
@@ -240,7 +229,7 @@ void TerrainTilesPanel::InitPanel(int numCols, int numRows)
 
 void TerrainTilesPanel::PaintCollisionTerrainTiles()
 {
-	TerrainTileset& TerrainTileset = m_project->GetTerrainTileset();
+	TerrainTileset& TerrainTileset = m_project.GetTerrainTileset();
 
 	for(int i = 0; i < TerrainTileset.GetCount(); i++)
 	{
@@ -253,13 +242,10 @@ void TerrainTilesPanel::PaintCollisionTerrainTiles()
 
 void TerrainTilesPanel::PaintCollisionTerrainTile(TerrainTileId tileId, int x, int y)
 {
-	if(m_project)
-	{
-		//Set texture coords for cell
-		ion::render::TexCoord coords[4];
-		m_renderResources.GetTerrainTileTexCoords(tileId, coords);
-		m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
-	}
+	//Set texture coords for cell
+	ion::render::TexCoord coords[4];
+	m_renderResources.GetTerrainTileTexCoords(tileId, coords);
+	m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 }
 
 void TerrainTilesPanel::FillTerrainTiles(TerrainTileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2)
@@ -360,7 +346,7 @@ void TerrainTilesPanel::OnContextMenuClick(wxCommandEvent& event)
 	if(event.GetId() == eMenuDeleteTile)
 	{
 		//Delete tile
-		m_project->DeleteTerrainTile(m_hoverTerrainTile);
+		m_project.DeleteTerrainTile(m_hoverTerrainTile);
 
 		//Invalidate hover/selected tile
 		m_hoverTerrainTile = InvalidTerrainTileId;
@@ -375,7 +361,7 @@ void TerrainTilesPanel::OnContextMenuClick(wxCommandEvent& event)
 	else if(event.GetId() == eMenuUseAsDefaultTile)
 	{
 		//Set default tile
-		m_project->SetDefaultTerrainTile(m_hoverTerrainTile);
+		m_project.SetDefaultTerrainTile(m_hoverTerrainTile);
 
 		//Refresh map
 		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);

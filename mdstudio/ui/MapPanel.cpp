@@ -9,10 +9,9 @@
 
 #include <wx/Menu.h>
 
-MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
+MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
-	
 	m_currentTool = eToolPaintTile;
 	m_tempStamp = NULL;
 	m_terrainCanvasPrimitive = NULL;
@@ -27,6 +26,25 @@ MapPanel::MapPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGL
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 
 	ResetToolData();
+
+	Map& map = project.GetMap();
+	CollisionMap& collisionMap = project.GetCollisionMap();
+	Tileset& tileset = project.GetTileset();
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
+	//Create canvas
+	CreateCanvas(mapWidth, mapHeight);
+	CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
+
+	//Create grid
+	CreateGrid(mapWidth, mapHeight, mapWidth / project.GetGridSize(), mapHeight / project.GetGridSize());
+
+	//Redraw map
+	PaintMap(project.GetMap());
+
+	//Redraw collision map
+	PaintCollisionMap(project.GetCollisionMap());
 }
 
 MapPanel::~MapPanel()
@@ -81,8 +99,8 @@ void MapPanel::OnResize(wxSizeEvent& event)
 
 void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
-	Map& map = m_project->GetMap();
-	Tileset& tileset = m_project->GetTileset();
+	Map& map = m_project.GetMap();
+	Tileset& tileset = m_project.GetTileset();
 
 	const int mapWidth = map.GetWidth();
 	const int mapHeight = map.GetHeight();
@@ -103,7 +121,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				if(map.FindStamp(x, y, stampTopLeft, stampFlags) == InvalidStampId)
 				{
 					//Update paint preview tile
-					m_previewTile = m_project->GetPaintTile();
+					m_previewTile = m_project.GetPaintTile();
 
 					//Update preview tile pos
 					m_previewTilePos.x = x;
@@ -115,9 +133,9 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						//Get tile ID to paint
 						TileId tileId = InvalidTileId;
 						if(buttonBits & eMouseLeft)
-							tileId = m_project->GetPaintTile();
+							tileId = m_project.GetPaintTile();
 						else if(buttonBits & eMouseRight)
-							tileId = m_project->GetEraseTile();
+							tileId = m_project.GetEraseTile();
 
 						if(tileId != InvalidTileId)
 						{
@@ -154,10 +172,10 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				if(buttonBits & eMouseLeft)
 				{
 					//Get tile ID to paint
-					TerrainTileId tileId = (m_currentTool == eToolPaintTerrainTile) ? m_project->GetPaintTerrainTile() : InvalidTerrainTileId;
+					TerrainTileId tileId = (m_currentTool == eToolPaintTerrainTile) ? m_project.GetPaintTerrainTile() : InvalidTerrainTileId;
 
 					//Get collision map
-					CollisionMap& collisionMap = m_project->GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetCollisionMap();
 
 					//Set on map
 					collisionMap.SetTerrainTile(x, y, tileId);
@@ -175,7 +193,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				if(buttonBits & eMouseLeft)
 				{
 					//Get collision map
-					CollisionMap& collisionMap = m_project->GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetCollisionMap();
 
 					//Set solid tile
 					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) | eCollisionTileFlagSolid;
@@ -187,7 +205,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				else if(buttonBits & eMouseRight)
 				{
 					//Get collision map
-					CollisionMap& collisionMap = m_project->GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetCollisionMap();
 
 					//Clear solid tile
 					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) & ~eCollisionTileFlagSolid;
@@ -287,7 +305,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						m_boxSelectEnd.x = -1;
 						m_boxSelectEnd.y = -1;
 
-						if(Stamp* stamp = m_project->GetStamp(stampId))
+						if(Stamp* stamp = m_project.GetStamp(stampId))
 						{
 							//Set box selection
 							m_boxSelectStart.x = stampPos.x;
@@ -300,7 +318,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					if(m_currentTool == eToolStampPicker)
 					{
 						//Set as paint stamp
-						m_project->SetPaintStamp(stampId);
+						m_project.SetPaintStamp(stampId);
 
 						//Set stamp tool
 						SetTool(eToolPaintStamp);
@@ -310,7 +328,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 					if(m_currentTool == eToolRemoveStamp)
 					{
-						if(Stamp* stamp = m_project->GetStamp(stampId))
+						if(Stamp* stamp = m_project.GetStamp(stampId))
 						{
 							//Remove stamp under cursor
 							map.RemoveStamp(x, y);
@@ -364,7 +382,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					if(stampId)
 					{
 						//Get from stamp
-						if(Stamp* stamp = m_project->GetStamp(stampId))
+						if(Stamp* stamp = m_project.GetStamp(stampId))
 						{
 							ion::Vector2i offset = ion::Vector2i(x, y) - stampPos;
 							tileId = stamp->GetTile(offset.x, offset.y);
@@ -377,7 +395,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					}
 
 					//Set as paint tile
-					m_project->SetPaintTile(tileId);
+					m_project.SetPaintTile(tileId);
 
 					//Set as preview tile
 					m_previewTile = tileId;
@@ -446,7 +464,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			case eToolPaintStamp:
 			{
 				//Paint temp cloning stamp, else Paint current paint stamp
-				Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_project->GetPaintStamp());
+				Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
 				if(stamp)
 				{
 					//Update paste pos
@@ -480,13 +498,13 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			case eToolAnimateGameObject:
 			{
 				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project->GetMap().FindGameObject(x, y, topLeft);
+				m_hoverGameObject = m_project.GetMap().FindGameObject(x, y, topLeft);
 
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
 					m_selectedGameObject = m_hoverGameObject;
 
-					if(GameObject* gameObject = m_project->GetMap().GetGameObject(m_hoverGameObject))
+					if(GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject))
 					{
 						m_mainWindow->SetSelectedGameObject(gameObject);
 
@@ -521,16 +539,16 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 			case eToolPlaceGameObject:
 			{
-				m_previewGameObjectType = m_project->GetPaintGameObjectType();
+				m_previewGameObjectType = m_project.GetPaintGameObjectType();
 				m_previewGameObjectPos.x = x;
 				m_previewGameObjectPos.y = y;
 
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
-					GameObjectTypeId gameObjectTypeId = m_project->GetPaintGameObjectType();
-					if(GameObjectType* gameObjectType = m_project->GetGameObjectType(gameObjectTypeId))
+					GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
+					if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
 					{
-						m_project->GetMap().PlaceGameObject(x, y, *gameObjectType);
+						m_project.GetMap().PlaceGameObject(x, y, *gameObjectType);
 						Refresh();
 					}
 				}
@@ -541,7 +559,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			{
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
-					m_project->GetMap().RemoveGameObject(x, y);
+					m_project.GetMap().RemoveGameObject(x, y);
 					Refresh();
 				}
 				break;
@@ -562,11 +580,11 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 {
-	Map& map = m_project->GetMap();
+	Map& map = m_project.GetMap();
 
 	if(event.GetId() == eContextMenuDeleteStamp)
 	{
-		if(Stamp* stamp = m_project->GetStamp(m_hoverStamp))
+		if(Stamp* stamp = m_project.GetStamp(m_hoverStamp))
 		{
 			//Remove stamp under cursor
 			map.RemoveStamp(m_hoverStampPos.x, m_hoverStampPos.y);
@@ -580,7 +598,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 				for(int tileY = m_hoverStampPos.y; tileY < m_hoverStampPos.y + stamp->GetHeight(); tileY++)
 				{
 					//Invert Y for OpenGL
-					int y_inv = m_project->GetMap().GetHeight() - 1 - tileY;
+					int y_inv = m_project.GetMap().GetHeight() - 1 - tileY;
 					PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
 				}
 			}
@@ -588,7 +606,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 	}
 	else if(event.GetId() == eContextMenuBakeStamp)
 	{
-		if(Stamp* stamp = m_project->GetStamp(m_hoverStamp))
+		if(Stamp* stamp = m_project.GetStamp(m_hoverStamp))
 		{
 			//Remove stamp under cursor
 			map.RemoveStamp(m_hoverStampPos.x, m_hoverStampPos.y);
@@ -605,7 +623,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		if(m_hoverGameObject != InvalidGameObjectId)
 		{
 			AnimationId animId = m_mainWindow->GetSelectedAnimation();
-			Animation* anim = m_project->GetAnimation(animId);
+			Animation* anim = m_project.GetAnimation(animId);
 			if(anim)
 			{
 				anim->AddActor(m_hoverGameObject);
@@ -616,8 +634,8 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 
 void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int x, int y)
 {
-	Map& map = m_project->GetMap();
-	Tileset& tileset = m_project->GetTileset();
+	Map& map = m_project.GetMap();
+	Tileset& tileset = m_project.GetTileset();
 
 	const int mapWidth = map.GetWidth();
 	const int mapHeight = map.GetHeight();
@@ -740,7 +758,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					//If no current bezier, create new
 					if(!m_currentBezier)
 					{
-						m_currentBezier = m_project->AddTerrainBezier();
+						m_currentBezier = m_project.AddTerrainBezier();
 					}
 
 					const float defaultControlLen = 10.0f;
@@ -758,9 +776,9 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			if(redraw)
 			{
 				//Invalidate beziers and refresh this panel
-				m_project->InvalidateTerrainBeziers(true);
+				m_project.InvalidateTerrainBeziers(true);
 				Refresh();
-				m_project->InvalidateTerrainBeziers(false);
+				m_project.InvalidateTerrainBeziers(false);
 			}
 		
 			break;
@@ -772,9 +790,9 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			m_highlightedBezier = NULL;
 
 			//Find bezier under cursor
-			for(int i = 0; i < m_project->GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL; i++)
+			for(int i = 0; i < m_project.GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL; i++)
 			{
-				ion::gamekit::BezierPath* bezier = m_project->GetTerrainBezier(i);
+				ion::gamekit::BezierPath* bezier = m_project.GetTerrainBezier(i);
 
 				ion::Vector2 boundsMin;
 				ion::Vector2 boundsMax;
@@ -792,9 +810,9 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						m_currentTool = eToolDrawTerrainBezier;
 
 						//Invalidate beziers and refresh this panel
-						m_project->InvalidateTerrainBeziers(true);
+						m_project.InvalidateTerrainBeziers(true);
 						Refresh();
-						m_project->InvalidateTerrainBeziers(false);
+						m_project.InvalidateTerrainBeziers(false);
 					}
 					else
 					{
@@ -812,10 +830,10 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 			{
 				//Get collision map
-				CollisionMap& collisionMap = m_project->GetCollisionMap();
+				CollisionMap& collisionMap = m_project.GetCollisionMap();
 
 				//Get terrain tileset
-				TerrainTileset& terrainTileset = m_project->GetTerrainTileset();
+				TerrainTileset& terrainTileset = m_project.GetTerrainTileset();
 
 				//Get pixel tile under cursor
 				TerrainTileId tileId = collisionMap.GetTerrainTile(x, y);
@@ -832,7 +850,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
 
 					//Invalidate terrain tileset
-					m_project->InvalidateTerrainTiles(true);
+					m_project.InvalidateTerrainTiles(true);
 
 					//Refresh terrain tileset texture
 					m_mainWindow->RefreshTerrainTileset();
@@ -873,7 +891,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTileEditor);
 				}
 
-				m_project->InvalidateTerrainTiles(false);
+				m_project.InvalidateTerrainTiles(false);
 			}
 
 			break;
@@ -884,11 +902,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 		//	if(buttonBits & eMouseLeft)
 		//	{
 		//		ion::Vector2i topLeft;
-		//		m_hoverGameObject = m_project->GetMap().FindGameObject(x, y, topLeft);
+		//		m_hoverGameObject = m_project.GetMap().FindGameObject(x, y, topLeft);
 		//
 		//		if(m_hoverGameObject != InvalidGameObjectId)
 		//		{
-		//			GameObject* gameObject = m_project->GetMap().GetGameObject(m_hoverGameObject);
+		//			GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject);
 		//			if(gameObject)
 		//			{
 		//				gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
@@ -905,11 +923,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			if(buttonBits & eMouseLeft)
 			{
 				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project->GetMap().FindGameObject(x, y, topLeft);
+				m_hoverGameObject = m_project.GetMap().FindGameObject(x, y, topLeft);
 
 				if(m_hoverGameObject != InvalidGameObjectId)
 				{
-					GameObject* gameObject = m_project->GetMap().GetGameObject(m_hoverGameObject);
+					GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject);
 					if(gameObject)
 					{
 						gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
@@ -976,7 +994,7 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	z += zOffset;
 
 	//Render grid
-	if(m_project->GetShowGrid())
+	if(m_project.GetShowGrid())
 	{
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 
@@ -984,73 +1002,45 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	}
 
 	//Render stamp outlines
-	if(m_project->GetShowStampOutlines())
+	if(m_project.GetShowStampOutlines())
 	{
 		RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
 	}
 }
 
-void MapPanel::SetProject(Project* project)
-{
-	//Creates tileset texture
-	ViewPanel::SetProject(project);
-
-	Map& map = project->GetMap();
-	CollisionMap& collisionMap = project->GetCollisionMap();
-	Tileset& tileset = project->GetTileset();
-	int mapWidth = map.GetWidth();
-	int mapHeight = map.GetHeight();
-
-	//Create canvas
-	CreateCanvas(mapWidth, mapHeight);
-	CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
-
-	//Create grid
-	CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
-
-	//Redraw map
-	PaintMap(m_project->GetMap());
-
-	//Redraw collision map
-	PaintCollisionMap(m_project->GetCollisionMap());
-}
-
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	if(m_project)
+	//If map invalidated
+	if(m_project.MapIsInvalidated())
 	{
-		//If map invalidated
-		if(m_project->MapIsInvalidated())
-		{
-			Map& map = m_project->GetMap();
-			CollisionMap& collisionMap = m_project->GetCollisionMap();
-			Tileset& tileset = m_project->GetTileset();
-			int mapWidth = map.GetWidth();
-			int mapHeight = map.GetHeight();
+		Map& map = m_project.GetMap();
+		CollisionMap& collisionMap = m_project.GetCollisionMap();
+		Tileset& tileset = m_project.GetTileset();
+		int mapWidth = map.GetWidth();
+		int mapHeight = map.GetHeight();
 
-			//Recreate canvas
-			CreateCanvas(mapWidth, mapHeight);
-			CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
+		//Recreate canvas
+		CreateCanvas(mapWidth, mapHeight);
+		CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
 
-			//Recreate grid
-			CreateGrid(mapWidth, mapHeight, mapWidth / m_project->GetGridSize(), mapHeight / m_project->GetGridSize());
+		//Recreate grid
+		CreateGrid(mapWidth, mapHeight, mapWidth / m_project.GetGridSize(), mapHeight / m_project.GetGridSize());
 
-			//Redraw map
-			PaintMap(map);
-		}
+		//Redraw map
+		PaintMap(map);
+	}
 
-		//If collision tilset invalidated
-		if(m_project->TerrainTilesAreInvalidated())
-		{
-			//Redraw collision map
-			PaintCollisionMap(m_project->GetCollisionMap());
-		}
+	//If collision tilset invalidated
+	if(m_project.TerrainTilesAreInvalidated())
+	{
+		//Redraw collision map
+		PaintCollisionMap(m_project.GetCollisionMap());
+	}
 
-		//If terrain beziers invalidated
-		if(m_project->TerrainBeziersAreInvalidated())
-		{
-			PaintTerrainBeziers(*m_project);
-		}
+	//If terrain beziers invalidated
+	if(m_project.TerrainBeziersAreInvalidated())
+	{
+		PaintTerrainBeziers(m_project);
 	}
 
 	ViewPanel::Refresh(eraseBackground, rect);
@@ -1074,170 +1064,167 @@ void MapPanel::SetTool(ToolType tool)
 	ToolType previousTool = m_currentTool;
 	m_currentTool = tool;
 
-	if(m_project)
+	Map& map = m_project.GetMap();
+
+	switch(tool)
 	{
-		Map& map = m_project->GetMap();
-
-		switch(tool)
+	case eToolFill:
+		//If previous tool was selectTiles, fill selection and leave previous tool data
+		//TODO: Should this really be a tool? Doesn't follow the same rules as the others
+		//(it's a single action, rather than a state which requires interaction from the user via the map)
+		if(previousTool == eToolSelectTiles)
 		{
-		case eToolFill:
-			//If previous tool was selectTiles, fill selection and leave previous tool data
-			//TODO: Should this really be a tool? Doesn't follow the same rules as the others
-			//(it's a single action, rather than a state which requires interaction from the user via the map)
-			if(previousTool == eToolSelectTiles)
+			if(m_project.GetPaintTile() != InvalidTileId)
 			{
-				if(m_project->GetPaintTile() != InvalidTileId)
-				{
-					//Set on map
-					map.FillTiles(m_project->GetPaintTile(), m_selectedTiles);
+				//Set on map
+				map.FillTiles(m_project.GetPaintTile(), m_selectedTiles);
 
-					//Draw to canvas
-					FillTiles(m_project->GetPaintTile(), m_selectedTiles);
+				//Draw to canvas
+				FillTiles(m_project.GetPaintTile(), m_selectedTiles);
 
-					//Refresh
-					Refresh();
-				}
-
-				//Set back to select tool, leave tool data intact
-				m_currentTool = previousTool;
-			}
-			else
-			{
-				ResetToolData();
-			}
-			break;
-
-		case eToolGenerateTerrain:
-			m_project->GenerateTerrain(m_selectedTiles);
-			m_mainWindow->RefreshTerrainTileset();
-			m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
-			m_mainWindow->RefreshPanel(MainWindow::ePanelTerrainTiles);
-			break;
-
-
-		case eToolPaintTile:
-			ResetToolData();
-			m_previewTile = m_project->GetPaintTile();
-			break;
-
-		case eToolPaintStamp:
-		{
-			//If coming from stamp clone tool, don't wipe preview data
-			if(previousTool != eToolClone)
-			{
-				ResetToolData();
+				//Refresh
+				Refresh();
 			}
 
-			//Get temp cloning stamp, else get current painting stamp
-			Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_project->GetPaintStamp());
-			if(stamp)
-			{
-				//Create preview primitive
-				CreateStampPreview(stamp);
-			}
-			else
-			{
-				//No stamp, revert to selection tool
-				m_currentTool = eToolSelectTiles;
-			}
-
-			break;
+			//Set back to select tool, leave tool data intact
+			m_currentTool = previousTool;
 		}
-
-		case eToolClone:
-		case eToolCreateStamp:
-			//Must previously have been in Select mode
-			if(previousTool == eToolSelectTiles)
-			{
-				//and have data to work with
-				if(m_selectedTiles.size() > 0)
-				{
-					//Get min/max width/height
-					int left, top, right, bottom;
-					FindBounds(m_selectedTiles, left, top, right, bottom);
-					int width = abs(right - left) + 1;
-					int height = abs(bottom - top) + 1;
-
-					Stamp* stamp = NULL;
-
-					if(tool == eToolClone)
-					{
-						//Cloning - create temp stamp
-						stamp = new Stamp(InvalidStampId, width, height);
-						m_tempStamp = stamp;
-					}
-					else if(tool == eToolCreateStamp)
-					{
-						//Creating - create real stamp
-						StampId stampId = m_project->AddStamp(width, height);
-						stamp = m_project->GetStamp(stampId);
-					}
-
-					//Populate stamp, set primitive UV coords
-					ion::render::TexCoord coords[4];
-
-					for(int i = 0; i < m_selectedTiles.size(); i++)
-					{
-						int mapX = m_selectedTiles[i].x;
-						int mapY = m_selectedTiles[i].y;
-						int stampX = mapX - left;
-						int stampY = mapY - top;
-						int y_inv = height - 1 - stampY;
-
-						TileId tileId = InvalidTileId;
-
-						//Find stamp under cursor first
-						ion::Vector2i stampPos;
-						u32 stampFlags = 0;
-						StampId stampId = map.FindStamp(mapX, mapY, stampPos, stampFlags);
-
-						//TODO - optimise for known stamp
-						if(stampId)
-						{
-							//Get from stamp
-							if(Stamp* stamp = m_project->GetStamp(stampId))
-							{
-								ion::Vector2i offset = ion::Vector2i(mapX, mapY) - stampPos;
-								tileId = stamp->GetTile(offset.x, offset.y);
-							}
-						}
-						else
-						{
-							//Pick tile
-							tileId = map.GetTile(mapX, mapY);
-						}
-
-						u32 tileFlags = map.GetTileFlags(mapX, mapY);
-						stamp->SetTile(stampX, stampY, tileId);
-						stamp->SetTileFlags(stampX, stampY, tileFlags);
-					}
-
-					if(tool == eToolClone)
-					{
-						//Cloning - switch straight to paste tool
-						SetTool(eToolPaintStamp);
-						return;
-					}
-					else if(tool == eToolCreateStamp)
-					{
-						//Creating - switch back to selection mode
-						m_currentTool = eToolSelectTiles;
-
-						//Refresh stamp panel to draw new stamp
-						m_mainWindow->RefreshPanel(MainWindow::ePanelStamps);
-					}
-				}
-			}
-			else
-			{
-				ResetToolData();
-			}
-
-			break;
-
-		default:
+		else
+		{
 			ResetToolData();
 		}
+		break;
+
+	case eToolGenerateTerrain:
+		m_project.GenerateTerrain(m_selectedTiles);
+		m_mainWindow->RefreshTerrainTileset();
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelTerrainTiles);
+		break;
+
+
+	case eToolPaintTile:
+		ResetToolData();
+		m_previewTile = m_project.GetPaintTile();
+		break;
+
+	case eToolPaintStamp:
+	{
+		//If coming from stamp clone tool, don't wipe preview data
+		if(previousTool != eToolClone)
+		{
+			ResetToolData();
+		}
+
+		//Get temp cloning stamp, else get current painting stamp
+		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
+		if(stamp)
+		{
+			//Create preview primitive
+			CreateStampPreview(stamp);
+		}
+		else
+		{
+			//No stamp, revert to selection tool
+			m_currentTool = eToolSelectTiles;
+		}
+
+		break;
+	}
+
+	case eToolClone:
+	case eToolCreateStamp:
+		//Must previously have been in Select mode
+		if(previousTool == eToolSelectTiles)
+		{
+			//and have data to work with
+			if(m_selectedTiles.size() > 0)
+			{
+				//Get min/max width/height
+				int left, top, right, bottom;
+				FindBounds(m_selectedTiles, left, top, right, bottom);
+				int width = abs(right - left) + 1;
+				int height = abs(bottom - top) + 1;
+
+				Stamp* stamp = NULL;
+
+				if(tool == eToolClone)
+				{
+					//Cloning - create temp stamp
+					stamp = new Stamp(InvalidStampId, width, height);
+					m_tempStamp = stamp;
+				}
+				else if(tool == eToolCreateStamp)
+				{
+					//Creating - create real stamp
+					StampId stampId = m_project.AddStamp(width, height);
+					stamp = m_project.GetStamp(stampId);
+				}
+
+				//Populate stamp, set primitive UV coords
+				ion::render::TexCoord coords[4];
+
+				for(int i = 0; i < m_selectedTiles.size(); i++)
+				{
+					int mapX = m_selectedTiles[i].x;
+					int mapY = m_selectedTiles[i].y;
+					int stampX = mapX - left;
+					int stampY = mapY - top;
+					int y_inv = height - 1 - stampY;
+
+					TileId tileId = InvalidTileId;
+
+					//Find stamp under cursor first
+					ion::Vector2i stampPos;
+					u32 stampFlags = 0;
+					StampId stampId = map.FindStamp(mapX, mapY, stampPos, stampFlags);
+
+					//TODO - optimise for known stamp
+					if(stampId)
+					{
+						//Get from stamp
+						if(Stamp* stamp = m_project.GetStamp(stampId))
+						{
+							ion::Vector2i offset = ion::Vector2i(mapX, mapY) - stampPos;
+							tileId = stamp->GetTile(offset.x, offset.y);
+						}
+					}
+					else
+					{
+						//Pick tile
+						tileId = map.GetTile(mapX, mapY);
+					}
+
+					u32 tileFlags = map.GetTileFlags(mapX, mapY);
+					stamp->SetTile(stampX, stampY, tileId);
+					stamp->SetTileFlags(stampX, stampY, tileFlags);
+				}
+
+				if(tool == eToolClone)
+				{
+					//Cloning - switch straight to paste tool
+					SetTool(eToolPaintStamp);
+					return;
+				}
+				else if(tool == eToolCreateStamp)
+				{
+					//Creating - switch back to selection mode
+					m_currentTool = eToolSelectTiles;
+
+					//Refresh stamp panel to draw new stamp
+					m_mainWindow->RefreshPanel(MainWindow::ePanelStamps);
+				}
+			}
+		}
+		else
+		{
+			ResetToolData();
+		}
+
+		break;
+
+	default:
+		ResetToolData();
 	}
 }
 
@@ -1315,7 +1302,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
-	const Map& map = m_project->GetMap();
+	const Map& map = m_project.GetMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
 	const float tileWidth = 8.0f;
@@ -1433,9 +1420,9 @@ void MapPanel::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::M
 
 void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	const TGameObjectPosMap& gameObjects = m_project->GetMap().GetGameObjects();
+	const TGameObjectPosMap& gameObjects = m_project.GetMap().GetGameObjects();
 
-	const Map& map = m_project->GetMap();
+	const Map& map = m_project.GetMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
 	const float tileWidth = 8.0f;
@@ -1452,7 +1439,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	{
 		for(std::vector<GameObjectMapEntry>::const_iterator itVec = itMap->second.begin(), endVec = itMap->second.end(); itVec != endVec; ++itVec)
 		{
-			if(const GameObjectType* gameObjectType = m_project->GetGameObjectType(itVec->m_gameObject.GetTypeId()))
+			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(itVec->m_gameObject.GetTypeId()))
 			{
 				const float x = itVec->m_position.x;
 				const float y_inv = mapHeight - 1 - itVec->m_position.y;
@@ -1502,7 +1489,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 
 void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	if(const GameObjectType* gameObjectType = m_project->GetGameObjectType(m_previewGameObjectType))
+	if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_previewGameObjectType))
 	{
 		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
@@ -1511,7 +1498,7 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 		material->SetDiffuseColour(colour);
 
-		const Map& map = m_project->GetMap();
+		const Map& map = m_project.GetMap();
 		const float mapWidth = map.GetWidth();
 		const float mapHeight = map.GetHeight();
 		const float tileWidth = 8.0f;
@@ -1560,7 +1547,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 {
 	if(m_previewTile != InvalidTileId)
 	{
-		const Map& map = m_project->GetMap();
+		const Map& map = m_project.GetMap();
 		const float mapWidth = map.GetWidth();
 		const float mapHeight = map.GetHeight();
 		const float tileWidth = 8.0f;
@@ -1590,7 +1577,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 
 void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	const Map& map = m_project->GetMap();
+	const Map& map = m_project.GetMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
 	const float tileWidth = 8.0f;
@@ -1659,10 +1646,10 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 	if(m_stampPreviewPrimitive && m_stampPastePos.x >= 0 && m_stampPastePos.y >= 0)
 	{
 		//Draw temp cloning stamp, else draw current paint stamp
-		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project->GetStamp(m_project->GetPaintStamp());
+		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
 		if(stamp)
 		{
-			const Map& map = m_project->GetMap();
+			const Map& map = m_project.GetMap();
 			const float mapWidth = map.GetWidth();
 			const float mapHeight = map.GetHeight();
 			const float tileWidth = 8.0f;
@@ -1711,15 +1698,15 @@ void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::M
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
 
-	const Map& map = m_project->GetMap();
+	const Map& map = m_project.GetMap();
 	const ion::Vector2i mapSize(map.GetWidth(), map.GetHeight());
 
 	material->SetDiffuseColour(colour);
 	material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
 
-	for(TStampPosMap::const_iterator it = m_project->GetMap().StampsBegin(), end = m_project->GetMap().StampsEnd(); it != end; ++it)
+	for(TStampPosMap::const_iterator it = m_project.GetMap().StampsBegin(), end = m_project.GetMap().StampsEnd(); it != end; ++it)
 	{
-		Stamp* stamp = m_project->GetStamp(it->m_id);
+		Stamp* stamp = m_project.GetStamp(it->m_id);
 		if(stamp)
 		{
 			outlineMtx = m_renderResources.CalcBoxMatrix(it->m_position, ion::Vector2i(stamp->GetWidth(), stamp->GetHeight()), mapSize, z);
@@ -1737,10 +1724,10 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 {
 	if(m_hoverStamp)
 	{
-		Stamp* stamp = m_project->GetStamp(m_hoverStamp);
+		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
 		{
-			const Map& map = m_project->GetMap();
+			const Map& map = m_project.GetMap();
 			const float mapWidth = map.GetWidth();
 			const float mapHeight = map.GetHeight();
 			const float tileWidth = 8.0f;
@@ -1800,7 +1787,7 @@ void MapPanel::PaintMap(const Map& map)
 	//Paint all stamps
 	for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
 	{
-		if(Stamp* stamp = m_project->GetStamp(it->m_id))
+		if(Stamp* stamp = m_project.GetStamp(it->m_id))
 		{
 			PaintStamp(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
 		}
@@ -1832,17 +1819,14 @@ void MapPanel::PaintCollisionMap(const CollisionMap& map)
 
 void MapPanel::PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y)
 {
-	if(m_project)
-	{
-		//Set texture coords for terrain cell
-		ion::render::TexCoord coords[4];
-		m_renderResources.GetTerrainTileTexCoords(terrainTileId, coords);
-		m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+	//Set texture coords for terrain cell
+	ion::render::TexCoord coords[4];
+	m_renderResources.GetTerrainTileTexCoords(terrainTileId, coords);
+	m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 
-		//Set texture coords for collision cell
-		m_renderResources.GetCollisionTypeTexCoords(collisionFlags, coords);
-		m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
-	}
+	//Set texture coords for collision cell
+	m_renderResources.GetCollisionTypeTexCoords(collisionFlags, coords);
+	m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 }
 
 void MapPanel::PaintTerrainBeziers(Project& project)
