@@ -34,9 +34,8 @@ protected:
 private:
 	void RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
+	Project& m_project;
+
 	//Rendering primitive
 	ion::render::Quad* m_tilePrimitive;
-
-	static const int s_tileWidth = 8;
-	static const int s_tileHeight = 8;
 };

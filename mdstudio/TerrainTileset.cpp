@@ -7,7 +7,8 @@
 #include "TerrainTileset.h"
 #include <ion/core/cryptography/Hash.h>
 
-TerrainTileset::TerrainTileset()
+TerrainTileset::TerrainTileset(const PlatformConfig& platformConfig)
+	: m_platformConfig(platformConfig)
 {
 }
 
@@ -19,7 +20,7 @@ void TerrainTileset::Clear()
 TerrainTileId TerrainTileset::AddTerrainTile()
 {
 	TerrainTileId index = m_tiles.size();
-	m_tiles.push_back(TerrainTile());
+	m_tiles.push_back(TerrainTile(m_platformConfig.tileWidth, m_platformConfig.tileHeight));
 	m_tiles[index].CalculateHash();
 	AddToHashMap(index);
 	return index;
@@ -50,10 +51,10 @@ void TerrainTileset::RemoveFromHashMap(TerrainTileId tileId)
 
 void TerrainTileset::CalculateHash(const TerrainTile& tile, u64& hash) const
 {
-	s8 heights[TerrainTile::tileWidth];
+	std::vector<s8> heights;
 	tile.GetHeights(heights);
 
-	hash = ion::Hash64((const u8*)heights, TerrainTile::tileWidth);
+	hash = ion::Hash64((u8*)heights.data(), heights.size());
 }
 
 TerrainTileId TerrainTileset::FindDuplicate(const TerrainTile& tile) const

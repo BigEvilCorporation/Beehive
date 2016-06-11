@@ -23,8 +23,11 @@ TerrainTilesPanel::TerrainTilesPanel(MainWindow* mainWindow, Project& project, i
 	EnableZoom(false);
 	EnablePan(false);
 
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 	//Create selection quad
-	m_selectionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
+	m_selectionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
 }
 
 TerrainTilesPanel::~TerrainTilesPanel()
@@ -36,8 +39,11 @@ void TerrainTilesPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseD
 {
 	ViewPanel::OnMouse(event, mouseDelta);
 
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 	//Camera pan Y (if canvas is taller than panel)
-	if((m_canvasSize.y * 8.0f) > (m_panelSize.y / m_cameraZoom))
+	if((m_canvasSize.y * tileHeight) > (m_panelSize.y / m_cameraZoom))
 	{
 		float panDeltaY = 0.0f;
 
@@ -56,7 +62,7 @@ void TerrainTilesPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseD
 			cameraPos.y += panDeltaY * m_cameraPanSpeed / m_cameraZoom;
 
 			//Clamp to size
-			float halfCanvas = (m_canvasSize.y * 4.0f);
+			float halfCanvas = (m_canvasSize.y * (tileHeight / 2.0f));
 			float minY = -halfCanvas;
 			float maxY = halfCanvas - ((float)m_panelSize.y / m_cameraZoom);
 
@@ -81,7 +87,10 @@ void TerrainTilesPanel::OnResize(wxSizeEvent& event)
 {
 	ViewPanel::OnResize(event);
 
-	if(m_panelSize.x > 8 && m_panelSize.y > 8)
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
 	{
 		ion::Vector2i canvasSize = CalcCanvasSize();
 
@@ -190,7 +199,10 @@ void TerrainTilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	//If TerrainTiles invalidated
 	if(m_project.TerrainTilesAreInvalidated())
 	{
-		if(m_panelSize.x > 8 && m_panelSize.y > 8)
+		const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+		if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
 		{
 			ion::Vector2i canvasSize = CalcCanvasSize();
 			InitPanel(canvasSize.x, canvasSize.y);
@@ -202,9 +214,11 @@ void TerrainTilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 ion::Vector2i TerrainTilesPanel::CalcCanvasSize()
 {
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 	wxSize panelSize = GetClientSize();
 	int numTerrainTiles = m_project.GetTerrainTileset().GetCount();
-	int numCols = ion::maths::Ceil((float)panelSize.x / 8.0f / s_TerrainTileSize);
+	int numCols = ion::maths::Ceil((float)panelSize.x / tileWidth / s_TerrainTileSize);
 	int numRows = max(numCols, (int)ion::maths::Ceil((float)numTerrainTiles / (float)numCols / s_TerrainTileSize));
 	return ion::Vector2i(numCols, numRows);
 }
@@ -288,8 +302,8 @@ void TerrainTilesPanel::RenderCanvas(ion::render::Renderer& renderer, const ion:
 
 void TerrainTilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	const int TerrainTileWidth = 8;
-	const int TerrainTileHeight = 8;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 	const int quadHalfExtentsX = 4;
 	const int quadHalfExtentsY = 4;
 
@@ -297,8 +311,8 @@ void TerrainTilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& 
 
 	ion::Matrix4 boxMtx;
 	ion::Vector3 boxScale(size.x, size.y, 0.0f);
-	ion::Vector3 boxPos(floor((pos.x - (m_canvasSize.x / 2.0f) + (boxScale.x / 2.0f)) * TerrainTileWidth),
-		floor((bottom - (m_canvasSize.y / 2.0f) + (boxScale.y / 2.0f)) * TerrainTileHeight), z);
+	ion::Vector3 boxPos(floor((pos.x - (m_canvasSize.x / 2.0f) + (boxScale.x / 2.0f)) * tileWidth),
+		floor((bottom - (m_canvasSize.y / 2.0f) + (boxScale.y / 2.0f)) * tileHeight), z);
 
 	boxMtx.SetTranslation(boxPos);
 	boxMtx.SetScale(boxScale);
@@ -315,10 +329,13 @@ void TerrainTilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& 
 
 void TerrainTilesPanel::ResetZoomPan()
 {
-	m_cameraZoom = (float)m_panelSize.x / (m_canvasSize.x * 8.0f);
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	m_cameraZoom = (float)m_panelSize.x / (m_canvasSize.x * tileWidth);
 
 	//Scroll to top
-	float halfCanvas = (m_canvasSize.y * 4.0f);
+	float halfCanvas = (m_canvasSize.y * ((float)tileHeight / 2.0f));
 	float maxY = halfCanvas - ((float)m_panelSize.y / m_cameraZoom);
 	ion::Vector3 cameraPos(-(m_panelSize.x / 2.0f / m_cameraZoom), maxY, 0.0f);
 

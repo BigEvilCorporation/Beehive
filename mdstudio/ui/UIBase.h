@@ -34,6 +34,7 @@ class SpriteCanvas;
 #include <wx/spinctrl.h>
 #include <wx/button.h>
 #include <wx/dialog.h>
+#include <wx/choice.h>
 #include <wx/textctrl.h>
 #include <wx/checkbox.h>
 #include <wx/bmpbuttn.h>
@@ -45,7 +46,6 @@ class SpriteCanvas;
 #include <wx/slider.h>
 #include <wx/toolbar.h>
 #include <wx/listctrl.h>
-#include <wx/choice.h>
 #include <wx/statline.h>
 
 ///////////////////////////////////////////////////////////////////////////
@@ -202,6 +202,40 @@ class DialogMapSizeBase : public wxDialog
 		
 		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~DialogMapSizeBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DialogNewProjectBase
+///////////////////////////////////////////////////////////////////////////////
+class DialogNewProjectBase : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText49;
+		wxChoice* m_choicePreset;
+		wxStaticText* m_text1;
+		wxStaticText* m_text3;
+		wxStaticText* m_text11;
+		wxStaticText* m_text31;
+		wxButton* m_buttonOk;
+		wxButton* m_buttonCancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnChoicePreset( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		wxSpinCtrl* m_spinCtrlTileWidth;
+		wxSpinCtrl* m_spinCtrlTileHeight;
+		wxSpinCtrl* m_spinCtrlMapWidth;
+		wxSpinCtrl* m_spinCtrlMapHeight;
+		
+		DialogNewProjectBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Project"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogNewProjectBase();
 	
 };
 

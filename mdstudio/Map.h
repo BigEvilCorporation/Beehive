@@ -12,6 +12,7 @@
 #include <io/Archive.h>
 #include <maths/Vector.h>
 
+#include "PlatformConfig.h"
 #include "Tile.h"
 #include "TerrainTile.h"
 #include "Stamp.h"
@@ -72,9 +73,6 @@ typedef std::map< GameObjectTypeId, std::vector<GameObjectMapEntry> > TGameObjec
 class Map
 {
 public:
-	static const int defaultWidth = 64;
-	static const int defaultHeight = 64;
-
 	enum TileFlags
 	{
 		eFlipX = 1<<0,
@@ -82,7 +80,7 @@ public:
 		eHighPlane = 1<<2
 	};
 
-	Map();
+	Map(const PlatformConfig& platformConfig);
 
 	void Clear();
 
@@ -139,6 +137,7 @@ private:
 
 	void BakeStamp(std::vector<TileDesc>& tiles, int x, int y, const Stamp& stamp, u32 flipFlags) const;
 
+	const PlatformConfig& m_platformConfig;
 	int m_width;
 	int m_height;
 	std::vector<TileDesc> m_tiles;

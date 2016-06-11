@@ -10,7 +10,8 @@
 
 const u32 Tileset::s_orientationFlags[eNumHashOrientations] = { 0, Map::eFlipX, Map::eFlipY, Map::eFlipX | Map::eFlipY };
 
-Tileset::Tileset()
+Tileset::Tileset(const PlatformConfig& platformConfig)
+	: m_platformConfig(platformConfig)
 {
 }
 
@@ -22,7 +23,7 @@ void Tileset::Clear()
 TileId Tileset::AddTile()
 {
 	TileId index = m_tiles.size();
-	m_tiles.push_back(Tile());
+	m_tiles.push_back(Tile(m_platformConfig.tileWidth, m_platformConfig.tileHeight));
 	m_tiles[index].SetIndex(index);
 	m_tiles[index].CalculateHash();
 	AddToHashMap(index);
@@ -54,45 +55,49 @@ void Tileset::RemoveFromHashMap(TileId tileId)
 
 void Tileset::CalculateHashes(const Tile& tile, u64 hashes[Tileset::eNumHashOrientations]) const
 {
-	u8 pixels[Tile::pixelsPerTile];
-	u8 pixelsFlipped[Tile::pixelsPerTile];
+	std::vector<u8> pixels;
 	tile.GetPixels(pixels);
 
+	std::vector<u8> pixelsFlipped(pixels.size());
+
+	const int tileWidth = m_platformConfig.tileWidth;
+	const int tileHeight = m_platformConfig.tileHeight;
+
 	//Normal
-	hashes[eNormal] = ion::Hash64(pixels, Tile::pixelsPerTile);
+	hashes[eNormal] = ion::Hash64(pixels.data(), pixels.size());
 
 	//Flip X
-	for(int x = 0; x < 8; x++)
+	for(int x = 0; x < tileWidth; x++)
 	{
-		for(int y = 0; y < 8; y++)
+		for(int y = 0; y < tileHeight; y++)
 		{
-			pixelsFlipped[(y * 8) + (7 - x)] = pixels[(y * 8) + x];
+			pixelsFlipped[(y * tileWidth) + (tileWidth - 1 - x)] = pixels[(y * tileWidth) + x];
 		}
 	}
 
-	hashes[eFlipX] = ion::Hash64(pixelsFlipped, Tile::pixelsPerTile);
+	hashes[eFlipX] = ion::Hash64(pixelsFlipped.data(), pixelsFlipped.size());
 
 	//Flip Y
-	for(int x = 0; x < 8; x++)
+	for(int x = 0; x < tileWidth; x++)
 	{
-		for(int y = 0; y < 8; y++)
+		for(int y = 0; y < tileHeight; y++)
 		{
-			pixelsFlipped[((7 - y) * 8) + x] = pixels[(y * 8) + x];
+			pixelsFlipped[((tileWidth - 1 - y) * tileWidth) + x] = pixels[(y * tileWidth) + x];
 		}
 	}
 
-	hashes[eFlipY] = ion::Hash64(pixelsFlipped, Tile::pixelsPerTile);
+	hashes[eFlipY] = ion::Hash64(pixelsFlipped.data(), pixelsFlipped.size());
 
 	//Flip XY
-	for(int x = 0; x < 8; x++)
+	for(int x = 0; x < tileWidth; x++)
 	{
-		for(int y = 0; y < 8; y++)
+		for(int y = 0; y < tileHeight; y++)
 		{
-			pixelsFlipped[((7 - y) * 8) + (7 - x)] = pixels[(y * 8) + x];
+			pixelsFlipped[((tileWidth - 1 - y) * tileWidth) + (tileWidth - 1 - x)] = pixels[(y * tileWidth) + x];
 		}
 	}
 
-	hashes[eFlipXY] = ion::Hash64(pixelsFlipped, Tile::pixelsPerTile);
+	hashes[eFlipXY] = ion::Hash64(pixelsFlipped.data(), pixelsFlipped.size());
 }
 
 TileId Tileset::FindDuplicate(const Tile& tile, u32& tileFlags) const

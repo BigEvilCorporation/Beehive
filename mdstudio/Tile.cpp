@@ -17,7 +17,18 @@ Tile::Tile()
 	m_index = 0;
 	m_palette = 0;
 	m_hash = 0;
-	m_pixels.resize(pixelsPerTile);
+	m_width = 0;
+	m_height = 0;
+}
+
+Tile::Tile(u8 width, u8 height)
+{
+	m_index = 0;
+	m_palette = 0;
+	m_hash = 0;
+	m_width = width;
+	m_height = height;
+	m_pixels.resize(width * height);
 }
 
 void Tile::SetIndex(u32 index)
@@ -32,15 +43,15 @@ u32 Tile::GetIndex() const
 
 void Tile::SetPixelColour(int x, int y, u8 colourIdx)
 {
-	int pixelIdx = (y * tileHeight) + x;
-	ion::debug::Assert(pixelIdx < pixelsPerTile, "eOut of range");
+	int pixelIdx = (y * m_height) + x;
+	ion::debug::Assert(pixelIdx < (m_width * m_height), "eOut of range");
 	m_pixels[pixelIdx] = colourIdx;
 }
 
 u8 Tile::GetPixelColour(int x, int y) const
 {
-	int pixelIdx = (y * tileHeight) + x;
-	ion::debug::Assert(pixelIdx < pixelsPerTile, "eOut of range");
+	int pixelIdx = (y * m_height) + x;
+	ion::debug::Assert(pixelIdx < (m_width * m_height), "eOut of range");
 	return m_pixels[pixelIdx];
 }
 
@@ -49,9 +60,10 @@ void Tile::CopyPixels(const Tile& tile)
 	m_pixels = tile.m_pixels;
 }
 
-void Tile::GetPixels(u8 pixels[pixelsPerTile]) const
+void Tile::GetPixels(std::vector<u8>& pixels) const
 {
-	ion::memory::MemCopy(pixels, &m_pixels[0], pixelsPerTile);
+	pixels.resize(m_pixels.size());
+	ion::memory::MemCopy(pixels.data(), m_pixels.data(), m_pixels.size());
 }
 
 void Tile::SetPaletteId(PaletteId palette)
@@ -66,6 +78,8 @@ PaletteId Tile::GetPaletteId() const
 
 void Tile::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_width, "width");
+	archive.Serialise(m_height, "height");
 	archive.Serialise(m_index, "index");
 	archive.Serialise(m_palette, "palette");
 	archive.Serialise(m_hash, "hash");
@@ -76,11 +90,11 @@ void Tile::Export(std::stringstream& stream) const
 {
 	stream << std::hex << std::setfill('0') << std::uppercase;
 
-	for(int y = 0; y < tileHeight; y++)
+	for(int y = 0; y < m_height; y++)
 	{
 		stream << "\tdc.l\t0x";
 
-		for(int x = 0; x < tileWidth; x++)
+		for(int x = 0; x < m_width; x++)
 		{
 			stream << std::setw(1) << (int)GetPixelColour(x, y);
 		}
@@ -93,12 +107,12 @@ void Tile::Export(std::stringstream& stream) const
 
 void Tile::Export(ion::io::File& file) const
 {
-	for(int y = 0; y < tileHeight; y++)
+	for(int y = 0; y < m_height; y++)
 	{
-		for(int x = 0; x < tileWidth; x += 2)
+		for(int x = 0; x < m_width; x += 2)
 		{
 			u8 nybble1 = (u8)GetPixelColour(x, y) << 4;
-			u8 nybble2 = ((x + 1) < tileWidth) ? (u8)GetPixelColour(x + 1, y) : 0;
+			u8 nybble2 = ((x + 1) < m_width) ? (u8)GetPixelColour(x + 1, y) : 0;
 
 			u8 byte = nybble1 | nybble2;
 			file.Write(&byte, sizeof(u8));
@@ -109,12 +123,12 @@ void Tile::Export(ion::io::File& file) const
 u32 Tile::GetBinarySize() const
 {
 	//4 bits per pixel
-	return (tileWidth * tileHeight) / 2;
+	return (m_width * m_height) / 2;
 }
 
 void Tile::CalculateHash()
 {
-	m_hash = ion::Hash64(&m_pixels[0], pixelsPerTile);
+	m_hash = ion::Hash64(m_pixels.data(), m_width * m_height);
 }
 
 u64 Tile::GetHash() const

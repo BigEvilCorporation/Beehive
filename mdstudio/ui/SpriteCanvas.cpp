@@ -166,6 +166,9 @@ void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion:
 {
 	if(m_drawSpriteSheet != InvalidSpriteSheetId)
 	{
+		const int tileWidth = m_project->GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project->GetPlatformConfig().tileHeight;
+
 		//Render spriteSheet
 		RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources->GetSpriteSheetResources(m_drawSpriteSheet);
 		ion::debug::Assert(spriteSheetResources, "SpriteCanvas::RenderSpriteSheet() - Missing spriteSheet render resources");
@@ -176,7 +179,7 @@ void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion:
 		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 		ion::Matrix4 boxMtx;
-		ion::Vector3 boxScale((m_spriteSheetDimentions.x / 8.0f) * m_cameraZoom, (m_spriteSheetDimentions.y / 8.0f) * m_cameraZoom, 0.0f);
+		ion::Vector3 boxScale((m_spriteSheetDimentions.x / tileWidth) * m_cameraZoom, (m_spriteSheetDimentions.y / tileHeight) * m_cameraZoom, 0.0f);
 		ion::Vector3 boxPos(0.0f, 0.0f, z);
 
 		boxMtx.SetTranslation(boxPos);

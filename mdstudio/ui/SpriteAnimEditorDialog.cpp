@@ -35,6 +35,7 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& projec
 	m_draggingTimelineItem = -1;
 	m_dragImage = NULL;
 
+	m_canvas->SetProject(&project);
 	m_canvas->SetupRendering(&renderer, &glContext, &renderResources);
 
 	PopulateActorList();
@@ -151,15 +152,18 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)
 {
 	if(m_selectedActor)
 	{
-		ImportDialogSpriteSheet dialog(this, m_renderer, m_glContext, m_renderResources);
+		ImportDialogSpriteSheet dialog(this, m_project, m_renderer, m_glContext, m_renderResources);
 		if(dialog.ShowModal() == wxID_OK)
 		{
 			//Create new spriteSheet
 			SpriteSheetId spriteSheetId = m_selectedActor->CreateSpriteSheet();
 			SpriteSheet* spriteSheet = m_selectedActor->GetSpriteSheet(spriteSheetId);
 
+			const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 			//Import bitmap
-			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
+			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), tileWidth, tileHeight, dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
 			{
 				//Create render resources
 				m_renderResources.CreateSpriteSheetResources(spriteSheetId, *spriteSheet);
@@ -542,6 +546,9 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 	m_listAnimations->Clear();
 	//m_listSpriteFrames->ClearAll();
 
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 	if(m_selectedActor && m_spriteSheetCache.size() > 0)
 	{
 		if(index >= 0 && index < m_spriteSheetCache.size())
@@ -549,7 +556,7 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 			m_selectedSpriteSheetId = m_spriteSheetCache[index];
 			m_selectedSpriteSheet = m_selectedActor->GetSpriteSheet(m_selectedSpriteSheetId);
 			ion::debug::Assert(m_selectedSpriteSheet, "SpriteAnimEditorDialog::OnSpriteSheetSelected() - Invalid spriteSheet ID");
-			m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(m_selectedSpriteSheet->GetWidthTiles() * 8, m_selectedSpriteSheet->GetHeightTiles() * 8));
+			m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(m_selectedSpriteSheet->GetWidthTiles() * tileWidth, m_selectedSpriteSheet->GetHeightTiles() * tileHeight));
 			m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, 0);
 
 			PopulateSpriteFrames(m_selectedSpriteSheetId);

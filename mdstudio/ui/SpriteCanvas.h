@@ -23,6 +23,7 @@ public:
 	SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr);
 	virtual ~SpriteCanvas();
 
+	void SetProject(Project* project) { m_project = project; }
 	void SetupRendering(ion::render::Renderer* renderer, wxGLContext* glContext, RenderResources* renderResources);
 	void SetSpriteSheetDimentionsPixels(const ion::Vector2i& spriteSheetDimentions);
 	void SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells);
@@ -54,6 +55,8 @@ private:
 	void RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+
+	Project* m_project;
 
 	//Rendering resources
 	ion::render::Renderer* m_renderer;

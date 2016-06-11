@@ -640,11 +640,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 	const int mapWidth = map.GetWidth();
 	const int mapHeight = map.GetHeight();
 
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	//Invert for OpenGL
-	ion::Vector2 mousePosF((float)mousePos.x, (float)(mapHeight * 8) - (float)mousePos.y);
+	ion::Vector2 mousePosF((float)mousePos.x, (float)(mapHeight * tileHeight) - (float)mousePos.y);
 	int y_inv = (mapHeight - 1 - y);
 
 	switch(m_currentTool)
@@ -762,7 +762,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					}
 
 					const float defaultControlLen = 10.0f;
-					m_currentBezier->AddPoint(ion::Vector2(mousePos.x, (mapHeight * 8) - mousePos.y), ion::Vector2(0.0f, defaultControlLen), ion::Vector2(0.0f, -defaultControlLen));
+					m_currentBezier->AddPoint(ion::Vector2(mousePos.x, (mapHeight * tileHeight) - mousePos.y), ion::Vector2(0.0f, defaultControlLen), ion::Vector2(0.0f, -defaultControlLen));
 					redraw = true;
 				}
 				else if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
@@ -860,9 +860,8 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				if(TerrainTile* terrainTile = terrainTileset.GetTerrainTile(tileId))
 				{
 					//Get pixel offset into tile
-					const int tileSize = 8;
-					int pixelX = mousePos.x - (x * tileSize);
-					int pixelY = mousePos.y - (y * tileSize);
+					int pixelX = mousePos.x - (x * tileWidth);
+					int pixelY = mousePos.y - (y * tileHeight);
 
 					if(buttonBits & eMouseLeft)
 					{
@@ -1055,8 +1054,11 @@ void MapPanel::CreateCollisionCanvas(int width, int height)
 	if(m_collisionCanvasPrimitive)
 		delete m_collisionCanvasPrimitive;
 
-	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
-	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * 4.0f, (float)height * 4.0f), width, height, true);
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
+	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
 }
 
 void MapPanel::SetTool(ToolType tool)
@@ -1305,8 +1307,8 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 	const Map& map = m_project.GetMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
-	const float tileWidth = 8.0f;
-	const float tileHeight = 8.0f;
+	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	ion::Matrix4 bezierMatrix;
 	bezierMatrix.SetTranslation(ion::Vector3(-(mapWidth * tileWidth) / 2.0f, -(mapHeight * tileHeight) / 2.0f, z));
@@ -1425,8 +1427,8 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	const Map& map = m_project.GetMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
-	const float tileWidth = 8.0f;
-	const float tileHeight = 8.0f;
+	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
@@ -1501,8 +1503,8 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		const Map& map = m_project.GetMap();
 		const float mapWidth = map.GetWidth();
 		const float mapHeight = map.GetHeight();
-		const float tileWidth = 8.0f;
-		const float tileHeight = 8.0f;
+		const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+		const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 		const float x = m_previewGameObjectPos.x;
 		const float y_inv = mapHeight - 1 - m_previewGameObjectPos.y;
@@ -1550,8 +1552,8 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 		const Map& map = m_project.GetMap();
 		const float mapWidth = map.GetWidth();
 		const float mapHeight = map.GetHeight();
-		const float tileWidth = 8.0f;
-		const float tileHeight = 8.0f;
+		const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+		const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
@@ -1580,8 +1582,8 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 	const Map& map = m_project.GetMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
-	const float tileWidth = 8.0f;
-	const float tileHeight = 8.0f;
+	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
@@ -1652,8 +1654,8 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 			const Map& map = m_project.GetMap();
 			const float mapWidth = map.GetWidth();
 			const float mapHeight = map.GetHeight();
-			const float tileWidth = 8.0f;
-			const float tileHeight = 8.0f;
+			const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+			const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 			//Draw clipboard tiles
 			float x = m_stampPastePos.x;
@@ -1730,8 +1732,8 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 			const Map& map = m_project.GetMap();
 			const float mapWidth = map.GetWidth();
 			const float mapHeight = map.GetHeight();
-			const float tileWidth = 8.0f;
-			const float tileHeight = 8.0f;
+			const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+			const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 			ion::Vector2i hoverStampEnd = m_hoverStampPos + ion::Vector2i(stamp->GetWidth() - 1, stamp->GetHeight() - 1);
 
@@ -1861,9 +1863,12 @@ void MapPanel::CreateStampPreview(Stamp* stamp)
 	if(m_stampPreviewPrimitive)
 		delete m_stampPreviewPrimitive;
 
-	int width = stamp->GetWidth();
-	int height = stamp->GetHeight();
-	m_stampPreviewPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2(width * 4.0f, height * 4.0f), width, height, true);
+	const int width = stamp->GetWidth();
+	const int height = stamp->GetHeight();
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	m_stampPreviewPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2(width * (tileWidth / 2.0f), height * (tileHeight / 2.0f)), width, height, true);
 
 	//Set primitive UV coords
 	ion::render::TexCoord coords[4];

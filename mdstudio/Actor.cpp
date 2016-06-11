@@ -82,7 +82,7 @@ void Actor::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_spriteSheets, "spriteSheets");
 }
 
-void Actor::ExportSpriteSheets(std::stringstream& stream) const
+void Actor::ExportSpriteSheets(std::stringstream& stream, int tileWidth, int tileHeight) const
 {
 	u32 frameIndex = 0;
 
@@ -109,9 +109,9 @@ void Actor::ExportSpriteSheets(std::stringstream& stream) const
 
 		spriteSheet.GetWidthSubsprites(widthTotal, widthWhole, widthRemainder);
 		spriteSheet.GetHeightSubsprites(heightTotal, heightWhole, heightRemainder);
-		spriteSheet.GetSubspriteDimensions(subSprDimensionsTiles);
-		spriteSheet.GetSubspritePosOffsets(subSprOffsetsUnflipped);
-		spriteSheet.GetSubspritePosOffsetsFlippedX(subSprOffsetsFlippedX);
+		spriteSheet.GetSubspriteDimensions(subSprDimensionsTiles, tileWidth, tileHeight);
+		spriteSheet.GetSubspritePosOffsets(subSprOffsetsUnflipped, tileWidth, tileHeight);
+		spriteSheet.GetSubspritePosOffsetsFlippedX(subSprOffsetsFlippedX, tileWidth, tileHeight);
 
 		int sizeTiles = spriteSheet.GetWidthTiles() * spriteSheet.GetHeightTiles();
 

@@ -265,6 +265,109 @@ DialogMapSizeBase::~DialogMapSizeBase()
 	
 }
 
+DialogNewProjectBase::DialogNewProjectBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizer30;
+	fgSizer30 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer30->SetFlexibleDirection( wxBOTH );
+	fgSizer30->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	wxFlexGridSizer* fgSizer27;
+	fgSizer27 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer27->AddGrowableCol( 1 );
+	fgSizer27->SetFlexibleDirection( wxBOTH );
+	fgSizer27->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticText49 = new wxStaticText( this, wxID_ANY, wxT("Preset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText49->Wrap( -1 );
+	fgSizer27->Add( m_staticText49, 0, wxALL, 5 );
+	
+	wxArrayString m_choicePresetChoices;
+	m_choicePreset = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choicePresetChoices, 0 );
+	m_choicePreset->SetSelection( 0 );
+	fgSizer27->Add( m_choicePreset, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	fgSizer30->Add( fgSizer27, 1, wxEXPAND, 5 );
+	
+	wxFlexGridSizer* fgSizer28;
+	fgSizer28 = new wxFlexGridSizer( 0, 4, 0, 0 );
+	fgSizer28->SetFlexibleDirection( wxBOTH );
+	fgSizer28->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_text1 = new wxStaticText( this, wxID_ANY, wxT("Tile width:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text1->Wrap( -1 );
+	fgSizer28->Add( m_text1, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_spinCtrlTileWidth = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 64 );
+	fgSizer28->Add( m_spinCtrlTileWidth, 0, wxALL, 5 );
+	
+	m_text3 = new wxStaticText( this, wxID_ANY, wxT("Tile height:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text3->Wrap( -1 );
+	fgSizer28->Add( m_text3, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	
+	m_spinCtrlTileHeight = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 64 );
+	fgSizer28->Add( m_spinCtrlTileHeight, 0, wxALL, 5 );
+	
+	m_text11 = new wxStaticText( this, wxID_ANY, wxT("Map width:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text11->Wrap( -1 );
+	fgSizer28->Add( m_text11, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_spinCtrlMapWidth = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 64 );
+	fgSizer28->Add( m_spinCtrlMapWidth, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_text31 = new wxStaticText( this, wxID_ANY, wxT("Map height:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text31->Wrap( -1 );
+	fgSizer28->Add( m_text31, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_spinCtrlMapHeight = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 64 );
+	fgSizer28->Add( m_spinCtrlMapHeight, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	
+	fgSizer30->Add( fgSizer28, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_buttonOk = new wxButton( this, wxID_BTN_CANCEL, wxT("&Ok"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_buttonOk, 0, wxALIGN_RIGHT, 5 );
+	
+	m_buttonCancel = new wxButton( this, wxID_BTN_CANCEL, wxT("&Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_buttonCancel, 0, wxALIGN_RIGHT, 5 );
+	
+	
+	fgSizer30->Add( bSizer4, 1, wxALIGN_RIGHT, 5 );
+	
+	
+	bSizer2->Add( fgSizer30, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer2 );
+	this->Layout();
+	bSizer2->Fit( this );
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_choicePreset->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( DialogNewProjectBase::OnChoicePreset ), NULL, this );
+	m_buttonOk->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewProjectBase::OnBtnOk ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewProjectBase::OnBtnCancel ), NULL, this );
+}
+
+DialogNewProjectBase::~DialogNewProjectBase()
+{
+	// Disconnect Events
+	m_choicePreset->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( DialogNewProjectBase::OnChoicePreset ), NULL, this );
+	m_buttonOk->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewProjectBase::OnBtnOk ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewProjectBase::OnBtnCancel ), NULL, this );
+	
+}
+
 DialogNewSpriteAnim::DialogNewSpriteAnim( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );

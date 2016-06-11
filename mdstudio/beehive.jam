@@ -28,6 +28,8 @@ local SRC =
 	Map.h
 	Palette.cpp
 	Palette.h
+	PlatformConfig.cpp
+	PlatformConfig.h
 	Project.cpp
 	Project.h
 	SpriteSheet.cpp

@@ -8,12 +8,12 @@
 
 #include <ion/core/memory/Memory.h>
 
-RenderResources::RenderResources()
+RenderResources::RenderResources(Project& project)
+ : m_project(project)
 {
 	m_tilesetSizeSq = 1;
 	m_terrainTilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
-	m_project = NULL;
 
 	//Create shaders
 	for(int i = 0; i < eShaderMax; i++)
@@ -84,9 +84,12 @@ RenderResources::RenderResources()
 	m_colours[eColourGrid] = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
 
 	//Create primitives
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(0.5f, 0.5f));
-	m_primitives[ePrimitiveTileQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(4.0f, 4.0f));
-	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(4.0f, 4.0f));
+	m_primitives[ePrimitiveTileQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
+	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
 }
 
 RenderResources::~RenderResources()
@@ -115,10 +118,10 @@ RenderResources::~RenderResources()
 
 void RenderResources::CreateTilesetTexture()
 {
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	const Tileset& tileset = m_project->GetTileset();
+	const Tileset& tileset = m_project.GetTileset();
 
 	u32 numTiles = tileset.GetCount();
 	m_tilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
@@ -135,14 +138,14 @@ void RenderResources::CreateTilesetTexture()
 	{
 		const Tile& tile = *tileset.GetTile(i);
 		PaletteId paletteId = tile.GetPaletteId();
-		Palette* palette = m_project->GetPalette(paletteId);
+		Palette* palette = m_project.GetPalette(paletteId);
 
 		u32 x = i % m_tilesetSizeSq;
 		u32 y = i / m_tilesetSizeSq;
 
-		for(int pixelY = 0; pixelY < 8; pixelY++)
+		for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 		{
-			for(int pixelX = 0; pixelX < 8; pixelX++)
+			for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 			{
 				//Invert Y for OpenGL
 				int pixelY_OGL = tileHeight - 1 - pixelY;
@@ -177,11 +180,11 @@ void RenderResources::CreateTilesetTexture()
 
 void RenderResources::CreateTerrainTilesTexture()
 {
-	const int tileWidth = 8;
-	const int tileHeight = 8;
-	const int blankRowHeight = 8;
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+	const int blankRowHeight = tileHeight;
 
-	const TerrainTileset& tileset = m_project->GetTerrainTileset();
+	const TerrainTileset& tileset = m_project.GetTerrainTileset();
 
 	u32 numTiles = tileset.GetCount() + 1;
 	m_terrainTilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
@@ -204,12 +207,12 @@ void RenderResources::CreateTerrainTilesTexture()
 		u32 x = i % m_terrainTilesetSizeSq;
 		u32 y = i / m_terrainTilesetSizeSq;
 		
-		for(int pixelX = 0; pixelX < 8; pixelX++)
+		for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 		{
 			//Get height at X
 			u16 height = tile.GetHeight(pixelX);
 
-			for(int pixelY = 0; pixelY < 8; pixelY++)
+			for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 			{
 				const ion::Colour& colour = pixelY < height ? setColour : unsetColour;
 
@@ -319,12 +322,15 @@ ion::render::Texture* RenderResources::CreateSpriteSheetPreviewTexture(const Spr
 
 void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const
 {
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 	if(tileId == InvalidTileId)
 	{
 		//Use background tile if there is one
-		tileId = m_project->GetBackgroundTile();
+		tileId = m_project.GetBackgroundTile();
 
-		if(tileId == InvalidTileId && m_project->GetTileset().GetCount() > 0)
+		if(tileId == InvalidTileId && m_project.GetTileset().GetCount() > 0)
 		{
 			//If no background tile, and there are tiles available, use first tile
 			tileId = 0;
@@ -334,19 +340,20 @@ void RenderResources::GetTileTexCoords(TileId tileId, ion::render::TexCoord texC
 	if(tileId == InvalidTileId)
 	{
 		//Invalid tile, use top-left pixel
-		float onePixelTexSpace = m_cellSizeTexSpaceSq / 8.0f;
+		float onePixelTexSpaceX = m_cellSizeTexSpaceSq / tileWidth;
+		float onePixelTexSpaceY = m_cellSizeTexSpaceSq / tileHeight;
 
 		//Top left
 		texCoords[0].x = 0.0f;
 		texCoords[0].y = 0.0f;
 		//Bottom left
 		texCoords[1].x = 0.0f;
-		texCoords[1].y = onePixelTexSpace;
+		texCoords[1].y = onePixelTexSpaceY;
 		//Bottom right
-		texCoords[2].x = onePixelTexSpace;
-		texCoords[2].y = onePixelTexSpace;
+		texCoords[2].x = onePixelTexSpaceX;
+		texCoords[2].y = onePixelTexSpaceY;
 		//Top right
-		texCoords[3].x = onePixelTexSpace;
+		texCoords[3].x = onePixelTexSpaceX;
 		texCoords[3].y = 0.0f;
 	}
 	else
@@ -421,7 +428,7 @@ void RenderResources::GetTerrainTileTexCoords(TerrainTileId tileId, ion::render:
 	if(tileId == InvalidTerrainTileId)
 	{
 		//Use default tile if there is one
-		tileId = m_project->GetDefaultTerrainTile();
+		tileId = m_project.GetDefaultTerrainTile();
 
 		if(tileId == InvalidTerrainTileId)
 		{
@@ -456,14 +463,14 @@ void RenderResources::GetTerrainTileTexCoords(TerrainTileId tileId, ion::render:
 
 void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pixel, u8 colourIdx)
 {
-	if(m_project && m_textures[eTextureTileset])
+	if(m_textures[eTextureTileset])
 	{
-		if(Tile* tile = m_project->GetTileset().GetTile(tileId))
+		if(Tile* tile = m_project.GetTileset().GetTile(tileId))
 		{
-			if(Palette* palette = m_project->GetPalette(tile->GetPaletteId()))
+			if(Palette* palette = m_project.GetPalette(tile->GetPaletteId()))
 			{
-				const int tileWidth = 8;
-				const int tileHeight = 8;
+				const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+				const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 				const Colour& colour = palette->GetColour(colourIdx);
 
@@ -483,15 +490,15 @@ void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pix
 
 void RenderResources::SetTerrainTileHeight(TerrainTileId terrainTileId, int x, s8 height)
 {
-	if(m_project && m_textures[eTextureTerrainTileset])
+	if(m_textures[eTextureTerrainTileset])
 	{
-		if(TerrainTile* tile = m_project->GetTerrainTileset().GetTerrainTile(terrainTileId))
+		if(TerrainTile* tile = m_project.GetTerrainTileset().GetTerrainTile(terrainTileId))
 		{
 			ion::Colour setColour(0.0f, 1.0f, 0.0f, 0.7f);
 			ion::Colour unsetColour(0.0f, 0.0f, 0.0f, 0.0f);
 
-			const int tileWidth = 8;
-			const int tileHeight = 8;
+			const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 			const u32 tileX = terrainTileId % m_terrainTilesetSizeSq;
 			const u32 tileY = terrainTileId / m_terrainTilesetSizeSq;
@@ -511,8 +518,11 @@ ion::Matrix4 RenderResources::CalcBoxMatrix(const ion::Vector2i& position, const
 {
 	ion::Matrix4 matrix;
 
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 	float bottom = mapSize.y - position.y - size.y;
-	ion::Vector2 tileSize(8, 8);
+	ion::Vector2 tileSize(tileWidth, tileHeight);
 	ion::Vector3 translation(floor((position.x - (mapSize.x / 2.0f) + (size.x / 2.0f)) * tileSize.x), floor((bottom - (mapSize.y / 2.0f) + (size.y / 2.0f)) * tileSize.y), z);
 	matrix.SetTranslation(translation);
 	matrix.SetScale(ion::Vector3(size.x, size.y, 1.0f));
@@ -615,12 +625,12 @@ RenderResources::SpriteSheetRenderResources::SpriteSheetRenderResources()
 	m_primitive = NULL;
 }
 
-void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader)
+void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader, Project* project)
 {
-	m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)spriteSheet.GetWidthTiles() * 4.0f, (float)spriteSheet.GetHeightTiles() * 4.0f), spriteSheet.GetWidthTiles(), spriteSheet.GetHeightTiles(), true);
+	const int tileWidth = project->GetPlatformConfig().tileWidth;
+	const int tileHeight = project->GetPlatformConfig().tileHeight;
 
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)spriteSheet.GetWidthTiles() * (tileWidth / 2.0f), (float)spriteSheet.GetHeightTiles() * (tileHeight / 2.0f)), spriteSheet.GetWidthTiles(), spriteSheet.GetHeightTiles(), true);
 
 	u32 widthTiles = spriteSheet.GetWidthTiles();
 	u32 heightTiles = spriteSheet.GetHeightTiles();
@@ -656,9 +666,9 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 				int tileY_inv = spriteSheet.GetHeightTiles() - 1 - tileY;
 
 				//Paint tile to texture
-				for(int pixelY = 0; pixelY < 8; pixelY++)
+				for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 				{
-					for(int pixelX = 0; pixelX < 8; pixelX++)
+					for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 					{
 						//Invert Y for OpenGL
 						int pixelY_OGL = tileHeight - 1 - pixelY;
@@ -755,7 +765,7 @@ void RenderResources::CreateSpriteSheetResources(SpriteSheetId spriteSheetId, co
 {
 	m_spriteSheetRenderResources.erase(spriteSheetId);
 	std::pair<std::map<SpriteSheetId, SpriteSheetRenderResources>::iterator, bool> it = m_spriteSheetRenderResources.insert(std::make_pair(spriteSheetId, SpriteSheetRenderResources()));
-	it.first->second.Load(spriteSheet, m_pixelShaders[eShaderFlatTextured], m_vertexShaders[eShaderFlatTextured]);
+	it.first->second.Load(spriteSheet, m_pixelShaders[eShaderFlatTextured], m_vertexShaders[eShaderFlatTextured], &m_project);
 }
 
 void RenderResources::DeleteSpriteSheetRenderResources(SpriteSheetId spriteSheetId)

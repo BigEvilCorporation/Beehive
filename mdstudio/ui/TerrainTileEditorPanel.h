@@ -44,7 +44,4 @@ private:
 	//Rendering primitives
 	ion::render::Quad* m_tilePrimitive;
 	ion::render::Quad* m_collisionPrimitive;
-
-	static const int s_tileWidth = 8;
-	static const int s_tileHeight = 8;
 };

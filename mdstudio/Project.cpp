@@ -11,7 +11,11 @@
 #include "Project.h"
 #include "BMPReader.h"
 
-Project::Project()
+Project::Project(PlatformConfig& defaultPatformConfig)
+	: m_platformConfig(defaultPatformConfig)
+	, m_map(m_platformConfig)
+	, m_tileset(m_platformConfig)
+	, m_terrainTileset(m_platformConfig)
 {
 	m_paintColour = 0;
 	m_paintTerrainTile = InvalidTerrainTileId;
@@ -109,6 +113,7 @@ bool Project::Save(const std::string& filename)
 
 void Project::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_platformConfig, "platformConfig");
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_palettes, "palettes");
 	archive.Serialise(m_paletteSlots, "paletteSlots");
@@ -889,8 +894,10 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 	TerrainTileId blankTileId = m_terrainTileset.AddTerrainTile();
 	SetDefaultTerrainTile(blankTileId);
 
-	const int tileSize = 8;
-	const int mapHeightPixels = (m_collisionMap.GetHeight() * 8);
+	const int tileWidth = GetPlatformConfig().tileWidth;
+	const int tileHeight = GetPlatformConfig().tileHeight;
+
+	const int mapHeightPixels = (m_collisionMap.GetHeight() * tileHeight);
 
 	//Follow paths, generate terrain height tiles
 	for(int i = 0; i < m_terrainBeziers.size(); i++)
@@ -907,7 +914,7 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 			{
 				//Get position
 				const ion::Vector2 pixelPos(points[posIdx].x, (float)mapHeightPixels - points[posIdx].y);
-				const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileSize), ion::maths::Floor(pixelPos.y / (float)tileSize));
+				const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileWidth), ion::maths::Floor(pixelPos.y / (float)tileHeight));
 
 				//Get tile under cursor
 				TerrainTileId tileId = m_collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
@@ -925,11 +932,11 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 				if(TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(tileId))
 				{
 					//Get pixel offset into tile
-					int pixelX = pixelPos.x - (tilePos.x * tileSize);
-					int pixelY = pixelPos.y - (tilePos.y * tileSize);
+					int pixelX = pixelPos.x - (tilePos.x * tileWidth);
+					int pixelY = pixelPos.y - (tilePos.y * tileHeight);
 
 					//Set height at X
-					const int height = tileSize - pixelY;
+					const int height = tileHeight - pixelY;
 					terrainTile->SetHeight(pixelX, height);
 				}
 			}
@@ -947,8 +954,8 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 
 void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 {
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const int tileWidth = GetPlatformConfig().tileWidth;
+	const int tileHeight = GetPlatformConfig().tileHeight;
 
 	std::map<TileId, TerrainTileId> generatedTiles;
 
@@ -1031,8 +1038,8 @@ void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 
 void Project::GenerateHeightMap(const Tile& graphicTile, std::vector<u8>& heightMap) const
 {
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const int tileWidth = GetPlatformConfig().tileWidth;
+	const int tileHeight = GetPlatformConfig().tileHeight;
 
 	heightMap.resize(tileWidth);
 	std::fill(heightMap.begin(), heightMap.end(), 0);
@@ -1056,8 +1063,8 @@ void Project::GenerateHeightMap(const Tile& graphicTile, std::vector<u8>& height
 
 void Project::GenerateCeilingMap(const Tile& graphicTile, std::vector<u8>& ceilingMap) const
 {
-	const int tileWidth = 8;
-	const int tileHeight = 8;
+	const int tileWidth = GetPlatformConfig().tileWidth;
+	const int tileHeight = GetPlatformConfig().tileHeight;
 
 	ceilingMap.resize(tileWidth);
 	std::fill(ceilingMap.begin(), ceilingMap.end(), 0);
@@ -1238,6 +1245,9 @@ bool Project::FindPalette(Colour* pixels, u32 useablePalettes, PaletteId& palett
 	//Set of found colour idxs
 	std::set<int> colourMatches;
 
+	const int tileWidth = GetPlatformConfig().tileWidth;
+	const int tileHeight = GetPlatformConfig().tileHeight;
+
 	//For each palette
 	for(int paletteIdx = 0; paletteIdx < s_maxPalettes; paletteIdx++)
 	{
@@ -1249,7 +1259,7 @@ bool Project::FindPalette(Colour* pixels, u32 useablePalettes, PaletteId& palett
 			colourMatches.clear();
 
 			//For each pixel
-			for(int i = 0; i < 8 * 8; i++)
+			for(int i = 0; i < tileWidth * tileHeight; i++)
 			{
 				int colourIdx = 0;
 
@@ -1290,8 +1300,11 @@ bool Project::ImportPalette(Colour* pixels, Palette& palette)
 	//Keep running colour count
 	int numColours = 1;
 
+	const int tileWidth = GetPlatformConfig().tileWidth;
+	const int tileHeight = GetPlatformConfig().tileHeight;
+
 	//Find/add remaining colours
-	for(int i = 1; i < 8*8; i++)
+	for(int i = 1; i < tileWidth * tileHeight; i++)
 	{
 		int colourIdx = 0;
 		if(!palette.GetNearestColourIdx(pixels[i], Palette::eExact, colourIdx))
@@ -1360,21 +1373,24 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		m_tileset.AddTile();
 	}
 
+	const int tileWidth = GetPlatformConfig().tileWidth;
+	const int tileHeight = GetPlatformConfig().tileHeight;
+
 	//Read BMP
 	BMPReader reader;
 	if(reader.Read(filename))
 	{
-		if(reader.GetWidth() % 8 != 0 || reader.GetHeight() % 8 != 0)
+		if(reader.GetWidth() % tileWidth != 0 || reader.GetHeight() % tileHeight != 0)
 		{
-			if(wxMessageBox("Bitmap width/height is not multiple of 8, image will be truncated", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
+			if(wxMessageBox("Bitmap width/height is not multiple of target platform tile width/height, image will be truncated", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
 			{
 				return false;
 			}
 		}
 
 		//Get width/height in tiles
-		int tilesWidth = reader.GetWidth() / 8;
-		int tilesHeight = reader.GetHeight() / 8;
+		int tilesWidth = reader.GetWidth() / tileWidth;
+		int tilesHeight = reader.GetHeight() / tileHeight;
 
 		if(importFlags & eBMPImportDrawToMap)
 		{
@@ -1424,15 +1440,12 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 			}
 		}
 
-		const int tileWidth = 8;
-		const int tileHeight = 8;
-
 		//For all 8x8 tiles, in row-at-a-time order
 		for(int tileY = 0; tileY < tilesHeight; tileY++)
 		{
 			for(int tileX = 0; tileX < tilesWidth; tileX++)
 			{
-				Colour pixels[tileWidth * tileHeight];
+				std::vector<Colour> pixels(tileWidth * tileHeight);
 
 				//Read pixel colours from bitmap
 				for(int pixelX = 0; pixelX < tileWidth; pixelX++)
@@ -1449,11 +1462,11 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 				PaletteId paletteId = 0;
 				PaletteId closestPaletteId = 0;
 				int closestPaletteColourMatches = 0;
-				if(!FindPalette(pixels, paletteBits, paletteId, closestPaletteId, closestPaletteColourMatches))
+				if(!FindPalette(pixels.data(), paletteBits, paletteId, closestPaletteId, closestPaletteColourMatches))
 				{
 					//Import palette
 					Palette importedPalette;
-					if(!ImportPalette(pixels, importedPalette))
+					if(!ImportPalette(pixels.data(), importedPalette))
 					{
 						wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK | wxICON_ERROR);
 						return false;
@@ -1521,7 +1534,7 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 				//Get palette
 				Palette& palette = m_palettes[paletteId];
 
-				Tile tile;
+				Tile tile(m_platformConfig.tileWidth, m_platformConfig.tileHeight);
 
 				//Find pixel colours from palette
 				for(int pixelX = 0; pixelX < tileWidth; pixelX++)
@@ -1926,7 +1939,7 @@ bool Project::ExportSpriteSheets(const std::string& directory, bool binary) cons
 			{
 				std::stringstream stream;
 				WriteFileHeader(stream);
-				it->second.ExportSpriteSheets(stream);
+				it->second.ExportSpriteSheets(stream, m_platformConfig.tileWidth, m_platformConfig.tileHeight);
 				file.Write(stream.str().c_str(), stream.str().size());
 			}
 			else
