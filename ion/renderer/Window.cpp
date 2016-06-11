@@ -13,34 +13,34 @@ namespace ion
 	{
 		Window::Window(const std::string& title, u32 clientAreaWidth, u32 clientAreaHeight, bool fullscreen)
 		{
-			mClientAreaWidth = clientAreaWidth;
-			mClientAreaHeight = clientAreaHeight;
-			mAspectRatio = (float)clientAreaHeight / (float)clientAreaWidth;
+			mclientAreaWidth = clientAreaWidth;
+			m_clientAreaHeight = clientAreaHeight;
+			maspectRatio = (float)clientAreaHeight / (float)clientAreaWidth;
 		}
 
 		u32 Window::GetWindowWidth() const
 		{
-			return mWindowWidth;
+			return m_windowWidth;
 		}
 
 		u32 Window::GetWindowHeight() const
 		{
-			return mWindowHeight;
+			return m_windowHeight;
 		}
 
 		u32 Window::GetClientAreaWidth() const
 		{
-			return mClientAreaWidth;
+			return mclientAreaWidth;
 		}
 
 		u32 Window::GetClientAreaHeight() const
 		{
-			return mClientAreaHeight;
+			return m_clientAreaHeight;
 		}
 
 		float Window::GetAspectRatio() const
 		{
-			return mAspectRatio;
+			return maspectRatio;
 		}
 	}
 }

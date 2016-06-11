@@ -18,16 +18,16 @@ namespace ion
 		class FileDevice
 		{
 		public:
-			enum DeviceType { Fixed, Optical, Removable, Network };
-			enum AccessType { ReadOnly, Writeable };
-			enum FileType { File, Directory };
+			enum DeviceType { eFixed, eOptical, eRemovable, eNetwork };
+			enum AccessType { eReadOnly, eWriteable };
+			enum FileType { eFile, eDirectory };
 
 			struct DirectoryItem
 			{
 				//TODO: Add creation/modify time, etc
-				std::string mFilename;
-				FileType mFileType;
-				AccessType mAccessType;
+				std::string m_filename;
+				FileType m_fileType;
+				AccessType m_accessType;
 			};
 
 			FileDevice(std::string label, std::string mountPoint, DeviceType deviceType, AccessType accessType);
@@ -45,12 +45,12 @@ namespace ion
 		private:
 			std::string NormalisePath(std::string path);
 
-			const std::string mLabel;
-			const std::string mMountPoint;
-			const DeviceType mDeviceType;
-			const AccessType mAccessType;
+			const std::string m_label;
+			const std::string m_mountPoint;
+			const DeviceType m_deviceType;
+			const AccessType m_accessType;
 
-			std::string mCurrentDirectory;
+			std::string m_currentDirectory;
 		};
 	}
 }

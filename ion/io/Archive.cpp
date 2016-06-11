@@ -14,42 +14,42 @@ namespace ion
 	namespace io
 	{
 		Archive::Archive(Stream& stream, Direction direction, ResourceManager* resourceManager, u32 version)
-			: mStream(stream)
+			: m_stream(stream)
 		{
-			mDirection = direction;
-			mVersion = version;
-			mResourceManager = resourceManager;
+			m_direction = direction;
+			m_version = version;
+			m_resourceManager = resourceManager;
 			m_blockNode = NULL;
 		}
 
 		void Archive::Serialise(void* data, u64 size)
 		{
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
-				mStream.Read(data, size);
+				m_stream.Read(data, size);
 			}
 			else
 			{
 				if(m_blockNode)
 					m_blockNode->data.Write(data, size);
 				else
-					mStream.Write(data, size);
+					m_stream.Write(data, size);
 			}
 		}
 
 		Archive::Direction Archive::GetDirection() const
 		{
-			return mDirection;
+			return m_direction;
 		}
 
 		u32 Archive::GetVersion() const
 		{
-			return mVersion;
+			return m_version;
 		}
 
 		ResourceManager* Archive::GetResourceManager() const
 		{
-			return mResourceManager;
+			return m_resourceManager;
 		}
 
 		bool Archive::PushBlock(const Tag& tag)
@@ -57,13 +57,13 @@ namespace ion
 			//Create block
 			Block* block = new Block;
 
-			if(mDirection == In)
+			if(m_direction == eIn)
 			{
 				u64 parentBlockStartPos = m_blockNode ? m_blockNode->startPos : 0;
-				u64 parentBlockEndPos = m_blockNode ? (parentBlockStartPos + m_blockNode->header.size - 1) : (mStream.GetSize() - 1);
+				u64 parentBlockEndPos = m_blockNode ? (parentBlockStartPos + m_blockNode->header.size - 1) : (m_stream.GetSize() - 1);
 
 				//Record search start pos
-				u64 searchStartPos = mStream.GetPosition();
+				u64 searchStartPos = m_stream.GetPosition();
 
 				//Record block start pos
 				block->startPos = searchStartPos;
@@ -82,13 +82,13 @@ namespace ion
 						block->startPos = 0;
 
 					//Seek to start of search block
-					mStream.Seek(block->startPos);
+					m_stream.Seek(block->startPos);
 
 					//Seek to each child of current block in turn, checking tag
 					while(block->header.tag != tag && block->header.size && block->startPos + block->header.size < parentBlockEndPos)
 					{
 						//Record start pos
-						block->startPos = mStream.GetPosition();
+						block->startPos = m_stream.GetPosition();
 
 						//Serialise block header
 						Serialise(block->header);
@@ -96,20 +96,20 @@ namespace ion
 						if(block->header.tag != tag)
 						{
 							//Seek to end of block
-							mStream.Seek(block->startPos + block->header.size);
+							m_stream.Seek(block->startPos + block->header.size);
 						}
 					}
 
 					if(block->header.tag != tag)
 					{
 						//Block not found, return to original starting position
-						mStream.Seek(searchStartPos);
+						m_stream.Seek(searchStartPos);
 					}
 				}
 			}
 			else
 			{
-				block->startPos = mStream.GetPosition();
+				block->startPos = m_stream.GetPosition();
 				block->header.tag = tag;
 			}
 
@@ -141,10 +141,10 @@ namespace ion
 			Block* child = m_blockNode;
 			m_blockNode = child->parent;
 
-			if(mDirection == In)
+			if(m_direction == eIn)
 			{
 				//Seek to block end
-				mStream.Seek(child->startPos + child->header.size);
+				m_stream.Seek(child->startPos + child->header.size);
 			}
 			else
 			{

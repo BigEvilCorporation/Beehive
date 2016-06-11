@@ -13,8 +13,8 @@ namespace ion
 	namespace gamekit
 	{
 		State::State(StateManager& stateManager, io::ResourceManager& resourceManager)
-			: mStateManager(stateManager)
-			, mResourceManager(resourceManager)
+			: m_stateManager(stateManager)
+			, m_resourceManager(resourceManager)
 		{
 		}
 
@@ -32,51 +32,51 @@ namespace ion
 
 		void StateManager::PushState(State& state)
 		{
-			if(mStateStack.size() > 0)
-				mStateStack.back()->OnLeaveState();
+			if(m_stateStack.size() > 0)
+				m_stateStack.back()->OnLeaveState();
 
 			state.OnEnterState();
-			mStateStack.push_back(&state);
+			m_stateStack.push_back(&state);
 		}
 
 		void StateManager::SwapState(State& state)
 		{
-			if(mStateStack.size() > 0)
+			if(m_stateStack.size() > 0)
 				PopState();
 
 			state.OnEnterState();
-			mStateStack.push_back(&state);
+			m_stateStack.push_back(&state);
 		}
 
 		void StateManager::PopState()
 		{
-			debug::Assert(mStateStack.size() > 0, "StateManager::PopState() - State stack is empty");
-			mStateStack.back()->OnLeaveState();
-			mStateStack.pop_back();
+			debug::Assert(m_stateStack.size() > 0, "StateManager::PopState() - State stack is empty");
+			m_stateStack.back()->OnLeaveState();
+			m_stateStack.pop_back();
 		}
 
 		void StateManager::Pause()
 		{
-			if(mStateStack.size() > 0)
-				mStateStack.back()->OnPauseState();
+			if(m_stateStack.size() > 0)
+				m_stateStack.back()->OnPauseState();
 		}
 
 		void StateManager::Resume()
 		{
-			if(mStateStack.size() > 0)
-				mStateStack.back()->OnResumeState();
+			if(m_stateStack.size() > 0)
+				m_stateStack.back()->OnResumeState();
 		}
 
 		void StateManager::Update(float deltaTime, input::Keyboard* keyboard, input::Mouse* mouse, input::Gamepad* gamepad)
 		{
-			if(mStateStack.size() > 0)
-				mStateStack.back()->Update(deltaTime, keyboard, mouse, gamepad);
+			if(m_stateStack.size() > 0)
+				m_stateStack.back()->Update(deltaTime, keyboard, mouse, gamepad);
 		}
 
 		void StateManager::Render(render::Renderer& renderer, render::Camera& camera)
 		{
-			if(mStateStack.size() > 0)
-				mStateStack.back()->Render(renderer, camera);
+			if(m_stateStack.size() > 0)
+				m_stateStack.back()->Render(renderer, camera);
 		}
 	}
 }

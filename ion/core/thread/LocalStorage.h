@@ -36,7 +36,7 @@ namespace ion
 
 		private:
 			#if defined ION_PLATFORM_WINDOWS
-			DWORD mTLSIndex;
+			DWORD m_TLSIndex;
 			#endif
 		};
 	}

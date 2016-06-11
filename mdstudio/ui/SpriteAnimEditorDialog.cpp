@@ -252,7 +252,7 @@ void SpriteAnimEditorDialog::OnBtnAnimDelete(wxCommandEvent& event)
 
 void SpriteAnimEditorDialog::OnSliderMove(wxScrollEvent& event)
 {
-	if(m_selectedAnim && m_selectedAnim->GetState() == ion::render::Animation::Stopped)
+	if(m_selectedAnim && m_selectedAnim->GetState() == ion::render::Animation::eStopped)
 	{
 		float time = ion::maths::Lerp(0.0f, m_selectedAnim->GetLength(), (float)m_sliderTimeline->GetValue() / 100.0f);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);
@@ -267,7 +267,7 @@ void SpriteAnimEditorDialog::OnBtnPlay(wxCommandEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::Playing);
+		m_selectedAnim->SetState(ion::render::Animation::ePlaying);
 		m_timer.Start(1);
 	}
 }
@@ -278,7 +278,7 @@ void SpriteAnimEditorDialog::OnBtnStop(wxCommandEvent& event)
 
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::Stopped);
+		m_selectedAnim->SetState(ion::render::Animation::eStopped);
 	}
 }
 
@@ -507,7 +507,7 @@ void SpriteAnimEditorDialog::SelectActor(int index)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::Stopped);
+		m_selectedAnim->SetState(ion::render::Animation::eStopped);
 	}
 
 	m_selectedActorId = InvalidActorId;
@@ -533,7 +533,7 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::Stopped);
+		m_selectedAnim->SetState(ion::render::Animation::eStopped);
 	}
 
 	m_selectedSpriteSheetId = InvalidSpriteSheetId;
@@ -562,7 +562,7 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::Stopped);
+		m_selectedAnim->SetState(ion::render::Animation::eStopped);
 	}
 
 	m_selectedAnimId = InvalidSpriteAnimId;

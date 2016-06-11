@@ -32,8 +32,8 @@ namespace ion
 
 		private:
 			void EnumerateDevices();
-			std::vector<FileDevice*> mFileDevices;
-			FileDevice* mDefaultFileDevice;
+			std::vector<FileDevice*> m_fileDevices;
+			FileDevice* m_defaultFileDevice;
 		};
 	}
 }

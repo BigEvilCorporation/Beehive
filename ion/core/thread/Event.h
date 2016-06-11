@@ -28,7 +28,7 @@ namespace ion
 
 		private:
 			#if defined ION_PLATFORM_WINDOWS
-			HANDLE mThreadEventHndl;
+			HANDLE m_threadEventHndl;
 			#endif
 		};
 	}

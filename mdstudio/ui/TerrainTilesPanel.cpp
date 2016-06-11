@@ -286,7 +286,7 @@ void TerrainTilesPanel::FillTerrainTiles(TerrainTileId tileId, const ion::Vector
 void TerrainTilesPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//No depth test (stops grid cells Z fighting)
-	renderer.SetDepthTest(ion::render::Renderer::Always);
+	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
@@ -297,7 +297,7 @@ void TerrainTilesPanel::RenderCanvas(ion::render::Renderer& renderer, const ion:
 	renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
 	material->Unbind();
 
-	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
 void TerrainTilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -319,12 +319,12 @@ void TerrainTilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& 
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
-	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 	material->SetDiffuseColour(colour);
 	material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_selectionPrimitive->GetVertexBuffer(), m_selectionPrimitive->GetIndexBuffer());
 	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 }
 
 void TerrainTilesPanel::ResetZoomPan()

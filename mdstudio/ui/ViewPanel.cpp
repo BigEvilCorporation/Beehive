@@ -5,7 +5,7 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 	: wxGLCanvas(parent, glContext, winid, pos, size, style, name, NULL, wxNullPalette)
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)
-	, m_viewport(128, 128, ion::render::Viewport::Ortho2DAbsolute)
+	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
 {
 	m_project = NULL;
 	m_mainWindow = mainWindow;
@@ -365,7 +365,7 @@ void ViewPanel::OnKeyboard(wxKeyEvent& event)
 void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//No depth test (stops grid cells Z fighting)
-	renderer.SetDepthTest(ion::render::Renderer::Always);
+	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
 
@@ -375,7 +375,7 @@ void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4
 	renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
 	material->Unbind();
 
-	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
 void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

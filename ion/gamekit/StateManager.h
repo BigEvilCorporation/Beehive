@@ -48,8 +48,8 @@ namespace ion
 			virtual void Render(render::Renderer& renderer, render::Camera& camera) = 0;
 
 		protected:
-			StateManager& mStateManager;
-			io::ResourceManager& mResourceManager;
+			StateManager& m_stateManager;
+			io::ResourceManager& m_resourceManager;
 		};
 
 		class StateManager
@@ -69,7 +69,7 @@ namespace ion
 			void Render(render::Renderer& renderer, render::Camera& camera);
 
 		private:
-			std::vector<State*> mStateStack;
+			std::vector<State*> m_stateStack;
 		};
 	}
 }

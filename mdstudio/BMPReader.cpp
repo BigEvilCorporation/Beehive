@@ -56,7 +56,7 @@ bool BMPReader::Read(const std::string& filename)
 					{
 						//Seek to palette pos
 						u64 paletteDataPos = sizeof(FileHeader) + bmpHeader.headerSize;
-						if(file.Seek(paletteDataPos, ion::io::File::Start) == paletteDataPos)
+						if(file.Seek(paletteDataPos, ion::io::File::eStart) == paletteDataPos)
 						{
 							//Calc palette size and alloc
 							m_paletteSize = bmpHeader.importantColourCount;
@@ -67,7 +67,7 @@ bool BMPReader::Read(const std::string& filename)
 							if(file.Read(m_palette, paletteSizeBytes) == paletteSizeBytes)
 							{
 								//Seek to data pos
-								if(file.Seek(fileHeader.dataOffset, ion::io::File::Start) == fileHeader.dataOffset)
+								if(file.Seek(fileHeader.dataOffset, ion::io::File::eStart) == fileHeader.dataOffset)
 								{
 									//Alloc pixel data buffer
 									m_data = new u8[m_dataSize];
@@ -119,7 +119,7 @@ int BMPReader::GetPaletteSize() const
 
 u8 BMPReader::GetColourIndex(int x, int y) const
 {
-	ion::debug::Assert(x < m_width && y < m_height, "Out of range");
+	ion::debug::Assert(x < m_width && y < m_height, "eOut of range");
 
 	u32 pixelOffset = (((m_height - y - 1) * m_width) + x);
 	u32 byteOffset = (pixelOffset & 0xFFFFFFFE) / 2;
@@ -130,14 +130,14 @@ u8 BMPReader::GetColourIndex(int x, int y) const
 	else
 		colourIndex = colourIndex >> 4;
 
-	ion::debug::Assert(colourIndex < m_paletteSize, "Out of range");
+	ion::debug::Assert(colourIndex < m_paletteSize, "eOut of range");
 
 	return colourIndex;
 }
 
 Colour BMPReader::GetPaletteEntry(int index) const
 {
-	ion::debug::Assert(index < m_paletteSize, "Out of range");
+	ion::debug::Assert(index < m_paletteSize, "eOut of range");
 
 	RGBQuad rgbQuad = m_palette[index];
 	Colour colour;
@@ -149,7 +149,7 @@ Colour BMPReader::GetPaletteEntry(int index) const
 
 Colour BMPReader::GetPixel(int x, int y) const
 {
-	ion::debug::Assert(x < m_width && y < m_height, "Out of range");
+	ion::debug::Assert(x < m_width && y < m_height, "eOut of range");
 
 	u32 pixelOffset = (((m_height - y - 1) * m_width) + x);
 	u32 byteOffset = (pixelOffset & 0xFFFFFFFE) / 2;
@@ -160,7 +160,7 @@ Colour BMPReader::GetPixel(int x, int y) const
 	else
 		colourIndex = colourIndex >> 4;
 
-	ion::debug::Assert(colourIndex < m_paletteSize, "Out of range");
+	ion::debug::Assert(colourIndex < m_paletteSize, "eOut of range");
 
 	return GetPaletteEntry(colourIndex);
 }

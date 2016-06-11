@@ -29,7 +29,7 @@ namespace ion
 		class Archive
 		{
 		public:
-			enum Direction { In, Out };
+			enum Direction { eIn, eOut };
 
 			struct Tag
 			{
@@ -103,16 +103,16 @@ namespace ion
 			template <typename KEY, typename T> void Serialise(std::map<KEY, T>& objects);
 
 			//i/o stream
-			Stream& mStream;
+			Stream& m_stream;
 
 			//Stream version
-			u32 mVersion;
+			u32 m_version;
 
 			//Serialise direction
-			Direction mDirection;
+			Direction m_direction;
 
 			//Resource manager
-			ResourceManager* mResourceManager;
+			ResourceManager* m_resourceManager;
 
 			//Block
 			struct Block
@@ -142,16 +142,16 @@ namespace ion
 				virtual void* Construct() { return NULL; }
 				virtual void Serialise(Archive& archive, void* pointer) {}
 
-				std::string mSerialiseTypeName;
-				std::string mRuntimeTypeName;
+				std::string m_serialiseTypeName;
+				std::string m_runtimeTypeName;
 			};
 
 			template <typename SERIALISE_T, typename RUNTIME_T> struct PointerMapping : public PointerMappingBase
 			{
 				PointerMapping()
 				{
-					mSerialiseTypeName = typeid(SERIALISE_T).name();
-					mRuntimeTypeName = typeid(RUNTIME_T).name();
+					m_serialiseTypeName = typeid(SERIALISE_T).name();
+					m_runtimeTypeName = typeid(RUNTIME_T).name();
 				}
 
 				virtual void* Construct()
@@ -166,8 +166,8 @@ namespace ion
 			};
 
 			//Registered pointer mappings
-			std::map<std::string, PointerMappingBase*> mPointerMappingsByRuntimeName;
-			std::map<std::string, PointerMappingBase*> mPointerMappingsBySerialiseName;
+			std::map<std::string, PointerMappingBase*> m_pointerMappingsByRuntimeName;
+			std::map<std::string, PointerMappingBase*> m_pointerMappingsBySerialiseName;
 		};
 	}
 }
@@ -187,11 +187,11 @@ namespace ion
 		{
 			std::string className = typeid(T).name();
 
-			if(mPointerMappingsBySerialiseName.find(className) == mPointerMappingsBySerialiseName.end())
+			if(m_pointerMappingsBySerialiseName.find(className) == m_pointerMappingsBySerialiseName.end())
 			{
 				PointerMappingBase* pointerMapping = new PointerMapping<T, T>();
-				mPointerMappingsByRuntimeName[className] = pointerMapping;
-				mPointerMappingsBySerialiseName[className] = pointerMapping;
+				m_pointerMappingsByRuntimeName[className] = pointerMapping;
+				m_pointerMappingsBySerialiseName[className] = pointerMapping;
 			}
 		}
 
@@ -200,11 +200,11 @@ namespace ion
 			std::string serialiseName = typeid(SERIALISE_T).name();
 			std::string runtimeName = typeid(RUNTIME_T).name();
 
-			if(mPointerMappingsByRuntimeName.find(runtimeName) == mPointerMappingsByRuntimeName.end())
+			if(m_pointerMappingsByRuntimeName.find(runtimeName) == m_pointerMappingsByRuntimeName.end())
 			{
 				PointerMappingBase* pointerMapping = new PointerMapping<SERIALISE_T, RUNTIME_T>();
-				mPointerMappingsByRuntimeName[runtimeName] = pointerMapping;
-				mPointerMappingsBySerialiseName[serialiseName] = pointerMapping;
+				m_pointerMappingsByRuntimeName[runtimeName] = pointerMapping;
+				m_pointerMappingsBySerialiseName[serialiseName] = pointerMapping;
 			}
 		}
 
@@ -228,7 +228,7 @@ namespace ion
 			bool nullPtr = (object == NULL);
 			Serialise(nullPtr, "nullPtr");
 
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
 				if(nullPtr)
 				{
@@ -242,8 +242,8 @@ namespace ion
 					Serialise(serialiseTypeName, "typeName");
 
 					//Find in pointer mapping
-					std::map<std::string, PointerMappingBase*>::iterator it = mPointerMappingsBySerialiseName.find(serialiseTypeName);
-					ion::debug::Assert(it != mPointerMappingsBySerialiseName.end(), "Archive::Serialise(T*) - Pointer type not registered");
+					std::map<std::string, PointerMappingBase*>::iterator it = m_pointerMappingsBySerialiseName.find(serialiseTypeName);
+					ion::debug::Assert(it != m_pointerMappingsBySerialiseName.end(), "Archive::Serialise(T*) - Pointer type not registered");
 
 					//Construct
 					object = (T*)it->second->Construct();
@@ -260,11 +260,11 @@ namespace ion
 					std::string runtimeClassName = typeid(*object).name();
 
 					//Find in pointer mapping
-					std::map<std::string, PointerMappingBase*>::iterator it = mPointerMappingsByRuntimeName.find(runtimeClassName);
-					ion::debug::Assert(it != mPointerMappingsByRuntimeName.end(), "Archive::Serialise(T*) - Pointer type not registered");
+					std::map<std::string, PointerMappingBase*>::iterator it = m_pointerMappingsByRuntimeName.find(runtimeClassName);
+					ion::debug::Assert(it != m_pointerMappingsByRuntimeName.end(), "Archive::Serialise(T*) - Pointer type not registered");
 
 					//Serialise class name
-					Serialise(it->second->mSerialiseTypeName, "typeName");
+					Serialise(it->second->m_serialiseTypeName, "typeName");
 
 					//Serialise out
 					it->second->Serialise(*this, object);
@@ -280,16 +280,16 @@ namespace ion
 
 			if(validResource)
 			{
-				if(GetDirection() == Archive::In)
+				if(GetDirection() == Archive::eIn)
 				{
-					debug::Assert(mResourceManager != NULL, "No ResourceManager, cannot serialise in Resources with this archive");
+					debug::Assert(m_resourceManager != NULL, "No ResourceManager, cannot serialise in Resources with this archive");
 
 					//Read resource name
 					std::string resourceName;
 					Serialise(resourceName, "name");
 
 					//Request resource
-					handle = mResourceManager->GetResource<T>(resourceName);
+					handle = m_resourceManager->GetResource<T>(resourceName);
 				}
 				else
 				{
@@ -305,7 +305,7 @@ namespace ion
 			const u64 bufferSize = 1024;
 			u8 buffer[bufferSize] = { 0 };
 
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
 				debug::Error("Archive::Serialise() - Cannot serialise a stream back in");
 			}
@@ -371,7 +371,7 @@ namespace ion
 
 		template <> void Archive::Serialise<bool>(bool& data)
 		{
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
 				u8 boolean = 0;
 				Serialise(boolean);
@@ -386,7 +386,7 @@ namespace ion
 		
 		template <> void Archive::Serialise<std::string>(std::string& string)
 		{
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
 				if(PushBlock("__string"))
 				{
@@ -440,7 +440,7 @@ namespace ion
 
 		template <typename T> void Archive::Serialise(std::vector<T>& objects)
 		{
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
 				//Serialise in num objects
 				int numObjects = 0;
@@ -472,7 +472,7 @@ namespace ion
 
 		template <typename T> void Archive::Serialise(std::list<T>& objects)
 		{
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
 				//Serialise in num objects
 				int numObjects = 0;
@@ -502,7 +502,7 @@ namespace ion
 
 		template <typename KEY, typename T> void Archive::Serialise(std::map<KEY, T>& objects)
 		{
-			if(GetDirection() == In)
+			if(GetDirection() == eIn)
 			{
 				//Serialise in num objects
 				int numObjects = 0;

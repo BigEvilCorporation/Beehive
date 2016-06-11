@@ -46,8 +46,8 @@ namespace ion
 			virtual void Unload();
 			static int GetOpenGLMode(Format format, BitsPerPixel bitsPerPixel);
 
-			GLuint mGLTextureId;
-			int mGLFormat;
+			GLuint m_glTextureId;
+			int m_glFormat;
 		};
 	}
 }

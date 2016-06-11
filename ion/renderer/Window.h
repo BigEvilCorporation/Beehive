@@ -33,11 +33,11 @@ namespace ion
 			virtual void SetTitle(const std::string& title) = 0;
 
 		protected:
-			u32 mWindowWidth;
-			u32 mWindowHeight;
-			u32 mClientAreaWidth;
-			u32 mClientAreaHeight;
-			float mAspectRatio;
+			u32 m_windowWidth;
+			u32 m_windowHeight;
+			u32 mclientAreaWidth;
+			u32 m_clientAreaHeight;
+			float maspectRatio;
 		};
 	}
 }

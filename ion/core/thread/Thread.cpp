@@ -26,12 +26,12 @@ namespace ion
 			}
 
 			#if defined ION_PLATFORM_WINDOWS
-			mThreadHndl = CreateThread(	NULL,                   //Default security attributes
+			m_threadHndl = CreateThread(	NULL,                   //Default security attributes
 										0,                      //Default stack size  
 										Thread::ThreadFunction, //Thread function
 										this,					//User data
 										0,                      //Default creation flags 
-										&mThreadId);			//Thread id
+										&m_threadId);			//Thread id
 
 			//Set thread name by invoking VC exception
 			const DWORD MS_VC_EXCEPTION = 0x406D1388;
@@ -47,7 +47,7 @@ namespace ion
 			THREADNAME_INFO nameInfo;
 			nameInfo.dwType = 0x1000;
 			nameInfo.szName = name;
-			nameInfo.dwThreadID = mThreadId;
+			nameInfo.dwThreadID = m_threadId;
 			nameInfo.dwFlags = 0;
 
 			__try
@@ -63,20 +63,20 @@ namespace ion
 		Thread::~Thread()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			CloseHandle(mThreadHndl);
+			CloseHandle(m_threadHndl);
 			#endif
 		}
 
 		void Thread::Join()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			WaitForSingleObject(mThreadHndl, INFINITE);
+			WaitForSingleObject(m_threadHndl, INFINITE);
 			#endif
 		}
 
 		u32 Thread::GetId() const
 		{
-			return mThreadId;
+			return m_threadId;
 		}
 
 		unsigned long WINAPI Thread::ThreadFunction(void* params)

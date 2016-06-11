@@ -27,33 +27,33 @@ namespace ion
 
 			enum BlendMode
 			{
-				Additive,
-				Modulative,
-				Replace,
-				TransparentAlpha,
-				TransparentColour
+				eAdditive,
+				eModulative,
+				eReplace,
+				eTransparentAlpha,
+				eTransparentColour
 			};
 
 			enum LightingMode
 			{
-				Flat,
-				Gouraud,
-				Phong
+				eFlat,
+				eGouraud,
+				ePhong
 			};
 
 			enum CullMode
 			{
-				None,
-				Clockwise,
-				CounterClockwise
+				eNone,
+				eClockwise,
+				eCounterClockwise
 			};
 
 			enum ColourType
 			{
-				Ambient,
-				Diffuse,
-				Specular,
-				Emissive
+				eAmbient,
+				eDiffuse,
+				eSpecular,
+				eEmissive
 			};
 
 			Material();
@@ -118,52 +118,52 @@ namespace ion
 
 			void ApplyShaderParams(const Matrix4& worldMtx, const Matrix4& viewMtx, const Matrix4& projectionMtx);
 
-			Colour mAmbientColour;
-			Colour mDiffuseColour;
-			Colour mSpecularColour;
-			Colour mEmissiveColour;
+			Colour m_ambientColour;
+			Colour m_diffuseColour;
+			Colour m_specularColour;
+			Colour m_emissiveColour;
 
-			std::vector<Texture*> mDiffuseMaps;
-			Texture* mNormalMap;
-			Texture* mSpecularMap;
-			Texture* mOpacityMap;
+			std::vector<Texture*> m_diffuseMaps;
+			Texture* m_normalMap;
+			Texture* m_specularMap;
+			Texture* m_opacityMap;
 
-			Shader* mVertexShader;
-			Shader* mPixelShader;
+			Shader* m_vertexShader;
+			Shader* m_pixelShader;
 
 			struct ShaderParams
 			{
 				struct MatrixParams
 				{
-					Shader::ParamHndl<Matrix4> mWorld;
-					Shader::ParamHndl<Matrix4> mWorldViewProjection;
-				} mMatrices;
+					Shader::ParamHndl<Matrix4> m_world;
+					Shader::ParamHndl<Matrix4> m_worldViewProjection;
+				} m_matrices;
 
 				struct ColourParams
 				{
-					Shader::ParamHndl<Colour> mAmbient;
-					Shader::ParamHndl<Colour> mDiffuse;
-					Shader::ParamHndl<Colour> mSpecular;
-					Shader::ParamHndl<Colour> mEmissive;
-				} mColours;
+					Shader::ParamHndl<Colour> m_ambient;
+					Shader::ParamHndl<Colour> m_diffuse;
+					Shader::ParamHndl<Colour> m_specular;
+					Shader::ParamHndl<Colour> m_emissive;
+				} m_colours;
 
 				struct TextureParams
 				{
-					Shader::ParamHndl<Texture> mDiffuseMap;
-					Shader::ParamHndl<Texture> mNormalMap;
-					Shader::ParamHndl<Texture> mSpecularMap;
-					Shader::ParamHndl<Texture> mOpacityMap;
-				} mTextures;
+					Shader::ParamHndl<Texture> m_diffuseMap;
+					Shader::ParamHndl<Texture> m_normalMap;
+					Shader::ParamHndl<Texture> m_specularMap;
+					Shader::ParamHndl<Texture> m_opacityMap;
+				} m_textures;
 			};
 
-			ShaderParams mVertexShaderParams;
-			ShaderParams mPixelShaderParams;
+			ShaderParams m_vertexShaderParams;
+			ShaderParams m_pixelShaderParams;
 
-			bool mLightingEnabled;
-			bool mReceiveShadows;
-			LightingMode mLightingMode;
+			bool m_lightingEnabled;
+			bool m_receiveShadows;
+			LightingMode m_lightingMode;
 
-			BlendMode mBlendMode;
+			BlendMode m_blendMode;
 		};
 	}
 }

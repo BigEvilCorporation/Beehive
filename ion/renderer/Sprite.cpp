@@ -13,37 +13,37 @@ namespace ion
 	{
 		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteGridSizeX, int spriteGridSizeY, const std::string& sprite, io::ResourceManager& resourceManager)
 		{
-			mRenderType = renderType;
-			mSize = size;
-			mDrawDepth = drawDepth;
-			mSpriteSheetGridSizeX = spriteGridSizeX;
-			mSpriteSheetGridSizeY = spriteGridSizeY;
-			mCurrentFrame = 0;
-			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
+			m_renderType = renderType;
+			m_size = size;
+			m_drawDepth = drawDepth;
+			m_spriteSheetGridSizeX = spriteGridSizeX;
+			m_spriteSheetGridSizeY = spriteGridSizeY;
+			m_currentFrame = 0;
+			m_quadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
 
-			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
-			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
-			mSpriteSheet = resourceManager.GetResource<Texture>(sprite);
+			m_vertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
+			m_pixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
+			m_spriteSheet = resourceManager.GetResource<Texture>(sprite);
 		}
 
 		Sprite::Sprite(RenderType renderType, const Vector2& size, float drawDepth, int spriteGridSizeX, int spriteGridSizeY, const io::ResourceHandle<Texture>& sprite, io::ResourceManager& resourceManager)
 		{
-			mRenderType = renderType;
-			mSize = size;
-			mDrawDepth = drawDepth;
-			mSpriteSheetGridSizeX = spriteGridSizeX;
-			mSpriteSheetGridSizeY = spriteGridSizeY;
-			mCurrentFrame = 0;
-			mQuadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
+			m_renderType = renderType;
+			m_size = size;
+			m_drawDepth = drawDepth;
+			m_spriteSheetGridSizeX = spriteGridSizeX;
+			m_spriteSheetGridSizeY = spriteGridSizeY;
+			m_currentFrame = 0;
+			m_quadPrimitive = new Quad(Quad::xy, Vector2(1.0f, 1.0f));
 
-			mVertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
-			mPixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
-			mSpriteSheet = sprite;
+			m_vertexShader = resourceManager.GetResource<Shader>("sprite_v.ion.shader");
+			m_pixelShader = resourceManager.GetResource<Shader>("sprite_p.ion.shader");
+			m_spriteSheet = sprite;
 		}
 
 		Sprite::~Sprite()
 		{
-			delete mQuadPrimitive;
+			delete m_quadPrimitive;
 		}
 
 		void Sprite::SetFrame(int frame)
@@ -51,38 +51,38 @@ namespace ion
 			char text[128] = {0};
 			sprintf(text, "%i\n", frame);
 			ion::debug::Log(text);
-			mCurrentFrame = frame;
+			m_currentFrame = frame;
 		}
 
 		int Sprite::GetFrame() const
 		{
-			return mCurrentFrame;
+			return m_currentFrame;
 		}
 
 		void Sprite::SetColour(const Colour& colour)
 		{
-			mColour = colour;
+			m_colour = colour;
 		}
 
 		void Sprite::Render(Renderer& renderer, Camera& camera)
 		{
-			if(mVertexShader && mPixelShader && mSpriteSheet)
+			if(m_vertexShader && m_pixelShader && m_spriteSheet)
 			{
-				if(!mShaderParams.mWorldViewProjMtx.IsValid())
+				if(!m_shaderParams.m_worldViewProjMtx.IsValid())
 				{
-					mShaderParams.mWorldViewProjMtx = mVertexShader.Get()->CreateParamHndl<Matrix4>("gWorldViewProjectionMatrix");
-					mShaderParams.mDiffuseColour = mVertexShader.Get()->CreateParamHndl<Colour>("gDiffuseColour");
-					mShaderParams.mSpriteSheetGridSize = mVertexShader.Get()->CreateParamHndl<Vector2>("gSpriteSheetGridSize");
-					mShaderParams.mSpriteAnimFrame = mVertexShader.Get()->CreateParamHndl<float>("gCurrentFrame");
-					mShaderParams.mSpriteSheet = mPixelShader.Get()->CreateParamHndl<Texture>("gSpriteSheet");
+					m_shaderParams.m_worldViewProjMtx = m_vertexShader.Get()->CreateParamHndl<Matrix4>("gWorldViewProjectionMatrix");
+					m_shaderParams.m_diffuseColour = m_vertexShader.Get()->CreateParamHndl<Colour>("gDiffuseColour");
+					m_shaderParams.m_spriteSheetGridSize = m_vertexShader.Get()->CreateParamHndl<Vector2>("gSpriteSheetGridSize");
+					m_shaderParams.m_spriteAnimFrame = m_vertexShader.Get()->CreateParamHndl<float>("gCurrentFrame");
+					m_shaderParams.m_spriteSheet = m_pixelShader.Get()->CreateParamHndl<Texture>("gSpriteSheet");
 				}
 
 				Matrix4 drawMatrix;
 
-				if(mRenderType == Render2D)
+				if(m_renderType == eRender2D)
 				{
-					Vector3 position = Vector3(GetTransform().GetTranslation().x, GetTransform().GetTranslation().y, -mDrawDepth);
-					Vector3 scale = Vector3(mSize.x, mSize.y, 1.0f);
+					Vector3 position = Vector3(GetTransform().GetTranslation().x, GetTransform().GetTranslation().y, -m_drawDepth);
+					Vector3 scale = Vector3(m_size.x, m_size.y, 1.0f);
 
 					drawMatrix.SetTranslation(position);
 					drawMatrix.SetScale(scale);
@@ -94,50 +94,50 @@ namespace ion
 				}
 
 				//Set world view projection matrix
-				mShaderParams.mWorldViewProjMtx.SetValue(drawMatrix);
+				m_shaderParams.m_worldViewProjMtx.SetValue(drawMatrix);
 
 				//Set colour
-				mShaderParams.mDiffuseColour.SetValue(mColour);
+				m_shaderParams.m_diffuseColour.SetValue(m_colour);
 			
 				//Set texture
-				mShaderParams.mSpriteSheet.SetValue(*mSpriteSheet);
+				m_shaderParams.m_spriteSheet.SetValue(*m_spriteSheet);
 
 				//Set grid size
-				mShaderParams.mSpriteSheetGridSize.SetValue(Vector2((float)mSpriteSheetGridSizeX, (float)mSpriteSheetGridSizeY));
+				m_shaderParams.m_spriteSheetGridSize.SetValue(Vector2((float)m_spriteSheetGridSizeX, (float)m_spriteSheetGridSizeY));
 
 				//Set current anim frame
-				mShaderParams.mSpriteAnimFrame.SetValue((float)mCurrentFrame);
+				m_shaderParams.m_spriteAnimFrame.SetValue((float)m_currentFrame);
 
 				//Bind shaders
-				mVertexShader.Get()->Bind();
-				mPixelShader.Get()->Bind();
+				m_vertexShader.Get()->Bind();
+				m_pixelShader.Get()->Bind();
 
 				//Render VBO
-				renderer.DrawVertexBuffer(mQuadPrimitive->GetVertexBuffer(), mQuadPrimitive->GetIndexBuffer());
+				renderer.DrawVertexBuffer(m_quadPrimitive->GetVertexBuffer(), m_quadPrimitive->GetIndexBuffer());
 
 				//Unbind
-				mPixelShader.Get()->Unbind();
-				mVertexShader.Get()->Unbind();
+				m_pixelShader.Get()->Unbind();
+				m_vertexShader.Get()->Unbind();
 			}
 		}
 
 		SpriteAnimation::SpriteAnimation(Sprite& sprite)
-			: mSprite(sprite)
+			: m_sprite(sprite)
 		{
-			mAnimationTrack = NULL;
+			m_animationTrack = NULL;
 		}
 
 		void SpriteAnimation::SetAnimationTrack(const AnimationTrackInt& animationTrack)
 		{
-			mAnimationTrack = &animationTrack;
+			m_animationTrack = &animationTrack;
 		}
 
 		void SpriteAnimation::ApplyFrame(float frame)
 		{
-			if(mAnimationTrack)
+			if(m_animationTrack)
 			{
-				int value = mAnimationTrack->GetValue(frame);
-				mSprite.SetFrame(value);
+				int value = m_animationTrack->GetValue(frame);
+				m_sprite.SetFrame(value);
 			}
 		}
 	}

@@ -14,28 +14,28 @@ namespace ion
 		Semaphore::Semaphore(int maxSignalCount)
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			mSemaphoreHndl = CreateSemaphore(NULL, 0, maxSignalCount, NULL);
+			m_semaphoreHndl = CreateSemaphore(NULL, 0, maxSignalCount, NULL);
 			#endif
 		}
 
 		Semaphore::~Semaphore()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			CloseHandle(mSemaphoreHndl);
+			CloseHandle(m_semaphoreHndl);
 			#endif
 		}
 
 		void Semaphore::Signal()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			ReleaseSemaphore(mSemaphoreHndl, 1, NULL);
+			ReleaseSemaphore(m_semaphoreHndl, 1, NULL);
 			#endif
 		}
 
 		void Semaphore::Wait()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			WaitForSingleObject(mSemaphoreHndl, INFINITE);
+			WaitForSingleObject(m_semaphoreHndl, INFINITE);
 			#endif
 		}
 	}

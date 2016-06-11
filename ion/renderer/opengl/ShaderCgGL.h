@@ -64,13 +64,13 @@ namespace ion
 				virtual void Set(const Matrix4& value);
 				virtual void Set(const Texture& value);
 
-				CGparameter mCgParam;
+				CGparameter m_cgParam;
 			};
 
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName);
 
-			CGprogram mCgProgram;
-			bool mCgProgramLoaded;
+			CGprogram m_cgProgram;
+			bool m_cgProgramLoaded;
 		};
 	}
 }

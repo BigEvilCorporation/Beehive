@@ -39,7 +39,7 @@ namespace ion
 			class ShaderParamDelegate;
 
 		public:
-			enum ProgramType { Vertex, Fragment };
+			enum ProgramType { eVertex, eFragment };
 
 			template <typename T> class ParamHndl
 			{
@@ -102,9 +102,9 @@ namespace ion
 			Shader();
 			virtual ShaderParamDelegate* CreateShaderParamDelegate(const std::string& paramName) = 0;
 
-			std::string mProgramFilename;
-			std::string mEntryPoint;
-			ProgramType mProgramType;
+			std::string m_programFilename;
+			std::string m_entryPoint;
+			ProgramType m_programType;
 		};
 
 		template <typename T> Shader::ParamHndl<T> Shader::CreateParamHndl(const std::string& name)

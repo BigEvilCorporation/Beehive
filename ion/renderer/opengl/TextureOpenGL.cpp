@@ -28,7 +28,7 @@ namespace ion
 
 		TextureOpenGL::TextureOpenGL()
 		{
-			mGLTextureId = 0;
+			m_glTextureId = 0;
 		}
 
 		TextureOpenGL::~TextureOpenGL()
@@ -39,13 +39,13 @@ namespace ion
 		bool TextureOpenGL::Load()
 		{
 			//Load image onto a new SDL surface
-			SDL_Surface* sdlSurface = IMG_Load(mImageFilename.c_str());
+			SDL_Surface* sdlSurface = IMG_Load(m_imageFilename.c_str());
 
 			if(sdlSurface)
 			{
 				//Get dimensions
-				mWidth = sdlSurface->w;
-				mHeight = sdlSurface->h;
+				m_width = sdlSurface->w;
+				m_height = sdlSurface->h;
 
 				Format format = eRGB;
 
@@ -66,30 +66,30 @@ namespace ion
 				}
 				
 				//Load image to OpenGL texture
-				Load(mWidth, mHeight, format, eRGBA_DXT5, BitsPerPixel(sdlSurface->format->BytesPerPixel * 8), true, (const u8*)sdlSurface->pixels);
+				Load(m_width, m_height, format, eRGBA_DXT5, BitsPerPixel(sdlSurface->format->BytesPerPixel * 8), true, (const u8*)sdlSurface->pixels);
 
 				//Free SDL surface
 				SDL_FreeSurface(sdlSurface);
 			}
 
-			return mGLTextureId != 0;
+			return m_glTextureId != 0;
 		}
 
 		bool TextureOpenGL::Load(u32 width, u32 height, Format sourceFormat, Format destFormat, BitsPerPixel bitsPerPixel, bool generateMipmaps, const u8* data)
 		{
 			//Destroy existing texture
-			if(mGLTextureId)
+			if(m_glTextureId)
 			{
 				Unload();
 			}
 
 			//Generate texture
-			glGenTextures(1, &mGLTextureId);
+			glGenTextures(1, &m_glTextureId);
 
-			debug::Assert(mGLTextureId != 0, "Could not create OpenGL texture");
+			debug::Assert(m_glTextureId != 0, "Could not create OpenGL texture");
 
 			//Bind the texture
-			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
+			glBindTexture(GL_TEXTURE_2D, m_glTextureId);
 
 			//Generate mipmaps
 			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, generateMipmaps ? GL_TRUE : GL_FALSE);
@@ -101,41 +101,41 @@ namespace ion
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, generateMipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 
 			//Get GL format
-			mGLFormat = GetOpenGLMode(destFormat, bitsPerPixel);
+			m_glFormat = GetOpenGLMode(destFormat, bitsPerPixel);
 			int GLSourceFormat = GetOpenGLMode(sourceFormat, bitsPerPixel);
 
 			//Copy all pixels in SDL surface to GL texture
-			glTexImage2D(GL_TEXTURE_2D, 0, mGLFormat, width, height, 0, GLSourceFormat, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, m_glFormat, width, height, 0, GLSourceFormat, GL_UNSIGNED_BYTE, data);
 
 			//Unbind texture
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			//Set dimensions
-			mWidth = width;
-			mHeight = height;
+			m_width = width;
+			m_height = height;
 
-			return mGLTextureId != 0;
+			return m_glTextureId != 0;
 		}
 
 		void TextureOpenGL::Unload()
 		{
-			if(mGLTextureId)
+			if(m_glTextureId)
 			{
-				glDeleteTextures(1, &mGLTextureId);
-				mGLTextureId = 0;
-				mWidth = 0;
-				mHeight = 0;
+				glDeleteTextures(1, &m_glTextureId);
+				m_glTextureId = 0;
+				m_width = 0;
+				m_height = 0;
 			}
 		}
 
 		GLuint TextureOpenGL::GetTextureId() const
 		{
-			return mGLTextureId;
+			return m_glTextureId;
 		}
 
 		void TextureOpenGL::SetPixel(const ion::Vector2i& position, const Colour& colour)
 		{
-			ion::debug::Assert(mGLFormat == GL_RGB || mGLFormat == GL_RGBA, "TextureOpenGL::SetPixel() - Only supported for 24 bit texture formats");
+			ion::debug::Assert(m_glFormat == GL_RGB || m_glFormat == GL_RGBA, "TextureOpenGL::SetPixel() - Only supported for 24 bit texture formats");
 
 			u8 data[4];
 
@@ -144,8 +144,8 @@ namespace ion
 			data[2] = (int)(colour.b * 255);
 			data[3] = (int)(colour.a * 255);
 
-			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, position.x, position.y, 1, 1, mGLFormat, GL_UNSIGNED_BYTE, data);
+			glBindTexture(GL_TEXTURE_2D, m_glTextureId);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, position.x, position.y, 1, 1, m_glFormat, GL_UNSIGNED_BYTE, data);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
@@ -157,7 +157,7 @@ namespace ion
 			u8* dest = data;
 			u32 lineSize = size.x * bytesPerPixel;
 
-			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
+			glBindTexture(GL_TEXTURE_2D, m_glTextureId);
 			glGetTexImage(GL_TEXTURE_2D, 0, GetOpenGLMode(format, bitsPerPixel), GL_UNSIGNED_BYTE, buffer);
 			glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -172,7 +172,7 @@ namespace ion
 
 		void TextureOpenGL::SetMinifyFilter(Filter filter)
 		{
-			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
+			glBindTexture(GL_TEXTURE_2D, m_glTextureId);
 
 			int filterMode = 0;
 
@@ -196,7 +196,7 @@ namespace ion
 
 		void TextureOpenGL::SetMagnifyFilter(Filter filter)
 		{
-			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
+			glBindTexture(GL_TEXTURE_2D, m_glTextureId);
 
 			int filterMode = 0;
 
@@ -220,7 +220,7 @@ namespace ion
 
 		void TextureOpenGL::SetWrapping(Wrapping wrapping)
 		{
-			glBindTexture(GL_TEXTURE_2D, mGLTextureId);
+			glBindTexture(GL_TEXTURE_2D, m_glTextureId);
 
 			int wrapMode = 0;
 

@@ -14,11 +14,11 @@ namespace ion
 	namespace io
 	{
 		Resource::Resource(ResourceManager& resourceManager, const std::string& filename)
-			: mResourceManager(resourceManager)
+			: m_resourceManager(resourceManager)
 		{
-			mFilename = filename;
-			mIsLoaded = false;
-			mResourceCount = 0;
+			m_filename = filename;
+			m_isLoaded = false;
+			m_resourceCount = 0;
 		}
 
 		Resource::~Resource()
@@ -28,32 +28,32 @@ namespace ion
 
 		u32 Resource::GetResourceCount() const
 		{
-			return mResourceCount;
+			return m_resourceCount;
 		}
 
 		void Resource::Reference()
 		{
-			if(!mResourceCount)
+			if(!m_resourceCount)
 			{
-				mResourceManager.RequestLoad(*this);
+				m_resourceManager.RequestLoad(*this);
 			}
 
-			thread::atomic::Increment(mResourceCount);
+			thread::atomic::Increment(m_resourceCount);
 		}
 
 		void Resource::Release()
 		{
-			thread::atomic::Decrement(mResourceCount);
+			thread::atomic::Decrement(m_resourceCount);
 
-			if(!mResourceCount)
+			if(!m_resourceCount)
 			{
-				mResourceManager.RequestUnload(*this);
+				m_resourceManager.RequestUnload(*this);
 			}
 		}
 
 		const std::string& Resource::GetFilename() const
 		{
-			return mFilename;
+			return m_filename;
 		}
 	}
 }

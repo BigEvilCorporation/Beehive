@@ -15,50 +15,50 @@ namespace ion
 	namespace io
 	{
 		FileDevice::FileDevice(std::string label, std::string mountPoint, DeviceType deviceType, AccessType accessType)
-			: mLabel(label),
-			mMountPoint(mountPoint),
-			mDeviceType(deviceType),
-			mAccessType(accessType)
+			: m_label(label),
+			m_mountPoint(mountPoint),
+			m_deviceType(deviceType),
+			m_accessType(accessType)
 		{
-			mCurrentDirectory = "/";
+			m_currentDirectory = "/";
 		}
 
 		FileDevice::DeviceType FileDevice::GetDeviceType() const
 		{
-			return mDeviceType;
+			return m_deviceType;
 		}
 
 		FileDevice::AccessType FileDevice::GetAccessType() const
 		{
-			return mAccessType;
+			return m_accessType;
 		}
 
 		const std::string& FileDevice::GetLabel() const
 		{
-			return mLabel;
+			return m_label;
 		}
 
 		const std::string& FileDevice::GetMountPoint() const
 		{
-			return mMountPoint;
+			return m_mountPoint;
 		}
 
 		void FileDevice::SetDirectory(std::string directory)
 		{
 			//If path begins with mount point, skip it
-			if(directory.find(mMountPoint) == 0)
+			if(directory.find(m_mountPoint) == 0)
 			{
-				mCurrentDirectory = directory.substr(0, mMountPoint.size());
+				m_currentDirectory = directory.substr(0, m_mountPoint.size());
 			}
 			else
 			{
-				mCurrentDirectory = NormalisePath(directory);
+				m_currentDirectory = NormalisePath(directory);
 			}
 		}
 
 		const std::string& FileDevice::GetDirectory() const
 		{
-			return mCurrentDirectory;
+			return m_currentDirectory;
 		}
 
 		void FileDevice::ReadDirectory(std::string directory, std::vector<DirectoryItem>& directoryListing)
@@ -68,7 +68,7 @@ namespace ion
 
 			WIN32_FIND_DATA findData = {0};
 
-			std::string path = mMountPoint;
+			std::string path = m_mountPoint;
 			path += directory;
 			path += "\\*.*";
 			path = NormalisePath(path);
@@ -79,9 +79,9 @@ namespace ion
 			{
 				DirectoryItem directoryItem;
 
-				directoryItem.mFilename = findData.cFileName;
-				directoryItem.mFileType = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? Directory : File;
-				directoryItem.mAccessType = (findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? ReadOnly : Writeable;
+				directoryItem.m_filename = findData.cFileName;
+				directoryItem.m_fileType = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? eDirectory : eFile;
+				directoryItem.m_accessType = (findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? eReadOnly : eWriteable;
 
 				directoryListing.push_back(directoryItem);
 			}

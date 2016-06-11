@@ -38,10 +38,10 @@ namespace ion
 			static unsigned long WINAPI ThreadFunction(void* params);
 			#endif
 
-			unsigned long mThreadId;
+			unsigned long m_threadId;
 
 			#if defined ION_PLATFORM_WINDOWS
-			HANDLE mThreadHndl;
+			HANDLE m_threadHndl;
 			#endif
 		};
 	}

@@ -27,14 +27,14 @@ namespace ion
 			static const int s_bufferSize = (1024 * 32);
 
 		public:
-			enum OpenMode { OpenRead, OpenWrite, OpenAppend };
-			enum SeekMode { Start, Current };
+			enum OpenMode { eOpenRead, eOpenWrite, eOpenAppend };
+			enum SeekMode { eStart, eCurrent };
 
 			File();
-			File(const std::string& filename, OpenMode openMode = OpenRead);
+			File(const std::string& filename, OpenMode openMode = eOpenRead);
 			virtual ~File();
 
-			virtual bool Open(const std::string& filename, OpenMode openMode = OpenRead);
+			virtual bool Open(const std::string& filename, OpenMode openMode = eOpenRead);
 			virtual void Close();
 
 			virtual u64 GetSize() const;
@@ -42,7 +42,7 @@ namespace ion
 			virtual u64 Read(void* data, u64 size);
 			virtual u64 Write(const void* data, u64 Size);
 			virtual u64 Seek(u64 position);
-			u64 Seek(u64 position, SeekMode origin = Current);
+			u64 Seek(u64 position, SeekMode origin = eCurrent);
 
 			void Flush();
 
@@ -51,15 +51,15 @@ namespace ion
 			OpenMode GetOpenMode() const;
 
 		protected:
-			std::string mFilename;
-			OpenMode mOpenMode;
+			std::string m_filename;
+			OpenMode m_openMode;
 
-			u64 mCurrentPosition;
-			u64 mSize;
+			u64 m_currentPosition;
+			u64 m_size;
 
-			bool mOpen;
+			bool m_open;
 
-			std::fstream mStream;
+			std::fstream m_stream;
 			u8 m_buffer[s_bufferSize];
 		};
 	}

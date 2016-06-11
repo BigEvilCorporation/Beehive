@@ -13,7 +13,7 @@ namespace ion
 	{
 		CameraThirdPerson::CameraThirdPerson()
 		{
-			mMoveSpeed = 10.0f;
+			m_moveSpeed = 10.0f;
 		}
 
 		CameraThirdPerson::~CameraThirdPerson()
@@ -23,17 +23,17 @@ namespace ion
 
 		void CameraThirdPerson::SetTargetHeadPosition(ion::Vector3& targetPosition)
 		{
-			mTargetHeadPosition = targetPosition;
+			m_targetHeadPosition = targetPosition;
 		}
 
 		void CameraThirdPerson::SetTargetFocusPosition(ion::Vector3& targetPosition)
 		{
-			mTargetFocusPosition = targetPosition;
+			m_targetFocusPosition = targetPosition;
 		}
 
 		void CameraThirdPerson::SetMoveSpeed(float speed)
 		{
-			mMoveSpeed = speed;
+			m_moveSpeed = speed;
 		}
 
 		void CameraThirdPerson::Update(float deltaTime)
@@ -45,13 +45,13 @@ namespace ion
 				const ion::Matrix4& transform = camera->GetTransform();
 				const ion::Vector3& currentPosition = transform.GetTranslation();
 
-				ion::Vector3 newPosition = currentPosition.Lerp(mTargetHeadPosition, mMoveSpeed * deltaTime);
-				ion::Vector3 newFocus = mFocusPosition.Lerp(mTargetFocusPosition, mMoveSpeed * deltaTime);
+				ion::Vector3 newPosition = currentPosition.Lerp(m_targetHeadPosition, m_moveSpeed * deltaTime);
+				ion::Vector3 newFocus = m_focusPosition.Lerp(m_targetFocusPosition, m_moveSpeed * deltaTime);
 
 				camera->SetPosition(newPosition);
 				camera->SetLookAt(newFocus);
 
-				mFocusPosition = newFocus;
+				m_focusPosition = newFocus;
 			}
 		}
 	}

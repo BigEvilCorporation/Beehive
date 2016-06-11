@@ -90,26 +90,26 @@ namespace ion
 
 		ShaderCgGL::ShaderCgGL()
 		{
-			mCgProgram = 0;
-			mCgProgramLoaded = false;
+			m_cgProgram = 0;
+			m_cgProgramLoaded = false;
 		}
 
 		ShaderCgGL::~ShaderCgGL()
 		{
-			if(mCgProgram)
+			if(m_cgProgram)
 			{
-				cgDestroyProgram(mCgProgram);
+				cgDestroyProgram(m_cgProgram);
 			}
 		}
 
 		bool ShaderCgGL::Load(const std::string& filename)
 		{
 			//Open shader file
-			io::File shaderFile(filename, io::File::OpenRead);
+			io::File shaderFile(filename, io::File::eOpenRead);
 			if(shaderFile.IsOpen())
 			{
 				//Serialise
-				io::Archive archiveIn(shaderFile, io::Archive::In, NULL);
+				io::Archive archiveIn(shaderFile, io::Archive::eIn, NULL);
 				archiveIn.Serialise(*this);
 
 				//Done with shader file
@@ -117,8 +117,8 @@ namespace ion
 
 				//Load program file
 				std::string shaderDirectory = filename.substr(0, filename.find_first_of('/'));
-				std::string programFilename = shaderDirectory + "/programs/cg/" + mProgramFilename;
-				io::File programFile(programFilename, io::File::OpenRead);
+				std::string programFilename = shaderDirectory + "/programs/cg/" + m_programFilename;
+				io::File programFile(programFilename, io::File::eOpenRead);
 
 				if(programFile.IsOpen())
 				{
@@ -132,13 +132,13 @@ namespace ion
 					programFile.Close();
 
 					CGprofile cgProfile;
-					if(mProgramType == Vertex)
+					if(m_programType == eVertex)
 						cgProfile = ShaderManagerCgGL::sCgProfileVertex;
-					else if(mProgramType == Fragment)
+					else if(m_programType == eFragment)
 						cgProfile = ShaderManagerCgGL::sCgProfilePixel;
 
 					//Compile program
-					mCgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, cgProfile, mEntryPoint.c_str(), NULL);
+					m_cgProgram = cgCreateProgram(ShaderManagerCgGL::sCgContext, CG_SOURCE, programText, cgProfile, m_entryPoint.c_str(), NULL);
 
 					//Done with file text
 					delete programText;
@@ -153,27 +153,27 @@ namespace ion
 		void ShaderCgGL::Bind()
 		{
 			CGprofile cgProfile;
-			if(mProgramType == Vertex)
+			if(m_programType == eVertex)
 				cgProfile = ShaderManagerCgGL::sCgProfileVertex;
-			else if(mProgramType == Fragment)
+			else if(m_programType == eFragment)
 				cgProfile = ShaderManagerCgGL::sCgProfilePixel;
 
-			if(!mCgProgramLoaded)
+			if(!m_cgProgramLoaded)
 			{
-				cgGLLoadProgram(mCgProgram);
-				mCgProgramLoaded = true;
+				cgGLLoadProgram(m_cgProgram);
+				m_cgProgramLoaded = true;
 			}
 
 			cgGLEnableProfile(cgProfile);
-			cgGLBindProgram(mCgProgram);
+			cgGLBindProgram(m_cgProgram);
 		}
 
 		void ShaderCgGL::Unbind()
 		{
 			CGprofile cgProfile;
-			if(mProgramType == Vertex)
+			if(m_programType == eVertex)
 				cgProfile = ShaderManagerCgGL::sCgProfileVertex;
-			else if(mProgramType == Fragment)
+			else if(m_programType == eFragment)
 				cgProfile = ShaderManagerCgGL::sCgProfilePixel;
 
 			cgGLUnbindProgram(cgProfile);
@@ -184,7 +184,7 @@ namespace ion
 		{
 			ShaderParamDelegateCg* paramDelegate = NULL;
 
-			CGparameter param = cgGetNamedParameter(mCgProgram, paramName.c_str());
+			CGparameter param = cgGetNamedParameter(m_cgProgram, paramName.c_str());
 			if(param)
 			{
 				paramDelegate = new ShaderParamDelegateCg(param);
@@ -195,42 +195,42 @@ namespace ion
 
 		ShaderCgGL::ShaderParamDelegateCg::ShaderParamDelegateCg(CGparameter cgParam)
 		{
-			mCgParam = cgParam;
+			m_cgParam = cgParam;
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const int& value)
 		{
-			cgGLSetParameter1f(mCgParam, (float)value);
+			cgGLSetParameter1f(m_cgParam, (float)value);
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const float& value)
 		{
-			cgGLSetParameter1f(mCgParam, value);
+			cgGLSetParameter1f(m_cgParam, value);
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Vector2& value)
 		{
-			cgGLSetParameter2fv(mCgParam, (float*)&value);
+			cgGLSetParameter2fv(m_cgParam, (float*)&value);
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Vector3& value)
 		{
-			cgGLSetParameter3fv(mCgParam, (float*)&value);
+			cgGLSetParameter3fv(m_cgParam, (float*)&value);
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Colour& value)
 		{
-			cgGLSetParameter4fv(mCgParam, (float*)&value);
+			cgGLSetParameter4fv(m_cgParam, (float*)&value);
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Matrix4& value)
 		{
-			cgSetMatrixParameterfc(mCgParam, (float*)&value);
+			cgSetMatrixParameterfc(m_cgParam, (float*)&value);
 		}
 
 		void ShaderCgGL::ShaderParamDelegateCg::Set(const Texture& value)
 		{
-			cgGLSetTextureParameter(mCgParam, ((TextureOpenGL&)value).GetTextureId());
+			cgGLSetTextureParameter(m_cgParam, ((TextureOpenGL&)value).GetTextureId());
 		}
 	}
 }

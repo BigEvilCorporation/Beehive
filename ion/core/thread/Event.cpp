@@ -14,28 +14,28 @@ namespace ion
 		Event::Event()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			mThreadEventHndl = CreateEvent(NULL, FALSE, FALSE, NULL);
+			m_threadEventHndl = CreateEvent(NULL, FALSE, FALSE, NULL);
 			#endif
 		}
 
 		Event::~Event()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			CloseHandle(mThreadEventHndl);
+			CloseHandle(m_threadEventHndl);
 			#endif
 		}
 
 		void Event::Signal()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			SetEvent(mThreadEventHndl);
+			SetEvent(m_threadEventHndl);
 			#endif
 		}
 
 		void Event::Wait()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			WaitForSingleObject(mThreadEventHndl, INFINITE);
+			WaitForSingleObject(m_threadEventHndl, INFINITE);
 			#endif
 		}
 	}

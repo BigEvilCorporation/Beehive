@@ -13,14 +13,14 @@ namespace ion
 	{
 		Animation::Animation()
 		{
-			mLength = 1.0f;
-			mCurrentFrame = 0.0f;
-			mPreviousFrame = 0.0f;
-			mPlaybackSpeed = 1.0f;
+			m_length = 1.0f;
+			m_currentFrame = 0.0f;
+			m_previousFrame = 0.0f;
+			m_playbackSpeed = 1.0f;
 
-			mState = Stopped;
-			mPlaybackBehaviour = Loop;
-			mPlaybackDirection = Forwards;
+			m_state = eStopped;
+			m_playbackBehaviour = eLoop;
+			m_playbackDirection = eForwards;
 		}
 
 		Animation::~Animation()
@@ -29,158 +29,158 @@ namespace ion
 
 		void Animation::Update(float deltaTime)
 		{
-			if(mState == Playing)
+			if(m_state == ePlaying)
 			{
 				//Cache previous frame
-				mPreviousFrame = mCurrentFrame;
+				m_previousFrame = m_currentFrame;
 
-				if(mPlaybackDirection == Forwards)
+				if(m_playbackDirection == eForwards)
 				{
 					//Advance animation forwards
-					mCurrentFrame += deltaTime * mPlaybackSpeed;
+					m_currentFrame += deltaTime * m_playbackSpeed;
 
 					//If gone past the length
-					if(mCurrentFrame > mLength)
+					if(m_currentFrame > m_length)
 					{
-						if(mPlaybackBehaviour == Loop)
+						if(m_playbackBehaviour == eLoop)
 						{
 							//Apply the final frame then loop
-							ApplyFrame(mLength);
+							ApplyFrame(m_length);
 
 							//Loop round
-							mCurrentFrame = maths::Fmod(mCurrentFrame, mLength);
+							m_currentFrame = maths::Fmod(m_currentFrame, m_length);
 						}
 						else
 						{
 							//Clamp to end
-							mCurrentFrame = mLength;
+							m_currentFrame = m_length;
 
 							//Finished
-							SetState(Stopped);
+							SetState(eStopped);
 						}
 					}
 				}
 				else
 				{
 					//Advance animation backwards
-					mCurrentFrame -= deltaTime * mPlaybackSpeed;
+					m_currentFrame -= deltaTime * m_playbackSpeed;
 
 					//If gone past the start
-					if(mCurrentFrame < 0.0f)
+					if(m_currentFrame < 0.0f)
 					{
-						if(mPlaybackBehaviour == Loop)
+						if(m_playbackBehaviour == eLoop)
 						{
 							//Apply the first frame then loop
 							ApplyFrame(0.0f);
 
 							//Loop round
-							mCurrentFrame = mLength - maths::Fmod(mLength - mCurrentFrame, mLength);
+							m_currentFrame = m_length - maths::Fmod(m_length - m_currentFrame, m_length);
 						}
 						else
 						{
 							//Clamp to start
-							mCurrentFrame = 0.0f;
+							m_currentFrame = 0.0f;
 
 							//Finished
-							SetState(Stopped);
+							SetState(eStopped);
 						}
 					}
 				}
 
 				//Apply new frame
-				ApplyFrame(mCurrentFrame);
+				ApplyFrame(m_currentFrame);
 			}
 		}
 
 		void Animation::SetLength(float length)
 		{
-			mLength = length;
+			m_length = length;
 		}
 
 		float Animation::GetLength() const
 		{
-			return mLength;
+			return m_length;
 		}
 
 		void Animation::SetFrame(float frame)
 		{
-			mPreviousFrame = mCurrentFrame;
-			mCurrentFrame = frame;
+			m_previousFrame = m_currentFrame;
+			m_currentFrame = frame;
 		}
 
 		float Animation::GetFrame() const
 		{
-			return mCurrentFrame;
+			return m_currentFrame;
 		}
 
 		float Animation::GetPreviousFrame() const
 		{
-			return mPreviousFrame;
+			return m_previousFrame;
 		}
 
 		void Animation::SetStart()
 		{
-			mCurrentFrame = 0.0f;
-			mPreviousFrame = 0.0f;
-			ApplyFrame(mCurrentFrame);
+			m_currentFrame = 0.0f;
+			m_previousFrame = 0.0f;
+			ApplyFrame(m_currentFrame);
 		}
 
 		void Animation::SetEnd()
 		{
-			mCurrentFrame = mLength;
-			mPreviousFrame = mLength;
-			ApplyFrame(mCurrentFrame);
+			m_currentFrame = m_length;
+			m_previousFrame = m_length;
+			ApplyFrame(m_currentFrame);
 		}
 
 		void Animation::SetState(AnimationState state)
 		{
-			mState = state;
+			m_state = state;
 		}
 
 		Animation::AnimationState Animation::GetState() const
 		{
-			return mState;
+			return m_state;
 		}
 
 		void Animation::SetPlaybackSpeed(float speed)
 		{
-			mPlaybackSpeed = speed;
+			m_playbackSpeed = speed;
 		}
 
 		float Animation::GetPlaybackSpeed() const
 		{
-			return mPlaybackSpeed;
+			return m_playbackSpeed;
 		}
 
 		void Animation::SetPlaybackBehaviour(PlaybackBehaviour behaviour)
 		{
-			mPlaybackBehaviour = behaviour;
+			m_playbackBehaviour = behaviour;
 		}
 
 		Animation::PlaybackBehaviour Animation::GetPlaybackBehaviour() const
 		{
-			return mPlaybackBehaviour;
+			return m_playbackBehaviour;
 		}
 
 		void Animation::SetPlaybackDirection(PlaybackDirection direction)
 		{
-			mPlaybackDirection = direction;
+			m_playbackDirection = direction;
 		}
 
 		Animation::PlaybackDirection Animation::GetPlaybackDirection() const
 		{
-			return mPlaybackDirection;
+			return m_playbackDirection;
 		}
 
 		void Animation::Serialise(io::Archive& archive)
 		{
-			archive.Serialise(mLength, "length");
-			archive.Serialise(mCurrentFrame, "currentFrame");
-			archive.Serialise(mPreviousFrame, "previousFrame");
-			archive.Serialise(mPlaybackSpeed, "playbackSpeed");
-			archive.Serialise((int&)mState, "state");
-			archive.Serialise((int&)mPlaybackBehaviour, "playbackBehaviour");
-			archive.Serialise((int&)mPlaybackDirection, "playbackDirection");
+			archive.Serialise(m_length, "length");
+			archive.Serialise(m_currentFrame, "currentFrame");
+			archive.Serialise(m_previousFrame, "previousFrame");
+			archive.Serialise(m_playbackSpeed, "playbackSpeed");
+			archive.Serialise((int&)m_state, "state");
+			archive.Serialise((int&)m_playbackBehaviour, "playbackBehaviour");
+			archive.Serialise((int&)m_playbackDirection, "playbackDirection");
 		}
 
 		const float AnimationTrackFloat::GetValue(float time) const

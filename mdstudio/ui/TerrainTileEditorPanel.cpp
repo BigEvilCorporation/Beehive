@@ -142,12 +142,12 @@ void TerrainTileEditorPanel::RenderCollision(ion::render::Renderer& renderer, co
 {
 	//Draw collision tile
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
-	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_collisionPrimitive->GetVertexBuffer(), m_collisionPrimitive->GetIndexBuffer());
 	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 }
 
 void TerrainTileEditorPanel::PaintTile()

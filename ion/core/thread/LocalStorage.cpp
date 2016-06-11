@@ -15,29 +15,29 @@ namespace ion
 		LocalStorage::LocalStorage()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			mTLSIndex = TlsAlloc();
-			debug::Assert(mTLSIndex != TLS_OUT_OF_INDEXES, "Could not create TLS - out of indices");
+			m_TLSIndex = TlsAlloc();
+			debug::Assert(m_TLSIndex != TLS_OUT_OF_INDEXES, "Could not create TLS - out of indices");
 			#endif
 		}
 
 		LocalStorage::~LocalStorage()
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			TlsFree(mTLSIndex);
+			TlsFree(m_TLSIndex);
 			#endif
 		}
 
 		void LocalStorage::SetData(StorageData& data)
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			TlsSetValue(mTLSIndex, &data);
+			TlsSetValue(m_TLSIndex, &data);
 			#endif
 		}
 
 		StorageData* LocalStorage::GetData() const
 		{
 			#if defined ION_PLATFORM_WINDOWS
-			return (StorageData*)TlsGetValue(mTLSIndex);
+			return (StorageData*)TlsGetValue(m_TLSIndex);
 			#endif
 		}
 	}

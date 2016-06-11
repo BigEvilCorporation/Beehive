@@ -14,18 +14,18 @@ namespace ion
 		z = Z;
 	}
 
-	Vector3::Vector3(float *Float3)
+	Vector3::Vector3(const float* float3)
 	{
-		x = Float3[0];
-		y = Float3[1];
-		z = Float3[2];
+		x = float3[0];
+		y = float3[1];
+		z = float3[2];
 	}
 
-	Vector3::Vector3(const Vector3 & Vector)
+	Vector3::Vector3(const Vector3& vector)
 	{
-		x = Vector.x;
-		y = Vector.y;
-		z = Vector.z;
+		x = vector.x;
+		y = vector.y;
+		z = vector.z;
 	}
 
 	Vector3::~Vector3() {}
@@ -35,9 +35,9 @@ namespace ion
 		x = y = z = 0.0f;
 	}
 
-	float Vector3::operator [](int Index) const
+	float Vector3::operator [](int index) const
 	{
-		switch(Index)
+		switch(index)
 		{
 		case 0:
 			return x;
@@ -56,98 +56,98 @@ namespace ion
 		}
 	}
 
-	Vector3 Vector3::operator *(float Scalar) const
+	Vector3 Vector3::operator *(float scalar) const
 	{
-		return Vector3(x * Scalar, y * Scalar, z * Scalar);
+		return Vector3(x * scalar, y * scalar, z * scalar);
 	}
 
-	Vector3 Vector3::operator *(const Vector3 &Vector) const
+	Vector3 Vector3::operator *(const Vector3& vector) const
 	{
-		return Vector3(x * Vector.x, y * Vector.y, z * Vector.z);
+		return Vector3(x * vector.x, y * vector.y, z * vector.z);
 	}
 
-	Vector3 Vector3::operator /(const Vector3 &Vector) const
+	Vector3 Vector3::operator /(const Vector3& vector) const
 	{
-		return Vector3(x / Vector.x, y / Vector.y, z / Vector.z);
+		return Vector3(x / vector.x, y / vector.y, z / vector.z);
 	}
 
-	Vector3 Vector3::operator -(float Scalar) const
+	Vector3 Vector3::operator -(float scalar) const
 	{
-		return Vector3(x - Scalar, y - Scalar, z - Scalar);
+		return Vector3(x - scalar, y - scalar, z - scalar);
 	}
 
-	Vector3 Vector3::operator +(float Scalar) const
+	Vector3 Vector3::operator +(float scalar) const
 	{
-		return Vector3(x + Scalar, y + Scalar, z + Scalar);
+		return Vector3(x + scalar, y + scalar, z + scalar);
 	}
 
-	Vector3 Vector3::operator /(float Scalar) const
+	Vector3 Vector3::operator /(float scalar) const
 	{
-		float inv = 1.0f / Scalar;
+		float inv = 1.0f / scalar;
 		return Vector3(x * inv, y * inv, z * inv);
 	}
 
-	Vector3 Vector3::operator -(const Vector3 &Vector) const
+	Vector3 Vector3::operator -(const Vector3& vector) const
 	{
-		return Vector3(x - Vector.x, y - Vector.y, z - Vector.z);
+		return Vector3(x - vector.x, y - vector.y, z - vector.z);
 	}
 
-	Vector3 Vector3::operator +(const Vector3 &Vector) const
+	Vector3 Vector3::operator +(const Vector3& vector) const
 	{
-		return Vector3(Vector.x + x, Vector.y + y, Vector.z + z);
+		return Vector3(vector.x + x, vector.y + y, vector.z + z);
 	}
 
-	void Vector3::operator +=(const Vector3 &Vector)
+	void Vector3::operator +=(const Vector3& vector)
 	{
-		*this = *this + Vector;
+		*this = *this + vector;
 	}
 
-	void Vector3::operator -=(const Vector3 &Vector)
+	void Vector3::operator -=(const Vector3& vector)
 	{
-		*this = *this - Vector;
+		*this = *this - vector;
 	}
 
-	void Vector3::operator *=(const Vector3 &Vector)
+	void Vector3::operator *=(const Vector3& vector)
 	{
-		x = x * Vector.x;
-		y = y * Vector.y;
-		z = z * Vector.z;
+		x = x * vector.x;
+		y = y * vector.y;
+		z = z * vector.z;
 	}
 
-	void Vector3::operator *=(float Scalar)
+	void Vector3::operator *=(float scalar)
 	{
-		*this = *this * Scalar;
+		*this = *this * scalar;
 	}
 
-	bool Vector3::operator ==(const Vector3 &Vector) const
+	bool Vector3::operator ==(const Vector3& vector) const
 	{
-		return (x == Vector.x && y == Vector.y && z == Vector.z);
+		return (x == vector.x && y == vector.y && z == vector.z);
 	}
 
-	Vector3 Vector3::Cross(const Vector3& b) const
+	Vector3 Vector3::Cross(const Vector3& vector) const
 	{
-		return Vector3((y * b.z - b.y * z), (z * b.x - b.z * x), (x * b.y - b.x * y));
+		return Vector3((y * vector.z - vector.y * z), (z * vector.x - vector.z * x), (x * vector.y - vector.x * y));
 	}
 
-	float Vector3::Dot(const Vector3& Vector) const
+	float Vector3::Dot(const Vector3& vector) const
 	{
-		return (x * Vector.x + y * Vector.y + z * Vector.z);
+		return (x * vector.x + y * vector.y + z * vector.z);
 	}
 
 	Vector3 Vector3::Normalise() const
 	{
-		float Length = GetLength();
+		float length = GetLength();
 
-		Vector3 Result;
+		Vector3 result;
 
-		if(Length != 0.0f)
+		if(length != 0.0f)
 		{
-			if(x != 0.0f) Result.x = x / Length;
-			if(y != 0.0f) Result.y = y / Length;
-			if(z != 0.0f) Result.z = z / Length;
+			if(x != 0.0f) result.x = x / length;
+			if(y != 0.0f) result.y = y / length;
+			if(z != 0.0f) result.z = z / length;
 		}
 
-		return Result;
+		return result;
 	}
 
 	float Vector3::GetLength() const
@@ -155,35 +155,35 @@ namespace ion
 		return sqrt(x*x + y*y + z*z);
 	}
 
-	float Vector3::GetDistance(const Vector3& v) const
+	float Vector3::GetDistance(const Vector3& vector) const
 	{
 		float dx, dy, dz;
-		dx = x - v.x;
-		dy = y - v.y;
-		dz = z - v.z;
+		dx = x - vector.x;
+		dy = y - vector.y;
+		dz = z - vector.z;
 		return sqrt(dx*dx + dy*dy + dz*dz);
 	}
 
-	Vector3 Vector3::Lerp(const Vector3& Vector, float Weight) const
+	Vector3 Vector3::Lerp(const Vector3& vector, float time) const
 	{
-		Vector3 Result;
+		Vector3 result;
 
-		if (Weight <= 0.0f)
+		if (time <= 0.0f)
 		{
-			Result = (*this);
+			result = (*this);
 		}
-		else if(Weight >= 1.0f)
+		else if(time >= 1.0f)
 		{
-			Result = Vector;
+			result = vector;
 		}
 		else
 		{
-			Result.x = x + Weight * (Vector.x - x);
-			Result.y = y + Weight * (Vector.y - y);
-			Result.z = z + Weight * (Vector.z - z);
+			result.x = x + time * (vector.x - x);
+			result.y = y + time * (vector.y - y);
+			result.z = z + time * (vector.z - z);
 		}
 
-		return Result;
+		return result;
 	}
 
 	void Vector3::Serialise(io::Archive& archive)

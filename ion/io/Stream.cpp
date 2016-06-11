@@ -50,7 +50,7 @@ namespace ion
 
 		u64 MemoryStream::Seek(u64 position)
 		{
-			debug::Assert(position < GetSize(), "MemoryStream::Seek() - Out of range");
+			debug::Assert(position < GetSize(), "MemoryStream::Seek() - eOut of range");
 			m_position = position;
 			return m_position;
 		}

@@ -14,33 +14,33 @@ namespace ion
 	{
 		ResourceManager::ResourceManager()
 		{
-			mWorkerThread = new WorkerThread();
+			m_workerThread = new WorkerThread();
 		}
 
 		ResourceManager::~ResourceManager()
 		{
-			delete mWorkerThread;
+			delete m_workerThread;
 		}
 
 		void ResourceManager::RemoveResource(const std::string& filename)
 		{
-			std::map<std::string, Resource*>::iterator it = mResourceMap.find(filename);
+			std::map<std::string, Resource*>::iterator it = m_resourceMap.find(filename);
 
-			if(it != mResourceMap.end())
+			if(it != m_resourceMap.end())
 			{
 				ion::debug::Assert(it->second->GetResourceCount() == 0, "ResourceManager::RemoveResource() - Resource is still referenced");
-				mResourceMap.erase(it);
+				m_resourceMap.erase(it);
 			}
 		}
 
 		u32 ResourceManager::GetNumResourcesWaiting() const
 		{
-			return mWorkerThread->GetNumJobsInQueue();
+			return m_workerThread->GetNumJobsInQueue();
 		}
 
 		void ResourceManager::RequestLoad(Resource& resource)
 		{
-			if(thread::GetCurrentThreadId() == mWorkerThread->GetId())
+			if(thread::GetCurrentThreadId() == m_workerThread->GetId())
 			{
 				//Already on worker thread, do job immediately
 				resource.Load();
@@ -48,13 +48,13 @@ namespace ion
 			else
 			{
 				//Push to job to worker thread
-				mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Load, resource));
+				m_workerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Load, resource));
 			}
 		}
 
 		void ResourceManager::RequestUnload(Resource& resource)
 		{
-			if(thread::GetCurrentThreadId() == mWorkerThread->GetId())
+			if(thread::GetCurrentThreadId() == m_workerThread->GetId())
 			{
 				//Already on worker thread, do job immediately
 				resource.Unload();
@@ -62,33 +62,33 @@ namespace ion
 			else
 			{
 				//Push to job to worker thread
-				mWorkerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Unload, resource));
+				m_workerThread->PushJob(WorkerThread::Job(WorkerThread::Job::Unload, resource));
 			}
 		}
 
 		ResourceManager::WorkerThread::WorkerThread()
-			: mJobQueueSemaphore(sJobQueueSize)
+			: m_jobQueueSemaphore(s_jobQueueSize)
 		{
-			mNumJobsInQueue = 0;
+			m_numJobsInQueue = 0;
 		}
 
 		ResourceManager::WorkerThread::~WorkerThread()
 		{
 			Job shutdownJob;
-			shutdownJob.mJobType = Job::Shutdown;
+			shutdownJob.m_jobType = Job::Shutdown;
 			PushJob(shutdownJob);
 		}
 
 		void ResourceManager::WorkerThread::PushJob(Job& job)
 		{
-			mJobQueue.Push(job);
-			thread::atomic::Increment(mNumJobsInQueue);
-			mJobQueueSemaphore.Signal();
+			m_jobQueue.Push(job);
+			thread::atomic::Increment(m_numJobsInQueue);
+			m_jobQueueSemaphore.Signal();
 		}
 
 		u32 ResourceManager::WorkerThread::GetNumJobsInQueue() const
 		{
-			return mNumJobsInQueue;
+			return m_numJobsInQueue;
 		}
 
 		void ResourceManager::WorkerThread::Entry()
@@ -96,23 +96,23 @@ namespace ion
 			while(true)
 			{
 				//Wait for job
-				mJobQueueSemaphore.Wait();
+				m_jobQueueSemaphore.Wait();
 
 				//Pop job from queue
-				Job job = mJobQueue.Pop();
+				Job job = m_jobQueue.Pop();
 
-				if(job.mJobType == ResourceManager::WorkerThread::Job::Load)
+				if(job.m_jobType == ResourceManager::WorkerThread::Job::Load)
 				{
 					//Load resource
-					job.mResource->Load();
+					job.m_resource->Load();
 				}
-				else if(job.mJobType == ResourceManager::WorkerThread::Job::Unload)
+				else if(job.m_jobType == ResourceManager::WorkerThread::Job::Unload)
 				{
 					//Unload resource
-					job.mResource->Unload();
+					job.m_resource->Unload();
 				}
 
-				thread::atomic::Decrement(mNumJobsInQueue);
+				thread::atomic::Decrement(m_numJobsInQueue);
 			}
 		}
 	}

@@ -14,7 +14,7 @@ namespace ion
 	{
 		Application::Application(const char* name)
 		{
-			mName = name;
+			m_name = name;
 		}
 
 		Application::~Application()

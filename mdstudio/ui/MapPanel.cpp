@@ -223,7 +223,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 							//Clear selection, start again
 							m_selectedTiles.clear();
 
-							//Start box selection, in case next event is dragging
+							//eStart box selection, in case next event is dragging
 							m_boxSelectStart.x = x;
 							m_boxSelectStart.y = y;
 						}
@@ -1293,25 +1293,25 @@ void MapPanel::ResetToolData()
 void MapPanel::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//No depth test (stops grid cells Z fighting)
-	renderer.SetDepthTest(ion::render::Renderer::Always);
+	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialCollisionTypes);
 
 	//Draw map
-	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
 	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 
-	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
 void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//No depth test
-	renderer.SetDepthTest(ion::render::Renderer::Always);
+	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
@@ -1357,7 +1357,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 		material->SetDiffuseColour(colour);
 
 		const float x = m_currentBezierControlPos.x;
@@ -1375,7 +1375,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 
-		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 	}
 
 	//Draw selected bezier
@@ -1384,7 +1384,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 		material->SetDiffuseColour(colour);
 
 		ion::Vector2 boundsMin;
@@ -1407,28 +1407,28 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 
-		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 	}
 
-	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
 void MapPanel::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//No depth test (stops grid cells Z fighting)
-	renderer.SetDepthTest(ion::render::Renderer::Always);
+	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
 
 	//Draw map
-	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
 	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 
-	renderer.SetDepthTest(ion::render::Renderer::LessEqual);
+	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
 void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -1445,7 +1445,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
-	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 	material->SetDiffuseColour(colour);
 
 	for(TGameObjectPosMap::const_iterator itMap = gameObjects.begin(), endMap = gameObjects.end(); itMap != endMap; ++itMap)
@@ -1497,7 +1497,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 		}
 	}
 
-	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 }
 
 void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -1508,7 +1508,7 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 		const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 		material->SetDiffuseColour(colour);
 
 		const Map& map = m_project->GetMap();
@@ -1552,7 +1552,7 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 			spriteSheetMaterial->Unbind();
 		}
 
-		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 	}
 }
 
@@ -1614,12 +1614,12 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 		boxMtx.SetTranslation(boxPos);
 		boxMtx.SetScale(boxScale);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 		material->SetDiffuseColour(colour);
 		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
-		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 	}
 	else if(m_selectedTiles.size() > 0)
 	{
@@ -1629,7 +1629,7 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 		ion::render::Shader* vertexShader = m_renderResources.GetVertexShader(RenderResources::eShaderFlatColour);
 		ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
 
-		renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 		material->SetDiffuseColour(colour);
 		material->Bind(selectionMtx, cameraInverseMtx, projectionMtx);
 
@@ -1650,7 +1650,7 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 		}
 
 		material->Unbind();
-		renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 	}
 }
 
@@ -1681,9 +1681,9 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 			clonePreviewMtx.SetTranslation(clonePreviewPos);
 			clonePreviewMtx.SetScale(clonePreviewScale);
 
-			renderer.SetFaceCulling(ion::render::Renderer::NoCull);
-			renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
-			renderer.SetDepthTest(ion::render::Renderer::Always);
+			renderer.SetFaceCulling(ion::render::Renderer::eNoCull);
+			renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+			renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
 			ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
 			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourPreview);
@@ -1693,9 +1693,9 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 			renderer.DrawVertexBuffer(m_stampPreviewPrimitive->GetVertexBuffer(), m_stampPreviewPrimitive->GetIndexBuffer());
 			material->Unbind();
 
-			renderer.SetDepthTest(ion::render::Renderer::LessEqual);
-			renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
-			renderer.SetFaceCulling(ion::render::Renderer::CounterClockwise);
+			renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+			renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+			renderer.SetFaceCulling(ion::render::Renderer::eCounterClockwise);
 		}
 	}
 }
@@ -1763,12 +1763,12 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 			ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 			const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
 
-			renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+			renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 			material->SetDiffuseColour(colour);
 			material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 			renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 			material->Unbind();
-			renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+			renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 		}
 	}
 }

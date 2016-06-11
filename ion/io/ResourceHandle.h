@@ -38,7 +38,7 @@ namespace ion
 			const std::string& GetName() const;
 
 		protected:
-			ResourceT<T>* mResource;
+			ResourceT<T>* m_resource;
 
 			friend class ResourceManager;
 		};
@@ -57,22 +57,22 @@ namespace ion
 	{
 		template <class T> ResourceHandle<T>::ResourceHandle()
 		{
-			mResource = NULL;
+			m_resource = NULL;
 		}
 
 		template <class T> ResourceHandle<T>::ResourceHandle(ResourceT<T>* resource)
 		{
-			mResource = resource;
-			mResource->Reference();
+			m_resource = resource;
+			m_resource->Reference();
 		}
 
 		template <class T> ResourceHandle<T>::ResourceHandle(const ResourceHandle<T>& rhs)
 		{
-			mResource = rhs.mResource;
+			m_resource = rhs.mResource;
 
-			if(mResource)
+			if(m_resource)
 			{
-				mResource->Reference();
+				m_resource->Reference();
 			}
 		}
 
@@ -83,28 +83,28 @@ namespace ion
 
 		template <class T> bool ResourceHandle<T>::IsValid() const
 		{
-			return mResource && mResource->IsLoaded();
+			return m_resource && m_resource->IsLoaded();
 		}
 
 		template <class T> void ResourceHandle<T>::Clear()
 		{
-			if(mResource)
+			if(m_resource)
 			{
-				mResource->Release();
-				mResource = NULL;
+				m_resource->Release();
+				m_resource = NULL;
 			}
 		}
 
 		template <class T> ResourceHandle<T>& ResourceHandle<T>::operator = (const ResourceHandle& rhs)
 		{
-			if(mResource != rhs.mResource)
+			if(m_resource != rhs.m_resource)
 			{
 				Clear();
-				mResource = rhs.mResource;
+				m_resource = rhs.m_resource;
 
-				if(mResource)
+				if(m_resource)
 				{
-					mResource->Reference();
+					m_resource->Reference();
 				}
 			}
 
@@ -119,7 +119,7 @@ namespace ion
 		template <class T> T* ResourceHandle<T>::Get() const
 		{
 			debug::Assert(IsValid(), "Resource not loaded");
-			return mResource->Get();
+			return m_resource->Get();
 		}
 
 		template <class T> T& ResourceHandle<T>::operator * () const
@@ -135,7 +135,7 @@ namespace ion
 		template <class T> const std::string& ResourceHandle<T>::GetName() const
 		{
 			debug::Assert(IsValid(), "Resource not loaded");
-			return mResource->GetFilename();
+			return m_resource->GetFilename();
 		}
 	}
 }

@@ -388,12 +388,12 @@ void StampsPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, 
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
-	renderer.SetAlphaBlending(ion::render::Renderer::Translucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 	material->SetDiffuseColour(colour);
 	material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_selectionPrimitive->GetVertexBuffer(), m_selectionPrimitive->GetIndexBuffer());
 	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::NoBlend);
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 }
 
 void StampsPanel::ResetZoomPan()

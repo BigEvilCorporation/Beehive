@@ -99,7 +99,7 @@ u16 Palette::GetUsedColourMask() const
 
 void Palette::MarkUsed(int colourIdx)
 {
-	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
+	ion::debug::Assert(colourIdx < coloursPerPalette, "eOut of range");
 	m_usedColours |= (1 << colourIdx);
 }
 
@@ -125,7 +125,7 @@ int Palette::AddColour(const Colour& colour)
 
 void Palette::SetColour(int colourIdx, const Colour& colour)
 {
-	ion::debug::Assert(colourIdx < coloursPerPalette, "Out of range");
+	ion::debug::Assert(colourIdx < coloursPerPalette, "eOut of range");
 	MarkUsed(colourIdx);
 	m_colours[colourIdx] = colour;
 }

@@ -109,7 +109,7 @@ const std::string& SpriteSheet::GetName() const
 
 const SpriteSheetFrame& SpriteSheet::GetFrame(int index) const
 {
-	ion::debug::Assert(index >= 0 && index < GetNumFrames(), "SpriteSheet::GetFrame() - Out of range");
+	ion::debug::Assert(index >= 0 && index < GetNumFrames(), "SpriteSheet::GetFrame() - eOut of range");
 	return m_frames[index];
 }
 
