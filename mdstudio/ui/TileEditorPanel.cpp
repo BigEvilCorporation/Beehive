@@ -11,8 +11,8 @@
 
 const float TileEditorPanel::s_defaultZoom = 3.0f;
 
-TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
+TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	//No panning
 	EnablePan(false);
@@ -54,30 +54,30 @@ void TileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
 	const int tileHeight = 8;
 
-	if(m_project && m_project->GetPaintTile())
+	if(m_project.GetPaintTile())
 	{
-		TileId tileId = m_project->GetPaintTile();
+		TileId tileId = m_project.GetPaintTile();
 
 		if(buttonBits & eMouseLeft)
 		{
-			if(Tile* tile = m_project->GetTileset().GetTile(tileId))
+			if(Tile* tile = m_project.GetTileset().GetTile(tileId))
 			{
 				if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
 				{
 					//Get palette
-					Palette* palette = m_project->GetPalette(tile->GetPaletteId());
+					Palette* palette = m_project.GetPalette(tile->GetPaletteId());
 
 					if(palette)
 					{
 						//Get colour
-						u8 colourIdx = m_project->GetPaintColour();
+						u8 colourIdx = m_project.GetPaintColour();
 						const Colour& colour = palette->GetColour(colourIdx);
 
 						//Set colour on tile
 						tile->SetPixelColour(x, y, colourIdx);
 
 						//Re-add to hash map
-						m_project->GetTileset().HashChanged(tileId);
+						m_project.GetTileset().HashChanged(tileId);
 
 						//Set colour on tileset texture
 						m_renderResources.SetTilesetTexPixel(tileId, ion::Vector2i(x, y), colourIdx);
@@ -102,27 +102,19 @@ void TileEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::Matri
 
 	z += zOffset;
 
-	if(m_project->GetShowGrid())
+	if(m_project.GetShowGrid())
 	{
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	}
-}
-
-void TileEditorPanel::SetProject(Project* project)
-{
-	ViewPanel::SetProject(project);
 }
 
 void TileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	ViewPanel::Refresh(eraseBackground, rect);
 
-	if(m_project)
-	{
-		ion::render::TexCoord texCoords[4];
-		m_renderResources.GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
-		m_tilePrimitive->SetTexCoords(texCoords);
-	}
+	ion::render::TexCoord texCoords[4];
+	m_renderResources.GetTileTexCoords(m_project.GetPaintTile(), texCoords, 0);
+	m_tilePrimitive->SetTexCoords(texCoords);
 }
 
 void TileEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

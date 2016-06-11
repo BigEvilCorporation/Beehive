@@ -12,16 +12,10 @@
 
 #include <stdio.h>
 
-PalettesPanel::PalettesPanel(	MainWindow* mainWindow,
-								wxWindow *parent,
-								wxWindowID id,
-								const wxPoint& pos,
-								const wxSize& size,
-								long style,
-								const wxString& name)
+PalettesPanel::PalettesPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxPanel(parent, id, pos, size, style, name)
+	, m_project(project)
 {
-	m_project = NULL;
 	m_mainWindow = mainWindow;
 	m_orientation = eVertical;
 
@@ -37,81 +31,78 @@ PalettesPanel::PalettesPanel(	MainWindow* mainWindow,
 
 void PalettesPanel::OnMouse(wxMouseEvent& event)
 {
-	if(m_project)
+	//Get mouse position in map space
+	wxClientDC clientDc(this);
+	wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
+	ion::Vector2 mousePosMapSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
+
+	//Get panel size
+	wxSize panelSize = GetClientSize();
+
+	float x = (m_orientation == eVertical) ? mousePosMapSpace.y : mousePosMapSpace.x;
+	float y = (m_orientation == eVertical) ? mousePosMapSpace.x : mousePosMapSpace.y;
+	float colourRectSize = (m_orientation == eVertical) ? (panelSize.y / Palette::coloursPerPalette) : (panelSize.x / Palette::coloursPerPalette);
+
+	//Get current selection
+	unsigned int colourId = (unsigned int)floor(x / colourRectSize);
+	unsigned int paletteId = (unsigned int)floor(y / colourRectSize);
+
+	if(paletteId < 4)
 	{
-		//Get mouse position in map space
-		wxClientDC clientDc(this);
-		wxPoint mouseCanvasPosWx = event.GetLogicalPosition(clientDc);
-		ion::Vector2 mousePosMapSpace(mouseCanvasPosWx.x, mouseCanvasPosWx.y);
-
-		//Get panel size
-		wxSize panelSize = GetClientSize();
-
-		float x = (m_orientation == eVertical) ? mousePosMapSpace.y : mousePosMapSpace.x;
-		float y = (m_orientation == eVertical) ? mousePosMapSpace.x : mousePosMapSpace.y;
-		float colourRectSize = (m_orientation == eVertical) ? (panelSize.y / Palette::coloursPerPalette) : (panelSize.x / Palette::coloursPerPalette);
-
-		//Get current selection
-		unsigned int colourId = (unsigned int)floor(x / colourRectSize);
-		unsigned int paletteId = (unsigned int)floor(y / colourRectSize);
-
-		if(paletteId < 4)
+		if(event.RightUp())
 		{
-			if(event.RightUp())
+			//Right-click slot menu
+			wxMenu slotMenu;
+			wxMenu* saveMenu = new wxMenu();
+			wxMenu* loadMenu = new wxMenu();
+
+			char text[1024] = { 0 };
+			int numSlots = m_project.GetNumPaletteSlots();
+
+			for(int i = 0; i < numSlots; i++)
 			{
-				//Right-click slot menu
-				wxMenu slotMenu;
-				wxMenu* saveMenu = new wxMenu();
-				wxMenu* loadMenu = new wxMenu();
-
-				char text[1024] = { 0 };
-				int numSlots = m_project->GetNumPaletteSlots();
-
-				for(int i = 0; i < numSlots; i++)
-				{
-					sprintf(text, "Slot %u", i);
-					saveMenu->Append(i | eMenuSave, wxString(text));
-					loadMenu->Append(i | eMenuLoad, wxString(text));
-				}
-
-				saveMenu->AppendSeparator();
-				saveMenu->Append(eMenuNew, wxString("Backup to new slot"));
-
-				slotMenu.AppendSubMenu(saveMenu, "Save");
-				slotMenu.AppendSubMenu(loadMenu, "Load");
-				slotMenu.Append(eMenuImport, wxString("Import..."));
-				slotMenu.Append(eMenuExport, wxString("Export..."));
-				
-				slotMenu.SetClientData((void*)paletteId);
-				slotMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PalettesPanel::OnSlotsMenuClick, NULL, this);
-				PopupMenu(&slotMenu, event.GetPosition());
+				sprintf(text, "Slot %u", i);
+				saveMenu->Append(i | eMenuSave, wxString(text));
+				loadMenu->Append(i | eMenuLoad, wxString(text));
 			}
 
-			if(paletteId < m_project->GetNumPalettes() && colourId < Palette::coloursPerPalette)
+			saveMenu->AppendSeparator();
+			saveMenu->Append(eMenuNew, wxString("Backup to new slot"));
+
+			slotMenu.AppendSubMenu(saveMenu, "Save");
+			slotMenu.AppendSubMenu(loadMenu, "Load");
+			slotMenu.Append(eMenuImport, wxString("Import..."));
+			slotMenu.Append(eMenuExport, wxString("Export..."));
+				
+			slotMenu.SetClientData((void*)paletteId);
+			slotMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PalettesPanel::OnSlotsMenuClick, NULL, this);
+			PopupMenu(&slotMenu, event.GetPosition());
+		}
+
+		if(paletteId < m_project.GetNumPalettes() && colourId < Palette::coloursPerPalette)
+		{
+			if(Palette* palette = m_project.GetPalette((PaletteId)paletteId))
 			{
-				if(Palette* palette = m_project->GetPalette((PaletteId)paletteId))
+				if(event.LeftDClick())
 				{
-					if(event.LeftDClick())
+					wxColourDialog dialogue(this);
+					if(dialogue.ShowModal() == wxID_OK)
 					{
-						wxColourDialog dialogue(this);
-						if(dialogue.ShowModal() == wxID_OK)
-						{
-							wxColour wxcolour = dialogue.GetColourData().GetColour();
-							Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
-							palette->SetColour(colourId, colour);
+						wxColour wxcolour = dialogue.GetColourData().GetColour();
+						Colour colour(wxcolour.Red(), wxcolour.Green(), wxcolour.Blue());
+						palette->SetColour(colourId, colour);
 
-							//Refresh tiles, stamps and map panels
-							m_mainWindow->RefreshAll();
-						}
+						//Refresh tiles, stamps and map panels
+						m_mainWindow->RefreshAll();
 					}
+				}
 
-					if(palette->IsColourUsed(colourId))
+				if(palette->IsColourUsed(colourId))
+				{
+					if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
 					{
-						if(event.ButtonIsDown(wxMOUSE_BTN_LEFT))
-						{
-							//Set current paint colour
-							m_project->SetPaintColour(colourId);
-						}
+						//Set current paint colour
+						m_project.SetPaintColour(colourId);
 					}
 				}
 			}
@@ -125,26 +116,26 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 {
 	int menuItemId = event.GetId();
 	int slotId = menuItemId & 0xFF;
-	int numSlots = m_project->GetNumPaletteSlots();
+	int numSlots = m_project.GetNumPaletteSlots();
 	PaletteId paletteId = (PaletteId)event.GetClientData();
 
 	if(menuItemId & eMenuNew)
 	{
 		//Backup palette to new slot
-		Palette* palette = m_project->GetPalette(paletteId);
-		m_project->AddPaletteSlot(*palette);
+		Palette* palette = m_project.GetPalette(paletteId);
+		m_project.AddPaletteSlot(*palette);
 	}
 	else if(menuItemId & eMenuSave)
 	{
 		//Backup palette to existing slot
-		Palette* palette = m_project->GetPalette(paletteId);
-		Palette* slot = m_project->GetPaletteSlot(slotId);
+		Palette* palette = m_project.GetPalette(paletteId);
+		Palette* slot = m_project.GetPaletteSlot(slotId);
 		*slot = *palette;
 	}
 	else if(menuItemId & eMenuLoad)
 	{
 		//Set active palette slot
-		m_project->SetActivePaletteSlot(paletteId, slotId);
+		m_project.SetActivePaletteSlot(paletteId, slotId);
 
 		//Refresh tiles, stamps and map panels
 		m_mainWindow->RefreshAll();
@@ -155,7 +146,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 		if(dialogue.ShowModal() == wxID_OK)
 		{
 			std::string filename = dialogue.GetPath().c_str().AsChar();
-			m_project->ImportPaletteSlots(filename);
+			m_project.ImportPaletteSlots(filename);
 			m_mainWindow->RefreshAll();
 		}
 	}
@@ -165,7 +156,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 		if(dialogue.ShowModal() == wxID_OK)
 		{
 			std::string filename = dialogue.GetPath().c_str().AsChar();
-			m_project->ExportPaletteSlots(filename);
+			m_project.ExportPaletteSlots(filename);
 		}
 	}
 }
@@ -188,9 +179,9 @@ void PalettesPanel::OnPaint(wxPaintEvent& event)
 
 	float colourRectSize = (m_orientation == eVertical) ? (clientSize.y / Palette::coloursPerPalette) : (clientSize.x / Palette::coloursPerPalette);
 
-	for(int i = 0; i < m_project->GetNumPalettes(); i++)
+	for(int i = 0; i < m_project.GetNumPalettes(); i++)
 	{
-		const Palette* palette = m_project->GetPalette(i);
+		const Palette* palette = m_project.GetPalette(i);
 
 		for(int j = 0; j < Palette::coloursPerPalette; j++)
 		{
@@ -223,28 +214,25 @@ void PalettesPanel::OnErase(wxEraseEvent& event)
 
 void PalettesPanel::OnResize(wxSizeEvent& event)
 {
-	if(m_project)
+	wxSize newSize = event.GetSize();
+
+	if(newSize.x > newSize.y)
 	{
-		wxSize newSize = event.GetSize();
+		//Set new orientation
+		m_orientation = eHorizontal;
 
-		if(newSize.x > newSize.y)
-		{
-			//Set new orientation
-			m_orientation = eHorizontal;
+		//Limit height
+		int colourRectSize = (newSize.x / Palette::coloursPerPalette);
+		SetMinSize(wxSize(1, colourRectSize * m_project.GetNumPalettes()));
+	}
+	else
+	{
+		//Set new orientation
+		m_orientation = eVertical;
 
-			//Limit height
-			int colourRectSize = (newSize.x / Palette::coloursPerPalette);
-			SetMinSize(wxSize(1, colourRectSize * m_project->GetNumPalettes()));
-		}
-		else
-		{
-			//Set new orientation
-			m_orientation = eVertical;
-
-			//Limit width
-			int colourRectSize = (newSize.y / Palette::coloursPerPalette);
-			SetMinSize(wxSize(colourRectSize * m_project->GetNumPalettes(), 1));
-		}
+		//Limit width
+		int colourRectSize = (newSize.y / Palette::coloursPerPalette);
+		SetMinSize(wxSize(colourRectSize * m_project.GetNumPalettes(), 1));
 	}
 
 	Refresh();

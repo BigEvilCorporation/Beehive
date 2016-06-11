@@ -1,13 +1,13 @@
 #include "ViewPanel.h"
 #include "MainWindow.h"
 
-ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxGLCanvas(parent, glContext, winid, pos, size, style, name, NULL, wxNullPalette)
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)
 	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
+	, m_project(project)
 {
-	m_project = NULL;
 	m_mainWindow = mainWindow;
 	m_canvasPrimitive = NULL;
 	m_gridPrimitive = NULL;
@@ -37,6 +37,15 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wx
 	Bind(wxEVT_PAINT, &ViewPanel::EventHandlerPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND, &ViewPanel::EventHandlerErase, this, GetId());
 	Bind(wxEVT_SIZE, &ViewPanel::EventHandlerResize, this, GetId());
+
+	//Centre camera on canvas
+	CentreCamera();
+
+	//Reset zoom
+	SetCameraZoom(1.0f);
+
+	//Refresh panel
+	Refresh();
 }
 
 ViewPanel::~ViewPanel()
@@ -68,18 +77,15 @@ void ViewPanel::EventHandlerPaint(wxPaintEvent& event)
 	m_renderer.ClearColour();
 	m_renderer.ClearDepth();
 
-	if(m_project)
-	{
-		ion::Matrix4 cameraInverseMtx = m_camera.GetTransform().GetInverse();
-		ion::Matrix4 projectionMtx = m_renderer.GetProjectionMatrix();
+	ion::Matrix4 cameraInverseMtx = m_camera.GetTransform().GetInverse();
+	ion::Matrix4 projectionMtx = m_renderer.GetProjectionMatrix();
 
-		//Z order
-		const float zOffset = 0.0001f;
-		float z = 0.0f;
+	//Z order
+	const float zOffset = 0.0001f;
+	float z = 0.0f;
 
-		//Render callback
-		OnRender(m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
-	}
+	//Render callback
+	OnRender(m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
 
 	//End rendering
 	m_renderer.SwapBuffers();
@@ -97,20 +103,6 @@ void ViewPanel::EventHandlerResize(wxSizeEvent& event)
 {
 	OnResize(event);
 	event.Skip();
-}
-
-void ViewPanel::SetProject(Project* project)
-{
-	m_project = project;
-
-	//Centre camera on canvas
-	CentreCamera();
-
-	//Reset zoom
-	SetCameraZoom(1.0f);
-
-	//Refresh panel
-	Refresh();
 }
 
 void ViewPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -139,39 +131,33 @@ void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 
 void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 {
-	if(m_project)
-	{
-		//Set texture coords for cell
-		ion::render::TexCoord coords[4];
-		m_renderResources.GetTileTexCoords(tileId, coords, flipFlags);
-		m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
-	}
+	//Set texture coords for cell
+	ion::render::TexCoord coords[4];
+	m_renderResources.GetTileTexCoords(tileId, coords, flipFlags);
+	m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 }
 
 void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 {
-	if(m_project)
+	int width = stamp.GetWidth();
+	int height = stamp.GetHeight();
+
+	for(int stampX = 0; stampX < width; stampX++)
 	{
-		int width = stamp.GetWidth();
-		int height = stamp.GetHeight();
-
-		for(int stampX = 0; stampX < width; stampX++)
+		for(int stampY = 0; stampY < height; stampY++)
 		{
-			for(int stampY = 0; stampY < height; stampY++)
-			{
-				int sourceX = (flipFlags & Map::eFlipX) ? (width - 1 - stampX) : stampX;
-				int sourceY = (flipFlags & Map::eFlipY) ? (height - 1 - stampY) : stampY;
+			int sourceX = (flipFlags & Map::eFlipX) ? (width - 1 - stampX) : stampX;
+			int sourceY = (flipFlags & Map::eFlipY) ? (height - 1 - stampY) : stampY;
 
-				TileId tileId = stamp.GetTile(sourceX, sourceY);
-				u32 tileFlags = stamp.GetTileFlags(sourceX, sourceY);
-				tileFlags ^= flipFlags;
-				int canvasX = stampX + x;
-				int canvasY = stampY + y;
-				int y_inv = m_canvasSize.y - 1 - canvasY;
+			TileId tileId = stamp.GetTile(sourceX, sourceY);
+			u32 tileFlags = stamp.GetTileFlags(sourceX, sourceY);
+			tileFlags ^= flipFlags;
+			int canvasX = stampX + x;
+			int canvasY = stampY + y;
+			int y_inv = m_canvasSize.y - 1 - canvasY;
 
-				//Paint on canvas
-				PaintTile(tileId, canvasX, y_inv, tileFlags);
-			}
+			//Paint on canvas
+			PaintTile(tileId, canvasX, y_inv, tileFlags);
 		}
 	}
 }
@@ -237,123 +223,120 @@ void ViewPanel::FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, i
 
 void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 {
-	if(m_project)
+	const int tileWidth = 8;
+	const int tileHeight = 8;
+
+	//Get mouse position in panel space
+	wxClientDC clientDc(this);
+	wxPoint mousePanelPosWx = event.GetLogicalPosition(clientDc);
+
+	//Centre of map quad is 0,0
+	ion::Vector2 mousePos(mousePanelPosWx.x, m_panelSize.y - mousePanelPosWx.y);
+	ion::Vector2 viewportSize(m_panelSize.x, m_panelSize.y);
+	ion::Vector2 cameraPos(m_camera.GetPosition().x * m_cameraZoom, m_camera.GetPosition().y * m_cameraZoom);
+	ion::Vector2 canvasSizePixels(m_canvasSize.x * tileWidth * m_cameraZoom, m_canvasSize.y * tileHeight * m_cameraZoom);
+	ion::Vector2 mousePosCanvasSpace;
+	mousePosCanvasSpace.x = (canvasSizePixels.x - (canvasSizePixels.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
+	mousePosCanvasSpace.y = (canvasSizePixels.y - (canvasSizePixels.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
+
+	//Get pixel x/y
+	int mousePixelY_inv = (m_canvasSize.y * tileHeight) - (int)floor(mousePosCanvasSpace.y) - 1;
+	ion::Vector2i mousePixelPosCanvas((int)floor(mousePosCanvasSpace.x), mousePixelY_inv);
+
+	//Get tile x/y
+	int x = (int)floor(mousePosCanvasSpace.x / (float)tileWidth);
+	int y_inv = (int)floor(mousePosCanvasSpace.y / (float)tileHeight);
+
+	//Invert for OpenGL
+	int y = (m_canvasSize.y - 1 - y_inv);
+
+	//Get button bits
+	int buttonBits = 0;
+	if(event.LeftIsDown())
+		buttonBits |= eMouseLeft;
+	if(event.MiddleIsDown())
+		buttonBits |= eMouseMiddle;
+	if(event.RightIsDown())
+		buttonBits |= eMouseRight;
+
+	if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))
 	{
-		const int tileWidth = 8;
-		const int tileHeight = 8;
+		//Mouse button clicked or changed grid pos
+		OnMouseTileEvent(buttonBits, x, y);
 
-		//Get mouse position in panel space
-		wxClientDC clientDc(this);
-		wxPoint mousePanelPosWx = event.GetLogicalPosition(clientDc);
+		m_prevMouseOverTilePos.x = x;
+		m_prevMouseOverTilePos.y = y;
+	}
 
-		//Centre of map quad is 0,0
-		ion::Vector2 mousePos(mousePanelPosWx.x, m_panelSize.y - mousePanelPosWx.y);
-		ion::Vector2 viewportSize(m_panelSize.x, m_panelSize.y);
-		ion::Vector2 cameraPos(m_camera.GetPosition().x * m_cameraZoom, m_camera.GetPosition().y * m_cameraZoom);
-		ion::Vector2 canvasSizePixels(m_canvasSize.x * tileWidth * m_cameraZoom, m_canvasSize.y * tileHeight * m_cameraZoom);
-		ion::Vector2 mousePosCanvasSpace;
-		mousePosCanvasSpace.x = (canvasSizePixels.x - (canvasSizePixels.x / 2.0f - cameraPos.x - mousePos.x)) / m_cameraZoom;
-		mousePosCanvasSpace.y = (canvasSizePixels.y - (canvasSizePixels.y / 2.0f - cameraPos.y - mousePos.y)) / m_cameraZoom;
+	if((buttonBits != m_prevMouseBits) || (mousePixelPosCanvas.x != m_prevMouseOverPixelPos.x) || (mousePixelPosCanvas.y != m_prevMouseOverPixelPos.y))
+	{
+		//Mouse button clicked or changed pixel pos
+		OnMousePixelEvent(mousePixelPosCanvas, mouseDelta, buttonBits, x, y);
+		m_prevMouseOverPixelPos = mousePixelPosCanvas;
+	}
 
-		//Get pixel x/y
-		int mousePixelY_inv = (m_canvasSize.y * tileHeight) - (int)floor(mousePosCanvasSpace.y) - 1;
-		ion::Vector2i mousePixelPosCanvas((int)floor(mousePosCanvasSpace.x), mousePixelY_inv);
+	m_prevMouseBits = buttonBits;
 
-		//Get tile x/y
-		int x = (int)floor(mousePosCanvasSpace.x / (float)tileWidth);
-		int y_inv = (int)floor(mousePosCanvasSpace.y / (float)tileHeight);
+	//Camera pan/zoom
+	float zoomDelta = 0.0f;
 
-		//Invert for OpenGL
-		int y = (m_canvasSize.y - 1 - y_inv);
-
-		//Get button bits
-		int buttonBits = 0;
-		if(event.LeftIsDown())
-			buttonBits |= eMouseLeft;
-		if(event.MiddleIsDown())
-			buttonBits |= eMouseMiddle;
-		if(event.RightIsDown())
-			buttonBits |= eMouseRight;
-
-		if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))
+	if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
+	{
+		if(event.ShiftDown())
 		{
-			//Mouse button clicked or changed grid pos
-			OnMouseTileEvent(buttonBits, x, y);
-
-			m_prevMouseOverTilePos.x = x;
-			m_prevMouseOverTilePos.y = y;
+			//SHIFT + middle mouse + drag = zoom
+			float zoomSpeed = 0.05f;
+			zoomDelta -= mouseDelta.y * zoomSpeed;
 		}
-
-		if((buttonBits != m_prevMouseBits) || (mousePixelPosCanvas.x != m_prevMouseOverPixelPos.x) || (mousePixelPosCanvas.y != m_prevMouseOverPixelPos.y))
+		else
 		{
-			//Mouse button clicked or changed pixel pos
-			OnMousePixelEvent(mousePixelPosCanvas, mouseDelta, buttonBits, x, y);
-			m_prevMouseOverPixelPos = mousePixelPosCanvas;
-		}
-
-		m_prevMouseBits = buttonBits;
-
-		//Camera pan/zoom
-		float zoomDelta = 0.0f;
-
-		if(event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_MIDDLE))
-		{
-			if(event.ShiftDown())
+			if(m_enablePan)
 			{
-				//SHIFT + middle mouse + drag = zoom
-				float zoomSpeed = 0.05f;
-				zoomDelta -= mouseDelta.y * zoomSpeed;
-			}
-			else
-			{
-				if(m_enablePan)
-				{
-					//Middle mouse + drag = pan
-					ion::Vector3 cameraPos = m_camera.GetPosition();
-					cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
-					cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
-					m_camera.SetPosition(cameraPos);
+				//Middle mouse + drag = pan
+				ion::Vector3 cameraPos = m_camera.GetPosition();
+				cameraPos.x -= mouseDelta.x * m_cameraPanSpeed / m_cameraZoom;
+				cameraPos.y += mouseDelta.y * m_cameraPanSpeed / m_cameraZoom;
+				m_camera.SetPosition(cameraPos);
 
-					//Invalidate rect
-					Refresh();
-				}
+				//Invalidate rect
+				Refresh();
 			}
 		}
-		else if(event.GetWheelRotation() != 0)
+	}
+	else if(event.GetWheelRotation() != 0)
+	{
+		//Zoom camera
+		int wheelDelta = event.GetWheelRotation();
+		float zoomSpeed = 1.0f;
+
+		//Reduce speed for <1.0f
+		if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
 		{
-			//Zoom camera
-			int wheelDelta = event.GetWheelRotation();
-			float zoomSpeed = 1.0f;
-
-			//Reduce speed for <1.0f
-			if((wheelDelta < 0 && m_cameraZoom <= 1.0f) || (wheelDelta > 0 && m_cameraZoom < 1.0f))
-			{
-				zoomSpeed = 0.2f;
-			}
-
-			//One notch at a time
-			if(wheelDelta > 0)
-				zoomDelta = zoomSpeed;
-			else if(wheelDelta < 0)
-				zoomDelta = -zoomSpeed;
+			zoomSpeed = 0.2f;
 		}
 
-		if(m_enableZoom && zoomDelta != 0.0f)
-		{
-			float zoom = m_cameraZoom + zoomDelta;
+		//One notch at a time
+		if(wheelDelta > 0)
+			zoomDelta = zoomSpeed;
+		else if(wheelDelta < 0)
+			zoomDelta = -zoomSpeed;
+	}
 
-			//Clamp
-			if(zoom < 0.2f)
-				zoom = 0.2f;
-			else if(zoom > 10.0f)
-				zoom = 10.0f;
+	if(m_enableZoom && zoomDelta != 0.0f)
+	{
+		float zoom = m_cameraZoom + zoomDelta;
 
-			//Set camera zoom
-			SetCameraZoom(zoom);
+		//Clamp
+		if(zoom < 0.2f)
+			zoom = 0.2f;
+		else if(zoom > 10.0f)
+			zoom = 10.0f;
 
-			//Invalidate rect
-			Refresh();
-		}
+		//Set camera zoom
+		SetCameraZoom(zoom);
+
+		//Invalidate rect
+		Refresh();
 	}
 }
 
@@ -386,7 +369,7 @@ void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& 
 
 	ion::Matrix4 gridMtx;
 	gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
-	gridMtx.SetScale(ion::Vector3((float)m_project->GetGridSize(), (float)m_project->GetGridSize(), 1.0f));
+	gridMtx.SetScale(ion::Vector3((float)m_project.GetGridSize(), (float)m_project.GetGridSize(), 1.0f));
 	material->SetDiffuseColour(colour);
 	material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());

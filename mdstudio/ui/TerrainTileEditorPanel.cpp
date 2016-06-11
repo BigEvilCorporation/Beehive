@@ -10,8 +10,8 @@
 
 const float TerrainTileEditorPanel::s_defaultZoom = 3.0f;
 
-TerrainTileEditorPanel::TerrainTileEditorPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
+TerrainTileEditorPanel::TerrainTileEditorPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	//No panning
 	EnablePan(false);
@@ -55,40 +55,37 @@ void TerrainTileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
 	const int tileHeight = 8;
 
-	if(m_project)
+	if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 	{
-		if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
+		TerrainTileId tileId = m_project.GetPaintTerrainTile();
+		if(TerrainTile* tile = m_project.GetTerrainTileset().GetTerrainTile(tileId))
 		{
-			TerrainTileId tileId = m_project->GetPaintTerrainTile();
-			if(TerrainTile* tile = m_project->GetTerrainTileset().GetTerrainTile(tileId))
+			if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
 			{
-				if(x >= 0 && x < s_tileWidth && y >= 0 && y < s_tileHeight)
+				if(buttonBits & eMouseLeft)
 				{
-					if(buttonBits & eMouseLeft)
-					{
-						//Invert for height
-						const int height = tileHeight - y;
+					//Invert for height
+					const int height = tileHeight - y;
 
-						//Set height at X
-						tile->SetHeight(x, height);
+					//Set height at X
+					tile->SetHeight(x, height);
 
-						//Draw on collision tile
-						m_renderResources.SetTerrainTileHeight(tileId, x, height);
-					}
-					else
-					{
-						//Clear height at X
-						tile->ClearHeight(x);
-
-						//Clear collision tile
-						m_renderResources.SetTerrainTileHeight(tileId, x, 0);
-					}
-
-					//Refresh collision panels
-					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTiles);
-					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTileEditor);
-					m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
+					//Draw on collision tile
+					m_renderResources.SetTerrainTileHeight(tileId, x, height);
 				}
+				else
+				{
+					//Clear height at X
+					tile->ClearHeight(x);
+
+					//Clear collision tile
+					m_renderResources.SetTerrainTileHeight(tileId, x, 0);
+				}
+
+				//Refresh collision panels
+				m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTiles);
+				m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTileEditor);
+				m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
 			}
 		}
 	}
@@ -104,28 +101,21 @@ void TerrainTileEditorPanel::OnRender(ion::render::Renderer& renderer, const ion
 
 	z += zOffset;
 
-	if(m_project->GetShowGrid())
+	if(m_project.GetShowGrid())
 	{
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	}
-}
-
-void TerrainTileEditorPanel::SetProject(Project* project)
-{
-	ViewPanel::SetProject(project);
 }
 
 void TerrainTileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	ViewPanel::Refresh(eraseBackground, rect);
 
-	if(m_project)
-	{
-		//Redraw tile and collision
-		PaintTile();
-		//Redraw collision tile
-		PaintCollision();
-	}
+	//Redraw tile and collision
+	PaintTile();
+
+	//Redraw collision tile
+	PaintCollision();
 }
 
 void TerrainTileEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -153,20 +143,17 @@ void TerrainTileEditorPanel::RenderCollision(ion::render::Renderer& renderer, co
 void TerrainTileEditorPanel::PaintTile()
 {
 	ion::render::TexCoord texCoords[4];
-	m_renderResources.GetTileTexCoords(m_project->GetPaintTile(), texCoords, 0);
+	m_renderResources.GetTileTexCoords(m_project.GetPaintTile(), texCoords, 0);
 	m_tilePrimitive->SetTexCoords(texCoords);
 }
 
 void TerrainTileEditorPanel::PaintCollision()
 {
-	if(m_project)
-	{
-		const int tileWidth = 8;
-		const int tileHeight = 8;
+	const int tileWidth = 8;
+	const int tileHeight = 8;
 
-		//Set tex coords
-		ion::render::TexCoord texCoords[4];
-		m_renderResources.GetTerrainTileTexCoords(m_project->GetPaintTerrainTile(), texCoords);
-		m_collisionPrimitive->SetTexCoords(texCoords);
-	}
+	//Set tex coords
+	ion::render::TexCoord texCoords[4];
+	m_renderResources.GetTerrainTileTexCoords(m_project.GetPaintTerrainTile(), texCoords);
+	m_collisionPrimitive->SetTexCoords(texCoords);
 }

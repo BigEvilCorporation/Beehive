@@ -12,8 +12,8 @@
 
 const float TilesPanel::s_tileSize = 4.0f;
 
-TilesPanel::TilesPanel(MainWindow* mainWindow, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: ViewPanel(mainWindow, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
+TilesPanel::TilesPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	m_selectedTile = InvalidTileId;
 	m_hoverTile = InvalidTileId;
@@ -116,7 +116,7 @@ void TilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 		m_selectedTilePos = m_hoverTilePos;
 
 		//Set as current painting tile
-		m_project->SetPaintTile(selectedTile);
+		m_project.SetPaintTile(selectedTile);
 
 		//Set tile paint tool
 		m_mainWindow->SetMapTool(eToolPaintTile);
@@ -151,7 +151,7 @@ void TilesPanel::OnContextMenuClick(wxCommandEvent& event)
 	if(event.GetId() == eMenuDeleteTile)
 	{
 		//Delete tile
-		m_project->DeleteTile(m_hoverTile);
+		m_project.DeleteTile(m_hoverTile);
 
 		//Invalidate hover/selected tile
 		m_hoverTile = InvalidTileId;
@@ -166,7 +166,7 @@ void TilesPanel::OnContextMenuClick(wxCommandEvent& event)
 	else if(event.GetId() == eMenuUseAsBgTile)
 	{
 		//Set background tile
-		m_project->SetBackgroundTile(m_hoverTile);
+		m_project.SetBackgroundTile(m_hoverTile);
 
 		//Refresh map
 		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
@@ -183,7 +183,7 @@ void TilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& c
 	//Render selected tile
 	if(m_selectedTile)
 	{
-		if(Tile* tile = m_project->GetTileset().GetTile(m_selectedTile))
+		if(Tile* tile = m_project.GetTileset().GetTile(m_selectedTile))
 		{
 			ion::debug::Assert(tile, "Invalid tile");
 			ion::Vector2 size(1, 1);
@@ -197,7 +197,7 @@ void TilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& c
 	//Render mouse hover tile
 	if(m_hoverTile && m_hoverTile != m_selectedTile)
 	{
-		if(Tile* tile = m_project->GetTileset().GetTile(m_hoverTile))
+		if(Tile* tile = m_project.GetTileset().GetTile(m_hoverTile))
 		{
 			ion::debug::Assert(tile, "Invalid tile");
 			ion::Vector2 size(1, 1);
@@ -209,32 +209,21 @@ void TilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& c
 	z += zOffset;
 
 	//Render grid
-	if(m_project->GetShowGrid())
+	if(m_project.GetShowGrid())
 	{
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	}
 }
 
-void TilesPanel::SetProject(Project* project)
-{
-	ViewPanel::SetProject(project);
-
-	//Refresh
-	Refresh();
-}
-
 void TilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	if(m_project)
+	//If tiles invalidated
+	if(m_project.TilesAreInvalidated())
 	{
-		//If tiles invalidated
-		if(m_project->TilesAreInvalidated())
+		if(m_panelSize.x > 8 && m_panelSize.y > 8)
 		{
-			if(m_panelSize.x > 8 && m_panelSize.y > 8)
-			{
-				ion::Vector2i canvasSize = CalcCanvasSize();
-				InitPanel(canvasSize.x, canvasSize.y);
-			}
+			ion::Vector2i canvasSize = CalcCanvasSize();
+			InitPanel(canvasSize.x, canvasSize.y);
 		}
 	}
 
@@ -244,7 +233,7 @@ void TilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 ion::Vector2i TilesPanel::CalcCanvasSize()
 {
 	wxSize panelSize = GetClientSize();
-	int numTiles = m_project->GetTileset().GetCount();
+	int numTiles = m_project.GetTileset().GetCount();
 	int numCols = ion::maths::Ceil((float)panelSize.x / 8.0f / s_tileSize);
 	int numRows = max(numCols, (int)ion::maths::Ceil((float)numTiles / (float)numCols / s_tileSize));
 	return ion::Vector2i(numCols, numRows);
@@ -270,7 +259,7 @@ void TilesPanel::InitPanel(int numCols, int numRows)
 
 void TilesPanel::PaintTiles()
 {
-	Tileset& tileset = m_project->GetTileset();
+	Tileset& tileset = m_project.GetTileset();
 
 	for(int i = 0; i < tileset.GetCount(); i++)
 	{

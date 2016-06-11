@@ -27,15 +27,7 @@ public:
 		eVertical
 	};
 
-	PalettesPanel(	MainWindow* mainWindow,
-					wxWindow *parent,
-					wxWindowID id,
-					const wxPoint& pos = wxDefaultPosition,
-					const wxSize& size = wxDefaultSize,
-					long style = wxDEFAULT_FRAME_STYLE,
-					const wxString& name = wxFrameNameStr);
-
-	void SetProject(Project* project) { m_project = project; }
+	PalettesPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr);
 
 	void OnMouse(wxMouseEvent& event);
 	void OnPaint(wxPaintEvent& event);
@@ -53,7 +45,7 @@ private:
 		eMenuExport =	(1 << 4) << 8
 	};
 
-	Project* m_project;
+	Project& m_project;
 	MainWindow* m_mainWindow;
 	Orientation m_orientation;
 };

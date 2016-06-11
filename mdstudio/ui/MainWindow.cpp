@@ -236,11 +236,9 @@ void MainWindow::ShowPanelPalettes()
 			paneInfo.Caption("Palettes");
 			paneInfo.CaptionVisible(true);
 
-			m_palettesPanel = new PalettesPanel(this, m_dockArea, NewControlId());
+			m_palettesPanel = new PalettesPanel(this, *m_project, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_palettesPanel, paneInfo);
 			m_palettesPanel->Show();
-
-			m_palettesPanel->SetProject(m_project.get());
 		}
 
 		if(!m_palettesPanel->IsShown())
@@ -264,11 +262,9 @@ void MainWindow::ShowPanelTiles()
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 			
-			m_tilesPanel = new TilesPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_tilesPanel = new TilesPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
 			m_tilesPanel->Show();
-
-			m_tilesPanel->SetProject(m_project.get());
 		}
 
 		if(!m_tilesPanel->IsShown())
@@ -294,11 +290,9 @@ void MainWindow::ShowPanelTerrainTiles()
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 
-			m_terrainTilesPanel = new TerrainTilesPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_terrainTilesPanel = new TerrainTilesPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_terrainTilesPanel, paneInfo);
 			m_terrainTilesPanel->Show();
-
-			m_terrainTilesPanel->SetProject(m_project.get());
 		}
 
 		if(!m_terrainTilesPanel->IsShown())
@@ -325,11 +319,9 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
-			m_stampsPanel = new StampsPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_stampsPanel = new StampsPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_stampsPanel, paneInfo);
 			m_stampsPanel->Show();
-
-			m_stampsPanel->SetProject(m_project.get());
 		}
 
 		if(!m_stampsPanel->IsShown())
@@ -353,11 +345,9 @@ void MainWindow::ShowPanelMap()
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
 
-			m_mapPanel = new MapPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_mapPanel = new MapPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
 			m_mapPanel->Show();
-
-			m_mapPanel->SetProject(m_project.get());
 		}
 
 		if(!m_mapPanel->IsShown())
@@ -430,12 +420,10 @@ void MainWindow::ShowPanelTileEditor()
 			paneInfo.Caption("Tile");
 			paneInfo.CaptionVisible(true);
 
-			m_tileEditorPanel = new TileEditorPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_tileEditorPanel = new TileEditorPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
 			m_tileEditorPanel->Show();
 			m_auiManager.Update();
-
-			m_tileEditorPanel->SetProject(m_project.get());
 		}
 
 		if(!m_tileEditorPanel->IsShown())
@@ -461,12 +449,10 @@ void MainWindow::ShowPanelTerrainEditor()
 			paneInfo.Caption("Collision Tile");
 			paneInfo.CaptionVisible(true);
 
-			m_TerrainTileEditorPanel = new TerrainTileEditorPanel(this, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_TerrainTileEditorPanel = new TerrainTileEditorPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_TerrainTileEditorPanel, paneInfo);
 			m_TerrainTileEditorPanel->Show();
 			m_auiManager.Update();
-
-			m_TerrainTileEditorPanel->SetProject(m_project.get());
 		}
 
 		if(!m_TerrainTileEditorPanel->IsShown())
