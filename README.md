@@ -22,8 +22,8 @@ You'll need:
 
 I've added binary dependencies for Win32, MSBuild v11 (VS2013) here:
 
-- http://www.mediafire.com/download/yl22ar67eszy5r6/beehive_ion_dependencies.7z
-- 
+ http://www.mediafire.com/download/yl22ar67eszy5r6/beehive_ion_dependencies.7z
+
 ///////////////////////////////////////////////////////
 // RUNNING
 ///////////////////////////////////////////////////////
