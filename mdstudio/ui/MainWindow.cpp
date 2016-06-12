@@ -53,7 +53,7 @@ MainWindow::MainWindow()
 	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
 
 	//Create default Mega Drive project
-	Project* defaultProject = new Project(PlatformConfigs::s_configs[ePlatformMegaDrive]);
+	Project* defaultProject = new Project(PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive]);
 
 	//Create and load rendering resources
 	m_renderResources = new RenderResources(*defaultProject);
@@ -781,7 +781,7 @@ void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 	{
 		SetStatusText("Opening...");
 
-		Project* project = new Project(PlatformConfigs::s_configs[ePlatformMegaDrive]);
+		Project* project = new Project(PlatformPresets::s_configs[ePlatformMegaDrive]);
 
 		if(project->Load(dialog.GetPath().c_str().AsChar()))
 		{

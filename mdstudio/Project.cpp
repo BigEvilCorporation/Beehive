@@ -1655,7 +1655,7 @@ bool Project::ExportTiles(const std::string& filename, bool binary) const
 		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
 		if(binaryFile.IsOpen())
 		{
-			m_tileset.Export(binaryFile);
+			m_tileset.Export(m_platformConfig, binaryFile);
 			binarySize = binaryFile.GetSize();
 		}
 		else
@@ -1680,7 +1680,7 @@ bool Project::ExportTiles(const std::string& filename, bool binary) const
 			//Export label, data and size as inline text
 			stream << "tiles_" << m_name << ":" << std::endl;
 
-			m_tileset.Export(stream);
+			m_tileset.Export(m_platformConfig, stream);
 
 			stream << std::endl;
 			stream << "tiles_" << m_name << "_end" << std::endl;
@@ -1944,7 +1944,7 @@ bool Project::ExportSpriteSheets(const std::string& directory, bool binary) cons
 			{
 				std::stringstream stream;
 				WriteFileHeader(stream);
-				it->second.ExportSpriteSheets(stream, m_platformConfig.tileWidth, m_platformConfig.tileHeight);
+				it->second.ExportSpriteSheets(m_platformConfig, stream);
 				file.Write(stream.str().c_str(), stream.str().size());
 			}
 			else
@@ -1975,7 +1975,7 @@ bool Project::ExportSpriteAnims(const std::string& directory, bool binary) const
 			{
 				std::stringstream stream;
 				WriteFileHeader(stream);
-				it->second.ExportSpriteAnims(stream);
+				it->second.ExportSpriteAnims(m_platformConfig, stream);
 				file.Write(stream.str().c_str(), stream.str().size());
 			}
 			else
@@ -2000,7 +2000,7 @@ bool Project::ExportSpritePalettes(const std::string& directory) const
 		{
 			std::stringstream stream;
 			WriteFileHeader(stream);
-			it->second.ExportSpritePalettes(stream);
+			it->second.ExportSpritePalettes(m_platformConfig, stream);
 			file.Write(stream.str().c_str(), stream.str().size());
 		}
 		else

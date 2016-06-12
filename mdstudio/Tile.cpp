@@ -91,37 +91,51 @@ void Tile::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_pixels, "pixels");
 }
 
-void Tile::Export(std::stringstream& stream) const
+void Tile::Export(const PlatformConfig& config, std::stringstream& stream) const
 {
-	stream << std::hex << std::setfill('0') << std::uppercase;
-
-	for(int y = 0; y < m_height; y++)
+	if(config.platform == ePlatformMegaDrive)
 	{
-		stream << "\tdc.l\t0x";
+		stream << std::hex << std::setfill('0') << std::uppercase;
 
-		for(int x = 0; x < m_width; x++)
+		for(int y = 0; y < m_height; y++)
 		{
-			stream << std::setw(1) << (int)GetPixelColour(x, y);
+			stream << "\tdc.l\t0x";
+
+			for(int x = 0; x < m_width; x++)
+			{
+				stream << std::setw(1) << (int)GetPixelColour(x, y);
+			}
+
+			stream << std::endl;
 		}
 
-		stream << std::endl;
+		stream << std::dec;
 	}
-
-	stream << std::dec;
+	else if(config.platform == ePlatformSNES)
+	{
+		//TODO: SNES text export goes here
+	}
 }
 
-void Tile::Export(ion::io::File& file) const
+void Tile::Export(const PlatformConfig& config, ion::io::File& file) const
 {
-	for(int y = 0; y < m_height; y++)
+	if(config.platform == ePlatformMegaDrive)
 	{
-		for(int x = 0; x < m_width; x += 2)
+		for(int y = 0; y < m_height; y++)
 		{
-			u8 nybble1 = (u8)GetPixelColour(x, y) << 4;
-			u8 nybble2 = ((x + 1) < m_width) ? (u8)GetPixelColour(x + 1, y) : 0;
+			for(int x = 0; x < m_width; x += 2)
+			{
+				u8 nybble1 = (u8)GetPixelColour(x, y) << 4;
+				u8 nybble2 = ((x + 1) < m_width) ? (u8)GetPixelColour(x + 1, y) : 0;
 
-			u8 byte = nybble1 | nybble2;
-			file.Write(&byte, sizeof(u8));
+				u8 byte = nybble1 | nybble2;
+				file.Write(&byte, sizeof(u8));
+			}
 		}
+	}
+	else if(config.platform == ePlatformSNES)
+	{
+		//TODO: SNES binary export goes here
 	}
 }
 

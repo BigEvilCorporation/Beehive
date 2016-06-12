@@ -20,14 +20,14 @@ namespace ion
 enum TargetPlatform
 {
 	ePlatformMegaDrive,
-	ePlatformSNES_8x8,
-	ePlatformSNES_16x16,
+	ePlatformSNES,
 
 	ePlatformNum
 };
 
 struct PlatformConfig
 {
+	TargetPlatform platform;
 	std::string name;
 	u8 tileWidth;
 	u8 tileHeight;
@@ -38,12 +38,21 @@ struct PlatformConfig
 	void Serialise(ion::io::Archive& archive);
 };
 
-namespace PlatformConfigs
+namespace PlatformPresets
 {
-	static PlatformConfig s_configs[ePlatformNum] =
+	enum Presets
 	{
-		{ "SEGA Mega Drive", 8, 8, 64, 32, 2 }, // SEGA Mega Drive = 8x8 tiles, 64x32 scroll planes, Plane A and plane B
-		{ "Super Nintendo (8x8 tile mode)", 8, 8, 64, 64, 1 }, // SNES = 8x8 tiles, 64x64 scroll planes, 1 plane
-		{ "Super Nintendo (16x16 tile mode)", 16, 16, 64, 64, 1 }, // SNES = 16x16 tiles, 64x64 scroll planes, 1 plane
+		ePresetMegaDrive,
+		ePresetSNES_8x8,
+		ePresetSNES_16x16,
+
+		ePresetNum
+	};
+
+	static PlatformConfig s_configs[ePresetNum] =
+	{
+		{ ePlatformMegaDrive, "SEGA Mega Drive", 8, 8, 64, 32, 2 },					// SEGA Mega Drive = 8x8 tiles, 64x32 scroll planes, Plane A and plane B
+		{ ePlatformSNES, "Super Nintendo (8x8 tile mode)", 8, 8, 64, 64, 1 },		// SNES = 8x8 tiles, 64x64 scroll planes, 1 plane
+		{ ePlatformSNES, "Super Nintendo (16x16 tile mode)", 16, 16, 64, 64, 1 },	// SNES = 16x16 tiles, 64x64 scroll planes, 1 plane
 	};
 }

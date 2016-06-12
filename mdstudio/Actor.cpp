@@ -82,7 +82,7 @@ void Actor::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_spriteSheets, "spriteSheets");
 }
 
-void Actor::ExportSpriteSheets(std::stringstream& stream, int tileWidth, int tileHeight) const
+void Actor::ExportSpriteSheets(const PlatformConfig& config, std::stringstream& stream) const
 {
 	u32 frameIndex = 0;
 
@@ -109,9 +109,9 @@ void Actor::ExportSpriteSheets(std::stringstream& stream, int tileWidth, int til
 
 		spriteSheet.GetWidthSubsprites(widthTotal, widthWhole, widthRemainder);
 		spriteSheet.GetHeightSubsprites(heightTotal, heightWhole, heightRemainder);
-		spriteSheet.GetSubspriteDimensions(subSprDimensionsTiles, tileWidth, tileHeight);
-		spriteSheet.GetSubspritePosOffsets(subSprOffsetsUnflipped, tileWidth, tileHeight);
-		spriteSheet.GetSubspritePosOffsetsFlippedX(subSprOffsetsFlippedX, tileWidth, tileHeight);
+		spriteSheet.GetSubspriteDimensions(subSprDimensionsTiles, config.tileWidth, config.tileHeight);
+		spriteSheet.GetSubspritePosOffsets(subSprOffsetsUnflipped, config.tileWidth, config.tileHeight);
+		spriteSheet.GetSubspritePosOffsetsFlippedX(subSprOffsetsFlippedX, config.tileWidth, config.tileHeight);
 
 		int sizeTiles = spriteSheet.GetWidthTiles() * spriteSheet.GetHeightTiles();
 
@@ -193,40 +193,40 @@ void Actor::ExportSpriteSheets(std::stringstream& stream, int tileWidth, int til
 
 		stream << label.str() << ":" << std::endl << std::endl;
 
-		it->second.ExportTiles(stream);
+		it->second.ExportTiles(config, stream);
 
 		stream << std::endl << std::endl;
 	}
 }
 
-void Actor::ExportSpriteSheets(ion::io::File& file) const
+void Actor::ExportSpriteSheets(const PlatformConfig& config, ion::io::File& file) const
 {
 
 }
 
-void Actor::ExportSpriteAnims(std::stringstream& stream) const
+void Actor::ExportSpriteAnims(const PlatformConfig& config, std::stringstream& stream) const
 {
 	stream << "spriteanims_" << m_name << ":" << std::endl << std::endl;
 
 	//Export sprite anim data
 	for(TSpriteSheetMap::const_iterator it = m_spriteSheets.begin(), end = m_spriteSheets.end(); it != end; ++it)
 	{
-		it->second.ExportAnims(stream, m_name);
+		it->second.ExportAnims(config, stream, m_name);
 		stream << std::endl;
 	}
 }
 
-void Actor::ExportSpriteAnims(ion::io::File& file) const
+void Actor::ExportSpriteAnims(const PlatformConfig& config, ion::io::File& file) const
 {
 
 }
 
-void Actor::ExportSpritePalettes(std::stringstream& stream) const
+void Actor::ExportSpritePalettes(const PlatformConfig& config, std::stringstream& stream) const
 {
 	if(m_spriteSheets.size() > 0)
 	{
 		stream << "palette_" << m_name << ":" << std::endl;
-		m_spriteSheets.begin()->second.ExportPalette(stream);
+		m_spriteSheets.begin()->second.ExportPalette(config, stream);
 		stream << std::endl;
 	}
 }

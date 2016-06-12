@@ -61,11 +61,11 @@ public:
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
-	void ExportTiles(std::stringstream& stream) const;
-	void ExportTiles(ion::io::File& file) const;
-	void ExportAnims(std::stringstream& stream, const std::string& actorName) const;
-	void ExportAnims(ion::io::File& file) const;
-	void ExportPalette(std::stringstream& stream) const;
+	void ExportTiles(const PlatformConfig& config, std::stringstream& stream) const;
+	void ExportTiles(const PlatformConfig& config, ion::io::File& file) const;
+	void ExportAnims(const PlatformConfig& config, std::stringstream& stream, const std::string& actorName) const;
+	void ExportAnims(const PlatformConfig& config, ion::io::File& file) const;
+	void ExportPalette(const PlatformConfig& config, std::stringstream& stream) const;
 	u32 GetBinarySizeTiles() const;
 
 private:

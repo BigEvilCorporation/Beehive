@@ -21,11 +21,11 @@ DialogNewProject::DialogNewProject(wxWindow* parent)
 {
 	for(int i = 0; i < ePlatformNum; i++)
 	{
-		m_choicePreset->AppendString(PlatformConfigs::s_configs[i].name);
+		m_choicePreset->AppendString(PlatformPresets::s_configs[i].name);
 	}
 
-	PopulatePreset(ePlatformMegaDrive);
-	m_choicePreset->SetSelection(ePlatformMegaDrive);
+	PopulatePreset(PlatformPresets::ePresetMegaDrive);
+	m_choicePreset->SetSelection(PlatformPresets::ePresetMegaDrive);
 }
 
 void DialogNewProject::OnChoicePreset(wxCommandEvent& event)
@@ -35,7 +35,7 @@ void DialogNewProject::OnChoicePreset(wxCommandEvent& event)
 
 void DialogNewProject::PopulatePreset(int index)
 {
-	PlatformConfig& config = PlatformConfigs::s_configs[index];
+	PlatformConfig& config = PlatformPresets::s_configs[index];
 	m_spinCtrlTileWidth->SetValue(config.tileWidth);
 	m_spinCtrlTileHeight->SetValue(config.tileHeight);
 	m_spinCtrlMapWidth->SetValue(config.scrollPlaneWidthTiles);

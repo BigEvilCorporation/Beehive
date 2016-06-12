@@ -258,7 +258,7 @@ void SpriteSheet::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_heightTiles, "height");
 }
 
-void SpriteSheet::ExportTiles(std::stringstream& stream) const
+void SpriteSheet::ExportTiles(const PlatformConfig& config, std::stringstream& stream) const
 {
 	for(std::vector<SpriteSheetFrame>::const_iterator it = m_frames.begin(), end = m_frames.end(); it != end; ++it)
 	{
@@ -280,7 +280,7 @@ void SpriteSheet::ExportTiles(std::stringstream& stream) const
 				{
 					for(int y = 0; y < ion::maths::Min(subSpriteHeightTiles, m_heightTiles - (subSpriteHeightTiles * subSprY)); y++)
 					{
-						(*it)[topLeft + (x * m_heightTiles) + y].Export(stream);
+						(*it)[topLeft + (x * m_heightTiles) + y].Export(config, stream);
 
 						stream << std::endl;
 					}
@@ -290,12 +290,12 @@ void SpriteSheet::ExportTiles(std::stringstream& stream) const
 	}
 }
 
-void SpriteSheet::ExportTiles(ion::io::File& file) const
+void SpriteSheet::ExportTiles(const PlatformConfig& config, ion::io::File& file) const
 {
 
 }
 
-void SpriteSheet::ExportAnims(std::stringstream& stream, const std::string& actorName) const
+void SpriteSheet::ExportAnims(const PlatformConfig& config, std::stringstream& stream, const std::string& actorName) const
 {
 	stream << std::hex << std::setfill('0') << std::uppercase;
 
@@ -320,12 +320,12 @@ void SpriteSheet::ExportAnims(std::stringstream& stream, const std::string& acto
 	stream << std::dec;
 }
 
-void SpriteSheet::ExportAnims(ion::io::File& file) const
+void SpriteSheet::ExportAnims(const PlatformConfig& config, ion::io::File& file) const
 {
 
 }
 
-void SpriteSheet::ExportPalette(std::stringstream& stream) const
+void SpriteSheet::ExportPalette(const PlatformConfig& config, std::stringstream& stream) const
 {
 	m_palette.Export(stream);
 }

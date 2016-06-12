@@ -15,6 +15,7 @@
 #include <sstream>
 
 #include "Palette.h"
+#include "PlatformConfig.h"
 
 typedef u32 TileId;
 static const TileId InvalidTileId = 0xFFFFFFFF;
@@ -43,8 +44,8 @@ public:
 	PaletteId GetPaletteId() const;
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream) const;
-	void Export(ion::io::File& file) const;
+	void Export(const PlatformConfig& config, std::stringstream& stream) const;
+	void Export(const PlatformConfig& config, ion::io::File& file) const;
 	u32 GetBinarySize() const;
 
 private:

@@ -53,8 +53,8 @@ public:
 	void CalculateHashes(const Tile& tile, u64 hashes[eNumHashOrientations]) const;
 
 	void Serialise(ion::io::Archive& archive);
-	void Export(std::stringstream& stream) const;
-	void Export(ion::io::File& file) const;
+	void Export(const PlatformConfig& config, std::stringstream& stream) const;
+	void Export(const PlatformConfig& config, ion::io::File& file) const;
 	
 private:
 

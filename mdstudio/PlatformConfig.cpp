@@ -9,6 +9,8 @@
 
 void PlatformConfig::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(name, "name");
+	archive.Serialise((u32&)platform, "platform");
 	archive.Serialise(tileWidth, "tileWidth");
 	archive.Serialise(tileHeight, "tileHeight");
 	archive.Serialise(scrollPlaneWidthTiles, "scrollPlaneWidthTiles");

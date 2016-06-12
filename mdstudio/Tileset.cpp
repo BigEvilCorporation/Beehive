@@ -161,19 +161,19 @@ void Tileset::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_hashMap, "hashMap");
 }
 
-void Tileset::Export(std::stringstream& stream) const
+void Tileset::Export(const PlatformConfig& config, std::stringstream& stream) const
 {
 	for(int i = 0; i < m_tiles.size(); i++)
 	{
-		m_tiles[i].Export(stream);
+		m_tiles[i].Export(config, stream);
 		stream << std::endl;
 	}
 }
 
-void Tileset::Export(ion::io::File& file) const
+void Tileset::Export(const PlatformConfig& config, ion::io::File& file) const
 {
 	for(int i = 0; i < m_tiles.size(); i++)
 	{
-		m_tiles[i].Export(file);
+		m_tiles[i].Export(config, file);
 	}
 }

@@ -364,9 +364,6 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 		BakeStamp(tiles, position.x, position.y, stamp, it->m_flags);
 	}
 
-	//Output to stream
-	stream << std::hex << std::setfill('0') << std::uppercase;
-
 	//Use background tile if there is one, else use first tile
 	u32 backgroundTileId = project.GetBackgroundTile();
 	if(backgroundTileId == InvalidTileId)
@@ -374,51 +371,61 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 		backgroundTileId = 0;
 	}
 
-	for(int y = 0; y < m_height; y++)
+	if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
 	{
-		stream << "\tdc.w\t";
+		//Output to stream
+		stream << std::hex << std::setfill('0') << std::uppercase;
 
-		for(int x = 0; x < m_width; x++)
+		for(int y = 0; y < m_height; y++)
 		{
-			//16 bit word:
-			//-------------------
-			//ABBC DEEE EEEE EEEE
-			//-------------------
-			//A = Low/high plane
-			//B = Palette ID
-			//C = Horizontal flip
-			//D = Vertical flip
-			//E = Tile ID
+			stream << "\tdc.w\t";
 
-			const TileDesc& tileDesc = tiles[(y * m_width) + x];
-			u8 paletteId = 0;
+			for(int x = 0; x < m_width; x++)
+			{
+				//16 bit word:
+				//-------------------
+				//ABBC DEEE EEEE EEEE
+				//-------------------
+				//A = Low/high plane
+				//B = Palette ID
+				//C = Horizontal flip
+				//D = Vertical flip
+				//E = Tile ID
 
-			//If blank tile, use background tile
-			u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
+				const TileDesc& tileDesc = tiles[(y * m_width) + x];
+				u8 paletteId = 0;
 
-			const Tile* tile = project.GetTileset().GetTile(tileId);
-			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
+				//If blank tile, use background tile
+				u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
 
-			//Generate components
-			u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
-			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
-			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
-			u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
-			u16 plane = (tileDesc.m_flags & eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
+				const Tile* tile = project.GetTileset().GetTile(tileId);
+				ion::debug::Assert(tile, "Map::Export() - Invalid tile");
 
-			//Generate word
-			u16 word = tileIndex | flipV | flipH | palette;
+				//Generate components
+				u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
+				u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
+				u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
+				u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
+				u16 plane = (tileDesc.m_flags & eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
 
-			stream << "0x" << std::setw(4) << (u32)word;
+				//Generate word
+				u16 word = tileIndex | flipV | flipH | palette;
 
-			if(x < (m_width - 1))
-				stream << ",";
+				stream << "0x" << std::setw(4) << (u32)word;
+
+				if(x < (m_width - 1))
+					stream << ",";
+			}
+
+			stream << std::endl;
 		}
 
-		stream << std::endl;
+		stream << std::dec;
 	}
-
-	stream << std::dec;
+	else if(project.GetPlatformConfig().platform == ePlatformSNES)
+	{
+		//TODO: SNES export goes here
+	}
 }
 
 void Map::Export(const Project& project, ion::io::File& file) const
@@ -441,44 +448,51 @@ void Map::Export(const Project& project, ion::io::File& file) const
 		backgroundTileId = 0;
 	}
 
-	for(int y = 0; y < m_height; y++)
+	if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
 	{
-		for(int x = 0; x < m_width; x++)
+		for(int y = 0; y < m_height; y++)
 		{
-			//16 bit word:
-			//-------------------
-			//ABBC DEEE EEEE EEEE
-			//-------------------
-			//A = Low/high plane
-			//B = Palette ID
-			//C = Horizontal flip
-			//D = Vertical flip
-			//E = Tile ID
+			for(int x = 0; x < m_width; x++)
+			{
+				//16 bit word:
+				//-------------------
+				//ABBC DEEE EEEE EEEE
+				//-------------------
+				//A = Low/high plane
+				//B = Palette ID
+				//C = Horizontal flip
+				//D = Vertical flip
+				//E = Tile ID
 
-			const TileDesc& tileDesc = tiles[(y * m_width) + x];
-			u8 paletteId = 0;
+				const TileDesc& tileDesc = tiles[(y * m_width) + x];
+				u8 paletteId = 0;
 
-			//If blank tile, use background tile
-			u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
+				//If blank tile, use background tile
+				u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
 
-			const Tile* tile = project.GetTileset().GetTile(tileId);
-			ion::debug::Assert(tile, "Map::Export() - Invalid tile");
+				const Tile* tile = project.GetTileset().GetTile(tileId);
+				ion::debug::Assert(tile, "Map::Export() - Invalid tile");
 
-			//Generate components
-			u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
-			u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
-			u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
-			u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
-			u16 plane = (tileDesc.m_flags & eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
+				//Generate components
+				u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
+				u16 flipH = (tileDesc.m_flags & eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
+				u16 flipV = (tileDesc.m_flags & eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
+				u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
+				u16 plane = (tileDesc.m_flags & eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
 
-			//Generate word
-			u16 word = tileIndex | flipV | flipH | palette | plane;
+				//Generate word
+				u16 word = tileIndex | flipV | flipH | palette | plane;
 
-			//Endian flip
-			ion::memory::EndianSwap(word);
+				//Endian flip
+				ion::memory::EndianSwap(word);
 
-			//Write
-			file.Write(&word, sizeof(u16));
+				//Write
+				file.Write(&word, sizeof(u16));
+			}
 		}
+	}
+	else if(project.GetPlatformConfig().platform == ePlatformSNES)
+	{
+		//TODO: SNES export goes here
 	}
 }
