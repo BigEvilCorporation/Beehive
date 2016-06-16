@@ -70,7 +70,7 @@ bool SpriteSheet::ImportBitmap(const std::string& filename, const std::string& n
 					for(int tileY = 0; tileY < m_heightTiles; tileY++)
 					{
 						//Read tile
-						Tile tile;
+						Tile tile(tileWidth, tileHeight);
 
 						//Read pixel colours from bitmap
 						for(int pixelX = 0; pixelX < tileWidth; pixelX++)
