@@ -1,8 +1,0 @@
-rule CompilerPlatformInfo
-{
-}
-
-rule CompilerConfigInfo
-{
-}
-
