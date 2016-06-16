@@ -1,7 +1,0 @@
-SubDir bigevilcorp ion editor ;
-
-SRC =
-	MaterialEditor.h
-	;
-
-C.Library editor : $(SRC) ;
