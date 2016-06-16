@@ -1,0 +1,5 @@
+out/*.o
+ion
+buildtools
+bigevilcorp.jamrules
+mdstudio/_build
