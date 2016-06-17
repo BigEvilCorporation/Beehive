@@ -26,7 +26,8 @@ public:
 	virtual void OnToolVariableAdd(wxCommandEvent& event);
 	virtual void OnToolVariableRemove(wxCommandEvent& event);
 	virtual void OnSelectVariable(wxListEvent& event);
-	virtual void OnBtnApplyChanges(wxCommandEvent& event);
+	virtual void OnButtonApplyObjectName(wxCommandEvent& event);
+	virtual void OnBtnApplyVariableChanges(wxCommandEvent& event);
 	
 	void SetGameObject(GameObject* gameObject);
 

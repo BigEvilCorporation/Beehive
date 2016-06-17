@@ -1907,7 +1907,16 @@ bool Project::ExportGameObjects(const std::string& filename) const
 			{
 				for(int i = 0; i < gameObjIt->second.size(); i++)
 				{
-					stream << gameObjectType.GetName() << "_" << std::dec << (u32)gameObjIt->second[i].m_gameObject.GetId() << "_idx\tequ 0x" << std::hex << i << std::endl;
+					if(gameObjIt->second[i].m_gameObject.GetName().size() > 0)
+					{
+						stream << gameObjIt->second[i].m_gameObject.GetName() << "_idx\tequ 0x" << std::hex << i << std::endl;
+					}
+					else
+					{
+						//No name, generate one
+						stream << gameObjectType.GetName() << "_" << std::dec << (u32)gameObjIt->second[i].m_gameObject.GetId() << "_idx\tequ 0x" << std::hex << i << std::endl;
+					}
+
 					gameObjIt->second[i].m_gameObject.Export(stream, gameObjectType);
 					stream << '\t' << "add.l #" << gameObjectType.GetName() << "_Struct_Size, a0" << std::endl;
 				}

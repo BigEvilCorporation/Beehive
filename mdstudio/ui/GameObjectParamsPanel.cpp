@@ -30,6 +30,12 @@ void GameObjectParamsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 void GameObjectParamsPanel::SetGameObject(GameObject* gameObject)
 {
 	m_gameObject = gameObject;
+
+	if(gameObject)
+	{
+		m_textObjectName->SetValue(m_gameObject->GetName());
+	}
+
 	PopulateVarsList();
 }
 
@@ -63,7 +69,15 @@ void GameObjectParamsPanel::OnSelectVariable(wxListEvent& event)
 	}
 }
 
-void GameObjectParamsPanel::OnBtnApplyChanges(wxCommandEvent& event)
+void GameObjectParamsPanel::OnButtonApplyObjectName(wxCommandEvent& event)
+{
+	if(m_gameObject)
+	{
+		m_gameObject->SetName(m_textObjectName->GetValue().c_str().AsChar());
+	}
+}
+
+void GameObjectParamsPanel::OnBtnApplyVariableChanges(wxCommandEvent& event)
 {
 	if(m_gameObject)
 	{

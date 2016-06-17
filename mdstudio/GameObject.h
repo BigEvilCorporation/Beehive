@@ -90,6 +90,9 @@ public:
 	GameObjectId GetId() const { return m_objectId; }
 	GameObjectTypeId GetTypeId() const { return m_typeId; }
 
+	void SetName(const std::string& name) { m_name = name; }
+	const std::string& GetName() const { return m_name; }
+
 	const ion::Vector2i& GetPosition() const { return m_position; }
 	void SetPosition(const ion::Vector2i& position) { m_position = position; }
 
@@ -117,6 +120,7 @@ private:
 
 	GameObjectId m_objectId;
 	GameObjectTypeId m_typeId;
+	std::string m_name;
 	ion::Vector2i m_position;
 	std::vector<GameObjectVariable> m_variables;
 

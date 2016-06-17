@@ -636,6 +636,9 @@ class GameObjParamsPanelBase : public wxPanel
 		wxToolBar* m_toolBar1;
 		wxToolBarToolBase* m_toolAddVariable; 
 		wxToolBarToolBase* m_toolRemoveVariable; 
+		wxStaticText* m_staticText42;
+		wxTextCtrl* m_textObjectName;
+		wxButton* m_btnApplyObjectName;
 		wxListCtrl* m_listVariables;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* m_textVariableName;
@@ -643,14 +646,15 @@ class GameObjParamsPanelBase : public wxPanel
 		wxChoice* m_choiceSize;
 		wxStaticText* m_staticText8;
 		wxTextCtrl* m_textValue;
-		wxButton* m_btnApply;
+		wxButton* m_btnApplyVarParams;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonApplyObjectName( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnApplyChanges( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnApplyVariableChanges( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:

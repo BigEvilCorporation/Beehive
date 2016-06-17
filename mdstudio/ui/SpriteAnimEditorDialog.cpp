@@ -455,7 +455,10 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
 
 	//Clear existing
-	m_gridTimeline->DeleteCols(0, m_gridTimeline->GetNumberCols());
+	if(m_gridTimeline->GetNumberCols() > 0)
+	{
+		m_gridTimeline->DeleteCols(0, m_gridTimeline->GetNumberCols());
+	}
 
 	const u32 numKeyframes = anim.m_trackSpriteFrame.GetNumKeyframes();
 
@@ -622,21 +625,23 @@ void SpriteAnimEditorDialog::EventHandlerDragFrameListBegin(wxGridEvent& event)
 {
 	m_draggingSpriteFrameItem = event.GetCol();
 
-	wxImageList* imageList = m_timelineImageList.get();
+	wxImageList* imageList = m_spriteFrameImageList.get();
 	if(imageList)
 	{
 		if(m_draggingSpriteFrameItem >= 0 && m_draggingSpriteFrameItem < imageList->GetImageCount())
 		{
+			//Create drag image
 			m_dragImage = new wxDragImage(imageList->GetBitmap(m_draggingSpriteFrameItem));
 			m_dragImage->BeginDrag(wxPoint(0, 0), m_gridSpriteFrames, m_gridTimeline);
 			m_dragImage->Show();
 
+			//Create target drop rect list
 			m_dragDropKeyframeList.clear();
 
 			if(m_selectedAnim)
 			{
 				//Backup all keyframes and list entry rects
-				for(int i = 0; i < imageList->GetImageCount(); i++)
+				for(int i = 0; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
 				{
 					wxRect rect = m_gridTimeline->CellToRect(0, i);
 
@@ -711,14 +716,15 @@ void SpriteAnimEditorDialog::EventHandlerDragTimelineBegin(wxGridEvent& event)
 	{
 		if(m_selectedAnim && m_draggingTimelineItem >= 0 && m_draggingTimelineItem < imageList->GetImageCount())
 		{
+			//Create drag image
 			m_dragImage = new wxDragImage(imageList->GetBitmap(m_draggingTimelineItem));
 			m_dragImage->BeginDrag(wxPoint(0, 0), m_gridTimeline, m_gridTimeline);
 			m_dragImage->Show();
 	
+			//Create target drop rect list
 			m_dragDropKeyframeList.clear();
 	
-			//Backup all keyframes and list entry rects
-			for(int i = 0; i < imageList->GetImageCount(); i++)
+			for(int i = 0; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
 			{
 				wxRect rect = m_gridTimeline->CellToRect(0, i);
 	
@@ -837,20 +843,20 @@ void SpriteAnimEditorDialog::FindAndDrawDropTarget(wxPoint mousePosDropSource, w
 {
 	m_dragImage->Move(mousePosDropSource);
 
-	if(m_dragDropKeyframeList.size() > 0)
+	m_dragDropTarget = -1;
+
+	//Check within timeline bounds
+	if(mousePosDropTarget.y >= 0 && mousePosDropTarget.y <= m_gridTimeline->GetSize().GetHeight())
 	{
-		m_dragDropTarget = -1;
+		//Offset scroll
+		int pixelsPerScrollUnitX = 0;
+		int pixelsPerScrollUnitY = 0;
+		m_gridTimeline->GetScrollPixelsPerUnit(&pixelsPerScrollUnitX, &pixelsPerScrollUnitY);
+		wxPoint scrollOffset(m_gridTimeline->GetViewStart().x * pixelsPerScrollUnitX, m_gridTimeline->GetViewStart().y * pixelsPerScrollUnitY);
+		mousePosDropTarget.x += scrollOffset.x;
 
-		//Check within timeline bounds
-		if(mousePosDropTarget.y >= 0 && mousePosDropTarget.y <= m_gridTimeline->GetSize().GetHeight())
+		if(m_dragDropKeyframeList.size() > 0)
 		{
-			//Offset scroll
-			int pixelsPerScrollUnitX = 0;
-			int pixelsPerScrollUnitY = 0;
-			m_gridTimeline->GetScrollPixelsPerUnit(&pixelsPerScrollUnitX, &pixelsPerScrollUnitY);
-			wxPoint scrollOffset(m_gridTimeline->GetViewStart().x * pixelsPerScrollUnitX, m_gridTimeline->GetViewStart().y * pixelsPerScrollUnitY);
-			mousePosDropTarget.x += scrollOffset.x;
-
 			if(mousePosDropTarget.x < m_dragDropKeyframeList.front().second.GetLeft() + (m_dragDropKeyframeList.front().second.GetWidth() / 2))
 			{
 				//Drag target is left of first item
@@ -875,49 +881,64 @@ void SpriteAnimEditorDialog::FindAndDrawDropTarget(wxPoint mousePosDropSource, w
 					}
 				}
 			}
+		}
+		else
+		{
+			//No frames in list, there's only one drop target
+			m_dragDropTarget = 0;
+		}
 
-			if(m_dragDropTarget != m_dragDropTargetPrev)
+		if(m_dragDropTarget != m_dragDropTargetPrev)
+		{
+			//De-select previous cell
+			if(m_dragDropTargetPrev >= 0)
 			{
-				//De-select previous cell
-				if(m_dragDropTargetPrev >= 0)
-				{
-					int drawIndex = (m_dragDropTargetPrev == m_dragDropKeyframeList.size()) ? m_dragDropTargetPrev - 1 : m_dragDropTargetPrev;
-					GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, drawIndex);
-					cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeNone);
+				int drawIndex = (m_dragDropKeyframeList.size() > 0 && m_dragDropTargetPrev == m_dragDropKeyframeList.size()) ? m_dragDropTargetPrev - 1 : m_dragDropTargetPrev;
+				GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, drawIndex);
+				cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeNone);
 
-					wxRect refreshRect = m_dragDropKeyframeList[drawIndex].second;
+				wxRect refreshRect = (m_dragDropKeyframeList.size() > 0) ? m_dragDropKeyframeList[drawIndex].second : m_gridTimeline->GetRect();
+				refreshRect.Offset(-scrollOffset);
+				m_gridTimeline->Refresh(true, &refreshRect);
+			}
+
+			//Set selected cell
+			if(m_dragDropTarget >= 0)
+			{
+				if(m_dragDropTarget == 0 && m_dragDropKeyframeList.size() == 0)
+				{
+					//No existing cells, use far left of timeline
+					GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, 0);
+					cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeLeft);
+
+					wxRect refreshRect = m_gridTimeline->GetRect();
 					refreshRect.Offset(-scrollOffset);
 					m_gridTimeline->Refresh(true, &refreshRect);
 				}
-
-				//Set selected cell
-				if(m_dragDropTarget >= 0)
+				else if(m_dragDropTarget == m_dragDropKeyframeList.size())
 				{
-					if(m_dragDropTarget == m_dragDropKeyframeList.size())
-					{
-						//Far right of last cell
-						GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, m_dragDropTarget - 1);
-						cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeRight);
+					//Far right of last cell
+					GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, m_dragDropTarget - 1);
+					cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeRight);
 
-						wxRect refreshRect = m_dragDropKeyframeList[m_dragDropTarget - 1].second;
-						refreshRect.Offset(-scrollOffset);
-						m_gridTimeline->Refresh(true, &refreshRect);
-					}
-					else
-					{
-						//Left of current cell
-						GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, m_dragDropTarget);
-						cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeLeft);
-
-						wxRect refreshRect = m_dragDropKeyframeList[m_dragDropTarget].second;
-						refreshRect.Offset(-scrollOffset);
-						m_gridTimeline->Refresh(true, &refreshRect);
-					}
+					wxRect refreshRect = m_dragDropKeyframeList[m_dragDropTarget - 1].second;
+					refreshRect.Offset(-scrollOffset);
+					m_gridTimeline->Refresh(true, &refreshRect);
 				}
+				else
+				{
+					//Left of current cell
+					GridCellBitmapRenderer* cellRenderer = (GridCellBitmapRenderer*)m_gridTimeline->GetCellRenderer(0, m_dragDropTarget);
+					cellRenderer->SetDrawSelectionEdge(GridCellBitmapRenderer::eDrawSelectionEdgeLeft);
 
-				//Drop target changed
-				m_dragDropTargetPrev = m_dragDropTarget;
+					wxRect refreshRect = m_dragDropKeyframeList[m_dragDropTarget].second;
+					refreshRect.Offset(-scrollOffset);
+					m_gridTimeline->Refresh(true, &refreshRect);
+				}
 			}
+
+			//Drop target changed
+			m_dragDropTargetPrev = m_dragDropTarget;
 		}
 	}
 }

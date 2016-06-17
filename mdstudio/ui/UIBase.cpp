@@ -1439,6 +1439,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	fgSizer5->Add( m_staticText10, 0, wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_textGameObjName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), 0 );
+	m_textGameObjName->Enable( false );
+	
 	fgSizer5->Add( m_textGameObjName, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticText25 = new wxStaticText( this, wxID_ANY, wxT("Preview Sprite:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1448,6 +1450,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	wxArrayString m_choiceSpritesChoices;
 	m_choiceSprites = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceSpritesChoices, 0 );
 	m_choiceSprites->SetSelection( 0 );
+	m_choiceSprites->Enable( false );
+	
 	fgSizer5->Add( m_choiceSprites, 0, wxALL, 5 );
 	
 	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("Dimensions:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1458,11 +1462,13 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	bSizer12 = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_spinWidth = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 16 );
+	m_spinWidth->Enable( false );
 	m_spinWidth->SetMaxSize( wxSize( 80,-1 ) );
 	
 	bSizer12->Add( m_spinWidth, 0, wxALL, 5 );
 	
-	m_spinHeight = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 16 );
+	m_spinHeight = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 15 );
+	m_spinHeight->Enable( false );
 	m_spinHeight->SetMaxSize( wxSize( 80,-1 ) );
 	
 	bSizer12->Add( m_spinHeight, 0, wxALL, 5 );
@@ -1490,6 +1496,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	fgSizer3->Add( m_staticText6, 0, wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_textVariableName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), 0 );
+	m_textVariableName->Enable( false );
+	
 	fgSizer3->Add( m_textVariableName, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Size:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1500,6 +1508,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	int m_choiceSizeNChoices = sizeof( m_choiceSizeChoices ) / sizeof( wxString );
 	m_choiceSize = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceSizeNChoices, m_choiceSizeChoices, 0 );
 	m_choiceSize->SetSelection( 0 );
+	m_choiceSize->Enable( false );
+	
 	fgSizer3->Add( m_choiceSize, 0, wxALL, 5 );
 	
 	m_staticText8 = new wxStaticText( this, wxID_ANY, wxT("Value:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1507,6 +1517,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	fgSizer3->Add( m_staticText8, 0, wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_textValue = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_textValue->Enable( false );
+	
 	fgSizer3->Add( m_textValue, 0, wxALL|wxEXPAND, 5 );
 	
 	
@@ -1514,6 +1526,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	
 	m_btnApply = new wxButton( this, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_btnApply->SetDefault(); 
+	m_btnApply->Enable( false );
+	
 	fgSizer3->Add( m_btnApply, 0, wxALL, 5 );
 	
 	
@@ -1584,6 +1598,12 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	wxBoxSizer* bSizer10;
 	bSizer10 = new wxBoxSizer( wxVERTICAL );
 	
+	wxFlexGridSizer* fgSizer31;
+	fgSizer31 = new wxFlexGridSizer( 3, 1, 0, 0 );
+	fgSizer31->AddGrowableRow( 2 );
+	fgSizer31->SetFlexibleDirection( wxBOTH );
+	fgSizer31->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
 	m_toolBar1 = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL ); 
 	m_toolAddVariable = m_toolBar1->AddTool( wxID_ANY, wxT("Add Variable"), wxBitmap( add_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 	
@@ -1591,7 +1611,26 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	
 	m_toolBar1->Realize(); 
 	
-	bSizer10->Add( m_toolBar1, 0, wxEXPAND, 5 );
+	fgSizer31->Add( m_toolBar1, 0, wxEXPAND, 5 );
+	
+	wxFlexGridSizer* fgSizer30;
+	fgSizer30 = new wxFlexGridSizer( 0, 3, 0, 0 );
+	fgSizer30->AddGrowableCol( 1 );
+	fgSizer30->SetFlexibleDirection( wxBOTH );
+	fgSizer30->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticText42 = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText42->Wrap( -1 );
+	fgSizer30->Add( m_staticText42, 0, wxALL, 5 );
+	
+	m_textObjectName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer30->Add( m_textObjectName, 0, wxALL|wxEXPAND, 5 );
+	
+	m_btnApplyObjectName = new wxButton( this, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer30->Add( m_btnApplyObjectName, 0, wxALL, 5 );
+	
+	
+	fgSizer31->Add( fgSizer30, 1, wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer11;
 	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
@@ -1599,15 +1638,8 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	m_listVariables = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxLC_REPORT );
 	bSizer11->Add( m_listVariables, 0, wxALL|wxEXPAND, 5 );
 	
-	wxFlexGridSizer* fgSizer4;
-	fgSizer4 = new wxFlexGridSizer( 0, 1, 0, 0 );
-	fgSizer4->AddGrowableRow( 1 );
-	fgSizer4->SetFlexibleDirection( wxBOTH );
-	fgSizer4->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-	
 	wxFlexGridSizer* fgSizer3;
-	fgSizer3 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer3->AddGrowableRow( 0 );
+	fgSizer3 = new wxFlexGridSizer( 4, 2, 0, 0 );
 	fgSizer3->SetFlexibleDirection( wxBOTH );
 	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
@@ -1638,18 +1670,18 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	
 	fgSizer3->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_btnApply = new wxButton( this, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_btnApply->SetDefault(); 
-	fgSizer3->Add( m_btnApply, 0, wxALL, 5 );
+	m_btnApplyVarParams = new wxButton( this, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_btnApplyVarParams->SetDefault(); 
+	fgSizer3->Add( m_btnApplyVarParams, 0, wxALL, 5 );
 	
 	
-	fgSizer4->Add( fgSizer3, 1, wxEXPAND, 5 );
+	bSizer11->Add( fgSizer3, 1, wxEXPAND, 5 );
 	
 	
-	bSizer11->Add( fgSizer4, 1, wxEXPAND, 5 );
+	fgSizer31->Add( bSizer11, 1, wxEXPAND, 5 );
 	
 	
-	bSizer10->Add( bSizer11, 1, wxEXPAND, 5 );
+	bSizer10->Add( fgSizer31, 1, wxEXPAND, 5 );
 	
 	
 	this->SetSizer( bSizer10 );
@@ -1658,9 +1690,10 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	// Connect Events
 	this->Connect( m_toolAddVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableAdd ) );
 	this->Connect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableRemove ) );
+	m_btnApplyObjectName->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonApplyObjectName ), NULL, this );
 	m_listVariables->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( GameObjParamsPanelBase::OnSelectVariable ), NULL, this );
 	m_choiceSize->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnVariableSizeChanged ), NULL, this );
-	m_btnApply->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnBtnApplyChanges ), NULL, this );
+	m_btnApplyVarParams->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnBtnApplyVariableChanges ), NULL, this );
 }
 
 GameObjParamsPanelBase::~GameObjParamsPanelBase()
@@ -1668,9 +1701,10 @@ GameObjParamsPanelBase::~GameObjParamsPanelBase()
 	// Disconnect Events
 	this->Disconnect( m_toolAddVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableAdd ) );
 	this->Disconnect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableRemove ) );
+	m_btnApplyObjectName->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonApplyObjectName ), NULL, this );
 	m_listVariables->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( GameObjParamsPanelBase::OnSelectVariable ), NULL, this );
 	m_choiceSize->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnVariableSizeChanged ), NULL, this );
-	m_btnApply->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnBtnApplyChanges ), NULL, this );
+	m_btnApplyVarParams->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnBtnApplyVariableChanges ), NULL, this );
 	
 }
 

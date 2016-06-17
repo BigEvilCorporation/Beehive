@@ -436,9 +436,12 @@ void Map::Export(const Project& project, ion::io::File& file) const
 	//Blit stamps
 	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
 	{
-		const Stamp& stamp = *project.GetStamp(it->m_id);
-		const ion::Vector2i& position = it->m_position;
-		BakeStamp(tiles, position.x, position.y, stamp, it->m_flags);
+		const Stamp* stamp = project.GetStamp(it->m_id);
+		if(stamp)
+		{
+			const ion::Vector2i& position = it->m_position;
+			BakeStamp(tiles, position.x, position.y, *stamp, it->m_flags);
+		}
 	}
 
 	//Use background tile if there is one, else use first tile

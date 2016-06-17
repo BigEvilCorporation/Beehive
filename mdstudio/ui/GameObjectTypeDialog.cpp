@@ -182,6 +182,12 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 {
 	if(gameObjType)
 	{
+		m_textGameObjName->Enable(true);
+		m_choiceSprites->Enable(true);
+		m_spinWidth->Enable(true);
+		m_spinHeight->Enable(true);
+		m_listVariables->Enable(true);
+
 		m_textGameObjName->SetValue(gameObjType->GetName());
 		m_spinWidth->SetValue(gameObjType->GetDimensions().x);
 		m_spinHeight->SetValue(gameObjType->GetDimensions().y);
@@ -207,6 +213,12 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_choiceSprites->Clear();
 		m_spinWidth->SetValue(1);
 		m_spinHeight->SetValue(1);
+
+		m_textGameObjName->Enable(false);
+		m_choiceSprites->Enable(false);
+		m_spinWidth->Enable(false);
+		m_spinHeight->Enable(false);
+		m_listVariables->Enable(false);
 	}
 }
 
@@ -285,11 +297,19 @@ void GameObjectTypeDialog::PopulateVarsFields(GameObjectVariable* variable)
 		}
 
 		m_choiceSize->SetSelection(choice);
+
+		m_textVariableName->Enable(true);
+		m_textValue->Enable(true);
+		m_choiceSize->Enable(true);
 	}
 	else
 	{
 		m_textVariableName->SetValue("");
 		m_textValue->SetValue("");
 		m_choiceSize->SetSelection(0);
+
+		m_textVariableName->Enable(false);
+		m_textValue->Enable(false);
+		m_choiceSize->Enable(false);
 	}
 }
