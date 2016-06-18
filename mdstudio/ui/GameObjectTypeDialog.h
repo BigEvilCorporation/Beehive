@@ -32,7 +32,8 @@ protected:
 	virtual void OnToolVariableRemove(wxCommandEvent& event);
 	virtual void OnSelectGameObjType(wxCommandEvent& event);
 	virtual void OnSelectVariable(wxListEvent& event);
-	virtual void OnBtnApplyChanges(wxCommandEvent& event);
+	virtual void OnBtnApplyObjChanges(wxCommandEvent& event);
+	virtual void OnBtnApplyVarChanges(wxCommandEvent& event);
 	virtual void OnBtnImport(wxCommandEvent& event);
 	virtual void OnBtnExport(wxCommandEvent& event);
 

@@ -637,7 +637,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 	}
 }
 
-void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int x, int y)
+void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int tileX, int tileY)
 {
 	Map& map = m_project.GetMap();
 	Tileset& tileset = m_project.GetTileset();
@@ -650,7 +650,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 	//Invert for OpenGL
 	ion::Vector2 mousePosF((float)mousePos.x, (float)(mapHeight * tileHeight) - (float)mousePos.y);
-	int y_inv = (mapHeight - 1 - y);
+	int y_inv = (mapHeight - 1 - tileY);
 
 	switch(m_currentTool)
 	{
@@ -841,7 +841,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				TerrainTileset& terrainTileset = m_project.GetTerrainTileset();
 
 				//Get pixel tile under cursor
-				TerrainTileId tileId = collisionMap.GetTerrainTile(x, y);
+				TerrainTileId tileId = collisionMap.GetTerrainTile(tileX, tileY);
 
 				if(tileId == InvalidTerrainTileId)
 				{
@@ -849,10 +849,10 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					tileId = terrainTileset.AddTerrainTile();
 
 					//Set on map
-					collisionMap.SetTerrainTile(x, y, tileId);
+					collisionMap.SetTerrainTile(tileX, tileY, tileId);
 
 					//Paint to canvas
-					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
+					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(tileX, tileY), tileX, y_inv);
 
 					//Invalidate terrain tileset
 					m_project.InvalidateTerrainTiles(true);
@@ -865,8 +865,8 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				if(TerrainTile* terrainTile = terrainTileset.GetTerrainTile(tileId))
 				{
 					//Get pixel offset into tile
-					int pixelX = mousePos.x - (x * tileWidth);
-					int pixelY = mousePos.y - (y * tileHeight);
+					int pixelX = mousePos.x - (tileX * tileWidth);
+					int pixelY = mousePos.y - (tileY * tileHeight);
 
 					if(buttonBits & eMouseLeft)
 					{
@@ -901,6 +901,32 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			break;
 		}
 
+		case eToolMoveGameObject:
+		{
+			if(buttonBits & eMouseLeft)
+			{
+				if(!(m_prevMouseBits & eMouseLeft))
+				{
+					ion::Vector2i topLeft;
+					m_hoverGameObject = m_project.GetMap().FindGameObject(tileX, tileY, topLeft);
+				}
+
+				if(m_hoverGameObject != InvalidGameObjectId)
+				{
+					if(GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject))
+					{
+						const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+						const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+						m_project.GetMap().MoveGameObject(m_hoverGameObject, tileX, tileY);
+						gameObject->SetPosition(ion::Vector2i(tileX * tileWidth, tileY * tileHeight));
+					}
+				}
+			}
+
+			break;
+		}
+
 		//case eToolMoveGameObject:
 		//{
 		//	if(buttonBits & eMouseLeft)
@@ -927,7 +953,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			if(buttonBits & eMouseLeft)
 			{
 				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project.GetMap().FindGameObject(x, y, topLeft);
+				m_hoverGameObject = m_project.GetMap().FindGameObject(tileX, tileY, topLeft);
 
 				if(m_hoverGameObject != InvalidGameObjectId)
 				{

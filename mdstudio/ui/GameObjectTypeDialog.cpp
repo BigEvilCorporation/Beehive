@@ -93,7 +93,7 @@ void GameObjectTypeDialog::OnSelectVariable(wxListEvent& event)
 	}
 }
 
-void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
+void GameObjectTypeDialog::OnBtnApplyObjChanges(wxCommandEvent& event)
 {
 	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
 	{
@@ -111,6 +111,14 @@ void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
 			}
 		}
 
+		PopulateTypeList();
+	}
+}
+
+void GameObjectTypeDialog::OnBtnApplyVarChanges(wxCommandEvent& event)
+{
+	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	{
 		if(m_currentVariable)
 		{
 			m_currentVariable->m_name = m_textVariableName->GetValue().c_str().AsChar();
@@ -133,7 +141,6 @@ void GameObjectTypeDialog::OnBtnApplyChanges(wxCommandEvent& event)
 			}
 		}
 
-		PopulateTypeList();
 		PopulateVarsList(gameObjType);
 		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
 		m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
@@ -187,6 +194,7 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_spinWidth->Enable(true);
 		m_spinHeight->Enable(true);
 		m_listVariables->Enable(true);
+		m_btnApplyObjSettings->Enable(true);
 
 		m_textGameObjName->SetValue(gameObjType->GetName());
 		m_spinWidth->SetValue(gameObjType->GetDimensions().x);
@@ -219,6 +227,7 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_spinWidth->Enable(false);
 		m_spinHeight->Enable(false);
 		m_listVariables->Enable(false);
+		m_btnApplyObjSettings->Enable(false);
 	}
 }
 
@@ -301,6 +310,7 @@ void GameObjectTypeDialog::PopulateVarsFields(GameObjectVariable* variable)
 		m_textVariableName->Enable(true);
 		m_textValue->Enable(true);
 		m_choiceSize->Enable(true);
+		m_btnApplyVarSettings->Enable(true);
 	}
 	else
 	{
@@ -311,5 +321,6 @@ void GameObjectTypeDialog::PopulateVarsFields(GameObjectVariable* variable)
 		m_textVariableName->Enable(false);
 		m_textValue->Enable(false);
 		m_choiceSize->Enable(false);
+		m_btnApplyVarSettings->Enable(false);
 	}
 }

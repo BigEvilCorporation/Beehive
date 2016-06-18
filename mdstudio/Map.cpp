@@ -306,6 +306,24 @@ GameObject* Map::GetGameObject(GameObjectId gameObjectId)
 	return NULL;
 }
 
+void Map::MoveGameObject(GameObjectId gameObjectId, int x, int y)
+{
+	if(gameObjectId != InvalidGameObjectId)
+	{
+		for(TGameObjectPosMap::iterator itMap = m_gameObjects.begin(), endMap = m_gameObjects.end(); itMap != endMap; ++itMap)
+		{
+			for(std::vector<GameObjectMapEntry>::iterator it = itMap->second.begin(), end = itMap->second.end(); it != end; ++it)
+			{
+				if(it->m_gameObject.GetId() == gameObjectId)
+				{
+					it->m_position = ion::Vector2i(x, y);
+					return;
+				}
+			}
+		}
+	}
+}
+
 void Map::RemoveGameObject(int x, int y)
 {
 	const int tileWidth = m_platformConfig.tileWidth;

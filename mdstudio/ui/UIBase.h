@@ -592,6 +592,7 @@ class GameObjTypeDialogBase : public wxDialog
 		wxStaticText* m_staticText9;
 		wxSpinCtrl* m_spinWidth;
 		wxSpinCtrl* m_spinHeight;
+		wxButton* m_btnApplyObjSettings;
 		wxStaticLine* m_staticline2;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* m_textVariableName;
@@ -599,7 +600,7 @@ class GameObjTypeDialogBase : public wxDialog
 		wxChoice* m_choiceSize;
 		wxStaticText* m_staticText8;
 		wxTextCtrl* m_textValue;
-		wxButton* m_btnApply;
+		wxButton* m_btnApplyVarSettings;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
 		
@@ -612,8 +613,9 @@ class GameObjTypeDialogBase : public wxDialog
 		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
 		virtual void OnWidthChanged( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnHeightChanged( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnBtnApplyObjChanges( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnApplyChanges( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnApplyVarChanges( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
 		
