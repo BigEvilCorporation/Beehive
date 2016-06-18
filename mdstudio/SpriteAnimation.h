@@ -39,8 +39,10 @@ class AnimTrackSpritePosition : public ion::render::AnimationTrack<ion::Vector2i
 public:
 	AnimTrackSpritePosition();
 	virtual const ion::Vector2i GetValue(float time) const;
-	void Export(std::stringstream& stream) const;
-	void Export(ion::io::File& file) const;
+	void ExportX(std::stringstream& stream) const;
+	void ExportY(std::stringstream& stream) const;
+	void ExportX(ion::io::File& file) const;
+	void ExportY(ion::io::File& file) const;
 };
 
 class SpriteAnimation : public ion::render::Animation

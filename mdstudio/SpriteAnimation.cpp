@@ -115,12 +115,50 @@ const ion::Vector2i AnimTrackSpritePosition::GetValue(float time) const
 	return result;
 }
 
-void AnimTrackSpritePosition::Export(std::stringstream& stream) const
+void AnimTrackSpritePosition::ExportX(std::stringstream& stream) const
+{
+	if(GetNumKeyframes() > 0)
+	{
+		stream << "\tdc.b ";
+
+		for(int i = 0; i < GetNumKeyframes(); i++)
+		{
+			u32 value = GetKeyframe(i).GetValue().x;
+			stream << "0x" << value;
+
+			if(i < GetNumKeyframes() - 1)
+				stream << ", ";
+		}
+	}
+
+	stream << std::endl;
+}
+
+void AnimTrackSpritePosition::ExportY(std::stringstream& stream) const
+{
+	if(GetNumKeyframes() > 0)
+	{
+		stream << "\tdc.b ";
+
+		for(int i = 0; i < GetNumKeyframes(); i++)
+		{
+			u32 value = GetKeyframe(i).GetValue().y;
+			stream << "0x" << value;
+
+			if(i < GetNumKeyframes() - 1)
+				stream << ", ";
+		}
+	}
+
+	stream << std::endl;
+}
+
+void AnimTrackSpritePosition::ExportX(ion::io::File& file) const
 {
 
 }
 
-void AnimTrackSpritePosition::Export(ion::io::File& file) const
+void AnimTrackSpritePosition::ExportY(ion::io::File& file) const
 {
 
 }
