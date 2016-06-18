@@ -54,6 +54,7 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& projec
 	m_gridTimeline->Bind(wxEVT_MOTION, &SpriteAnimEditorDialog::EventHandlerDragTimelineMove, this, m_gridTimeline->GetId());
 	m_gridTimeline->Bind(wxEVT_LEFT_UP, &SpriteAnimEditorDialog::EventHandlerDragTimelineEnd, this, m_gridTimeline->GetId());
 	m_gridTimeline->Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &SpriteAnimEditorDialog::EventHandlerTimelineRightClick, this, m_gridTimeline->GetId());
+	m_gridTimeline->Bind(wxEVT_GRID_CELL_CHANGING, &SpriteAnimEditorDialog::OnTimelineCellChange, this, m_gridTimeline->GetId());
 
 	//Get system scrollbar height
 	m_scrollbarHeight = wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y, m_gridTimeline);
@@ -75,6 +76,9 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& projec
 	m_gridTimeline->DisableDragGridSize();
 	m_gridTimeline->DisableDragRowSize();
 	m_gridTimeline->EnableDragCell(true);
+
+	//Append 1 row per keyframe track
+	m_gridTimeline->AppendRows(eTrack_MAX - m_gridTimeline->GetRows());
 
 	Maximize();
 }
@@ -127,7 +131,7 @@ void SpriteAnimEditorDialog::OnBtnActorDelete(wxCommandEvent& event)
 			m_renderResources.DeleteSpriteSheetRenderResources(it->first);
 		}
 
-		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0);
+		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0, ion::Vector2i());
 
 		m_project.DeleteActor(m_selectedActorId);
 
@@ -197,7 +201,7 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetDelete(wxCommandEvent& event)
 	{
 		m_selectedActor->DeleteSpriteSheet(m_selectedSpriteSheetId);
 		m_renderResources.DeleteSpriteSheetRenderResources(m_selectedSpriteSheetId);
-		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0);
+		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0, ion::Vector2i());
 
 		PopulateSpriteSheetList(*m_selectedActor);
 		m_listAnimations->Clear();
@@ -259,15 +263,45 @@ void SpriteAnimEditorDialog::OnBtnAnimDelete(wxCommandEvent& event)
 	}
 }
 
+void SpriteAnimEditorDialog::OnTimelineCellChange(wxGridEvent& event)
+{
+	if(m_selectedAnim)
+	{
+		int frame = event.GetCol();
+		TimelineTrack trackType = (TimelineTrack)event.GetRow();
+
+		if(trackType == eTrackPositionX || trackType == eTrackPositionY)
+		{
+			//Resize position track to match sprite frame track
+			int numExistingFrames = m_selectedAnim->m_trackPosition.GetNumKeyframes();
+			for(int i = numExistingFrames; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
+			{
+				m_selectedAnim->m_trackPosition.InsertKeyframe(ion::render::Keyframe<ion::Vector2i>((float)i, ion::Vector2i(0, 0)));
+			}
+			
+			//Set keyframe
+			ion::Vector2i position(0, 0);
+			if(trackType == eTrackPositionX)
+				event.GetString().ToLong((long*)&position.x, 10);
+			else
+				event.GetString().ToLong((long*)&position.y, 10);
+
+			ion::render::Keyframe<ion::Vector2i>& keyframe = m_selectedAnim->m_trackPosition.GetKeyframe(frame);
+			keyframe.SetValue(position);
+		}
+	}
+}
+
 void SpriteAnimEditorDialog::OnSliderMove(wxScrollEvent& event)
 {
 	if(m_selectedAnim && m_selectedAnim->GetState() == ion::render::Animation::eStopped)
 	{
 		float time = ion::maths::Lerp(0.0f, m_selectedAnim->GetLength(), (float)m_sliderTimeline->GetValue() / 100.0f);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);
+		const ion::Vector2i& offset = m_selectedAnim->m_trackPosition.GetValue(time);
 
 		m_selectedAnim->SetFrame(time);
-		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame);
+		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame, offset);
 		m_gridTimeline->GoToCell(0, frame);
 	}
 }
@@ -296,6 +330,22 @@ void SpriteAnimEditorDialog::OnSpinSpeedChange(wxSpinEvent& event)
 	if(m_selectedAnim)
 	{
 		m_selectedAnim->SetSpeed(event.GetValue());
+	}
+}
+
+void SpriteAnimEditorDialog::OnRadioBlendLerp(wxCommandEvent& event)
+{
+	if(m_selectedAnim)
+	{
+		m_selectedAnim->m_trackPosition.SetBlendMode(AnimTrackSpritePosition::eLinear);
+	}
+}
+
+void SpriteAnimEditorDialog::OnRadioBlendSnap(wxCommandEvent& event)
+{
+	if(m_selectedAnim)
+	{
+		m_selectedAnim->m_trackPosition.SetBlendMode(AnimTrackSpritePosition::eSnap);
 	}
 }
 
@@ -476,21 +526,23 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 		m_gridTimeline->AppendCols(numKeyframes);
 		
 		//Reset timeline row height
-		m_gridTimeline->SetRowSize(0, s_iconHeight + (s_iconBorderY * 2));
-		m_gridTimeline->DisableRowResize(0);
+		m_gridTimeline->SetRowSize(eTrackSpriteFrame, s_iconHeight + (s_iconBorderY * 2));
+		m_gridTimeline->DisableRowResize(eTrackSpriteFrame);
 
 		for(int i = 0; i < numKeyframes; i++)
 		{
 			//Setup column
+			//Set all row content types to number
+			m_gridTimeline->SetColFormatNumber(i);
 			m_gridTimeline->SetColSize(i, iconWidth + (s_iconBorderX * 2));
 			m_gridTimeline->DisableColResize(i);
-			m_gridTimeline->SetCellRenderer(0, i, new GridCellBitmapRenderer(m_timelineImageList.get()));
+			m_gridTimeline->SetCellRenderer(eTrackSpriteFrame, i, new GridCellBitmapRenderer(m_timelineImageList.get()));
 
-			//Get keyframe
-			const int frame = anim.m_trackSpriteFrame.GetKeyframe(i).GetValue();
+			//Get sprite keyframe
+			const int spriteFrame = anim.m_trackSpriteFrame.GetKeyframe(i).GetValue();
 			 
 			//Fetch texture, convert to wxImage
-			const ion::render::Texture* texture = spriteResources->m_frames[frame].texture;
+			const ion::render::Texture* texture = spriteResources->m_frames[spriteFrame].texture;
 			wxImage image(texture->GetWidth(), texture->GetHeight());
 			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::eRGB, ion::render::Texture::eBPP24, image.GetData());
 
@@ -505,6 +557,18 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 
 			//Add to image list
 			m_timelineImageList->Add(bitmap);
+
+			//Get position
+			if(i < anim.m_trackPosition.GetNumKeyframes())
+			{
+				ion::Vector2i position = anim.m_trackPosition.GetKeyframe(i).GetValue();
+				wxString textX;
+				wxString textY;
+				textX << position.x;
+				textY << position.y;
+				m_gridTimeline->SetCellValue(textX, eTrackPositionX, i);
+				m_gridTimeline->SetCellValue(textY, eTrackPositionY, i);
+			}
 		}
 
 		//Set timeline height
@@ -513,6 +577,10 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 		m_gridTimeline->GetContainingSizer()->Layout();
 		m_gridTimeline->Refresh();
 	}
+
+	//Set blend mode radio buttons
+	m_radioBlendLerp->SetValue(anim.m_trackPosition.GetBlendMode() == AnimTrackSpritePosition::eLinear);
+	m_radioBlendLerp->SetValue(anim.m_trackPosition.GetBlendMode() == AnimTrackSpritePosition::eSnap);
 }
 
 void SpriteAnimEditorDialog::SelectActor(int index)
@@ -565,7 +633,10 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 			m_selectedSpriteSheet = m_selectedActor->GetSpriteSheet(m_selectedSpriteSheetId);
 			ion::debug::Assert(m_selectedSpriteSheet, "SpriteAnimEditorDialog::OnSpriteSheetSelected() - Invalid spriteSheet ID");
 			m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(m_selectedSpriteSheet->GetWidthTiles() * tileWidth, m_selectedSpriteSheet->GetHeightTiles() * tileHeight));
-			m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, 0);
+			m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, 0, ion::Vector2i());
+			m_canvas->CreateGrid(m_selectedSpriteSheet->GetWidthTiles() * tileWidth, m_selectedSpriteSheet->GetHeightTiles() * tileHeight, m_selectedSpriteSheet->GetWidthTiles(), m_selectedSpriteSheet->GetHeightTiles());
+			m_canvas->SetGridColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+			m_canvas->SetDrawGrid(true);
 
 			PopulateSpriteFrames(m_selectedSpriteSheetId);
 			PopulateAnimList(*m_selectedSpriteSheet);
@@ -613,9 +684,10 @@ void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 		float time = m_selectedAnim->GetFrame();
 		float lerpTime = ion::maths::UnLerp(0.0f, m_selectedAnim->GetLength(), time);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);
+		const ion::Vector2i& offset = m_selectedAnim->m_trackPosition.GetValue(time);
 
 		m_selectedAnim->Update(delta);
-		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame);
+		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame, offset);
 		m_sliderTimeline->SetValue((int)ion::maths::Round(lerpTime * 100.0f));
 		m_gridTimeline->GoToCell(0, frame);
 	}
@@ -710,31 +782,35 @@ void SpriteAnimEditorDialog::EventHandlerDragFrameListEnd(wxMouseEvent& event)
 void SpriteAnimEditorDialog::EventHandlerDragTimelineBegin(wxGridEvent& event)
 {
 	m_draggingTimelineItem = event.GetCol();
+	TimelineTrack trackType = (TimelineTrack)event.GetRow();
 
-	wxImageList* imageList = m_timelineImageList.get();
-	if(imageList)
+	if(trackType == eTrackSpriteFrame)
 	{
-		if(m_selectedAnim && m_draggingTimelineItem >= 0 && m_draggingTimelineItem < imageList->GetImageCount())
+		wxImageList* imageList = m_timelineImageList.get();
+		if(imageList)
 		{
-			//Create drag image
-			m_dragImage = new wxDragImage(imageList->GetBitmap(m_draggingTimelineItem));
-			m_dragImage->BeginDrag(wxPoint(0, 0), m_gridTimeline, m_gridTimeline);
-			m_dragImage->Show();
-	
-			//Create target drop rect list
-			m_dragDropKeyframeList.clear();
-	
-			for(int i = 0; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
+			if(m_selectedAnim && m_draggingTimelineItem >= 0 && m_draggingTimelineItem < imageList->GetImageCount())
 			{
-				wxRect rect = m_gridTimeline->CellToRect(0, i);
-	
-				u32 frame = m_selectedAnim->m_trackSpriteFrame.GetKeyframe(i).GetValue();
-	
-				m_dragDropKeyframeList.push_back(std::make_pair(frame, rect));
+				//Create drag image
+				m_dragImage = new wxDragImage(imageList->GetBitmap(m_draggingTimelineItem));
+				m_dragImage->BeginDrag(wxPoint(0, 0), m_gridTimeline, m_gridTimeline);
+				m_dragImage->Show();
+
+				//Create target drop rect list
+				m_dragDropKeyframeList.clear();
+
+				for(int i = 0; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
+				{
+					wxRect rect = m_gridTimeline->CellToRect(0, i);
+
+					u32 frame = m_selectedAnim->m_trackSpriteFrame.GetKeyframe(i).GetValue();
+
+					m_dragDropKeyframeList.push_back(std::make_pair(frame, rect));
+				}
+
+				m_dragDropTarget = -1;
+				m_dragDropTargetPrev = -1;
 			}
-	
-			m_dragDropTarget = -1;
-			m_dragDropTargetPrev = -1;
 		}
 	}
 }

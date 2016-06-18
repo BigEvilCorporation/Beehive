@@ -83,10 +83,11 @@ void SpriteCanvas::SetDrawGrid(bool drawGrid)
 	Refresh();
 }
 
-void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame)
+void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& offset)
 {
 	m_drawSpriteSheet = spriteSheet;
 	m_drawSpriteSheetFrame = frame;
+	m_drawOffset = offset;
 	Refresh();
 }
 
@@ -184,8 +185,8 @@ void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion:
 		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 		ion::Matrix4 boxMtx;
-		ion::Vector3 boxScale((m_spriteSheetDimentions.x / tileWidth) * m_cameraZoom, (m_spriteSheetDimentions.y / tileHeight) * m_cameraZoom, 0.0f);
-		ion::Vector3 boxPos(0.0f, 0.0f, z);
+		ion::Vector3 boxScale(m_cameraZoom, m_cameraZoom, 0.0f);
+		ion::Vector3 boxPos(m_drawOffset.x * m_cameraZoom, m_drawOffset.y * m_cameraZoom, z);
 
 		boxMtx.SetTranslation(boxPos);
 		boxMtx.SetScale(boxScale);

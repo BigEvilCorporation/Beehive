@@ -79,6 +79,12 @@ void AnimTrackSpriteFrame::Export(ion::io::File& file) const
 
 }
 
+AnimTrackSpritePosition::AnimTrackSpritePosition()
+{
+	//Linear mode by default
+	SetBlendMode(eLinear);
+}
+
 const ion::Vector2i AnimTrackSpritePosition::GetValue(float time) const
 {
 	ion::Vector2i result;
@@ -88,15 +94,22 @@ const ion::Vector2i AnimTrackSpritePosition::GetValue(float time) const
 
 	if(keyframeA && keyframeB)
 	{
-		float timeA = keyframeA->GetTime();
-		float timeB = keyframeB->GetTime();
+		if(GetBlendMode() == eSnap)
+		{
+			result = keyframeA->GetValue();
+		}
+		else
+		{
+			float timeA = keyframeA->GetTime();
+			float timeB = keyframeB->GetTime();
 
-		float lerpTime = ion::maths::UnLerp(timeA, timeB, time);
+			float lerpTime = ion::maths::UnLerp(timeA, timeB, time);
 
-		const ion::Vector2i& vectorA = keyframeA->GetValue();
-		const ion::Vector2i& vectorB = keyframeB->GetValue();
+			const ion::Vector2i& vectorA = keyframeA->GetValue();
+			const ion::Vector2i& vectorB = keyframeB->GetValue();
 
-		result = vectorA.Lerp(vectorB, lerpTime);
+			result = vectorA.Lerp(vectorB, lerpTime);
+		}
 	}
 
 	return result;

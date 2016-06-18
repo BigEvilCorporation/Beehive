@@ -545,6 +545,9 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxBitmapButton* m_btnStop;
 		wxStaticText* m_staticText40;
 		wxSpinCtrl* m_spinCtrlSpeed;
+		wxStaticText* m_staticText43;
+		wxRadioButton* m_radioBlendLerp;
+		wxRadioButton* m_radioBlendSnap;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnActorSelected( wxCommandEvent& event ) { event.Skip(); }
@@ -561,6 +564,8 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		virtual void OnBtnPlay( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpinSpeedChange( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnRadioBlendLerp( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnRadioBlendSnap( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:

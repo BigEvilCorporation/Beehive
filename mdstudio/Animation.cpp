@@ -119,15 +119,22 @@ const ion::Vector2i AnimTrackPosition::GetValue(float time) const
 
 	if(keyframeA && keyframeB)
 	{
-		float timeA = keyframeA->GetTime();
-		float timeB = keyframeB->GetTime();
+		if(GetBlendMode() == eSnap)
+		{
+			result = keyframeA->GetValue();
+		}
+		else
+		{
+			float timeA = keyframeA->GetTime();
+			float timeB = keyframeB->GetTime();
 
-		float lerpTime = ion::maths::UnLerp(timeA, timeB, time);
+			float lerpTime = ion::maths::UnLerp(timeA, timeB, time);
 
-		const ion::Vector2i& vectorA = keyframeA->GetValue();
-		const ion::Vector2i& vectorB = keyframeB->GetValue();
+			const ion::Vector2i& vectorA = keyframeA->GetValue();
+			const ion::Vector2i& vectorB = keyframeB->GetValue();
 
-		result = vectorA.Lerp(vectorB, lerpTime);
+			result = vectorA.Lerp(vectorB, lerpTime);
+		}
 	}
 
 	return result;

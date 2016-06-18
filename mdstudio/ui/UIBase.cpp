@@ -72,6 +72,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonBar = new wxRibbonBar( this, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxRIBBON_BAR_DEFAULT_STYLE|wxRIBBON_BAR_FLOW_HORIZONTAL|wxRIBBON_BAR_SHOW_PAGE_ICONS|wxRIBBON_BAR_SHOW_PAGE_LABELS|wxRIBBON_BAR_SHOW_PANEL_MINIMISE_BUTTONS|wxNO_BORDER );
 	m_ribbonBar->SetArtProvider(new wxRibbonDefaultArtProvider); 
 	m_ribbonPageProject = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Project") , wxNullBitmap , 0 );
+	m_ribbonBar->SetActivePage( m_ribbonPageProject ); 
 	m_ribbonPanelProject = new wxRibbonPanel( m_ribbonPageProject, wxID_ANY, wxT("Project") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarProject = new wxRibbonButtonBar( m_ribbonPanelProject, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_NEW, wxT("New"), wxBitmap( newproj_xpm ), wxEmptyString);
@@ -85,7 +86,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SNAP, wxT("Snap to Grid"), wxBitmap( gridsnap_xpm ), wxEmptyString);
 	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_SHOW_OUTLINES, wxT("Show Outlines"), wxBitmap( showoutlines_xpm ), wxEmptyString);
 	m_ribbonPageTools = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Tools") , wxNullBitmap , 0 );
-	m_ribbonBar->SetActivePage( m_ribbonPageTools ); 
 	m_ribbonPanelTools = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tool Panels") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarTools = new wxRibbonButtonBar( m_ribbonPanelTools, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAPEDIT, wxT("Toolbox"), wxBitmap( toolspanel_xpm ), wxEmptyString);
@@ -1273,7 +1273,7 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	
 	// Grid
 	m_gridTimeline->CreateGrid( 1, 1 );
-	m_gridTimeline->EnableEditing( false );
+	m_gridTimeline->EnableEditing( true );
 	m_gridTimeline->EnableGridLines( true );
 	m_gridTimeline->EnableDragGridSize( false );
 	m_gridTimeline->SetMargins( 0, 0 );
@@ -1316,6 +1316,17 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	m_spinCtrlSpeed = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 10 );
 	bSizer28->Add( m_spinCtrlSpeed, 0, wxALL, 5 );
 	
+	m_staticText43 = new wxStaticText( this, wxID_ANY, wxT("Blend mode:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText43->Wrap( -1 );
+	bSizer28->Add( m_staticText43, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_radioBlendLerp = new wxRadioButton( this, wxID_ANY, wxT("Linear"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_radioBlendLerp->SetValue( true ); 
+	bSizer28->Add( m_radioBlendLerp, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_radioBlendSnap = new wxRadioButton( this, wxID_ANY, wxT("Snap"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer28->Add( m_radioBlendSnap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
 	
 	m_sizerTimeline->Add( bSizer28, 1, wxEXPAND, 5 );
 	
@@ -1357,6 +1368,8 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	m_btnPlay->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnPlay ), NULL, this );
 	m_btnStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnStop ), NULL, this );
 	m_spinCtrlSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( SpriteAnimEditorDialogBase::OnSpinSpeedChange ), NULL, this );
+	m_radioBlendLerp->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnRadioBlendLerp ), NULL, this );
+	m_radioBlendSnap->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnRadioBlendSnap ), NULL, this );
 }
 
 SpriteAnimEditorDialogBase::~SpriteAnimEditorDialogBase()
@@ -1384,6 +1397,8 @@ SpriteAnimEditorDialogBase::~SpriteAnimEditorDialogBase()
 	m_btnPlay->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnPlay ), NULL, this );
 	m_btnStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnStop ), NULL, this );
 	m_spinCtrlSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( SpriteAnimEditorDialogBase::OnSpinSpeedChange ), NULL, this );
+	m_radioBlendLerp->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnRadioBlendLerp ), NULL, this );
+	m_radioBlendSnap->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnRadioBlendSnap ), NULL, this );
 	
 }
 

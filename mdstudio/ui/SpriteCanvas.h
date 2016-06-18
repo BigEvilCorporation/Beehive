@@ -32,11 +32,14 @@ public:
 	void SetupRendering(ion::render::Renderer* renderer, wxGLContext* glContext, RenderResources* renderResources);
 	void SetSpriteSheetDimentionsPixels(const ion::Vector2i& spriteSheetDimentions);
 	void SetSpriteSheetDimentionsCells(const ion::Vector2i& spriteSheetDimentionsCells);
+
+	//Grid
+	void CreateGrid(int width, int height, int cellsX, int cellsY);
 	void SetGridColour(const ion::Colour& colour);
 
 	void SetDrawPreview(bool drawPreview, u32 maxFrames);
 	void SetDrawGrid(bool drawGrid);
-	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame);
+	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& offset);
 
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
@@ -52,9 +55,6 @@ private:
 	void EventHandlerPaint(wxPaintEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
 	void EventHandlerMouse(wxMouseEvent& event);
-
-	//Primitive creation
-	void CreateGrid(int width, int height, int cellsX, int cellsY);
 
 	//Rendering
 	void RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
@@ -73,6 +73,7 @@ private:
 	u32 m_drawPreviewMaxFrames;
 	SpriteSheetId m_drawSpriteSheet;
 	u32 m_drawSpriteSheetFrame;
+	ion::Vector2i m_drawOffset;
 	bool m_drawGrid;
 
 	//Mouse

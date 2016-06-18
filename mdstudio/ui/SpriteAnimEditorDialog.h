@@ -60,6 +60,14 @@ public:
 		eMenuDeleteKeyframe = 1
 	};
 
+	enum TimelineTrack
+	{
+		eTrackSpriteFrame,
+		eTrackPositionX,
+		eTrackPositionY,
+		eTrack_MAX
+	};
+
 	SpriteAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual ~SpriteAnimEditorDialog();
 
@@ -84,10 +92,13 @@ protected:
 	virtual void OnBtnSpriteSheetDelete(wxCommandEvent& event);
 	virtual void OnBtnAnimNew(wxCommandEvent& event);
 	virtual void OnBtnAnimDelete(wxCommandEvent& event);
+	virtual void OnTimelineCellChange(wxGridEvent& event);
 	virtual void OnSliderMove(wxScrollEvent& event);
 	virtual void OnBtnPlay(wxCommandEvent& event);
 	virtual void OnBtnStop(wxCommandEvent& event);
 	virtual void OnSpinSpeedChange(wxSpinEvent& event);
+	virtual void OnRadioBlendLerp(wxCommandEvent& event);
+	virtual void OnRadioBlendSnap(wxCommandEvent& event);
 
 private:
 	void PopulateActorList();
