@@ -19,6 +19,7 @@
 Project::Project(PlatformConfig& defaultPatformConfig)
 	: m_platformConfig(defaultPatformConfig)
 	, m_map(m_platformConfig)
+	, m_collisionMap(m_platformConfig)
 	, m_tileset(m_platformConfig)
 	, m_terrainTileset(m_platformConfig)
 {
@@ -1897,7 +1898,7 @@ bool Project::ExportGameObjects(const std::string& filename) const
 			u32 count = (gameObjIt != gameObjMap.end()) ? gameObjIt->second.size() : 0;
 			
 			//Export game object count
-			stream << "gameobjects_" << m_name << "_" << gameObjectType.GetName() << "_count equ " << count << std::endl;
+			stream << "gameobjects_" << m_name << "_" << gameObjectType.GetName() << "_count equ 0x" << count << std::endl;
 
 			//Export game object init sunroutine
 			stream << "LoadGameObjects_" << m_name << "_" << gameObjectType.GetName() << ":" << std::endl;

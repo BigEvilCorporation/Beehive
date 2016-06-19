@@ -1088,8 +1088,8 @@ void MapPanel::CreateCollisionCanvas(int width, int height)
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
-	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
+	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
 }
 
 void MapPanel::SetTool(ToolType tool)

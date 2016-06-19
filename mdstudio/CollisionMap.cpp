@@ -15,11 +15,11 @@
 
 #include <ion/core/memory/Memory.h>
 
-CollisionMap::CollisionMap()
+CollisionMap::CollisionMap(const PlatformConfig& platformConfig)
 {
 	m_width = 0;
 	m_height = 0;
-	Resize(defaultWidth, defaultHeight, false);
+	Resize(platformConfig.scrollPlaneWidthTiles, platformConfig.scrollPlaneHeightTiles, false);
 }
 
 void CollisionMap::Clear()
