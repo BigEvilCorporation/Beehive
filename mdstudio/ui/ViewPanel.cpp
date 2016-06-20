@@ -72,26 +72,29 @@ void ViewPanel::EventHandlerKeyboard(wxKeyEvent& event)
 
 void ViewPanel::EventHandlerPaint(wxPaintEvent& event)
 {
-	//Begin rendering to current viewport
-	m_renderer.BeginFrame(m_viewport, GetHDC());
-	m_renderer.ClearColour();
-	m_renderer.ClearDepth();
+	if(!m_mainWindow->IsRefreshLocked())
+	{
+		//Begin rendering to current viewport
+		m_renderer.BeginFrame(m_viewport, GetHDC());
+		m_renderer.ClearColour();
+		m_renderer.ClearDepth();
 
-	ion::Matrix4 cameraInverseMtx = m_camera.GetTransform().GetInverse();
-	ion::Matrix4 projectionMtx = m_renderer.GetProjectionMatrix();
+		ion::Matrix4 cameraInverseMtx = m_camera.GetTransform().GetInverse();
+		ion::Matrix4 projectionMtx = m_renderer.GetProjectionMatrix();
 
-	//Z order
-	const float zOffset = 0.0001f;
-	float z = 0.0f;
+		//Z order
+		const float zOffset = 0.0001f;
+		float z = 0.0f;
 
-	//Render callback
-	OnRender(m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
+		//Render callback
+		OnRender(m_renderer, cameraInverseMtx, projectionMtx, z, zOffset);
 
-	//End rendering
-	m_renderer.SwapBuffers();
-	m_renderer.EndFrame();
+		//End rendering
+		m_renderer.SwapBuffers();
+		m_renderer.EndFrame();
 
-	event.Skip();
+		event.Skip();
+	}
 }
 
 void ViewPanel::EventHandlerErase(wxEraseEvent& event)
