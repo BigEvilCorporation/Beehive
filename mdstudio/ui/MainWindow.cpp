@@ -35,7 +35,7 @@ MainWindow::MainWindow()
 	m_refreshLockStack = 0;
 
 	//Lock refresh during init
-	Lockrefresh();
+	LockRefresh();
 
 	//Setup panel docking manager
 	m_auiManager.SetManagedWindow(m_dockArea);
@@ -109,7 +109,7 @@ void MainWindow::EventHandlerKeyboard(wxKeyEvent& event)
 void MainWindow::SetProject(Project* project)
 {
 	//Lock refresh
-	Lockrefresh();
+	LockRefresh();
 
 	if(project != m_project.get())
 	{
@@ -650,7 +650,7 @@ void MainWindow::RefreshAll()
 	}
 }
 
-void MainWindow::Lockrefresh()
+void MainWindow::LockRefresh()
 {
 	m_refreshLockStack++;
 }

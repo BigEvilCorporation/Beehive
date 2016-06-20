@@ -101,7 +101,7 @@ public:
 	void RefreshSpriteSheets();
 
 	//Panel refresh lock (to speed up initialisation)
-	void Lockrefresh();
+	void LockRefresh();
 	void UnlockRefresh();
 	bool IsRefreshLocked() const;
 
