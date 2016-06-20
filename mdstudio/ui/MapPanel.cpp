@@ -117,11 +117,13 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 	int y_inv = (mapHeight - 1 - y);
 
 	//Check in map range
-	if((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight))
+	bool inMaprange = ((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight));
+
+	switch(m_currentTool)
 	{
-		switch(m_currentTool)
+		case eToolPaintTile:
 		{
-			case eToolPaintTile:
+			if(inMaprange)
 			{
 				//Cannot paint over a stamp
 				ion::Vector2i stampTopLeft;
@@ -169,12 +171,15 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				{
 					m_previewTile = InvalidTileId;
 				}
-				
-				break;
 			}
+				
+			break;
+		}
 
-			case eToolPaintTerrainTile:
-			case eToolDeleteTerrainTile:
+		case eToolPaintTerrainTile:
+		case eToolDeleteTerrainTile:
+		{
+			if(inMaprange)
 			{
 				//If clicking/dragging, paint collision tile
 				if(buttonBits & eMouseLeft)
@@ -191,11 +196,14 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					//Paint to canvas
 					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
 				}
-
-				break;
 			}
 
-			case eToolPaintCollisionSolid:
+			break;
+		}
+
+		case eToolPaintCollisionSolid:
+		{
+			if(inMaprange)
 			{
 				//If clicking/dragging, paint solid collision tile
 				if(buttonBits & eMouseLeft)
@@ -222,11 +230,14 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					//Paint to canvas
 					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
 				}
-
-				break;
 			}
 
-			case eToolSelectTiles:
+			break;
+		}
+
+		case eToolSelectTiles:
+		{
+			if(inMaprange)
 			{
 				if(buttonBits & eMouseLeft)
 				{
@@ -285,98 +296,106 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					//Refresh to draw box selection
 					Refresh();
 				}
-				break;
 			}
+			break;
+		}
 
-			case eToolSelectStamp:
-			case eToolStampPicker:
-			case eToolRemoveStamp:
+		case eToolSelectStamp:
+		case eToolStampPicker:
+		case eToolRemoveStamp:
+		{
+			//Find stamp under cursor
+			ion::Vector2i stampPos;
+			u32 stampFlags = 0;
+			StampId stampId = map.FindStamp(x, y, stampPos, stampFlags);
+
+			m_hoverStamp = stampId;
+			m_hoverStampPos = stampPos;
+			m_hoverStampFlags = stampFlags;
+
+			if(buttonBits & eMouseLeft && !(m_prevMouseBits & eMouseLeft))
 			{
-				//Find stamp under cursor
-				ion::Vector2i stampPos;
-				u32 stampFlags = 0;
-				StampId stampId = map.FindStamp(x, y, stampPos, stampFlags);
+				m_selectedStamp = m_hoverStamp;
 
-				m_hoverStamp = stampId;
-				m_hoverStampPos = stampPos;
-				m_hoverStampFlags = stampFlags;
-
-				if(buttonBits & eMouseLeft && !(m_prevMouseBits & eMouseLeft))
+				if(m_currentTool == eToolSelectStamp)
 				{
-					m_selectedStamp = m_hoverStamp;
+					//Reset selection box
+					m_boxSelectStart.x = -1;
+					m_boxSelectStart.y = -1;
+					m_boxSelectEnd.x = -1;
+					m_boxSelectEnd.y = -1;
 
-					if(m_currentTool == eToolSelectStamp)
+					if(Stamp* stamp = m_project.GetStamp(stampId))
 					{
-						//Reset selection box
-						m_boxSelectStart.x = -1;
-						m_boxSelectStart.y = -1;
-						m_boxSelectEnd.x = -1;
-						m_boxSelectEnd.y = -1;
-
-						if(Stamp* stamp = m_project.GetStamp(stampId))
-						{
-							//Set box selection
-							m_boxSelectStart.x = stampPos.x;
-							m_boxSelectStart.y = stampPos.y;
-							m_boxSelectEnd.x = stampPos.x + stamp->GetWidth() - 1;
-							m_boxSelectEnd.y = stampPos.y + stamp->GetHeight() - 1;
-						}
+						//Set box selection
+						m_boxSelectStart.x = stampPos.x;
+						m_boxSelectStart.y = stampPos.y;
+						m_boxSelectEnd.x = stampPos.x + stamp->GetWidth() - 1;
+						m_boxSelectEnd.y = stampPos.y + stamp->GetHeight() - 1;
 					}
+				}
 
-					if(m_currentTool == eToolStampPicker)
+				if(m_currentTool == eToolStampPicker)
+				{
+					//Set as paint stamp
+					m_project.SetPaintStamp(stampId);
+
+					//Set stamp tool
+					SetTool(eToolPaintStamp);
+
+					//TODO: Update tileset panel selection + toolbox button state
+				}
+
+				if(m_currentTool == eToolRemoveStamp)
+				{
+					if(Stamp* stamp = m_project.GetStamp(stampId))
 					{
-						//Set as paint stamp
-						m_project.SetPaintStamp(stampId);
+						//Remove stamp under cursor
+						map.RemoveStamp(x, y);
 
-						//Set stamp tool
-						SetTool(eToolPaintStamp);
+						//Clear hover stamp
+						m_hoverStamp = InvalidStampId;
 
-						//TODO: Update tileset panel selection + toolbox button state
-					}
-
-					if(m_currentTool == eToolRemoveStamp)
-					{
-						if(Stamp* stamp = m_project.GetStamp(stampId))
+						//Repaint area underneath stamp
+						for(int tileX = stampPos.x; tileX < stampPos.x + stamp->GetWidth(); tileX++)
 						{
-							//Remove stamp under cursor
-							map.RemoveStamp(x, y);
-
-							//Clear hover stamp
-							m_hoverStamp = InvalidStampId;
-
-							//Repaint area underneath stamp
-							for(int tileX = stampPos.x; tileX < stampPos.x + stamp->GetWidth(); tileX++)
+							for(int tileY = stampPos.y; tileY < stampPos.y + stamp->GetHeight(); tileY++)
 							{
-								for(int tileY = stampPos.y; tileY < stampPos.y + stamp->GetHeight(); tileY++)
+								//Invert Y for OpenGL
+								int y_inv = map.GetHeight() - 1 - tileY;
+
+								//Stamps can be placed outside map boundaries, only remove tiles that are inside
+								if(tileX >= 0 && tileX < mapWidth && y_inv >= 0 && y_inv < mapHeight)
 								{
-									//Invert Y for OpenGL
-									int y_inv = map.GetHeight() - 1 - tileY;
 									PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
 								}
 							}
 						}
 					}
 				}
-
-				if(buttonBits & eMouseRight)
-				{
-					if(m_hoverStamp != InvalidStampId)
-					{
-						//Right-click menu
-						wxMenu contextMenu;
-
-						contextMenu.Append(eContextMenuDeleteStamp, wxString("Delete stamp"));
-						contextMenu.Append(eContextMenuBakeStamp, wxString("Bake stamp"));
-						contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
-						PopupMenu(&contextMenu);
-					}
-				}
-
-				Refresh();
 			}
-			break;
 
-			case eToolTilePicker:
+			if(buttonBits & eMouseRight)
+			{
+				if(m_hoverStamp != InvalidStampId)
+				{
+					//Right-click menu
+					wxMenu contextMenu;
+
+					contextMenu.Append(eContextMenuDeleteStamp, wxString("Delete stamp"));
+					contextMenu.Append(eContextMenuBakeStamp, wxString("Bake stamp"));
+					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
+					PopupMenu(&contextMenu);
+				}
+			}
+
+			Refresh();
+		}
+		break;
+
+		case eToolTilePicker:
+		{
+			if(inMaprange)
 			{
 				if(buttonBits & eMouseLeft)
 				{
@@ -417,12 +436,15 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					//Refresh collision tile edit panel
 					m_mainWindow->RedrawPanel(MainWindow::ePanelTerrainTileEditor);
 				}
-
-				//TODO: Update tileset panel selection + toolbox button state
-				break;
 			}
 
-			case eToolFlipX:
+			//TODO: Update tileset panel selection + toolbox button state
+			break;
+		}
+
+		case eToolFlipX:
+		{
+			if(inMaprange)
 			{
 				//Flip preview opposite of current tile
 				m_previewTile = map.GetTile(x, y);
@@ -442,11 +464,14 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					PaintTile(tileId, x, y_inv, tileFlags);
 					Refresh();
 				}
-
-				break;
 			}
 
-			case eToolFlipY:
+			break;
+		}
+
+		case eToolFlipY:
+		{
+			if(inMaprange)
 			{
 				//Flip preview opposite of current tile
 				m_previewTile = map.GetTile(x, y);
@@ -466,44 +491,41 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					PaintTile(tileId, x, y_inv, tileFlags);
 					Refresh();
 				}
-				break;
 			}
+			break;
+		}
 
-			case eToolPaintStamp:
+		case eToolPaintStamp:
+		{
+			//Paint temp cloning stamp, else Paint current paint stamp
+			Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
+			if(stamp)
 			{
-				//Paint temp cloning stamp, else Paint current paint stamp
-				Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
-				if(stamp)
+				//Update paste pos
+				m_stampPastePos.x = x;
+				m_stampPastePos.y = y;
+
+				//Redraw
+				Refresh();
+
+				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
-					//Update paste pos
-					m_stampPastePos.x = x;
-					m_stampPastePos.y = y;
+					u32 flipFlags = (m_previewTileFlipX ? Map::eFlipX : 0) | (m_previewTileFlipY ? Map::eFlipY : 0);
 
-					//Clamp to stamp size
-					if(m_stampPastePos.x + stamp->GetWidth() > mapWidth)
-						m_stampPastePos.x = mapWidth - stamp->GetWidth();
-					if(m_stampPastePos.y + stamp->GetHeight() > mapHeight)
-						m_stampPastePos.y = mapHeight - stamp->GetHeight();
+					//Set on map
+					map.SetStamp(m_stampPastePos.x, m_stampPastePos.y, *stamp, flipFlags);
 
-					//Redraw
-					Refresh();
-
-					if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
-					{
-						u32 flipFlags = (m_previewTileFlipX ? Map::eFlipX : 0) | (m_previewTileFlipY ? Map::eFlipY : 0);
-
-						//Set on map
-						map.SetStamp(m_stampPastePos.x, m_stampPastePos.y, *stamp, flipFlags);
-
-						//Paint on canvas
-						PaintStamp(*stamp, m_stampPastePos.x, m_stampPastePos.y, flipFlags);
-					}
+					//Paint on canvas
+					PaintStamp(*stamp, m_stampPastePos.x, m_stampPastePos.y, flipFlags);
 				}
-				break;
 			}
+			break;
+		}
 
-			case eToolSelectGameObject:
-			case eToolAnimateGameObject:
+		case eToolSelectGameObject:
+		case eToolAnimateGameObject:
+		{
+			if(inMaprange)
 			{
 				ion::Vector2i topLeft;
 				m_hoverGameObject = m_project.GetMap().FindGameObject(x, y, topLeft);
@@ -542,10 +564,13 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						}
 					}
 				}
-				break;
 			}
+			break;
+		}
 
-			case eToolPlaceGameObject:
+		case eToolPlaceGameObject:
+		{
+			if(inMaprange)
 			{
 				m_previewGameObjectType = m_project.GetPaintGameObjectType();
 				m_previewGameObjectPos.x = x;
@@ -560,21 +585,25 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						Refresh();
 					}
 				}
-				break;
 			}
+			break;
+		}
 
-			case eToolRemoveGameObject:
+		case eToolRemoveGameObject:
+		{
+			if(inMaprange)
 			{
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
 					m_project.GetMap().RemoveGameObject(x, y);
 					Refresh();
 				}
-				break;
 			}
+			break;
 		}
 	}
-	else
+
+	if(!inMaprange && m_currentTool != eToolPaintStamp)
 	{
 		//Mouse of of map range, invalidate preview tile
 		m_previewTile = InvalidTileId;
@@ -1682,7 +1711,7 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 
 void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	if(m_stampPreviewPrimitive && m_stampPastePos.x >= 0 && m_stampPastePos.y >= 0)
+	if(m_stampPreviewPrimitive)
 	{
 		//Draw temp cloning stamp, else draw current paint stamp
 		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());

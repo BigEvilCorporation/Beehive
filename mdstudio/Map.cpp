@@ -207,10 +207,14 @@ void Map::BakeStamp(std::vector<TileDesc>& tiles, int x, int y, const Stamp& sta
 				int mapX = stampX + x;
 				int mapY = stampY + y;
 
-				//Copy tile and flags
-				int tileIdx = (mapY * m_width) + mapX;
-				tiles[tileIdx].m_id = tileId;
-				tiles[tileIdx].m_flags = tileFlags;
+				//Can place stamps outside map boundaries, only bake tiles that are inside
+				if(mapX >= 0 && mapX < m_width && mapY >= 0 && mapY < m_height)
+				{
+					//Copy tile and flags
+					int tileIdx = (mapY * m_width) + mapX;
+					tiles[tileIdx].m_id = tileId;
+					tiles[tileIdx].m_flags = tileFlags;
+				}
 			}
 		}
 	}
