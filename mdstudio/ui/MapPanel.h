@@ -52,6 +52,16 @@ private:
 		eContextMenuGameObjAddToAnim,
 	};
 
+	enum CursorOrigin
+	{
+		eCursorTopLeft,
+		eCursorCentred,
+		eCursorTopRight,
+		eCursorBottomLeft,
+		eCursorBottomRight,
+		eCursor_MAX
+	};
+
 	//Create collision canvas
 	void CreateCollisionCanvas(int width, int height);
 
@@ -97,6 +107,9 @@ private:
 
 	//Current tool
 	ToolType m_currentTool;
+
+	//Current cursor origin mode
+	CursorOrigin m_cursorOrigin;
 
 	///////////////////////////////////////////////////
 	// SELECT tool

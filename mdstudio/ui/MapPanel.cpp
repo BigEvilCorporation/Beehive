@@ -18,6 +18,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	m_currentTool = eToolPaintTile;
+	m_cursorOrigin = eCursorTopLeft;
 	m_tempStamp = NULL;
 	m_terrainCanvasPrimitive = NULL;
 	m_collisionCanvasPrimitive = NULL;
@@ -501,9 +502,37 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
 			if(stamp)
 			{
+				if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
+				{
+					//Switch cursor origin
+					int cursorOrigin = (int)m_cursorOrigin;
+					m_cursorOrigin = (CursorOrigin)(++cursorOrigin % eCursor_MAX);
+				}
+
 				//Update paste pos
 				m_stampPastePos.x = x;
 				m_stampPastePos.y = y;
+
+				//Adjust for cursor origin
+				switch(m_cursorOrigin)
+				{
+				case eCursorCentred:
+					m_stampPastePos.x -= stamp->GetWidth() / 2;
+					m_stampPastePos.y -= stamp->GetHeight() / 2;
+					break;
+				case eCursorTopRight:
+					m_stampPastePos.x -= stamp->GetWidth();
+					break;
+				case eCursorBottomLeft:
+					m_stampPastePos.y -= stamp->GetHeight();
+					break;
+				case eCursorBottomRight:
+					m_stampPastePos.x -= stamp->GetWidth();
+					m_stampPastePos.y -= stamp->GetHeight();
+					break;
+				default:
+					break;
+				}
 
 				//Redraw
 				Refresh();
