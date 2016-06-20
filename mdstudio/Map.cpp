@@ -21,7 +21,7 @@ Map::Map(const PlatformConfig& platformConfig)
 	m_width = 0;
 	m_height = 0;
 	m_nextFreeGameObjectId = 1;
-	Resize(platformConfig.scrollPlaneWidthTiles, platformConfig.scrollPlaneHeightTiles, false);
+	Resize(platformConfig.scrollPlaneWidthTiles, platformConfig.scrollPlaneHeightTiles, false, false);
 }
 
 void Map::Clear()
@@ -59,7 +59,7 @@ int Map::GetHeight() const
 	return m_height;
 }
 
-void Map::Resize(int width, int height, bool shiftRight)
+void Map::Resize(int width, int height, bool shiftRight, bool shiftDown)
 {
 	const int tileWidth = m_platformConfig.tileWidth;
 	const int tileHeight = m_platformConfig.tileHeight;
@@ -86,6 +86,8 @@ void Map::Resize(int width, int height, bool shiftRight)
 			int destTileIdx = (y * width) + x;
 			if(shiftRight && width > m_width)
 				destTileIdx += (width - m_width);
+			if(shiftDown && height > m_height)
+				destTileIdx += (height - m_height) * width;
 
 			tiles[destTileIdx].m_id = GetTile(x, y);
 			tiles[destTileIdx].m_flags = GetTileFlags(x, y);
@@ -106,6 +108,25 @@ void Map::Resize(int width, int height, bool shiftRight)
 			for(int i = 0; i < it->second.size(); i++)
 			{
 				it->second[i].m_position.x += (width - m_width);
+				it->second[i].m_gameObject.SetPosition(ion::Vector2i(it->second[i].m_position.x * tileWidth, it->second[i].m_position.y * tileHeight));
+			}
+		}
+	}
+
+	if(shiftDown && height > m_height)
+	{
+		//Shift stamps
+		for(TStampPosMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+		{
+			it->m_position.y += (height - m_height);
+		}
+
+		//Shift game objects
+		for(TGameObjectPosMap::iterator it = m_gameObjects.begin(), end = m_gameObjects.end(); it != end; ++it)
+		{
+			for(int i = 0; i < it->second.size(); i++)
+			{
+				it->second[i].m_position.y += (height - m_height);
 				it->second[i].m_gameObject.SetPosition(ion::Vector2i(it->second[i].m_position.x * tileWidth, it->second[i].m_position.y * tileHeight));
 			}
 		}

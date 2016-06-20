@@ -32,6 +32,7 @@ class SpriteCanvas;
 #include <wx/frame.h>
 #include <wx/stattext.h>
 #include <wx/spinctrl.h>
+#include <wx/radiobox.h>
 #include <wx/button.h>
 #include <wx/dialog.h>
 #include <wx/choice.h>
@@ -199,8 +200,10 @@ class DialogMapSizeBase : public wxDialog
 	public:
 		wxSpinCtrl* m_spinCtrlWidth;
 		wxSpinCtrl* m_spinCtrlHeight;
+		wxRadioBox* m_radioBoxShiftY;
+		wxRadioBox* m_radioBoxShiftX;
 		
-		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,189 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~DialogMapSizeBase();
 	
 };

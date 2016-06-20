@@ -233,6 +233,24 @@ DialogMapSizeBase::DialogMapSizeBase( wxWindow* parent, wxWindowID id, const wxS
 	
 	bSizer2->Add( bSizer3, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 	
+	wxBoxSizer* bSizer35;
+	bSizer35 = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxString m_radioBoxShiftYChoices[] = { wxT("Top"), wxT("Bottom") };
+	int m_radioBoxShiftYNChoices = sizeof( m_radioBoxShiftYChoices ) / sizeof( wxString );
+	m_radioBoxShiftY = new wxRadioBox( this, wxID_ANY, wxT("Shift contents V"), wxDefaultPosition, wxDefaultSize, m_radioBoxShiftYNChoices, m_radioBoxShiftYChoices, 1, wxRA_SPECIFY_ROWS );
+	m_radioBoxShiftY->SetSelection( 0 );
+	bSizer35->Add( m_radioBoxShiftY, 0, wxALL, 5 );
+	
+	wxString m_radioBoxShiftXChoices[] = { wxT("Left"), wxT("Right") };
+	int m_radioBoxShiftXNChoices = sizeof( m_radioBoxShiftXChoices ) / sizeof( wxString );
+	m_radioBoxShiftX = new wxRadioBox( this, wxID_ANY, wxT("Shift contents H"), wxDefaultPosition, wxDefaultSize, m_radioBoxShiftXNChoices, m_radioBoxShiftXChoices, 1, wxRA_SPECIFY_ROWS );
+	m_radioBoxShiftX->SetSelection( 0 );
+	bSizer35->Add( m_radioBoxShiftX, 0, wxALL, 5 );
+	
+	
+	bSizer2->Add( bSizer35, 1, wxEXPAND, 5 );
+	
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
 	
@@ -248,7 +266,6 @@ DialogMapSizeBase::DialogMapSizeBase( wxWindow* parent, wxWindowID id, const wxS
 	
 	this->SetSizer( bSizer2 );
 	this->Layout();
-	bSizer2->Fit( this );
 	
 	this->Centre( wxBOTH );
 	

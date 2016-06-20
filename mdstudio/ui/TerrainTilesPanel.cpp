@@ -90,22 +90,25 @@ void TerrainTilesPanel::OnKeyboard(wxKeyEvent& event)
 
 void TerrainTilesPanel::OnResize(wxSizeEvent& event)
 {
-	ViewPanel::OnResize(event);
-
-	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-
-	if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		ion::Vector2i canvasSize = CalcCanvasSize();
+		ViewPanel::OnResize(event);
 
-		if(canvasSize.x != m_canvasSize.x || canvasSize.y != m_canvasSize.y)
+		const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+		if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
 		{
-			InitPanel(canvasSize.x, canvasSize.y);
-		}
-	}
+			ion::Vector2i canvasSize = CalcCanvasSize();
 
-	ResetZoomPan();
+			if(canvasSize.x != m_canvasSize.x || canvasSize.y != m_canvasSize.y)
+			{
+				InitPanel(canvasSize.x, canvasSize.y);
+			}
+		}
+
+		ResetZoomPan();
+	}
 }
 
 void TerrainTilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
@@ -201,20 +204,23 @@ void TerrainTilesPanel::OnRender(ion::render::Renderer& renderer, const ion::Mat
 
 void TerrainTilesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	//If TerrainTiles invalidated
-	if(m_project.TerrainTilesAreInvalidated())
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-		const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-
-		if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+		//If TerrainTiles invalidated
+		if(m_project.TerrainTilesAreInvalidated())
 		{
-			ion::Vector2i canvasSize = CalcCanvasSize();
-			InitPanel(canvasSize.x, canvasSize.y);
-		}
-	}
+			const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	ViewPanel::Refresh(eraseBackground, rect);
+			if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+			{
+				ion::Vector2i canvasSize = CalcCanvasSize();
+				InitPanel(canvasSize.x, canvasSize.y);
+			}
+		}
+
+		ViewPanel::Refresh(eraseBackground, rect);
+	}
 }
 
 ion::Vector2i TerrainTilesPanel::CalcCanvasSize()

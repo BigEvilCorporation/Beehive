@@ -53,10 +53,13 @@ void TerrainTileEditorPanel::OnKeyboard(wxKeyEvent& event)
 
 void TerrainTileEditorPanel::OnResize(wxSizeEvent& event)
 {
-	ViewPanel::OnResize(event);
-	CentreCamera();
-	SetCameraZoom(s_defaultZoom);
-	Refresh();
+	if(!m_mainWindow->IsRefreshLocked())
+	{
+		ViewPanel::OnResize(event);
+		CentreCamera();
+		SetCameraZoom(s_defaultZoom);
+		Refresh();
+	}
 }
 
 void TerrainTileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
@@ -118,13 +121,16 @@ void TerrainTileEditorPanel::OnRender(ion::render::Renderer& renderer, const ion
 
 void TerrainTileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	ViewPanel::Refresh(eraseBackground, rect);
+	if(!m_mainWindow->IsRefreshLocked())
+	{
+		ViewPanel::Refresh(eraseBackground, rect);
 
-	//Redraw tile and collision
-	PaintTile();
+		//Redraw tile and collision
+		PaintTile();
 
-	//Redraw collision tile
-	PaintCollision();
+		//Redraw collision tile
+		PaintCollision();
+	}
 }
 
 void TerrainTileEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

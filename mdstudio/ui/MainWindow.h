@@ -100,6 +100,11 @@ public:
 	//Refresh sprite sheets
 	void RefreshSpriteSheets();
 
+	//Panel refresh lock (to speed up initialisation)
+	void Lockrefresh();
+	void UnlockRefresh();
+	bool IsRefreshLocked() const;
+
 protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);
@@ -168,4 +173,7 @@ private:
 
 	//Rendering resources
 	RenderResources* m_renderResources;
+
+	//Refresh lock
+	int m_refreshLockStack;
 };

@@ -24,7 +24,10 @@ GameObjectParamsPanel::GameObjectParamsPanel(MainWindow& mainWindow, Project& pr
 
 void GameObjectParamsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	PopulateVarsList();
+	if(!m_mainWindow.IsRefreshLocked())
+	{
+		PopulateVarsList();
+	}
 }
 
 void GameObjectParamsPanel::SetGameObject(GameObject* gameObject)

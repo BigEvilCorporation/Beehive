@@ -19,7 +19,7 @@ CollisionMap::CollisionMap(const PlatformConfig& platformConfig)
 {
 	m_width = 0;
 	m_height = 0;
-	Resize(platformConfig.scrollPlaneWidthTiles, platformConfig.scrollPlaneHeightTiles, false);
+	Resize(platformConfig.scrollPlaneWidthTiles, platformConfig.scrollPlaneHeightTiles, false, false);
 }
 
 void CollisionMap::Clear()
@@ -51,7 +51,7 @@ int CollisionMap::GetHeight() const
 	return m_height;
 }
 
-void CollisionMap::Resize(int width, int height, bool shiftRight)
+void CollisionMap::Resize(int width, int height, bool shiftRight, bool shiftDown)
 {
 	//Create new tile array
 	std::vector<TerrainTileId> terrainTiles;
@@ -71,6 +71,8 @@ void CollisionMap::Resize(int width, int height, bool shiftRight)
 			int destTileIdx = (y * width) + x;
 			if(shiftRight && width > m_width)
 				destTileIdx += (width - m_width);
+			if(shiftDown && height > m_height)
+				destTileIdx += (height - m_height) * width;
 
 			terrainTiles[destTileIdx] = GetTerrainTile(x, y);
 		}

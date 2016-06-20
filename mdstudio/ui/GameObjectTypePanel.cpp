@@ -22,15 +22,18 @@ GameObjectTypesPanel::GameObjectTypesPanel(MainWindow* mainWindow, Project& proj
 
 void GameObjectTypesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	m_listGameObjTypes->Clear();
-	m_gameObjectTypeMap.clear();
-	const TGameObjectTypeMap& types = m_project.GetGameObjectTypes();
-
-	int index = 0;
-	for(TGameObjectTypeMap::const_iterator it = types.begin(), end = types.end(); it != end; ++it, ++index)
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		m_gameObjectTypeMap.push_back(it->second.GetId());
-		m_listGameObjTypes->Insert(wxString(it->second.GetName()), index);
+		m_listGameObjTypes->Clear();
+		m_gameObjectTypeMap.clear();
+		const TGameObjectTypeMap& types = m_project.GetGameObjectTypes();
+
+		int index = 0;
+		for(TGameObjectTypeMap::const_iterator it = types.begin(), end = types.end(); it != end; ++it, ++index)
+		{
+			m_gameObjectTypeMap.push_back(it->second.GetId());
+			m_listGameObjTypes->Insert(wxString(it->second.GetName()), index);
+		}
 	}
 }
 

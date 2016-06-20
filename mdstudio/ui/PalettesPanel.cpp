@@ -219,26 +219,29 @@ void PalettesPanel::OnErase(wxEraseEvent& event)
 
 void PalettesPanel::OnResize(wxSizeEvent& event)
 {
-	wxSize newSize = event.GetSize();
-
-	if(newSize.x > newSize.y)
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		//Set new orientation
-		m_orientation = eHorizontal;
+		wxSize newSize = event.GetSize();
 
-		//Limit height
-		int colourRectSize = (newSize.x / Palette::coloursPerPalette);
-		SetMinSize(wxSize(1, colourRectSize * m_project.GetNumPalettes()));
+		if(newSize.x > newSize.y)
+		{
+			//Set new orientation
+			m_orientation = eHorizontal;
+
+			//Limit height
+			int colourRectSize = (newSize.x / Palette::coloursPerPalette);
+			SetMinSize(wxSize(1, colourRectSize * m_project.GetNumPalettes()));
+		}
+		else
+		{
+			//Set new orientation
+			m_orientation = eVertical;
+
+			//Limit width
+			int colourRectSize = (newSize.y / Palette::coloursPerPalette);
+			SetMinSize(wxSize(colourRectSize * m_project.GetNumPalettes(), 1));
+		}
+
+		Refresh();
 	}
-	else
-	{
-		//Set new orientation
-		m_orientation = eVertical;
-
-		//Limit width
-		int colourRectSize = (newSize.y / Palette::coloursPerPalette);
-		SetMinSize(wxSize(colourRectSize * m_project.GetNumPalettes(), 1));
-	}
-
-	Refresh();
 }

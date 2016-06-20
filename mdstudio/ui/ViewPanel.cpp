@@ -107,7 +107,10 @@ void ViewPanel::EventHandlerResize(wxSizeEvent& event)
 
 void ViewPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	wxGLCanvas::Refresh(eraseBackground, rect);
+	if(!m_mainWindow->IsRefreshLocked())
+	{
+		wxGLCanvas::Refresh(eraseBackground, rect);
+	}
 }
 
 void ViewPanel::CreateCanvas(int width, int height)
@@ -384,22 +387,25 @@ void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& 
 
 void ViewPanel::OnResize(wxSizeEvent& event)
 {
-	wxSize clientSize = event.GetSize();
-	m_panelSize.x = clientSize.x;
-	m_panelSize.y = clientSize.y;
-
-	if(m_panelSize.x > 1 && m_panelSize.y > 1)
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
-		if(m_prevPanelSize.x != m_panelSize.x || m_prevPanelSize.y != m_panelSize.y)
-		{
-			m_prevPanelSize = m_panelSize;
-			m_viewport.Resize(m_panelSize.x, m_panelSize.y);
-			CentreCamera();
-		}
-	}
+		wxSize clientSize = event.GetSize();
+		m_panelSize.x = clientSize.x;
+		m_panelSize.y = clientSize.y;
 
-	Refresh();
+		if(m_panelSize.x > 1 && m_panelSize.y > 1)
+		{
+			//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
+			if(m_prevPanelSize.x != m_panelSize.x || m_prevPanelSize.y != m_panelSize.y)
+			{
+				m_prevPanelSize = m_panelSize;
+				m_viewport.Resize(m_panelSize.x, m_panelSize.y);
+				CentreCamera();
+			}
+		}
+
+		Refresh();
+	}
 }
 
 void ViewPanel::CentreCamera()

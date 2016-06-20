@@ -86,30 +86,33 @@ void StampsPanel::OnKeyboard(wxKeyEvent& event)
 
 void StampsPanel::OnResize(wxSizeEvent& event)
 {
-	ViewPanel::OnResize(event);
-
-	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-
-	if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		//Rearrange stamps (calculates canvas size)
-		ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));
+		ViewPanel::OnResize(event);
 
-		//Recreate canvas
-		CreateCanvas(m_canvasSize.x, m_canvasSize.y);
+		const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-		//Fill with invalid tile
-		FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasSize.x - 1, m_canvasSize.y - 1));
+		if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+		{
+			//Rearrange stamps (calculates canvas size)
+			ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));
 
-		//Redraw stamps on canvas
-		PaintStamps();
+			//Recreate canvas
+			CreateCanvas(m_canvasSize.x, m_canvasSize.y);
 
-		//Recreate grid
-		CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project.GetGridSize(), m_canvasSize.y / m_project.GetGridSize());
+			//Fill with invalid tile
+			FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasSize.x - 1, m_canvasSize.y - 1));
 
-		//Reset zoom/pan
-		ResetZoomPan();
+			//Redraw stamps on canvas
+			PaintStamps();
+
+			//Recreate grid
+			CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project.GetGridSize(), m_canvasSize.y / m_project.GetGridSize());
+
+			//Reset zoom/pan
+			ResetZoomPan();
+		}
 	}
 }
 
@@ -267,32 +270,35 @@ void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 
 void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-
-	//If stamps invalidated
-	if(m_project.StampsAreInvalidated() && m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		//Rearrange stamps (calculates canvas size)
-		ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));
+		const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-		//Recreate canvas
-		CreateCanvas(m_canvasSize.x, m_canvasSize.y);
+		//If stamps invalidated
+		if(m_project.StampsAreInvalidated() && m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+		{
+			//Rearrange stamps (calculates canvas size)
+			ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));
 
-		//Fill with invalid tile
-		FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasSize.x - 1, m_canvasSize.y - 1));
+			//Recreate canvas
+			CreateCanvas(m_canvasSize.x, m_canvasSize.y);
 
-		//Recreate grid
-		CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project.GetGridSize(), m_canvasSize.y / m_project.GetGridSize());
+			//Fill with invalid tile
+			FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(m_canvasSize.x - 1, m_canvasSize.y - 1));
 
-		//Redraw stamps on canvas
-		PaintStamps();
+			//Recreate grid
+			CreateGrid(m_canvasSize.x, m_canvasSize.y, m_canvasSize.x / m_project.GetGridSize(), m_canvasSize.y / m_project.GetGridSize());
 
-		//Reset zoom/pan
-		ResetZoomPan();
+			//Redraw stamps on canvas
+			PaintStamps();
+
+			//Reset zoom/pan
+			ResetZoomPan();
+		}
+
+		ViewPanel::Refresh(eraseBackground, rect);
 	}
-
-	ViewPanel::Refresh(eraseBackground, rect);
 }
 
 void StampsPanel::ArrangeStamps(const ion::Vector2& panelSize)

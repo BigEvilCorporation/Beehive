@@ -53,10 +53,13 @@ void TileEditorPanel::OnKeyboard(wxKeyEvent& event)
 
 void TileEditorPanel::OnResize(wxSizeEvent& event)
 {
-	ViewPanel::OnResize(event);
-	CentreCamera();
-	SetCameraZoom(s_defaultZoom);
-	Refresh();
+	if(!m_mainWindow->IsRefreshLocked())
+	{
+		ViewPanel::OnResize(event);
+		CentreCamera();
+		SetCameraZoom(s_defaultZoom);
+		Refresh();
+	}
 }
 
 void TileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
@@ -120,11 +123,14 @@ void TileEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::Matri
 
 void TileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	ViewPanel::Refresh(eraseBackground, rect);
+	if(!m_mainWindow->IsRefreshLocked())
+	{
+		ViewPanel::Refresh(eraseBackground, rect);
 
-	ion::render::TexCoord texCoords[4];
-	m_renderResources.GetTileTexCoords(m_project.GetPaintTile(), texCoords, 0);
-	m_tilePrimitive->SetTexCoords(texCoords);
+		ion::render::TexCoord texCoords[4];
+		m_renderResources.GetTileTexCoords(m_project.GetPaintTile(), texCoords, 0);
+		m_tilePrimitive->SetTexCoords(texCoords);
+	}
 }
 
 void TileEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

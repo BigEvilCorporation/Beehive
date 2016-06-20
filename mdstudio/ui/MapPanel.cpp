@@ -99,7 +99,10 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 
 void MapPanel::OnResize(wxSizeEvent& event)
 {
-	ViewPanel::OnResize(event);
+	if(!m_mainWindow->IsRefreshLocked())
+	{
+		ViewPanel::OnResize(event);
+	}
 }
 
 void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
@@ -1040,40 +1043,43 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-	//If map invalidated
-	if(m_project.MapIsInvalidated())
+	if(!m_mainWindow->IsRefreshLocked())
 	{
-		Map& map = m_project.GetMap();
-		CollisionMap& collisionMap = m_project.GetCollisionMap();
-		Tileset& tileset = m_project.GetTileset();
-		int mapWidth = map.GetWidth();
-		int mapHeight = map.GetHeight();
+		//If map invalidated
+		if(m_project.MapIsInvalidated())
+		{
+			Map& map = m_project.GetMap();
+			CollisionMap& collisionMap = m_project.GetCollisionMap();
+			Tileset& tileset = m_project.GetTileset();
+			int mapWidth = map.GetWidth();
+			int mapHeight = map.GetHeight();
 
-		//Recreate canvas
-		CreateCanvas(mapWidth, mapHeight);
-		CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
+			//Recreate canvas
+			CreateCanvas(mapWidth, mapHeight);
+			CreateCollisionCanvas(collisionMap.GetWidth(), collisionMap.GetHeight());
 
-		//Recreate grid
-		CreateGrid(mapWidth, mapHeight, mapWidth / m_project.GetGridSize(), mapHeight / m_project.GetGridSize());
+			//Recreate grid
+			CreateGrid(mapWidth, mapHeight, mapWidth / m_project.GetGridSize(), mapHeight / m_project.GetGridSize());
 
-		//Redraw map
-		PaintMap(map);
+			//Redraw map
+			PaintMap(map);
+		}
+
+		//If collision tilset invalidated
+		if(m_project.TerrainTilesAreInvalidated())
+		{
+			//Redraw collision map
+			PaintCollisionMap(m_project.GetCollisionMap());
+		}
+
+		//If terrain beziers invalidated
+		if(m_project.TerrainBeziersAreInvalidated())
+		{
+			PaintTerrainBeziers(m_project);
+		}
+
+		ViewPanel::Refresh(eraseBackground, rect);
 	}
-
-	//If collision tilset invalidated
-	if(m_project.TerrainTilesAreInvalidated())
-	{
-		//Redraw collision map
-		PaintCollisionMap(m_project.GetCollisionMap());
-	}
-
-	//If terrain beziers invalidated
-	if(m_project.TerrainBeziersAreInvalidated())
-	{
-		PaintTerrainBeziers(m_project);
-	}
-
-	ViewPanel::Refresh(eraseBackground, rect);
 }
 
 void MapPanel::CreateCollisionCanvas(int width, int height)

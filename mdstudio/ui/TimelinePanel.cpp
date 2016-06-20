@@ -209,7 +209,9 @@ void TimelinePanel::SyncAllActors()
 
 void TimelinePanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
-
+	if(!m_mainWindow.IsRefreshLocked())
+	{
+	}
 }
 
 void TimelinePanel::OnSelectAnimation(wxCommandEvent& event)

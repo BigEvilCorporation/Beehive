@@ -32,6 +32,11 @@ MainWindow::MainWindow()
 {
 	SetStatusText("BEEhive v0.11");
 
+	m_refreshLockStack = 0;
+
+	//Lock refresh during init
+	Lockrefresh();
+
 	//Setup panel docking manager
 	m_auiManager.SetManagedWindow(m_dockArea);
 	m_auiManager.SetFlags(	wxAUI_MGR_ALLOW_FLOATING			//Allow floating panels
@@ -70,7 +75,11 @@ MainWindow::MainWindow()
 	//Set default project
 	SetProject(defaultProject);
 
+	//Set window focus
 	SetFocus();
+
+	//Unlock refresh (and refreshes all)
+	UnlockRefresh();
 }
 
 MainWindow::~MainWindow()
@@ -99,6 +108,9 @@ void MainWindow::EventHandlerKeyboard(wxKeyEvent& event)
 
 void MainWindow::SetProject(Project* project)
 {
+	//Lock refresh
+	Lockrefresh();
+
 	if(project != m_project.get())
 	{
 		//Changed project, close all panels
@@ -206,10 +218,10 @@ void MainWindow::SetProject(Project* project)
 			//Sync settings widgets states
 			SyncSettingsWidgets();
 		}
-
-		//Refresh whole window
-		RefreshAll();
 	}
+
+	//Unlock refresh
+	UnlockRefresh();
 }
 
 void MainWindow::SetPanelCaptions()
@@ -611,28 +623,51 @@ void MainWindow::SyncSettingsWidgets()
 
 void MainWindow::RefreshAll()
 {
-	m_auiManager.Update();
-	Refresh();
-
-	if(m_project.get())
+	if(!IsRefreshLocked())
 	{
-		m_project->InvalidateMap(true);
-		m_project->InvalidateTiles(true);
-		m_project->InvalidateTerrainTiles(true);
-		m_project->InvalidateTerrainBeziers(true);
-		m_project->InvalidateStamps(true);
+		m_auiManager.Update();
+		Refresh();
+
+		if(m_project.get())
+		{
+			m_project->InvalidateMap(true);
+			m_project->InvalidateTiles(true);
+			m_project->InvalidateTerrainTiles(true);
+			m_project->InvalidateTerrainBeziers(true);
+			m_project->InvalidateStamps(true);
+		}
+
+		RedrawAll();
+
+		if(m_project.get())
+		{
+			m_project->InvalidateMap(false);
+			m_project->InvalidateTiles(false);
+			m_project->InvalidateTerrainTiles(false);
+			m_project->InvalidateTerrainBeziers(false);
+			m_project->InvalidateStamps(false);
+		}
 	}
+}
 
-	RedrawAll();
+void MainWindow::Lockrefresh()
+{
+	m_refreshLockStack++;
+}
 
-	if(m_project.get())
+void MainWindow::UnlockRefresh()
+{
+	m_refreshLockStack--;
+
+	if(!m_refreshLockStack)
 	{
-		m_project->InvalidateMap(false);
-		m_project->InvalidateTiles(false);
-		m_project->InvalidateTerrainTiles(false);
-		m_project->InvalidateTerrainBeziers(false);
-		m_project->InvalidateStamps(false);
+		RefreshAll();
 	}
+}
+
+bool MainWindow::IsRefreshLocked() const
+{
+	return m_refreshLockStack > 0;
 }
 
 void MainWindow::RedrawAll()
@@ -668,53 +703,65 @@ void MainWindow::RedrawAll()
 
 void MainWindow::RefreshTileset()
 {
-	if(m_project.get())
+	if(!IsRefreshLocked())
 	{
-		//Recreate tileset texture
-		m_renderResources->CreateTilesetTexture();
+		if(m_project.get())
+		{
+			//Recreate tileset texture
+			m_renderResources->CreateTilesetTexture();
+		}
 	}
 }
 
 void MainWindow::RefreshTerrainTileset()
 {
-	if(m_project.get())
+	if(!IsRefreshLocked())
 	{
-		//Recreate collision set texture
-		m_renderResources->CreateCollisionTypesTexture();
-		m_renderResources->CreateTerrainTilesTexture();
+		if(m_project.get())
+		{
+			//Recreate collision set texture
+			m_renderResources->CreateCollisionTypesTexture();
+			m_renderResources->CreateTerrainTilesTexture();
+		}
 	}
 }
 
 void MainWindow::RefreshSpriteSheets()
 {
-	if(m_project.get())
+	if(!IsRefreshLocked())
 	{
-		m_renderResources->CreateSpriteSheetResources(*m_project.get());
+		if(m_project.get())
+		{
+			m_renderResources->CreateSpriteSheetResources(*m_project.get());
+		}
 	}
 }
 
 void MainWindow::RefreshPanel(Panel panel)
 {
-	if(m_project.get())
+	if(!IsRefreshLocked())
 	{
-		m_project->InvalidateMap(true);
-		m_project->InvalidateTiles(true);
-		m_project->InvalidateTerrainTiles(true);
-		m_project->InvalidateTerrainBeziers(true);
-		m_project->InvalidateStamps(true);
+		if(m_project.get())
+		{
+			m_project->InvalidateMap(true);
+			m_project->InvalidateTiles(true);
+			m_project->InvalidateTerrainTiles(true);
+			m_project->InvalidateTerrainBeziers(true);
+			m_project->InvalidateStamps(true);
 
-	}
-	
-	RedrawPanel(panel);
-	SetPanelCaptions();
+		}
 
-	if(m_project.get())
-	{
-		m_project->InvalidateMap(false);
-		m_project->InvalidateTiles(false);
-		m_project->InvalidateTerrainTiles(false);
-		m_project->InvalidateTerrainBeziers(false);
-		m_project->InvalidateStamps(false);
+		RedrawPanel(panel);
+		SetPanelCaptions();
+
+		if(m_project.get())
+		{
+			m_project->InvalidateMap(false);
+			m_project->InvalidateTiles(false);
+			m_project->InvalidateTerrainTiles(false);
+			m_project->InvalidateTerrainBeziers(false);
+			m_project->InvalidateStamps(false);
+		}
 	}
 }
 
@@ -1169,13 +1216,15 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 		{
 			int width = dialog.m_spinCtrlWidth->GetValue();
 			int height = dialog.m_spinCtrlHeight->GetValue();
-			bool shiftRight = true;
+
+			bool shiftRight = dialog.m_radioBoxShiftX->GetSelection() != 0;
+			bool shiftDown = dialog.m_radioBoxShiftY->GetSelection() != 0;
 
 			if(width > 0 && width <= 10000 && height > 0 && height <= 10000)
 			{
 				//Resize map
-				map.Resize(width, height, shiftRight);
-				collisionMap.Resize(width, height, shiftRight);
+				map.Resize(width, height, shiftRight, shiftDown);
+				collisionMap.Resize(width, height, shiftRight, shiftDown);
 
 				if(shiftRight && width > originalWidth)
 				{
