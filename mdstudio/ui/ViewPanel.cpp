@@ -153,8 +153,6 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 {
 	int width = stamp.GetWidth();
 	int height = stamp.GetHeight();
-	int mapWidth = m_project.GetMap().GetWidth();
-	int mapHeight = m_project.GetMap().GetHeight();
 
 	for(int stampX = 0; stampX < width; stampX++)
 	{
@@ -170,10 +168,9 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 			int canvasY = stampY + y;
 			int y_inv = m_canvasSize.y - 1 - canvasY;
 
-			//Can place stamps outside map boundaries, only draw tiles that are inside
-			if(canvasX >= 0 && canvasX < mapWidth && y_inv >= 0 && y_inv < mapHeight)
+			//Can place stamps outside canvas boundaries, only draw tiles that are inside
+			if(canvasX >= 0 && canvasX < m_canvasSize.x && y_inv >= 0 && y_inv < m_canvasSize.y)
 			{
-
 				//Paint on canvas
 				PaintTile(tileId, canvasX, y_inv, tileFlags);
 			}
