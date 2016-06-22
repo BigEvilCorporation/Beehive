@@ -674,6 +674,7 @@ void MainWindow::RedrawAll()
 {
 	RefreshTileset();
 	RefreshTerrainTileset();
+	RefreshSpriteSheets();
 	SetPanelCaptions();
 
 	if(m_palettesPanel)
@@ -728,12 +729,9 @@ void MainWindow::RefreshTerrainTileset()
 
 void MainWindow::RefreshSpriteSheets()
 {
-	if(!IsRefreshLocked())
+	if(m_project.get())
 	{
-		if(m_project.get())
-		{
-			m_renderResources->CreateSpriteSheetResources(*m_project.get());
-		}
+		m_renderResources->CreateSpriteSheetResources(*m_project.get());
 	}
 }
 
