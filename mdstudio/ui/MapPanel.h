@@ -103,7 +103,8 @@ private:
 	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
 	std::vector<ion::render::Primitive*> m_primitiveBeziers;
-	ion::render::Primitive* m_primitiveBezierControls;
+	ion::render::Primitive* m_primitiveBezierPoints;
+	ion::render::Primitive* m_primitiveBezierHandles;
 
 	//Current tool
 	ToolType m_currentTool;

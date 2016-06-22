@@ -23,7 +23,8 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	m_terrainCanvasPrimitive = NULL;
 	m_collisionCanvasPrimitive = NULL;
 	m_stampPreviewPrimitive = NULL;
-	m_primitiveBezierControls = NULL;
+	m_primitiveBezierPoints = NULL;
+	m_primitiveBezierHandles = NULL;
 	m_highlightedBezier = NULL;
 	m_currentBezier = NULL;
 	m_currentBezierControlIdx = -1;
@@ -728,7 +729,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 	{
 		case eToolDrawTerrainBezier:
 		{
-			const float boxHalfExtents = 4.0f;
+			const float boxHalfExtents = 2.0f;
 
 			//Check if touching an existing control handle
 			bool redraw = false;
@@ -838,8 +839,21 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						m_currentBezier = m_project.AddTerrainBezier();
 					}
 
-					const float defaultControlLen = 10.0f;
-					m_currentBezier->AddPoint(ion::Vector2(mousePos.x, (mapHeight * tileHeight) - mousePos.y), ion::Vector2(0.0f, defaultControlLen), ion::Vector2(0.0f, -defaultControlLen));
+					//If new point is to the right of the prev, point handles -1,1 on X axis, else 1,-1
+					ion::Vector2 prevPosition(0.0f, 0.0f);
+					ion::Vector2 prevControlA(0.0f, 0.0f);
+					ion::Vector2 prevControlB(0.0f, 0.0f);
+
+					int numExistingPoints = m_currentBezier->GetNumPoints();
+
+					if(numExistingPoints > 0)
+					{
+						m_currentBezier->GetPoint(numExistingPoints - 1, prevPosition, prevControlA, prevControlB);
+					}
+
+					const float defaultControlLen = (mousePos.x > prevPosition.x )? 10.0f : -10.0f;
+
+					m_currentBezier->AddPoint(ion::Vector2(mousePos.x, (mapHeight * tileHeight) - mousePos.y), ion::Vector2(-defaultControlLen, 0.0f), ion::Vector2(defaultControlLen, 0.0f));
 					redraw = true;
 				}
 				else if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
@@ -1378,10 +1392,16 @@ void MapPanel::ResetToolData()
 		m_stampPreviewPrimitive = NULL;
 	}
 
-	if(m_primitiveBezierControls)
+	if(m_primitiveBezierPoints)
 	{
-		delete m_primitiveBezierControls;
-		m_primitiveBezierControls = NULL;
+		delete m_primitiveBezierPoints;
+		m_primitiveBezierPoints = NULL;
+	}
+
+	if(m_primitiveBezierHandles)
+	{
+		delete m_primitiveBezierHandles;
+		m_primitiveBezierHandles = NULL;
 	}
 }
 
@@ -1422,7 +1442,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 	//Draw curves
 	if(m_primitiveBeziers.size() > 0)
 	{
-		material->SetDiffuseColour(ion::Colour(1.0f, 0.0f, 0.0f, 1.0f));
+		material->SetDiffuseColour(ion::Colour(1.0f, 0.4f, 0.4f, 1.0f));
 		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(3.0f);
 
@@ -1435,13 +1455,24 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 		material->Unbind();
 	}
 
-	//Draw curve control handles
-	if(m_primitiveBezierControls)
+	//Draw curve points
+	if(m_primitiveBezierPoints)
 	{
-		material->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 1.0f, 1.0f));
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(2.0f);
-		renderer.DrawVertexBuffer(m_primitiveBezierControls->GetVertexBuffer());
+		renderer.DrawVertexBuffer(m_primitiveBezierPoints->GetVertexBuffer());
+		renderer.SetLineWidth(1.0f);
+		material->Unbind();
+	}
+
+	//Draw curve control handles
+	if(m_primitiveBezierHandles)
+	{
+		material->SetDiffuseColour(ion::Colour(1.0f, 0.6f, 0.6f, 1.0f));
+		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.SetLineWidth(2.0f);
+		renderer.DrawVertexBuffer(m_primitiveBezierHandles->GetVertexBuffer());
 		renderer.SetLineWidth(1.0f);
 		material->Unbind();
 	}
@@ -1457,14 +1488,14 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 
 		const float x = m_currentBezierControlPos.x;
 		const float y = m_currentBezierControlPos.y;
-		const float width = 2;
-		const float height = 2;
+		const float width = m_currentBezierControlHndl == eBezierPosition ? 1.0f : 0.5f;
+		const float height = m_currentBezierControlHndl == eBezierPosition ? 1.0f : 0.5f;
 
 		ion::Vector3 previewScale(width, height, 1.0f);
 		ion::Matrix4 previewMtx;
 		ion::Vector3 previewPos(x, y, z);
 		previewMtx.SetTranslation(previewPos);
-		//previewMtx.SetScale(previewScale);
+		previewMtx.SetScale(previewScale);
 
 		material->Bind(previewMtx * bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
@@ -1946,10 +1977,16 @@ void MapPanel::PaintTerrainBeziers(Project& project)
 
 	m_primitiveBeziers.clear();
 
-	if(m_primitiveBezierControls)
+	if(m_primitiveBezierPoints)
 	{
-		delete m_primitiveBezierControls;
-		m_primitiveBezierControls = NULL;
+		delete m_primitiveBezierPoints;
+		m_primitiveBezierPoints = NULL;
+	}
+
+	if(m_primitiveBezierHandles)
+	{
+		delete m_primitiveBezierHandles;
+		m_primitiveBezierHandles = NULL;
 	}
 
 	for(int i = 0; i < project.GetNumTerrainBeziers(); i++)
@@ -1960,7 +1997,8 @@ void MapPanel::PaintTerrainBeziers(Project& project)
 
 	if(m_currentBezier && m_currentBezier->GetNumPoints() > 0)
 	{
-		m_primitiveBezierControls = m_renderResources.CreateBezierControlsPrimitive(*m_currentBezier, 4.0f);
+		m_primitiveBezierPoints = m_renderResources.CreateBezierPointsPrimitive(*m_currentBezier, 2.0f);
+		m_primitiveBezierHandles = m_renderResources.CreateBezierHandlesPrimitive(*m_currentBezier, 1.0f);
 	}
 }
 

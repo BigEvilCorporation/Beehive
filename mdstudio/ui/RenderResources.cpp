@@ -554,7 +554,35 @@ ion::render::Primitive* RenderResources::CreateBezierPrimitive(const ion::gameki
 	return new ion::render::LineStrip(points3d);
 }
 
-ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents)
+ion::render::Primitive* RenderResources::CreateBezierPointsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents)
+{
+	int numPoints = bezier.GetNumPoints();
+	std::vector<ion::Vector3> points;
+	points.reserve(numPoints * 28);
+
+	for(int i = 0; i < numPoints; i++)
+	{
+		ion::Vector2 position;
+		ion::Vector2 controlA;
+		ion::Vector2 controlB;
+
+		bezier.GetPoint(i, position, controlA, controlB);
+
+		//Boxes
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
+	}
+
+	return new ion::render::LineSegments(points);
+}
+
+ion::render::Primitive* RenderResources::CreateBezierHandlesPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents)
 {
 	int numPoints = bezier.GetNumPoints();
 	std::vector<ion::Vector3> points;
@@ -588,15 +616,6 @@ ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion
 		}
 
 		//Boxes
-		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
-		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
-		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
-		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
-		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y - handleBoxHalfExtents, 0.0f));
-		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
-		points.push_back(ion::Vector3(position.x - handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
-		points.push_back(ion::Vector3(position.x + handleBoxHalfExtents, position.y + handleBoxHalfExtents, 0.0f));
-
 		if(drawHandleA)
 		{
 			points.push_back(ion::Vector3(controlA.x - handleBoxHalfExtents, controlA.y - handleBoxHalfExtents, 0.0f));
@@ -622,7 +641,14 @@ ion::render::Primitive* RenderResources::CreateBezierControlsPrimitive(const ion
 		}
 	}
 
-	return new ion::render::LineSegments(points);
+	ion::render::LineSegments* primitive = NULL;
+
+	if(points.size() > 0)
+	{
+		primitive = new ion::render::LineSegments(points);
+	}
+
+	return primitive;
 }
 
 RenderResources::SpriteSheetRenderResources::SpriteSheetRenderResources()

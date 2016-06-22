@@ -110,7 +110,8 @@ public:
 	//Rendering util functions
 	ion::Matrix4 CalcBoxMatrix(const ion::Vector2i& position, const ion::Vector2i& size, const ion::Vector2i& mapSize, float z);
 	ion::render::Primitive* CreateBezierPrimitive(const ion::gamekit::BezierPath& bezier);
-	ion::render::Primitive* CreateBezierControlsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
+	ion::render::Primitive* CreateBezierPointsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
+	ion::render::Primitive* CreateBezierHandlesPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
 
 	//SpriteSheet rendering
 	class SpriteSheetRenderResources

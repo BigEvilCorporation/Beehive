@@ -443,6 +443,7 @@ void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteShe
 {
 	//Get sprite resources
 	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
+	ion::debug::Assert(spriteResources, "SpriteAnimEditorDialog::PopulateSpriteFrames() - No sprite resources");
 
 	//Clear existing
 	m_gridSpriteFrames->DeleteCols(0, m_gridSpriteFrames->GetNumberCols());
