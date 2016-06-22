@@ -238,6 +238,7 @@ StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const
 			&& x < bottomRight.x && y < bottomRight.y)
 		{
 			stampId = it->m_id;
+			flags = it->m_flags;
 		}
 	}
 
