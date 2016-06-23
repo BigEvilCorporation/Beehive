@@ -1351,7 +1351,7 @@ bool Project::MergePalettes(Palette& dest, const Palette& source)
 	return true;
 }
 
-bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits)
+bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits, Stamp* stamp)
 {
 	if(importFlags & eBMPImportClearPalettes)
 	{
@@ -1394,6 +1394,15 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 			}
 		}
 
+		if(stamp)
+		{
+			if(((reader.GetWidth() / m_platformConfig.tileWidth) != stamp->GetWidth()) || ((reader.GetHeight() / m_platformConfig.tileHeight) != stamp->GetHeight()))
+			{
+				wxMessageBox("Bitmap width/height does not match stamp to be replaced, cannot import", "Warning", wxOK | wxICON_WARNING);
+				return false;
+			}
+		}
+
 		//Get width/height in tiles
 		int tilesWidth = reader.GetWidth() / tileWidth;
 		int tilesHeight = reader.GetHeight() / tileHeight;
@@ -1404,8 +1413,6 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 			m_map.Resize(max(m_map.GetWidth(), tilesWidth), max(m_map.GetHeight(), tilesHeight), false, false);
 			m_collisionMap.Resize(max(m_collisionMap.GetWidth(), tilesWidth), max(m_collisionMap.GetHeight(), tilesHeight), false, false);
 		}
-
-		Stamp* stamp = NULL;
 
 		if(importFlags & eBMPImportToStamp)
 		{
@@ -1590,7 +1597,7 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 					m_map.SetTileFlags(tileX, tileY, tileFlags);
 				}
 
-				if(importFlags & eBMPImportToStamp)
+				if((importFlags & eBMPImportToStamp) || (importFlags & eBMPImportReplaceStamp))
 				{
 					//Set in stamp
 					stamp->SetTile(tileX, tileY, tileId);

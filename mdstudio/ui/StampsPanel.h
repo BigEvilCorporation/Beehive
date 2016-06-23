@@ -41,6 +41,7 @@ private:
 
 	enum MenuItems
 	{
+		eMenuReplaceStamp,
 		eMenuDeleteStamp,
 		eMenuSetStampLowDrawPrio,
 		eMenuSetStampHighDrawPrio,

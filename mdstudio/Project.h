@@ -50,9 +50,10 @@ public:
 		eBMPImportClearMap		= (1 << 2),
 		eBMPImportDrawToMap		= (1 << 3),
 		eBMPImportToStamp		= (1 << 4),
-		eBMPImportToSpriteSheet		= (1 << 5),
-		eBMPImportWholePalette	= (1 << 6),
-		eBMPImportInsertBGTile	= (1 << 7),
+		eBMPImportReplaceStamp	= (1 << 5),
+		eBMPImportToSpriteSheet	= (1 << 6),
+		eBMPImportWholePalette	= (1 << 7),
+		eBMPImportInsertBGTile	= (1 << 8),
 	};
 
 	Project(PlatformConfig& defaultPatformConfig);
@@ -210,7 +211,7 @@ public:
 	bool StampsAreInvalidated() const { return m_stampsInvalidated; }
 
 	//Import bitmap
-	bool ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits);
+	bool ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits, Stamp* stamp = NULL);
 
 	//Export
 	bool ExportPalettes(const std::string& filename) const;

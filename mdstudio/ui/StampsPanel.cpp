@@ -13,6 +13,7 @@
 #include "MainWindow.h"
 
 #include <wx/menu.h>
+#include <wx/filedlg.h>
 
 StampsPanel::StampsPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
@@ -170,6 +171,7 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			//Right-click menu
 			wxMenu contextMenu;
 
+			contextMenu.Append(eMenuReplaceStamp, wxString("Replace stamp"));
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
 			contextMenu.Append(eMenuSetStampLowDrawPrio, wxString("Set stamp low draw priority"));
 			contextMenu.Append(eMenuSetStampHighDrawPrio, wxString("Set stamp high draw priority"));
@@ -184,7 +186,29 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 {
-	if(event.GetId() == eMenuDeleteStamp)
+	if(event.GetId() == eMenuReplaceStamp)
+	{
+		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			int paletteIdx = 0;
+			TileId firstTile = stamp->GetTile(0, 0);
+			if(Tile* tile = m_project.GetTileset().GetTile(firstTile))
+			{
+				paletteIdx = (int)tile->GetPaletteId();
+			}
+
+			wxFileDialog dialog(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			if(dialog.ShowModal() == wxID_OK)
+			{
+				if(m_project.ImportBitmap(dialog.GetPath().c_str().AsChar(), Project::eBMPImportReplaceStamp, 1 << paletteIdx, stamp))
+				{
+					m_mainWindow->RefreshAll();
+				}
+			}
+		}
+	}
+	else if(event.GetId() == eMenuDeleteStamp)
 	{
 		//Delete stamp
 		m_project.DeleteStamp(m_hoverStamp);
