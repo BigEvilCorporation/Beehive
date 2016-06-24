@@ -685,13 +685,20 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 			m_hoverStamp = InvalidStampId;
 
 			//Repaint area underneath stamp
+			const int mapWidth = map.GetWidth();
+			const int mapHeight = map.GetHeight();
+
 			for(int tileX = m_hoverStampPos.x; tileX < m_hoverStampPos.x + stamp->GetWidth(); tileX++)
 			{
 				for(int tileY = m_hoverStampPos.y; tileY < m_hoverStampPos.y + stamp->GetHeight(); tileY++)
 				{
-					//Invert Y for OpenGL
-					int y_inv = m_project.GetMap().GetHeight() - 1 - tileY;
-					PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
+					//Can place stamps outside map boundaries, only bake tiles that are inside
+					if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
+					{
+						//Invert Y for OpenGL
+						int y_inv = mapHeight - 1 - tileY;
+						PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
+					}
 				}
 			}
 		}
