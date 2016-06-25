@@ -61,7 +61,7 @@ bool BMPReader::Read(const std::string& filename)
 					{
 						//Seek to palette pos
 						u64 paletteDataPos = sizeof(FileHeader) + bmpHeader.headerSize;
-						if(file.Seek(paletteDataPos, ion::io::File::eStart) == paletteDataPos)
+						if(file.Seek(paletteDataPos, ion::io::eSeekModeStart) == paletteDataPos)
 						{
 							//Calc palette size and alloc
 							m_paletteSize = bmpHeader.importantColourCount;
@@ -72,7 +72,7 @@ bool BMPReader::Read(const std::string& filename)
 							if(file.Read(m_palette, paletteSizeBytes) == paletteSizeBytes)
 							{
 								//Seek to data pos
-								if(file.Seek(fileHeader.dataOffset, ion::io::File::eStart) == fileHeader.dataOffset)
+								if(file.Seek(fileHeader.dataOffset, ion::io::eSeekModeStart) == fileHeader.dataOffset)
 								{
 									//Alloc pixel data buffer
 									m_data = new u8[m_dataSize];
