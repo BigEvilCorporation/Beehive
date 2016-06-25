@@ -24,6 +24,7 @@
 #include "TilesPanel.h"
 #include "StampsPanel.h"
 #include "MapPanel.h"
+#include "MapListPanel.h"
 #include "TileEditorPanel.h"
 #include "TerrainTilesPanel.h"
 #include "TerrainTileEditorPanel.h"
@@ -42,6 +43,7 @@ public:
 	enum Panel
 	{
 		ePanelMap,
+		ePanelMapList,
 		ePanelStamps,
 		ePanelTiles,
 		ePanelPalettes,
@@ -60,6 +62,7 @@ public:
 	void ShowPanelTiles();
 	void ShowPanelStamps();
 	void ShowPanelMap();
+	void ShowPanelMapList();
 	void ShowPanelTileEditor();
 	void ShowPanelTerrainTiles();
 	void ShowPanelTerrainEditor();
@@ -151,6 +154,7 @@ private:
 	wxWeakRef<MapToolbox> m_toolboxPanel;
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
+	wxWeakRef<MapListPanel> m_mapListPanel;
 	wxWeakRef<TilesPanel> m_tilesPanel;
 	wxWeakRef<StampsPanel> m_stampsPanel;
 	wxWeakRef<TileEditorPanel> m_tileEditorPanel;

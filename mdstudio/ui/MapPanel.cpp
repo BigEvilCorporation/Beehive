@@ -34,7 +34,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 
 	ResetToolData();
 
-	Map& map = project.GetMap();
+	Map& map = project.GetEditingMap();
 	CollisionMap& collisionMap = project.GetCollisionMap();
 	Tileset& tileset = project.GetTileset();
 	int mapWidth = map.GetWidth();
@@ -48,7 +48,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	CreateGrid(mapWidth, mapHeight, mapWidth / project.GetGridSize(), mapHeight / project.GetGridSize());
 
 	//Redraw map
-	PaintMap(project.GetMap());
+	PaintMap(project.GetEditingMap());
 
 	//Redraw collision map
 	PaintCollisionMap(project.GetCollisionMap());
@@ -109,7 +109,7 @@ void MapPanel::OnResize(wxSizeEvent& event)
 
 void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
-	Map& map = m_project.GetMap();
+	Map& map = m_project.GetEditingMap();
 	Tileset& tileset = m_project.GetTileset();
 
 	const int mapWidth = map.GetWidth();
@@ -558,13 +558,13 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			if(inMaprange)
 			{
 				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project.GetMap().FindGameObject(x, y, topLeft);
+				m_hoverGameObject = m_project.GetEditingMap().FindGameObject(x, y, topLeft);
 
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
 					m_selectedGameObject = m_hoverGameObject;
 
-					if(GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject))
+					if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
 					{
 						m_mainWindow->SetSelectedGameObject(gameObject);
 
@@ -611,7 +611,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
 					if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
 					{
-						m_project.GetMap().PlaceGameObject(x, y, *gameObjectType);
+						m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType);
 						Refresh();
 					}
 				}
@@ -625,7 +625,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			{
 				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 				{
-					m_project.GetMap().RemoveGameObject(x, y);
+					m_project.GetEditingMap().RemoveGameObject(x, y);
 					Refresh();
 				}
 			}
@@ -647,7 +647,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 {
-	Map& map = m_project.GetMap();
+	Map& map = m_project.GetEditingMap();
 
 	if(event.GetId() == eContextMenuDeleteStamp)
 	{
@@ -665,7 +665,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 				for(int tileY = m_hoverStampPos.y; tileY < m_hoverStampPos.y + stamp->GetHeight(); tileY++)
 				{
 					//Invert Y for OpenGL
-					int y_inv = m_project.GetMap().GetHeight() - 1 - tileY;
+					int y_inv = m_project.GetEditingMap().GetHeight() - 1 - tileY;
 					PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
 				}
 			}
@@ -719,7 +719,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 
 void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int tileX, int tileY)
 {
-	Map& map = m_project.GetMap();
+	Map& map = m_project.GetEditingMap();
 	Tileset& tileset = m_project.GetTileset();
 
 	const int mapWidth = map.GetWidth();
@@ -1001,17 +1001,17 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				if(!(m_prevMouseBits & eMouseLeft))
 				{
 					ion::Vector2i topLeft;
-					m_hoverGameObject = m_project.GetMap().FindGameObject(tileX, tileY, topLeft);
+					m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
 				}
 
 				if(m_hoverGameObject != InvalidGameObjectId)
 				{
-					if(GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject))
+					if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
 					{
 						const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 						const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-						m_project.GetMap().MoveGameObject(m_hoverGameObject, tileX, tileY);
+						m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, tileX, tileY);
 						gameObject->SetPosition(ion::Vector2i(tileX * tileWidth, tileY * tileHeight));
 					}
 				}
@@ -1025,11 +1025,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 		//	if(buttonBits & eMouseLeft)
 		//	{
 		//		ion::Vector2i topLeft;
-		//		m_hoverGameObject = m_project.GetMap().FindGameObject(x, y, topLeft);
+		//		m_hoverGameObject = m_project.GetEditingMap().FindGameObject(x, y, topLeft);
 		//
 		//		if(m_hoverGameObject != InvalidGameObjectId)
 		//		{
-		//			GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject);
+		//			GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject);
 		//			if(gameObject)
 		//			{
 		//				gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
@@ -1046,11 +1046,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			if(buttonBits & eMouseLeft)
 			{
 				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project.GetMap().FindGameObject(tileX, tileY, topLeft);
+				m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
 
 				if(m_hoverGameObject != InvalidGameObjectId)
 				{
-					GameObject* gameObject = m_project.GetMap().GetGameObject(m_hoverGameObject);
+					GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject);
 					if(gameObject)
 					{
 						gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
@@ -1138,7 +1138,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		//If map invalidated
 		if(m_project.MapIsInvalidated())
 		{
-			Map& map = m_project.GetMap();
+			Map& map = m_project.GetEditingMap();
 			CollisionMap& collisionMap = m_project.GetCollisionMap();
 			Tileset& tileset = m_project.GetTileset();
 			int mapWidth = map.GetWidth();
@@ -1193,7 +1193,7 @@ void MapPanel::SetTool(ToolType tool)
 	ToolType previousTool = m_currentTool;
 	m_currentTool = tool;
 
-	Map& map = m_project.GetMap();
+	Map& map = m_project.GetEditingMap();
 
 	switch(tool)
 	{
@@ -1437,7 +1437,7 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
-	const Map& map = m_project.GetMap();
+	const Map& map = m_project.GetEditingMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
 	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -1566,9 +1566,9 @@ void MapPanel::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::M
 
 void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	const TGameObjectPosMap& gameObjects = m_project.GetMap().GetGameObjects();
+	const TGameObjectPosMap& gameObjects = m_project.GetEditingMap().GetGameObjects();
 
-	const Map& map = m_project.GetMap();
+	const Map& map = m_project.GetEditingMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
 	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -1644,7 +1644,7 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 		material->SetDiffuseColour(colour);
 
-		const Map& map = m_project.GetMap();
+		const Map& map = m_project.GetEditingMap();
 		const float mapWidth = map.GetWidth();
 		const float mapHeight = map.GetHeight();
 		const float tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -1693,7 +1693,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 {
 	if(m_previewTile != InvalidTileId)
 	{
-		const Map& map = m_project.GetMap();
+		const Map& map = m_project.GetEditingMap();
 		const float mapWidth = map.GetWidth();
 		const float mapHeight = map.GetHeight();
 		const float tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -1723,7 +1723,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 
 void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	const Map& map = m_project.GetMap();
+	const Map& map = m_project.GetEditingMap();
 	const float mapWidth = map.GetWidth();
 	const float mapHeight = map.GetHeight();
 	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -1795,7 +1795,7 @@ void MapPanel::RenderStampPreview(ion::render::Renderer& renderer, const ion::Ma
 		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
 		if(stamp)
 		{
-			const Map& map = m_project.GetMap();
+			const Map& map = m_project.GetEditingMap();
 			const float mapWidth = map.GetWidth();
 			const float mapHeight = map.GetHeight();
 			const float tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -1844,13 +1844,13 @@ void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::M
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
 
-	const Map& map = m_project.GetMap();
+	const Map& map = m_project.GetEditingMap();
 	const ion::Vector2i mapSize(map.GetWidth(), map.GetHeight());
 
 	material->SetDiffuseColour(colour);
 	material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
 
-	for(TStampPosMap::const_iterator it = m_project.GetMap().StampsBegin(), end = m_project.GetMap().StampsEnd(); it != end; ++it)
+	for(TStampPosMap::const_iterator it = m_project.GetEditingMap().StampsBegin(), end = m_project.GetEditingMap().StampsEnd(); it != end; ++it)
 	{
 		Stamp* stamp = m_project.GetStamp(it->m_id);
 		if(stamp)
@@ -1873,7 +1873,7 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
 		{
-			const Map& map = m_project.GetMap();
+			const Map& map = m_project.GetEditingMap();
 			const float mapWidth = map.GetWidth();
 			const float mapHeight = map.GetHeight();
 			const float tileWidth = m_project.GetPlatformConfig().tileWidth;

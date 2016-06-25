@@ -753,6 +753,52 @@ MapToolbox::~MapToolbox()
 {
 }
 
+MapListPanelBase::MapListPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	wxBoxSizer* bSizer16;
+	bSizer16 = new wxBoxSizer( wxVERTICAL );
+	
+	m_toolBar1 = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL ); 
+	m_toolAddMap = m_toolBar1->AddTool( wxID_ANY, wxT("Add Variable"), wxBitmap( add_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
+	m_toolRemoveMap = m_toolBar1->AddTool( wxID_ANY, wxT("Remove Variable"), wxBitmap( remove_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
+	m_toolBar1->Realize(); 
+	
+	bSizer16->Add( m_toolBar1, 0, wxEXPAND, 5 );
+	
+	wxFlexGridSizer* fgSizer39;
+	fgSizer39 = new wxFlexGridSizer( 1, 1, 0, 0 );
+	fgSizer39->AddGrowableCol( 0 );
+	fgSizer39->AddGrowableRow( 0 );
+	fgSizer39->SetFlexibleDirection( wxBOTH );
+	fgSizer39->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_listMaps = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_LIST|wxLC_SINGLE_SEL );
+	fgSizer39->Add( m_listMaps, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	bSizer16->Add( fgSizer39, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer16 );
+	this->Layout();
+	
+	// Connect Events
+	this->Connect( m_toolAddMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolAddMap ) );
+	this->Connect( m_toolRemoveMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRemoveMap ) );
+	m_listMaps->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( MapListPanelBase::OnMapSelected ), NULL, this );
+}
+
+MapListPanelBase::~MapListPanelBase()
+{
+	// Disconnect Events
+	this->Disconnect( m_toolAddMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolAddMap ) );
+	this->Disconnect( m_toolRemoveMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRemoveMap ) );
+	m_listMaps->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( MapListPanelBase::OnMapSelected ), NULL, this );
+	
+}
+
 GameObjTypesPanelBase::GameObjTypesPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
 	wxFlexGridSizer* fgSizer13;

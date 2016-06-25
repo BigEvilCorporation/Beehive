@@ -15,9 +15,19 @@
 
 #include <ion/core/memory/Memory.h>
 
+Map::Map()
+	: m_platformConfig(PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive])
+{
+	m_name = "Unnamed";
+	m_width = 0;
+	m_height = 0;
+	m_nextFreeGameObjectId = 1;
+}
+
 Map::Map(const PlatformConfig& platformConfig)
 	: m_platformConfig(platformConfig)
 {
+	m_name = "Unnamed";
 	m_width = 0;
 	m_height = 0;
 	m_nextFreeGameObjectId = 1;
@@ -41,6 +51,7 @@ void Map::Clear()
 
 void Map::Serialise(ion::io::Archive& archive)
 {
+	archive.Serialise(m_name, "name");
 	archive.Serialise(m_width, "width");
 	archive.Serialise(m_height, "height");
 	archive.Serialise(m_tiles, "tiles");

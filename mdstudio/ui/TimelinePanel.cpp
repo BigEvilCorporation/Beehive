@@ -121,7 +121,7 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 		}
 
 		//Set label
-		if(GameObject* gameObject = m_project.GetMap().GetGameObject(actor->GetGameObjectId()))
+		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor->GetGameObjectId()))
 		{
 			std::stringstream label;
 			label << "Object" << gameObject->GetId();
@@ -188,7 +188,7 @@ void TimelinePanel::SyncActor(AnimationActor& actor)
 {
 	if(m_animation)
 	{
-		if(GameObject* gameObject = m_project.GetMap().GetGameObject(actor.GetGameObjectId()))
+		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor.GetGameObjectId()))
 		{
 			float frame = m_animation->GetFrame();
 			gameObject->SetAnimDrawOffset(actor.m_trackPosition.GetValue(frame));
@@ -263,7 +263,7 @@ void TimelinePanel::OnToolKeyframeActor(wxCommandEvent& event)
 		float frame = m_animation->GetFrame();
 
 		//Insert keyframe
-		if(GameObject* gameObject = m_project.GetMap().GetGameObject(m_actorId))
+		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_actorId))
 		{
 			m_actor->m_trackPosition.InsertKeyframe(AnimKeyframePosition(frame, gameObject->GetAnimDrawOffset()));
 		}
@@ -307,7 +307,7 @@ void TimelinePanel::OnToolKeyframeAll(wxCommandEvent& event)
 		//Insert keyframes
 		for(TAnimActorMap::iterator it = m_animation->ActorsBegin(), end = m_animation->ActorsEnd(); it != end; ++it)
 		{
-			if(GameObject* gameObject = m_project.GetMap().GetGameObject(it->first))
+			if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(it->first))
 			{
 				it->second.m_trackPosition.InsertKeyframe(AnimKeyframePosition(frame, gameObject->GetAnimDrawOffset()));
 			}

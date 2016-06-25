@@ -18,7 +18,6 @@
 
 Project::Project(PlatformConfig& defaultPatformConfig)
 	: m_platformConfig(defaultPatformConfig)
-	, m_map(m_platformConfig)
 	, m_collisionMap(m_platformConfig)
 	, m_tileset(m_platformConfig)
 	, m_terrainTileset(m_platformConfig)
@@ -42,6 +41,9 @@ Project::Project(PlatformConfig& defaultPatformConfig)
 	m_palettes.resize(s_maxPalettes);
 	m_nextFreeStampId = 1;
 	m_nextFreeGameObjectTypeId = 1;
+
+	//Add default map
+	m_editingMapId = CreateMap();
 }
 
 void Project::Clear()
@@ -64,7 +66,7 @@ void Project::Clear()
 		m_palettes[i].Clear();
 	}
 
-	m_map.Clear();
+	m_maps[m_editingMapId].Clear();
 	m_collisionMap.Clear();
 	m_tileset.Clear();
 	m_stamps.clear();
@@ -119,15 +121,21 @@ bool Project::Save(const std::string& filename)
 
 void Project::Serialise(ion::io::Archive& archive)
 {
+	if(archive.GetDirection() == ion::io::Archive::eIn)
+	{
+		m_maps.clear();
+	}
+
 	archive.Serialise(m_platformConfig, "platformConfig");
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_palettes, "palettes");
 	archive.Serialise(m_paletteSlots, "paletteSlots");
 	archive.Serialise(m_tileset, "tileset");
+	archive.Serialise(m_maps, "maps");
+	archive.Serialise(m_editingMapId, "editingMap");
 	archive.Serialise(m_backgroundTile, "backgroundTile");
 	archive.Serialise(m_terrainTileset, "terrainTileset");
 	archive.Serialise(m_defaultTerrainTile, "defaultTerrainTile");
-	archive.Serialise(m_map, "map");
 	archive.Serialise(m_collisionMap, "collisionMap");
 	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
@@ -137,6 +145,66 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
 	archive.Serialise(m_exportFilenames, "exportFilenames");
+
+	if(archive.GetDirection() == ion::io::Archive::eIn && m_maps.size() == 0)
+	{
+		//Legacy, single map
+		m_editingMapId = CreateMap();
+		archive.Serialise(m_maps[m_editingMapId], "map");
+	}
+}
+
+MapId Project::CreateMap()
+{
+	MapId mapId = ion::GenerateUUID64();
+	m_maps.insert(std::make_pair(mapId, Map(m_platformConfig)));
+	return mapId;
+}
+
+void Project::DeleteMap(MapId mapId)
+{
+	TMapMap::iterator it = m_maps.find(mapId);
+	ion::debug::Assert(it != m_maps.end(), "Project::DeleteMap() - Invalid map ID");
+	m_maps.erase(it);
+}
+
+Map& Project::GetMap(MapId mapId)
+{
+	TMapMap::iterator it = m_maps.find(mapId);
+	ion::debug::Assert(it != m_maps.end(), "Project::GetMap() - Invalid map ID");
+	return it->second;
+}
+
+const Map& Project::GetMap(MapId mapId) const
+{
+	TMapMap::const_iterator it = m_maps.find(mapId);
+	ion::debug::Assert(it != m_maps.end(), "Project::GetMap() - Invalid map ID");
+	return it->second;
+}
+
+Map& Project::GetEditingMap()
+{
+	return GetMap(m_editingMapId);
+}
+
+void Project::SetEditingMap(MapId mapId)
+{
+	m_editingMapId = mapId;
+}
+
+const TMapMap::const_iterator Project::MapsBegin() const
+{
+	return m_maps.begin();
+}
+
+const TMapMap::const_iterator Project::MapsEnd() const
+{
+	return m_maps.end();
+}
+
+int Project::GetMapCount() const
+{
+	return m_maps.size();
 }
 
 int Project::AddPaletteSlot(Palette& palette)
@@ -203,23 +271,27 @@ void Project::DeleteTile(TileId tileId)
 {
 	TileId swapTileId = (TileId)m_tileset.GetCount() - 1;
 
+	Map& map = m_maps[m_editingMapId];
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
 	//Find all uses of tile on map, set blank
-	for(int x = 0; x < m_map.GetWidth(); x++)
+	for(int x = 0; x < mapWidth; x++)
 	{
-		for(int y = 0; y < m_map.GetHeight(); y++)
+		for(int y = 0; y < mapHeight; y++)
 		{
-			TileId currTileId = m_map.GetTile(x, y);
+			TileId currTileId = map.GetTile(x, y);
 			if(currTileId == tileId)
 			{
 				//Referencing deleted tile, set as invalid
-				m_map.SetTile(x, y, InvalidTileId);
+				map.SetTile(x, y, InvalidTileId);
 			}
 			else if(currTileId == swapTileId)
 			{
 				//Referencing swap tile, set new id
-				u32 flags = m_map.GetTileFlags(x, y);
-				m_map.SetTile(x, y, tileId);
-				m_map.SetTileFlags(x, y, flags);
+				u32 flags = map.GetTileFlags(x, y);
+				map.SetTile(x, y, tileId);
+				map.SetTileFlags(x, y, flags);
 			}
 		}
 	}
@@ -284,19 +356,23 @@ void Project::SwapTiles(TileId tileId1, TileId tileId2)
 	*tile1 = *tile2;
 	*tile2 = tmpTile;
 
+	Map& map = m_maps[m_editingMapId];
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
 	//Find all uses of tiles on map, swap ids
-	for(int x = 0; x < m_map.GetWidth(); x++)
+	for(int x = 0; x < mapWidth; x++)
 	{
-		for(int y = 0; y < m_map.GetHeight(); y++)
+		for(int y = 0; y < mapHeight; y++)
 		{
-			TileId currTileId = m_map.GetTile(x, y);
+			TileId currTileId = map.GetTile(x, y);
 			if(currTileId == tileId1)
 			{
-				m_map.SetTile(x, y, tileId2);
+				map.SetTile(x, y, tileId2);
 			}
 			else if(currTileId == tileId2)
 			{
-				m_map.SetTile(x, y, tileId1);
+				map.SetTile(x, y, tileId1);
 			}
 		}
 	}
@@ -331,12 +407,16 @@ int Project::CleanupTiles()
 {
 	std::set<TileId> usedTiles;
 
+	Map& map = m_maps[m_editingMapId];
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
 	//Collect all used tile ids from map
-	for(int x = 0; x < m_map.GetWidth(); x++)
+	for(int x = 0; x < mapWidth; x++)
 	{
-		for(int y = 0; y < m_map.GetHeight(); y++)
+		for(int y = 0; y < mapHeight; y++)
 		{
-			TileId tileId = m_map.GetTile(x, y);
+			TileId tileId = map.GetTile(x, y);
 
 			//Ignore background tile
 			if(tileId != m_backgroundTile)
@@ -437,19 +517,19 @@ int Project::CleanupTiles()
 			for(int i = 0; i < duplicates.size(); i++)
 			{
 				//Find use of duplicate id in map
-				for(int x = 0; x < m_map.GetWidth(); x++)
+				for(int x = 0; x < mapWidth; x++)
 				{
-					for(int y = 0; y < m_map.GetHeight(); y++)
+					for(int y = 0; y < mapHeight; y++)
 					{
-						if(m_map.GetTile(x, y) == duplicates[i].duplicate)
+						if(m_maps[m_editingMapId].GetTile(x, y) == duplicates[i].duplicate)
 						{
-							u32 originalFlags = m_map.GetTileFlags(x, y);
+							u32 originalFlags = map.GetTileFlags(x, y);
 
 							//Replace duplicate with original
-							m_map.SetTile(x, y, duplicates[i].original);
+							map.SetTile(x, y, duplicates[i].original);
 
 							//Orientate to match duplicate
-							m_map.SetTileFlags(x, y, originalFlags ^ Tileset::s_orientationFlags[duplicates[i].duplicateOrientation]);
+							map.SetTileFlags(x, y, originalFlags ^ Tileset::s_orientationFlags[duplicates[i].duplicateOrientation]);
 						}
 					}
 				}
@@ -610,9 +690,11 @@ StampId Project::AddStamp(int width, int height)
 
 void Project::DeleteStamp(StampId stampId)
 {
+	Map& map = m_maps[m_editingMapId];
+
 	//Remove all uses of stamp on map
 	std::vector<ion::Vector2i> stampUseCoords;
-	for(TStampPosMap::const_iterator it = m_map.StampsBegin(), end = m_map.StampsEnd(); it != end; ++it)
+	for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
 	{
 		if(it->m_id == stampId)
 		{
@@ -622,7 +704,7 @@ void Project::DeleteStamp(StampId stampId)
 
 	for(int i = 0; i < stampUseCoords.size(); i++)
 	{
-		m_map.RemoveStamp(stampUseCoords[i].x, stampUseCoords[i].y);
+		map.RemoveStamp(stampUseCoords[i].x, stampUseCoords[i].y);
 	}
 
 	//Delete stamp
@@ -738,6 +820,10 @@ void Project::SetDefaultTerrainTile(TerrainTileId tileId)
 
 int Project::CleanupTerrainTiles(bool prompt)
 {
+	Map& map = m_maps[m_editingMapId];
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
 	//Backup default collision tile
 	TerrainTile* defaultTile = (m_defaultTerrainTile != InvalidTerrainTileId) ? GetTerrainTileset().GetTerrainTile(m_defaultTerrainTile) : NULL;
 	u64 defaultTileHash = defaultTile ? defaultTile->CalculateHash() : 0;
@@ -745,9 +831,9 @@ int Project::CleanupTerrainTiles(bool prompt)
 	std::set<TerrainTileId> usedTerrainTiles;
 
 	//Collect all used TerrainTile ids from map
-	for(int x = 0; x < m_map.GetWidth(); x++)
+	for(int x = 0; x < mapWidth; x++)
 	{
-		for(int y = 0; y < m_map.GetHeight(); y++)
+		for(int y = 0; y < mapHeight; y++)
 		{
 			TerrainTileId terrainTileId = m_collisionMap.GetTerrainTile(x, y);
 			usedTerrainTiles.insert(terrainTileId);
@@ -1097,10 +1183,12 @@ TileId Project::GetTileAtPosition(const ion::Vector2i& position)
 {
 	TileId tileId = InvalidTileId;
 
+	Map& map = m_maps[m_editingMapId];
+
 	//Find stamp under cursor first
 	ion::Vector2i stampPos;
 	u32 stampFlags = 0;
-	StampId stampId = m_map.FindStamp(position.x, position.y, stampPos, stampFlags);
+	StampId stampId = map.FindStamp(position.x, position.y, stampPos, stampFlags);
 	if(stampId)
 	{
 		//Get from stamp
@@ -1113,7 +1201,7 @@ TileId Project::GetTileAtPosition(const ion::Vector2i& position)
 	else
 	{
 		//Pick tile
-		tileId = m_map.GetTile(position.x, position.y);
+		tileId = map.GetTile(position.x, position.y);
 	}
 
 	return tileId;
@@ -1353,6 +1441,10 @@ bool Project::MergePalettes(Palette& dest, const Palette& source)
 
 bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits, Stamp* stamp)
 {
+	Map& map = m_maps[m_editingMapId];
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
 	if(importFlags & eBMPImportClearPalettes)
 	{
 		for(int i = 0; i < s_maxPalettes; i++)
@@ -1371,7 +1463,7 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 
 	if(importFlags & eBMPImportClearMap)
 	{
-		m_map.Clear();
+		map.Clear();
 	}
 
 	if(importFlags & eBMPImportInsertBGTile)
@@ -1410,7 +1502,7 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		if(importFlags & eBMPImportDrawToMap)
 		{
 			//Grow map if necessary
-			m_map.Resize(max(m_map.GetWidth(), tilesWidth), max(m_map.GetHeight(), tilesHeight), false, false);
+			map.Resize(max(mapWidth, tilesWidth), max(mapHeight, tilesHeight), false, false);
 			m_collisionMap.Resize(max(m_collisionMap.GetWidth(), tilesWidth), max(m_collisionMap.GetHeight(), tilesHeight), false, false);
 		}
 
@@ -1593,8 +1685,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 				if(importFlags & eBMPImportDrawToMap)
 				{
 					//Set in map
-					m_map.SetTile(tileX, tileY, tileId);
-					m_map.SetTileFlags(tileX, tileY, tileFlags);
+					map.SetTile(tileX, tileY, tileId);
+					map.SetTileFlags(tileX, tileY, tileFlags);
 				}
 
 				if((importFlags & eBMPImportToStamp) || (importFlags & eBMPImportReplaceStamp))
@@ -1766,6 +1858,10 @@ bool Project::ExportTerrainTiles(const std::string& filename, bool binary) const
 
 bool Project::ExportMap(const std::string& filename, bool binary) const
 {
+	const Map& map = m_maps.find(m_editingMapId)->second;
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+
 	u32 binarySize = 0;
 
 	if(binary)
@@ -1777,7 +1873,7 @@ bool Project::ExportMap(const std::string& filename, bool binary) const
 		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
 		if(binaryFile.IsOpen())
 		{
-			m_map.Export(*this, binaryFile);
+			map.Export(*this, binaryFile);
 			binarySize = binaryFile.GetSize();
 		}
 		else
@@ -1802,7 +1898,7 @@ bool Project::ExportMap(const std::string& filename, bool binary) const
 			//Export label, data and size as inline text
 			stream << "map_" << m_name << ":" << std::endl;
 
-			m_map.Export(*this, stream);
+			map.Export(*this, stream);
 
 			stream << std::endl;
 			stream << "map_" << m_name << "_end:" << std::endl;
@@ -1813,8 +1909,8 @@ bool Project::ExportMap(const std::string& filename, bool binary) const
 		stream << "map_" << m_name << "_size_l\tequ (map_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << "map_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_map.GetWidth() << std::endl;
-		stream << "map_" << m_name << "_height\tequ " << "0x" << std::setw(2) <<  m_map.GetHeight() << std::endl;
+		stream << "map_" << m_name << "_width\tequ " << "0x" << std::setw(2) << mapWidth << std::endl;
+		stream << "map_" << m_name << "_height\tequ " << "0x" << std::setw(2) << mapHeight << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());
@@ -1888,6 +1984,8 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 
 bool Project::ExportGameObjects(const std::string& filename) const
 {
+	const Map& map = m_maps.find(m_editingMapId)->second;
+
 	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
@@ -1895,7 +1993,7 @@ bool Project::ExportGameObjects(const std::string& filename) const
 		WriteFileHeader(stream);
 		stream << "gameobjects_" << m_name << ":" << std::endl;
 
-		const TGameObjectPosMap& gameObjMap = m_map.GetGameObjects();
+		const TGameObjectPosMap& gameObjMap = map.GetGameObjects();
 
 		//Bake out all game object types, even if there's no game objects to go with them (still need the count and init subroutine)
 		for(TGameObjectTypeMap::const_iterator it = m_gameObjectTypes.begin(), end = m_gameObjectTypes.end(); it != end; ++it)

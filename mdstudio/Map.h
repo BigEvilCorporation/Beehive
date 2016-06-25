@@ -85,7 +85,11 @@ public:
 		eHighPlane = 1<<2
 	};
 
+	Map();
 	Map(const PlatformConfig& platformConfig);
+
+	void SetName(const std::string& name) { m_name = name; }
+	const std::string& GetName() const { return m_name; }
 
 	void Clear();
 
@@ -144,6 +148,7 @@ private:
 	void BakeStamp(std::vector<TileDesc>& tiles, int x, int y, const Stamp& stamp, u32 flipFlags) const;
 
 	const PlatformConfig& m_platformConfig;
+	std::string m_name;
 	int m_width;
 	int m_height;
 	std::vector<TileDesc> m_tiles;

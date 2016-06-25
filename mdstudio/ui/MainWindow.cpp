@@ -132,6 +132,12 @@ void MainWindow::SetProject(Project* project)
 			delete m_mapPanel;
 		}
 
+		if(m_mapListPanel)
+		{
+			m_auiManager.DetachPane(m_mapListPanel);
+			delete m_mapListPanel;
+		}
+
 		if(m_toolboxPanel)
 		{
 			m_auiManager.DetachPane(m_toolboxPanel);
@@ -205,6 +211,7 @@ void MainWindow::SetProject(Project* project)
 			ShowPanelTerrainEditor();
 			ShowPanelTerrainTiles();
 			ShowPanelTileEditor();
+			ShowPanelMapList();
 
 			//Open left panels
 			ShowPanelToolbox();
@@ -376,6 +383,36 @@ void MainWindow::ShowPanelMap()
 		if(!m_mapPanel->IsShown())
 		{
 			m_mapPanel->Show();
+		}
+	}
+}
+
+void MainWindow::ShowPanelMapList()
+{
+	if(m_project.get())
+	{
+		if(!m_gameObjectTypePanel)
+		{
+			wxSize clientSize = GetClientSize();
+
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Dockable(true);
+			paneInfo.Float();
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(300, 300);
+			paneInfo.Bottom();
+			paneInfo.Caption("Maps");
+			paneInfo.CaptionVisible(true);
+
+			m_mapListPanel = new MapListPanel(this, *m_project.get(), m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_mapListPanel, paneInfo);
+			m_mapListPanel->Show();
+			m_auiManager.Update();
+		}
+
+		if(!m_mapListPanel->IsShown())
+		{
+			m_mapListPanel->Show();
 		}
 	}
 }
@@ -686,6 +723,9 @@ void MainWindow::RedrawAll()
 	if(m_mapPanel)
 		m_mapPanel->Refresh();
 
+	if(m_mapListPanel)
+		m_mapListPanel->Refresh();
+
 	if(m_stampsPanel)
 		m_stampsPanel->Refresh();
 
@@ -770,6 +810,10 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelMap:
 		if(m_mapPanel)
 			m_mapPanel->Refresh();
+		break;
+	case ePanelMapList:
+		if(m_mapListPanel)
+			m_mapListPanel->Refresh();
 		break;
 	case ePanelStamps:
 		if(m_stampsPanel)
@@ -1188,7 +1232,7 @@ void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		m_project->GetMap().Clear();
+		m_project->GetEditingMap().Clear();
 		m_project->GetCollisionMap().Clear();
 		RefreshPanel(ePanelMap);
 	}
@@ -1198,7 +1242,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		Map& map = m_project->GetMap();
+		Map& map = m_project->GetEditingMap();
 		CollisionMap& collisionMap = m_project->GetCollisionMap();
 
 		const int originalWidth = map.GetWidth();

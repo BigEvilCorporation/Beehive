@@ -32,6 +32,7 @@
 #include "TerrainTileset.h"
 #include "GameObject.h"
 
+typedef std::map<MapId, Map> TMapMap;
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<ActorId, Actor> TActorMap;
 typedef std::map<AnimationId, Animation> TAnimationMap;
@@ -75,8 +76,16 @@ public:
 	//Clear project (palettes, tiles, map)
 	void Clear();
 
-	//Get map
-	Map& GetMap() { return m_map; }
+	//Maps
+	MapId CreateMap();
+	void DeleteMap(MapId mapId);
+	Map& GetMap(MapId mapId);
+	const Map& GetMap(MapId mapId) const;
+	Map& GetEditingMap();
+	void SetEditingMap(MapId mapId);
+	const TMapMap::const_iterator MapsBegin() const;
+	const TMapMap::const_iterator MapsEnd() const;
+	int GetMapCount() const;
 
 	//Get collision map
 	CollisionMap& GetCollisionMap() { return m_collisionMap; }
@@ -290,7 +299,7 @@ private:
 	TerrainTileset m_terrainTileset;
 
 	//Map
-	Map m_map;
+	TMapMap m_maps;
 
 	//Collision map
 	CollisionMap m_collisionMap;
@@ -341,6 +350,9 @@ private:
 
 	//Default collision tile (replaces InvalidTerrainTileId on export)
 	TerrainTileId m_defaultTerrainTile;
+
+	//Currently editing map id
+	MapId m_editingMapId;
 
 	//Grid
 	int m_gridSize;

@@ -39,14 +39,14 @@ class SpriteCanvas;
 #include <wx/textctrl.h>
 #include <wx/checkbox.h>
 #include <wx/bmpbuttn.h>
+#include <wx/toolbar.h>
+#include <wx/listctrl.h>
 #include <wx/listbox.h>
 #include <wx/filepicker.h>
 #include <wx/radiobut.h>
 #include <wx/clrpicker.h>
 #include <wx/grid.h>
 #include <wx/slider.h>
-#include <wx/toolbar.h>
-#include <wx/listctrl.h>
 #include <wx/statline.h>
 
 ///////////////////////////////////////////////////////////////////////////
@@ -370,6 +370,32 @@ class MapToolbox : public wxPanel
 		
 		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 124,757 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
 		~MapToolbox();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MapListPanelBase
+///////////////////////////////////////////////////////////////////////////////
+class MapListPanelBase : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxToolBar* m_toolBar1;
+		wxToolBarToolBase* m_toolAddMap; 
+		wxToolBarToolBase* m_toolRemoveMap; 
+		wxListCtrl* m_listMaps;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnToolAddMap( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolRemoveMap( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapSelected( wxListEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		MapListPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 375,425 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
+		~MapListPanelBase();
 	
 };
 
