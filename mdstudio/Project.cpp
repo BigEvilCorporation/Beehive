@@ -187,6 +187,11 @@ Map& Project::GetEditingMap()
 	return GetMap(m_editingMapId);
 }
 
+MapId Project::GetEditingMapId() const
+{
+	return m_editingMapId;
+}
+
 void Project::SetEditingMap(MapId mapId)
 {
 	m_editingMapId = mapId;

@@ -282,6 +282,70 @@ DialogMapSizeBase::~DialogMapSizeBase()
 	
 }
 
+DialogNewMap::DialogNewMap( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer45;
+	bSizer45 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticText50 = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText50->Wrap( -1 );
+	bSizer45->Add( m_staticText50, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_textMapName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer45->Add( m_textMapName, 1, wxALL|wxEXPAND, 5 );
+	
+	
+	bSizer2->Add( bSizer45, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_text1 = new wxStaticText( this, wxID_ANY, wxT("Width:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text1->Wrap( -1 );
+	bSizer3->Add( m_text1, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_spinCtrlWidth = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 64 );
+	bSizer3->Add( m_spinCtrlWidth, 0, wxALL, 5 );
+	
+	m_text2 = new wxStaticText( this, wxID_ANY, wxT("x"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text2->Wrap( -1 );
+	bSizer3->Add( m_text2, 0, wxALIGN_CENTER, 5 );
+	
+	m_text3 = new wxStaticText( this, wxID_ANY, wxT("Height:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_text3->Wrap( -1 );
+	bSizer3->Add( m_text3, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	
+	m_spinCtrlHeight = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 64 );
+	bSizer3->Add( m_spinCtrlHeight, 0, wxALL, 5 );
+	
+	
+	bSizer2->Add( bSizer3, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	m_sdbSizer7 = new wxStdDialogButtonSizer();
+	m_sdbSizer7OK = new wxButton( this, wxID_OK );
+	m_sdbSizer7->AddButton( m_sdbSizer7OK );
+	m_sdbSizer7Cancel = new wxButton( this, wxID_CANCEL );
+	m_sdbSizer7->AddButton( m_sdbSizer7Cancel );
+	m_sdbSizer7->Realize();
+	
+	bSizer2->Add( m_sdbSizer7, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer2 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+}
+
+DialogNewMap::~DialogNewMap()
+{
+}
+
 DialogNewProjectBase::DialogNewProjectBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
@@ -763,6 +827,8 @@ MapListPanelBase::MapListPanelBase( wxWindow* parent, wxWindowID id, const wxPoi
 	
 	m_toolRemoveMap = m_toolBar1->AddTool( wxID_ANY, wxT("Remove Variable"), wxBitmap( remove_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 	
+	m_toolRename = m_toolBar1->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
 	m_toolBar1->Realize(); 
 	
 	bSizer16->Add( m_toolBar1, 0, wxEXPAND, 5 );
@@ -787,6 +853,7 @@ MapListPanelBase::MapListPanelBase( wxWindow* parent, wxWindowID id, const wxPoi
 	// Connect Events
 	this->Connect( m_toolAddMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolAddMap ) );
 	this->Connect( m_toolRemoveMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRemoveMap ) );
+	this->Connect( m_toolRename->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRenameMap ) );
 	m_listMaps->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( MapListPanelBase::OnMapSelected ), NULL, this );
 }
 
@@ -795,6 +862,7 @@ MapListPanelBase::~MapListPanelBase()
 	// Disconnect Events
 	this->Disconnect( m_toolAddMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolAddMap ) );
 	this->Disconnect( m_toolRemoveMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRemoveMap ) );
+	this->Disconnect( m_toolRename->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRenameMap ) );
 	m_listMaps->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( MapListPanelBase::OnMapSelected ), NULL, this );
 	
 }

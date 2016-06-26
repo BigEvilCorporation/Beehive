@@ -82,6 +82,7 @@ public:
 	Map& GetMap(MapId mapId);
 	const Map& GetMap(MapId mapId) const;
 	Map& GetEditingMap();
+	MapId GetEditingMapId() const;
 	void SetEditingMap(MapId mapId);
 	const TMapMap::const_iterator MapsBegin() const;
 	const TMapMap::const_iterator MapsEnd() const;

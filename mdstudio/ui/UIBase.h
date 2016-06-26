@@ -35,8 +35,8 @@ class SpriteCanvas;
 #include <wx/radiobox.h>
 #include <wx/button.h>
 #include <wx/dialog.h>
-#include <wx/choice.h>
 #include <wx/textctrl.h>
+#include <wx/choice.h>
 #include <wx/checkbox.h>
 #include <wx/bmpbuttn.h>
 #include <wx/toolbar.h>
@@ -205,6 +205,32 @@ class DialogMapSizeBase : public wxDialog
 		
 		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,189 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~DialogMapSizeBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DialogNewMap
+///////////////////////////////////////////////////////////////////////////////
+class DialogNewMap : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText50;
+		wxStaticText* m_text1;
+		wxStaticText* m_text2;
+		wxStaticText* m_text3;
+		wxStdDialogButtonSizer* m_sdbSizer7;
+		wxButton* m_sdbSizer7OK;
+		wxButton* m_sdbSizer7Cancel;
+	
+	public:
+		wxTextCtrl* m_textMapName;
+		wxSpinCtrl* m_spinCtrlWidth;
+		wxSpinCtrl* m_spinCtrlHeight;
+		
+		DialogNewMap( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,139 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogNewMap();
 	
 };
 
@@ -384,11 +410,13 @@ class MapListPanelBase : public wxPanel
 		wxToolBar* m_toolBar1;
 		wxToolBarToolBase* m_toolAddMap; 
 		wxToolBarToolBase* m_toolRemoveMap; 
+		wxToolBarToolBase* m_toolRename; 
 		wxListCtrl* m_listMaps;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolAddMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRemoveMap( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolRenameMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapSelected( wxListEvent& event ) { event.Skip(); }
 		
 	

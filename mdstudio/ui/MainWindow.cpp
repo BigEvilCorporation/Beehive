@@ -345,7 +345,7 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.DockFixed(false);
 			paneInfo.BestSize(300, 800);
 			paneInfo.Right();
-			paneInfo.Row(0);
+			paneInfo.Row(1);
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
@@ -397,10 +397,10 @@ void MainWindow::ShowPanelMapList()
 
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
-			paneInfo.Float();
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
-			paneInfo.Bottom();
+			paneInfo.BestSize(300, 150);
+			paneInfo.Right();
+			paneInfo.Row(0);
 			paneInfo.Caption("Maps");
 			paneInfo.CaptionVisible(true);
 

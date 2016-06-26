@@ -11,6 +11,7 @@
 
 #include "MapListPanel.h"
 #include "MainWindow.h"
+#include "Dialogs.h"
 
 MapListPanel::MapListPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: MapListPanelBase(parent, id, pos, size, style)
@@ -27,11 +28,18 @@ void MapListPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		m_listMaps->ClearAll();
 		m_mapIds.clear();
 
+		MapId editingMap = m_project.GetEditingMapId();
+
 		int index = 0;
 		for(TMapMap::const_iterator it = m_project.MapsBegin(), end = m_project.MapsEnd(); it != end; ++it, ++index)
 		{
 			m_mapIds.push_back(it->first);
 			m_listMaps->InsertItem(index, wxString(it->second.GetName()));
+
+			if(it->first == editingMap)
+			{
+				m_listMaps->SetItemState(index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			}
 		}
 	}
 }
@@ -47,21 +55,39 @@ void MapListPanel::OnMapSelected(wxListEvent& event)
 
 void MapListPanel::OnToolAddMap(wxCommandEvent& event)
 {
-	Map& currentMap = m_project.GetEditingMap();
+	DialogNewMap dialog(m_mainWindow);
 
-	MapId newMapId = m_project.CreateMap();
-	Map& newMap = m_project.GetMap(newMapId);
-	newMap.Resize(currentMap.GetWidth(), currentMap.GetHeight(), false, false);
-	m_project.SetEditingMap(newMapId);
+	if(dialog.ShowModal() == wxID_OK)
+	{
+		MapId newMapId = m_project.CreateMap();
+		Map& newMap = m_project.GetMap(newMapId);
+		newMap.SetName(dialog.m_textMapName->GetValue().GetData().AsChar());
+		newMap.Resize(dialog.m_spinCtrlWidth->GetValue(), dialog.m_spinCtrlHeight->GetValue(), false, false);
+		m_project.SetEditingMap(newMapId);
 
-	m_project.InvalidateMap(true);
-	m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
-	m_project.InvalidateMap(false);
+		m_project.InvalidateMap(true);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_project.InvalidateMap(false);
 
-	Refresh(false, NULL);
+		Refresh(false, NULL);
+	}
 }
 
 void MapListPanel::OnToolRemoveMap(wxCommandEvent& event)
+{
+	if(m_mapIds.size() > 1)
+	{
+		m_project.DeleteMap(m_project.GetEditingMapId());
+		Refresh(false, NULL);
+		m_project.SetEditingMap(m_mapIds[0]);
+
+		m_project.InvalidateMap(true);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_project.InvalidateMap(false);
+	}
+}
+
+void MapListPanel::OnToolRenameMap(wxCommandEvent& event)
 {
 
 }
