@@ -994,6 +994,98 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			break;
 		}
 
+		case eToolMoveStamp:
+		{
+			if(buttonBits & eMouseLeft)
+			{
+				if(!(m_prevMouseBits & eMouseLeft))
+				{
+					ion::Vector2i topLeft;
+					u32 flags = 0;
+					m_hoverStamp = m_project.GetEditingMap().FindStamp(tileX, tileY, topLeft, flags);
+					m_hoverStampPos.x = topLeft.x;
+					m_hoverStampPos.y = topLeft.y;
+				}
+
+				if(tileX != m_hoverStampPos.x && tileY != m_hoverStampPos.y)
+				{
+					if(m_hoverStamp != InvalidStampId)
+					{
+						if(Stamp* stamp = m_project.GetStamp(m_hoverStamp))
+						{
+							int originalX = 0;
+							int originalY = 0;
+
+							m_project.GetEditingMap().MoveStamp(m_hoverStamp, tileX, tileY, originalX, originalY);
+
+							//Repaint area underneath original pos
+							for(int x = originalX; x < originalX + stamp->GetWidth(); x++)
+							{
+								for(int y = originalY; y < originalY + stamp->GetHeight(); y++)
+								{
+									//Invert Y for OpenGL
+									int y_inv = map.GetHeight() - 1 - y;
+
+									//Stamps can be placed outside map boundaries, only paint tiles that are inside
+									if(x >= 0 && x < mapWidth && y_inv >= 0 && y_inv < mapHeight)
+									{
+										TileId tileId = InvalidTileId;
+
+										//Find stamp under cursor first
+										ion::Vector2i stampPos;
+										u32 flags = 0;
+										StampId stampId = map.FindStamp(x, y, stampPos, flags);
+
+										if(stampId)
+										{
+											//Get from stamp
+											if(Stamp* stamp = m_project.GetStamp(stampId))
+											{
+												ion::Vector2i offset = ion::Vector2i(x, y) - stampPos;
+												tileId = stamp->GetTile(offset.x, offset.y);
+											}
+										}
+										else
+										{
+											//Pick tile
+											tileId = map.GetTile(x, y);
+											flags = map.GetTileFlags(x, y);
+										}
+
+										PaintTile(tileId, x, y_inv, flags);
+									}
+								}
+							}
+
+							//Repaint stamp
+							for(int x = 0; x < stamp->GetWidth(); x++)
+							{
+								for(int y = 0; y < stamp->GetHeight(); y++)
+								{
+									int mapX = x + tileX;
+									int mapY = y + tileY;
+
+									//Invert Y for OpenGL
+									int y_inv = map.GetHeight() - 1 - mapY;
+
+									//Stamps can be placed outside map boundaries, only paint tiles that are inside
+									if(mapX >= 0 && mapX < mapWidth && y_inv >= 0 && y_inv < mapHeight)
+									{
+										PaintTile(stamp->GetTile(x, y), mapX, y_inv, stamp->GetTileFlags(x, y));
+									}
+								}
+							}
+
+							m_hoverStampPos.x = tileX;
+							m_hoverStampPos.y = tileY;
+						}
+					}
+				}
+			}
+
+			break;
+		}
+
 		case eToolMoveGameObject:
 		{
 			if(buttonBits & eMouseLeft)

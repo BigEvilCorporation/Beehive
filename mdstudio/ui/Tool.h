@@ -34,6 +34,7 @@ enum ToolType
 	eToolClone,
 	eToolCreateStamp,
 	eToolRemoveStamp,
+	eToolMoveStamp,
 	eToolFill,
 	eToolTilePicker,
 	eToolStampPicker,

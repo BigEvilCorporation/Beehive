@@ -716,6 +716,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer7->Add( m_toolPaintStamp, 0, wxALL, 5 );
 	
+	m_toolMveStamp = new wxBitmapButton( this, wxID_TOOL_MOVESTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolMveStamp->SetToolTip( wxT("Select Stamp") );
+	
+	fgSizer7->Add( m_toolMveStamp, 0, wxALL, 5 );
+	
 	m_toolStampPicker = new wxBitmapButton( this, wxID_TOOL_STAMPPICKER, wxBitmap( tool_stamppicker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolStampPicker->SetToolTip( wxT("Pick Stamp") );
 	

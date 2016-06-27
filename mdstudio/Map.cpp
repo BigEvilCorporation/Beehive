@@ -256,6 +256,21 @@ StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const
 	return stampId;
 }
 
+void Map::MoveStamp(StampId stampId, int x, int y, int& originalX, int& originalY)
+{
+	//TODO: Slow, map by key (needs serialisation fixing)
+	for(TStampPosMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		if(it->m_id == stampId)
+		{
+			originalX = it->m_position.x;
+			originalY = it->m_position.y;
+			it->m_position.x = x;
+			it->m_position.y = y;
+		}
+	}
+}
+
 void Map::RemoveStamp(int x, int y)
 {
 	ion::Vector2i size;
