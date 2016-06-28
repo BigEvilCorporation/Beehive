@@ -125,6 +125,7 @@ private:
 	ion::Vector2i m_hoverStampPos;
 	ion::Vector2i m_selectedStampPos;
 	u32 m_hoverStampFlags;
+	u32 m_hoverStampMapEntry;
 
 	//Selected game object
 	GameObjectId m_hoverGameObject;

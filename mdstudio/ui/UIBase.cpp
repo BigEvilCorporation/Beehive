@@ -30,6 +30,7 @@
 #include "../FormBuilderProj/open.xpm"
 #include "../FormBuilderProj/palettespanel.xpm"
 #include "../FormBuilderProj/play_16_16.xpm"
+#include "../FormBuilderProj/qmark_16_16.xpm"
 #include "../FormBuilderProj/remove_16_16.xpm"
 #include "../FormBuilderProj/resizemap.xpm"
 #include "../FormBuilderProj/rewind_16_16.xpm"
@@ -832,7 +833,7 @@ MapListPanelBase::MapListPanelBase( wxWindow* parent, wxWindowID id, const wxPoi
 	
 	m_toolRemoveMap = m_toolBar1->AddTool( wxID_ANY, wxT("Remove Variable"), wxBitmap( remove_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 	
-	m_toolRename = m_toolBar1->AddTool( wxID_ANY, wxT("tool"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	m_toolRename = m_toolBar1->AddTool( wxID_ANY, wxT("tool"), wxBitmap( qmark_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 	
 	m_toolBar1->Realize(); 
 	

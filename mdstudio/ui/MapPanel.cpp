@@ -130,7 +130,8 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				//Cannot paint over a stamp
 				ion::Vector2i stampTopLeft;
 				u32 stampFlags = 0;
-				if(map.FindStamp(x, y, stampTopLeft, stampFlags) == InvalidStampId)
+				u32 mapEntryIndex = 0;
+				if(map.FindStamp(x, y, stampTopLeft, stampFlags, mapEntryIndex) == InvalidStampId)
 				{
 					//Update paint preview tile
 					m_previewTile = m_project.GetPaintTile();
@@ -309,7 +310,8 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			//Find stamp under cursor
 			ion::Vector2i stampPos;
 			u32 stampFlags = 0;
-			StampId stampId = map.FindStamp(x, y, stampPos, stampFlags);
+			u32 mapEntryIndex = 0;
+			StampId stampId = map.FindStamp(x, y, stampPos, stampFlags, mapEntryIndex);
 
 			m_hoverStamp = stampId;
 			m_hoverStampPos = stampPos;
@@ -369,7 +371,36 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 								//Stamps can be placed outside map boundaries, only remove tiles that are inside
 								if(tileX >= 0 && tileX < mapWidth && y_inv >= 0 && y_inv < mapHeight)
 								{
-									PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
+									TileId tileId = InvalidTileId;
+
+									//Find stamp under cursor first
+									ion::Vector2i stampPos;
+									u32 flags = 0;
+									u32 mapEntryIndex = 0;
+									StampId stampId = map.FindStamp(tileX, tileY, stampPos, flags, mapEntryIndex);
+
+									if(stampId)
+									{
+										//Get from stamp
+										if(Stamp* stamp = m_project.GetStamp(stampId))
+										{
+											ion::Vector2i offset = ion::Vector2i(tileX, tileY) - stampPos;
+
+											int sourceX = (flags & Map::eFlipX) ? (stamp->GetWidth() - 1 - offset.x) : offset.x;
+											int sourceY = (flags & Map::eFlipY) ? (stamp->GetHeight() - 1 - offset.y) : offset.y;
+
+											tileId = stamp->GetTile(sourceX, sourceY);
+											flags ^= stamp->GetTileFlags(sourceX, sourceY);
+										}
+									}
+									else
+									{
+										//Pick tile
+										tileId = map.GetTile(tileX, tileY);
+										flags = map.GetTileFlags(tileX, tileY);
+									}
+
+									PaintTile(tileId, tileX, y_inv, flags);
 								}
 							}
 						}
@@ -406,7 +437,8 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					//Find stamp under cursor first
 					ion::Vector2i stampPos;
 					u32 stampFlags = 0;
-					StampId stampId = map.FindStamp(x, y, stampPos, stampFlags);
+					u32 mapEntryIndex = 0;
+					StampId stampId = map.FindStamp(x, y, stampPos, stampFlags, mapEntryIndex);
 
 					if(stampId)
 					{
@@ -1001,13 +1033,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				if(!(m_prevMouseBits & eMouseLeft))
 				{
 					ion::Vector2i topLeft;
-					u32 flags = 0;
-					m_hoverStamp = m_project.GetEditingMap().FindStamp(tileX, tileY, topLeft, flags);
-					m_hoverStampPos.x = topLeft.x;
-					m_hoverStampPos.y = topLeft.y;
+					m_hoverStamp = m_project.GetEditingMap().FindStamp(tileX, tileY, topLeft, m_hoverStampFlags, m_hoverStampMapEntry);
+					m_hoverStampPos = topLeft;
 				}
 
-				if(tileX != m_hoverStampPos.x && tileY != m_hoverStampPos.y)
+				if(tileX != m_hoverStampPos.x || tileY != m_hoverStampPos.y)
 				{
 					if(m_hoverStamp != InvalidStampId)
 					{
@@ -1016,7 +1046,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 							int originalX = 0;
 							int originalY = 0;
 
-							m_project.GetEditingMap().MoveStamp(m_hoverStamp, tileX, tileY, originalX, originalY);
+							m_project.GetEditingMap().MoveStamp(m_hoverStamp, m_hoverStampMapEntry, tileX, tileY, originalX, originalY);
 
 							//Repaint area underneath original pos
 							for(int x = originalX; x < originalX + stamp->GetWidth(); x++)
@@ -1034,7 +1064,10 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 										//Find stamp under cursor first
 										ion::Vector2i stampPos;
 										u32 flags = 0;
-										StampId stampId = map.FindStamp(x, y, stampPos, flags);
+										u32 mapEntryIndex = 0;
+
+										//TODO: Very slow
+										StampId stampId = map.FindStamp(x, y, stampPos, flags, mapEntryIndex);
 
 										if(stampId)
 										{
@@ -1042,7 +1075,12 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 											if(Stamp* stamp = m_project.GetStamp(stampId))
 											{
 												ion::Vector2i offset = ion::Vector2i(x, y) - stampPos;
-												tileId = stamp->GetTile(offset.x, offset.y);
+
+												int sourceX = (flags & Map::eFlipX) ? (stamp->GetWidth() - 1 - offset.x) : offset.x;
+												int sourceY = (flags & Map::eFlipY) ? (stamp->GetHeight() - 1 - offset.y) : offset.y;
+												
+												tileId = stamp->GetTile(sourceX, sourceY);
+												flags ^= stamp->GetTileFlags(sourceX, sourceY);
 											}
 										}
 										else
@@ -1071,7 +1109,10 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 									//Stamps can be placed outside map boundaries, only paint tiles that are inside
 									if(mapX >= 0 && mapX < mapWidth && y_inv >= 0 && y_inv < mapHeight)
 									{
-										PaintTile(stamp->GetTile(x, y), mapX, y_inv, stamp->GetTileFlags(x, y));
+										int sourceX = (m_hoverStampFlags & Map::eFlipX) ? (stamp->GetWidth() - 1 - x) : x;
+										int sourceY = (m_hoverStampFlags & Map::eFlipY) ? (stamp->GetHeight() - 1 - y) : y;
+
+										PaintTile(stamp->GetTile(sourceX, sourceY), mapX, y_inv, stamp->GetTileFlags(sourceX, sourceY) ^ m_hoverStampFlags);
 									}
 								}
 							}
@@ -1398,7 +1439,8 @@ void MapPanel::SetTool(ToolType tool)
 					//Find stamp under cursor first
 					ion::Vector2i stampPos;
 					u32 stampFlags = 0;
-					StampId stampId = map.FindStamp(mapX, mapY, stampPos, stampFlags);
+					u32 mapEntryIndex = 0;
+					StampId stampId = map.FindStamp(mapX, mapY, stampPos, stampFlags, mapEntryIndex);
 
 					//TODO - optimise for known stamp
 					if(stampId)

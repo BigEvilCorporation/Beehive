@@ -112,8 +112,8 @@ public:
 	//Set stamp on map
 	void SetStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
 	void BakeStamp(int x, int y, const Stamp& stamp, u32 flipFlags);
-	StampId FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const;
-	void MoveStamp(StampId stampId, int x, int y, int& originalX, int& originalY);
+	StampId FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags, u32& mapEntryIndex) const;
+	void MoveStamp(StampId stampId, u32 mapEntryIndex, int x, int y, int& originalX, int& originalY);
 	void RemoveStamp(int x, int y);
 
 	//Place game object on map

@@ -1193,7 +1193,8 @@ TileId Project::GetTileAtPosition(const ion::Vector2i& position)
 	//Find stamp under cursor first
 	ion::Vector2i stampPos;
 	u32 stampFlags = 0;
-	StampId stampId = map.FindStamp(position.x, position.y, stampPos, stampFlags);
+	u32 mapEntryIndex = 0;
+	StampId stampId = map.FindStamp(position.x, position.y, stampPos, stampFlags, mapEntryIndex);
 	if(stampId)
 	{
 		//Get from stamp

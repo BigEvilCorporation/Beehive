@@ -231,13 +231,14 @@ void Map::BakeStamp(std::vector<TileDesc>& tiles, int x, int y, const Stamp& sta
 	}
 }
 
-StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const
+StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags, u32& mapEntryIndex) const
 {
 	StampId stampId = InvalidStampId;
 	ion::Vector2i size;
 	ion::Vector2i bottomRight;
 
 	//Work backwards, find last placed stamp first
+	int index = m_stamps.size() - 1;
 	for(TStampPosMap::const_reverse_iterator it = m_stamps.rbegin(), end = m_stamps.rend(); it != end && !stampId; ++it)
 	{
 		topLeft = it->m_position;
@@ -250,25 +251,24 @@ StampId Map::FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags) const
 		{
 			stampId = it->m_id;
 			flags = it->m_flags;
+			mapEntryIndex = index;
 		}
+
+		index--;
 	}
 
 	return stampId;
 }
 
-void Map::MoveStamp(StampId stampId, int x, int y, int& originalX, int& originalY)
+void Map::MoveStamp(StampId stampId, u32 mapEntryIndex, int x, int y, int& originalX, int& originalY)
 {
-	//TODO: Slow, map by key (needs serialisation fixing)
-	for(TStampPosMap::iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
-	{
-		if(it->m_id == stampId)
-		{
-			originalX = it->m_position.x;
-			originalY = it->m_position.y;
-			it->m_position.x = x;
-			it->m_position.y = y;
-		}
-	}
+	ion::debug::Assert(mapEntryIndex < m_stamps.size(), "Map::MoveStamp() - Out of bounds");
+	ion::debug::Assert(m_stamps[mapEntryIndex].m_id == stampId, "Map::MoveStamp() - StampId/map entry mismatch");
+
+	originalX = m_stamps[mapEntryIndex].m_position.x;
+	originalY = m_stamps[mapEntryIndex].m_position.y;
+	m_stamps[mapEntryIndex].m_position.x = x;
+	m_stamps[mapEntryIndex].m_position.y = y;
 }
 
 void Map::RemoveStamp(int x, int y)
