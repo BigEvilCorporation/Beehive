@@ -38,6 +38,7 @@ Project::Project(PlatformConfig& defaultPatformConfig)
 	m_showGrid = true;
 	m_snapToGrid = false;
 	m_showStampOutlines = true;
+	m_showDisplayFrame = false;
 	m_palettes.resize(s_maxPalettes);
 	m_nextFreeStampId = 1;
 	m_nextFreeGameObjectTypeId = 1;

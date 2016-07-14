@@ -135,6 +135,7 @@ protected:
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 	virtual void OnBtnShowOutlines(wxCommandEvent& event);
+	virtual void OnBtnShowDisplayFrame(wxCommandEvent& event);
 	virtual void OnBtnTerrainTileEdit(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGameObjTypes(wxRibbonButtonBarEvent& event);
 

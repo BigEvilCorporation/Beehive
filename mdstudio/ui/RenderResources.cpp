@@ -87,14 +87,19 @@ RenderResources::RenderResources(Project& project)
 	m_colours[eColourPreview] = ion::Colour(1.0f, 1.0f, 1.0f, 0.8f);
 	m_colours[eColourOutline] = ion::Colour(1.0f, 1.0f, 0.0f, 1.0f);
 	m_colours[eColourGrid] = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
+	m_colours[eColourDisplayFrame] = ion::Colour(0.9f, 0.9f, 0.9f, 1.0f);
 
 	//Create primitives
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
+	const int screenWidth = project.GetPlatformConfig().screenWidth;
+	const int screenHeight = project.GetPlatformConfig().screenHeight;
+
 	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(0.5f, 0.5f));
 	m_primitives[ePrimitiveTileQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
 	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
+	m_primitives[ePrimitiveScreenLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(screenWidth / 2.0f, screenHeight / 2.0f));
 }
 
 RenderResources::~RenderResources()

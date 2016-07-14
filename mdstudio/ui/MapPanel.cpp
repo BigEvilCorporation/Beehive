@@ -1262,6 +1262,12 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	{
 		RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
 	}
+
+	//Render display frame
+	if(m_project.GetShowDisplayFrame())
+	{
+		RenderDisplayFrame(renderer, cameraInverseMtx, projectionMtx, z);
+	}
 }
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -1998,6 +2004,28 @@ void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::M
 	}
 
 	material->Unbind();
+}
+
+void MapPanel::RenderDisplayFrame(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveScreenLineQuad);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourDisplayFrame);
+
+	const int screenWidth = m_project.GetPlatformConfig().screenWidth;
+	const int screenHeight = m_project.GetPlatformConfig().screenHeight;
+
+	renderer.SetLineWidth(5.0f);
+
+	ion::Matrix4 gridMtx;
+	gridMtx.SetTranslation(ion::Vector3(m_panelSize.x / 2, m_panelSize.y / 2, 0.0f));
+	gridMtx.SetScale(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+	material->SetDiffuseColour(colour);
+	material->Bind(gridMtx, ion::Matrix4(), projectionMtx);
+	renderer.DrawVertexBuffer(primitive->GetVertexBuffer());
+	material->Unbind();
+
+	renderer.SetLineWidth(1.0f);
 }
 
 void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

@@ -59,53 +59,54 @@ class SpriteCanvas;
 #define wxID_BTN_GRID_SHOW 1005
 #define wxID_BTN_GRID_SNAP 1006
 #define wxID_BTN_SHOW_OUTLINES 1007
-#define wxID_BTN_TOOLS_MAPEDIT 1008
-#define wxID_BTN_TOOLS_TILES 1009
-#define wxID_BTN_TOOLS_STAMPS 1010
-#define wxID_BTN_TOOLS_PALETTES 1011
-#define wxID_BTN_TOOLS_GAMEOBJS 1012
-#define wxID_BTN_TOOLS_GAMEOBJPARAMS 1013
-#define wxID_BTN_TOOLS_TIMELINE 1014
-#define wxID_BTN_TOOLS_SPRITEANIM 1015
-#define wxID_BTN_MAP_CLEAR 1016
-#define wxID_BTN_MAP_RESIZE 1017
-#define wxID_BTN_TILES_IMPORT 1018
-#define wxID_BTN_TILES_CREATE 1019
-#define wxID_BTN_TILES_DELETE 1020
-#define wxID_BTN_TILES_CLEANUP 1021
-#define wxID_BTN_SPRITE_EDITOR 1022
-#define wxID_BTN_STAMPS_CREATE 1023
-#define wxID_BTN_STAMPS_DELETE 1024
-#define wxID_BTN_COL_TILES_CREATE 1025
-#define wxID_BTN_COL_TILES_DELETE 1026
-#define wxID_BTN_COL_TILES_CLEANUP 1027
-#define wxID_BTN_COL_MAP_CLEAR 1028
-#define wxID_BTN_COL_GEN_BEZIER 1029
-#define wxID_BTN_GAME_OBJ_TYPES 1030
-#define wxID_BTN_CANCEL 1031
-#define wxID_TOOL_SELECTTILE 1032
-#define wxID_TOOL_PAINT 1033
-#define wxID_TOOL_TILEPICKER 1034
-#define wxID_TOOL_FLIPX 1035
-#define wxID_TOOL_FLIPY 1036
-#define wxID_TOOL_FILL 1037
-#define wxID_TOOL_CLONE 1038
-#define wxID_TOOL_SELECTSTAMP 1039
-#define wxID_TOOL_STAMP 1040
-#define wxID_TOOL_MOVESTAMP 1041
-#define wxID_TOOL_STAMPPICKER 1042
-#define wxID_TOOL_CREATESTAMP 1043
-#define wxID_TOOL_REMOVESTAMP 1044
-#define wxID_TOOL_COL_PAINTTERRAIN 1045
-#define wxID_TOOL_COL_PAINTSOLID 1046
-#define wxID_TOOL_COL_DELETETERRTILE 1047
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1048
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1049
-#define wxID_TOOL_SELECTGAMEOBJ 1050
-#define wxID_TOOL_PLACEGAMEOBJ 1051
-#define wxID_TOOL_MOVEGAMEOBJ 1052
-#define wxID_TOOL_ANIMATEGAMEOBJ 1053
-#define wxID_TOOL_REMOVEGAMEOBJ 1054
+#define wxID_BTN_SHOW_DISPLAYFRAME 1008
+#define wxID_BTN_TOOLS_MAPEDIT 1009
+#define wxID_BTN_TOOLS_TILES 1010
+#define wxID_BTN_TOOLS_STAMPS 1011
+#define wxID_BTN_TOOLS_PALETTES 1012
+#define wxID_BTN_TOOLS_GAMEOBJS 1013
+#define wxID_BTN_TOOLS_GAMEOBJPARAMS 1014
+#define wxID_BTN_TOOLS_TIMELINE 1015
+#define wxID_BTN_TOOLS_SPRITEANIM 1016
+#define wxID_BTN_MAP_CLEAR 1017
+#define wxID_BTN_MAP_RESIZE 1018
+#define wxID_BTN_TILES_IMPORT 1019
+#define wxID_BTN_TILES_CREATE 1020
+#define wxID_BTN_TILES_DELETE 1021
+#define wxID_BTN_TILES_CLEANUP 1022
+#define wxID_BTN_SPRITE_EDITOR 1023
+#define wxID_BTN_STAMPS_CREATE 1024
+#define wxID_BTN_STAMPS_DELETE 1025
+#define wxID_BTN_COL_TILES_CREATE 1026
+#define wxID_BTN_COL_TILES_DELETE 1027
+#define wxID_BTN_COL_TILES_CLEANUP 1028
+#define wxID_BTN_COL_MAP_CLEAR 1029
+#define wxID_BTN_COL_GEN_BEZIER 1030
+#define wxID_BTN_GAME_OBJ_TYPES 1031
+#define wxID_BTN_CANCEL 1032
+#define wxID_TOOL_SELECTTILE 1033
+#define wxID_TOOL_PAINT 1034
+#define wxID_TOOL_TILEPICKER 1035
+#define wxID_TOOL_FLIPX 1036
+#define wxID_TOOL_FLIPY 1037
+#define wxID_TOOL_FILL 1038
+#define wxID_TOOL_CLONE 1039
+#define wxID_TOOL_SELECTSTAMP 1040
+#define wxID_TOOL_STAMP 1041
+#define wxID_TOOL_MOVESTAMP 1042
+#define wxID_TOOL_STAMPPICKER 1043
+#define wxID_TOOL_CREATESTAMP 1044
+#define wxID_TOOL_REMOVESTAMP 1045
+#define wxID_TOOL_COL_PAINTTERRAIN 1046
+#define wxID_TOOL_COL_PAINTSOLID 1047
+#define wxID_TOOL_COL_DELETETERRTILE 1048
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1049
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1050
+#define wxID_TOOL_SELECTGAMEOBJ 1051
+#define wxID_TOOL_PLACEGAMEOBJ 1052
+#define wxID_TOOL_MOVEGAMEOBJ 1053
+#define wxID_TOOL_ANIMATEGAMEOBJ 1054
+#define wxID_TOOL_REMOVEGAMEOBJ 1055
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -148,6 +149,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnGridShow( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnGridSnap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnShowOutlines( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnShowDisplayFrame( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsTiles( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnToolsStamps( wxRibbonButtonBarEvent& event ) { event.Skip(); }

@@ -58,6 +58,7 @@ public:
 		eColourPreview,
 		eColourOutline,
 		eColourGrid,
+		eColourDisplayFrame,
 		eColourMax
 	};
 
@@ -66,6 +67,7 @@ public:
 		ePrimitiveUnitQuad,
 		ePrimitiveTileQuad,
 		ePrimitiveUnitLineQuad,
+		ePrimitiveScreenLineQuad,
 		ePrimitiveMax
 	};
 

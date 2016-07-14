@@ -209,6 +209,10 @@ public:
 	bool GetShowStampOutlines() const { return m_showStampOutlines; }
 	void SetShowStampOutlines(bool show) { m_showStampOutlines = show; }
 
+	//Display frame
+	bool GetShowDisplayFrame() const { return m_showDisplayFrame; }
+	void SetShowDisplayFrame(bool show) { m_showDisplayFrame = show; }
+
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
 	void InvalidateTerrainTiles(bool invalidate) { m_terrainTilesInvalidated = invalidate; }
@@ -362,6 +366,9 @@ private:
 
 	//Stamp outlines
 	bool m_showStampOutlines;
+
+	//Display frame
+	bool m_showDisplayFrame;
 
 	//Map needs redraw
 	bool m_mapInvalidated;

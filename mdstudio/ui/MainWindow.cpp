@@ -656,6 +656,7 @@ void MainWindow::SyncSettingsWidgets()
 		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SHOW, m_project->GetShowGrid());
 		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SNAP, m_project->GetGridSnap());
 		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_SHOW_OUTLINES, m_project->GetShowStampOutlines());
+		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_SHOW_DISPLAYFRAME, m_project->GetShowDisplayFrame());
 	}
 }
 
@@ -1310,9 +1311,9 @@ void MainWindow::OnBtnGridShow(wxCommandEvent& event)
 	if(m_project.get())
 	{
 		m_project->SetShowGrid(!m_project->GetShowGrid());
-		RefreshPanel(ePanelMap);
-		RefreshPanel(ePanelStamps);
-		RefreshPanel(ePanelTileEditor);
+		RedrawPanel(ePanelMap);
+		RedrawPanel(ePanelStamps);
+		RedrawPanel(ePanelTileEditor);
 	}
 }
 
@@ -1329,8 +1330,17 @@ void MainWindow::OnBtnShowOutlines(wxCommandEvent& event)
 	if(m_project.get())
 	{
 		m_project->SetShowStampOutlines(!m_project->GetShowStampOutlines());
-		RefreshPanel(ePanelMap);
-		RefreshPanel(ePanelStamps);
+		RedrawPanel(ePanelMap);
+		RedrawPanel(ePanelStamps);
+	}
+}
+
+void MainWindow::OnBtnShowDisplayFrame(wxCommandEvent& event)
+{
+	if(m_project.get())
+	{
+		m_project->SetShowDisplayFrame(!m_project->GetShowDisplayFrame());
+		RedrawPanel(ePanelMap);
 	}
 }
 

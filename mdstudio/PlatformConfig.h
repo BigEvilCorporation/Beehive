@@ -29,6 +29,8 @@ struct PlatformConfig
 {
 	TargetPlatform platform;
 	std::string name;
+	u16 screenWidth;
+	u16 screenHeight;
 	u8 tileWidth;
 	u8 tileHeight;
 	u16 scrollPlaneWidthTiles;
@@ -51,8 +53,8 @@ namespace PlatformPresets
 
 	static PlatformConfig s_configs[ePresetNum] =
 	{
-		{ ePlatformMegaDrive, "SEGA Mega Drive", 8, 8, 64, 32, 2 },					// SEGA Mega Drive = 8x8 tiles, 64x32 scroll planes, Plane A and plane B
-		{ ePlatformSNES, "Super Nintendo (8x8 tile mode)", 8, 8, 64, 64, 1 },		// SNES = 8x8 tiles, 64x64 scroll planes, 1 plane
-		{ ePlatformSNES, "Super Nintendo (16x16 tile mode)", 16, 16, 64, 64, 1 },	// SNES = 16x16 tiles, 64x64 scroll planes, 1 plane
+		{ ePlatformMegaDrive, "SEGA Mega Drive", 320, 240, 8, 8, 64, 32, 2 },					// SEGA Mega Drive = 8x8 tiles, 64x32 scroll planes, Plane A and plane B
+		{ ePlatformSNES, "Super Nintendo (8x8 tile mode)", 256, 224, 8, 8, 64, 64, 1 },			// SNES = 8x8 tiles, 64x64 scroll planes, 1 plane
+		{ ePlatformSNES, "Super Nintendo (16x16 tile mode)", 256, 224, 16, 16, 64, 64, 1 },		// SNES = 16x16 tiles, 64x64 scroll planes, 1 plane
 	};
 }
