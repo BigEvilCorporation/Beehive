@@ -283,11 +283,9 @@ void Map::RemoveStamp(int x, int y)
 
 		bottomRight = topLeft + size;
 
-		if(x >= topLeft.x && y >= topLeft.y
-			&& x < bottomRight.x && y < bottomRight.y)
+		if(x >= topLeft.x && y >= topLeft.y && x < bottomRight.x && y < bottomRight.y)
 		{
-			std::swap(*it, m_stamps.back());
-			m_stamps.pop_back();
+			m_stamps.erase(std::next(it).base());
 			
 			return;
 		}
