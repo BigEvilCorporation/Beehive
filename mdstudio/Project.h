@@ -213,6 +213,10 @@ public:
 	bool GetShowDisplayFrame() const { return m_showDisplayFrame; }
 	void SetShowDisplayFrame(bool show) { m_showDisplayFrame = show; }
 
+	//Collision
+	bool GetShowCollision() const { return m_showCollision; }
+	void SetShowCollision(bool show) { m_showCollision = show; }
+
 	void InvalidateMap(bool invalidate) { m_mapInvalidated = invalidate; }
 	void InvalidateTiles(bool invalidate) { m_tilesInvalidated = invalidate; }
 	void InvalidateTerrainTiles(bool invalidate) { m_terrainTilesInvalidated = invalidate; }
@@ -369,6 +373,9 @@ private:
 
 	//Display frame
 	bool m_showDisplayFrame;
+
+	//Collision
+	bool m_showCollision;
 
 	//Map needs redraw
 	bool m_mapInvalidated;

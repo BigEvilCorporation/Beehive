@@ -1209,15 +1209,18 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	z += zOffset;
 
-	//Render collision map
-	RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+	if(m_project.GetShowCollision())
+	{
+		//Render collision map
+		RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
 
-	z += zOffset;
+		z += zOffset;
 
-	//Render terrain map
-	RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+		//Render terrain map
+		RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
 
-	z += zOffset;
+		z += zOffset;
+	}
 
 	//Render paint preview tile
 	RenderPaintPreview(renderer, cameraInverseMtx, projectionMtx, z);
@@ -1244,10 +1247,13 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	z += zOffset;
 
-	//Render collision bezier paths
-	RenderCollisionBeziers(renderer, cameraInverseMtx, projectionMtx, z);
+	if(m_project.GetShowCollision())
+	{
+		//Render collision bezier paths
+		RenderCollisionBeziers(renderer, cameraInverseMtx, projectionMtx, z);
 
-	z += zOffset;
+		z += zOffset;
+	}
 
 	//Render grid
 	if(m_project.GetShowGrid())
