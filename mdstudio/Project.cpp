@@ -225,6 +225,12 @@ Palette* Project::GetPaletteSlot(int slotIndex)
 	return &m_paletteSlots[slotIndex];
 }
 
+const Palette* Project::GetPaletteSlot(int slotIndex) const
+{
+	ion::debug::Assert(slotIndex < GetNumPaletteSlots(), "Project::GetPaletteSlot() - Invalid slot index");
+	return &m_paletteSlots[slotIndex];
+}
+
 int Project::GetNumPaletteSlots() const
 {
 	return m_paletteSlots.size();
@@ -1502,9 +1508,9 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 			}
 		}
 
-		//Get width/height in tiles
-		int tilesWidth = reader.GetWidth() / tileWidth;
-		int tilesHeight = reader.GetHeight() / tileHeight;
+		//Get width/height in tiles (aligned up to tile width/height)
+		int tilesWidth = (int)ion::maths::Ceil((float)reader.GetWidth() / (float)tileWidth);
+		int tilesHeight = (int)ion::maths::Ceil((float)reader.GetHeight() / (float)tileHeight);
 
 		if(importFlags & eBMPImportDrawToMap)
 		{
@@ -1566,7 +1572,15 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 					{
 						int sourcePixelX = (tileX * tileWidth) + pixelX;
 						int sourcePixelY = (tileY * tileHeight) + pixelY;
-						pixels[(pixelY * tileWidth) + pixelX] = reader.GetPixel(sourcePixelX, sourcePixelY);
+
+						if(sourcePixelX < reader.GetWidth() && sourcePixelY < reader.GetHeight())
+						{
+							pixels[(pixelY * tileWidth) + pixelX] = reader.GetPixel(sourcePixelX, sourcePixelY);
+						}
+						else
+						{
+							pixels[(pixelY * tileWidth) + pixelX] = reader.GetPaletteEntry(0);
+						}
 					}
 				}
 
@@ -2129,6 +2143,51 @@ bool Project::ExportSpritePalettes(const std::string& directory) const
 		{
 			return false;
 		}
+	}
+
+	return true;
+}
+
+bool Project::ExportStampBitmaps(const std::string& directory) const
+{
+	for(TStampMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		std::stringstream filename;
+		filename << directory << "\\stamp_" << it->first << ".bmp";
+
+		const Stamp& stamp = it->second;
+
+		BMPReader writer;
+		writer.SetDimensions(stamp.GetWidth() * m_platformConfig.tileWidth, stamp.GetHeight() * m_platformConfig.tileHeight);
+
+		const Palette& palette = *GetPalette(m_tileset.GetTile(stamp.GetTile(0, 0))->GetPaletteId());
+		for(int i = 0; i < Palette::coloursPerPalette && palette.IsColourUsed(i); i++)
+		{
+			writer.SetPaletteEntry(i, palette.GetColour(i));
+		}
+		
+		for(int tileX = 0; tileX < stamp.GetWidth(); tileX++)
+		{
+			for(int tileY = 0; tileY < stamp.GetHeight(); tileY++)
+			{
+				TileId tileId = stamp.GetTile(tileX, tileY);
+				u32 tileFlags = stamp.GetTileFlags(tileX, tileY);
+				const Tile* tile = m_tileset.GetTile(tileId);
+
+				for(int x = 0; x < m_platformConfig.tileWidth; x++)
+				{
+					for(int y = 0; y < m_platformConfig.tileHeight; y++)
+					{
+						u8 colourIndex = tile->GetPixelColour(x, y);
+						int pixelX = (tileFlags & Map::eFlipX) ? (m_platformConfig.tileWidth - x - 1) : x;
+						int pixelY = (tileFlags & Map::eFlipY) ? (m_platformConfig.tileHeight - y - 1) : y;
+						writer.SetColourIndex((tileX * m_platformConfig.tileWidth) + pixelX, (tileY * m_platformConfig.tileHeight) + pixelY, colourIndex);
+					}
+				}
+			}
+		}
+
+		writer.Write(filename.str());
 	}
 
 	return true;

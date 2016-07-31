@@ -14,6 +14,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <core/Types.h>
 #include <io/File.h>
@@ -31,19 +32,34 @@ public:
 		eIndexed256Colour = 8
 	};
 
+	enum FileType
+	{
+		eTypeBMP = 19778
+	};
+
+	enum Resolution
+	{
+		eResolutionDefault = 2835
+	};
+
 	BMPReader();
 	~BMPReader();
 
 	bool Read(const std::string& filename);
+	bool Write(const std::string& filename);
 
 	int GetWidth() const;
 	int GetHeight() const;
 
+	void SetDimensions(int width, int height);
+
 	int GetPaletteSize() const;
+	Colour GetPaletteEntry(int index) const;
+	void SetPaletteEntry(int index, const Colour& colour);
 
 	u8 GetColourIndex(int x, int y) const;
+	void SetColourIndex(int x, int y, u8 index);
 	Colour GetPixel(int x, int y) const;
-	Colour GetPaletteEntry(int index) const;
 
 private:
 
@@ -86,10 +102,8 @@ private:
 	u8 m_bitsPerPixel;
 
 	//Palette
-	RGBQuad* m_palette;
-	u32 m_paletteSize;
+	std::vector<RGBQuad> m_palette;
 
 	//Pixel data
-	u8* m_data;
-	u32 m_dataSize;
+	std::vector<u8> m_data;
 };

@@ -101,11 +101,13 @@ public:
 
 	//Get palette
 	Palette* GetPalette(PaletteId paletteId) { return &m_palettes[paletteId]; }
+	const Palette* GetPalette(PaletteId paletteId) const { return &m_palettes[paletteId]; }
 	int GetNumPalettes() const { return s_maxPalettes; }
 
 	//Palette slots
 	int AddPaletteSlot(Palette& palette);
 	Palette* GetPaletteSlot(int slotIndex);
+	const Palette* GetPaletteSlot(int slotIndex) const;
 	int GetNumPaletteSlots() const;
 	void SetActivePaletteSlot(PaletteId paletteId, int slotIndex);
 	void ExportPaletteSlots(const std::string& filename);
@@ -241,6 +243,7 @@ public:
 	bool ExportSpriteSheets(const std::string& directory, bool binary) const;
 	bool ExportSpriteAnims(const std::string& directory, bool binary) const;
 	bool ExportSpritePalettes(const std::string& directory) const;
+	bool ExportStampBitmaps(const std::string& directory) const;
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);

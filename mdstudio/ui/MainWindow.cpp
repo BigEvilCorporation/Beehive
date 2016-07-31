@@ -1060,6 +1060,18 @@ void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnStampsExportBMPs(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		wxDirDialog dialog(this);
+		if(dialog.ShowModal() == wxID_OK)
+		{
+			m_project->ExportStampBitmaps(dialog.GetPath().c_str().AsChar());
+		}
+	}
+}
+
 void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
