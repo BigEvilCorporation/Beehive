@@ -93,7 +93,7 @@ void Tile::Serialise(ion::io::Archive& archive)
 
 void Tile::Export(const PlatformConfig& config, std::stringstream& stream) const
 {
-	if(config.platform == ePlatformMegaDrive)
+	//if(config.platform == ePlatformMegaDrive)
 	{
 		stream << std::hex << std::setfill('0') << std::uppercase;
 
@@ -111,7 +111,7 @@ void Tile::Export(const PlatformConfig& config, std::stringstream& stream) const
 
 		stream << std::dec;
 	}
-	else if(config.platform == ePlatformSNES)
+	//else if(config.platform == ePlatformSNES)
 	{
 		//TODO: SNES text export goes here
 	}
@@ -119,7 +119,7 @@ void Tile::Export(const PlatformConfig& config, std::stringstream& stream) const
 
 void Tile::Export(const PlatformConfig& config, ion::io::File& file) const
 {
-	if(config.platform == ePlatformMegaDrive)
+	//if(config.platform == ePlatformMegaDrive)
 	{
 		for(int y = 0; y < m_height; y++)
 		{
@@ -133,7 +133,7 @@ void Tile::Export(const PlatformConfig& config, ion::io::File& file) const
 			}
 		}
 	}
-	else if(config.platform == ePlatformSNES)
+	//else if(config.platform == ePlatformSNES)
 	{
 		//TODO: SNES binary export goes here
 	}

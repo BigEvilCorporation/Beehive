@@ -116,7 +116,8 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarStamps = new wxRibbonButtonBar( m_ribbonPanelStamps, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_CREATE, wxT("Create"), wxBitmap( newstamp_xpm ), wxEmptyString);
 	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_DELETE, wxT("Delete"), wxBitmap( deletestamp_xpm ), wxEmptyString);
-	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_EXPORT_BMP, wxT("Exports As BMPs"), wxBitmap( save_xpm ), wxEmptyString);
+	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_EXPORT_BMP, wxT("Export As BMPs"), wxBitmap( save_xpm ), wxEmptyString);
+	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_CLEANUP, wxT("Cleanup"), wxBitmap( deleteunusedtiles_xpm ), wxEmptyString);
 	m_ribbonPanelCollision = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Collision") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarCollision = new wxRibbonButtonBar( m_ribbonPanelCollision, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_CREATE, wxT("New"), wxBitmap( newtile_xpm ), wxEmptyString);
@@ -167,6 +168,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
 	this->Connect( wxID_BTN_SPRITE_EDITOR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpriteEditor ) );
 	this->Connect( wxID_BTN_STAMPS_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsExportBMPs ) );
+	this->Connect( wxID_BTN_STAMPS_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsCleanup ) );
 	this->Connect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Connect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
 	this->Connect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );
@@ -203,6 +205,7 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
 	this->Disconnect( wxID_BTN_SPRITE_EDITOR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpriteEditor ) );
 	this->Disconnect( wxID_BTN_STAMPS_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsExportBMPs ) );
+	this->Disconnect( wxID_BTN_STAMPS_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsCleanup ) );
 	this->Disconnect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
 	this->Disconnect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
 	this->Disconnect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );

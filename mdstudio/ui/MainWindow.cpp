@@ -1072,6 +1072,17 @@ void MainWindow::OnBtnStampsExportBMPs(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnStampsCleanup(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		if(m_project->CleanupStamps())
+		{
+			RefreshAll();
+		}
+	}
+}
+
 void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())

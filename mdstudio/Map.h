@@ -115,6 +115,7 @@ public:
 	StampId FindStamp(int x, int y, ion::Vector2i& topLeft, u32& flags, u32& mapEntryIndex) const;
 	void MoveStamp(StampId stampId, u32 mapEntryIndex, int x, int y, int& originalX, int& originalY);
 	void RemoveStamp(int x, int y);
+	const TStampPosMap& GetStamps() const;
 
 	//Place game object on map
 	GameObjectId PlaceGameObject(int x, int y, const GameObjectType& objectType);

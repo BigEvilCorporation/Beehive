@@ -768,6 +768,40 @@ int Project::GetStampCount() const
 	return m_stamps.size();
 }
 
+int Project::CleanupStamps()
+{
+	std::set<StampId> unusedStamps;
+
+	for(TStampMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		unusedStamps.insert(it->first);
+	}
+
+	for(TMapMap::const_iterator mapIt = m_maps.begin(), mapEnd = m_maps.end(); mapIt != mapEnd; ++mapIt)
+	{
+		for(TStampPosMap::const_iterator stampIt = mapIt->second.GetStamps().begin(), stampEnd = mapIt->second.GetStamps().end(); stampIt != stampEnd; ++stampIt)
+		{
+			unusedStamps.erase(stampIt->m_id);
+		}
+	}
+	
+	if(unusedStamps.size() > 0)
+	{
+		std::stringstream message;
+		message << "Found " << unusedStamps.size() << " unused stamps, delete?";
+
+		if(wxMessageBox(message.str().c_str(), "Delete unused stamps", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		{
+			for(std::set<StampId>::const_iterator it = unusedStamps.begin(), end = unusedStamps.end(); it != end; ++it)
+			{
+				DeleteStamp(*it);
+			}
+		}
+	}
+
+	return unusedStamps.size();
+}
+
 void Project::DeleteTerrainTile(TerrainTileId terrainTileId)
 {
 	TerrainTileId swapTerrainTileId = (TerrainTileId)m_terrainTileset.GetCount() - 1;

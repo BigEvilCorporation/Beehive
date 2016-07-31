@@ -146,6 +146,7 @@ public:
 	const TStampMap::const_iterator StampsBegin() const;
 	const TStampMap::const_iterator StampsEnd() const;
 	int GetStampCount() const;
+	int CleanupStamps();
 
 	//Collision tiles
 	void DeleteTerrainTile(TerrainTileId tileId);

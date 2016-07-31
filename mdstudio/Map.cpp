@@ -292,6 +292,11 @@ void Map::RemoveStamp(int x, int y)
 	}
 }
 
+const TStampPosMap& Map::GetStamps() const
+{
+	return m_stamps;
+}
+
 GameObjectId Map::PlaceGameObject(int x, int y, const GameObjectType& objectType)
 {
 	TGameObjectPosMap::iterator it = m_gameObjects.find(objectType.GetId());
@@ -439,7 +444,7 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 		backgroundTileId = 0;
 	}
 
-	if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
+	//if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
 	{
 		//Output to stream
 		stream << std::hex << std::setfill('0') << std::uppercase;
@@ -490,7 +495,7 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 
 		stream << std::dec;
 	}
-	else if(project.GetPlatformConfig().platform == ePlatformSNES)
+	//else if(project.GetPlatformConfig().platform == ePlatformSNES)
 	{
 		//TODO: SNES export goes here
 	}
@@ -519,7 +524,7 @@ void Map::Export(const Project& project, ion::io::File& file) const
 		backgroundTileId = 0;
 	}
 
-	if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
+	//if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
 	{
 		for(int y = 0; y < m_height; y++)
 		{
@@ -562,7 +567,7 @@ void Map::Export(const Project& project, ion::io::File& file) const
 			}
 		}
 	}
-	else if(project.GetPlatformConfig().platform == ePlatformSNES)
+	//else if(project.GetPlatformConfig().platform == ePlatformSNES)
 	{
 		//TODO: SNES export goes here
 	}
