@@ -105,6 +105,17 @@ void Tileset::CalculateHashes(const Tile& tile, u64 hashes[Tileset::eNumHashOrie
 	hashes[eFlipXY] = ion::Hash64(pixelsFlipped.data(), pixelsFlipped.size());
 }
 
+void Tileset::RebuildHashMap()
+{
+	m_hashMap.clear();
+
+	for(int i = 0; i < m_tiles.size(); i++)
+	{
+		m_tiles[i].CalculateHash();
+		AddToHashMap(i);
+	}
+}
+
 TileId Tileset::FindDuplicate(const Tile& tile, u32& tileFlags) const
 {
 	//Calculate hashes for each orientation
@@ -159,6 +170,7 @@ void Tileset::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_tiles, "tiles");
 	archive.Serialise(m_hashMap, "hashMap");
+	RebuildHashMap();
 }
 
 void Tileset::Export(const PlatformConfig& config, std::stringstream& stream) const

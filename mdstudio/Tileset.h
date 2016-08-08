@@ -51,6 +51,7 @@ public:
 	int GetCount() const;
 
 	void CalculateHashes(const Tile& tile, u64 hashes[eNumHashOrientations]) const;
+	void RebuildHashMap();
 
 	void Serialise(ion::io::Archive& archive);
 	void Export(const PlatformConfig& config, std::stringstream& stream) const;

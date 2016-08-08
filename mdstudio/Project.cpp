@@ -417,6 +417,8 @@ void Project::SetBackgroundTile(TileId tileId)
 
 int Project::CleanupTiles()
 {
+	m_tileset.RebuildHashMap();
+
 	std::set<TileId> usedTiles;
 
 	Map& map = m_maps[m_editingMapId];
@@ -575,6 +577,8 @@ int Project::CleanupTiles()
 			}
 		}
 	}
+
+	m_tileset.RebuildHashMap();
 
 	return unusedTiles.size() + duplicates.size();
 }
@@ -1488,6 +1492,9 @@ bool Project::MergePalettes(Palette& dest, const Palette& source)
 
 bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 paletteBits, Stamp* stamp)
 {
+	//Just in case
+	m_tileset.RebuildHashMap();
+
 	Map& map = m_maps[m_editingMapId];
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
