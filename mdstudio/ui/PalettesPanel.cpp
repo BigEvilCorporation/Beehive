@@ -24,8 +24,13 @@ PalettesPanel::PalettesPanel(MainWindow* mainWindow, Project& project, wxWindow 
 	m_mainWindow = mainWindow;
 	m_orientation = eVertical;
 
+	m_dragPalette = -1;
+	m_dragColour = -1;
+
 	Bind(wxEVT_LEFT_DOWN,		&PalettesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_LEFT_UP,			&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_DCLICK,		&PalettesPanel::OnMouse, this, GetId());
+	Bind(wxEVT_MOTION,			&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_RIGHT_UP,		&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_PAINT,			&PalettesPanel::OnPaint, this, GetId());
 	Bind(wxEVT_ERASE_BACKGROUND,&PalettesPanel::OnErase, this, GetId());
@@ -54,9 +59,49 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 
 	if(paletteId < 4)
 	{
+		if(event.Dragging() && (m_dragPalette == -1))
+		{
+			//Begin drag/drop
+			m_dragPalette = paletteId;
+			m_dragColour = colourId;
+		}
+
+		if(event.LeftUp() && (m_dragPalette != -1))
+		{
+			//End drag/drop
+
+			//TODO: Fix for non-active palette
+			if(m_dragPalette != paletteId && m_dragColour != colourId)
+			{
+				if(Palette* palette = m_project.GetPalette(paletteId))
+				{
+					if(palette->IsColourUsed(m_dragColour) && palette->IsColourUsed(colourId))
+					{
+						//Swap colours in palette
+						Colour originalColour = palette->GetColour(m_dragColour);
+						Colour newColour = palette->GetColour(colourId);
+						palette->SetColour(colourId, originalColour);
+						palette->SetColour(m_dragColour, newColour);
+
+						//Swap colours in all tiles
+						m_project.SwapPaletteEntries(m_dragColour, colourId);
+
+						//Refresh all
+						m_mainWindow->RefreshAll();
+					}
+				}
+			}
+
+			m_dragPalette = -1;
+			m_dragColour = -1;
+		}
+
 		if(event.RightUp())
 		{
 			//Right-click slot menu
+			m_selectedPaletteId = paletteId;
+			m_seletedColourId = colourId;
+
 			wxMenu slotMenu;
 			wxMenu* saveMenu = new wxMenu();
 			wxMenu* loadMenu = new wxMenu();
@@ -78,6 +123,8 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 			slotMenu.AppendSubMenu(loadMenu, "Load");
 			slotMenu.Append(eMenuImport, wxString("Import..."));
 			slotMenu.Append(eMenuExport, wxString("Export..."));
+			saveMenu->AppendSeparator();
+			slotMenu.Append(eMenuSetAsBg, wxString("Set as Background/Transparency Colour"));
 				
 			slotMenu.SetClientData((void*)paletteId);
 			slotMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PalettesPanel::OnSlotsMenuClick, NULL, this);
@@ -162,6 +209,23 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 		{
 			std::string filename = dialogue.GetPath().c_str().AsChar();
 			m_project.ExportPaletteSlots(filename);
+		}
+	}
+	else if(menuItemId & eMenuSetAsBg)
+	{
+		if(Palette* palette = m_project.GetPalette(m_selectedPaletteId))
+		{
+			//Swap colours in palette
+			Colour originalColour = palette->GetColour(0);
+			Colour newColour = palette->GetColour(m_seletedColourId);
+			palette->SetColour(m_seletedColourId, originalColour);
+			palette->SetColour(0, newColour);
+
+			//Swap colours in all tiles
+			m_project.SetBackgroundColour(m_seletedColourId);
+
+			//Refresh all
+			m_mainWindow->RefreshAll();
 		}
 	}
 }

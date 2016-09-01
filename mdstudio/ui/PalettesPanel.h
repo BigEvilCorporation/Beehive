@@ -47,10 +47,17 @@ private:
 		eMenuLoad =		(1 << 1) << 8,
 		eMenuNew =		(1 << 2) << 8,
 		eMenuImport =	(1 << 3) << 8,
-		eMenuExport =	(1 << 4) << 8
+		eMenuExport =	(1 << 4) << 8,
+		eMenuSetAsBg =	(1 << 5) << 8,
 	};
 
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	Orientation m_orientation;
+
+	u32 m_selectedPaletteId;
+	u32 m_seletedColourId;
+
+	s32 m_dragPalette;
+	s32 m_dragColour;
 };

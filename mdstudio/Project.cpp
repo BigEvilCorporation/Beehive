@@ -266,6 +266,36 @@ void Project::ImportPaletteSlots(const std::string& filename)
 	}
 }
 
+void Project::SetBackgroundColour(u8 colourIdx)
+{
+	SwapPaletteEntries(colourIdx, 0);
+}
+
+void Project::SwapPaletteEntries(u8 colourA, u8 colourB)
+{
+	for(int i = 0; i < m_tileset.GetCount(); i++)
+	{
+		if(Tile* tile = m_tileset.GetTile(i))
+		{
+			for(int x = 0; x < m_platformConfig.tileWidth; x++)
+			{
+				for(int y = 0; y < m_platformConfig.tileHeight; y++)
+				{
+					u8 originalIdx = tile->GetPixelColour(x, y);
+					if(originalIdx == colourB)
+					{
+						tile->SetPixelColour(x, y, colourA);
+					}
+					else if(originalIdx == colourA)
+					{
+						tile->SetPixelColour(x, y, colourB);
+					}
+				}
+			}
+		}
+	}
+}
+
 void Project::CollapsePaletteSlots()
 {
 	m_paletteSlots.clear();

@@ -112,6 +112,8 @@ public:
 	void SetActivePaletteSlot(PaletteId paletteId, int slotIndex);
 	void ExportPaletteSlots(const std::string& filename);
 	void ImportPaletteSlots(const std::string& filename);
+	void SetBackgroundColour(u8 colourIdx);
+	void SwapPaletteEntries(u8 colourA, u8 colourB);
 
 	//Tiles
 	void DeleteTile(TileId tileId);
