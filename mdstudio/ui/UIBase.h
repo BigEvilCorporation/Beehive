@@ -102,14 +102,15 @@ class SpriteCanvas;
 #define wxID_TOOL_REMOVESTAMP 1048
 #define wxID_TOOL_COL_PAINTTERRAIN 1049
 #define wxID_TOOL_COL_PAINTSOLID 1050
-#define wxID_TOOL_COL_DELETETERRTILE 1051
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1052
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1053
-#define wxID_TOOL_SELECTGAMEOBJ 1054
-#define wxID_TOOL_PLACEGAMEOBJ 1055
-#define wxID_TOOL_MOVEGAMEOBJ 1056
-#define wxID_TOOL_ANIMATEGAMEOBJ 1057
-#define wxID_TOOL_REMOVEGAMEOBJ 1058
+#define wxID_TOOL_COL_PAINTHOLE 1051
+#define wxID_TOOL_COL_DELETETERRTILE 1052
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1053
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1054
+#define wxID_TOOL_SELECTGAMEOBJ 1055
+#define wxID_TOOL_PLACEGAMEOBJ 1056
+#define wxID_TOOL_MOVEGAMEOBJ 1057
+#define wxID_TOOL_ANIMATEGAMEOBJ 1058
+#define wxID_TOOL_REMOVEGAMEOBJ 1059
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -392,6 +393,7 @@ class MapToolbox : public wxPanel
 		wxStaticText* m_staticText13;
 		wxBitmapButton* m_toolPaintCollisionPixel;
 		wxBitmapButton* m_toolPaintCollisionSolid;
+		wxBitmapButton* m_toolPaintCollisionHole;
 		wxBitmapButton* m_toolDeleteTerrainTile;
 		wxBitmapButton* m_toolAddTerrainBezier;
 		wxBitmapButton* m_toolEditTerrainBezier1;
@@ -600,6 +602,7 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxButton* m_btnActorExport;
 		wxButton* m_btnImportSpriteSheet;
 		wxButton* m_btnDeleteSprite;
+		wxButton* m_btnUsePalette;
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
 		SpriteCanvas* m_canvas;
@@ -625,6 +628,7 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		virtual void OnBtnActorExport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnSpriteSheetUsePalette( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSliderMove( wxScrollEvent& event ) { event.Skip(); }

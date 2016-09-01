@@ -263,8 +263,8 @@ void RenderResources::CreateCollisionTypesTexture()
 	const ion::Colour colours[numCollisionTypes] =
 	{
 		ion::Colour(0.0f, 0.0f, 0.0f, 0.0f),
-		ion::Colour(1.0f, 0.0f, 0.0f, 0.7f),
-		ion::Colour(0.0f, 0.0f, 1.0f, 0.7f),
+		ion::Colour(1.0f, 0.0f, 0.0f, 0.7f), // eCollisionTileFlagSolid
+		ion::Colour(0.0f, 0.0f, 1.0f, 0.7f), // eCollisionTileFlagHole
 		ion::Colour(0.0f, 1.0f, 0.0f, 0.7f),
 	};
 
@@ -403,14 +403,19 @@ void RenderResources::GetCollisionTypeTexCoords(u16 collisionFlags, ion::render:
 	u32 collisionTexSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes)));
 	float cellSizeCollisionTexSpaceSq = 1.0f / (float)collisionTexSizeSq;
 
-	//TODO: Only allows for one flag type
-	int cellX = 0;
-	int cellY = 0;
+	int collisionType = 0;
 
 	if(collisionFlags & eCollisionTileFlagSolid)
 	{
-		cellX = 1;
+		collisionType = 1;
 	}
+	else if(collisionFlags & eCollisionTileFlagHole)
+	{
+		collisionType = 2;
+	}
+
+	int cellX = (collisionType % collisionTexSizeSq);
+	int cellY = (collisionType / collisionTexSizeSq);
 	
 	ion::Vector2 textureBottomLeft(cellSizeCollisionTexSpaceSq * cellX, cellSizeCollisionTexSpaceSq * cellY);
 

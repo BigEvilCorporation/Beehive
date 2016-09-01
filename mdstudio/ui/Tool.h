@@ -27,6 +27,7 @@ enum ToolType
 	eToolPaintTerrainTile,
 	eToolPaintCollisionTerrain,
 	eToolPaintCollisionSolid,
+	eToolPaintCollisionHole,
 	eToolDeleteTerrainTile,
 	eToolDrawTerrainBezier,
 	eToolSelectTerrainBezier,

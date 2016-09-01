@@ -238,6 +238,40 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			break;
 		}
 
+		case eToolPaintCollisionHole:
+		{
+			if(inMaprange)
+			{
+				//If clicking/dragging, paint collision hole
+				if(buttonBits & eMouseLeft)
+				{
+					//Get collision map
+					CollisionMap& collisionMap = m_project.GetCollisionMap();
+
+					//Set hole tile
+					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) | eCollisionTileFlagHole;
+					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
+
+					//Paint to canvas
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
+				}
+				else if(buttonBits & eMouseRight)
+				{
+					//Get collision map
+					CollisionMap& collisionMap = m_project.GetCollisionMap();
+
+					//Clear hole tile
+					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) & ~eCollisionTileFlagHole;
+					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
+
+					//Paint to canvas
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
+				}
+			}
+
+			break;
+		}
+
 		case eToolSelectTiles:
 		{
 			if(inMaprange)

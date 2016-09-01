@@ -449,6 +449,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTHOLE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRTILE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_ADDTERRAINBEZIER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_EDITTERRAINBEZIER);
@@ -1308,15 +1309,15 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 								ion::Vector2 controlA;
 								ion::Vector2 controlB;
 								bezier->GetPoint(j, position, controlA, controlB);
-
+				
 								position.x += (width - originalWidth) * (float)tileWidth;
-
+				
 								bezier->SetPoint(j, position, controlA, controlB);
 							}
-
+				
 						}
 					}
-
+				
 					//Repaint all
 					m_project->InvalidateTerrainBeziers(true);
 				}
@@ -1414,6 +1415,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_COL_PAINTSOLID:
 			m_mapPanel->SetTool(eToolPaintCollisionSolid);
+			break;
+		case wxID_TOOL_COL_PAINTHOLE:
+			m_mapPanel->SetTool(eToolPaintCollisionHole);
 			break;
 		case wxID_TOOL_COL_DELETETERRTILE:
 			m_mapPanel->SetTool(eToolDeleteTerrainTile);
