@@ -32,6 +32,8 @@ public:
 	const TSpriteSheetMap::const_iterator SpriteSheetsEnd() const;
 	int GetSpriteSheetCount() const;
 
+	void SetMasterPalette(SpriteSheetId spriteSheetId);
+
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
 	void ExportSpriteSheets(const PlatformConfig& config, std::stringstream& stream) const;
@@ -43,4 +45,5 @@ public:
 private:
 	std::string m_name;
 	std::map<SpriteSheetId, SpriteSheet> m_spriteSheets;
+	SpriteSheetId m_masterPaletteHolder;
 };

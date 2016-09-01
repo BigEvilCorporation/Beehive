@@ -216,6 +216,14 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetDelete(wxCommandEvent& event)
 	}
 }
 
+void SpriteAnimEditorDialog::OnBtnSpriteSheetUsePalette(wxCommandEvent& event)
+{
+	if(m_selectedSpriteSheetId != InvalidSpriteSheetId && m_selectedActor)
+	{
+		m_selectedActor->SetMasterPalette(m_selectedSpriteSheetId);
+	}
+}
+
 void SpriteAnimEditorDialog::OnBtnAnimNew(wxCommandEvent& event)
 {
 	if(m_selectedSpriteSheet)

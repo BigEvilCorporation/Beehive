@@ -76,9 +76,15 @@ int Actor::GetSpriteSheetCount() const
 	return m_spriteSheets.size();
 }
 
+void Actor::SetMasterPalette(SpriteSheetId spriteSheetId)
+{
+	m_masterPaletteHolder = spriteSheetId;
+}
+
 void Actor::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_name, "name");
+	archive.Serialise(m_masterPaletteHolder, "masterPaletteHolder");
 	archive.Serialise(m_spriteSheets, "spriteSheets");
 }
 
@@ -223,8 +229,16 @@ void Actor::ExportSpriteAnims(const PlatformConfig& config, ion::io::File& file)
 
 void Actor::ExportSpritePalettes(const PlatformConfig& config, std::stringstream& stream) const
 {
-	if(m_spriteSheets.size() > 0)
+	if(const SpriteSheet* spriteSheet = GetSpriteSheet(m_masterPaletteHolder))
 	{
+		//Export palette from palette master
+		stream << "palette_" << m_name << ":" << std::endl;
+		spriteSheet->ExportPalette(config, stream);
+		stream << std::endl;
+	}
+	else if(m_spriteSheets.size() > 0)
+	{
+		//Use first palette
 		stream << "palette_" << m_name << ":" << std::endl;
 		m_spriteSheets.begin()->second.ExportPalette(config, stream);
 		stream << std::endl;
