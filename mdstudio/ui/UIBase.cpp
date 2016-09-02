@@ -852,6 +852,8 @@ MapListPanelBase::MapListPanelBase( wxWindow* parent, wxWindowID id, const wxPoi
 	
 	m_toolRename = m_toolBar1->AddTool( wxID_ANY, wxT("tool"), wxBitmap( qmark_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 	
+	m_toolImport = m_toolBar1->AddTool( wxID_ANY, wxT("tool"), wxBitmap( qmark_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
 	m_toolBar1->Realize(); 
 	
 	bSizer16->Add( m_toolBar1, 0, wxEXPAND, 5 );
@@ -877,6 +879,7 @@ MapListPanelBase::MapListPanelBase( wxWindow* parent, wxWindowID id, const wxPoi
 	this->Connect( m_toolAddMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolAddMap ) );
 	this->Connect( m_toolRemoveMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRemoveMap ) );
 	this->Connect( m_toolRename->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRenameMap ) );
+	this->Connect( m_toolImport->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolImportMap ) );
 	m_listMaps->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( MapListPanelBase::OnMapSelected ), NULL, this );
 }
 
@@ -886,6 +889,7 @@ MapListPanelBase::~MapListPanelBase()
 	this->Disconnect( m_toolAddMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolAddMap ) );
 	this->Disconnect( m_toolRemoveMap->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRemoveMap ) );
 	this->Disconnect( m_toolRename->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolRenameMap ) );
+	this->Disconnect( m_toolImport->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( MapListPanelBase::OnToolImportMap ) );
 	m_listMaps->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( MapListPanelBase::OnMapSelected ), NULL, this );
 	
 }

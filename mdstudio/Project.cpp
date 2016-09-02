@@ -18,7 +18,6 @@
 
 Project::Project(PlatformConfig& defaultPatformConfig)
 	: m_platformConfig(defaultPatformConfig)
-	, m_collisionMap(m_platformConfig)
 	, m_tileset(m_platformConfig)
 	, m_terrainTileset(m_platformConfig)
 {
@@ -45,6 +44,7 @@ Project::Project(PlatformConfig& defaultPatformConfig)
 
 	//Add default map
 	m_editingMapId = CreateMap();
+	m_editingCollisionMapId = CreateCollisionMap(m_editingMapId);
 }
 
 void Project::Clear()
@@ -68,7 +68,7 @@ void Project::Clear()
 	}
 
 	m_maps[m_editingMapId].Clear();
-	m_collisionMap.Clear();
+	m_collisionMaps[m_editingCollisionMapId].Clear();
 	m_tileset.Clear();
 	m_stamps.clear();
 	m_nextFreeStampId = 1;
@@ -125,6 +125,9 @@ void Project::Serialise(ion::io::Archive& archive)
 	if(archive.GetDirection() == ion::io::Archive::eIn)
 	{
 		m_maps.clear();
+		m_collisionMaps.clear();
+		m_editingMapId = InvalidMapId;
+		m_editingCollisionMapId = InvalidCollisionMapId;
 	}
 
 	archive.Serialise(m_platformConfig, "platformConfig");
@@ -134,10 +137,11 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_tileset, "tileset");
 	archive.Serialise(m_maps, "maps");
 	archive.Serialise(m_editingMapId, "editingMap");
+	archive.Serialise(m_editingCollisionMapId, "editingCollisionMap");
 	archive.Serialise(m_backgroundTile, "backgroundTile");
 	archive.Serialise(m_terrainTileset, "terrainTileset");
 	archive.Serialise(m_defaultTerrainTile, "defaultTerrainTile");
-	archive.Serialise(m_collisionMap, "collisionMap");
+	archive.Serialise(m_collisionMaps, "collisionMaps");
 	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_actors, "actors");
@@ -152,6 +156,26 @@ void Project::Serialise(ion::io::Archive& archive)
 		//Legacy, single map
 		m_editingMapId = CreateMap();
 		archive.Serialise(m_maps[m_editingMapId], "map");
+	}
+
+	if(archive.GetDirection() == ion::io::Archive::eIn && m_collisionMaps.size() != m_maps.size())
+	{
+		//Legacy, single collision map
+		if(m_collisionMaps.size() == 0)
+		{
+			m_editingCollisionMapId = CreateCollisionMap(m_editingMapId);
+			archive.Serialise(m_collisionMaps[m_editingCollisionMapId], "collisionMap");
+		}
+
+		//Create remaining collision maps
+		for(TMapMap::const_iterator it = m_maps.begin(), end = m_maps.end(); it != end; ++it)
+		{
+			if(it->first != m_editingCollisionMapId)
+			{
+				CollisionMapId collisionMapId = CreateCollisionMap(it->first);
+				m_collisionMaps[collisionMapId].Resize(it->second.GetWidth(), it->second.GetHeight(), false, false);
+			}
+		}
 	}
 }
 
@@ -211,6 +235,63 @@ const TMapMap::const_iterator Project::MapsEnd() const
 int Project::GetMapCount() const
 {
 	return m_maps.size();
+}
+
+CollisionMapId Project::CreateCollisionMap(CollisionMapId collisionMapId)
+{
+	m_collisionMaps.insert(std::make_pair(collisionMapId, CollisionMap(m_platformConfig)));
+	return collisionMapId;
+}
+
+void Project::DeleteCollisionMap(CollisionMapId collisionMapId)
+{
+	TCollisionMapMap::iterator it = m_collisionMaps.find(collisionMapId);
+	ion::debug::Assert(it != m_collisionMaps.end(), "Project::DeleteCollisionMap() - Invalid collisionMap ID");
+	m_collisionMaps.erase(it);
+}
+
+CollisionMap& Project::GetEditingCollisionMap(CollisionMapId collisionMapId)
+{
+	TCollisionMapMap::iterator it = m_collisionMaps.find(collisionMapId);
+	ion::debug::Assert(it != m_collisionMaps.end(), "Project::GetEditingCollisionMap() - Invalid collisionMap ID");
+	return it->second;
+}
+
+const CollisionMap& Project::GetEditingCollisionMap(CollisionMapId collisionMapId) const
+{
+	TCollisionMapMap::const_iterator it = m_collisionMaps.find(collisionMapId);
+	ion::debug::Assert(it != m_collisionMaps.end(), "Project::GetEditingCollisionMap() - Invalid collisionMap ID");
+	return it->second;
+}
+
+CollisionMap& Project::GetEditingCollisionMap()
+{
+	return GetEditingCollisionMap(m_editingCollisionMapId);
+}
+
+CollisionMapId Project::GetEditingCollisionMapId() const
+{
+	return m_editingCollisionMapId;
+}
+
+void Project::SetEditingCollisionMap(CollisionMapId collisionMapId)
+{
+	m_editingCollisionMapId = collisionMapId;
+}
+
+const TCollisionMapMap::const_iterator Project::CollisionMapsBegin() const
+{
+	return m_collisionMaps.begin();
+}
+
+const TCollisionMapMap::const_iterator Project::CollisionMapsEnd() const
+{
+	return m_collisionMaps.end();
+}
+
+int Project::GetCollisionMapCount() const
+{
+	return m_collisionMaps.size();
 }
 
 int Project::AddPaletteSlot(Palette& palette)
@@ -840,21 +921,25 @@ void Project::DeleteTerrainTile(TerrainTileId terrainTileId)
 {
 	TerrainTileId swapTerrainTileId = (TerrainTileId)m_terrainTileset.GetCount() - 1;
 
+	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
+	int mapWidth = collisionMap.GetWidth();
+	int mapHeight = collisionMap.GetHeight();
+
 	//Find all uses of terrain tile on map, set blank
-	for(int x = 0; x < m_collisionMap.GetWidth(); x++)
+	for(int x = 0; x < collisionMap.GetWidth(); x++)
 	{
-		for(int y = 0; y < m_collisionMap.GetHeight(); y++)
+		for(int y = 0; y < collisionMap.GetHeight(); y++)
 		{
-			TerrainTileId currTerrainTileId = m_collisionMap.GetTerrainTile(x, y);
+			TerrainTileId currTerrainTileId = collisionMap.GetTerrainTile(x, y);
 			if(currTerrainTileId == terrainTileId)
 			{
 				//Referencing deleted tile, set as invalid
-				m_collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
+				collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
 			}
 			else if(currTerrainTileId == swapTerrainTileId)
 			{
 				//Referencing swap tile, set new id
-				m_collisionMap.SetTerrainTile(x, y, terrainTileId);
+				collisionMap.SetTerrainTile(x, y, terrainTileId);
 			}
 		}
 	}
@@ -900,9 +985,9 @@ void Project::SetDefaultTerrainTile(TerrainTileId tileId)
 
 int Project::CleanupTerrainTiles(bool prompt)
 {
-	Map& map = m_maps[m_editingMapId];
-	int mapWidth = map.GetWidth();
-	int mapHeight = map.GetHeight();
+	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
+	int mapWidth = collisionMap.GetWidth();
+	int mapHeight = collisionMap.GetHeight();
 
 	//Backup default collision tile
 	TerrainTile* defaultTile = (m_defaultTerrainTile != InvalidTerrainTileId) ? GetTerrainTileset().GetTerrainTile(m_defaultTerrainTile) : NULL;
@@ -915,7 +1000,7 @@ int Project::CleanupTerrainTiles(bool prompt)
 	{
 		for(int y = 0; y < mapHeight; y++)
 		{
-			TerrainTileId terrainTileId = m_collisionMap.GetTerrainTile(x, y);
+			TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
 			usedTerrainTiles.insert(terrainTileId);
 		}
 	}
@@ -995,14 +1080,14 @@ int Project::CleanupTerrainTiles(bool prompt)
 			for(int i = 0; i < duplicates.size(); i++)
 			{
 				//Find use of duplicate id in map
-				for(int x = 0; x < m_collisionMap.GetWidth(); x++)
+				for(int x = 0; x < collisionMap.GetWidth(); x++)
 				{
-					for(int y = 0; y < m_collisionMap.GetHeight(); y++)
+					for(int y = 0; y < collisionMap.GetHeight(); y++)
 					{
-						if(m_collisionMap.GetTerrainTile(x, y) == duplicates[i].duplicate)
+						if(collisionMap.GetTerrainTile(x, y) == duplicates[i].duplicate)
 						{
 							//Replace duplicate with original
-							m_collisionMap.SetTerrainTile(x, y, duplicates[i].original);
+							collisionMap.SetTerrainTile(x, y, duplicates[i].original);
 						}
 					}
 				}
@@ -1050,15 +1135,19 @@ int Project::GetNumTerrainBeziers() const
 
 void Project::GenerateTerrainFromBeziers(int granularity)
 {
+	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
+	int mapWidth = collisionMap.GetWidth();
+	int mapHeight = collisionMap.GetHeight();
+
 	//Clear all terrain tiles
 	m_terrainTileset.Clear();
 
 	//Clear all terrain map entries
-	for(int x = 0; x < m_collisionMap.GetWidth(); x++)
+	for(int x = 0; x < mapWidth; x++)
 	{
-		for(int y = 0; y < m_collisionMap.GetHeight(); y++)
+		for(int y = 0; y < mapHeight; y++)
 		{
-			m_collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
+			collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
 		}
 	}
 
@@ -1069,7 +1158,7 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 	const int tileWidth = GetPlatformConfig().tileWidth;
 	const int tileHeight = GetPlatformConfig().tileHeight;
 
-	const int mapHeightPixels = (m_collisionMap.GetHeight() * tileHeight);
+	const int mapHeightPixels = (collisionMap.GetHeight() * tileHeight);
 
 	//Follow paths, generate terrain height tiles
 	for(int i = 0; i < m_terrainBeziers.size(); i++)
@@ -1089,7 +1178,7 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 				const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileWidth), ion::maths::Floor(pixelPos.y / (float)tileHeight));
 
 				//Get tile under cursor
-				TerrainTileId tileId = m_collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
+				TerrainTileId tileId = collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
 
 				if(tileId == InvalidTerrainTileId)
 				{
@@ -1097,7 +1186,7 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 					tileId = m_terrainTileset.AddTerrainTile();
 
 					//Set on map
-					m_collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
+					collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
 				}
 
 				//Get collision tile
@@ -1126,6 +1215,10 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 
 void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 {
+	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
+	int mapWidth = collisionMap.GetWidth();
+	int mapHeight = collisionMap.GetHeight();
+
 	const int tileWidth = GetPlatformConfig().tileWidth;
 	const int tileHeight = GetPlatformConfig().tileHeight;
 
@@ -1146,7 +1239,7 @@ void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 				std::map<TileId, TerrainTileId>::iterator it = generatedTiles.find(graphicTileId);
 				if(it != generatedTiles.end())
 				{
-					m_collisionMap.SetTerrainTile(position.x, position.y, it->second);
+					collisionMap.SetTerrainTile(position.x, position.y, it->second);
 				}
 				else
 				{
@@ -1196,7 +1289,7 @@ void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
 							//TODO: Find duplicate
 
 							//Set on map
-							m_collisionMap.SetTerrainTile(position.x, position.y, terrainTileId);
+							collisionMap.SetTerrainTile(position.x, position.y, terrainTileId);
 
 							//Add to cache
 							generatedTiles.insert(std::make_pair(graphicTileId, terrainTileId));
@@ -1529,6 +1622,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
 
+	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
+
 	if(importFlags & eBMPImportClearPalettes)
 	{
 		for(int i = 0; i < s_maxPalettes; i++)
@@ -1587,7 +1682,7 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		{
 			//Grow map if necessary
 			map.Resize(max(mapWidth, tilesWidth), max(mapHeight, tilesHeight), false, false);
-			m_collisionMap.Resize(max(m_collisionMap.GetWidth(), tilesWidth), max(m_collisionMap.GetHeight(), tilesHeight), false, false);
+			collisionMap.Resize(max(collisionMap.GetWidth(), tilesWidth), max(collisionMap.GetHeight(), tilesHeight), false, false);
 		}
 
 		if(importFlags & eBMPImportToStamp)
@@ -2017,6 +2112,8 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 {
 	u32 binarySize = 0;
 
+	const CollisionMap& collisionMap = m_collisionMaps.find(m_editingCollisionMapId)->second;
+
 	if(binary)
 	{
 		std::string binaryFilename = filename.substr(0, filename.find_first_of('.'));
@@ -2026,7 +2123,7 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
 		if(binaryFile.IsOpen())
 		{
-			m_collisionMap.Export(*this, binaryFile);
+			collisionMap.Export(*this, binaryFile);
 			binarySize = binaryFile.GetSize();
 		}
 		else
@@ -2051,7 +2148,7 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 			//Export label, data and size as inline text
 			stream << "collisionmap_" << m_name << ":" << std::endl;
 
-			m_collisionMap.Export(*this, stream);
+			collisionMap.Export(*this, stream);
 
 			stream << std::endl;
 			stream << "collisionmap_" << m_name << "_end:" << std::endl;
@@ -2062,8 +2159,8 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 		stream << "collisionmap_" << m_name << "_size_l\tequ (collisionmap_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << "collisionmap_" << m_name << "_width\tequ " << "0x" << std::setw(2) << m_collisionMap.GetWidth() << std::endl;
-		stream << "collisionmap_" << m_name << "_height\tequ " << "0x" << std::setw(2) << m_collisionMap.GetHeight() << std::endl;
+		stream << "collisionmap_" << m_name << "_width\tequ " << "0x" << std::setw(2) << collisionMap.GetWidth() << std::endl;
+		stream << "collisionmap_" << m_name << "_height\tequ " << "0x" << std::setw(2) << collisionMap.GetHeight() << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());

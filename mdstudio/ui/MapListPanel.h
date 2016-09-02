@@ -26,6 +26,7 @@ public:
 	virtual void OnMapSelected(wxListEvent& event);
 	virtual void OnToolAddMap(wxCommandEvent& event);
 	virtual void OnToolRemoveMap(wxCommandEvent& event);
+	virtual void OnToolImportMap(wxCommandEvent& event);
 	virtual void OnToolRenameMap(wxCommandEvent& event);
 
 private:

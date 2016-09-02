@@ -15,6 +15,14 @@
 
 #include <ion/core/memory/Memory.h>
 
+CollisionMap::CollisionMap()
+{
+	const PlatformConfig& defaultPlatformConfig = PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive];
+	m_width = 0;
+	m_height = 0;
+	Resize(defaultPlatformConfig.scrollPlaneWidthTiles, defaultPlatformConfig.scrollPlaneHeightTiles, false, false);
+}
+
 CollisionMap::CollisionMap(const PlatformConfig& platformConfig)
 {
 	m_width = 0;

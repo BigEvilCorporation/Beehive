@@ -423,12 +423,14 @@ class MapListPanelBase : public wxPanel
 		wxToolBarToolBase* m_toolAddMap; 
 		wxToolBarToolBase* m_toolRemoveMap; 
 		wxToolBarToolBase* m_toolRename; 
+		wxToolBarToolBase* m_toolImport; 
 		wxListCtrl* m_listMaps;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolAddMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRemoveMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRenameMap( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolImportMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapSelected( wxListEvent& event ) { event.Skip(); }
 		
 	

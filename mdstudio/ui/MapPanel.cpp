@@ -35,7 +35,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	ResetToolData();
 
 	Map& map = project.GetEditingMap();
-	CollisionMap& collisionMap = project.GetCollisionMap();
+	CollisionMap& collisionMap = project.GetEditingCollisionMap();
 	Tileset& tileset = project.GetTileset();
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
@@ -51,7 +51,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	PaintMap(project.GetEditingMap());
 
 	//Redraw collision map
-	PaintCollisionMap(project.GetCollisionMap());
+	PaintCollisionMap(project.GetEditingCollisionMap());
 }
 
 MapPanel::~MapPanel()
@@ -191,7 +191,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					TerrainTileId tileId = (m_currentTool == eToolPaintTerrainTile) ? m_project.GetPaintTerrainTile() : InvalidTerrainTileId;
 
 					//Get collision map
-					CollisionMap& collisionMap = m_project.GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
 					//Set on map
 					collisionMap.SetTerrainTile(x, y, tileId);
@@ -212,7 +212,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				if(buttonBits & eMouseLeft)
 				{
 					//Get collision map
-					CollisionMap& collisionMap = m_project.GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
 					//Set solid tile
 					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) | eCollisionTileFlagSolid;
@@ -224,7 +224,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				else if(buttonBits & eMouseRight)
 				{
 					//Get collision map
-					CollisionMap& collisionMap = m_project.GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
 					//Clear solid tile
 					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) & ~eCollisionTileFlagSolid;
@@ -246,7 +246,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				if(buttonBits & eMouseLeft)
 				{
 					//Get collision map
-					CollisionMap& collisionMap = m_project.GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
 					//Set hole tile
 					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) | eCollisionTileFlagHole;
@@ -258,7 +258,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				else if(buttonBits & eMouseRight)
 				{
 					//Get collision map
-					CollisionMap& collisionMap = m_project.GetCollisionMap();
+					CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
 					//Clear hole tile
 					u16 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y) & ~eCollisionTileFlagHole;
@@ -994,7 +994,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 			{
 				//Get collision map
-				CollisionMap& collisionMap = m_project.GetCollisionMap();
+				CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
 				//Get terrain tileset
 				TerrainTileset& terrainTileset = m_project.GetTerrainTileset();
@@ -1318,7 +1318,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		if(m_project.MapIsInvalidated())
 		{
 			Map& map = m_project.GetEditingMap();
-			CollisionMap& collisionMap = m_project.GetCollisionMap();
+			CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 			Tileset& tileset = m_project.GetTileset();
 			int mapWidth = map.GetWidth();
 			int mapHeight = map.GetHeight();
@@ -1338,7 +1338,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		if(m_project.TerrainTilesAreInvalidated())
 		{
 			//Redraw collision map
-			PaintCollisionMap(m_project.GetCollisionMap());
+			PaintCollisionMap(m_project.GetEditingCollisionMap());
 		}
 
 		//If terrain beziers invalidated

@@ -33,6 +33,7 @@
 #include "GameObject.h"
 
 typedef std::map<MapId, Map> TMapMap;
+typedef std::map<CollisionMapId, CollisionMap> TCollisionMapMap;
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<ActorId, Actor> TActorMap;
 typedef std::map<AnimationId, Animation> TAnimationMap;
@@ -88,8 +89,17 @@ public:
 	const TMapMap::const_iterator MapsEnd() const;
 	int GetMapCount() const;
 
-	//Get collision map
-	CollisionMap& GetCollisionMap() { return m_collisionMap; }
+	//Collision maps
+	CollisionMapId CreateCollisionMap(CollisionMapId collisionMapId);
+	void DeleteCollisionMap(CollisionMapId collisionMapId);
+	CollisionMap& GetEditingCollisionMap(CollisionMapId collisionMapId);
+	const CollisionMap& GetEditingCollisionMap(CollisionMapId collisionMapId) const;
+	CollisionMap& GetEditingCollisionMap();
+	CollisionMapId GetEditingCollisionMapId() const;
+	void SetEditingCollisionMap(CollisionMapId collisionMapId);
+	const TCollisionMapMap::const_iterator CollisionMapsBegin() const;
+	const TCollisionMapMap::const_iterator CollisionMapsEnd() const;
+	int GetCollisionMapCount() const;
 
 	//Get tileset
 	Tileset& GetTileset() { return m_tileset; }
@@ -317,7 +327,7 @@ private:
 	TMapMap m_maps;
 
 	//Collision map
-	CollisionMap m_collisionMap;
+	TCollisionMapMap m_collisionMaps;
 
 	//Terrain beziers
 	std::vector<ion::gamekit::BezierPath> m_terrainBeziers;
@@ -368,6 +378,9 @@ private:
 
 	//Currently editing map id
 	MapId m_editingMapId;
+
+	//Currently editing collision map id
+	CollisionMapId m_editingCollisionMapId;
 
 	//Grid
 	int m_gridSize;

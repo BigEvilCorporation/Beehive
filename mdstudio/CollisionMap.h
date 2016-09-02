@@ -32,6 +32,7 @@ public:
 	static const int defaultWidth = 64;
 	static const int defaultHeight = 64;
 
+	CollisionMap();
 	CollisionMap(const PlatformConfig& platformConfig);
 
 	void Clear();

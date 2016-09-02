@@ -1143,7 +1143,7 @@ void MainWindow::OnBtnColMapClear(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		m_project->GetCollisionMap().Clear();
+		m_project->GetEditingCollisionMap().Clear();
 		RefreshAll();
 	}
 }
@@ -1207,7 +1207,7 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 		TerrainTileId tileId = m_project->GetPaintTerrainTile();
 		if(tileId != InvalidTerrainTileId && tileId != m_project->GetDefaultTerrainTile())
 		{
-			CollisionMap& map = m_project->GetCollisionMap();
+			CollisionMap& map = m_project->GetEditingCollisionMap();
 			TerrainTileset& tileset = m_project->GetTerrainTileset();
 
 			//Delete tile
@@ -1260,7 +1260,7 @@ void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
 	if(m_project.get())
 	{
 		m_project->GetEditingMap().Clear();
-		m_project->GetCollisionMap().Clear();
+		m_project->GetEditingCollisionMap().Clear();
 		RefreshPanel(ePanelMap);
 	}
 }
@@ -1270,7 +1270,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 	if(m_project.get())
 	{
 		Map& map = m_project->GetEditingMap();
-		CollisionMap& collisionMap = m_project->GetCollisionMap();
+		CollisionMap& collisionMap = m_project->GetEditingCollisionMap();
 
 		const int originalWidth = map.GetWidth();
 		const int originalHeight = map.GetHeight();
