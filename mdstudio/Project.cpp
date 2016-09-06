@@ -967,6 +967,20 @@ int Project::GetStampCount() const
 	return m_stamps.size();
 }
 
+void Project::SubstituteStamp(StampId stampToReplace, StampId substitution)
+{
+	for(TMapMap::iterator mapIt = m_maps.begin(), mapEnd = m_maps.end(); mapIt != mapEnd; ++mapIt)
+	{
+		for(TStampPosMap::iterator stampIt = mapIt->second.GetStamps().begin(), stampEnd = mapIt->second.GetStamps().end(); stampIt != stampEnd; ++stampIt)
+		{
+			if(stampIt->m_id == stampToReplace)
+			{
+				stampIt->m_id = substitution;
+			}
+		}
+	}
+}
+
 int Project::CleanupStamps()
 {
 	std::set<StampId> unusedStamps;

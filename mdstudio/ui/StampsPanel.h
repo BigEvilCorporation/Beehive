@@ -41,10 +41,17 @@ private:
 
 	enum MenuItems
 	{
-		eMenuReplaceStamp,
+		eMenuUpdateStamp,
+		eMenuSubstituteStamp,
 		eMenuDeleteStamp,
 		eMenuSetStampLowDrawPrio,
 		eMenuSetStampHighDrawPrio,
+	};
+
+	enum Mode
+	{
+		eModeSelect,
+		eModeSubstitute
 	};
 
 	//Paint all stamps using position map to canvas
@@ -62,9 +69,13 @@ private:
 	//Stamp position map
 	std::vector< std::pair<StampId, ion::Vector2i> > m_stampPosMap;
 
-	//Current/hover stamp
+	//Current/hover/substitute stamp
 	StampId m_selectedStamp;
 	StampId m_hoverStamp;
+	StampId m_stampToSubstitute;
+
+	//Current selection mode
+	Mode m_mode;
 
 	//Current/hover stamp pos
 	ion::Vector2i m_selectedStampPos;

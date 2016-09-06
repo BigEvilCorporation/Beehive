@@ -292,6 +292,11 @@ void Map::RemoveStamp(int x, int y)
 	}
 }
 
+TStampPosMap& Map::GetStamps()
+{
+	return m_stamps;
+}
+
 const TStampPosMap& Map::GetStamps() const
 {
 	return m_stamps;

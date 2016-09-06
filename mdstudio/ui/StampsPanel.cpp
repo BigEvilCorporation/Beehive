@@ -14,12 +14,16 @@
 
 #include <wx/menu.h>
 #include <wx/filedlg.h>
+#include <wx/msgdlg.h>
 
 StampsPanel::StampsPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
 	m_selectedStamp = InvalidStampId;
 	m_hoverStamp = InvalidStampId;
+	m_stampToSubstitute = InvalidStampId;
+
+	m_mode = eModeSelect;
 
 	//Custom zoom/pan handling
 	EnableZoom(false);
@@ -157,11 +161,44 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 		m_selectedStamp = selectedStamp;
 		m_selectedStampPos = stampTopLeft;
 
-		//Set as current painting stamp
-		m_project.SetPaintStamp(selectedStamp);
+		if(m_mode == eModeSelect)
+		{
+			//Set as current painting stamp
+			m_project.SetPaintStamp(selectedStamp);
 
-		//Set stamp paint tool
-		m_mainWindow->SetMapTool(eToolPaintStamp);
+			//Set stamp paint tool
+			m_mainWindow->SetMapTool(eToolPaintStamp);
+		}
+		else if(m_mode == eModeSubstitute)
+		{
+			const Stamp* stampA = m_project.GetStamp(m_stampToSubstitute);
+			const Stamp* stampB = m_project.GetStamp(m_selectedStamp);
+
+			if(stampA && stampB && stampA != stampB)
+			{
+				if(stampA->GetWidth() == stampB->GetWidth() && stampA->GetHeight() == stampB->GetHeight())
+				{
+					//Substitute stamp
+					m_project.SubstituteStamp(m_stampToSubstitute, m_selectedStamp);
+
+					//Delete stamp
+					m_project.DeleteStamp(m_stampToSubstitute);
+
+					//Redraw stamps and map panels
+					m_project.InvalidateStamps(true);
+					m_mainWindow->RefreshPanel(MainWindow::ePanelStamps);
+					m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+					m_project.InvalidateStamps(false);
+				}
+				else
+				{
+					wxMessageBox("Substitute stamp's width/height does not match the original", "Error", wxOK);
+				}
+			}
+
+			m_stampToSubstitute = InvalidStampId;
+			m_mode = eModeSelect;
+		}
 	}
 
 	if(buttonBits & eMouseRight)
@@ -171,7 +208,8 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			//Right-click menu
 			wxMenu contextMenu;
 
-			contextMenu.Append(eMenuReplaceStamp, wxString("Replace stamp"));
+			contextMenu.Append(eMenuUpdateStamp, wxString("Update stamp"));
+			contextMenu.Append(eMenuSubstituteStamp, wxString("Substitute stamp"));
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
 			contextMenu.Append(eMenuSetStampLowDrawPrio, wxString("Set stamp low draw priority"));
 			contextMenu.Append(eMenuSetStampHighDrawPrio, wxString("Set stamp high draw priority"));
@@ -186,7 +224,7 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 {
-	if(event.GetId() == eMenuReplaceStamp)
+	if(event.GetId() == eMenuUpdateStamp)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
@@ -206,6 +244,15 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 					m_mainWindow->RefreshAll();
 				}
 			}
+		}
+	}
+	else if(event.GetId() == eMenuSubstituteStamp)
+	{
+		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			m_stampToSubstitute = m_hoverStamp;
+			m_mode = eModeSubstitute;
 		}
 	}
 	else if(event.GetId() == eMenuDeleteStamp)
