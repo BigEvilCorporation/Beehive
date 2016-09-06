@@ -413,27 +413,30 @@ void Project::DeleteTile(TileId tileId)
 {
 	TileId swapTileId = (TileId)m_tileset.GetCount() - 1;
 
-	Map& map = m_maps[m_editingMapId];
-	int mapWidth = map.GetWidth();
-	int mapHeight = map.GetHeight();
-
-	//Find all uses of tile on map, set blank
-	for(int x = 0; x < mapWidth; x++)
+	//Find all uses of tile on all maps, set blank
+	for(TMapMap::iterator it = m_maps.begin(), end = m_maps.end(); it != end; ++it)
 	{
-		for(int y = 0; y < mapHeight; y++)
+		Map& map = it->second;
+		int mapWidth = map.GetWidth();
+		int mapHeight = map.GetHeight();
+
+		for(int x = 0; x < mapWidth; x++)
 		{
-			TileId currTileId = map.GetTile(x, y);
-			if(currTileId == tileId)
+			for(int y = 0; y < mapHeight; y++)
 			{
-				//Referencing deleted tile, set as invalid
-				map.SetTile(x, y, InvalidTileId);
-			}
-			else if(currTileId == swapTileId)
-			{
-				//Referencing swap tile, set new id
-				u32 flags = map.GetTileFlags(x, y);
-				map.SetTile(x, y, tileId);
-				map.SetTileFlags(x, y, flags);
+				TileId currTileId = map.GetTile(x, y);
+				if(currTileId == tileId)
+				{
+					//Referencing deleted tile, set as invalid
+					map.SetTile(x, y, InvalidTileId);
+				}
+				else if(currTileId == swapTileId)
+				{
+					//Referencing swap tile, set new id
+					u32 flags = map.GetTileFlags(x, y);
+					map.SetTile(x, y, tileId);
+					map.SetTileFlags(x, y, flags);
+				}
 			}
 		}
 	}
@@ -498,23 +501,26 @@ void Project::SwapTiles(TileId tileId1, TileId tileId2)
 	*tile1 = *tile2;
 	*tile2 = tmpTile;
 
-	Map& map = m_maps[m_editingMapId];
-	int mapWidth = map.GetWidth();
-	int mapHeight = map.GetHeight();
-
-	//Find all uses of tiles on map, swap ids
-	for(int x = 0; x < mapWidth; x++)
+	//Find all uses of tiles on all maps, swap ids
+	for(TMapMap::iterator it = m_maps.begin(), end = m_maps.end(); it != end; ++it)
 	{
-		for(int y = 0; y < mapHeight; y++)
+		Map& map = it->second;
+		int mapWidth = map.GetWidth();
+		int mapHeight = map.GetHeight();
+
+		for(int x = 0; x < mapWidth; x++)
 		{
-			TileId currTileId = map.GetTile(x, y);
-			if(currTileId == tileId1)
+			for(int y = 0; y < mapHeight; y++)
 			{
-				map.SetTile(x, y, tileId2);
-			}
-			else if(currTileId == tileId2)
-			{
-				map.SetTile(x, y, tileId1);
+				TileId currTileId = map.GetTile(x, y);
+				if(currTileId == tileId1)
+				{
+					map.SetTile(x, y, tileId2);
+				}
+				else if(currTileId == tileId2)
+				{
+					map.SetTile(x, y, tileId1);
+				}
 			}
 		}
 	}
@@ -551,21 +557,24 @@ int Project::CleanupTiles()
 
 	std::set<TileId> usedTiles;
 
-	Map& map = m_maps[m_editingMapId];
-	int mapWidth = map.GetWidth();
-	int mapHeight = map.GetHeight();
-
-	//Collect all used tile ids from map
-	for(int x = 0; x < mapWidth; x++)
+	//Collect all used tile ids from all maps
+	for(TMapMap::iterator it = m_maps.begin(), end = m_maps.end(); it != end; ++it)
 	{
-		for(int y = 0; y < mapHeight; y++)
-		{
-			TileId tileId = map.GetTile(x, y);
+		Map& map = it->second;
+		int mapWidth = map.GetWidth();
+		int mapHeight = map.GetHeight();
 
-			//Ignore background tile
-			if(tileId != m_backgroundTile)
+		for(int x = 0; x < mapWidth; x++)
+		{
+			for(int y = 0; y < mapHeight; y++)
 			{
-				usedTiles.insert(tileId);
+				TileId tileId = map.GetTile(x, y);
+
+				//Ignore background tile
+				if(tileId != m_backgroundTile)
+				{
+					usedTiles.insert(tileId);
+				}
 			}
 		}
 	}
@@ -660,20 +669,27 @@ int Project::CleanupTiles()
 		{
 			for(int i = 0; i < duplicates.size(); i++)
 			{
-				//Find use of duplicate id in map
-				for(int x = 0; x < mapWidth; x++)
+				//Find use of duplicate id in all maps
+				for(TMapMap::iterator it = m_maps.begin(), end = m_maps.end(); it != end; ++it)
 				{
-					for(int y = 0; y < mapHeight; y++)
+					Map& map = it->second;
+					int mapWidth = map.GetWidth();
+					int mapHeight = map.GetHeight();
+
+					for(int x = 0; x < mapWidth; x++)
 					{
-						if(m_maps[m_editingMapId].GetTile(x, y) == duplicates[i].duplicate)
+						for(int y = 0; y < mapHeight; y++)
 						{
-							u32 originalFlags = map.GetTileFlags(x, y);
+							if(map.GetTile(x, y) == duplicates[i].duplicate)
+							{
+								u32 originalFlags = map.GetTileFlags(x, y);
 
-							//Replace duplicate with original
-							map.SetTile(x, y, duplicates[i].original);
+								//Replace duplicate with original
+								map.SetTile(x, y, duplicates[i].original);
 
-							//Orientate to match duplicate
-							map.SetTileFlags(x, y, originalFlags ^ Tileset::s_orientationFlags[duplicates[i].duplicateOrientation]);
+								//Orientate to match duplicate
+								map.SetTileFlags(x, y, originalFlags ^ Tileset::s_orientationFlags[duplicates[i].duplicateOrientation]);
+							}
 						}
 					}
 				}
@@ -843,21 +859,27 @@ StampId Project::AddStamp(Stamp* stamp)
 
 void Project::DeleteStamp(StampId stampId)
 {
-	Map& map = m_maps[m_editingMapId];
-
-	//Remove all uses of stamp on map
+	//Remove all uses of stamp on all maps
 	std::vector<ion::Vector2i> stampUseCoords;
-	for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
-	{
-		if(it->m_id == stampId)
-		{
-			stampUseCoords.push_back(it->m_position);
-		}
-	}
 
-	for(int i = 0; i < stampUseCoords.size(); i++)
+	for(TMapMap::iterator it = m_maps.begin(), end = m_maps.end(); it != end; ++it)
 	{
-		map.RemoveStamp(stampUseCoords[i].x, stampUseCoords[i].y);
+		Map& map = it->second;
+		int mapWidth = map.GetWidth();
+		int mapHeight = map.GetHeight();
+
+		for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
+		{
+			if(it->m_id == stampId)
+			{
+				stampUseCoords.push_back(it->m_position);
+			}
+		}
+
+		for(int i = 0; i < stampUseCoords.size(); i++)
+		{
+			map.RemoveStamp(stampUseCoords[i].x, stampUseCoords[i].y);
+		}
 	}
 
 	//Delete stamp
