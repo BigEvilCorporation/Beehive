@@ -183,6 +183,22 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 						}
 					}
 				}
+
+				//Import all game objects
+				for(TGameObjectPosMap::const_iterator it = map.GetGameObjects().begin(), end = map.GetGameObjects().end(); it != end; ++it)
+				{
+					for(int i = 0; i < it->second.size(); i++)
+					{
+						if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(it->first))
+						{
+							newMap.PlaceGameObject(it->second[i].m_position.x, it->second[i].m_position.y, it->second[i].m_gameObject, *gameObjectType);
+						}
+						else
+						{
+							wxMessageBox("Game object type ID mismatch, game objects will be missing", "Error", wxOK);
+						}
+					}
+				}
 			}
 
 			//Import all collision maps

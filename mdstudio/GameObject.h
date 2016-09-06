@@ -85,6 +85,7 @@ class GameObject
 {
 public:
 	GameObject();
+	GameObject(GameObjectId objectId, const GameObject& rhs);
 	GameObject(GameObjectId objectId, GameObjectTypeId typeId, const ion::Vector2i& position);
 
 	GameObjectId GetId() const { return m_objectId; }

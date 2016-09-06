@@ -317,6 +317,20 @@ GameObjectId Map::PlaceGameObject(int x, int y, const GameObjectType& objectType
 	return objectId;
 }
 
+GameObjectId Map::PlaceGameObject(int x, int y, const GameObject& object, const GameObjectType& objectType)
+{
+	TGameObjectPosMap::iterator it = m_gameObjects.find(object.GetTypeId());
+	if(it == m_gameObjects.end())
+		it = m_gameObjects.insert(std::make_pair(object.GetTypeId(), std::vector<GameObjectMapEntry>())).first;
+
+	const int tileWidth = m_platformConfig.tileWidth;
+	const int tileHeight = m_platformConfig.tileHeight;
+
+	GameObjectId objectId = m_nextFreeGameObjectId++;
+	it->second.push_back(GameObjectMapEntry(GameObject(objectId, object), ion::Vector2i(x, y), ion::Vector2i(objectType.GetDimensions().x, objectType.GetDimensions().y)));
+	return objectId;
+}
+
 GameObjectId Map::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
 {
 	GameObjectId gameObjectId = InvalidGameObjectId;

@@ -68,6 +68,17 @@ GameObject::GameObject()
 	m_typeId = InvalidGameObjectTypeId;
 }
 
+GameObject::GameObject(GameObjectId objectId, const GameObject& rhs)
+{
+	m_objectId = objectId;
+	m_typeId = rhs.m_typeId;
+	m_position = rhs.m_position;
+	m_spriteAnimId = rhs.m_spriteAnimId;
+	m_spriteAnimFrame = rhs.m_spriteAnimFrame;
+	m_animDrawOffset = rhs.m_animDrawOffset;
+	m_variables = rhs.m_variables;
+}
+
 GameObject::GameObject(GameObjectId objectId, GameObjectTypeId typeId, const ion::Vector2i& position)
 {
 	m_objectId = objectId;
