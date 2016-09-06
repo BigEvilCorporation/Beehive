@@ -909,7 +909,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					//If no current bezier, create new
 					if(!m_currentBezier)
 					{
-						m_currentBezier = m_project.AddTerrainBezier();
+						m_currentBezier = m_project.GetEditingCollisionMap().AddTerrainBezier();
 					}
 
 					//If new point is to the right of the prev, point handles -1,1 on X axis, else 1,-1
@@ -954,9 +954,9 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			m_highlightedBezier = NULL;
 
 			//Find bezier under cursor
-			for(int i = 0; i < m_project.GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL; i++)
+			for(int i = 0; i < m_project.GetEditingCollisionMap().GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL; i++)
 			{
-				ion::gamekit::BezierPath* bezier = m_project.GetTerrainBezier(i);
+				ion::gamekit::BezierPath* bezier = m_project.GetEditingCollisionMap().GetTerrainBezier(i);
 
 				ion::Vector2 boundsMin;
 				ion::Vector2 boundsMax;
@@ -2198,9 +2198,9 @@ void MapPanel::PaintTerrainBeziers(Project& project)
 		m_primitiveBezierHandles = NULL;
 	}
 
-	for(int i = 0; i < project.GetNumTerrainBeziers(); i++)
+	for(int i = 0; i < project.GetEditingCollisionMap().GetNumTerrainBeziers(); i++)
 	{
-		ion::gamekit::BezierPath* bezier = project.GetTerrainBezier(i);
+		ion::gamekit::BezierPath* bezier = project.GetEditingCollisionMap().GetTerrainBezier(i);
 		m_primitiveBeziers.push_back(m_renderResources.CreateBezierPrimitive(*bezier));
 	}
 

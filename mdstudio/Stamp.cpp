@@ -21,6 +21,12 @@ Stamp::Stamp()
 	m_nameHash = 0;
 }
 
+Stamp::Stamp(StampId stampId, const Stamp& rhs)
+{
+	*this = rhs;
+	m_id = stampId;
+}
+
 Stamp::Stamp(StampId stampId, int width, int height)
 {
 	m_id = stampId;

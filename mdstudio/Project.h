@@ -16,8 +16,6 @@
 #include <vector>
 #include <set>
 
-#include <ion/gamekit/Bezier.h>
-
 #include "Types.h"
 #include "PlatformConfig.h"
 #include "Map.h"
@@ -79,6 +77,7 @@ public:
 
 	//Maps
 	MapId CreateMap();
+	MapId CreateMap(MapId mapId);
 	void DeleteMap(MapId mapId);
 	Map& GetMap(MapId mapId);
 	const Map& GetMap(MapId mapId) const;
@@ -91,9 +90,10 @@ public:
 
 	//Collision maps
 	CollisionMapId CreateCollisionMap(CollisionMapId collisionMapId);
+	CollisionMapId CreateCollisionMap(CollisionMapId collisionMapId, int width, int height);
 	void DeleteCollisionMap(CollisionMapId collisionMapId);
-	CollisionMap& GetEditingCollisionMap(CollisionMapId collisionMapId);
-	const CollisionMap& GetEditingCollisionMap(CollisionMapId collisionMapId) const;
+	CollisionMap& GetCollisionMap(CollisionMapId collisionMapId);
+	const CollisionMap& GetCollisionMap(CollisionMapId collisionMapId) const;
 	CollisionMap& GetEditingCollisionMap();
 	CollisionMapId GetEditingCollisionMapId() const;
 	void SetEditingCollisionMap(CollisionMapId collisionMapId);
@@ -152,9 +152,11 @@ public:
 
 	//Stamps
 	StampId AddStamp(int width, int height);
+	StampId AddStamp(Stamp* stamp);
 	void DeleteStamp(StampId stampId);
 	Stamp* GetStamp(StampId stampId);
 	const Stamp* GetStamp(StampId stampId) const;
+	StampId FindDuplicateStamp(Stamp* stamp) const;
 	const TStampMap::const_iterator StampsBegin() const;
 	const TStampMap::const_iterator StampsEnd() const;
 	int GetStampCount() const;
@@ -166,12 +168,6 @@ public:
 	void SetDefaultTerrainTile(TerrainTileId tileId);
 	TerrainTileId GetDefaultTerrainTile() const { return m_defaultTerrainTile; }
 	int CleanupTerrainTiles(bool prompt);
-
-	//Collision beziers
-	ion::gamekit::BezierPath* AddTerrainBezier();
-	ion::gamekit::BezierPath* GetTerrainBezier(u32 index);
-	void RemoveTerrainBezier(u32 index);
-	int GetNumTerrainBeziers() const;
 
 	//Terrain generation from bezier paths
 	void GenerateTerrainFromBeziers(int granularity);
@@ -328,9 +324,6 @@ private:
 
 	//Collision map
 	TCollisionMapMap m_collisionMaps;
-
-	//Terrain beziers
-	std::vector<ion::gamekit::BezierPath> m_terrainBeziers;
 
 	//Active palettes
 	std::vector<Palette> m_palettes;

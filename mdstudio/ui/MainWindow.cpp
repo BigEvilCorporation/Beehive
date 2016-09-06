@@ -1298,9 +1298,9 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 				if(shiftRight && width > originalWidth)
 				{
 					//Move terrain beziers
-					for(int i = 0; i < m_project->GetNumTerrainBeziers(); i++)
+					for(int i = 0; i < m_project->GetEditingCollisionMap().GetNumTerrainBeziers(); i++)
 					{
-						ion::gamekit::BezierPath* bezier = m_project->GetTerrainBezier(i);
+						ion::gamekit::BezierPath* bezier = m_project->GetEditingCollisionMap().GetTerrainBezier(i);
 						if(bezier)
 						{
 							for(int j = 0; j < bezier->GetNumPoints(); j++)

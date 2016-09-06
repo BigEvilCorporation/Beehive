@@ -17,6 +17,8 @@
 #include <io/Archive.h>
 #include <maths/Vector.h>
 
+#include <ion/gamekit/Bezier.h>
+
 #include "TerrainTile.h"
 #include "PlatformConfig.h"
 
@@ -34,6 +36,7 @@ public:
 
 	CollisionMap();
 	CollisionMap(const PlatformConfig& platformConfig);
+	CollisionMap(const PlatformConfig& platformConfig, int width, int height);
 
 	void Clear();
 
@@ -50,6 +53,14 @@ public:
 	void SetCollisionTileFlags(int x, int y, u16 flags);
 	u16 GetCollisionTileFlags(int x, int y) const;
 
+	//Collision beziers
+	ion::gamekit::BezierPath* AddTerrainBezier();
+	void AddTerrainBezier(const ion::gamekit::BezierPath& bezier);
+	ion::gamekit::BezierPath* GetTerrainBezier(u32 index);
+	const ion::gamekit::BezierPath* GetTerrainBezier(u32 index) const;
+	void RemoveTerrainBezier(u32 index);
+	int GetNumTerrainBeziers() const;
+
 	void Serialise(ion::io::Archive& archive);
 	void Export(const Project& project, std::stringstream& stream) const;
 	void Export(const Project& project, ion::io::File& file) const;
@@ -60,4 +71,7 @@ private:
 	int m_width;
 	int m_height;
 	std::vector<TerrainTileId> m_collisionTiles;
+
+	//Terrain beziers
+	std::vector<ion::gamekit::BezierPath> m_terrainBeziers;
 };

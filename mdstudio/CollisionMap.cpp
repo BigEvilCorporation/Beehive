@@ -30,6 +30,11 @@ CollisionMap::CollisionMap(const PlatformConfig& platformConfig)
 	Resize(platformConfig.scrollPlaneWidthTiles, platformConfig.scrollPlaneHeightTiles, false, false);
 }
 
+CollisionMap::CollisionMap(const PlatformConfig& platformConfig, int width, int height)
+{
+	Resize(width, height, false, false);
+}
+
 void CollisionMap::Clear()
 {
 	//Clear tiles
@@ -122,6 +127,40 @@ u16 CollisionMap::GetCollisionTileFlags(int x, int y) const
 	int tileIdx = (y * m_width) + x;
 	ion::debug::Assert(tileIdx < (m_width * m_height), "eOut of range");
 	return m_collisionTiles[tileIdx] & s_collisionTileFlagMask;
+}
+
+ion::gamekit::BezierPath* CollisionMap::AddTerrainBezier()
+{
+	m_terrainBeziers.push_back(ion::gamekit::BezierPath());
+	return &m_terrainBeziers.back();
+}
+
+void CollisionMap::AddTerrainBezier(const ion::gamekit::BezierPath& bezier)
+{
+	m_terrainBeziers.push_back(bezier);
+}
+
+ion::gamekit::BezierPath* CollisionMap::GetTerrainBezier(u32 index)
+{
+	ion::debug::Assert(index < m_terrainBeziers.size(), "eOut of range");
+	return &m_terrainBeziers[index];
+}
+
+const ion::gamekit::BezierPath* CollisionMap::GetTerrainBezier(u32 index) const
+{
+	ion::debug::Assert(index < m_terrainBeziers.size(), "eOut of range");
+	return &m_terrainBeziers[index];
+}
+
+void CollisionMap::RemoveTerrainBezier(u32 index)
+{
+	ion::debug::Assert(index < m_terrainBeziers.size(), "eOut of range");
+	m_terrainBeziers.erase(m_terrainBeziers.begin() + index);
+}
+
+int CollisionMap::GetNumTerrainBeziers() const
+{
+	return m_terrainBeziers.size();
 }
 
 void CollisionMap::Export(const Project& project, std::stringstream& stream) const

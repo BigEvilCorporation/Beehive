@@ -21,6 +21,7 @@ class Stamp
 {
 public:
 	Stamp();
+	Stamp(StampId stampId, const Stamp& rhs);
 	Stamp(StampId stampId, int width, int height);
 
 	StampId GetId() const;

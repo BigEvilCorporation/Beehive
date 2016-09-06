@@ -9,7 +9,8 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 ///////////////////////////////////////////////////////
 
-#include <io/Archive.h>
+#include <ion/io/Archive.h>
+#include <ion/gamekit/Bezier.h>
 #include <wx/msgdlg.h>
 #include <set>
 
@@ -142,7 +143,6 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_terrainTileset, "terrainTileset");
 	archive.Serialise(m_defaultTerrainTile, "defaultTerrainTile");
 	archive.Serialise(m_collisionMaps, "collisionMaps");
-	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_actors, "actors");
 	archive.Serialise(m_animations, "animations");
@@ -165,6 +165,14 @@ void Project::Serialise(ion::io::Archive& archive)
 		{
 			m_editingCollisionMapId = CreateCollisionMap(m_editingMapId);
 			archive.Serialise(m_collisionMaps[m_editingCollisionMapId], "collisionMap");
+
+			std::vector<ion::gamekit::BezierPath> terrainBeziers;
+			archive.Serialise(terrainBeziers, "terrainBeziers");
+
+			for(int i = 0; i < terrainBeziers.size(); i++)
+			{
+				m_collisionMaps[m_editingCollisionMapId].AddTerrainBezier(terrainBeziers[i]);
+			}
 		}
 
 		//Create remaining collision maps
@@ -172,8 +180,7 @@ void Project::Serialise(ion::io::Archive& archive)
 		{
 			if(it->first != m_editingCollisionMapId)
 			{
-				CollisionMapId collisionMapId = CreateCollisionMap(it->first);
-				m_collisionMaps[collisionMapId].Resize(it->second.GetWidth(), it->second.GetHeight(), false, false);
+				CollisionMapId collisionMapId = CreateCollisionMap(it->first, it->second.GetWidth(), it->second.GetHeight());
 			}
 		}
 	}
@@ -182,6 +189,12 @@ void Project::Serialise(ion::io::Archive& archive)
 MapId Project::CreateMap()
 {
 	MapId mapId = ion::GenerateUUID64();
+	m_maps.insert(std::make_pair(mapId, Map(m_platformConfig)));
+	return mapId;
+}
+
+MapId Project::CreateMap(MapId mapId)
+{
 	m_maps.insert(std::make_pair(mapId, Map(m_platformConfig)));
 	return mapId;
 }
@@ -243,6 +256,12 @@ CollisionMapId Project::CreateCollisionMap(CollisionMapId collisionMapId)
 	return collisionMapId;
 }
 
+CollisionMapId Project::CreateCollisionMap(CollisionMapId collisionMapId, int width, int height)
+{
+	m_collisionMaps.insert(std::make_pair(collisionMapId, CollisionMap(m_platformConfig, width, height)));
+	return collisionMapId;
+}
+
 void Project::DeleteCollisionMap(CollisionMapId collisionMapId)
 {
 	TCollisionMapMap::iterator it = m_collisionMaps.find(collisionMapId);
@@ -250,14 +269,14 @@ void Project::DeleteCollisionMap(CollisionMapId collisionMapId)
 	m_collisionMaps.erase(it);
 }
 
-CollisionMap& Project::GetEditingCollisionMap(CollisionMapId collisionMapId)
+CollisionMap& Project::GetCollisionMap(CollisionMapId collisionMapId)
 {
 	TCollisionMapMap::iterator it = m_collisionMaps.find(collisionMapId);
 	ion::debug::Assert(it != m_collisionMaps.end(), "Project::GetEditingCollisionMap() - Invalid collisionMap ID");
 	return it->second;
 }
 
-const CollisionMap& Project::GetEditingCollisionMap(CollisionMapId collisionMapId) const
+const CollisionMap& Project::GetCollisionMap(CollisionMapId collisionMapId) const
 {
 	TCollisionMapMap::const_iterator it = m_collisionMaps.find(collisionMapId);
 	ion::debug::Assert(it != m_collisionMaps.end(), "Project::GetEditingCollisionMap() - Invalid collisionMap ID");
@@ -266,7 +285,7 @@ const CollisionMap& Project::GetEditingCollisionMap(CollisionMapId collisionMapI
 
 CollisionMap& Project::GetEditingCollisionMap()
 {
-	return GetEditingCollisionMap(m_editingCollisionMapId);
+	return GetCollisionMap(m_editingCollisionMapId);
 }
 
 CollisionMapId Project::GetEditingCollisionMapId() const
@@ -815,6 +834,13 @@ StampId Project::AddStamp(int width, int height)
 	return id;
 }
 
+StampId Project::AddStamp(Stamp* stamp)
+{
+	StampId id = m_nextFreeStampId++;
+	m_stamps.insert(std::make_pair(id, Stamp(id, *stamp)));
+	return id;
+}
+
 void Project::DeleteStamp(StampId stampId)
 {
 	Map& map = m_maps[m_editingMapId];
@@ -866,6 +892,42 @@ const Stamp* Project::GetStamp(StampId stampId) const
 	}
 
 	return stamp;
+}
+
+StampId Project::FindDuplicateStamp(Stamp* stamp) const
+{
+	StampId foundStampId = InvalidStampId;
+
+	for(TStampMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end && foundStampId == InvalidStampId; ++it)
+	{
+		if(it->second.GetWidth() == stamp->GetWidth() && it->second.GetHeight() == stamp->GetHeight())
+		{
+			bool tilesMatch = true;
+
+			for(int x = 0; x < it->second.GetWidth() && tilesMatch; x++)
+			{
+				for(int y = 0; y < it->second.GetHeight() && tilesMatch; y++)
+				{
+					const Tile* tileA = GetTileset().GetTile(stamp->GetTile(x, y));
+					const Tile* tileB = GetTileset().GetTile(it->second.GetTile(x, y));
+					const u64 hashA = tileA ? tileA->GetHash() : 0;
+					const u64 hashB = tileB ? tileB->GetHash() : 0;
+					const u32 flagsA = stamp->GetTileFlags(x, y);
+					const u32 flagsB = it->second.GetTileFlags(x, y);
+
+					if(((tileA != NULL) != (tileB != NULL)) || (hashA != hashB) || (flagsA != flagsB))
+					{
+						tilesMatch = false;
+					}
+				}
+			}
+
+			if(tilesMatch)
+				foundStampId = it->first;
+		}
+	}
+
+	return foundStampId;
 }
 
 const TStampMap::const_iterator Project::StampsBegin() const
@@ -1110,29 +1172,6 @@ int Project::CleanupTerrainTiles(bool prompt)
 	return unusedTerrainTiles.size() + duplicates.size();
 }
 
-ion::gamekit::BezierPath* Project::AddTerrainBezier()
-{
-	m_terrainBeziers.push_back(ion::gamekit::BezierPath());
-	return &m_terrainBeziers.back();
-}
-
-ion::gamekit::BezierPath* Project::GetTerrainBezier(u32 index)
-{
-	ion::debug::Assert(index < m_terrainBeziers.size(), "eOut of range");
-	return &m_terrainBeziers[index];
-}
-
-void Project::RemoveTerrainBezier(u32 index)
-{
-	ion::debug::Assert(index < m_terrainBeziers.size(), "eOut of range");
-	m_terrainBeziers.erase(m_terrainBeziers.begin() + index);
-}
-
-int Project::GetNumTerrainBeziers() const
-{
-	return m_terrainBeziers.size();
-}
-
 void Project::GenerateTerrainFromBeziers(int granularity)
 {
 	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
@@ -1161,15 +1200,16 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 	const int mapHeightPixels = (collisionMap.GetHeight() * tileHeight);
 
 	//Follow paths, generate terrain height tiles
-	for(int i = 0; i < m_terrainBeziers.size(); i++)
+	for(int i = 0; i < collisionMap.GetNumTerrainBeziers(); i++)
 	{
-		const int maxPoints = m_terrainBeziers[i].GetNumPoints();
+		const ion::gamekit::BezierPath* bezier = collisionMap.GetTerrainBezier(i);
+		const int maxPoints = bezier->GetNumPoints();
 
 		if(maxPoints > 0)
 		{
 			std::vector<ion::Vector2> points;
 			points.reserve(maxPoints);
-			m_terrainBeziers[i].GetPositions(points, 0.0f, 1.0f, granularity);
+			bezier->GetPositions(points, 0.0f, 1.0f, granularity);
 
 			for(int posIdx = 0; posIdx < points.size(); posIdx++)
 			{
