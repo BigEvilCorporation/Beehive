@@ -32,6 +32,8 @@ CollisionMap::CollisionMap(const PlatformConfig& platformConfig)
 
 CollisionMap::CollisionMap(const PlatformConfig& platformConfig, int width, int height)
 {
+	m_width = 0;
+	m_height = 0;
 	Resize(width, height, false, false);
 }
 
