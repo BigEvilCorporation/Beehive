@@ -983,25 +983,28 @@ void Project::DeleteTerrainTile(TerrainTileId terrainTileId)
 {
 	TerrainTileId swapTerrainTileId = (TerrainTileId)m_terrainTileset.GetCount() - 1;
 
-	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
-	int mapWidth = collisionMap.GetWidth();
-	int mapHeight = collisionMap.GetHeight();
-
-	//Find all uses of terrain tile on map, set blank
-	for(int x = 0; x < collisionMap.GetWidth(); x++)
+	//Find all uses of terrain tile on all maps, set blank
+	for(TCollisionMapMap::iterator it = m_collisionMaps.begin(), end = m_collisionMaps.end(); it != end; ++it)
 	{
-		for(int y = 0; y < collisionMap.GetHeight(); y++)
+		CollisionMap& collisionMap = it->second;
+		int mapWidth = collisionMap.GetWidth();
+		int mapHeight = collisionMap.GetHeight();
+
+		for(int x = 0; x < collisionMap.GetWidth(); x++)
 		{
-			TerrainTileId currTerrainTileId = collisionMap.GetTerrainTile(x, y);
-			if(currTerrainTileId == terrainTileId)
+			for(int y = 0; y < collisionMap.GetHeight(); y++)
 			{
-				//Referencing deleted tile, set as invalid
-				collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
-			}
-			else if(currTerrainTileId == swapTerrainTileId)
-			{
-				//Referencing swap tile, set new id
-				collisionMap.SetTerrainTile(x, y, terrainTileId);
+				TerrainTileId currTerrainTileId = collisionMap.GetTerrainTile(x, y);
+				if(currTerrainTileId == terrainTileId)
+				{
+					//Referencing deleted tile, set as invalid
+					collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
+				}
+				else if(currTerrainTileId == swapTerrainTileId)
+				{
+					//Referencing swap tile, set new id
+					collisionMap.SetTerrainTile(x, y, terrainTileId);
+				}
 			}
 		}
 	}
@@ -1047,28 +1050,31 @@ void Project::SetDefaultTerrainTile(TerrainTileId tileId)
 
 int Project::CleanupTerrainTiles(bool prompt)
 {
-	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
-	int mapWidth = collisionMap.GetWidth();
-	int mapHeight = collisionMap.GetHeight();
-
 	//Backup default collision tile
 	TerrainTile* defaultTile = (m_defaultTerrainTile != InvalidTerrainTileId) ? GetTerrainTileset().GetTerrainTile(m_defaultTerrainTile) : NULL;
 	u64 defaultTileHash = defaultTile ? defaultTile->CalculateHash() : 0;
 
+	//Collect all used TerrainTile ids from all maps
 	std::set<TerrainTileId> usedTerrainTiles;
-
-	//Collect all used TerrainTile ids from map
-	for(int x = 0; x < mapWidth; x++)
-	{
-		for(int y = 0; y < mapHeight; y++)
-		{
-			TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
-			usedTerrainTiles.insert(terrainTileId);
-		}
-	}
 
 	//Always add default tile
 	usedTerrainTiles.insert(m_defaultTerrainTile);
+
+	for(TCollisionMapMap::iterator it = m_collisionMaps.begin(), end = m_collisionMaps.end(); it != end; ++it)
+	{
+		CollisionMap& collisionMap = it->second;
+		int mapWidth = collisionMap.GetWidth();
+		int mapHeight = collisionMap.GetHeight();
+
+		for(int x = 0; x < mapWidth; x++)
+		{
+			for(int y = 0; y < mapHeight; y++)
+			{
+				TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
+				usedTerrainTiles.insert(terrainTileId);
+			}
+		}
+	}
 
 	std::set<TerrainTileId> unusedTerrainTiles;
 
@@ -1141,15 +1147,20 @@ int Project::CleanupTerrainTiles(bool prompt)
 		{
 			for(int i = 0; i < duplicates.size(); i++)
 			{
-				//Find use of duplicate id in map
-				for(int x = 0; x < collisionMap.GetWidth(); x++)
+				//Find use of duplicate id in all maps
+				for(TCollisionMapMap::iterator it = m_collisionMaps.begin(), end = m_collisionMaps.end(); it != end; ++it)
 				{
-					for(int y = 0; y < collisionMap.GetHeight(); y++)
+					CollisionMap& collisionMap = it->second;
+
+					for(int x = 0; x < collisionMap.GetWidth(); x++)
 					{
-						if(collisionMap.GetTerrainTile(x, y) == duplicates[i].duplicate)
+						for(int y = 0; y < collisionMap.GetHeight(); y++)
 						{
-							//Replace duplicate with original
-							collisionMap.SetTerrainTile(x, y, duplicates[i].original);
+							if(collisionMap.GetTerrainTile(x, y) == duplicates[i].duplicate)
+							{
+								//Replace duplicate with original
+								collisionMap.SetTerrainTile(x, y, duplicates[i].original);
+							}
 						}
 					}
 				}
@@ -1174,71 +1185,74 @@ int Project::CleanupTerrainTiles(bool prompt)
 
 void Project::GenerateTerrainFromBeziers(int granularity)
 {
-	CollisionMap& collisionMap = m_collisionMaps[m_editingCollisionMapId];
-	int mapWidth = collisionMap.GetWidth();
-	int mapHeight = collisionMap.GetHeight();
-
 	//Clear all terrain tiles
 	m_terrainTileset.Clear();
-
-	//Clear all terrain map entries
-	for(int x = 0; x < mapWidth; x++)
-	{
-		for(int y = 0; y < mapHeight; y++)
-		{
-			collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
-		}
-	}
 
 	//Create blank tile, use as default
 	TerrainTileId blankTileId = m_terrainTileset.AddTerrainTile();
 	SetDefaultTerrainTile(blankTileId);
 
-	const int tileWidth = GetPlatformConfig().tileWidth;
-	const int tileHeight = GetPlatformConfig().tileHeight;
-
-	const int mapHeightPixels = (collisionMap.GetHeight() * tileHeight);
-
-	//Follow paths, generate terrain height tiles
-	for(int i = 0; i < collisionMap.GetNumTerrainBeziers(); i++)
+	for(TCollisionMapMap::iterator it = m_collisionMaps.begin(), end = m_collisionMaps.end(); it != end; ++it)
 	{
-		const ion::gamekit::BezierPath* bezier = collisionMap.GetTerrainBezier(i);
-		const int maxPoints = bezier->GetNumPoints();
+		CollisionMap& collisionMap = it->second;
+		int mapWidth = collisionMap.GetWidth();
+		int mapHeight = collisionMap.GetHeight();
 
-		if(maxPoints > 0)
+		//Clear all terrain map entries
+		for(int x = 0; x < mapWidth; x++)
 		{
-			std::vector<ion::Vector2> points;
-			points.reserve(maxPoints);
-			bezier->GetPositions(points, 0.0f, 1.0f, granularity);
-
-			for(int posIdx = 0; posIdx < points.size(); posIdx++)
+			for(int y = 0; y < mapHeight; y++)
 			{
-				//Get position
-				const ion::Vector2 pixelPos(points[posIdx].x, (float)mapHeightPixels - points[posIdx].y);
-				const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileWidth), ion::maths::Floor(pixelPos.y / (float)tileHeight));
+				collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
+			}
+		}
 
-				//Get tile under cursor
-				TerrainTileId tileId = collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
+		const int tileWidth = GetPlatformConfig().tileWidth;
+		const int tileHeight = GetPlatformConfig().tileHeight;
 
-				if(tileId == InvalidTerrainTileId)
+		const int mapHeightPixels = (collisionMap.GetHeight() * tileHeight);
+
+		//Follow paths, generate terrain height tiles
+		for(int i = 0; i < collisionMap.GetNumTerrainBeziers(); i++)
+		{
+			const ion::gamekit::BezierPath* bezier = collisionMap.GetTerrainBezier(i);
+			const int maxPoints = bezier->GetNumPoints();
+
+			if(maxPoints > 0)
+			{
+				std::vector<ion::Vector2> points;
+				points.reserve(maxPoints);
+				bezier->GetPositions(points, 0.0f, 1.0f, granularity);
+
+				for(int posIdx = 0; posIdx < points.size(); posIdx++)
 				{
-					//Create new collision tile
-					tileId = m_terrainTileset.AddTerrainTile();
+					//Get position
+					const ion::Vector2 pixelPos(points[posIdx].x, (float)mapHeightPixels - points[posIdx].y);
+					const ion::Vector2i tilePos(ion::maths::Floor(pixelPos.x / (float)tileWidth), ion::maths::Floor(pixelPos.y / (float)tileHeight));
 
-					//Set on map
-					collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
-				}
+					//Get tile under cursor
+					TerrainTileId tileId = collisionMap.GetTerrainTile(tilePos.x, tilePos.y);
 
-				//Get collision tile
-				if(TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(tileId))
-				{
-					//Get pixel offset into tile
-					int pixelX = pixelPos.x - (tilePos.x * tileWidth);
-					int pixelY = pixelPos.y - (tilePos.y * tileHeight);
+					if(tileId == InvalidTerrainTileId)
+					{
+						//Create new collision tile
+						tileId = m_terrainTileset.AddTerrainTile();
 
-					//Set height at X
-					const int height = tileHeight - pixelY;
-					terrainTile->SetHeight(pixelX, height);
+						//Set on map
+						collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
+					}
+
+					//Get collision tile
+					if(TerrainTile* terrainTile = m_terrainTileset.GetTerrainTile(tileId))
+					{
+						//Get pixel offset into tile
+						int pixelX = pixelPos.x - (tilePos.x * tileWidth);
+						int pixelY = pixelPos.y - (tilePos.y * tileHeight);
+
+						//Set height at X
+						const int height = tileHeight - pixelY;
+						terrainTile->SetHeight(pixelX, height);
+					}
 				}
 			}
 		}
