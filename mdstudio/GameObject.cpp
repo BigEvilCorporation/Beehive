@@ -73,6 +73,7 @@ GameObject::GameObject(GameObjectId objectId, const GameObject& rhs)
 	m_objectId = objectId;
 	m_typeId = rhs.m_typeId;
 	m_position = rhs.m_position;
+	m_name = rhs.m_name;
 	m_spriteAnimId = rhs.m_spriteAnimId;
 	m_spriteAnimFrame = rhs.m_spriteAnimFrame;
 	m_animDrawOffset = rhs.m_animDrawOffset;
