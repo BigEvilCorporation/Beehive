@@ -86,6 +86,8 @@ public:
 	void SetEditingMap(MapId mapId);
 	const TMapMap::const_iterator MapsBegin() const;
 	const TMapMap::const_iterator MapsEnd() const;
+	TMapMap::iterator MapsBegin();
+	TMapMap::iterator MapsEnd();
 	int GetMapCount() const;
 
 	//Collision maps
@@ -246,14 +248,15 @@ public:
 	//Export
 	bool ExportPalettes(const std::string& filename) const;
 	bool ExportTiles(const std::string& filename, bool binary) const;
-	bool ExportMap(const std::string& filename, bool binary) const;
 	bool ExportTerrainTiles(const std::string& filename, bool binary) const;
-	bool ExportCollisionMap(const std::string& filename, bool binary) const;
-	bool ExportGameObjects(const std::string& filename) const;
 	bool ExportSpriteSheets(const std::string& directory, bool binary) const;
 	bool ExportSpriteAnims(const std::string& directory, bool binary) const;
 	bool ExportSpritePalettes(const std::string& directory) const;
 	bool ExportStampBitmaps(const std::string& directory) const;
+
+	bool ExportMap(MapId mapId, const std::string& filename, bool binary) const;
+	bool ExportCollisionMap(MapId mapId, const std::string& filename, bool binary) const;
+	bool ExportGameObjects(MapId mapId, const std::string& filename) const;
 
 	//Serialise
 	void Serialise(ion::io::Archive& archive);
@@ -263,22 +266,30 @@ public:
 	{
 		std::string palettes;
 		std::string tileset;
-		std::string map;
-		std::string TerrainTiles;
-		std::string collisionMap;
-		std::string gameObjects;
+		std::string terrainTiles;
 		std::string spriteSheets;
 		std::string spriteAnims;
 		std::string spritePalettes;
 
+		bool palettesExportEnabled;
+		bool tilesetExportEnabled;
+		bool terrainTilesExportEnabled;
+		bool spriteSheetsExportEnabled;
+		bool spriteAnimsExportEnabled;
+		bool spritePalettesExportEnabled;
+
 		void Serialise(ion::io::Archive& archive)
 		{
+			archive.Serialise(palettesExportEnabled, "palettesExportEnabled");
+			archive.Serialise(tilesetExportEnabled, "tilesetExportEnabled");
+			archive.Serialise(terrainTilesExportEnabled, "terrainTilesExportEnabled");
+			archive.Serialise(spriteSheetsExportEnabled, "spriteSheetsExportEnabled");
+			archive.Serialise(spriteAnimsExportEnabled, "spriteAnimsExportEnabled");
+			archive.Serialise(spritePalettesExportEnabled, "spritePalettesExportEnabled");
+
 			archive.Serialise(palettes, "exportFNamePalettes");
 			archive.Serialise(tileset, "exportFNameTileset");
-			archive.Serialise(map, "exportFNameMap");
-			archive.Serialise(TerrainTiles, "exportFNameTerrainTiles");
-			archive.Serialise(collisionMap, "exportFNameCollisionMap");
-			archive.Serialise(gameObjects, "exportFNameGameObjects");
+			archive.Serialise(terrainTiles, "exportFNameTerrainTiles");
 			archive.Serialise(spriteSheets, "exportDirSpriteSheets");
 			archive.Serialise(spriteAnims, "exportDirSpriteAnims");
 			archive.Serialise(spritePalettes, "exportDirSpritePalettes");

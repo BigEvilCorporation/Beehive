@@ -57,6 +57,8 @@ local SRC =
 	ui/GameObjectTypePanel.h
 	ui/GameObjectTypeDialog.cpp
 	ui/GameObjectTypeDialog.h
+	ui/ExportDialog.cpp
+	ui/ExportDialog.h
 	ui/MapPanel.cpp
 	ui/MapPanel.h
 	ui/MapListPanel.cpp

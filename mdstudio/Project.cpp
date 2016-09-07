@@ -245,6 +245,16 @@ const TMapMap::const_iterator Project::MapsEnd() const
 	return m_maps.end();
 }
 
+TMapMap::iterator Project::MapsBegin()
+{
+	return m_maps.begin();
+}
+
+TMapMap::iterator Project::MapsEnd()
+{
+	return m_maps.end();
+}
+
 int Project::GetMapCount() const
 {
 	return m_maps.size();
@@ -2133,11 +2143,12 @@ bool Project::ExportTerrainTiles(const std::string& filename, bool binary) const
 	return false;
 }
 
-bool Project::ExportMap(const std::string& filename, bool binary) const
+bool Project::ExportMap(MapId mapId, const std::string& filename, bool binary) const
 {
-	const Map& map = m_maps.find(m_editingMapId)->second;
+	const Map& map = m_maps.find(mapId)->second;
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
+	const std::string& mapName = map.GetName();
 
 	u32 binarySize = 0;
 
@@ -2168,26 +2179,26 @@ bool Project::ExportMap(const std::string& filename, bool binary) const
 		if(binary)
 		{
 			//Export size of binary file
-			stream << "map_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+			stream << "map_" << mapName << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
 		}
 		else
 		{
 			//Export label, data and size as inline text
-			stream << "map_" << m_name << ":" << std::endl;
+			stream << "map_" << mapName << ":" << std::endl;
 
 			map.Export(*this, stream);
 
 			stream << std::endl;
-			stream << "map_" << m_name << "_end:" << std::endl;
-			stream << "map_" << m_name << "_size_b\tequ (map_" << m_name << "_end-map_" << m_name << ")\t; Size in bytes" << std::endl;
+			stream << "map_" << mapName << "_end:" << std::endl;
+			stream << "map_" << mapName << "_size_b\tequ (map_" << mapName << "_end-map_" << mapName << ")\t; Size in bytes" << std::endl;
 		}
 
-		stream << "map_" << m_name << "_size_w\tequ (map_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
-		stream << "map_" << m_name << "_size_l\tequ (map_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << "map_" << mapName << "_size_w\tequ (map_" << mapName << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "map_" << mapName << "_size_l\tequ (map_" << mapName << "_size_b/4)\t; Size in longwords" << std::endl;
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << "map_" << m_name << "_width\tequ " << "0x" << std::setw(2) << mapWidth << std::endl;
-		stream << "map_" << m_name << "_height\tequ " << "0x" << std::setw(2) << mapHeight << std::endl;
+		stream << "map_" << mapName << "_width\tequ " << "0x" << std::setw(2) << mapWidth << std::endl;
+		stream << "map_" << mapName << "_height\tequ " << "0x" << std::setw(2) << mapHeight << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());
@@ -2198,11 +2209,13 @@ bool Project::ExportMap(const std::string& filename, bool binary) const
 	return false;
 }
 
-bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
+bool Project::ExportCollisionMap(MapId mapId, const std::string& filename, bool binary) const
 {
 	u32 binarySize = 0;
 
-	const CollisionMap& collisionMap = m_collisionMaps.find(m_editingCollisionMapId)->second;
+	const Map& map = m_maps.find(mapId)->second;
+	const std::string& mapName = map.GetName();
+	const CollisionMap& collisionMap = m_collisionMaps.find(mapId)->second;
 
 	if(binary)
 	{
@@ -2231,26 +2244,26 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 		if(binary)
 		{
 			//Export size of binary file
-			stream << "collisionmap_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+			stream << "collisionmap_" << mapName << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
 		}
 		else
 		{
 			//Export label, data and size as inline text
-			stream << "collisionmap_" << m_name << ":" << std::endl;
+			stream << "collisionmap_" << mapName << ":" << std::endl;
 
 			collisionMap.Export(*this, stream);
 
 			stream << std::endl;
-			stream << "collisionmap_" << m_name << "_end:" << std::endl;
-			stream << "collisionmap_" << m_name << "_size_b\tequ (collisionmap_" << m_name << "_end-collisionmap_" << m_name << ")\t; Size in bytes" << std::endl;
+			stream << "collisionmap_" << mapName << "_end:" << std::endl;
+			stream << "collisionmap_" << mapName << "_size_b\tequ (collisionmap_" << mapName << "_end-collisionmap_" << mapName << ")\t; Size in bytes" << std::endl;
 		}
 
-		stream << "collisionmap_" << m_name << "_size_w\tequ (collisionmap_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
-		stream << "collisionmap_" << m_name << "_size_l\tequ (collisionmap_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+		stream << "collisionmap_" << mapName << "_size_w\tequ (collisionmap_" << mapName << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "collisionmap_" << mapName << "_size_l\tequ (collisionmap_" << mapName << "_size_b/4)\t; Size in longwords" << std::endl;
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << "collisionmap_" << m_name << "_width\tequ " << "0x" << std::setw(2) << collisionMap.GetWidth() << std::endl;
-		stream << "collisionmap_" << m_name << "_height\tequ " << "0x" << std::setw(2) << collisionMap.GetHeight() << std::endl;
+		stream << "collisionmap_" << mapName << "_width\tequ " << "0x" << std::setw(2) << collisionMap.GetWidth() << std::endl;
+		stream << "collisionmap_" << mapName << "_height\tequ " << "0x" << std::setw(2) << collisionMap.GetHeight() << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());
@@ -2261,16 +2274,17 @@ bool Project::ExportCollisionMap(const std::string& filename, bool binary) const
 	return false;
 }
 
-bool Project::ExportGameObjects(const std::string& filename) const
+bool Project::ExportGameObjects(MapId mapId, const std::string& filename) const
 {
-	const Map& map = m_maps.find(m_editingMapId)->second;
+	const Map& map = m_maps.find(mapId)->second;
+	const std::string& mapName = map.GetName();
 
 	ion::io::File file(filename, ion::io::File::eOpenWrite);
 	if(file.IsOpen())
 	{
 		std::stringstream stream;
 		WriteFileHeader(stream);
-		stream << "gameobjects_" << m_name << ":" << std::endl;
+		stream << "gameobjects_" << mapName << ":" << std::endl;
 
 		const TGameObjectPosMap& gameObjMap = map.GetGameObjects();
 
@@ -2282,10 +2296,10 @@ bool Project::ExportGameObjects(const std::string& filename) const
 			u32 count = (gameObjIt != gameObjMap.end()) ? gameObjIt->second.size() : 0;
 			
 			//Export game object count
-			stream << "gameobjects_" << m_name << "_" << gameObjectType.GetName() << "_count equ 0x" << count << std::endl;
+			stream << "gameobjects_" << mapName << "_" << gameObjectType.GetName() << "_count equ 0x" << count << std::endl;
 
 			//Export game object init sunroutine
-			stream << "LoadGameObjects_" << m_name << "_" << gameObjectType.GetName() << ":" << std::endl;
+			stream << "LoadGameObjects_" << mapName << "_" << gameObjectType.GetName() << ":" << std::endl;
 
 			//Export all game objects of this type
 			if(gameObjIt != gameObjMap.end())

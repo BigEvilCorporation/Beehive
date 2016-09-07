@@ -42,8 +42,9 @@ class SpriteCanvas;
 #include <wx/toolbar.h>
 #include <wx/listctrl.h>
 #include <wx/listbox.h>
-#include <wx/filepicker.h>
 #include <wx/radiobut.h>
+#include <wx/filepicker.h>
+#include <wx/notebook.h>
 #include <wx/clrpicker.h>
 #include <wx/grid.h>
 #include <wx/slider.h>
@@ -463,48 +464,42 @@ class GameObjTypesPanelBase : public wxPanel
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class ExportDialog
+/// Class ExportDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class ExportDialog : public wxDialog 
+class ExportDialogBase : public wxDialog 
 {
 	private:
 	
 	protected:
 		wxStaticText* m_static1;
+		wxNotebook* m_notebookMapTabs;
+		wxButton* m_btnCancel;
+		wxButton* m_btnExportAll;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnExportAll( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
 		wxTextCtrl* m_txtProjectName;
+		wxRadioButton* m_btnText;
+		wxRadioButton* m_btnBinary;
 		wxCheckBox* m_chkPalettes;
 		wxFilePickerCtrl* m_filePickerPalettes;
 		wxCheckBox* m_chkTileset;
 		wxFilePickerCtrl* m_filePickerTileset;
-		wxCheckBox* m_chkMap;
-		wxFilePickerCtrl* m_filePickerMap;
 		wxCheckBox* m_chkTerrainTiles;
 		wxFilePickerCtrl* m_filePickerTerrainTiles;
-		wxCheckBox* m_chkCollisionMap;
-		wxFilePickerCtrl* m_filePickerCollisionMap;
-		wxCheckBox* m_chkGameObj;
-		wxFilePickerCtrl* m_filePickerGameObj;
 		wxCheckBox* m_chkSpriteSheets;
 		wxDirPickerCtrl* m_dirPickerSpriteSheets;
 		wxCheckBox* m_chkSpritePalettes;
 		wxDirPickerCtrl* m_dirPickerSpritePalettes;
 		wxCheckBox* m_chkSpriteAnims;
 		wxDirPickerCtrl* m_dirPickerSpriteAnims;
-		wxRadioButton* m_btnText;
-		wxRadioButton* m_btnBinary;
-		wxStdDialogButtonSizer* m_buttons;
-		wxButton* m_buttonsOK;
-		wxButton* m_buttonsCancel;
 		
-		ExportDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 788,606 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
-		~ExportDialog();
+		ExportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 976,587 ), long style = wxCAPTION|wxRESIZE_BORDER ); 
+		~ExportDialogBase();
 	
 };
 
@@ -803,6 +798,28 @@ class SpriteAnimPanelBase : public wxPanel
 		
 		SpriteAnimPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,130 ), long style = wxTAB_TRAVERSAL ); 
 		~SpriteAnimPanelBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ExportDialogMapTab
+///////////////////////////////////////////////////////////////////////////////
+class ExportDialogMapTab : public wxPanel 
+{
+	private:
+	
+	protected:
+	
+	public:
+		wxCheckBox* m_chkMap;
+		wxFilePickerCtrl* m_filePickerMap;
+		wxCheckBox* m_chkCollisionMap;
+		wxFilePickerCtrl* m_filePickerCollisionMap;
+		wxCheckBox* m_chkGameObj;
+		wxFilePickerCtrl* m_filePickerGameObj;
+		
+		ExportDialogMapTab( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL ); 
+		~ExportDialogMapTab();
 	
 };
 

@@ -57,6 +57,7 @@ void Map::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_tiles, "tiles");
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_gameObjects, "gameObjects");
+	archive.Serialise(m_exportFilenames, "exportFilenames");
 	archive.Serialise(m_nextFreeGameObjectId, "nextFreeGameObjId");
 }
 
@@ -451,9 +452,11 @@ void Map::Export(const Project& project, std::stringstream& stream) const
 	//Blit stamps
 	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
 	{
-		const Stamp& stamp = *project.GetStamp(it->m_id);
-		const ion::Vector2i& position = it->m_position;
-		BakeStamp(tiles, position.x, position.y, stamp, it->m_flags);
+		if(const Stamp* stamp = project.GetStamp(it->m_id))
+		{
+			const ion::Vector2i& position = it->m_position;
+			BakeStamp(tiles, position.x, position.y, *stamp, it->m_flags);
+		}
 	}
 
 	//Use background tile if there is one, else use first tile

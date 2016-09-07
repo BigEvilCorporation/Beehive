@@ -134,6 +134,31 @@ public:
 	void Export(const Project& project, std::stringstream& stream) const;
 	void Export(const Project& project, ion::io::File& file) const;
 
+	//Last used export filenames
+	struct ExportFilenames
+	{
+		std::string map;
+		std::string collisionMap;
+		std::string gameObjects;
+
+		bool mapExportEnabled;
+		bool collisionMapExportEnabled;
+		bool gameObjectsExportEnabled;
+
+		void Serialise(ion::io::Archive& archive)
+		{
+			archive.Serialise(mapExportEnabled, "mapExportEnabled");
+			archive.Serialise(collisionMapExportEnabled, "collisionMapExportEnabled");
+			archive.Serialise(gameObjectsExportEnabled, "gameObjectsExportEnabled");
+
+			archive.Serialise(map, "exportFNameMap");
+			archive.Serialise(collisionMap, "exportFNameCollisionMap");
+			archive.Serialise(gameObjects, "exportFNameGameObjects");
+		}
+	};
+
+	ExportFilenames m_exportFilenames;
+
 private:
 	struct TileDesc
 	{

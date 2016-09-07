@@ -15,6 +15,7 @@
 
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
+#include <wx/textdlg.h>
 
 MapListPanel::MapListPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: MapListPanelBase(parent, id, pos, size, style)
@@ -255,5 +256,10 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 
 void MapListPanel::OnToolRenameMap(wxCommandEvent& event)
 {
-
+	wxTextEntryDialog dialog(m_mainWindow, "Rename Map");
+	if(dialog.ShowModal() == wxID_OK)
+	{
+		m_project.GetEditingMap().SetName(dialog.GetValue().c_str().AsChar());
+		Refresh(false, NULL);
+	}
 }

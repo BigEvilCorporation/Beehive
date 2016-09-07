@@ -20,6 +20,7 @@
 
 #include "MainWindow.h"
 #include "Dialogs.h"
+#include "ExportDialog.h"
 #include "SpriteAnimEditorDialog.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
@@ -930,60 +931,82 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		ExportDialog dialog(this);
+		ExportDialog dialog(this, *m_project);
 
 		dialog.m_txtProjectName->SetValue(m_project->GetName());
 		dialog.m_filePickerPalettes->SetPath(m_project->m_exportFilenames.palettes);
 		dialog.m_filePickerTileset->SetPath(m_project->m_exportFilenames.tileset);
-		dialog.m_filePickerMap->SetPath(m_project->m_exportFilenames.map);
-		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.TerrainTiles);
-		dialog.m_filePickerCollisionMap->SetPath(m_project->m_exportFilenames.collisionMap);
-		dialog.m_filePickerGameObj->SetPath(m_project->m_exportFilenames.gameObjects);
+		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.terrainTiles);
 		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
 		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
 		dialog.m_dirPickerSpritePalettes->SetPath(m_project->m_exportFilenames.spritePalettes);
 
+		dialog.m_chkPalettes->SetValue(m_project->m_exportFilenames.palettesExportEnabled);
+		dialog.m_chkTileset->SetValue(m_project->m_exportFilenames.tilesetExportEnabled);
+		dialog.m_chkTerrainTiles->SetValue(m_project->m_exportFilenames.terrainTilesExportEnabled);
+		dialog.m_chkSpriteSheets->SetValue(m_project->m_exportFilenames.spriteSheetsExportEnabled);
+		dialog.m_chkSpriteAnims->SetValue(m_project->m_exportFilenames.spriteAnimsExportEnabled);
+		dialog.m_chkSpritePalettes->SetValue(m_project->m_exportFilenames.spritePalettesExportEnabled);
+
+		int mapIndex = 0;
+		for(TMapMap::const_iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
+		{
+			dialog.SetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
+			dialog.SetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
+		}
+
 		if(dialog.ShowModal() == wxID_OK)
 		{
 			SetStatusText("Exporting...");
-
+			
 			m_project->SetName(std::string(dialog.m_txtProjectName->GetValue()));
 			m_project->m_exportFilenames.palettes = dialog.m_filePickerPalettes->GetPath();
 			m_project->m_exportFilenames.tileset = dialog.m_filePickerTileset->GetPath();
-			m_project->m_exportFilenames.map = dialog.m_filePickerMap->GetPath();
-			m_project->m_exportFilenames.TerrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
-			m_project->m_exportFilenames.collisionMap = dialog.m_filePickerCollisionMap->GetPath();
-			m_project->m_exportFilenames.gameObjects = dialog.m_filePickerGameObj->GetPath();
+			m_project->m_exportFilenames.terrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
 			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
 			m_project->m_exportFilenames.spritePalettes = dialog.m_dirPickerSpritePalettes->GetPath();
 
+			m_project->m_exportFilenames.palettesExportEnabled = dialog.m_chkPalettes->GetValue();
+			m_project->m_exportFilenames.tilesetExportEnabled = dialog.m_chkTileset->GetValue();
+			m_project->m_exportFilenames.terrainTilesExportEnabled = dialog.m_chkTerrainTiles->GetValue();
+			m_project->m_exportFilenames.spriteSheetsExportEnabled = dialog.m_chkSpriteSheets->GetValue();
+			m_project->m_exportFilenames.spriteAnimsExportEnabled = dialog.m_chkSpriteAnims->GetValue();
+			m_project->m_exportFilenames.spritePalettesExportEnabled = dialog.m_chkSpritePalettes->GetValue();
+			
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
-
+			
 			if(dialog.m_chkTileset->GetValue())
 				m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
 
-			if(dialog.m_chkMap->GetValue())
-				m_project->ExportMap(m_project->m_exportFilenames.map, dialog.m_btnBinary->GetValue());
-
 			if(dialog.m_chkTerrainTiles->GetValue())
-				m_project->ExportTerrainTiles(m_project->m_exportFilenames.TerrainTiles, dialog.m_btnBinary->GetValue());
-
-			if(dialog.m_chkCollisionMap->GetValue())
-				m_project->ExportCollisionMap(m_project->m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
-
-			if(dialog.m_chkGameObj->GetValue())
-				m_project->ExportGameObjects(m_project->m_exportFilenames.gameObjects);
+				m_project->ExportTerrainTiles(m_project->m_exportFilenames.terrainTiles, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkSpriteSheets->GetValue())
 				m_project->ExportSpriteSheets(m_project->m_exportFilenames.spriteSheets, dialog.m_btnBinary->GetValue());
-
+			
 			if(dialog.m_chkSpriteAnims->GetValue())
 				m_project->ExportSpriteAnims(m_project->m_exportFilenames.spriteAnims, dialog.m_btnBinary->GetValue());
-
+			
 			if(dialog.m_chkSpritePalettes->GetValue())
 				m_project->ExportSpritePalettes(m_project->m_exportFilenames.spritePalettes);
+
+			int mapIndex = 0;
+			for(TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
+			{
+				dialog.GetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
+				dialog.GetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
+
+				if(it->second.m_exportFilenames.mapExportEnabled)
+					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, dialog.m_btnBinary->GetValue());
+				
+				if(it->second.m_exportFilenames.collisionMapExportEnabled)
+					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
+				
+				if(it->second.m_exportFilenames.gameObjectsExportEnabled)
+					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects);
+			}
 
 			SetStatusText("Export complete");
 			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);

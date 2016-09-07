@@ -921,85 +921,28 @@ GameObjTypesPanelBase::~GameObjTypesPanelBase()
 	
 }
 
-ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
 	wxFlexGridSizer* fgSizer3;
-	fgSizer3 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer3->AddGrowableCol( 1 );
+	fgSizer3 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer3->AddGrowableCol( 0 );
 	fgSizer3->SetFlexibleDirection( wxBOTH );
 	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
+	wxFlexGridSizer* fgSizer32;
+	fgSizer32 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer32->AddGrowableCol( 1 );
+	fgSizer32->SetFlexibleDirection( wxBOTH );
+	fgSizer32->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
 	m_static1 = new wxStaticText( this, wxID_ANY, wxT("Project name:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_static1->Wrap( -1 );
-	fgSizer3->Add( m_static1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	fgSizer32->Add( m_static1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_txtProjectName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer3->Add( m_txtProjectName, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export map palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkPalettes->SetValue(true); 
-	fgSizer3->Add( m_chkPalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer3->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export map tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkTileset->SetValue(true); 
-	fgSizer3->Add( m_chkTileset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer3->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkMap = new wxCheckBox( this, wxID_ANY, wxT("Export map:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkMap->SetValue(true); 
-	fgSizer3->Add( m_chkMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer3->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkTerrainTiles = new wxCheckBox( this, wxID_ANY, wxT("Export terrain tiles:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkTerrainTiles->SetValue(true); 
-	fgSizer3->Add( m_chkTerrainTiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer3->Add( m_filePickerTerrainTiles, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkCollisionMap = new wxCheckBox( this, wxID_ANY, wxT("Export collision map:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkCollisionMap->SetValue(true); 
-	fgSizer3->Add( m_chkCollisionMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer3->Add( m_filePickerCollisionMap, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkGameObj = new wxCheckBox( this, wxID_ANY, wxT("Export game objects:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkGameObj->SetValue(true); 
-	fgSizer3->Add( m_chkGameObj, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer3->Add( m_filePickerGameObj, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkSpriteSheets = new wxCheckBox( this, wxID_ANY, wxT("Export sprite sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkSpriteSheets->SetValue(true); 
-	fgSizer3->Add( m_chkSpriteSheets, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_dirPickerSpriteSheets = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer3->Add( m_dirPickerSpriteSheets, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkSpritePalettes = new wxCheckBox( this, wxID_ANY, wxT("Export sprite palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkSpritePalettes->SetValue(true); 
-	fgSizer3->Add( m_chkSpritePalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_dirPickerSpritePalettes = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer3->Add( m_dirPickerSpritePalettes, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkSpriteAnims = new wxCheckBox( this, wxID_ANY, wxT("Export sprite animations:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkSpriteAnims->SetValue(true); 
-	fgSizer3->Add( m_chkSpriteAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_dirPickerSpriteAnims = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer3->Add( m_dirPickerSpriteAnims, 0, wxALL|wxEXPAND, 5 );
+	fgSizer32->Add( m_txtProjectName, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer16;
 	bSizer16 = new wxBoxSizer( wxHORIZONTAL );
@@ -1012,16 +955,78 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	bSizer16->Add( m_btnBinary, 0, wxALL, 5 );
 	
 	
-	fgSizer3->Add( bSizer16, 1, wxEXPAND, 5 );
+	fgSizer32->Add( bSizer16, 1, wxEXPAND, 5 );
 	
-	m_buttons = new wxStdDialogButtonSizer();
-	m_buttonsOK = new wxButton( this, wxID_OK );
-	m_buttons->AddButton( m_buttonsOK );
-	m_buttonsCancel = new wxButton( this, wxID_CANCEL );
-	m_buttons->AddButton( m_buttonsCancel );
-	m_buttons->Realize();
 	
-	fgSizer3->Add( m_buttons, 1, wxEXPAND, 5 );
+	fgSizer3->Add( fgSizer32, 1, wxEXPAND, 5 );
+	
+	wxFlexGridSizer* fgSizer33;
+	fgSizer33 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer33->AddGrowableCol( 1 );
+	fgSizer33->SetFlexibleDirection( wxBOTH );
+	fgSizer33->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export map palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkPalettes->SetValue(true); 
+	fgSizer33->Add( m_chkPalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer33->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export graphics tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTileset->SetValue(true); 
+	fgSizer33->Add( m_chkTileset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer33->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkTerrainTiles = new wxCheckBox( this, wxID_ANY, wxT("Export terrain tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTerrainTiles->SetValue(true); 
+	fgSizer33->Add( m_chkTerrainTiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer33->Add( m_filePickerTerrainTiles, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkSpriteSheets = new wxCheckBox( this, wxID_ANY, wxT("Export sprite sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpriteSheets->SetValue(true); 
+	fgSizer33->Add( m_chkSpriteSheets, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_dirPickerSpriteSheets = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer33->Add( m_dirPickerSpriteSheets, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkSpritePalettes = new wxCheckBox( this, wxID_ANY, wxT("Export sprite palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpritePalettes->SetValue(true); 
+	fgSizer33->Add( m_chkSpritePalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_dirPickerSpritePalettes = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer33->Add( m_dirPickerSpritePalettes, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkSpriteAnims = new wxCheckBox( this, wxID_ANY, wxT("Export sprite animations:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpriteAnims->SetValue(true); 
+	fgSizer33->Add( m_chkSpriteAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_dirPickerSpriteAnims = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer33->Add( m_dirPickerSpriteAnims, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	fgSizer3->Add( fgSizer33, 1, wxEXPAND, 5 );
+	
+	m_notebookMapTabs = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	
+	fgSizer3->Add( m_notebookMapTabs, 1, wxEXPAND | wxALL, 5 );
+	
+	wxBoxSizer* bSizer43;
+	bSizer43 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_btnCancel = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer43->Add( m_btnCancel, 0, wxALIGN_RIGHT|wxALL, 5 );
+	
+	m_btnExportAll = new wxButton( this, wxID_ANY, wxT("Export All"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_btnExportAll->SetDefault(); 
+	bSizer43->Add( m_btnExportAll, 0, wxALIGN_RIGHT|wxALL, 5 );
+	
+	
+	fgSizer3->Add( bSizer43, 1, wxALIGN_RIGHT, 5 );
 	
 	
 	this->SetSizer( fgSizer3 );
@@ -1030,15 +1035,15 @@ ExportDialog::ExportDialog( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_buttonsCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnCancel ), NULL, this );
-	m_buttonsOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnOk ), NULL, this );
+	m_btnCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialogBase::OnBtnCancel ), NULL, this );
+	m_btnExportAll->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialogBase::OnBtnExportAll ), NULL, this );
 }
 
-ExportDialog::~ExportDialog()
+ExportDialogBase::~ExportDialogBase()
 {
 	// Disconnect Events
-	m_buttonsCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnCancel ), NULL, this );
-	m_buttonsOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialog::OnBtnOk ), NULL, this );
+	m_btnCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialogBase::OnBtnCancel ), NULL, this );
+	m_btnExportAll->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ExportDialogBase::OnBtnExportAll ), NULL, this );
 	
 }
 
@@ -2043,5 +2048,47 @@ SpriteAnimPanelBase::SpriteAnimPanelBase( wxWindow* parent, wxWindowID id, const
 }
 
 SpriteAnimPanelBase::~SpriteAnimPanelBase()
+{
+}
+
+ExportDialogMapTab::ExportDialogMapTab( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+	wxFlexGridSizer* fgSizer34;
+	fgSizer34 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer34->AddGrowableCol( 1 );
+	fgSizer34->SetFlexibleDirection( wxBOTH );
+	fgSizer34->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_chkMap = new wxCheckBox( this, wxID_ANY, wxT("Export graphics map:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkMap->SetValue(true); 
+	fgSizer34->Add( m_chkMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer34->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkCollisionMap = new wxCheckBox( this, wxID_ANY, wxT("Export terrain map:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkCollisionMap->SetValue(true); 
+	fgSizer34->Add( m_chkCollisionMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer34->Add( m_filePickerCollisionMap, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkGameObj = new wxCheckBox( this, wxID_ANY, wxT("Export game objects:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkGameObj->SetValue(true); 
+	fgSizer34->Add( m_chkGameObj, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer34->Add( m_filePickerGameObj, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	fgSizer34->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( fgSizer34 );
+	this->Layout();
+	fgSizer34->Fit( this );
+}
+
+ExportDialogMapTab::~ExportDialogMapTab()
 {
 }
