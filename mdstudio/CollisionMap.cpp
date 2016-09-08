@@ -53,6 +53,7 @@ void CollisionMap::Serialise(ion::io::Archive& archive)
 {
 	archive.Serialise(m_width, "width");
 	archive.Serialise(m_height, "height");
+	archive.Serialise(m_terrainBeziers, "terrainBeziers");
 	archive.Serialise(m_collisionTiles, "collisionTiles");
 }
 
