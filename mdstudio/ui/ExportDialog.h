@@ -28,7 +28,7 @@ public:
 	void SetMapFormBools(int mapIndex, bool mapExport, bool collisionMapExport, bool gameObjectsExport);
 
 	void GetMapFormStrings(int mapIndex, std::string& mapFilename, std::string& collisionMapFilename, std::string& gameObjectsFilename) const;
-	void GetMapFormBools(int mapIndex, bool mapExport, bool collisionMapExport, bool gameObjectsExport) const;
+	void GetMapFormBools(int mapIndex, bool& mapExport, bool& collisionMapExport, bool& gameObjectsExport) const;
 
 private:
 	std::vector<ExportDialogMapTab*> m_mapTabs;

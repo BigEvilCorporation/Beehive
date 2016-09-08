@@ -53,7 +53,7 @@ void ExportDialog::GetMapFormStrings(int mapIndex, std::string& mapFilename, std
 	gameObjectsFilename = m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath();
 }
 
-void ExportDialog::GetMapFormBools(int mapIndex, bool mapExport, bool collisionMapExport, bool gameObjectsExport) const
+void ExportDialog::GetMapFormBools(int mapIndex, bool& mapExport, bool& collisionMapExport, bool& gameObjectsExport) const
 {
 	mapExport = m_mapTabs[mapIndex]->m_chkMap->GetValue();
 	collisionMapExport = m_mapTabs[mapIndex]->m_chkCollisionMap->GetValue();

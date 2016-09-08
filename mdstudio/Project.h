@@ -278,6 +278,8 @@ public:
 		bool spriteAnimsExportEnabled;
 		bool spritePalettesExportEnabled;
 
+		bool exportBinary;
+
 		void Serialise(ion::io::Archive& archive)
 		{
 			archive.Serialise(palettesExportEnabled, "palettesExportEnabled");
@@ -286,6 +288,7 @@ public:
 			archive.Serialise(spriteSheetsExportEnabled, "spriteSheetsExportEnabled");
 			archive.Serialise(spriteAnimsExportEnabled, "spriteAnimsExportEnabled");
 			archive.Serialise(spritePalettesExportEnabled, "spritePalettesExportEnabled");
+			archive.Serialise(exportBinary, "exportBinary");
 
 			archive.Serialise(palettes, "exportFNamePalettes");
 			archive.Serialise(tileset, "exportFNameTileset");

@@ -948,6 +948,9 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_chkSpriteAnims->SetValue(m_project->m_exportFilenames.spriteAnimsExportEnabled);
 		dialog.m_chkSpritePalettes->SetValue(m_project->m_exportFilenames.spritePalettesExportEnabled);
 
+		dialog.m_btnBinary->SetValue(m_project->m_exportFilenames.exportBinary);
+		dialog.m_btnText->SetValue(!m_project->m_exportFilenames.exportBinary);
+
 		int mapIndex = 0;
 		for(TMapMap::const_iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
 		{
@@ -973,6 +976,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.spriteSheetsExportEnabled = dialog.m_chkSpriteSheets->GetValue();
 			m_project->m_exportFilenames.spriteAnimsExportEnabled = dialog.m_chkSpriteAnims->GetValue();
 			m_project->m_exportFilenames.spritePalettesExportEnabled = dialog.m_chkSpritePalettes->GetValue();
+
+			m_project->m_exportFilenames.exportBinary = dialog.m_btnBinary->GetValue();
 			
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
