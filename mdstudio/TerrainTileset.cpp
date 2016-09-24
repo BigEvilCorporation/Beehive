@@ -20,15 +20,25 @@ TerrainTileset::TerrainTileset(const PlatformConfig& platformConfig)
 void TerrainTileset::Clear()
 {
 	m_tiles.clear();
+	m_hashMap.clear();
 }
 
 TerrainTileId TerrainTileset::AddTerrainTile()
 {
 	TerrainTileId index = m_tiles.size();
-	m_tiles.push_back(TerrainTile(m_platformConfig.tileWidth, m_platformConfig.tileHeight));
-	m_tiles[index].CalculateHash();
-	AddToHashMap(index);
-	return index;
+
+	if(index >= eCollisionTileFlagNone)
+	{
+		//Out of bits for id
+		return InvalidTerrainTileId;
+	}
+	else
+	{
+		m_tiles.push_back(TerrainTile(m_platformConfig.tileWidth, m_platformConfig.tileHeight));
+		m_tiles[index].CalculateHash();
+		AddToHashMap(index);
+		return index;
+	}
 }
 
 void TerrainTileset::PopBackTerrainTile()
@@ -52,6 +62,17 @@ void TerrainTileset::AddToHashMap(TerrainTileId tileId)
 void TerrainTileset::RemoveFromHashMap(TerrainTileId tileId)
 {
 	m_hashMap.erase(m_tiles[tileId].GetHash());
+}
+
+void TerrainTileset::RebuildHashMap()
+{
+	m_hashMap.clear();
+
+	for(int i = 0; i < m_tiles.size(); i++)
+	{
+		m_tiles[i].CalculateHash();
+		AddToHashMap(i);
+	}
 }
 
 void TerrainTileset::CalculateHash(const TerrainTile& tile, u64& hash) const

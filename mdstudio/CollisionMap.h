@@ -29,7 +29,7 @@ class CollisionMap
 public:
 
 	static const u16 s_collisionTileFlagMask = eCollisionTileFlagAll;
-	static const u16 s_collisionTileTerrainIdMask = ~eCollisionTileFlagAll;
+	static const u16 s_collisionTileTerrainIdMask = eCollisionTileFlagNone;
 
 	static const int defaultWidth = 64;
 	static const int defaultHeight = 64;

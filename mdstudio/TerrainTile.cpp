@@ -27,9 +27,10 @@ TerrainTile::TerrainTile()
 
 TerrainTile::TerrainTile(u8 width, u8 height)
 {
+	m_hash = 0;
 	m_width = width;
 	m_height = height;
-	m_heightmap.resize(width * height);
+	m_heightmap.resize(width * height, 0);
 }
 
 void TerrainTile::CopyHeights(const TerrainTile& tile)

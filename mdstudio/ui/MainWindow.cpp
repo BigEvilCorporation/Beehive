@@ -1188,7 +1188,11 @@ void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
 
 			if(wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
 			{
-				m_project->GenerateTerrainFromBeziers(granularity);
+				if(!m_project->GenerateTerrainFromBeziers(granularity))
+				{
+					wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
+				}
+				
 				RefreshAll();
 			}
 		}
@@ -1213,18 +1217,25 @@ void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 		//Add new collision tile
 		TerrainTileId tileId = m_project->GetTerrainTileset().AddTerrainTile();
 
-		//Recreate tileset texture
-		RefreshTerrainTileset();
+		if(tileId == InvalidTerrainTileId)
+		{
+			wxMessageBox("Max terrain tiles reached", "Error", wxOK, this);
+		}
+		else
+		{
+			//Recreate tileset texture
+			RefreshTerrainTileset();
 
-		//Set as current paint collision tile
-		m_project->SetPaintTerrainTile(tileId);
+			//Set as current paint collision tile
+			m_project->SetPaintTerrainTile(tileId);
 
-		//Set paint tool
-		SetMapTool(eToolPaintTerrainTile);
+			//Set paint tool
+			SetMapTool(eToolPaintTerrainTile);
 
-		//Refresh collision tiles and collision tile editor panels
-		RefreshPanel(ePanelTerrainTiles);
-		RefreshPanel(ePanelTerrainTileEditor);
+			//Refresh collision tiles and collision tile editor panels
+			RefreshPanel(ePanelTerrainTiles);
+			RefreshPanel(ePanelTerrainTileEditor);
+		}
 	}
 }
 

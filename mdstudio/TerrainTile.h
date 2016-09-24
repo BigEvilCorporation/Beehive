@@ -19,11 +19,12 @@ enum eCollisionTileFlags
 	eCollisionTileFlagSolid = (1 << 13),
 	eCollisionTileFlagHole = (1 << 14),
 
-	eCollisionTileFlagAll = (eCollisionTileFlagSolid | eCollisionTileFlagHole)
+	eCollisionTileFlagAll = (eCollisionTileFlagSolid | eCollisionTileFlagHole),
+	eCollisionTileFlagNone = (eCollisionTileFlagSolid - 1)
 };
 
 typedef u32 TerrainTileId;
-static const TerrainTileId InvalidTerrainTileId = (~eCollisionTileFlagAll & 0xFFFF);
+static const TerrainTileId InvalidTerrainTileId = eCollisionTileFlagNone;
 
 class TerrainTile
 {

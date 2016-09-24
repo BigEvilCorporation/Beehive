@@ -11,8 +11,12 @@
 
 #include <ion/io/Archive.h>
 #include <ion/gamekit/Bezier.h>
+
 #include <wx/msgdlg.h>
+
 #include <set>
+#include <vector>
+#include <algorithm>
 
 #include "Project.h"
 #include "BMPReader.h"
@@ -1101,10 +1105,15 @@ int Project::CleanupTerrainTiles(bool prompt)
 	u64 defaultTileHash = defaultTile ? defaultTile->CalculateHash() : 0;
 
 	//Collect all used TerrainTile ids from all maps
-	std::set<TerrainTileId> usedTerrainTiles;
+	std::vector<bool> usedTerrainTiles;
+	usedTerrainTiles.resize(m_terrainTileset.GetCount(), false);
+	bool usedTileCount = 0;
 
 	//Always add default tile
-	usedTerrainTiles.insert(m_defaultTerrainTile);
+	if(m_defaultTerrainTile != InvalidTerrainTileId)
+	{
+		usedTerrainTiles[m_defaultTerrainTile] = true;
+	}
 
 	for(TCollisionMapMap::iterator it = m_collisionMaps.begin(), end = m_collisionMaps.end(); it != end; ++it)
 	{
@@ -1117,18 +1126,24 @@ int Project::CleanupTerrainTiles(bool prompt)
 			for(int y = 0; y < mapHeight; y++)
 			{
 				TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
-				usedTerrainTiles.insert(terrainTileId);
+
+				if(terrainTileId != InvalidTerrainTileId)
+				{
+					usedTerrainTiles[terrainTileId] = true;
+					usedTileCount++;
+				}
 			}
 		}
 	}
 
-	std::set<TerrainTileId> unusedTerrainTiles;
+	std::vector<TerrainTileId> unusedTerrainTiles;
+	unusedTerrainTiles.reserve(m_terrainTileset.GetCount() - usedTileCount);
 
 	for(TerrainTileId i = 0; i < m_terrainTileset.GetCount(); i++)
 	{
-		if(usedTerrainTiles.find(i) == usedTerrainTiles.end())
+		if(!usedTerrainTiles[i])
 		{
-			unusedTerrainTiles.insert(i);
+			unusedTerrainTiles.push_back(i);
 		}
 	}
 
@@ -1137,15 +1152,24 @@ int Project::CleanupTerrainTiles(bool prompt)
 		std::stringstream message;
 		message << "Found " << unusedTerrainTiles.size() << " unused collision tiles, delete?";
 
+		//Sort
+		std::sort(unusedTerrainTiles.begin(), unusedTerrainTiles.end());
+
 		if(!prompt || wxMessageBox(message.str().c_str(), "Delete unused collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			//Delete in reverse, popping from back
-			for(std::set<TerrainTileId>::const_reverse_iterator it = unusedTerrainTiles.rbegin(), end = unusedTerrainTiles.rend(); it != end; ++it)
+			for(std::vector<TerrainTileId>::const_reverse_iterator it = unusedTerrainTiles.rbegin(), end = unusedTerrainTiles.rend(); it != end; ++it)
 			{
 				DeleteTerrainTile(*it);
 			}
 		}
 	}
+
+	//Rebuild hash map
+	GetTerrainTileset().RebuildHashMap();
+
+	//Default might have moved
+	m_defaultTerrainTile = GetTerrainTileset().FindDuplicate(defaultTileHash);
 
 	//Calculate hashes for all TerrainTiles
 	struct Duplicate
@@ -1165,7 +1189,7 @@ int Project::CleanupTerrainTiles(bool prompt)
 		u64 hash = terrainTile->GetHash();
 		bool duplicateFound = false;
 
-		if(hash != defaultTileHash)
+		if(i != m_defaultTerrainTile)
 		{
 			std::map<u64, TerrainTileId>::iterator it = terrainTileMap.find(hash);
 			if(it != terrainTileMap.end())
@@ -1220,16 +1244,16 @@ int Project::CleanupTerrainTiles(bool prompt)
 		}
 	}
 
-	//Find and set default tile
-	if(defaultTileHash)
-	{
-		m_defaultTerrainTile = m_terrainTileset.FindDuplicate(defaultTileHash);
-	}
+	//Rebuild hash map
+	GetTerrainTileset().RebuildHashMap();
+
+	//Default might have moved
+	m_defaultTerrainTile = GetTerrainTileset().FindDuplicate(defaultTileHash);
 
 	return unusedTerrainTiles.size() + duplicates.size();
 }
 
-void Project::GenerateTerrainFromBeziers(int granularity)
+bool Project::GenerateTerrainFromBeziers(int granularity)
 {
 	//Clear all terrain tiles
 	m_terrainTileset.Clear();
@@ -1238,13 +1262,13 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 	TerrainTileId blankTileId = m_terrainTileset.AddTerrainTile();
 	SetDefaultTerrainTile(blankTileId);
 
+	//Clear all terrain entries from all maps
 	for(TCollisionMapMap::iterator it = m_collisionMaps.begin(), end = m_collisionMaps.end(); it != end; ++it)
 	{
 		CollisionMap& collisionMap = it->second;
 		int mapWidth = collisionMap.GetWidth();
 		int mapHeight = collisionMap.GetHeight();
 
-		//Clear all terrain map entries
 		for(int x = 0; x < mapWidth; x++)
 		{
 			for(int y = 0; y < mapHeight; y++)
@@ -1252,6 +1276,13 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 				collisionMap.SetTerrainTile(x, y, InvalidTerrainTileId);
 			}
 		}
+	}
+
+	for(TCollisionMapMap::iterator it = m_collisionMaps.begin(), end = m_collisionMaps.end(); it != end; ++it)
+	{
+		CollisionMap& collisionMap = it->second;
+		int mapWidth = collisionMap.GetWidth();
+		int mapHeight = collisionMap.GetHeight();
 
 		const int tileWidth = GetPlatformConfig().tileWidth;
 		const int tileHeight = GetPlatformConfig().tileHeight;
@@ -1284,6 +1315,12 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 						//Create new collision tile
 						tileId = m_terrainTileset.AddTerrainTile();
 
+						if(tileId == InvalidTerrainTileId)
+						{
+							//Out of tiles
+							return false;
+						}
+
 						//Set on map
 						collisionMap.SetTerrainTile(tilePos.x, tilePos.y, tileId);
 					}
@@ -1302,15 +1339,17 @@ void Project::GenerateTerrainFromBeziers(int granularity)
 				}
 			}
 		}
+
+		//Rebuild hash map
+		GetTerrainTileset().RebuildHashMap();
+
+		//Remove duplicates
+		CleanupTerrainTiles(false);
 	}
 
-	//Remove duplicates
-	CleanupTerrainTiles(false);
-
-	//Reset default terrain tile
-	SetDefaultTerrainTile(blankTileId);
-
 	InvalidateTerrainTiles(false);
+
+	return true;
 }
 
 void Project::GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles)
@@ -2313,7 +2352,7 @@ bool Project::ExportGameObjects(MapId mapId, const std::string& filename) const
 					else
 					{
 						//No name, generate one
-						stream << gameObjectType.GetName() << "_" << std::dec << (u32)gameObjIt->second[i].m_gameObject.GetId() << "_idx\tequ 0x" << std::hex << i << std::endl;
+						stream << mapName << gameObjectType.GetName() << "_" << std::dec << (u32)gameObjIt->second[i].m_gameObject.GetId() << "_idx\tequ 0x" << std::hex << i << std::endl;
 					}
 
 					gameObjIt->second[i].m_gameObject.Export(stream, gameObjectType);

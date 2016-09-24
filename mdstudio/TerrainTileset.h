@@ -34,6 +34,7 @@ public:
 	void HashChanged(TerrainTileId tileId);
 	TerrainTileId FindDuplicate(const TerrainTile& tile) const;
 	TerrainTileId FindDuplicate(u64 hash) const;
+	void RebuildHashMap();
 
 	TerrainTile* GetTerrainTile(TerrainTileId tileId);
 	const TerrainTile* GetTerrainTile(TerrainTileId tileId) const;

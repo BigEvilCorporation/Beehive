@@ -13,6 +13,7 @@
 #include "MainWindow.h"
 
 #include <wx/Menu.h>
+#include <wx/msgdlg.h>
 
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
@@ -1007,17 +1008,24 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					//Create new collision tile
 					tileId = terrainTileset.AddTerrainTile();
 
-					//Set on map
-					collisionMap.SetTerrainTile(tileX, tileY, tileId);
+					if(tileId == InvalidTerrainTileId)
+					{
+						wxMessageBox("Max terrain tiles reached", "Error", wxOK, this);
+					}
+					else
+					{
+						//Set on map
+						collisionMap.SetTerrainTile(tileX, tileY, tileId);
 
-					//Paint to canvas
-					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(tileX, tileY), tileX, y_inv);
+						//Paint to canvas
+						PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(tileX, tileY), tileX, y_inv);
 
-					//Invalidate terrain tileset
-					m_project.InvalidateTerrainTiles(true);
+						//Invalidate terrain tileset
+						m_project.InvalidateTerrainTiles(true);
 
-					//Refresh terrain tileset texture
-					m_mainWindow->RefreshTerrainTileset();
+						//Refresh terrain tileset texture
+						m_mainWindow->RefreshTerrainTileset();
+					}
 				}
 
 				//Get collision tile

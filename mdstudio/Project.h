@@ -173,7 +173,7 @@ public:
 	int CleanupTerrainTiles(bool prompt);
 
 	//Terrain generation from bezier paths
-	void GenerateTerrainFromBeziers(int granularity);
+	bool GenerateTerrainFromBeziers(int granularity);
 
 	//Terrain generation from graphic tiles
 	void GenerateTerrain(const std::vector<ion::Vector2i>& graphicTiles);
