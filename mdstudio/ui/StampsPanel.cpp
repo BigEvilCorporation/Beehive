@@ -312,9 +312,9 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 				std::vector<std::pair<TileId, Tile*>> tiles;
 				tiles.reserve(stamp->GetWidth() * stamp->GetHeight());
 
-				for(int x = 0; x < stamp->GetWidth(); x++)
+				for(int y = 0; y < stamp->GetHeight(); y++)
 				{
-					for(int y = 0; y < stamp->GetHeight(); y++)
+					for(int x = 0; x < stamp->GetWidth(); x++)
 					{
 						StampId stampId = stamp->GetTile(x, y);
 						tiles.push_back(std::make_pair(stampId, m_project.GetTileset().GetTile(stampId)));
@@ -322,10 +322,11 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 				}
 
 				stampAnim->AddTileFrame(TileFrame(tiles, stamp->GetWidth(), stamp->GetHeight()));
+				stampAnim->m_trackTileFrame.InsertKeyframe(AnimKeyframeSpriteFrame(0.0f, 0));
 				stampAnim->SetName(stamp->GetName());
 
 				//Show editor
-				StampAnimEditorDialog stampAnimEditorDialog(this, m_project, m_renderer, *m_glContext, m_renderResources);
+				StampAnimEditorDialog stampAnimEditorDialog(*m_mainWindow, m_project, m_renderer, *m_glContext, m_renderResources);
 				stampAnimEditorDialog.ShowModal();
 			}
 		}

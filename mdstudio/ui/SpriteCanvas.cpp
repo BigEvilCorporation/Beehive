@@ -118,7 +118,7 @@ void SpriteCanvas::SetDrawTileFrame(TileFrame tileFrame)
 			//Set texture coords for cell
 			ion::render::TexCoord coords[4];
 			m_renderResources->GetTileTexCoords(tileId, coords, 0);
-			m_tileFramePrimitive->SetTexCoords((y * width) + x, coords);
+			m_tileFramePrimitive->SetTexCoords((y_inv * width) + x, coords);
 		}
 	}
 
@@ -239,7 +239,24 @@ void SpriteCanvas::RenderTileFrame(ion::render::Renderer& renderer, const ion::M
 {
 	if(m_tileFramePrimitive)
 	{
+		const int tileWidth = m_project->GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project->GetPlatformConfig().tileHeight;
 
+		//Render spriteSheet
+		ion::render::Primitive* primitive = m_tileFramePrimitive;
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTileset);
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+
+		ion::Matrix4 boxMtx;
+		ion::Vector3 boxScale(m_cameraZoom, m_cameraZoom, 0.0f);
+		ion::Vector3 boxPos(m_drawOffset.x * m_cameraZoom, m_drawOffset.y * m_cameraZoom, z);
+
+		boxMtx.SetTranslation(boxPos);
+		boxMtx.SetScale(boxScale);
+
+		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+		material->Unbind();
 	}
 }
 

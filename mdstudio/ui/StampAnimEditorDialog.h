@@ -24,6 +24,8 @@
 #include <wx/dragimag.h>
 #include <wx/weakref.h>
 
+class MainWindow;
+
 class StampAnimEditorDialog : public StampAnimEditorDialogBase
 {
 public:
@@ -33,10 +35,11 @@ public:
 
 	enum ContextMenu
 	{
-		eMenuDeleteKeyframe = 1
+		eMenuDeleteKeyframe = 1,
+		eMenuAddKeyframe
 	};
 
-	StampAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
+	StampAnimEditorDialog(MainWindow& mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual ~StampAnimEditorDialog();
 
 	void SetAnimation(StampAnimId animId);
@@ -65,10 +68,13 @@ private:
 
 	void FindAndDrawDropTarget(wxPoint mousePosDropSource, wxPoint mousePosDropTarget);
 
+	void ApplyAnimFrame(int frame);
+
 	Project& m_project;
 	ion::render::Renderer& m_renderer;
 	RenderResources& m_renderResources;
 	wxGLContext& m_glContext;
+	MainWindow& m_mainWindow;
 
 	StampAnimId m_selectedAnimId;
 	StampAnimation* m_selectedAnim;

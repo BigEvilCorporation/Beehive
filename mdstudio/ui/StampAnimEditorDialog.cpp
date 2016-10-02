@@ -12,6 +12,7 @@
 #include "StampAnimEditorDialog.h"
 #include "SpriteCanvas.h"
 #include "Dialogs.h"
+#include "MainWindow.h"
 
 #include <wx/msgdlg.h>
 #include <wx/imaglist.h>
@@ -23,13 +24,14 @@
 #include <GL/glext.h>
 #include <GL/wglext.h>
 
-StampAnimEditorDialog::StampAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
-	: StampAnimEditorDialogBase(parent)
+StampAnimEditorDialog::StampAnimEditorDialog(MainWindow& mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
+	: StampAnimEditorDialogBase(&mainWindow)
 	, m_project(project)
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)
 	, m_glContext(glContext)
 	, m_timer(this)
+	, m_mainWindow(mainWindow)
 {
 	m_selectedAnimId = InvalidStampAnimId;
 	m_selectedAnim = NULL;
@@ -104,7 +106,8 @@ void StampAnimEditorDialog::OnSliderMove(wxScrollEvent& event)
 		int frame = m_selectedAnim->m_trackTileFrame.GetValue(time);
 
 		m_selectedAnim->SetFrame(time);
-		//m_canvas->SetDrawTileFrame(m_selectedAnim->Get, frame, offset);
+		m_canvas->SetDrawTileFrame(m_selectedAnim->GetTileFrame(frame));
+		ApplyAnimFrame(frame);
 		m_gridTimeline->GoToCell(0, frame);
 	}
 }
@@ -181,34 +184,40 @@ void StampAnimEditorDialog::PopulateKeyframes(const StampAnimation& anim)
 		m_gridTimeline->DeleteCols(0, m_gridTimeline->GetNumberCols());
 	}
 
-	if(spriteResources)
-	{
-		const u32 numKeyframes = anim.m_trackTileFrame.GetNumKeyframes();
+	const u32 numKeyframes = anim.m_trackTileFrame.GetNumKeyframes();
 
-		if(numKeyframes > 0 && spriteResources->m_frames.size() > 0)
+	if(numKeyframes > 0)
+	{
+		int iconWidth = s_iconHeight;
+
+		if(spriteResources && spriteResources->m_frames.size() > 0)
 		{
 			//Create new image list based on size of first texture
 			const ion::render::Texture* texture0 = spriteResources->m_frames[0].texture;
 
 			const float iconAspect = (float)texture0->GetWidth() / (float)texture0->GetHeight();
-			const int iconWidth = s_iconHeight * iconAspect;
+			iconWidth = s_iconHeight * iconAspect;
+		}
 
-			m_timelineImageList = new wxImageList(iconWidth, s_iconHeight, numKeyframes);
+		m_timelineImageList = new wxImageList(iconWidth, s_iconHeight, numKeyframes);
 
-			//Create timeline cells
-			m_gridTimeline->AppendCols(numKeyframes);
+		//Create timeline cells
+		m_gridTimeline->AppendCols(numKeyframes);
 
-			//Reset timeline row height
-			m_gridTimeline->SetRowSize(0, s_iconHeight + (s_iconBorderY * 2));
-			m_gridTimeline->DisableRowResize(0);
+		//Reset timeline row height
+		m_gridTimeline->SetRowSize(0, s_iconHeight + (s_iconBorderY * 2));
+		m_gridTimeline->DisableRowResize(0);
 
-			for(int i = 0; i < numKeyframes; i++)
+		for(int i = 0; i < numKeyframes; i++)
+		{
+			//Setup column
+			//Set all row content types to number
+			m_gridTimeline->SetColFormatNumber(i);
+			m_gridTimeline->SetColSize(i, iconWidth + (s_iconBorderX * 2));
+			m_gridTimeline->DisableColResize(i);
+
+			if(spriteResources && spriteResources->m_frames.size() > 0)
 			{
-				//Setup column
-				//Set all row content types to number
-				m_gridTimeline->SetColFormatNumber(i);
-				m_gridTimeline->SetColSize(i, iconWidth + (s_iconBorderX * 2));
-				m_gridTimeline->DisableColResize(i);
 				m_gridTimeline->SetCellRenderer(0, i, new GridCellBitmapRenderer(m_timelineImageList.get()));
 
 				//Get sprite keyframe
@@ -231,13 +240,13 @@ void StampAnimEditorDialog::PopulateKeyframes(const StampAnimation& anim)
 				//Add to image list
 				m_timelineImageList->Add(bitmap);
 			}
-
-			//Set timeline height
-			m_gridTimeline->SetMinSize(wxSize(m_gridTimeline->GetMinSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
-			m_gridTimeline->SetMaxSize(wxSize(m_gridTimeline->GetMaxSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
-			m_gridTimeline->GetContainingSizer()->Layout();
-			m_gridTimeline->Refresh();
 		}
+
+		//Set timeline height
+		m_gridTimeline->SetMinSize(wxSize(m_gridTimeline->GetMinSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
+		m_gridTimeline->SetMaxSize(wxSize(m_gridTimeline->GetMaxSize().x, s_iconHeight + (s_iconBorderY * 2) + m_scrollbarHeight));
+		m_gridTimeline->GetContainingSizer()->Layout();
+		m_gridTimeline->Refresh();
 	}
 }
 
@@ -265,6 +274,40 @@ void StampAnimEditorDialog::SelectAnimation(int index)
 	}
 }
 
+void StampAnimEditorDialog::ApplyAnimFrame(int frame)
+{
+	if(m_selectedAnim)
+	{
+		Tileset& tileset = m_project.GetTileset();
+
+		const TileFrame& tileFrame = m_selectedAnim->GetTileFrame(frame);
+		for(int i = 0; i < tileFrame.m_tiles.size(); i++)
+		{
+			TileId tileId = tileFrame.m_tiles[i].first;
+			if(Tile* tile = tileset.GetTile(tileId))
+			{
+				for(int x = 0; x < tile->GetWidth(); x++)
+				{
+					for(int y = 0; y < tile->GetHeight(); y++)
+					{
+						int colourIdx = tileFrame.m_tiles[i].second.GetPixelColour(x, y);
+						tile->SetPixelColour(x, y, colourIdx);
+						m_renderResources.SetTilesetTexPixel(tileId, ion::Vector2i(x, y), colourIdx);
+					}
+				}
+			}
+		}
+
+		//Refresh panel
+		Refresh();
+
+		//Refresh tiles, map and stamps panels
+		m_mainWindow.RedrawPanel(MainWindow::ePanelTiles);
+		m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
+		m_mainWindow.RedrawPanel(MainWindow::ePanelStamps);
+	}
+}
+
 void StampAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 {
 	if(m_selectedAnim)
@@ -277,7 +320,8 @@ void StampAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 		int frame = m_selectedAnim->m_trackTileFrame.GetValue(time);
 
 		m_selectedAnim->Update(delta);
-		//m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame, offset);
+		m_canvas->SetDrawTileFrame(m_selectedAnim->GetTileFrame(frame));
+		ApplyAnimFrame(frame);
 		m_sliderTimeline->SetValue((int)ion::maths::Round(lerpTime * 100.0f));
 		m_gridTimeline->GoToCell(0, frame);
 	}
@@ -378,6 +422,7 @@ void StampAnimEditorDialog::EventHandlerTimelineRightClick(wxGridEvent& event)
 		m_contextMenuKeyframeIndex = event.GetCol();
 
 		wxMenu contextMenu;
+		contextMenu.Append(eMenuAddKeyframe, wxString("Insert keyframe"));
 		contextMenu.Append(eMenuDeleteKeyframe, wxString("Delete keyframe"));
 		contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampAnimEditorDialog::EventHandlerContextMenuClick, NULL, this);
 		PopupMenu(&contextMenu);
@@ -388,7 +433,31 @@ void StampAnimEditorDialog::EventHandlerContextMenuClick(wxCommandEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		if(event.GetId() == eMenuDeleteKeyframe)
+		if(event.GetId() == eMenuAddKeyframe)
+		{
+			const int numExistingFrames = m_selectedAnim->m_trackTileFrame.GetNumKeyframes();
+
+			//Create new tile frame using prev as template
+			TileFrame tileFrame(m_selectedAnim->GetTileFrame(numExistingFrames - 1));
+
+			//Import tile frame
+			wxFileDialog dialog(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			if(dialog.ShowModal() == wxID_OK)
+			{
+				if(tileFrame.Import(dialog.GetPath().c_str().AsChar(), m_project))
+				{
+					//Insert tile frame
+					m_selectedAnim->AddTileFrame(tileFrame);
+
+					//Add new keyframe
+					m_selectedAnim->m_trackTileFrame.InsertKeyframe(AnimKeyframeSpriteFrame((float)numExistingFrames, numExistingFrames));
+
+					//Re-populate keyframe view
+					PopulateKeyframes(*m_selectedAnim);
+				}
+			}
+		}
+		else if(event.GetId() == eMenuDeleteKeyframe)
 		{
 			//Rebuild animation
 			std::vector<u32> keyframes;

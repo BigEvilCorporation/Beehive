@@ -34,6 +34,7 @@ class TileFrame
 {
 public:
 	TileFrame();
+	TileFrame(const TileFrame& rhs);
 	TileFrame(const std::vector<std::pair<TileId, Tile*>>& tiles, int width, int height);
 
 	bool Import(const std::string filename, Project& project);

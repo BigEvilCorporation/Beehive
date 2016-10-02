@@ -54,6 +54,13 @@ TileFrame::TileFrame()
 	m_height = 0;
 }
 
+TileFrame::TileFrame(const TileFrame& rhs)
+{
+	m_width = rhs.m_width;
+	m_height = rhs.m_height;
+	m_tiles = rhs.m_tiles;
+}
+
 TileFrame::TileFrame(const std::vector<std::pair<TileId, Tile*>>& tiles, int width, int height)
 {
 	m_tiles.reserve(tiles.size());
