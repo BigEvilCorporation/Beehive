@@ -72,46 +72,48 @@ class SpriteCanvas;
 #define wxID_BTN_TOOLS_SPRITEANIM 1017
 #define wxID_BTN_MAP_CLEAR 1018
 #define wxID_BTN_MAP_RESIZE 1019
-#define wxID_BTN_TILES_IMPORT 1020
-#define wxID_BTN_TILES_CREATE 1021
-#define wxID_BTN_TILES_DELETE 1022
-#define wxID_BTN_TILES_CLEANUP 1023
-#define wxID_BTN_SPRITE_EDITOR 1024
-#define wxID_BTN_STAMPS_CREATE 1025
-#define wxID_BTN_STAMPS_DELETE 1026
-#define wxID_BTN_STAMPS_EXPORT_BMP 1027
-#define wxID_BTN_STAMPS_CLEANUP 1028
-#define wxID_BTN_COL_TILES_CREATE 1029
-#define wxID_BTN_COL_TILES_DELETE 1030
-#define wxID_BTN_COL_TILES_CLEANUP 1031
-#define wxID_BTN_COL_MAP_CLEAR 1032
-#define wxID_BTN_COL_GEN_BEZIER 1033
-#define wxID_BTN_GAME_OBJ_TYPES 1034
-#define wxID_BTN_CANCEL 1035
-#define wxID_TOOL_SELECTTILE 1036
-#define wxID_TOOL_PAINT 1037
-#define wxID_TOOL_TILEPICKER 1038
-#define wxID_TOOL_FLIPX 1039
-#define wxID_TOOL_FLIPY 1040
-#define wxID_TOOL_FILL 1041
-#define wxID_TOOL_CLONE 1042
-#define wxID_TOOL_SELECTSTAMP 1043
-#define wxID_TOOL_STAMP 1044
-#define wxID_TOOL_MOVESTAMP 1045
-#define wxID_TOOL_STAMPPICKER 1046
-#define wxID_TOOL_CREATESTAMP 1047
-#define wxID_TOOL_REMOVESTAMP 1048
-#define wxID_TOOL_COL_PAINTTERRAIN 1049
-#define wxID_TOOL_COL_PAINTSOLID 1050
-#define wxID_TOOL_COL_PAINTHOLE 1051
-#define wxID_TOOL_COL_DELETETERRTILE 1052
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1053
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1054
-#define wxID_TOOL_SELECTGAMEOBJ 1055
-#define wxID_TOOL_PLACEGAMEOBJ 1056
-#define wxID_TOOL_MOVEGAMEOBJ 1057
-#define wxID_TOOL_ANIMATEGAMEOBJ 1058
-#define wxID_TOOL_REMOVEGAMEOBJ 1059
+#define wxID_BTN_MAP_EXPORT_BMP 1020
+#define wxID_BTN_TILES_IMPORT 1021
+#define wxID_BTN_TILES_CREATE 1022
+#define wxID_BTN_TILES_DELETE 1023
+#define wxID_BTN_TILES_CLEANUP 1024
+#define wxID_BTN_SPRITE_EDITOR 1025
+#define wxID_BTN_STAMPS_CREATE 1026
+#define wxID_BTN_STAMPS_DELETE 1027
+#define wxID_BTN_STAMPS_EXPORT_BMP 1028
+#define wxID_BTN_STAMPS_CLEANUP 1029
+#define wxID_BTN_COL_TILES_CREATE 1030
+#define wxID_BTN_COL_TILES_DELETE 1031
+#define wxID_BTN_COL_TILES_CLEANUP 1032
+#define wxID_BTN_COL_MAP_CLEAR 1033
+#define wxID_BTN_COL_GEN_BEZIER 1034
+#define wxID_BTN_GAME_OBJ_TYPES 1035
+#define wxID_BTN_CANCEL 1036
+#define wxID_TOOL_SELECTTILE 1037
+#define wxID_TOOL_PAINT 1038
+#define wxID_TOOL_TILEPICKER 1039
+#define wxID_TOOL_FLIPX 1040
+#define wxID_TOOL_FLIPY 1041
+#define wxID_TOOL_FILL 1042
+#define wxID_TOOL_CLONE 1043
+#define wxID_TOOL_CREATE_SCENE_ANIM 1044
+#define wxID_TOOL_SELECTSTAMP 1045
+#define wxID_TOOL_STAMP 1046
+#define wxID_TOOL_MOVESTAMP 1047
+#define wxID_TOOL_STAMPPICKER 1048
+#define wxID_TOOL_CREATESTAMP 1049
+#define wxID_TOOL_REMOVESTAMP 1050
+#define wxID_TOOL_COL_PAINTTERRAIN 1051
+#define wxID_TOOL_COL_PAINTSOLID 1052
+#define wxID_TOOL_COL_PAINTHOLE 1053
+#define wxID_TOOL_COL_DELETETERRTILE 1054
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1055
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1056
+#define wxID_TOOL_SELECTGAMEOBJ 1057
+#define wxID_TOOL_PLACEGAMEOBJ 1058
+#define wxID_TOOL_MOVEGAMEOBJ 1059
+#define wxID_TOOL_ANIMATEGAMEOBJ 1060
+#define wxID_TOOL_REMOVEGAMEOBJ 1061
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -166,6 +168,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnToolsSpriteAnim( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapResize( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnMapExportBMP( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -384,6 +387,7 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolFlipY;
 		wxBitmapButton* m_toolFill;
 		wxBitmapButton* m_toolClone;
+		wxBitmapButton* m_toolCreateSceneAnim;
 		wxStaticText* m_staticText12;
 		wxBitmapButton* m_toolSelectStamp;
 		wxBitmapButton* m_toolPaintStamp;
@@ -640,6 +644,42 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		
 		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
 		~SpriteAnimEditorDialogBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class StampAnimEditorDialogBase
+///////////////////////////////////////////////////////////////////////////////
+class StampAnimEditorDialogBase : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText39;
+		wxListBox* m_listAnimations;
+		wxButton* m_btnDeleteAnim;
+		SpriteCanvas* m_canvas;
+		wxStaticText* m_staticText32;
+		wxGrid* m_gridTimeline;
+		wxSlider* m_sliderTimeline;
+		wxBitmapButton* m_btnPlay;
+		wxBitmapButton* m_btnStop;
+		wxStaticText* m_staticText40;
+		wxSpinCtrl* m_spinCtrlSpeed;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnAnimSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSliderMove( wxScrollEvent& event ) { event.Skip(); }
+		virtual void OnBtnPlay( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnStop( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSpinSpeedChange( wxSpinEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		StampAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Stamp Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+		~StampAnimEditorDialogBase();
 	
 };
 

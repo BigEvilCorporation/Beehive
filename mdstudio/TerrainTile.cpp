@@ -17,12 +17,15 @@
 #include <iomanip>
 
 #include "TerrainTile.h"
+#include "PlatformConfig.h"
 
 TerrainTile::TerrainTile()
 {
+	const PlatformConfig& defaultPlatformConfig = PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive];
+
 	m_hash = 0;
-	m_width = 0;
-	m_height = 0;
+	m_width = defaultPlatformConfig.tileWidth;
+	m_height = defaultPlatformConfig.tileHeight;
 }
 
 TerrainTile::TerrainTile(u8 width, u8 height)

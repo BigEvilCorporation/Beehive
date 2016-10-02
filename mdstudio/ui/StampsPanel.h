@@ -46,6 +46,7 @@ private:
 		eMenuDeleteStamp,
 		eMenuSetStampLowDrawPrio,
 		eMenuSetStampHighDrawPrio,
+		eMenuCreateStampAnim
 	};
 
 	enum Mode

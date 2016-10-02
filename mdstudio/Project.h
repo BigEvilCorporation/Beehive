@@ -29,12 +29,14 @@
 #include "TerrainTile.h"
 #include "TerrainTileset.h"
 #include "GameObject.h"
+#include "StampAnimation.h"
 
 typedef std::map<MapId, Map> TMapMap;
 typedef std::map<CollisionMapId, CollisionMap> TCollisionMapMap;
 typedef std::map<StampId, Stamp> TStampMap;
 typedef std::map<ActorId, Actor> TActorMap;
 typedef std::map<AnimationId, Animation> TAnimationMap;
+typedef std::map<StampAnimId, StampAnimation> TStampAnimationMap;
 typedef std::map<GameObjectTypeId, GameObjectType> TGameObjectTypeMap;
 
 class Project
@@ -152,6 +154,15 @@ public:
 	const TAnimationMap::const_iterator AnimationsEnd() const;
 	int GetAnimationCount() const;
 
+	//Stamp animations
+	StampAnimId CreateStampAnimation();
+	void DeleteStampAnimation(StampAnimId StampAnimId);
+	StampAnimation* GetStampAnimation(StampAnimId StampAnimId);
+	const StampAnimation* GetStampAnimation(StampAnimId StampAnimId) const;
+	const TStampAnimationMap::const_iterator StampAnimationsBegin() const;
+	const TStampAnimationMap::const_iterator StampAnimationsEnd() const;
+	int GetStampAnimationCount() const;
+
 	//Stamps
 	StampId AddStamp(int width, int height);
 	StampId AddStamp(Stamp* stamp);
@@ -252,6 +263,7 @@ public:
 	bool ExportSpriteSheets(const std::string& directory, bool binary) const;
 	bool ExportSpriteAnims(const std::string& directory, bool binary) const;
 	bool ExportSpritePalettes(const std::string& directory) const;
+	bool ExportMapBitmaps(const std::string& directory) const;
 	bool ExportStampBitmaps(const std::string& directory) const;
 
 	bool ExportMap(MapId mapId, const std::string& filename, bool binary) const;
@@ -355,6 +367,9 @@ private:
 
 	//Animations
 	TAnimationMap m_animations;
+
+	//Stamp animations
+	TStampAnimationMap m_stampAnimations;
 
 	//Game object types
 	TGameObjectTypeMap m_gameObjectTypes;

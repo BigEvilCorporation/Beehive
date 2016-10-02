@@ -23,6 +23,7 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	m_drawGrid = false;
 	m_drawSpriteSheet = InvalidSpriteSheetId;
 	m_drawSpriteSheetFrame = 0;
+	m_tileFramePrimitive = NULL;
 
 	//Set viewport clear colour
 	m_viewport.SetClearColour(ion::Colour(0.3f, 0.3f, 0.3f));
@@ -88,6 +89,39 @@ void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, cons
 	m_drawSpriteSheet = spriteSheet;
 	m_drawSpriteSheetFrame = frame;
 	m_drawOffset = offset;
+	Refresh();
+}
+
+void SpriteCanvas::SetDrawTileFrame(TileFrame tileFrame)
+{
+	m_drawTileFrame = tileFrame;
+
+	if(m_tileFramePrimitive)
+	{
+		delete m_tileFramePrimitive;
+	}
+
+	const int tileWidth = m_project->GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project->GetPlatformConfig().tileHeight;
+	const int width = tileFrame.m_width;
+	const int height = tileFrame.m_height;
+
+	m_tileFramePrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
+
+	for(int x = 0; x < width; x++)
+	{
+		for(int y = 0; y < height; y++)
+		{
+			TileId tileId = m_drawTileFrame.m_tiles[(y * width) + x].first;
+			int y_inv = height - 1 - y;
+
+			//Set texture coords for cell
+			ion::render::TexCoord coords[4];
+			m_renderResources->GetTileTexCoords(tileId, coords, 0);
+			m_tileFramePrimitive->SetTexCoords((y * width) + x, coords);
+		}
+	}
+
 	Refresh();
 }
 
@@ -163,6 +197,10 @@ void SpriteCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4&
 	RenderSpriteSheet(renderer, cameraInverseMtx, projectionMtx, z);
 	z += zOffset;
 
+	//Render tile frame
+	RenderTileFrame(renderer, cameraInverseMtx, projectionMtx, z);
+	z += zOffset;
+
 	//Render grid
 	RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	z += zOffset;
@@ -194,6 +232,14 @@ void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion:
 		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
+	}
+}
+
+void SpriteCanvas::RenderTileFrame(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	if(m_tileFramePrimitive)
+	{
+
 	}
 }
 

@@ -15,6 +15,7 @@ typedef ion::UUID64 CollisionMapId;
 typedef ion::UUID64 ActorId;
 typedef ion::UUID64 AnimationId;
 typedef ion::UUID64 SpriteAnimId;
+typedef ion::UUID64 StampAnimId;
 
 static const MapId InvalidMapId = 0;
 static const CollisionMapId InvalidCollisionMapId = 0;
@@ -23,3 +24,4 @@ static const GameObjectId InvalidGameObjectId = 0;
 static const ActorId InvalidActorId = 0;
 static const AnimationId InvalidAnimationId = 0;
 static const SpriteAnimId InvalidSpriteAnimId = 0;
+static const StampAnimId InvalidStampAnimId = 0;

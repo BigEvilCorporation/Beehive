@@ -134,6 +134,7 @@ protected:
 	virtual void OnBtnToolsTimeline(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnMapExportBMP(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 	virtual void OnBtnShowOutlines(wxCommandEvent& event);

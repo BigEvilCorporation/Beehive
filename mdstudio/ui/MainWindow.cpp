@@ -26,6 +26,8 @@
 #include "TilesPanel.h"
 #include "MapPanel.h"
 
+#include "maths\Maths.h"
+
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
 
 MainWindow::MainWindow()
@@ -445,6 +447,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATE_SCENE_ANIM);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVESTAMP);
@@ -1370,6 +1373,18 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnMapExportBMP(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		wxDirDialog dialog(this);
+		if(dialog.ShowModal() == wxID_OK)
+		{
+			m_project->ExportMapBitmaps(dialog.GetPath().c_str().AsChar());
+		}
+	}
+}
+
 void MainWindow::OnBtnGridShow(wxCommandEvent& event)
 {
 	if(m_project.get())
@@ -1484,6 +1499,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_CLONE:
 			m_mapPanel->SetTool(eToolClone);
+			break;
+		case wxID_TOOL_CREATE_SCENE_ANIM:
+			m_mapPanel->SetTool(eToolCreateStampAnim);
 			break;
 		case wxID_TOOL_CREATESTAMP:
 			m_mapPanel->SetTool(eToolCreateStamp);

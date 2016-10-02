@@ -11,6 +11,8 @@
 
 #include "StampsPanel.h"
 #include "MainWindow.h"
+#include "StampAnimEditorDialog.h"
+#include "../StampAnimation.h"
 
 #include <wx/menu.h>
 #include <wx/filedlg.h>
@@ -211,6 +213,7 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			contextMenu.Append(eMenuUpdateStamp, wxString("Update stamp"));
 			contextMenu.Append(eMenuSubstituteStamp, wxString("Substitute stamp"));
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
+			contextMenu.Append(eMenuCreateStampAnim, wxString("Create stamp animation"));
 			contextMenu.Append(eMenuSetStampLowDrawPrio, wxString("Set stamp low draw priority"));
 			contextMenu.Append(eMenuSetStampHighDrawPrio, wxString("Set stamp high draw priority"));
 			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampsPanel::OnContextMenuClick, NULL, this);
@@ -292,6 +295,38 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 				{
 					stamp->SetTileFlags(x, y, stamp->GetTileFlags(x, y) | Map::eHighPlane);
 				}
+			}
+		}
+	}
+	else if(event.GetId() == eMenuCreateStampAnim)
+	{
+		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			//Create new scene anim
+			StampAnimId stampAnimId = m_project.CreateStampAnimation();
+
+			if(StampAnimation* stampAnim = m_project.GetStampAnimation(stampAnimId))
+			{
+				//Create first frame
+				std::vector<std::pair<TileId, Tile*>> tiles;
+				tiles.reserve(stamp->GetWidth() * stamp->GetHeight());
+
+				for(int x = 0; x < stamp->GetWidth(); x++)
+				{
+					for(int y = 0; y < stamp->GetHeight(); y++)
+					{
+						StampId stampId = stamp->GetTile(x, y);
+						tiles.push_back(std::make_pair(stampId, m_project.GetTileset().GetTile(stampId)));
+					}
+				}
+
+				stampAnim->AddTileFrame(TileFrame(tiles, stamp->GetWidth(), stamp->GetHeight()));
+				stampAnim->SetName(stamp->GetName());
+
+				//Show editor
+				StampAnimEditorDialog stampAnimEditorDialog(this, m_project, m_renderer, *m_glContext, m_renderResources);
+				stampAnimEditorDialog.ShowModal();
 			}
 		}
 	}

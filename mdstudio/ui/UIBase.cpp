@@ -103,6 +103,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarMap = new wxRibbonButtonBar( m_ribbonPanelMap, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_CLEAR, wxT("Clear Map"), wxBitmap( clearmap_xpm ), wxEmptyString);
 	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_RESIZE, wxT("Resize Map"), wxBitmap( resizemap_xpm ), wxEmptyString);
+	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_EXPORT_BMP, wxT("Export BMP"), wxBitmap( save_xpm ), wxEmptyString);
 	m_ribbonPanelTiles = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tiles") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarTiles = new wxRibbonButtonBar( m_ribbonPanelTiles, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_IMPORT, wxT("Import"), wxBitmap( importtiles_xpm ), wxEmptyString);
@@ -162,6 +163,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TOOLS_SPRITEANIM, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsSpriteAnim ) );
 	this->Connect( wxID_BTN_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapClear ) );
 	this->Connect( wxID_BTN_MAP_RESIZE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapResize ) );
+	this->Connect( wxID_BTN_MAP_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapExportBMP ) );
 	this->Connect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
 	this->Connect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
 	this->Connect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
@@ -199,6 +201,7 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TOOLS_SPRITEANIM, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsSpriteAnim ) );
 	this->Disconnect( wxID_BTN_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapClear ) );
 	this->Disconnect( wxID_BTN_MAP_RESIZE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapResize ) );
+	this->Disconnect( wxID_BTN_MAP_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapExportBMP ) );
 	this->Disconnect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
 	this->Disconnect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
 	this->Disconnect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
@@ -706,6 +709,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_toolClone->SetToolTip( wxT("Clone Selection") );
 	
 	fgSizer1->Add( m_toolClone, 0, wxALL, 5 );
+	
+	m_toolCreateSceneAnim = new wxBitmapButton( this, wxID_TOOL_CREATE_SCENE_ANIM, wxBitmap( tool_createstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolCreateSceneAnim->SetToolTip( wxT("Create Scene Anim") );
+	
+	fgSizer1->Add( m_toolCreateSceneAnim, 0, wxALL, 5 );
 	
 	
 	bSizer16->Add( fgSizer1, 1, wxEXPAND, 5 );
@@ -1573,6 +1581,187 @@ SpriteAnimEditorDialogBase::~SpriteAnimEditorDialogBase()
 	m_spinCtrlSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( SpriteAnimEditorDialogBase::OnSpinSpeedChange ), NULL, this );
 	m_radioBlendLerp->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnRadioBlendLerp ), NULL, this );
 	m_radioBlendSnap->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnRadioBlendSnap ), NULL, this );
+	
+}
+
+StampAnimEditorDialogBase::StampAnimEditorDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer10;
+	bSizer10 = new wxBoxSizer( wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizer14;
+	fgSizer14 = new wxFlexGridSizer( 3, 1, 0, 0 );
+	fgSizer14->AddGrowableCol( 0 );
+	fgSizer14->AddGrowableRow( 1 );
+	fgSizer14->SetFlexibleDirection( wxBOTH );
+	fgSizer14->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	wxFlexGridSizer* fgSizer15;
+	fgSizer15 = new wxFlexGridSizer( 2, 2, 0, 0 );
+	fgSizer15->SetFlexibleDirection( wxBOTH );
+	fgSizer15->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	
+	fgSizer14->Add( fgSizer15, 1, wxEXPAND, 5 );
+	
+	wxFlexGridSizer* fgSizer13;
+	fgSizer13 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer13->AddGrowableCol( 0 );
+	fgSizer13->AddGrowableRow( 0 );
+	fgSizer13->SetFlexibleDirection( wxBOTH );
+	fgSizer13->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	wxFlexGridSizer* fgSizer24;
+	fgSizer24 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer24->AddGrowableCol( 1 );
+	fgSizer24->AddGrowableRow( 0 );
+	fgSizer24->SetFlexibleDirection( wxBOTH );
+	fgSizer24->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	wxFlexGridSizer* fgSizer25;
+	fgSizer25 = new wxFlexGridSizer( 3, 1, 0, 0 );
+	fgSizer25->AddGrowableRow( 1 );
+	fgSizer25->SetFlexibleDirection( wxBOTH );
+	fgSizer25->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticText39 = new wxStaticText( this, wxID_ANY, wxT("Animations:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText39->Wrap( -1 );
+	fgSizer25->Add( m_staticText39, 0, wxALL, 5 );
+	
+	m_listAnimations = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 ); 
+	fgSizer25->Add( m_listAnimations, 0, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer27;
+	bSizer27 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_btnDeleteAnim = new wxButton( this, wxID_ANY, wxT("Delete"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer27->Add( m_btnDeleteAnim, 0, wxALL, 5 );
+	
+	
+	fgSizer25->Add( bSizer27, 1, wxEXPAND, 5 );
+	
+	
+	fgSizer24->Add( fgSizer25, 1, wxEXPAND, 5 );
+	
+	m_canvas = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	fgSizer24->Add( m_canvas, 1, wxEXPAND | wxALL, 5 );
+	
+	
+	fgSizer13->Add( fgSizer24, 1, wxEXPAND, 5 );
+	
+	wxFlexGridSizer* m_sizerTimeline;
+	m_sizerTimeline = new wxFlexGridSizer( 6, 1, 0, 0 );
+	m_sizerTimeline->AddGrowableCol( 0 );
+	m_sizerTimeline->AddGrowableRow( 1 );
+	m_sizerTimeline->AddGrowableRow( 3 );
+	m_sizerTimeline->SetFlexibleDirection( wxBOTH );
+	m_sizerTimeline->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticText32 = new wxStaticText( this, wxID_ANY, wxT("Timeline:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText32->Wrap( -1 );
+	m_sizerTimeline->Add( m_staticText32, 0, wxALL, 5 );
+	
+	m_gridTimeline = new wxGrid( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL );
+	
+	// Grid
+	m_gridTimeline->CreateGrid( 1, 1 );
+	m_gridTimeline->EnableEditing( true );
+	m_gridTimeline->EnableGridLines( true );
+	m_gridTimeline->EnableDragGridSize( false );
+	m_gridTimeline->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridTimeline->SetColSize( 0, 128 );
+	m_gridTimeline->EnableDragColMove( false );
+	m_gridTimeline->EnableDragColSize( false );
+	m_gridTimeline->SetColLabelSize( 0 );
+	m_gridTimeline->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridTimeline->SetRowSize( 0, 64 );
+	m_gridTimeline->EnableDragRowSize( false );
+	m_gridTimeline->SetRowLabelSize( 0 );
+	m_gridTimeline->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridTimeline->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	m_sizerTimeline->Add( m_gridTimeline, 0, wxALL|wxEXPAND, 5 );
+	
+	m_sliderTimeline = new wxSlider( this, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	m_sizerTimeline->Add( m_sliderTimeline, 0, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer28;
+	bSizer28 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_btnPlay = new wxBitmapButton( this, wxID_ANY, wxBitmap( play_16_16_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer28->Add( m_btnPlay, 0, wxALL, 5 );
+	
+	m_btnStop = new wxBitmapButton( this, wxID_ANY, wxBitmap( stop_16_16_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	bSizer28->Add( m_btnStop, 0, wxALL, 5 );
+	
+	m_staticText40 = new wxStaticText( this, wxID_ANY, wxT("Speed:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText40->Wrap( -1 );
+	bSizer28->Add( m_staticText40, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	
+	m_spinCtrlSpeed = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 10 );
+	bSizer28->Add( m_spinCtrlSpeed, 0, wxALL, 5 );
+	
+	
+	m_sizerTimeline->Add( bSizer28, 1, wxEXPAND, 5 );
+	
+	
+	fgSizer13->Add( m_sizerTimeline, 1, wxEXPAND, 5 );
+	
+	
+	fgSizer14->Add( fgSizer13, 1, wxEXPAND, 5 );
+	
+	
+	bSizer10->Add( fgSizer14, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer10 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_listAnimations->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( StampAnimEditorDialogBase::OnAnimSelected ), NULL, this );
+	m_btnDeleteAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StampAnimEditorDialogBase::OnBtnAnimDelete ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_btnPlay->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StampAnimEditorDialogBase::OnBtnPlay ), NULL, this );
+	m_btnStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StampAnimEditorDialogBase::OnBtnStop ), NULL, this );
+	m_spinCtrlSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( StampAnimEditorDialogBase::OnSpinSpeedChange ), NULL, this );
+}
+
+StampAnimEditorDialogBase::~StampAnimEditorDialogBase()
+{
+	// Disconnect Events
+	m_listAnimations->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( StampAnimEditorDialogBase::OnAnimSelected ), NULL, this );
+	m_btnDeleteAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StampAnimEditorDialogBase::OnBtnAnimDelete ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_sliderTimeline->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( StampAnimEditorDialogBase::OnSliderMove ), NULL, this );
+	m_btnPlay->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StampAnimEditorDialogBase::OnBtnPlay ), NULL, this );
+	m_btnStop->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StampAnimEditorDialogBase::OnBtnStop ), NULL, this );
+	m_spinCtrlSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( StampAnimEditorDialogBase::OnSpinSpeedChange ), NULL, this );
 	
 }
 

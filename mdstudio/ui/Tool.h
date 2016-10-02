@@ -46,7 +46,8 @@ enum ToolType
 	eToolMoveGameObject,
 	eToolAnimateGameObject,
 	eToolRemoveGameObject,
-	eToolGenerateTerrain
+	eToolGenerateTerrain,
+	eToolCreateStampAnim
 };
 
 class Tool

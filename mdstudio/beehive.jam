@@ -36,6 +36,8 @@ local SRC =
 	SpriteSheet.h
 	SpriteAnimation.cpp
 	SpriteAnimation.h
+	StampAnimation.cpp
+	StampAnimation.h
 	Stamp.cpp
 	Stamp.h
 	TerrainTile.cpp
@@ -46,6 +48,7 @@ local SRC =
 	Tile.h
 	Tileset.cpp
 	Tileset.h
+	Types.h
 
 	ui/Dialogs.cpp
 	ui/Dialogs.h
@@ -57,6 +60,8 @@ local SRC =
 	ui/GameObjectTypePanel.h
 	ui/GameObjectTypeDialog.cpp
 	ui/GameObjectTypeDialog.h
+	ui/GridCellRenderer.cpp
+	ui/GridCellRenderer.h
 	ui/ExportDialog.cpp
 	ui/ExportDialog.h
 	ui/MapPanel.cpp
@@ -73,6 +78,8 @@ local SRC =
 	ui/SpriteAnimEditorDialog.h
 	ui/SpriteAnimPanel.cpp
 	ui/SpriteAnimPanel.h
+	ui/StampAnimEditorDialog.cpp
+	ui/StampAnimEditorDialog.h
 	ui/StampsPanel.cpp
 	ui/StampsPanel.h
 	ui/TerrainTileEditorPanel.cpp

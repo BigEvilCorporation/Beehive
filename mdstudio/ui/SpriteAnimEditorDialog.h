@@ -13,6 +13,7 @@
 
 #include "UIBase.h"
 #include "RenderResources.h"
+#include "GridCellRenderer.h"
 #include "../Project.h"
 #include "../SpriteSheet.h"
 
@@ -22,31 +23,6 @@
 #include <wx/timer.h>
 #include <wx/dragimag.h>
 #include <wx/weakref.h>
-
-class GridCellBitmapRenderer : public wxGridCellStringRenderer
-{
-public:
-	enum SelectionEdge
-	{
-		eDrawSelectionEdgeNone,
-		eDrawSelectionEdgeLeft,
-		eDrawSelectionEdgeRight
-	};
-
-	GridCellBitmapRenderer(wxImageList* imageList);
-	virtual ~GridCellBitmapRenderer();
-
-	void SetImageList(wxImageList* imageList);
-	wxImageList* GetImageList() const;
-
-	void SetDrawSelectionEdge(SelectionEdge selectionEdge);
-
-	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
-
-private:
-	wxImageList* m_imageList;
-	SelectionEdge m_selectionEdge;
-};
 
 class SpriteAnimEditorDialog : public SpriteAnimEditorDialogBase
 {

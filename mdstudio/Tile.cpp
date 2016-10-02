@@ -19,11 +19,13 @@
 
 Tile::Tile()
 {
+	const PlatformConfig& defaultPlatformConfig = PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive];
+
 	m_index = 0;
 	m_palette = 0;
 	m_hash = 0;
-	m_width = 0;
-	m_height = 0;
+	m_width = defaultPlatformConfig.tileWidth;
+	m_height = defaultPlatformConfig.tileHeight;
 }
 
 Tile::Tile(u8 width, u8 height)

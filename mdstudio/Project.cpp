@@ -150,6 +150,7 @@ void Project::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_stamps, "stamps");
 	archive.Serialise(m_actors, "actors");
 	archive.Serialise(m_animations, "animations");
+	archive.Serialise(m_stampAnimations, "stampAnimations");
 	archive.Serialise(m_gameObjectTypes, "gameObjectTypes");
 	archive.Serialise(m_nextFreeStampId, "nextFreeStampId");
 	archive.Serialise(m_nextFreeGameObjectTypeId, "nextFreeGameObjectTypeId");
@@ -855,6 +856,63 @@ const TAnimationMap::const_iterator Project::AnimationsEnd() const
 int Project::GetAnimationCount() const
 {
 	return m_animations.size();
+}
+
+StampAnimId Project::CreateStampAnimation()
+{
+	StampAnimId animationId = ion::GenerateUUID64();
+	m_stampAnimations.insert(std::make_pair(animationId, StampAnimation()));
+	return animationId;
+}
+
+void Project::DeleteStampAnimation(StampAnimId animationId)
+{
+	TStampAnimationMap::iterator it = m_stampAnimations.find(animationId);
+	if(it != m_stampAnimations.end())
+	{
+		m_stampAnimations.erase(it);
+	}
+}
+
+StampAnimation* Project::GetStampAnimation(StampAnimId animationId)
+{
+	StampAnimation* animation = NULL;
+
+	TStampAnimationMap::iterator it = m_stampAnimations.find(animationId);
+	if(it != m_stampAnimations.end())
+	{
+		animation = &it->second;
+	}
+
+	return animation;
+}
+
+const StampAnimation* Project::GetStampAnimation(StampAnimId animationId) const
+{
+	const StampAnimation* animation = NULL;
+
+	TStampAnimationMap::const_iterator it = m_stampAnimations.find(animationId);
+	if(it != m_stampAnimations.end())
+	{
+		animation = &it->second;
+	}
+
+	return animation;
+}
+
+const TStampAnimationMap::const_iterator Project::StampAnimationsBegin() const
+{
+	return m_stampAnimations.begin();
+}
+
+const TStampAnimationMap::const_iterator Project::StampAnimationsEnd() const
+{
+	return m_stampAnimations.end();
+}
+
+int Project::GetStampAnimationCount() const
+{
+	return m_stampAnimations.size();
 }
 
 StampId Project::AddStamp(int width, int height)
@@ -1831,12 +1889,11 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 			stamp = GetStamp(stampId);
 		}
 
+		int paletteIndex = -1;
+
 		if(importFlags & eBMPImportWholePalette)
 		{
 			//Read whole palette
-			int paletteIndex = -1;
-
-			//Get selected palette index
 			for(int i = 0; i < s_maxPalettes && paletteIndex == -1; i++)
 			{
 				if(paletteBits & (1 << i))
@@ -1868,119 +1925,136 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		{
 			for(int tileX = 0; tileX < tilesWidth; tileX++)
 			{
-				std::vector<Colour> pixels(tileWidth * tileHeight);
+				Tile tile(m_platformConfig.tileWidth, m_platformConfig.tileHeight);
+				PaletteId paletteId = (importFlags & eBMPImportWholePalette) ? paletteIndex : 0;
 
-				//Read pixel colours from bitmap
-				for(int pixelX = 0; pixelX < tileWidth; pixelX++)
+				if(importFlags & eBMPImportWholePalette)
 				{
-					for(int pixelY = 0; pixelY < tileHeight; pixelY++)
+					//Copy colour indices directly
+					for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 					{
-						int sourcePixelX = (tileX * tileWidth) + pixelX;
-						int sourcePixelY = (tileY * tileHeight) + pixelY;
-
-						if(sourcePixelX < reader.GetWidth() && sourcePixelY < reader.GetHeight())
+						for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 						{
-							pixels[(pixelY * tileWidth) + pixelX] = reader.GetPixel(sourcePixelX, sourcePixelY);
-						}
-						else
-						{
-							pixels[(pixelY * tileWidth) + pixelX] = reader.GetPaletteEntry(0);
+							int sourcePixelX = (tileX * tileWidth) + pixelX;
+							int sourcePixelY = (tileY * tileHeight) + pixelY;
+							tile.SetPixelColour(pixelX, pixelY, reader.GetColourIndex(sourcePixelX, sourcePixelY));
 						}
 					}
 				}
-
-				//Find or create palette
-				PaletteId paletteId = 0;
-				PaletteId closestPaletteId = 0;
-				int closestPaletteColourMatches = 0;
-				if(!FindPalette(pixels.data(), paletteBits, paletteId, closestPaletteId, closestPaletteColourMatches))
+				else
 				{
-					//Import palette
-					Palette importedPalette;
-					if(!ImportPalette(pixels.data(), importedPalette))
+					//Search for colours
+					std::vector<Colour> pixels(tileWidth * tileHeight);
+
+					//Read pixel colours from bitmap
+					for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 					{
-						wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK | wxICON_ERROR);
-						return false;
-					}
-
-					//If closest palette has enough space to merge
-					bool merged = false;
-
-					int closestPaletteUsedColours = 0;
-					int importedPaletteUsedColours = 0;
-
-					for(int i = 0; i < Palette::coloursPerPalette; i++)
-					{
-						if(m_palettes[closestPaletteId].IsColourUsed(i))
+						for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 						{
-							closestPaletteUsedColours++;
-						}
-					}
+							int sourcePixelX = (tileX * tileWidth) + pixelX;
+							int sourcePixelY = (tileY * tileHeight) + pixelY;
 
-					for(int i = 0; i < Palette::coloursPerPalette; i++)
-					{
-						if(importedPalette.IsColourUsed(i))
-						{
-							importedPaletteUsedColours++;
-						}
-					}
-
-					int spareColours = Palette::coloursPerPalette - closestPaletteUsedColours;
-					int requiredNewColours = importedPaletteUsedColours - closestPaletteColourMatches;
-
-					if(spareColours >= requiredNewColours)
-					{
-						//Merge palettes
-						if(MergePalettes(m_palettes[closestPaletteId], importedPalette))
-						{
-							paletteId = closestPaletteId;
-							merged = true;
-						}
-					}
-					
-					if(!merged)
-					{
-						//Find free useable palette
-						bool foundFreePalette = false;
-						for(int i = 0; i < s_maxPalettes && !foundFreePalette; i++)
-						{
-							if((paletteBits & (1 << i)) && m_palettes[i].GetUsedColourMask() == 0)
+							if(sourcePixelX < reader.GetWidth() && sourcePixelY < reader.GetHeight())
 							{
-								paletteId = i;
-								foundFreePalette = true;
+								pixels[(pixelY * tileWidth) + pixelX] = reader.GetPixel(sourcePixelX, sourcePixelY);
+							}
+							else
+							{
+								pixels[(pixelY * tileWidth) + pixelX] = reader.GetPaletteEntry(0);
+							}
+						}
+					}
+
+					//Find or create palette
+					PaletteId closestPaletteId = 0;
+					int closestPaletteColourMatches = 0;
+					if(!FindPalette(pixels.data(), paletteBits, paletteId, closestPaletteId, closestPaletteColourMatches))
+					{
+						//Import palette
+						Palette importedPalette;
+						if(!ImportPalette(pixels.data(), importedPalette))
+						{
+							wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK | wxICON_ERROR);
+							return false;
+						}
+
+						//If closest palette has enough space to merge
+						bool merged = false;
+
+						int closestPaletteUsedColours = 0;
+						int importedPaletteUsedColours = 0;
+
+						for(int i = 0; i < Palette::coloursPerPalette; i++)
+						{
+							if(m_palettes[closestPaletteId].IsColourUsed(i))
+							{
+								closestPaletteUsedColours++;
 							}
 						}
 
-						if(!foundFreePalette)
+						for(int i = 0; i < Palette::coloursPerPalette; i++)
 						{
-							wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK | wxICON_ERROR);
-							return false;
+							if(importedPalette.IsColourUsed(i))
+							{
+								importedPaletteUsedColours++;
+							}
 						}
 
-						//Use imported palette
-						m_palettes[paletteId] = importedPalette;
+						int spareColours = Palette::coloursPerPalette - closestPaletteUsedColours;
+						int requiredNewColours = importedPaletteUsedColours - closestPaletteColourMatches;
+
+						if(spareColours >= requiredNewColours)
+						{
+							//Merge palettes
+							if(MergePalettes(m_palettes[closestPaletteId], importedPalette))
+							{
+								paletteId = closestPaletteId;
+								merged = true;
+							}
+						}
+
+						if(!merged)
+						{
+							//Find free useable palette
+							bool foundFreePalette = false;
+							for(int i = 0; i < s_maxPalettes && !foundFreePalette; i++)
+							{
+								if((paletteBits & (1 << i)) && m_palettes[i].GetUsedColourMask() == 0)
+								{
+									paletteId = i;
+									foundFreePalette = true;
+								}
+							}
+
+							if(!foundFreePalette)
+							{
+								wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK | wxICON_ERROR);
+								return false;
+							}
+
+							//Use imported palette
+							m_palettes[paletteId] = importedPalette;
+						}
 					}
-				}
 
-				//Get palette
-				Palette& palette = m_palettes[paletteId];
+					//Get palette
+					Palette& palette = m_palettes[paletteId];
 
-				Tile tile(m_platformConfig.tileWidth, m_platformConfig.tileHeight);
-
-				//Find pixel colours from palette
-				for(int pixelX = 0; pixelX < tileWidth; pixelX++)
-				{
-					for(int pixelY = 0; pixelY < tileHeight; pixelY++)
+					//Find pixel colours from palette
+					for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 					{
-						int colourIdx = 0;
-						if(!palette.GetNearestColourIdx(pixels[(pixelY * tileWidth) + pixelX], Palette::eExact, colourIdx))
+						for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 						{
-							//Shouldn't reach here - palette should have been validated
-							wxMessageBox("Error mapping colour indices", "Error", wxOK | wxICON_ERROR);
-							return false;
-						}
+							int colourIdx = 0;
+							if(!palette.GetNearestColourIdx(pixels[(pixelY * tileWidth) + pixelX], Palette::eExact, colourIdx))
+							{
+								//Shouldn't reach here - palette should have been validated
+								wxMessageBox("Error mapping colour indices", "Error", wxOK | wxICON_ERROR);
+								return false;
+							}
 
-						tile.SetPixelColour(pixelX, pixelY, colourIdx);
+							tile.SetPixelColour(pixelX, pixelY, colourIdx);
+						}
 					}
 				}
 
@@ -2454,6 +2528,91 @@ bool Project::ExportSpritePalettes(const std::string& directory) const
 		{
 			return false;
 		}
+	}
+
+	return true;
+}
+
+bool Project::ExportMapBitmaps(const std::string& directory) const
+{
+	for(TMapMap::const_iterator it = m_maps.begin(), end = m_maps.end(); it != end; ++it)
+	{
+		std::stringstream filename;
+		filename << directory << "\\map_" << it->first << ".bmp";
+
+		const Map& map = it->second;
+
+		BMPReader writer;
+		writer.SetDimensions(map.GetWidth() * m_platformConfig.tileWidth, map.GetHeight() * m_platformConfig.tileHeight);
+
+		const Palette* palette = GetPalette(0);
+
+		if(palette)
+		{
+			for(int i = 0; i < Palette::coloursPerPalette && palette->IsColourUsed(i); i++)
+			{
+				writer.SetPaletteEntry(i, palette->GetColour(i));
+			}
+
+			for(int tileX = 0; tileX < map.GetWidth(); tileX++)
+			{
+				for(int tileY = 0; tileY < map.GetHeight(); tileY++)
+				{
+					//Find stamp at position first
+					ion::Vector2i stampPos;
+					TileId tileId = InvalidTileId;
+					u32 flags = 0;
+					u32 mapEntryIndex = 0;
+					StampId stampId = map.FindStamp(tileX, tileY, stampPos, flags, mapEntryIndex);
+
+					if(stampId)
+					{
+						//Get from stamp
+						if(const Stamp* stamp = GetStamp(stampId))
+						{
+							ion::Vector2i offset = ion::Vector2i(tileX, tileY) - stampPos;
+
+							int sourceX = (flags & Map::eFlipX) ? (stamp->GetWidth() - 1 - offset.x) : offset.x;
+							int sourceY = (flags & Map::eFlipY) ? (stamp->GetHeight() - 1 - offset.y) : offset.y;
+
+							tileId = stamp->GetTile(sourceX, sourceY);
+							flags ^= stamp->GetTileFlags(sourceX, sourceY);
+						}
+					}
+					else
+					{
+						//Pick tile
+						tileId = map.GetTile(tileX, tileY);
+						flags = map.GetTileFlags(tileX, tileY);
+					}
+
+					if(tileId == InvalidTileId)
+					{
+						tileId = m_backgroundTile;
+
+						if(tileId == InvalidTileId)
+						{
+							tileId = 0;
+						}
+					}
+
+					const Tile* tile = m_tileset.GetTile(tileId);
+
+					for(int x = 0; x < m_platformConfig.tileWidth; x++)
+					{
+						for(int y = 0; y < m_platformConfig.tileHeight; y++)
+						{
+							u8 colourIndex = tile->GetPixelColour(x, y);
+							int pixelX = (flags & Map::eFlipX) ? (m_platformConfig.tileWidth - x - 1) : x;
+							int pixelY = (flags & Map::eFlipY) ? (m_platformConfig.tileHeight - y - 1) : y;
+							writer.SetColourIndex((tileX * m_platformConfig.tileWidth) + pixelX, (tileY * m_platformConfig.tileHeight) + pixelY, colourIndex);
+						}
+					}
+				}
+			}
+		}
+
+		writer.Write(filename.str());
 	}
 
 	return true;
