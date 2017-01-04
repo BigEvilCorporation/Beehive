@@ -288,13 +288,13 @@ void SpriteAnimEditorDialog::OnTimelineCellChange(wxGridEvent& event)
 			}
 			
 			//Set keyframe
-			ion::Vector2i position(0, 0);
+			ion::render::Keyframe<ion::Vector2i>& keyframe = m_selectedAnim->m_trackPosition.GetKeyframe(frame);
+			ion::Vector2i position = keyframe.GetValue();
 			if(trackType == eTrackPositionX)
 				event.GetString().ToLong((long*)&position.x, 10);
 			else
 				event.GetString().ToLong((long*)&position.y, 10);
 
-			ion::render::Keyframe<ion::Vector2i>& keyframe = m_selectedAnim->m_trackPosition.GetKeyframe(frame);
 			keyframe.SetValue(position);
 		}
 	}

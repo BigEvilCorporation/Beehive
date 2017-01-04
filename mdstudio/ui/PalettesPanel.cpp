@@ -137,7 +137,19 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 			{
 				if(event.LeftDClick())
 				{
-					wxColourDialog dialogue(this);
+					wxColourData customColourData;
+
+					for(int i = 0; i < Palette::coloursPerPalette; i++)
+					{
+						if(palette->IsColourUsed(i))
+						{
+							Colour colour = palette->GetColour(i);
+							customColourData.SetCustomColour(i, wxColour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
+						}
+					}
+
+					wxColourDialog dialogue(this, &customColourData);
+					
 					if(dialogue.ShowModal() == wxID_OK)
 					{
 						wxColour wxcolour = dialogue.GetColourData().GetColour();
