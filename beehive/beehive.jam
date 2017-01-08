@@ -7,9 +7,7 @@ ApplyIonIo beehive ;
 ApplyIonRenderer beehive : opengl ;
 ApplyIonGameKit beehive ;
 
-ApplyWxSDK beehive ;
-
-local SRC = 
+local BEEHIVE_SRC = 
 	Actor.cpp
 	Actor.h
 	Animation.cpp
@@ -49,6 +47,6 @@ SubInclude bigevilcorp imageformats : imageformats ;
 C.IncludeDirectories beehive : $(bigevilcorp)/imageformats ;
 C.LinkLibraries beehive : imageformats ;
 
-AutoSourceGroup beehive : $(SRC) ;
+AutoSourceGroup beehive : $(BEEHIVE_SRC) ;
 C.RuntimeType beehive : static ;
-C.Library beehive : $(SRC) ;
+C.Library beehive : $(BEEHIVE_SRC) ;
