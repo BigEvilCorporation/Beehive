@@ -1,0 +1,31 @@
+SubDir bigevilcorp mdstudio ;
+
+ApplyIonDefines beehivestudio ;
+ApplyIonIncludes beehivestudio ;
+ApplyIonCore beehivestudio ;
+ApplyIonIo beehivestudio ;
+ApplyIonRenderer beehivestudio : opengl ;
+ApplyIonGameKit beehivestudio ;
+ApplyWxSDK beehivestudio ;
+
+local BEEHIVE_STUDIO_SRC = 
+	main.cpp
+	beehivestudio.cpp
+	beehivestudio.h
+	;
+
+SubInclude bigevilcorp beehive : beehive ;
+SubInclude bigevilcorp mdstudio ui : ui ;
+SubInclude bigevilcorp imageformats : imageformats ;
+
+C.IncludeDirectories beehivestudio : $(bigevilcorp)/beehive ;
+C.IncludeDirectories beehivestudio : $(bigevilcorp)/mdstudio/ui ;
+C.IncludeDirectories beehivestudio : $(bigevilcorp)/imageformats ;
+
+C.LinkLibraries beehivestudio : beehive ;
+C.LinkLibraries beehivestudio : ui ;
+C.LinkLibraries beehivestudio : imageformats ;
+
+AutoSourceGroup beehivestudio : $(BEEHIVE_STUDIO_SRC) ;
+C.RuntimeType beehivestudio : static ;
+C.Application beehivestudio : $(BEEHIVE_STUDIO_SRC) ;

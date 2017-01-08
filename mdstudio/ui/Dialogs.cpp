@@ -12,7 +12,7 @@
 #include "Dialogs.h"
 #include "SpriteCanvas.h"
 
-#include "../BMPReader.h"
+#include "BMPReader.h"
 
 #include <wx/msgdlg.h>
 

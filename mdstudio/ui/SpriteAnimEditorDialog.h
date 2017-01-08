@@ -14,8 +14,8 @@
 #include "UIBase.h"
 #include "RenderResources.h"
 #include "GridCellRenderer.h"
-#include "../Project.h"
-#include "../SpriteSheet.h"
+#include "Project.h"
+#include "SpriteSheet.h"
 
 #include <ion/renderer/Renderer.h>
 

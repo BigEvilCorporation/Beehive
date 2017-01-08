@@ -1,0 +1,76 @@
+SubDir bigevilcorp mdstudio ui ;
+
+ApplyIonDefines ui ;
+ApplyIonIncludes ui ;
+ApplyIonCore ui ;
+ApplyIonIo ui ;
+ApplyIonRenderer ui : opengl ;
+ApplyIonGameKit ui ;
+ApplyWxSDK ui ;
+
+local BEEHIVE_STUDIO_UI_SRC = 
+	Dialogs.cpp
+	Dialogs.h
+	MainWindow.cpp
+	MainWindow.h
+	GameObjectParamsPanel.cpp
+	GameObjectParamsPanel.h
+	GameObjectTypePanel.cpp
+	GameObjectTypePanel.h
+	GameObjectTypeDialog.cpp
+	GameObjectTypeDialog.h
+	GridCellRenderer.cpp
+	GridCellRenderer.h
+	ExportDialog.cpp
+	ExportDialog.h
+	MapPanel.cpp
+	MapPanel.h
+	MapListPanel.cpp
+	MapListPanel.h
+	ViewPanel.cpp
+	ViewPanel.h
+	PalettesPanel.cpp
+	PalettesPanel.h
+	SpriteCanvas.cpp
+	SpriteCanvas.h
+	SpriteAnimEditorDialog.cpp
+	SpriteAnimEditorDialog.h
+	SpriteAnimPanel.cpp
+	SpriteAnimPanel.h
+	StampAnimEditorDialog.cpp
+	StampAnimEditorDialog.h
+	StampsPanel.cpp
+	StampsPanel.h
+	TerrainTileEditorPanel.cpp
+	TerrainTileEditorPanel.h
+	TerrainTilesPanel.cpp
+	TerrainTilesPanel.h
+	TileEditorPanel.cpp
+	TileEditorPanel.h
+	TilesPanel.cpp
+	TilesPanel.h
+	TimelinePanel.cpp
+	TimelinePanel.h
+	Tool.h
+	ToolSelectStamp.cpp
+	ToolSelectStamp.h
+	RenderResources.cpp
+	RenderResources.h
+	UIBase.cpp
+	UIBase.h
+	WxApp.cpp
+	WxApp.h
+	;
+
+SubInclude bigevilcorp beehive : beehive ;
+SubInclude bigevilcorp imageformats : imageformats ;
+
+C.IncludeDirectories ui : $(bigevilcorp)/beehive ;
+C.IncludeDirectories ui : $(bigevilcorp)/imageformats ;
+
+C.LinkLibraries ui : beehive ;
+C.LinkLibraries ui : imageformats ;
+
+AutoSourceGroup ui : $(BEEHIVE_STUDIO_UI_SRC) ;
+C.RuntimeType ui : static ;
+C.Library ui : $(BEEHIVE_STUDIO_UI_SRC) ;

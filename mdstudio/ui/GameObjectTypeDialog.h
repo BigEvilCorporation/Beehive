@@ -14,8 +14,8 @@
 #include <ion/core/Types.h>
 
 #include "UIBase.h"
-#include "../GameObject.h"
-#include "../SpriteSheet.h"
+#include "GameObject.h"
+#include "SpriteSheet.h"
 
 class MainWindow;
 class Project;

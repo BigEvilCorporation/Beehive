@@ -12,8 +12,8 @@
 #pragma once
 
 #include "UIBase.h"
-#include "../Project.h"
-#include "../GameObject.h"
+#include "Project.h"
+#include "GameObject.h"
 
 class MainWindow;
 

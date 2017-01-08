@@ -15,7 +15,7 @@
 #include <ion/renderer/Renderer.h>
 
 #include "Mouse.h"
-#include "..\Project.h"
+#include "Project.h"
 
 class MapPanel;
 

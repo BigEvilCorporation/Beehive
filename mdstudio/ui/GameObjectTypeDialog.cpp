@@ -11,7 +11,7 @@
 
 #include "GameObjectTypeDialog.h"
 #include "MainWindow.h"
-#include "../Project.h"
+#include "Project.h"
 
 GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& project)
 	: GameObjTypeDialogBase((wxWindow*)&mainWindow)

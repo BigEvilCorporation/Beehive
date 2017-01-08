@@ -32,7 +32,7 @@
 #include "Mouse.h"
 #include "Tool.h"
 #include "RenderResources.h"
-#include "../Project.h"
+#include "Project.h"
 
 class MainWindow;
 

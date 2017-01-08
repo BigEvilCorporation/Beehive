@@ -33,7 +33,7 @@
 #include "GameObjectParamsPanel.h"
 #include "TimelinePanel.h"
 
-#include "../Project.h"
+#include "Project.h"
 
 wxDECLARE_SCOPED_PTR(Project, ProjectPtr)
 

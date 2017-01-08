@@ -13,7 +13,7 @@
 
 #include "UIBase.h"
 #include "ViewPanel.h"
-#include "../Animation.h"
+#include "Animation.h"
 
 #include <wx/timer.h>
 

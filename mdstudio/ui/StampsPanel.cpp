@@ -12,7 +12,7 @@
 #include "StampsPanel.h"
 #include "MainWindow.h"
 #include "StampAnimEditorDialog.h"
-#include "../StampAnimation.h"
+#include "StampAnimation.h"
 
 #include <wx/menu.h>
 #include <wx/filedlg.h>

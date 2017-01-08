@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////
 
 #include <windows.h>
-#include "Beehive.h"
+#include "BeehiveStudio.h"
 #include "core/time/Time.h"
 
 int main(char** args, int numargs)

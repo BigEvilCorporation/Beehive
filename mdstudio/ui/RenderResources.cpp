@@ -306,7 +306,7 @@ void RenderResources::CreateSpriteSheetPreviewTexture(const BMPReader& reader)
 	{
 		for(int y = 0; y < textureHeight; y++)
 		{
-			const Colour& colour = reader.GetPixel(x, y);
+			const BMPReader::Colour& colour = reader.GetPixel(x, y);
 
 			u32 pixelIdx = (y * textureWidth) + x;
 			u32 dataOffset = pixelIdx * bytesPerPixel;

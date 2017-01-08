@@ -18,9 +18,9 @@
 #include <ion/renderer/Shader.h>
 #include <ion/renderer/Texture.h>
 
-#include "../Project.h"
-#include "../SpriteSheet.h"
-#include "../BMPReader.h"
+#include "Project.h"
+#include "SpriteSheet.h"
+#include "BMPReader.h"
 
 class RenderResources
 {

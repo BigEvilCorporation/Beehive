@@ -12,8 +12,8 @@
 #pragma once
 
 #include "UIBase.h"
-#include "../Project.h"
-#include "../Map.h"
+#include "Project.h"
+#include "Map.h"
 
 class MainWindow;
 

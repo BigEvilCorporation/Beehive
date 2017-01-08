@@ -12,7 +12,7 @@
 #pragma once
 
 #include "UIBase.h"
-#include "../Project.h"
+#include "Project.h"
 
 #include <vector>
 

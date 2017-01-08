@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "UIBase.h"
-#include "../Project.h"
+#include "Project.h"
 
 class MainWindow;
 
