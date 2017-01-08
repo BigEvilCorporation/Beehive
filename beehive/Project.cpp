@@ -12,8 +12,6 @@
 #include <ion/io/Archive.h>
 #include <ion/gamekit/Bezier.h>
 
-#include <wx/msgdlg.h>
-
 #include <set>
 #include <vector>
 #include <algorithm>
@@ -624,7 +622,8 @@ int Project::CleanupTiles()
 		std::stringstream message;
 		message << "Found " << unusedTiles.size() << " unused tiles, delete?";
 
-		if(wxMessageBox(message.str().c_str(), "Delete unused tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		//TODO: wx message handler in ion::debug
+		//if(wxMessageBox(message.str().c_str(), "Delete unused tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			//Delete in reverse, popping from back
 			for(std::set<TileId>::const_reverse_iterator it = unusedTiles.rbegin(), end = unusedTiles.rend(); it != end; ++it)
@@ -680,7 +679,8 @@ int Project::CleanupTiles()
 		std::stringstream message;
 		message << "Found " << duplicates.size() << " duplicate tiles, delete?";
 
-		if(wxMessageBox(message.str().c_str(), "Delete duplicate tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		//TODO: wx message handler in ion::debug
+		//if(wxMessageBox(message.str().c_str(), "Delete duplicate tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			for(int i = 0; i < duplicates.size(); i++)
 			{
@@ -1075,7 +1075,8 @@ int Project::CleanupStamps()
 		std::stringstream message;
 		message << "Found " << unusedStamps.size() << " unused stamps, delete?";
 
-		if(wxMessageBox(message.str().c_str(), "Delete unused stamps", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		//TODO: wx message handler in ion::debug
+		//if(wxMessageBox(message.str().c_str(), "Delete unused stamps", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			for(std::set<StampId>::const_iterator it = unusedStamps.begin(), end = unusedStamps.end(); it != end; ++it)
 			{
@@ -1213,7 +1214,8 @@ int Project::CleanupTerrainTiles(bool prompt)
 		//Sort
 		std::sort(unusedTerrainTiles.begin(), unusedTerrainTiles.end());
 
-		if(!prompt || wxMessageBox(message.str().c_str(), "Delete unused collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		//TODO: wx message handler in ion::debug
+		//if(!prompt || wxMessageBox(message.str().c_str(), "Delete unused collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			//Delete in reverse, popping from back
 			for(std::vector<TerrainTileId>::const_reverse_iterator it = unusedTerrainTiles.rbegin(), end = unusedTerrainTiles.rend(); it != end; ++it)
@@ -1271,7 +1273,8 @@ int Project::CleanupTerrainTiles(bool prompt)
 		std::stringstream message;
 		message << "Found " << duplicates.size() << " duplicate collision tiles, delete?";
 
-		if(!prompt || wxMessageBox(message.str().c_str(), "Delete duplicate collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
+		//TODO: wx message handler in ion::debug
+		//if(!prompt || wxMessageBox(message.str().c_str(), "Delete duplicate collision tiles", wxOK | wxCANCEL | wxICON_WARNING) == wxOK)
 		{
 			for(int i = 0; i < duplicates.size(); i++)
 			{
@@ -1856,7 +1859,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 	{
 		if(reader.GetWidth() % tileWidth != 0 || reader.GetHeight() % tileHeight != 0)
 		{
-			if(wxMessageBox("Bitmap width/height is not multiple of target platform tile width/height, image will be truncated", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
+			//TODO: wx message handler in ion::debug
+			//if(wxMessageBox("Bitmap width/height is not multiple of target platform tile width/height, image will be truncated", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
 			{
 				return false;
 			}
@@ -1866,7 +1870,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 		{
 			if(((reader.GetWidth() / m_platformConfig.tileWidth) != stamp->GetWidth()) || ((reader.GetHeight() / m_platformConfig.tileHeight) != stamp->GetHeight()))
 			{
-				wxMessageBox("Bitmap width/height does not match stamp to be replaced, cannot import", "Warning", wxOK | wxICON_WARNING);
+				//TODO: wx message handler in ion::debug
+				//wxMessageBox("Bitmap width/height does not match stamp to be replaced, cannot import", "Warning", wxOK | wxICON_WARNING);
 				return false;
 			}
 		}
@@ -1977,7 +1982,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 						Palette importedPalette;
 						if(!ImportPalette(pixels.data(), importedPalette))
 						{
-							wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK | wxICON_ERROR);
+							//TODO: wx message handler in ion::debug
+							//wxMessageBox("Too many colours in tile, bailing out", "Error", wxOK | wxICON_ERROR);
 							return false;
 						}
 
@@ -2031,7 +2037,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 
 							if(!foundFreePalette)
 							{
-								wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK | wxICON_ERROR);
+								//TODO: wx message handler in ion::debug
+								//wxMessageBox("Exceeded palette count, bailing out", "Error", wxOK | wxICON_ERROR);
 								return false;
 							}
 
@@ -2052,7 +2059,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 							if(!palette.GetNearestColourIdx(pixels[(pixelY * tileWidth) + pixelX], Palette::eExact, colourIdx))
 							{
 								//Shouldn't reach here - palette should have been validated
-								wxMessageBox("Error mapping colour indices", "Error", wxOK | wxICON_ERROR);
+								//TODO: wx message handler in ion::debug
+								//wxMessageBox("Error mapping colour indices", "Error", wxOK | wxICON_ERROR);
 								return false;
 							}
 
@@ -2103,7 +2111,8 @@ bool Project::ImportBitmap(const std::string& filename, u32 importFlags, u32 pal
 	}
 	else
 	{
-		wxMessageBox("Error reading bitmap", "Error", wxOK);
+		//TODO: wx message handler in ion::debug
+		//wxMessageBox("Error reading bitmap", "Error", wxOK);
 	}
 
 	return true;
@@ -2315,6 +2324,184 @@ bool Project::ExportMap(MapId mapId, const std::string& filename, bool binary) c
 		stream << std::hex << std::setfill('0') << std::uppercase;
 		stream << "map_" << mapName << "_width\tequ " << "0x" << std::setw(2) << mapWidth << std::endl;
 		stream << "map_" << mapName << "_height\tequ " << "0x" << std::setw(2) << mapHeight << std::endl;
+		stream << std::dec;
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Project::ExportStamps(const std::string& filename, bool binary) const
+{
+	u32 binarySize = 0;
+
+#pragma pack(push, 1)
+	struct StampTableEntry
+	{
+		StampTableEntry() {}
+		StampTableEntry(u32 offset, u8 width, u8 height)
+		{
+			m_offset = offset;
+			m_width = width;
+			m_height = height;
+		}
+
+		u32 m_offset;
+		u8 m_width;
+		u8 m_height;
+	};
+#pragma pack(pop)
+
+	std::vector<StampTableEntry> stampTable;
+
+	if(binary)
+	{
+		std::string binaryFilename = filename.substr(0, filename.find_first_of('.'));
+		binaryFilename += ".bin";
+
+		//Export binary data
+		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
+		if(binaryFile.IsOpen())
+		{
+			for(TStampMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+			{
+				stampTable.push_back(StampTableEntry(binaryFile.GetSize(), it->second.GetWidth(), it->second.GetHeight()));
+				it->second.Export(*this, binaryFile);
+			}
+
+			binarySize = binaryFile.GetSize();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		WriteFileHeader(stream);
+
+		if(binary)
+		{
+			//Export size of binary file
+			stream << "stamps_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Binary size in bytes" << std::endl;
+
+			stream << std::endl;
+
+			//Export stamp table
+			stream << "stamps_" << m_name << "_table:" << std::endl;
+			stream << std::endl;
+
+			for(int i = 0; i < stampTable.size(); i++)
+			{
+				stream << "stamp_" << i << "_offset:\tdc.l 0x" << (int)stampTable[i].m_offset << std::endl;
+				stream << "stamp_" << i << "_width:\tdc.b 0x" << (int)stampTable[i].m_width << std::endl;
+				stream << "stamp_" << i << "_height:\tdc.b 0x" << (int)stampTable[i].m_height << std::endl;
+				stream << std::endl;
+			}
+		}
+		else
+		{
+			//Export label, data and size as inline text
+			stream << "stamps_" << m_name << ":" << std::endl;
+
+			for(TStampMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+			{
+				stampTable.push_back(StampTableEntry(stampTable.size() * sizeof(StampTableEntry), it->second.GetWidth(), it->second.GetHeight()));
+				stream << "stamp_" << it->first << ":" << std::endl;
+				it->second.Export(*this, stream);
+				stream << std::endl;
+			}
+
+			//Export stamp table
+			stream << "stamps_" << m_name << "_table:" << std::endl;
+			stream << std::endl;
+
+			for(int i = 0; i < stampTable.size(); i++)
+			{
+				stream << "stamp_" << i << "_offset:\tdc.l 0x" << (int)stampTable[i].m_offset << std::endl;
+				stream << "stamp_" << i << "_width:\tdc.b 0x" << (int)stampTable[i].m_width << std::endl;
+				stream << "stamp_" << i << "_height:\tdc.b 0x" << (int)stampTable[i].m_height << std::endl;
+				stream << std::endl;
+			}
+
+			stream << std::endl;
+			stream << "stamps_" << m_name << "_end:" << std::endl;
+			stream << "stamps_" << m_name << "_size_b\tequ (stamps_" << m_name << "_end-stamps_" << m_name << ")\t; Size in bytes" << std::endl;
+		}
+
+		stream << "stamps_" << m_name << "_size_w\tequ (stamps_" << m_name << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "stamps_" << m_name << "_size_l\tequ (stamps_" << m_name << "_size_b/4)\t; Size in longwords" << std::endl;
+
+		file.Write(stream.str().c_str(), stream.str().size());
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Project::ExportStampMap(MapId mapId, const std::string& filename, bool binary) const
+{
+	const Map& map = m_maps.find(mapId)->second;
+	int mapWidth = map.GetWidth();
+	int mapHeight = map.GetHeight();
+	const std::string& mapName = map.GetName();
+
+	u32 binarySize = 0;
+
+	if(binary)
+	{
+		std::string binaryFilename = filename.substr(0, filename.find_first_of('.'));
+		binaryFilename += ".bin";
+
+		//Export binary data
+		ion::io::File binaryFile(binaryFilename, ion::io::File::eOpenWrite);
+		if(binaryFile.IsOpen())
+		{
+			map.ExportStampMap(*this, binaryFile);
+			binarySize = binaryFile.GetSize();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	ion::io::File file(filename, ion::io::File::eOpenWrite);
+	if(file.IsOpen())
+	{
+		std::stringstream stream;
+		WriteFileHeader(stream);
+
+		if(binary)
+		{
+			//Export size of binary file
+			stream << "stampmap_" << mapName << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+		}
+		else
+		{
+			//Export label, data and size as inline text
+			stream << "stampmap_" << mapName << ":" << std::endl;
+
+			map.ExportStampMap(*this, stream);
+
+			stream << std::endl;
+			stream << "stampmap_" << mapName << "_end:" << std::endl;
+			stream << "stampmap_" << mapName << "_size_b\tequ (stampmap_" << mapName << "_end-stampmap_" << mapName << ")\t; Size in bytes" << std::endl;
+		}
+
+		stream << "stampmap_" << mapName << "_size_w\tequ (stampmap_" << mapName << "_size_b/2)\t; Size in words" << std::endl;
+		stream << "stampmap_" << mapName << "_size_l\tequ (stampmap_" << mapName << "_size_b/4)\t; Size in longwords" << std::endl;
+
+		stream << std::hex << std::setfill('0') << std::uppercase;
+		stream << "stampmap_" << mapName << "_width\tequ " << "0x" << std::setw(2) << mapWidth << std::endl;
+		stream << "stampmap_" << mapName << "_height\tequ " << "0x" << std::setw(2) << mapHeight << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());

@@ -939,6 +939,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_txtProjectName->SetValue(m_project->GetName());
 		dialog.m_filePickerPalettes->SetPath(m_project->m_exportFilenames.palettes);
 		dialog.m_filePickerTileset->SetPath(m_project->m_exportFilenames.tileset);
+		dialog.m_filePickerStamps->SetPath(m_project->m_exportFilenames.stamps);
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.terrainTiles);
 		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
 		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
@@ -946,6 +947,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		dialog.m_chkPalettes->SetValue(m_project->m_exportFilenames.palettesExportEnabled);
 		dialog.m_chkTileset->SetValue(m_project->m_exportFilenames.tilesetExportEnabled);
+		dialog.m_chkStamps->SetValue(m_project->m_exportFilenames.stampsExportEnabled);
 		dialog.m_chkTerrainTiles->SetValue(m_project->m_exportFilenames.terrainTilesExportEnabled);
 		dialog.m_chkSpriteSheets->SetValue(m_project->m_exportFilenames.spriteSheetsExportEnabled);
 		dialog.m_chkSpriteAnims->SetValue(m_project->m_exportFilenames.spriteAnimsExportEnabled);
@@ -957,8 +959,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		int mapIndex = 0;
 		for(TMapMap::const_iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
 		{
-			dialog.SetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
-			dialog.SetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
+			dialog.SetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.stampMap, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
+			dialog.SetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.stampMapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
 		}
 
 		if(dialog.ShowModal() == wxID_OK)
@@ -968,6 +970,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->SetName(std::string(dialog.m_txtProjectName->GetValue()));
 			m_project->m_exportFilenames.palettes = dialog.m_filePickerPalettes->GetPath();
 			m_project->m_exportFilenames.tileset = dialog.m_filePickerTileset->GetPath();
+			m_project->m_exportFilenames.stamps = dialog.m_filePickerStamps->GetPath();
 			m_project->m_exportFilenames.terrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
 			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
@@ -975,6 +978,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			m_project->m_exportFilenames.palettesExportEnabled = dialog.m_chkPalettes->GetValue();
 			m_project->m_exportFilenames.tilesetExportEnabled = dialog.m_chkTileset->GetValue();
+			m_project->m_exportFilenames.stampsExportEnabled = dialog.m_chkStamps->GetValue();
 			m_project->m_exportFilenames.terrainTilesExportEnabled = dialog.m_chkTerrainTiles->GetValue();
 			m_project->m_exportFilenames.spriteSheetsExportEnabled = dialog.m_chkSpriteSheets->GetValue();
 			m_project->m_exportFilenames.spriteAnimsExportEnabled = dialog.m_chkSpriteAnims->GetValue();
@@ -987,6 +991,9 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			
 			if(dialog.m_chkTileset->GetValue())
 				m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
+
+			if(dialog.m_chkStamps->GetValue())
+				m_project->ExportStamps(m_project->m_exportFilenames.stamps, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkTerrainTiles->GetValue())
 				m_project->ExportTerrainTiles(m_project->m_exportFilenames.terrainTiles, dialog.m_btnBinary->GetValue());
@@ -1003,11 +1010,14 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			int mapIndex = 0;
 			for(TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
 			{
-				dialog.GetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
-				dialog.GetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
+				dialog.GetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.stampMap, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
+				dialog.GetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.stampMapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
 					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, dialog.m_btnBinary->GetValue());
+
+				if(it->second.m_exportFilenames.stampMapExportEnabled)
+					m_project->ExportStampMap(it->first, it->second.m_exportFilenames.stampMap, dialog.m_btnBinary->GetValue());
 				
 				if(it->second.m_exportFilenames.collisionMapExportEnabled)
 					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());

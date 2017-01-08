@@ -17,6 +17,8 @@
 typedef u32 StampId;
 static const StampId InvalidStampId = 0;
 
+class Project;
+
 class Stamp
 {
 public:
@@ -39,6 +41,8 @@ public:
 	u32 GetNameHash() const;
 
 	void Serialise(ion::io::Archive& archive);
+	void Export(const Project& project, std::stringstream& stream) const;
+	void Export(const Project& project, ion::io::File& file) const;
 
 private:
 	StampId m_id;

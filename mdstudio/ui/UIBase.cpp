@@ -981,12 +981,19 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
 	
-	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export graphics tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkTileset->SetValue(true); 
 	fgSizer33->Add( m_chkTileset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkStamps = new wxCheckBox( this, wxID_ANY, wxT("Export stamps:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkStamps->SetValue(true); 
+	fgSizer33->Add( m_chkStamps, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerStamps = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer33->Add( m_filePickerStamps, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
 	
 	m_chkTerrainTiles = new wxCheckBox( this, wxID_ANY, wxT("Export terrain tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkTerrainTiles->SetValue(true); 
@@ -2248,12 +2255,19 @@ ExportDialogMapTab::ExportDialogMapTab( wxWindow* parent, wxWindowID id, const w
 	fgSizer34->SetFlexibleDirection( wxBOTH );
 	fgSizer34->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_chkMap = new wxCheckBox( this, wxID_ANY, wxT("Export graphics map:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkMap = new wxCheckBox( this, wxID_ANY, wxT("Export tile map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkMap->SetValue(true); 
 	fgSizer34->Add( m_chkMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkStampMap = new wxCheckBox( this, wxID_ANY, wxT("Export stamp map:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkStampMap->SetValue(true); 
+	fgSizer34->Add( m_chkStampMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerStampMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer34->Add( m_filePickerStampMap, 0, wxALL|wxEXPAND, 5 );
 	
 	m_chkCollisionMap = new wxCheckBox( this, wxID_ANY, wxT("Export terrain map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_chkCollisionMap->SetValue(true); 

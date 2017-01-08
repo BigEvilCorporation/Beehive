@@ -133,25 +133,31 @@ public:
 	void Serialise(ion::io::Archive& archive);
 	void Export(const Project& project, std::stringstream& stream) const;
 	void Export(const Project& project, ion::io::File& file) const;
+	void ExportStampMap(const Project& project, std::stringstream& stream) const;
+	void ExportStampMap(const Project& project, ion::io::File& file) const;
 
 	//Last used export filenames
 	struct ExportFilenames
 	{
 		std::string map;
+		std::string stampMap;
 		std::string collisionMap;
 		std::string gameObjects;
 
 		bool mapExportEnabled;
+		bool stampMapExportEnabled;
 		bool collisionMapExportEnabled;
 		bool gameObjectsExportEnabled;
 
 		void Serialise(ion::io::Archive& archive)
 		{
 			archive.Serialise(mapExportEnabled, "mapExportEnabled");
+			archive.Serialise(stampMapExportEnabled, "stampMapExportEnabled");
 			archive.Serialise(collisionMapExportEnabled, "collisionMapExportEnabled");
 			archive.Serialise(gameObjectsExportEnabled, "gameObjectsExportEnabled");
 
 			archive.Serialise(map, "exportFNameMap");
+			archive.Serialise(stampMap, "exportFNameStampMap");
 			archive.Serialise(collisionMap, "exportFNameCollisionMap");
 			archive.Serialise(gameObjects, "exportFNameGameObjects");
 		}

@@ -11,9 +11,6 @@
 
 #include <ion/core/debug/Debug.h>
 
-#include <wx/dialog.h>
-#include <wx/msgdlg.h>
-
 #include "SpriteSheet.h"
 #include "BMPReader.h"
 
@@ -31,7 +28,8 @@ bool SpriteSheet::ImportBitmap(const std::string& filename, const std::string& n
 	{
 		if(reader.GetWidth() % tileWidth != 0 || reader.GetHeight() % tileHeight != 0)
 		{
-			if(wxMessageBox("Bitmap width/height is not multiple of target platform tile width/height", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
+			//TODO: wx message handler in ion::debug
+			//if(wxMessageBox("Bitmap width/height is not multiple of target platform tile width/height", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
 			{
 				return false;
 			}

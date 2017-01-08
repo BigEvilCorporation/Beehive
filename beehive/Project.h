@@ -267,6 +267,8 @@ public:
 	bool ExportStampBitmaps(const std::string& directory) const;
 
 	bool ExportMap(MapId mapId, const std::string& filename, bool binary) const;
+	bool ExportStamps(const std::string& filename, bool binary) const;
+	bool ExportStampMap(MapId mapId, const std::string& filename, bool binary) const;
 	bool ExportCollisionMap(MapId mapId, const std::string& filename, bool binary) const;
 	bool ExportGameObjects(MapId mapId, const std::string& filename) const;
 
@@ -278,6 +280,7 @@ public:
 	{
 		std::string palettes;
 		std::string tileset;
+		std::string stamps;
 		std::string terrainTiles;
 		std::string spriteSheets;
 		std::string spriteAnims;
@@ -285,6 +288,7 @@ public:
 
 		bool palettesExportEnabled;
 		bool tilesetExportEnabled;
+		bool stampsExportEnabled;
 		bool terrainTilesExportEnabled;
 		bool spriteSheetsExportEnabled;
 		bool spriteAnimsExportEnabled;
@@ -296,6 +300,7 @@ public:
 		{
 			archive.Serialise(palettesExportEnabled, "palettesExportEnabled");
 			archive.Serialise(tilesetExportEnabled, "tilesetExportEnabled");
+			archive.Serialise(stampsExportEnabled, "stampsExportEnabled");
 			archive.Serialise(terrainTilesExportEnabled, "terrainTilesExportEnabled");
 			archive.Serialise(spriteSheetsExportEnabled, "spriteSheetsExportEnabled");
 			archive.Serialise(spriteAnimsExportEnabled, "spriteAnimsExportEnabled");
@@ -304,6 +309,7 @@ public:
 
 			archive.Serialise(palettes, "exportFNamePalettes");
 			archive.Serialise(tileset, "exportFNameTileset");
+			archive.Serialise(stamps, "exportFNameStamps");
 			archive.Serialise(terrainTiles, "exportFNameTerrainTiles");
 			archive.Serialise(spriteSheets, "exportDirSpriteSheets");
 			archive.Serialise(spriteAnims, "exportDirSpriteAnims");

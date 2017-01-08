@@ -594,3 +594,65 @@ void Map::Export(const Project& project, ion::io::File& file) const
 		//TODO: SNES export goes here
 	}
 }
+
+void Map::ExportStampMap(const Project& project, std::stringstream& stream) const
+{
+	//Assign indices to stampIds
+	std::map<StampId, u32> indexMap;
+
+	int index = 0;
+	for(TStampMap::const_iterator it = project.StampsBegin(), end = project.StampsEnd(); it != end; ++it, ++index)
+	{
+		indexMap[it->first] = index;
+	}
+
+	//Sort by X and Y coord
+	std::vector<std::pair<u32, s32>> sortedX;
+	std::vector<std::pair<u32, s32>> sortedY;
+
+	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
+	{
+		if(const Stamp* stamp = project.GetStamp(it->m_id))
+		{
+			const ion::Vector2i& position = it->m_position;
+			sortedX.push_back(std::make_pair(indexMap[stamp->GetId()], position.x));
+			sortedY.push_back(std::make_pair(indexMap[stamp->GetId()], position.y));
+		}
+	}
+
+	std::sort(sortedX.begin(), sortedX.end(), [](const std::pair<u32, s32>& lhs, std::pair<u32, s32>& rhs) { return lhs.second < rhs.second; });
+	std::sort(sortedY.begin(), sortedY.end(), [](const std::pair<u32, s32>& lhs, std::pair<u32, s32>& rhs) { return lhs.second < rhs.second; });
+	
+	//Export X-sorted table
+	stream << "stampmap_" << project.GetName() << "_x_table:" << std::endl;
+
+	for(int i = 0; i < sortedX.size(); i++)
+	{
+		//TODO: Support negative placements
+		if(sortedX[i].second >= 0)
+		{
+			stream << "stampentry_x_" << i << "_x:\tdc.w 0x" << (int)sortedX[i].second << std::endl;
+			stream << "stampentry_x_" << i << "_i:\tdc.w 0x" << (int)sortedX[i].first << std::endl;
+		}
+	}
+
+	stream << std::endl;
+
+	//Export Y-sorted table
+	stream << "stampmap_" << project.GetName() << "_y_table:" << std::endl;
+
+	for(int i = 0; i < sortedY.size(); i++)
+	{
+		//TODO: Support negative placements
+		if(sortedY[i].second >= 0)
+		{
+			stream << "stampentry_y_" << i << "_y:\tdc.w 0x" << (int)sortedY[i].second << std::endl;
+			stream << "stampentry_y_" << i << "_i:\tdc.w 0x" << (int)sortedY[i].first << std::endl;
+		}
+	}
+}
+
+void Map::ExportStampMap(const Project& project, ion::io::File& file) const
+{
+
+}

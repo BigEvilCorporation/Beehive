@@ -13,8 +13,6 @@
 #include "BMPReader.h"
 #include "Project.h"
 
-#include <wx/msgdlg.h>
-
 const u32 AnimTrackTileFrame::GetValue(float time) const
 {
 	u32 intValue = 0;
@@ -87,7 +85,8 @@ bool TileFrame::Import(const std::string filename, Project& project)
 
 		if(m_tiles.size() != (tilesWidth * tilesHeight))
 		{
-			wxMessageBox("Bitmap width/height does not match original frame", "Error", wxOK | wxICON_ERROR);
+			//TODO: wx message handler in ion::debug
+			//wxMessageBox("Bitmap width/height does not match original frame", "Error", wxOK | wxICON_ERROR);
 			return false;
 		}
 
@@ -116,7 +115,8 @@ bool TileFrame::Import(const std::string filename, Project& project)
 						int colourIdx = 0;
 						if(!palette->GetNearestColourIdx(colour, Palette::eExact, colourIdx))
 						{
-							wxMessageBox("Palette mismatch", "Error", wxOK | wxICON_ERROR);
+							//TODO: wx message handler in ion::debug
+							//wxMessageBox("Palette mismatch", "Error", wxOK | wxICON_ERROR);
 							return false;
 						}
 

@@ -10,7 +10,9 @@
 ///////////////////////////////////////////////////////
 
 #include "Stamp.h"
+#include "Project.h"
 
+#include <core/memory/Memory.h>
 #include <core/cryptography/Hash.h>
 
 Stamp::Stamp()
@@ -111,4 +113,128 @@ void Stamp::Serialise(ion::io::Archive& archive)
 	archive.Serialise(m_name, "name");
 	archive.Serialise(m_nameHash, "nameHash");
 	archive.Serialise(m_tiles, "tiles");
+}
+
+void Stamp::Export(const Project& project, std::stringstream& stream) const
+{
+	//Use background tile if there is one, else use first tile
+	u32 backgroundTileId = project.GetBackgroundTile();
+	if(backgroundTileId == InvalidTileId)
+	{
+		backgroundTileId = 0;
+	}
+
+	//if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
+	{
+		//Output to stream
+		stream << std::hex << std::setfill('0') << std::uppercase;
+
+		for(int y = 0; y < m_height; y++)
+		{
+			stream << "\tdc.w\t";
+
+			for(int x = 0; x < m_width; x++)
+			{
+				//16 bit word:
+				//-------------------
+				//ABBC DEEE EEEE EEEE
+				//-------------------
+				//A = Low/high plane
+				//B = Palette ID
+				//C = Horizontal flip
+				//D = Vertical flip
+				//E = Tile ID
+
+				const TileDesc& tileDesc = m_tiles[(y * m_width) + x];
+				u8 paletteId = 0;
+
+				//If blank tile, use background tile
+				u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
+
+				const Tile* tile = project.GetTileset().GetTile(tileId);
+				ion::debug::Assert(tile, "Map::Export() - Invalid tile");
+
+				//Generate components
+				u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
+				u16 flipH = (tileDesc.m_flags & Map::eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
+				u16 flipV = (tileDesc.m_flags & Map::eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
+				u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
+				u16 plane = (tileDesc.m_flags & Map::eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
+
+				//Generate word
+				u16 word = tileIndex | flipV | flipH | palette;
+
+				stream << "0x" << std::setw(4) << (u32)word;
+
+				if(x < (m_width - 1))
+					stream << ",";
+			}
+
+			stream << std::endl;
+		}
+
+		stream << std::dec;
+	}
+	//else if(project.GetPlatformConfig().platform == ePlatformSNES)
+	{
+		//TODO: SNES export goes here
+	}
+}
+
+void Stamp::Export(const Project& project, ion::io::File& file) const
+{
+	//Use background tile if there is one, else use first tile
+	u32 backgroundTileId = project.GetBackgroundTile();
+	if(backgroundTileId == InvalidTileId)
+	{
+		backgroundTileId = 0;
+	}
+
+	//if(project.GetPlatformConfig().platform == ePlatformMegaDrive)
+	{
+		for(int y = 0; y < m_height; y++)
+		{
+			for(int x = 0; x < m_width; x++)
+			{
+				//16 bit word:
+				//-------------------
+				//ABBC DEEE EEEE EEEE
+				//-------------------
+				//A = Low/high plane
+				//B = Palette ID
+				//C = Horizontal flip
+				//D = Vertical flip
+				//E = Tile ID
+
+				const TileDesc& tileDesc = m_tiles[(y * m_width) + x];
+				u8 paletteId = 0;
+
+				//If blank tile, use background tile
+				u32 tileId = (tileDesc.m_id == InvalidTileId) ? backgroundTileId : tileDesc.m_id;
+
+				const Tile* tile = project.GetTileset().GetTile(tileId);
+				ion::debug::Assert(tile, "Map::Export() - Invalid tile");
+
+				//Generate components
+				u16 tileIndex = tileId & 0x7FF;								//Bottom 11 bits = tile ID (index from 0)
+				u16 flipH = (tileDesc.m_flags & Map::eFlipX) ? 1 << 11 : 0;		//12th bit = Flip X flag
+				u16 flipV = (tileDesc.m_flags & Map::eFlipY) ? 1 << 12 : 0;		//13th bit = Flip Y flag
+				u16 palette = (tile->GetPaletteId() & 0x3) << 13;			//14th+15th bits = Palette ID
+				u16 plane = (tileDesc.m_flags & Map::eHighPlane) ? 1 << 15 : 0;	//16th bit = High plane flag
+
+				//Generate word
+				u16 word = tileIndex | flipV | flipH | palette | plane;
+
+				//Endian flip
+				ion::memory::EndianSwap(word);
+
+				//Write
+				file.Write(&word, sizeof(u16));
+			}
+		}
+	}
+	//else if(project.GetPlatformConfig().platform == ePlatformSNES)
+	{
+		//TODO: SNES export goes here
+	}
 }
