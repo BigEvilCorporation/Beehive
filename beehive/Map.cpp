@@ -15,6 +15,11 @@
 
 #include <ion/core/memory/Memory.h>
 
+#define HEX1(val) std::hex << std::setfill('0') << std::setw(1) << std::uppercase << (int)##val
+#define HEX2(val) std::hex << std::setfill('0') << std::setw(2) << std::uppercase << (int)##val
+#define HEX4(val) std::hex << std::setfill('0') << std::setw(4) << std::uppercase << (int)##val
+#define HEX8(val) std::hex << std::setfill('0') << std::setw(8) << std::uppercase << (int)##val
+
 Map::Map()
 	: m_platformConfig(PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive])
 {
@@ -607,33 +612,41 @@ void Map::ExportStampMap(const Project& project, std::stringstream& stream) cons
 	}
 
 	//Sort by X and Y coord
-	std::vector<std::pair<u32, s32>> sortedX;
-	std::vector<std::pair<u32, s32>> sortedY;
+	std::vector<std::pair<const StampMapEntry*, s32>> sortedX;
+	std::vector<std::pair<const StampMapEntry*, s32>> sortedY;
 
 	for(TStampPosMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
 	{
 		if(const Stamp* stamp = project.GetStamp(it->m_id))
 		{
 			const ion::Vector2i& position = it->m_position;
-			sortedX.push_back(std::make_pair(indexMap[stamp->GetId()], position.x));
-			sortedY.push_back(std::make_pair(indexMap[stamp->GetId()], position.y));
+
+			//TODO: Support negative placements
+			if(position.x >= 0 && position.y >= 0)
+			{
+				sortedX.push_back(std::make_pair(&(*it), position.x));
+				sortedY.push_back(std::make_pair(&(*it), position.y));
+			}
 		}
 	}
 
-	std::sort(sortedX.begin(), sortedX.end(), [](const std::pair<u32, s32>& lhs, std::pair<u32, s32>& rhs) { return lhs.second < rhs.second; });
-	std::sort(sortedY.begin(), sortedY.end(), [](const std::pair<u32, s32>& lhs, std::pair<u32, s32>& rhs) { return lhs.second < rhs.second; });
+	std::sort(sortedX.begin(), sortedX.end(), [](const std::pair<const StampMapEntry*, s32>& lhs, std::pair<const StampMapEntry*, s32>& rhs) { return lhs.second < rhs.second; });
+	std::sort(sortedY.begin(), sortedY.end(), [](const std::pair<const StampMapEntry*, s32>& lhs, std::pair<const StampMapEntry*, s32>& rhs) { return lhs.second < rhs.second; });
+
+	//Export count
+	stream << "stampmap_" << project.GetName() << "_count equ 0x" << HEX4((int)sortedX.size()) << std::endl;
+
+	stream << std::endl;
 	
 	//Export X-sorted table
 	stream << "stampmap_" << project.GetName() << "_x_table:" << std::endl;
 
 	for(int i = 0; i < sortedX.size(); i++)
 	{
-		//TODO: Support negative placements
-		if(sortedX[i].second >= 0)
-		{
-			stream << "stampentry_x_" << i << "_x:\tdc.w 0x" << (int)sortedX[i].second << std::endl;
-			stream << "stampentry_x_" << i << "_i:\tdc.w 0x" << (int)sortedX[i].first << std::endl;
-		}
+		stream << "stampentry_x_" << project.GetName() << "_" << i << "_xpos:\tdc.w 0x" << HEX4((int)sortedX[i].first->m_position.x) << std::endl;
+		stream << "stampentry_x_" << project.GetName() << "_" << i << "_ypos:\tdc.w 0x" << HEX4((int)sortedX[i].first->m_position.y) << std::endl;
+		stream << "stampentry_x_" << project.GetName() << "_" << i << "_idx:\tdc.w 0x" << HEX4((int)indexMap[sortedX[i].first->m_id]) << std::endl;
+		stream << "stampentry_x_" << project.GetName() << "_" << i << "_flags:\tdc.w 0x" << HEX4((int)sortedX[i].first->m_flags) << std::endl;
 	}
 
 	stream << std::endl;
@@ -643,12 +656,10 @@ void Map::ExportStampMap(const Project& project, std::stringstream& stream) cons
 
 	for(int i = 0; i < sortedY.size(); i++)
 	{
-		//TODO: Support negative placements
-		if(sortedY[i].second >= 0)
-		{
-			stream << "stampentry_y_" << i << "_y:\tdc.w 0x" << (int)sortedY[i].second << std::endl;
-			stream << "stampentry_y_" << i << "_i:\tdc.w 0x" << (int)sortedY[i].first << std::endl;
-		}
+		stream << "stampentry_y_" << project.GetName() << "_" << i << "_xpos:\tdc.w 0x" << HEX4((int)sortedY[i].first->m_position.x) << std::endl;
+		stream << "stampentry_y_" << project.GetName() << "_" << i << "_ypos:\tdc.w 0x" << HEX4((int)sortedY[i].first->m_position.y) << std::endl;
+		stream << "stampentry_y_" << project.GetName() << "_" << i << "_idx:\tdc.w 0x" << HEX4((int)indexMap[sortedY[i].first->m_id]) << std::endl;
+		stream << "stampentry_y_" << project.GetName() << "_" << i << "_flags:\tdc.w 0x" << HEX4((int)sortedY[i].first->m_flags) << std::endl;
 	}
 }
 

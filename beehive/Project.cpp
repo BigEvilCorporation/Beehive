@@ -19,6 +19,11 @@
 #include "Project.h"
 #include "BMPReader.h"
 
+#define HEX1(val) std::hex << std::setfill('0') << std::setw(1) << std::uppercase << (int)##val
+#define HEX2(val) std::hex << std::setfill('0') << std::setw(2) << std::uppercase << (int)##val
+#define HEX4(val) std::hex << std::setfill('0') << std::setw(4) << std::uppercase << (int)##val
+#define HEX8(val) std::hex << std::setfill('0') << std::setw(8) << std::uppercase << (int)##val
+
 Project::Project(PlatformConfig& defaultPatformConfig)
 	: m_platformConfig(defaultPatformConfig)
 	, m_tileset(m_platformConfig)
@@ -2350,8 +2355,8 @@ bool Project::ExportStamps(const std::string& filename, bool binary) const
 		}
 
 		u32 m_offset;
-		u8 m_width;
-		u8 m_height;
+		u16 m_width;
+		u16 m_height;
 	};
 #pragma pack(pop)
 
@@ -2389,7 +2394,7 @@ bool Project::ExportStamps(const std::string& filename, bool binary) const
 		if(binary)
 		{
 			//Export size of binary file
-			stream << "stamps_" << m_name << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Binary size in bytes" << std::endl;
+			stream << "stamps_" << m_name << "_size_b\tequ 0x" << HEX8(binarySize) << "\t; Binary size in bytes" << std::endl;
 
 			stream << std::endl;
 
@@ -2399,9 +2404,9 @@ bool Project::ExportStamps(const std::string& filename, bool binary) const
 
 			for(int i = 0; i < stampTable.size(); i++)
 			{
-				stream << "stamp_" << i << "_offset:\tdc.l 0x" << (int)stampTable[i].m_offset << std::endl;
-				stream << "stamp_" << i << "_width:\tdc.b 0x" << (int)stampTable[i].m_width << std::endl;
-				stream << "stamp_" << i << "_height:\tdc.b 0x" << (int)stampTable[i].m_height << std::endl;
+				stream << "stamp_" << i << "_offset:\tdc.l 0x" << HEX8((int)stampTable[i].m_offset) << std::endl;
+				stream << "stamp_" << i << "_width:\tdc.w 0x" << HEX4((int)stampTable[i].m_width) << std::endl;
+				stream << "stamp_" << i << "_height:\tdc.w 0x" << HEX4((int)stampTable[i].m_height) << std::endl;
 				stream << std::endl;
 			}
 		}
@@ -2410,12 +2415,15 @@ bool Project::ExportStamps(const std::string& filename, bool binary) const
 			//Export label, data and size as inline text
 			stream << "stamps_" << m_name << ":" << std::endl;
 
+			int offset = 0;
 			for(TStampMap::const_iterator it = m_stamps.begin(), end = m_stamps.end(); it != end; ++it)
 			{
-				stampTable.push_back(StampTableEntry(stampTable.size() * sizeof(StampTableEntry), it->second.GetWidth(), it->second.GetHeight()));
+				stampTable.push_back(StampTableEntry(offset, it->second.GetWidth(), it->second.GetHeight()));
 				stream << "stamp_" << it->first << ":" << std::endl;
 				it->second.Export(*this, stream);
 				stream << std::endl;
+
+				offset += it->second.GetBinarySize();
 			}
 
 			//Export stamp table
@@ -2424,9 +2432,9 @@ bool Project::ExportStamps(const std::string& filename, bool binary) const
 
 			for(int i = 0; i < stampTable.size(); i++)
 			{
-				stream << "stamp_" << i << "_offset:\tdc.l 0x" << (int)stampTable[i].m_offset << std::endl;
-				stream << "stamp_" << i << "_width:\tdc.b 0x" << (int)stampTable[i].m_width << std::endl;
-				stream << "stamp_" << i << "_height:\tdc.b 0x" << (int)stampTable[i].m_height << std::endl;
+				stream << "stamp_" << i << "_offset:\tdc.l 0x" << HEX8((int)stampTable[i].m_offset) << std::endl;
+				stream << "stamp_" << i << "_width:\tdc.w 0x" << HEX4((int)stampTable[i].m_width) << std::endl;
+				stream << "stamp_" << i << "_height:\tdc.w 0x" << HEX4((int)stampTable[i].m_height) << std::endl;
 				stream << std::endl;
 			}
 
@@ -2482,7 +2490,7 @@ bool Project::ExportStampMap(MapId mapId, const std::string& filename, bool bina
 		if(binary)
 		{
 			//Export size of binary file
-			stream << "stampmap_" << mapName << "_size_b\tequ 0x" << std::hex << std::setfill('0') << std::uppercase << std::setw(8) << binarySize << std::dec << "\t; Size in bytes" << std::endl;
+			stream << "stampmap_" << mapName << "_size_b\tequ 0x" << HEX8(binarySize) << "\t; Size in bytes" << std::endl;
 		}
 		else
 		{
@@ -2500,8 +2508,8 @@ bool Project::ExportStampMap(MapId mapId, const std::string& filename, bool bina
 		stream << "stampmap_" << mapName << "_size_l\tequ (stampmap_" << mapName << "_size_b/4)\t; Size in longwords" << std::endl;
 
 		stream << std::hex << std::setfill('0') << std::uppercase;
-		stream << "stampmap_" << mapName << "_width\tequ " << "0x" << std::setw(2) << mapWidth << std::endl;
-		stream << "stampmap_" << mapName << "_height\tequ " << "0x" << std::setw(2) << mapHeight << std::endl;
+		stream << "stampmap_" << mapName << "_width\tequ " << "0x" << HEX2(mapWidth) << std::endl;
+		stream << "stampmap_" << mapName << "_height\tequ " << "0x" << HEX2(mapHeight) << std::endl;
 		stream << std::dec;
 
 		file.Write(stream.str().c_str(), stream.str().size());

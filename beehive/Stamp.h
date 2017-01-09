@@ -44,6 +44,8 @@ public:
 	void Export(const Project& project, std::stringstream& stream) const;
 	void Export(const Project& project, ion::io::File& file) const;
 
+	int GetBinarySize() const { return m_width * m_height * sizeof(u16); }
+
 private:
 	StampId m_id;
 	int m_width;
