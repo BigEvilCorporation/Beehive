@@ -6,6 +6,7 @@ ApplyIonCore ui ;
 ApplyIonIo ui ;
 ApplyIonRenderer ui : opengl ;
 ApplyIonGameKit ui ;
+ApplyIonLib ui : beehive ;
 ApplyWxSDK ui ;
 
 local BEEHIVE_STUDIO_UI_SRC = 
@@ -62,13 +63,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	WxApp.h
 	;
 
-SubInclude bigevilcorp beehive : beehive ;
-SubInclude bigevilcorp imageformats : imageformats ;
-
-C.IncludeDirectories ui : $(bigevilcorp)/beehive ;
-C.IncludeDirectories ui : $(bigevilcorp)/imageformats ;
-
-C.LinkLibraries ui : beehive ;
+SubInclude bigevilcorp ion renderer imageformats : imageformats ;
+C.IncludeDirectories ui : $(bigevilcorp)/ion/renderer/imageformats ;
 C.LinkLibraries ui : imageformats ;
 
 AutoSourceGroup ui : $(BEEHIVE_STUDIO_UI_SRC) ;

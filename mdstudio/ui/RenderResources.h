@@ -17,10 +17,9 @@
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Shader.h>
 #include <ion/renderer/Texture.h>
-
-#include "Project.h"
-#include "SpriteSheet.h"
-#include "BMPReader.h"
+#include <ion/renderer/imageformats/BMPReader.h>
+#include <ion/beehive/Project.h>
+#include <ion/beehive/SpriteSheet.h>
 
 class RenderResources
 {

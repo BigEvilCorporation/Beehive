@@ -9,9 +9,10 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 ///////////////////////////////////////////////////////
 
+#include <ion/beehive/Project.h>
+
 #include "GameObjectTypeDialog.h"
 #include "MainWindow.h"
-#include "Project.h"
 
 GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& project)
 	: GameObjTypeDialogBase((wxWindow*)&mainWindow)

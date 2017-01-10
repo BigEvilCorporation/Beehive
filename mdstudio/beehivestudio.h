@@ -17,10 +17,9 @@
 #include <ion/io/Resource.h>
 #include <ion/io/ResourceManager.h>
 #include <ion/renderer/Material.h>
+#include <ion/beehive/Project.h>
 
 #include <vector>
-
-#include "Project.h"
 
 class BeehiveWxApp;
 

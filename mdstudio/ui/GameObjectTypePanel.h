@@ -11,9 +11,10 @@
 
 #pragma once
 
+#include <ion/beehive/Project.h>
+#include <ion/beehive/GameObject.h>
+
 #include "UIBase.h"
-#include "Project.h"
-#include "GameObject.h"
 
 class MainWindow;
 

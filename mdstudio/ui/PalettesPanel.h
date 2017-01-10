@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <ion/beehive/Project.h>
+
 #include <wx/frame.h>
 #include <wx/event.h>
 #include <wx/dcbuffer.h>
@@ -19,7 +21,6 @@
 #include <vector>
 
 #include "UIBase.h"
-#include "Project.h"
 
 class MainWindow;
 

@@ -11,9 +11,10 @@
 
 #pragma once
 
+#include <ion/beehive/Animation.h>
+
 #include "UIBase.h"
 #include "ViewPanel.h"
-#include "Animation.h"
 
 #include <wx/timer.h>
 

@@ -6,6 +6,7 @@ ApplyIonCore beehivestudio ;
 ApplyIonIo beehivestudio ;
 ApplyIonRenderer beehivestudio : opengl ;
 ApplyIonGameKit beehivestudio ;
+ApplyIonLib beehivestudio : beehive ;
 ApplyWxSDK beehivestudio ;
 
 local BEEHIVE_STUDIO_SRC = 
@@ -14,15 +15,12 @@ local BEEHIVE_STUDIO_SRC =
 	beehivestudio.h
 	;
 
-SubInclude bigevilcorp beehive : beehive ;
 SubInclude bigevilcorp mdstudio ui : ui ;
-SubInclude bigevilcorp imageformats : imageformats ;
+SubInclude bigevilcorp ion renderer imageformats : imageformats ;
 
-C.IncludeDirectories beehivestudio : $(bigevilcorp)/beehive ;
 C.IncludeDirectories beehivestudio : $(bigevilcorp)/mdstudio/ui ;
-C.IncludeDirectories beehivestudio : $(bigevilcorp)/imageformats ;
+C.IncludeDirectories beehivestudio : $(bigevilcorp)/ion/renderer/imageformats ;
 
-C.LinkLibraries beehivestudio : beehive ;
 C.LinkLibraries beehivestudio : ui ;
 C.LinkLibraries beehivestudio : imageformats ;
 

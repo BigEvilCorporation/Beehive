@@ -15,6 +15,7 @@
 
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Texture.h>
+#include <ion/beehive/Project.h>
 
 #include "UIBase.h"
 #include "RenderResources.h"
@@ -32,8 +33,6 @@
 #include "GameObjectTypePanel.h"
 #include "GameObjectParamsPanel.h"
 #include "TimelinePanel.h"
-
-#include "Project.h"
 
 wxDECLARE_SCOPED_PTR(Project, ProjectPtr)
 

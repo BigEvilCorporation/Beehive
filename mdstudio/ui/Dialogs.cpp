@@ -9,10 +9,10 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 /////////////////////////////////////////////////////
 
+#include <ion/renderer/imageformats/BMPReader.h>
+
 #include "Dialogs.h"
 #include "SpriteCanvas.h"
-
-#include "BMPReader.h"
 
 #include <wx/msgdlg.h>
 

@@ -11,13 +11,13 @@
 
 #pragma once
 
+#include <ion/renderer/Renderer.h>
+#include <ion/beehive/Project.h>
+#include <ion/beehive/SpriteSheet.h>
+
 #include "UIBase.h"
 #include "RenderResources.h"
 #include "GridCellRenderer.h"
-#include "Project.h"
-#include "SpriteSheet.h"
-
-#include <ion/renderer/Renderer.h>
 
 #include <wx/glcanvas.h>
 #include <wx/timer.h>

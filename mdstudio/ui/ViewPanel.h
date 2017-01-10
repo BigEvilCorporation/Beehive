@@ -18,6 +18,7 @@
 #include <ion/renderer/Camera.h>
 #include <ion/renderer/Primitive.h>
 #include <ion/renderer/Material.h>
+#include <ion/beehive/Project.h>
 
 #include <wx/event.h>
 #include <wx/panel.h>
@@ -32,7 +33,6 @@
 #include "Mouse.h"
 #include "Tool.h"
 #include "RenderResources.h"
-#include "Project.h"
 
 class MainWindow;
 

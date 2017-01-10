@@ -9,10 +9,11 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 ///////////////////////////////////////////////////////
 
+#include <ion/beehive/StampAnimation.h>
+
 #include "StampsPanel.h"
 #include "MainWindow.h"
 #include "StampAnimEditorDialog.h"
-#include "StampAnimation.h"
 
 #include <wx/menu.h>
 #include <wx/filedlg.h>

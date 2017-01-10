@@ -11,9 +11,10 @@
 
 #pragma once
 
+#include <ion/beehive/Project.h>
+#include <ion/beehive/Map.h>
+
 #include "UIBase.h"
-#include "Project.h"
-#include "Map.h"
 
 class MainWindow;
 

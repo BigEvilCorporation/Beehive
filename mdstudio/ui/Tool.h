@@ -13,9 +13,9 @@
 
 #include <ion/maths/Matrix.h>
 #include <ion/renderer/Renderer.h>
+#include <ion/beehive/Project.h>
 
 #include "Mouse.h"
-#include "Project.h"
 
 class MapPanel;
 
