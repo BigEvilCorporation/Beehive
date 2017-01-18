@@ -14,6 +14,7 @@
 #include "StampsPanel.h"
 #include "MainWindow.h"
 #include "StampAnimEditorDialog.h"
+#include "UpdateStampDialog.h"
 
 #include <wx/menu.h>
 #include <wx/filedlg.h>
@@ -240,13 +241,10 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 				paletteIdx = (int)tile->GetPaletteId();
 			}
 
-			wxFileDialog dialog(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			DialogUpdateStamp dialog(this, *stamp, m_project, m_renderer, *m_glContext, m_renderResources);
 			if(dialog.ShowModal() == wxID_OK)
 			{
-				if(m_project.ImportBitmap(dialog.GetPath().c_str().AsChar(), Project::eBMPImportReplaceStamp, 1 << paletteIdx, stamp))
-				{
-					m_mainWindow->RefreshAll();
-				}
+				m_mainWindow->RefreshAll();
 			}
 		}
 	}

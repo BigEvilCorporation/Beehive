@@ -298,6 +298,104 @@ DialogMapSizeBase::~DialogMapSizeBase()
 	
 }
 
+DialogUpdateStampBase::DialogUpdateStampBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizer41;
+	fgSizer41 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer41->AddGrowableCol( 0 );
+	fgSizer41->AddGrowableRow( 2 );
+	fgSizer41->SetFlexibleDirection( wxBOTH );
+	fgSizer41->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_filePicker10 = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("BMP files (*.bmp)|*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
+	fgSizer41->Add( m_filePicker10, 0, wxALL|wxEXPAND, 5 );
+	
+	m_chkReplacePalette = new wxCheckBox( this, wxID_ANY, wxT("Replace palette"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer41->Add( m_chkReplacePalette, 0, wxALL, 5 );
+	
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_canvasOld = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	bSizer3->Add( m_canvasOld, 1, wxEXPAND | wxALL, 5 );
+	
+	m_canvasNew = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	bSizer3->Add( m_canvasNew, 1, wxEXPAND | wxALL, 5 );
+	
+	
+	fgSizer41->Add( bSizer3, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer35;
+	bSizer35 = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxString m_radioBoxShiftYChoices[] = { wxT("Top"), wxT("Bottom") };
+	int m_radioBoxShiftYNChoices = sizeof( m_radioBoxShiftYChoices ) / sizeof( wxString );
+	m_radioBoxShiftY = new wxRadioBox( this, wxID_ANY, wxT("Shift contents Y"), wxDefaultPosition, wxDefaultSize, m_radioBoxShiftYNChoices, m_radioBoxShiftYChoices, 1, wxRA_SPECIFY_ROWS );
+	m_radioBoxShiftY->SetSelection( 0 );
+	bSizer35->Add( m_radioBoxShiftY, 0, wxALL, 5 );
+	
+	wxString m_radioBoxShiftXChoices[] = { wxT("Left"), wxT("Right") };
+	int m_radioBoxShiftXNChoices = sizeof( m_radioBoxShiftXChoices ) / sizeof( wxString );
+	m_radioBoxShiftX = new wxRadioBox( this, wxID_ANY, wxT("Shift contents X"), wxDefaultPosition, wxDefaultSize, m_radioBoxShiftXNChoices, m_radioBoxShiftXChoices, 1, wxRA_SPECIFY_ROWS );
+	m_radioBoxShiftX->SetSelection( 0 );
+	bSizer35->Add( m_radioBoxShiftX, 0, wxALL, 5 );
+	
+	wxBoxSizer* bSizer61;
+	bSizer61 = new wxBoxSizer( wxVERTICAL );
+	
+	m_chkFlipX = new wxCheckBox( this, wxID_ANY, wxT("Flip X"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer61->Add( m_chkFlipX, 0, wxALL, 5 );
+	
+	m_chkFlipY = new wxCheckBox( this, wxID_ANY, wxT("Flip Y"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer61->Add( m_chkFlipY, 0, wxALL, 5 );
+	
+	
+	bSizer35->Add( bSizer61, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_buttonOk = new wxButton( this, wxID_BTN_CANCEL, wxT("&Ok"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_buttonOk, 0, wxALIGN_RIGHT, 5 );
+	
+	m_buttonCancel = new wxButton( this, wxID_BTN_CANCEL, wxT("&Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_buttonCancel, 0, wxALIGN_RIGHT, 5 );
+	
+	
+	bSizer35->Add( bSizer4, 1, wxALIGN_BOTTOM|wxALIGN_RIGHT, 5 );
+	
+	
+	fgSizer41->Add( bSizer35, 1, wxEXPAND, 5 );
+	
+	
+	bSizer2->Add( fgSizer41, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizer2 );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_filePicker10->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( DialogUpdateStampBase::OnFileBrowse ), NULL, this );
+	m_buttonOk->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogUpdateStampBase::OnBtnOk ), NULL, this );
+	m_buttonCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogUpdateStampBase::OnBtnCancel ), NULL, this );
+}
+
+DialogUpdateStampBase::~DialogUpdateStampBase()
+{
+	// Disconnect Events
+	m_filePicker10->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( DialogUpdateStampBase::OnFileBrowse ), NULL, this );
+	m_buttonOk->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogUpdateStampBase::OnBtnOk ), NULL, this );
+	m_buttonCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogUpdateStampBase::OnBtnCancel ), NULL, this );
+	
+}
+
 DialogNewMap::DialogNewMap( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );

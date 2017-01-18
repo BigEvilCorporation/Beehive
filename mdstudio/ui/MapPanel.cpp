@@ -1800,20 +1800,22 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				if(gameObjectType->GetPreviewSpriteSheet() != InvalidSpriteSheetId)
 				{
 					//Render spriteSheet
-					RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheet());
-					ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
-					ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
+					if(RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheet()))
+					{
+						ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
+						ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
 
-					ion::render::Primitive* spriteSheetPrimitive = spriteSheetResources->m_primitive;
-					ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[0].material;
-					spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+						ion::render::Primitive* spriteSheetPrimitive = spriteSheetResources->m_primitive;
+						ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[0].material;
+						spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
-					ion::Matrix4 spriteSheetMtx;
-					spriteSheetMtx.SetTranslation(pos);
+						ion::Matrix4 spriteSheetMtx;
+						spriteSheetMtx.SetTranslation(pos);
 
-					spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
-					renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
-					spriteSheetMaterial->Unbind();
+						spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
+						renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
+						spriteSheetMaterial->Unbind();
+					}
 				}
 			}
 		}

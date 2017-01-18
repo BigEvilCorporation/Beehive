@@ -41,6 +41,7 @@ public:
 	void SetDrawGrid(bool drawGrid);
 	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& offset);
 	void SetDrawTileFrame(TileFrame tileFrame);
+	void SetDrawStamp(Stamp& stamp, const ion::Vector2i& offset);
 
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
@@ -69,8 +70,11 @@ private:
 	ion::render::Renderer* m_renderer;
 	ion::render::Camera m_camera;
 	ion::render::Viewport m_viewport;
-	ion::render::Chessboard* m_tileFramePrimitive;
 	RenderResources* m_renderResources;
+
+	//Rendering primitives
+	ion::render::Grid* m_gridPrimitive;
+	ion::render::Chessboard* m_tileFramePrimitive;
 
 	bool m_drawPreview;
 	u32 m_drawPreviewMaxFrames;
@@ -83,9 +87,6 @@ private:
 	//Mouse
 	ion::Vector2i m_mousePrevPos;
 	float m_cameraZoom;
-
-	//Rendering primitives
-	ion::render::Grid* m_gridPrimitive;
 
 	//Panel size (pixels)
 	ion::Vector2i m_panelSize;

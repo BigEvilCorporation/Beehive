@@ -35,15 +35,15 @@ class SpriteCanvas;
 #include <wx/radiobox.h>
 #include <wx/button.h>
 #include <wx/dialog.h>
+#include <wx/filepicker.h>
+#include <wx/checkbox.h>
 #include <wx/textctrl.h>
 #include <wx/choice.h>
-#include <wx/checkbox.h>
 #include <wx/bmpbuttn.h>
 #include <wx/toolbar.h>
 #include <wx/listctrl.h>
 #include <wx/listbox.h>
 #include <wx/radiobut.h>
-#include <wx/filepicker.h>
 #include <wx/notebook.h>
 #include <wx/clrpicker.h>
 #include <wx/grid.h>
@@ -219,6 +219,38 @@ class DialogMapSizeBase : public wxDialog
 		
 		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,189 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~DialogMapSizeBase();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DialogUpdateStampBase
+///////////////////////////////////////////////////////////////////////////////
+class DialogUpdateStampBase : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxFilePickerCtrl* m_filePicker10;
+		wxCheckBox* m_chkReplacePalette;
+		SpriteCanvas* m_canvasOld;
+		SpriteCanvas* m_canvasNew;
+		wxCheckBox* m_chkFlipX;
+		wxCheckBox* m_chkFlipY;
+		wxButton* m_buttonOk;
+		wxButton* m_buttonCancel;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnFileBrowse( wxFileDirPickerEvent& event ) { event.Skip(); }
+		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		wxRadioBox* m_radioBoxShiftY;
+		wxRadioBox* m_radioBoxShiftX;
+		
+		DialogUpdateStampBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Update Stamp"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 688,485 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		~DialogUpdateStampBase();
 	
 };
 

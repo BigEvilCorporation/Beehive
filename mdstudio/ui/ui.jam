@@ -32,6 +32,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	ViewPanel.h
 	PalettesPanel.cpp
 	PalettesPanel.h
+	RenderResources.cpp
+	RenderResources.h
 	SpriteCanvas.cpp
 	SpriteCanvas.h
 	SpriteAnimEditorDialog.cpp
@@ -55,10 +57,10 @@ local BEEHIVE_STUDIO_UI_SRC =
 	Tool.h
 	ToolSelectStamp.cpp
 	ToolSelectStamp.h
-	RenderResources.cpp
-	RenderResources.h
 	UIBase.cpp
 	UIBase.h
+	UpdateStampDialog.cpp
+	UpdateStampDialog.h
 	WxApp.cpp
 	WxApp.h
 	;

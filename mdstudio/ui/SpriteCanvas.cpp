@@ -92,6 +92,39 @@ void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, cons
 	Refresh();
 }
 
+void SpriteCanvas::SetDrawStamp(Stamp& stamp, const ion::Vector2i& offset)
+{
+	m_drawOffset = offset;
+
+	if(m_tileFramePrimitive)
+	{
+		delete m_tileFramePrimitive;
+	}
+
+	const int tileWidth = m_project->GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project->GetPlatformConfig().tileHeight;
+	const int width = stamp.GetWidth();
+	const int height = stamp.GetHeight();
+
+	m_tileFramePrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
+
+	for(int x = 0; x < width; x++)
+	{
+		for(int y = 0; y < height; y++)
+		{
+			TileId tileId = stamp.GetTile(x, y);
+			int y_inv = height - 1 - y;
+
+			//Set texture coords for cell
+			ion::render::TexCoord coords[4];
+			m_renderResources->GetTileTexCoords(tileId, coords, 0);
+			m_tileFramePrimitive->SetTexCoords((y_inv * width) + x, coords);
+		}
+	}
+
+	Refresh();
+}
+
 void SpriteCanvas::SetDrawTileFrame(TileFrame tileFrame)
 {
 	m_drawTileFrame = tileFrame;
