@@ -1207,8 +1207,12 @@ ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_chkPaintToMap = new wxCheckBox( this, wxID_ANY, wxT("Paint to map"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer13->Add( m_chkPaintToMap, 0, wxALL, 5 );
 	
-	m_chkImportToStamp = new wxCheckBox( this, wxID_ANY, wxT("Import as new stamp"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkImportToStamp = new wxCheckBox( this, wxID_ANY, wxT("Import as new stamp(s)"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer13->Add( m_chkImportToStamp, 0, wxALL, 5 );
+	
+	m_chkReplaceStamps = new wxCheckBox( this, wxID_ANY, wxT("Replace existing stamp(s)"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkReplaceStamps->SetValue(true); 
+	bSizer13->Add( m_chkReplaceStamps, 0, wxALL, 5 );
 	
 	
 	bSizer12->Add( bSizer13, 1, wxEXPAND, 5 );

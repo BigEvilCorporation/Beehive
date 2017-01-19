@@ -568,6 +568,7 @@ class ImportDialogBase : public wxDialog
 		wxCheckBox* m_chkInsertBGTile;
 		wxCheckBox* m_chkPaintToMap;
 		wxCheckBox* m_chkImportToStamp;
+		wxCheckBox* m_chkReplaceStamps;
 		wxCheckBox* m_chkPalette1;
 		wxCheckBox* m_chkPalette2;
 		wxCheckBox* m_chkPalette3;

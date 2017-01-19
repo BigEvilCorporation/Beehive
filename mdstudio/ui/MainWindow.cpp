@@ -1045,6 +1045,8 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 
 			if(dialog.m_chkImportToStamp->GetValue())
 				flags |= Project::eBMPImportToStamp;
+			if(dialog.m_chkReplaceStamps->GetValue())
+				flags |= Project::eBMPImportReplaceStamp;
 			if(dialog.m_chkInsertBGTile->GetValue())
 				flags |= Project::eBMPImportInsertBGTile;
 
@@ -1076,7 +1078,29 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 
 			for(int i = 0; i < dialog.m_paths.size(); i++)
 			{
-				m_project->ImportBitmap(dialog.m_paths[i].c_str().AsChar(), flags, palettes);
+				Stamp* stampToReplace = NULL;
+
+				if(flags & Project::eBMPImportReplaceStamp)
+				{
+					std::string stampName = dialog.m_paths[i].c_str().AsChar();
+
+					const size_t lastSlash = stampName.find_last_of('\\');
+					if(std::string::npos != lastSlash)
+					{
+						stampName.erase(0, lastSlash + 1);
+					}
+
+					// Remove extension if present.
+					const size_t period = stampName.rfind('.');
+					if(std::string::npos != period)
+					{
+						stampName.erase(period);
+					}
+
+					stampToReplace = m_project->FindStamp(stampName);
+				}
+
+				m_project->ImportBitmap(dialog.m_paths[i].c_str().AsChar(), flags, palettes, stampToReplace);
 			}
 
 			//Refresh tileset
