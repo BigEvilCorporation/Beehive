@@ -4,7 +4,7 @@ ApplyIonDefines ui ;
 ApplyIonIncludes ui ;
 ApplyIonCore ui ;
 ApplyIonIo ui ;
-ApplyIonRenderer ui : opengl ;
+ApplyIonRenderer ui ;
 ApplyIonGameKit ui ;
 ApplyIonLib ui : beehive ;
 ApplyWxSDK ui ;

@@ -4,7 +4,7 @@ ApplyIonDefines beehivestudio ;
 ApplyIonIncludes beehivestudio ;
 ApplyIonCore beehivestudio ;
 ApplyIonIo beehivestudio ;
-ApplyIonRenderer beehivestudio : opengl ;
+ApplyIonRenderer beehivestudio ;
 ApplyIonGameKit beehivestudio ;
 ApplyIonLib beehivestudio : beehive ;
 ApplyWxSDK beehivestudio ;
