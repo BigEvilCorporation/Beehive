@@ -372,6 +372,14 @@ void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 	{
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	}
+
+	z += zOffset;
+
+	//Render outlines
+	if(m_project.GetShowStampOutlines())
+	{
+		RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
+	}
 }
 
 void StampsPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -511,6 +519,36 @@ void StampsPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, 
 	renderer.DrawVertexBuffer(m_selectionPrimitive->GetVertexBuffer(), m_selectionPrimitive->GetIndexBuffer());
 	material->Unbind();
 	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+}
+
+void StampsPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	ion::Matrix4 worldViewProjMtx;
+	ion::Matrix4 outlineMtx;
+	ion::render::Shader* vertexShader = m_renderResources.GetVertexShader(RenderResources::eShaderFlatColour);
+	ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
+
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitLineQuad);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
+
+	material->SetDiffuseColour(colour);
+	material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
+
+	for(int i = 0; i < m_stampPosMap.size(); i++)
+	{
+		Stamp* stamp = m_project.GetStamp(m_stampPosMap[i].first);
+		if(stamp)
+		{
+			outlineMtx = m_renderResources.CalcBoxMatrix(m_stampPosMap[i].second, ion::Vector2i(stamp->GetWidth(), stamp->GetHeight()), m_canvasSize, z);
+			worldViewProjMtx = outlineMtx * cameraInverseMtx * projectionMtx;
+			worldViewProjParamV.SetValue(worldViewProjMtx);
+
+			renderer.DrawVertexBuffer(primitive->GetVertexBuffer());
+		}
+	}
+
+	material->Unbind();
 }
 
 void StampsPanel::ResetZoomPan()

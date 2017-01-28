@@ -64,6 +64,9 @@ private:
 	//Render selection box
 	void RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, const ion::Colour& colour, ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
+	//Render stamp outlines
+	void RenderStampOutlines(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+
 	//Reset zoom/pan
 	void ResetZoomPan();
 
