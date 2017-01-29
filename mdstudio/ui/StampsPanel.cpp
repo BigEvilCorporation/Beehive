@@ -427,19 +427,28 @@ void StampsPanel::ArrangeStamps(const ion::Vector2& panelSize)
 	//Clear stamp position map
 	m_stampPosMap.clear();
 
-	//Find widest stamp first
-	for(TStampMap::const_iterator it = m_project.StampsBegin(), end = m_project.StampsEnd(); it != end; ++it)
-	{
-		//If wider than current canvas width, grow canvas
-		m_canvasSize.x = max(m_canvasSize.x, it->second.GetWidth());
-	}
-
-	ion::Vector2i currPos;
-	int rowHeight = 1;
+	//Sort by size, and find widest stamp
+	std::vector<std::pair<int, const Stamp*>> stampsSorted;
+	stampsSorted.reserve(m_project.GetStampCount());
 
 	for(TStampMap::const_iterator it = m_project.StampsBegin(), end = m_project.StampsEnd(); it != end; ++it)
 	{
 		const Stamp& stamp = it->second;
+		int size = stamp.GetWidth() * stamp.GetHeight();
+		stampsSorted.push_back(std::make_pair(size, &stamp));
+
+		//If wider than current canvas width, grow canvas
+		m_canvasSize.x = max(m_canvasSize.x, it->second.GetWidth());
+	}
+
+	std::sort(stampsSorted.begin(), stampsSorted.end(), [](const std::pair<int, const Stamp*>& a, const std::pair<int, const Stamp*>& b) { return a.first < b.first; });
+
+	ion::Vector2i currPos;
+	int rowHeight = 1;
+
+	for(int i = 0; i < stampsSorted.size(); i++)
+	{
+		const Stamp& stamp = *stampsSorted[i].second;
 		ion::Vector2i stampSize(stamp.GetWidth(), stamp.GetHeight());
 		ion::Vector2i stampPos;
 
