@@ -93,6 +93,9 @@ private:
 	//Create stamp preview primitive
 	void CreateStampPreview(Stamp* stamp);
 
+	//Bucket fill (recursive)
+	void BucketFill(Map& map, ion::Vector2i position, ion::Vector2i prevPosition, TileId originalTile, TileId newTile);
+
 	//Clear all tool data
 	void ResetToolData();
 

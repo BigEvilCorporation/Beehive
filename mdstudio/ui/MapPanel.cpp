@@ -109,6 +109,65 @@ void MapPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
+void MapPanel::BucketFill(Map& map, ion::Vector2i position, ion::Vector2i prevPosition, TileId originalTile, TileId newTile)
+{
+	//Stop if already been here
+	if(position == prevPosition)
+	{
+		return;
+	}
+
+	//Get tile at position
+	TileId currentTile = map.GetTile(position.x, position.y);
+
+	//Stop if original tiles differ
+	if(currentTile != originalTile)
+	{
+		return;
+	}
+
+	//Stop if stamp
+	ion::Vector2i stampPos;
+	u32 stampFlags = 0;
+	u32 mapEntryIndex = 0;
+	StampId stampId = map.FindStamp(position.x, position.y, stampPos, stampFlags, mapEntryIndex);
+
+	if(stampId)
+	{
+		return;
+	}
+
+	//Set this tile
+	map.SetTile(position.x, position.y, newTile);
+
+	//Paint to canvas
+	PaintTile(newTile, position.x, map.GetHeight() - 1 - position.y, 0);
+
+	//Recurse up
+	if(position.y > 0)
+	{
+		BucketFill(map, ion::Vector2i(position.x, position.y - 1), position, originalTile, newTile);
+	}
+
+	//Recurse down
+	if(position.y < (map.GetHeight() - 1))
+	{
+		BucketFill(map, ion::Vector2i(position.x, position.y + 1), position, originalTile, newTile);
+	}
+
+	//Recurse left
+	if(position.x > 0)
+	{
+		BucketFill(map, ion::Vector2i(position.x - 1, position.y), position, originalTile, newTile);
+	}
+
+	//Recurse right
+	if(position.x < (map.GetWidth() - 1))
+	{
+		BucketFill(map, ion::Vector2i(position.x + 1, position.y), position, originalTile, newTile);
+	}
+}
+
 void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 {
 	Map& map = m_project.GetEditingMap();
@@ -178,6 +237,18 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				}
 			}
 				
+			break;
+		}
+
+		case eToolFill:
+		{
+			if(buttonBits & eMouseLeft)
+			{
+				if(map.GetTile(x, y) != m_project.GetPaintTile())
+				{
+					BucketFill(map, ion::Vector2i(x, y), ion::Vector2i(-1, -1), map.GetTile(x, y), m_project.GetPaintTile());
+				}
+			}
 			break;
 		}
 
@@ -1387,28 +1458,29 @@ void MapPanel::SetTool(ToolType tool)
 	{
 	case eToolFill:
 		//If previous tool was selectTiles, fill selection and leave previous tool data
-		//TODO: Should this really be a tool? Doesn't follow the same rules as the others
-		//(it's a single action, rather than a state which requires interaction from the user via the map)
-		if(previousTool == eToolSelectTiles)
+		if(m_selectedTiles.size() > 0)
 		{
-			if(m_project.GetPaintTile() != InvalidTileId)
+			if(previousTool == eToolSelectTiles)
 			{
-				//Set on map
-				map.FillTiles(m_project.GetPaintTile(), m_selectedTiles);
+				if(m_project.GetPaintTile() != InvalidTileId)
+				{
+					//Set on map
+					map.FillTiles(m_project.GetPaintTile(), m_selectedTiles);
 
-				//Draw to canvas
-				FillTiles(m_project.GetPaintTile(), m_selectedTiles);
+					//Draw to canvas
+					FillTiles(m_project.GetPaintTile(), m_selectedTiles);
 
-				//Refresh
-				Refresh();
+					//Refresh
+					Refresh();
+				}
+
+				//Set back to select tool, leave tool data intact
+				m_currentTool = previousTool;
 			}
-
-			//Set back to select tool, leave tool data intact
-			m_currentTool = previousTool;
-		}
-		else
-		{
-			ResetToolData();
+			else
+			{
+				ResetToolData();
+			}
 		}
 		break;
 
