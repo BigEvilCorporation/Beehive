@@ -1529,6 +1529,13 @@ void MapPanel::SetTool(ToolType tool)
 					//Creating - switch back to selection mode
 					m_currentTool = eToolSelectTiles;
 
+					//Place new stamp to map
+					ion::Vector2i stampPos = (m_boxSelectStart.x <= m_boxSelectEnd.x && m_boxSelectStart.y <= m_boxSelectEnd.y) ? m_boxSelectStart : m_boxSelectEnd;
+					map.SetStamp(stampPos.x, stampPos.y, *stamp, 0);
+
+					//Paint on canvas
+					PaintStamp(*stamp, stampPos.x, stampPos.y, 0);
+
 					//Refresh stamp panel to draw new stamp
 					m_mainWindow->RefreshPanel(MainWindow::ePanelStamps);
 				}
