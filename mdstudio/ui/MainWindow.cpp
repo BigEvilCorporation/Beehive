@@ -13,6 +13,7 @@
 
 #include <wx/filedlg.h>
 #include <wx/dirdlg.h>
+#include <wx/dir.h>
 #include <wx/aui/framemanager.h>
 #include <wx/msgdlg.h>
 
@@ -1049,10 +1050,15 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 				flags |= Project::eBMPImportReplaceStamp;
 			if(dialog.m_chkInsertBGTile->GetValue())
 				flags |= Project::eBMPImportInsertBGTile;
+			if(dialog.m_chkOnlyExisting->GetValue())
+				flags |= Project::eBMPImportOnlyExisting;
+			if(dialog.m_chkOnlyExisting->GetValue())
+				flags |= Project::eBMPImportOnlyExisting;
 
-			//Unsupported flags if multiple files selected
-			if(dialog.m_paths.size() > 0)
+			//Unsupported flags if multiple files/stamp directory selected
+			if((dialog.m_dirStamps->GetPath().size() == 0) || (dialog.m_paths.size() > 1))
 			{
+				
 				if(dialog.m_chkImportPalette->GetValue())
 					flags |= Project::eBMPImportWholePalette;
 				if(dialog.m_chkClearMap->GetValue())
@@ -1063,6 +1069,8 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 					flags |= Project::eBMPImportClearPalettes;
 				if(dialog.m_chkClearTiles->GetValue())
 					flags |= Project::eBMPImportClearTiles;
+				if(dialog.m_chkInsertBGTile->GetValue())
+					flags |= Project::eBMPImportInsertBGTile;
 			}
 
 			u32 palettes = 0;
@@ -1076,13 +1084,56 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkPalette4->GetValue())
 				palettes |= (1 << 3);
 
-			for(int i = 0; i < dialog.m_paths.size(); i++)
+			wxArrayString filenames;
+
+			if(dialog.m_dirStamps->GetPath().size() > 0)
+			{
+				//Enumerate all files in directory
+				wxString directoryPath = dialog.m_dirStamps->GetDirName().GetPath();
+				wxDir dir(directoryPath);
+
+				wxString filename;
+				bool next = dir.GetFirst(&filename, "*.bmp", wxDIR_FILES | wxDIR_NO_FOLLOW);
+				while(next)
+				{
+					//Get stamp name
+					std::string stampName = filename;
+
+					const size_t lastSlash = stampName.find_last_of('\\');
+					if(std::string::npos != lastSlash)
+					{
+						stampName.erase(0, lastSlash + 1);
+					}
+
+					// Remove extension if present.
+					const size_t period = stampName.rfind('.');
+					if(std::string::npos != period)
+					{
+						stampName.erase(period);
+					}
+
+					//If only to import existing, stamp by this name must already exist
+					if(!(flags & Project::eBMPImportOnlyExisting) || m_project->FindStamp(stampName))
+					{
+						filenames.Add(directoryPath + "\\" + filename);
+					}
+
+					next = dir.GetNext(&filename);
+				}
+			}
+			else
+			{
+				//Use files from file selection dlg
+				filenames = dialog.m_paths;
+			}
+
+			for(int i = 0; i < filenames.size(); i++)
 			{
 				Stamp* stampToReplace = NULL;
 
 				if(flags & Project::eBMPImportReplaceStamp)
 				{
-					std::string stampName = dialog.m_paths[i].c_str().AsChar();
+					std::string stampName = filenames[i].c_str().AsChar();
 
 					const size_t lastSlash = stampName.find_last_of('\\');
 					if(std::string::npos != lastSlash)
@@ -1100,7 +1151,7 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 					stampToReplace = m_project->FindStamp(stampName);
 				}
 
-				m_project->ImportBitmap(dialog.m_paths[i].c_str().AsChar(), flags, palettes, stampToReplace);
+				m_project->ImportBitmap(filenames[i].c_str().AsChar(), flags, palettes, stampToReplace);
 			}
 
 			//Refresh tileset

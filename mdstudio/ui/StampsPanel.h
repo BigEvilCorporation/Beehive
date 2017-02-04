@@ -42,11 +42,12 @@ private:
 	enum MenuItems
 	{
 		eMenuUpdateStamp,
+		eMenuUpdatePalette,
 		eMenuSubstituteStamp,
 		eMenuDeleteStamp,
 		eMenuSetStampLowDrawPrio,
 		eMenuSetStampHighDrawPrio,
-		eMenuCreateStampAnim
+		eMenuCreateStampAnim,
 	};
 
 	enum Mode

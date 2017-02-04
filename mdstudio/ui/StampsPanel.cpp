@@ -213,6 +213,7 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			wxMenu contextMenu;
 
 			contextMenu.Append(eMenuUpdateStamp, wxString("Update stamp"));
+			contextMenu.Append(eMenuUpdatePalette, wxString("Update palette"));
 			contextMenu.Append(eMenuSubstituteStamp, wxString("Substitute stamp"));
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
 			contextMenu.Append(eMenuCreateStampAnim, wxString("Create stamp animation"));
@@ -234,17 +235,75 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
 		{
-			int paletteIdx = 0;
-			TileId firstTile = stamp->GetTile(0, 0);
-			if(Tile* tile = m_project.GetTileset().GetTile(firstTile))
-			{
-				paletteIdx = (int)tile->GetPaletteId();
-			}
-
 			DialogUpdateStamp dialog(this, *stamp, m_project, m_renderer, *m_glContext, m_renderResources);
 			if(dialog.ShowModal() == wxID_OK)
 			{
 				m_mainWindow->RefreshAll();
+			}
+		}
+	}
+	else if(event.GetId() == eMenuUpdatePalette)
+	{
+		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			wxFileDialog dialog(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			if(dialog.ShowModal() == wxID_OK)
+			{
+				std::string filename = dialog.GetPath().c_str().AsChar();
+				BMPReader reader;
+				if(reader.Read(filename))
+				{
+					const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+					const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+					if(reader.GetWidth() != (stamp->GetWidth() * tileWidth) || (reader.GetHeight() != stamp->GetHeight() * tileHeight))
+					{
+						ion::debug::log << "Bitmap width / height " << reader.GetWidth() << "x" << reader.GetHeight() << " does not match original stamp: " << filename << ion::debug::end;
+						return;
+					}
+
+					//Get original palette
+					int paletteIdx = 0;
+					TileId firstTile = stamp->GetTile(0, 0);
+					if(Tile* tile = m_project.GetTileset().GetTile(firstTile))
+					{
+						paletteIdx = (int)tile->GetPaletteId();
+					}
+
+					if(Palette* originalPalette = m_project.GetPalette(paletteIdx))
+					{
+						//New palette
+						Palette newPalette;
+
+						for(int x = 0; x < reader.GetWidth(); x++)
+						{
+							for(int y = 0; y < reader.GetHeight(); y++)
+							{
+								//Get original tile
+								TileId tileId = stamp->GetTile(x / tileWidth, y / tileHeight);
+
+								if(const Tile* tile = m_project.GetTileset().GetTile(tileId))
+								{
+									//Get colour idx of old pixel
+									u8 originalIdx = tile->GetPixelColour(x % tileWidth, y % tileHeight);
+
+									//Get colour of new pixel
+									BMPReader::Colour colour = reader.GetPixel(x, y);
+
+									//Replace colour in original palette
+									newPalette.SetColour(originalIdx, Colour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
+								}
+							}
+						}
+
+						//Replace palette
+						*originalPalette = newPalette;
+
+						//Refresh
+						m_mainWindow->RefreshAll();
+					}
+				}
 			}
 		}
 	}

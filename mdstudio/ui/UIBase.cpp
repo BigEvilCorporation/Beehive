@@ -1183,6 +1183,19 @@ ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	
 	bSizer10->Add( bSizer11, 0, wxEXPAND, 5 );
 	
+	wxBoxSizer* bSizer111;
+	bSizer111 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticText81 = new wxStaticText( this, wxID_ANY, wxT("Stamps directory:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText81->Wrap( -1 );
+	bSizer111->Add( m_staticText81, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_dirStamps = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE|wxDIRP_DIR_MUST_EXIST );
+	bSizer111->Add( m_dirStamps, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	bSizer10->Add( bSizer111, 1, wxEXPAND, 5 );
+	
 	wxBoxSizer* bSizer12;
 	bSizer12 = new wxBoxSizer( wxHORIZONTAL );
 	
@@ -1211,8 +1224,10 @@ ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	bSizer13->Add( m_chkImportToStamp, 0, wxALL, 5 );
 	
 	m_chkReplaceStamps = new wxCheckBox( this, wxID_ANY, wxT("Replace existing stamp(s)"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_chkReplaceStamps->SetValue(true); 
 	bSizer13->Add( m_chkReplaceStamps, 0, wxALL, 5 );
+	
+	m_chkOnlyExisting = new wxCheckBox( this, wxID_ANY, wxT("Don't import new"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkOnlyExisting, 0, wxALL, 5 );
 	
 	
 	bSizer12->Add( bSizer13, 1, wxEXPAND, 5 );
