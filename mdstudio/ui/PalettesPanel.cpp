@@ -225,20 +225,35 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 	}
 	else if(menuItemId & eMenuSetAsBg)
 	{
+		//Swap colours in active palette
 		if(Palette* palette = m_project.GetPalette(m_selectedPaletteId))
 		{
-			//Swap colours in palette
 			Colour originalColour = palette->GetColour(0);
 			Colour newColour = palette->GetColour(m_seletedColourId);
 			palette->SetColour(m_seletedColourId, originalColour);
 			palette->SetColour(0, newColour);
-
-			//Swap colours in all tiles
-			m_project.SetBackgroundColour(m_seletedColourId);
-
-			//Refresh all
-			m_mainWindow->RefreshAll();
 		}
+
+		//Swap colours in all palette slots
+		for(int i = 0; i < m_project.GetNumPaletteSlots(); i++)
+		{
+			if(Palette* palette = m_project.GetPaletteSlot(i))
+			{
+				if(palette->IsColourUsed(0) && palette->IsColourUsed(m_seletedColourId))
+				{
+					Colour originalColour = palette->GetColour(0);
+					Colour newColour = palette->GetColour(m_seletedColourId);
+					palette->SetColour(m_seletedColourId, originalColour);
+					palette->SetColour(0, newColour);
+				}
+			}
+		}
+
+		//Swap colours in all tiles
+		m_project.SetBackgroundColour(m_seletedColourId);
+
+		//Refresh all
+		m_mainWindow->RefreshAll();
 	}
 }
 
