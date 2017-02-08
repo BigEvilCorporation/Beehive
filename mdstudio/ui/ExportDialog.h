@@ -25,11 +25,8 @@ public:
 	virtual void OnBtnCancel(wxCommandEvent& event);
 	virtual void OnBtnExportAll(wxCommandEvent& event);
 
-	void SetMapFormStrings(int mapIndex, const std::string& mapFilename, const std::string& stampMapFilename, const std::string& collisionMapFilename, const std::string& gameObjectsFilename);
-	void SetMapFormBools(int mapIndex, bool mapExport, bool stampMapExport, bool collisionMapExport, bool gameObjectsExport);
-
-	void GetMapFormStrings(int mapIndex, std::string& mapFilename, std::string& stampMapFilename, std::string& collisionMapFilename, std::string& gameObjectsFilename) const;
-	void GetMapFormBools(int mapIndex, bool& mapExport, bool& stampMapExport, bool& collisionMapExport, bool& gameObjectsExport) const;
+	void SetMapFormValues(int mapIndex, const Map::ExportFilenames& values);
+	void GetMapFormValues(int mapIndex, Map::ExportFilenames& values) const;
 
 private:
 	std::vector<ExportDialogMapTab*> m_mapTabs;

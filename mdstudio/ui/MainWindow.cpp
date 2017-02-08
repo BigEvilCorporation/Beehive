@@ -960,8 +960,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		int mapIndex = 0;
 		for(TMapMap::const_iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
 		{
-			dialog.SetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.stampMap, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
-			dialog.SetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.stampMapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
+			dialog.SetMapFormValues(mapIndex, it->second.m_exportFilenames);
 		}
 
 		if(dialog.ShowModal() == wxID_OK)
@@ -1008,14 +1007,28 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkSpritePalettes->GetValue())
 				m_project->ExportSpritePalettes(m_project->m_exportFilenames.spritePalettes);
 
+			int blockWidth = 4;
+			int blockHeight = 4;
+
 			int mapIndex = 0;
 			for(TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
 			{
-				dialog.GetMapFormStrings(mapIndex, it->second.m_exportFilenames.map, it->second.m_exportFilenames.stampMap, it->second.m_exportFilenames.collisionMap, it->second.m_exportFilenames.gameObjects);
-				dialog.GetMapFormBools(mapIndex, it->second.m_exportFilenames.mapExportEnabled, it->second.m_exportFilenames.stampMapExportEnabled, it->second.m_exportFilenames.collisionMapExportEnabled, it->second.m_exportFilenames.gameObjectsExportEnabled);
+				dialog.GetMapFormValues(mapIndex, it->second.m_exportFilenames);
+
+				if(it->second.m_exportFilenames.blocksExportEnabled || it->second.m_exportFilenames.blockMapExportEnabled)
+				{
+					//Generate blocks
+					it->second.GenerateBlocks(*m_project, blockWidth, blockHeight);
+				}
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
 					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, dialog.m_btnBinary->GetValue());
+
+				if(it->second.m_exportFilenames.blocksExportEnabled)
+					m_project->ExportBlocks(it->first, it->second.m_exportFilenames.blocks, dialog.m_btnBinary->GetValue(), blockWidth, blockHeight);
+
+				if(it->second.m_exportFilenames.blockMapExportEnabled)
+					m_project->ExportBlockMap(it->first, it->second.m_exportFilenames.blockMap, dialog.m_btnBinary->GetValue(), blockWidth, blockHeight);
 
 				if(it->second.m_exportFilenames.stampMapExportEnabled)
 					m_project->ExportStampMap(it->first, it->second.m_exportFilenames.stampMap, dialog.m_btnBinary->GetValue());

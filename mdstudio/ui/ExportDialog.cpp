@@ -32,34 +32,34 @@ void ExportDialog::OnBtnExportAll(wxCommandEvent& event)
 	EndModal(wxID_OK);
 }
 
-void ExportDialog::SetMapFormStrings(int mapIndex, const std::string& mapFilename, const std::string& stampMapFilename, const std::string& collisionMapFilename, const std::string& gameObjectsFilename)
+void ExportDialog::SetMapFormValues(int mapIndex, const Map::ExportFilenames& values)
 {
-	m_mapTabs[mapIndex]->m_filePickerMap->SetPath(mapFilename);
-	m_mapTabs[mapIndex]->m_filePickerStampMap->SetPath(stampMapFilename);
-	m_mapTabs[mapIndex]->m_filePickerCollisionMap->SetPath(collisionMapFilename);
-	m_mapTabs[mapIndex]->m_filePickerGameObj->SetPath(gameObjectsFilename);
+	m_mapTabs[mapIndex]->m_filePickerMap->SetPath(values.map);
+	m_mapTabs[mapIndex]->m_filePickerStampMap->SetPath(values.stampMap);
+	m_mapTabs[mapIndex]->m_filePickerCollisionMap->SetPath(values.collisionMap);
+	m_mapTabs[mapIndex]->m_filePickerGameObj->SetPath(values.gameObjects);
+	m_mapTabs[mapIndex]->m_filePickerBlocks->SetPath(values.blocks);
+	m_mapTabs[mapIndex]->m_filePickerBlockMap->SetPath(values.blockMap);
+	m_mapTabs[mapIndex]->m_chkMap->SetValue(values.mapExportEnabled);
+	m_mapTabs[mapIndex]->m_chkStampMap->SetValue(values.stampMapExportEnabled);
+	m_mapTabs[mapIndex]->m_chkCollisionMap->SetValue(values.collisionMapExportEnabled);
+	m_mapTabs[mapIndex]->m_chkGameObj->SetValue(values.gameObjectsExportEnabled);
+	m_mapTabs[mapIndex]->m_chkBlocks->SetValue(values.blocksExportEnabled);
+	m_mapTabs[mapIndex]->m_chkBlockMap->SetValue(values.blockMapExportEnabled);
 }
 
-void ExportDialog::SetMapFormBools(int mapIndex, bool mapExport, bool stampMapExport, bool collisionMapExport, bool gameObjectsExport)
+void ExportDialog::GetMapFormValues(int mapIndex, Map::ExportFilenames& values) const
 {
-	m_mapTabs[mapIndex]->m_chkMap->SetValue(mapExport);
-	m_mapTabs[mapIndex]->m_chkStampMap->SetValue(stampMapExport);
-	m_mapTabs[mapIndex]->m_chkCollisionMap->SetValue(collisionMapExport);
-	m_mapTabs[mapIndex]->m_chkGameObj->SetValue(gameObjectsExport);
-}
-
-void ExportDialog::GetMapFormStrings(int mapIndex, std::string& mapFilename, std::string& stampMapFilename, std::string& collisionMapFilename, std::string& gameObjectsFilename) const
-{
-	mapFilename = m_mapTabs[mapIndex]->m_filePickerMap->GetPath();
-	stampMapFilename = m_mapTabs[mapIndex]->m_filePickerStampMap->GetPath();
-	collisionMapFilename = m_mapTabs[mapIndex]->m_filePickerCollisionMap->GetPath();
-	gameObjectsFilename = m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath();
-}
-
-void ExportDialog::GetMapFormBools(int mapIndex, bool& mapExport, bool& stampMapExport, bool& collisionMapExport, bool& gameObjectsExport) const
-{
-	mapExport = m_mapTabs[mapIndex]->m_chkMap->GetValue();
-	stampMapExport = m_mapTabs[mapIndex]->m_chkStampMap->GetValue();
-	collisionMapExport = m_mapTabs[mapIndex]->m_chkCollisionMap->GetValue();
-	gameObjectsExport = m_mapTabs[mapIndex]->m_chkGameObj->GetValue();
+	values.map = m_mapTabs[mapIndex]->m_filePickerMap->GetPath();
+	values.stampMap = m_mapTabs[mapIndex]->m_filePickerStampMap->GetPath();
+	values.collisionMap = m_mapTabs[mapIndex]->m_filePickerCollisionMap->GetPath();
+	values.gameObjects = m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath();
+	values.blocks = m_mapTabs[mapIndex]->m_filePickerBlocks->GetPath();
+	values.blockMap = m_mapTabs[mapIndex]->m_filePickerBlockMap->GetPath();
+	values.mapExportEnabled = m_mapTabs[mapIndex]->m_chkMap->GetValue();
+	values.stampMapExportEnabled = m_mapTabs[mapIndex]->m_chkStampMap->GetValue();
+	values.collisionMapExportEnabled = m_mapTabs[mapIndex]->m_chkCollisionMap->GetValue();
+	values.gameObjectsExportEnabled = m_mapTabs[mapIndex]->m_chkGameObj->GetValue();
+	values.blocksExportEnabled = m_mapTabs[mapIndex]->m_chkBlocks->GetValue();
+	values.blockMapExportEnabled = m_mapTabs[mapIndex]->m_chkBlockMap->GetValue();
 }
