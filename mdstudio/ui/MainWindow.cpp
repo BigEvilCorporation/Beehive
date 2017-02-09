@@ -1009,6 +1009,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			int blockWidth = 4;
 			int blockHeight = 4;
+			int terrainBlockWidth = 4;
+			int terrainBlockHeight = 4;
 
 			int mapIndex = 0;
 			for(TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
@@ -1019,6 +1021,13 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				{
 					//Generate blocks
 					it->second.GenerateBlocks(*m_project, blockWidth, blockHeight);
+				}
+
+				if(it->second.m_exportFilenames.terrainBlocksExportEnabled || it->second.m_exportFilenames.terrainBlockMapExportEnabled)
+				{
+					//Generate terrain blocks
+					CollisionMap& collisionMap = m_project->GetCollisionMap(it->first);
+					collisionMap.GenerateBlocks(*m_project, terrainBlockWidth, terrainBlockHeight);
 				}
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
@@ -1035,6 +1044,12 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				
 				if(it->second.m_exportFilenames.collisionMapExportEnabled)
 					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
+
+				if(it->second.m_exportFilenames.terrainBlocksExportEnabled)
+					m_project->ExportTerrainBlocks(it->first, it->second.m_exportFilenames.terrainBlocks, dialog.m_btnBinary->GetValue(), terrainBlockWidth, terrainBlockHeight);
+
+				if(it->second.m_exportFilenames.terrainBlockMapExportEnabled)
+					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, dialog.m_btnBinary->GetValue(), terrainBlockWidth, terrainBlockHeight);
 				
 				if(it->second.m_exportFilenames.gameObjectsExportEnabled)
 					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects);

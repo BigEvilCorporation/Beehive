@@ -536,7 +536,7 @@ class ExportDialogBase : public wxDialog
 		wxCheckBox* m_chkSpriteAnims;
 		wxDirPickerCtrl* m_dirPickerSpriteAnims;
 		
-		ExportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 976,671 ), long style = wxCAPTION|wxRESIZE_BORDER ); 
+		ExportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 976,744 ), long style = wxCAPTION|wxRESIZE_BORDER ); 
 		~ExportDialogBase();
 	
 };
@@ -899,6 +899,10 @@ class ExportDialogMapTab : public wxPanel
 		wxFilePickerCtrl* m_filePickerStampMap;
 		wxCheckBox* m_chkCollisionMap;
 		wxFilePickerCtrl* m_filePickerCollisionMap;
+		wxCheckBox* m_chkCollisionBlocks;
+		wxFilePickerCtrl* m_filePickerCollisionBlocks;
+		wxCheckBox* m_chkCollisionBlockMap;
+		wxFilePickerCtrl* m_filePickerCollisionBlockMap;
 		wxCheckBox* m_chkGameObj;
 		wxFilePickerCtrl* m_filePickerGameObj;
 		

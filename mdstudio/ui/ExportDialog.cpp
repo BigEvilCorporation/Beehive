@@ -40,12 +40,16 @@ void ExportDialog::SetMapFormValues(int mapIndex, const Map::ExportFilenames& va
 	m_mapTabs[mapIndex]->m_filePickerGameObj->SetPath(values.gameObjects);
 	m_mapTabs[mapIndex]->m_filePickerBlocks->SetPath(values.blocks);
 	m_mapTabs[mapIndex]->m_filePickerBlockMap->SetPath(values.blockMap);
+	m_mapTabs[mapIndex]->m_filePickerCollisionBlocks->SetPath(values.terrainBlocks);
+	m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->SetPath(values.terrainBlockMap);
 	m_mapTabs[mapIndex]->m_chkMap->SetValue(values.mapExportEnabled);
 	m_mapTabs[mapIndex]->m_chkStampMap->SetValue(values.stampMapExportEnabled);
 	m_mapTabs[mapIndex]->m_chkCollisionMap->SetValue(values.collisionMapExportEnabled);
 	m_mapTabs[mapIndex]->m_chkGameObj->SetValue(values.gameObjectsExportEnabled);
 	m_mapTabs[mapIndex]->m_chkBlocks->SetValue(values.blocksExportEnabled);
 	m_mapTabs[mapIndex]->m_chkBlockMap->SetValue(values.blockMapExportEnabled);
+	m_mapTabs[mapIndex]->m_chkCollisionBlocks->SetValue(values.terrainBlocksExportEnabled);
+	m_mapTabs[mapIndex]->m_chkCollisionBlockMap->SetValue(values.terrainBlockMapExportEnabled);
 }
 
 void ExportDialog::GetMapFormValues(int mapIndex, Map::ExportFilenames& values) const
@@ -56,10 +60,14 @@ void ExportDialog::GetMapFormValues(int mapIndex, Map::ExportFilenames& values) 
 	values.gameObjects = m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath();
 	values.blocks = m_mapTabs[mapIndex]->m_filePickerBlocks->GetPath();
 	values.blockMap = m_mapTabs[mapIndex]->m_filePickerBlockMap->GetPath();
+	values.terrainBlocks = m_mapTabs[mapIndex]->m_filePickerCollisionBlocks->GetPath();
+	values.terrainBlockMap = m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->GetPath();
 	values.mapExportEnabled = m_mapTabs[mapIndex]->m_chkMap->GetValue();
 	values.stampMapExportEnabled = m_mapTabs[mapIndex]->m_chkStampMap->GetValue();
 	values.collisionMapExportEnabled = m_mapTabs[mapIndex]->m_chkCollisionMap->GetValue();
 	values.gameObjectsExportEnabled = m_mapTabs[mapIndex]->m_chkGameObj->GetValue();
 	values.blocksExportEnabled = m_mapTabs[mapIndex]->m_chkBlocks->GetValue();
 	values.blockMapExportEnabled = m_mapTabs[mapIndex]->m_chkBlockMap->GetValue();
+	values.terrainBlocksExportEnabled = m_mapTabs[mapIndex]->m_chkCollisionBlocks->GetValue();
+	values.terrainBlockMapExportEnabled = m_mapTabs[mapIndex]->m_chkCollisionBlockMap->GetValue();
 }
