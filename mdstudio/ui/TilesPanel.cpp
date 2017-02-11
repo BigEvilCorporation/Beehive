@@ -184,8 +184,8 @@ void TilesPanel::OnContextMenuClick(wxCommandEvent& event)
 		//Set background tile
 		m_project.SetBackgroundTile(m_hoverTile);
 
-		//Refresh map
-		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		//Redraw everything (tiles will have swapped places)
+		m_mainWindow->RefreshAll();
 	}
 }
 
