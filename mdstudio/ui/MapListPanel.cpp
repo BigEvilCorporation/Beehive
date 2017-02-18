@@ -50,12 +50,18 @@ void MapListPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 void MapListPanel::OnMapSelected(wxListEvent& event)
 {
-	m_project.SetEditingMap(m_mapIds[event.GetIndex()]);
-	m_project.SetEditingCollisionMap(m_mapIds[event.GetIndex()]);
+	MapId mapId = m_mapIds[event.GetIndex()];
+	CollisionMapId collisionMapId = m_mapIds[event.GetIndex()];
 
-	m_project.InvalidateMap(true);
-	m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
-	m_project.InvalidateMap(false);
+	if(mapId != m_project.GetEditingMapId() || collisionMapId != m_project.GetEditingCollisionMapId())
+	{
+		m_project.SetEditingMap(m_mapIds[event.GetIndex()]);
+		m_project.SetEditingCollisionMap(m_mapIds[event.GetIndex()]);
+
+		m_project.InvalidateMap(true);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_project.InvalidateMap(false);
+	}
 }
 
 void MapListPanel::OnToolAddMap(wxCommandEvent& event)

@@ -813,6 +813,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	
 	fgSizer1->Add( m_toolCreateSceneAnim, 0, wxALL, 5 );
 	
+	m_toolCopyToNewMap = new wxBitmapButton( this, wxID_TOOL_COPY_TO_NEW_MAP, wxBitmap( tool_createstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolCopyToNewMap->SetToolTip( wxT("Copy to new map") );
+	
+	fgSizer1->Add( m_toolCopyToNewMap, 0, wxALL, 5 );
+	
 	
 	bSizer16->Add( fgSizer1, 1, wxEXPAND, 5 );
 	

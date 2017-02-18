@@ -111,60 +111,73 @@ void MapPanel::OnResize(wxSizeEvent& event)
 
 void MapPanel::BucketFill(Map& map, ion::Vector2i position, ion::Vector2i prevPosition, TileId originalTile, TileId newTile)
 {
-	//Stop if already been here
-	if(position == prevPosition)
+	std::vector<ion::Vector2i> fillQueue;
+
+	//Best guess at max queue size
+	fillQueue.reserve((map.GetWidth() * map.GetHeight()) / 8);
+
+	//Add this node to queue
+	fillQueue.push_back(position);
+
+	for(int i = 0; i < fillQueue.size(); i++)
 	{
-		return;
-	}
+		//Stop if already been here
+		if(fillQueue[i] == prevPosition)
+		{
+			continue;
+		}
 
-	//Get tile at position
-	TileId currentTile = map.GetTile(position.x, position.y);
+		//Get tile at position
+		TileId currentTile = map.GetTile(fillQueue[i].x, fillQueue[i].y);
 
-	//Stop if original tiles differ
-	if(currentTile != originalTile)
-	{
-		return;
-	}
+		//Stop if original tiles differ
+		if(currentTile != originalTile)
+		{
+			continue;
+		}
 
-	//Stop if stamp
-	ion::Vector2i stampPos;
-	u32 stampFlags = 0;
-	u32 mapEntryIndex = 0;
-	StampId stampId = map.FindStamp(position.x, position.y, stampPos, stampFlags, mapEntryIndex);
+		//Stop if stamp
+		ion::Vector2i stampPos;
+		u32 stampFlags = 0;
+		u32 mapEntryIndex = 0;
+		StampId stampId = map.FindStamp(fillQueue[i].x, fillQueue[i].y, stampPos, stampFlags, mapEntryIndex);
 
-	if(stampId)
-	{
-		return;
-	}
+		if(stampId)
+		{
+			continue;
+		}
 
-	//Set this tile
-	map.SetTile(position.x, position.y, newTile);
+		//Set this tile
+		map.SetTile(fillQueue[i].x, fillQueue[i].y, newTile);
 
-	//Paint to canvas
-	PaintTile(newTile, position.x, map.GetHeight() - 1 - position.y, 0);
+		//Paint to canvas
+		PaintTile(newTile, fillQueue[i].x, map.GetHeight() - 1 - fillQueue[i].y, 0);
 
-	//Recurse up
-	if(position.y > 0)
-	{
-		BucketFill(map, ion::Vector2i(position.x, position.y - 1), position, originalTile, newTile);
-	}
+		//Recurse up
+		if(fillQueue[i].y > 0)
+		{
+			fillQueue.push_back(ion::Vector2i(fillQueue[i].x, fillQueue[i].y - 1));
+		}
 
-	//Recurse down
-	if(position.y < (map.GetHeight() - 1))
-	{
-		BucketFill(map, ion::Vector2i(position.x, position.y + 1), position, originalTile, newTile);
-	}
+		//Recurse down
+		if(fillQueue[i].y < (map.GetHeight() - 1))
+		{
+			fillQueue.push_back(ion::Vector2i(fillQueue[i].x, fillQueue[i].y + 1));
+		}
 
-	//Recurse left
-	if(position.x > 0)
-	{
-		BucketFill(map, ion::Vector2i(position.x - 1, position.y), position, originalTile, newTile);
-	}
+		//Recurse left
+		if(fillQueue[i].x > 0)
+		{
+			fillQueue.push_back(ion::Vector2i(fillQueue[i].x - 1, fillQueue[i].y));
+		}
 
-	//Recurse right
-	if(position.x < (map.GetWidth() - 1))
-	{
-		BucketFill(map, ion::Vector2i(position.x + 1, position.y), position, originalTile, newTile);
+		//Recurse right
+		if(fillQueue[i].x < (map.GetWidth() - 1))
+		{
+			fillQueue.push_back(ion::Vector2i(fillQueue[i].x + 1, fillQueue[i].y));
+		}
+
+		prevPosition = fillQueue[i];
 	}
 }
 
@@ -1453,6 +1466,7 @@ void MapPanel::SetTool(ToolType tool)
 	m_currentTool = tool;
 
 	Map& map = m_project.GetEditingMap();
+	CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
 	switch(tool)
 	{
@@ -1521,8 +1535,108 @@ void MapPanel::SetTool(ToolType tool)
 		break;
 	}
 
+	case eToolCopyToNewMap:
+	{
+		//Must previously have been in Select mode
+		if(previousTool == eToolSelectTiles)
+		{
+			//and have data to work with
+			if(m_selectedTiles.size() > 0)
+			{
+				//Query for new map name
+				DialogNewMap dialog(m_mainWindow);
+
+				if(dialog.ShowModal() == wxID_OK)
+				{
+					//Get min/max width/height
+					int left, top, right, bottom;
+					FindBounds(m_selectedTiles, left, top, right, bottom);
+					int width = abs(right - left) + 1;
+					int height = abs(bottom - top) + 1;
+
+					//Create new map
+					MapId newMapId = m_project.CreateMap();
+					CollisionMapId collisionMapId = m_project.CreateCollisionMap(newMapId);
+					Map& newMap = m_project.GetMap(newMapId);
+					CollisionMap& newCollisionMap = m_project.GetCollisionMap(collisionMapId);
+
+					//Resize
+					newMap.SetName(dialog.m_textMapName->GetValue().GetData().AsChar());
+					newMap.Resize(width, height, false, false);
+					newCollisionMap.Resize(width, height, false, false);
+					
+					//Populate tiles
+					for(int y = top; y < bottom; y++)
+					{
+						for(int x = left; x < right; x++)
+						{
+							int newX = x - left;
+							int newY = y - top;
+
+							if(x >= 0 && x < map.GetWidth() && y >= 0 && y < map.GetHeight())
+							{
+								//Grab tile
+								newMap.SetTile(newX, newY, map.GetTile(x, y));
+								newMap.SetTileFlags(newY, newY, map.GetTileFlags(x, y));
+
+								//Grab terrain tile
+								newCollisionMap.SetTerrainTile(newX, newY, collisionMap.GetTerrainTile(x, y));
+								newCollisionMap.SetCollisionTileFlags(newY, newY, collisionMap.GetCollisionTileFlags(x, y));
+							}
+						}
+					}
+
+					//Populate stamps
+					std::vector<const StampMapEntry*> stamps;
+					map.FindStamps(left, top, width, height, stamps);
+					for(int i = 0; i < stamps.size(); i++)
+					{
+						if(const Stamp* stamp = m_project.GetStamp(stamps[i]->m_id))
+						{
+							newMap.SetStamp(stamps[i]->m_position.x - left, stamps[i]->m_position.y - top, *stamp, stamps[i]->m_flags);
+						}
+					}
+
+					//Populate terrain splines
+					std::vector<const ion::gamekit::BezierPath*> beziers;
+					collisionMap.FindTerrainBeziers(left, top, width, height, beziers);
+					for(int i = 0; i < beziers.size(); i++)
+					{
+						ion::gamekit::BezierPath bezier = *beziers[i];
+						bezier.Move(ion::Vector2(-left, -top));
+						newCollisionMap.AddTerrainBezier(bezier);
+					}
+
+					//Populate game objects
+					std::vector<const GameObjectMapEntry*> gameObjects;
+					map.FindGameObjects(left, top, width, height, gameObjects);
+					for(int i = 0; i < gameObjects.size(); i++)
+					{
+						if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjects[i]->m_gameObject.GetTypeId()))
+						{
+							newMap.PlaceGameObject(gameObjects[i]->m_position.x - left, gameObjects[i]->m_position.y - top, gameObjects[i]->m_gameObject, *gameObjectType);
+						}
+					}
+
+					//Set as editing map
+					m_project.SetEditingMap(newMapId);
+					m_project.SetEditingCollisionMap(newMapId);
+
+					//Refresh
+					m_project.InvalidateMap(true);
+					m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+					m_mainWindow->RefreshPanel(MainWindow::ePanelMapList);
+					m_project.InvalidateMap(false);
+				}
+			}
+		}
+
+		break;
+	}
+
 	case eToolClone:
 	case eToolCreateStamp:
+	{
 		//Must previously have been in Select mode
 		if(previousTool == eToolSelectTiles)
 		{
@@ -1619,6 +1733,7 @@ void MapPanel::SetTool(ToolType tool)
 		}
 
 		break;
+	}
 
 	default:
 		ResetToolData();

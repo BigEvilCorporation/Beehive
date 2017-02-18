@@ -449,6 +449,7 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATE_SCENE_ANIM);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COPY_TO_NEW_MAP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVESTAMP);
@@ -1615,6 +1616,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_CREATE_SCENE_ANIM:
 			m_mapPanel->SetTool(eToolCreateStampAnim);
+			break;
+		case wxID_TOOL_COPY_TO_NEW_MAP:
+			m_mapPanel->SetTool(eToolCopyToNewMap);
 			break;
 		case wxID_TOOL_CREATESTAMP:
 			m_mapPanel->SetTool(eToolCreateStamp);
