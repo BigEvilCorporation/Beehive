@@ -257,9 +257,12 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 		{
 			if(buttonBits & eMouseLeft)
 			{
-				if(map.GetTile(x, y) != m_project.GetPaintTile())
+				if(inMaprange)
 				{
-					BucketFill(map, ion::Vector2i(x, y), ion::Vector2i(-1, -1), map.GetTile(x, y), m_project.GetPaintTile());
+					if(map.GetTile(x, y) != m_project.GetPaintTile())
+					{
+						BucketFill(map, ion::Vector2i(x, y), ion::Vector2i(-1, -1), map.GetTile(x, y), m_project.GetPaintTile());
+					}
 				}
 			}
 			break;
