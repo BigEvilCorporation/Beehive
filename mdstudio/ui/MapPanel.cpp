@@ -1554,6 +1554,10 @@ void MapPanel::SetTool(ToolType tool)
 					//Get min/max width/height
 					int left, top, right, bottom;
 					FindBounds(m_selectedTiles, left, top, right, bottom);
+					left = ion::maths::Clamp(left, 0, map.GetWidth());
+					right = ion::maths::Clamp(right, 0, map.GetWidth());
+					top = ion::maths::Clamp(top, 0, map.GetHeight());
+					bottom = ion::maths::Clamp(bottom, 0, map.GetHeight());
 					int width = abs(right - left) + 1;
 					int height = abs(bottom - top) + 1;
 
@@ -1584,7 +1588,7 @@ void MapPanel::SetTool(ToolType tool)
 
 								//Grab terrain tile
 								newCollisionMap.SetTerrainTile(newX, newY, collisionMap.GetTerrainTile(x, y));
-								newCollisionMap.SetCollisionTileFlags(newY, newY, collisionMap.GetCollisionTileFlags(x, y));
+								newCollisionMap.SetCollisionTileFlags(newX, newY, collisionMap.GetCollisionTileFlags(x, y));
 							}
 						}
 					}
@@ -1606,7 +1610,7 @@ void MapPanel::SetTool(ToolType tool)
 					for(int i = 0; i < beziers.size(); i++)
 					{
 						ion::gamekit::BezierPath bezier = *beziers[i];
-						bezier.Move(ion::Vector2(-left, -top));
+						bezier.Move(ion::Vector2(-left * m_project.GetPlatformConfig().tileWidth, -(map.GetHeight() - bottom - 1) * m_project.GetPlatformConfig().tileHeight));
 						newCollisionMap.AddTerrainBezier(bezier);
 					}
 
