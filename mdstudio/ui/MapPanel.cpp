@@ -956,26 +956,26 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						//Control point is under cursor, and left button is held
 						m_currentBezier->GetPoint(m_currentBezierControlIdx, position, controlA, controlB);
 
-						//Set new point/control handle position
-						switch(m_currentBezierControlHndl)
-						{
-						case eBezierPosition:
-							position = mousePosF;
-							break;
-						case eBezierControlA:
-							controlA = mousePosF - position;
-							break;
-						case eBezierControlB:
-							controlB = mousePosF - position;
-							break;
-						}
+//Set new point/control handle position
+switch(m_currentBezierControlHndl)
+{
+case eBezierPosition:
+	position = mousePosF;
+	break;
+case eBezierControlA:
+	controlA = mousePosF - position;
+	break;
+case eBezierControlB:
+	controlB = mousePosF - position;
+	break;
+}
 
-						//Set new preview pos
-						m_currentBezierControlPos = mousePosF;
+//Set new preview pos
+m_currentBezierControlPos = mousePosF;
 
-						//Set new point
-						m_currentBezier->SetPoint(m_currentBezierControlIdx, position, controlA, controlB);
-						redraw = true;
+//Set new point
+m_currentBezier->SetPoint(m_currentBezierControlIdx, position, controlA, controlB);
+redraw = true;
 					}
 					else if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
 					{
@@ -1013,7 +1013,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						m_currentBezier->GetPoint(numExistingPoints - 1, prevPosition, prevControlA, prevControlB);
 					}
 
-					const float defaultControlLen = (mousePos.x > prevPosition.x )? 10.0f : -10.0f;
+					const float defaultControlLen = (mousePos.x > prevPosition.x) ? 10.0f : -10.0f;
 
 					m_currentBezier->AddPoint(ion::Vector2(mousePos.x, (mapHeight * tileHeight) - mousePos.y), ion::Vector2(-defaultControlLen, 0.0f), ion::Vector2(defaultControlLen, 0.0f));
 					redraw = true;
@@ -1033,17 +1033,19 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				Refresh();
 				m_project.InvalidateTerrainBeziers(false);
 			}
-		
+
 			break;
 		}
 
 		case eToolSelectTerrainBezier:
+		case eToolDeleteTerrainBezier:
 		{
 			m_currentBezier = NULL;
 			m_highlightedBezier = NULL;
+			bool deleted = false;
 
 			//Find bezier under cursor
-			for(int i = 0; i < m_project.GetEditingCollisionMap().GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL; i++)
+			for(int i = 0; i < m_project.GetEditingCollisionMap().GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL && !deleted; i++)
 			{
 				ion::gamekit::BezierPath* bezier = m_project.GetEditingCollisionMap().GetTerrainBezier(i);
 
@@ -1052,15 +1054,38 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 				bezier->GetBounds(boundsMin, boundsMax);
 
+				//Ensure bounds are at least 1 tile thick
+				if(((boundsMax.x - boundsMin.x) / (float)tileWidth) < 1.0f)
+				{
+					boundsMax.x += (float)tileWidth;
+				}
+
+				if(((boundsMax.y - boundsMin.y) / (float)tileHeight) < 1.0f)
+				{
+					boundsMax.y += (float)tileHeight;
+				}
+
 				if(ion::maths::PointInsideBox(mousePosF, boundsMin, boundsMax))
 				{
 					if(buttonBits & eMouseLeft)
 					{
-						//Set current bezier
-						m_currentBezier = bezier;
+						if(m_currentTool == eToolSelectTerrainBezier)
+						{
+							//Set current bezier
+							m_currentBezier = bezier;
 
-						//Set bezier draw tool
-						m_currentTool = eToolDrawTerrainBezier;
+							//Set bezier draw tool
+							m_currentTool = eToolDrawTerrainBezier;
+						}
+						else if(m_currentTool == eToolDeleteTerrainBezier)
+						{
+							//Get collision map
+							CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
+
+							//Delete bezier
+							collisionMap.RemoveTerrainBezier(i);
+							deleted = true;
+						}
 
 						//Invalidate beziers and refresh this panel
 						m_project.InvalidateTerrainBeziers(true);

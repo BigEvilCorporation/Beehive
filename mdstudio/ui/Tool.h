@@ -31,6 +31,7 @@ enum ToolType
 	eToolDeleteTerrainTile,
 	eToolDrawTerrainBezier,
 	eToolSelectTerrainBezier,
+	eToolDeleteTerrainBezier,
 	eToolPaintStamp,
 	eToolClone,
 	eToolCreateStamp,

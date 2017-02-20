@@ -762,11 +762,112 @@ DialogTerrainGenBase::~DialogTerrainGenBase()
 MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
 	wxBoxSizer* bSizer16;
-	bSizer16 = new wxBoxSizer( wxVERTICAL );
+	bSizer16 = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxBoxSizer* bSizer52;
+	bSizer52 = new wxBoxSizer( wxVERTICAL );
 	
 	m_staticText11 = new wxStaticText( this, wxID_ANY, wxT("Tile Tools"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText11->Wrap( -1 );
-	bSizer16->Add( m_staticText11, 0, wxALIGN_CENTER, 5 );
+	bSizer52->Add( m_staticText11, 0, wxALIGN_CENTER, 5 );
+	
+	wxFlexGridSizer* fgSizer7;
+	fgSizer7 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer7->SetFlexibleDirection( wxBOTH );
+	fgSizer7->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_toolSelectStamp = new wxBitmapButton( this, wxID_TOOL_SELECTSTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolSelectStamp->SetToolTip( wxT("Select Stamp") );
+	
+	fgSizer7->Add( m_toolSelectStamp, 0, wxALL, 5 );
+	
+	m_toolPaintStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, wxBitmap( tool_paintstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintStamp->SetToolTip( wxT("Paint Stamp") );
+	
+	fgSizer7->Add( m_toolPaintStamp, 0, wxALL, 5 );
+	
+	m_toolMveStamp = new wxBitmapButton( this, wxID_TOOL_MOVESTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolMveStamp->SetToolTip( wxT("Move Stamp") );
+	
+	fgSizer7->Add( m_toolMveStamp, 0, wxALL, 5 );
+	
+	m_toolStampPicker = new wxBitmapButton( this, wxID_TOOL_STAMPPICKER, wxBitmap( tool_stamppicker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolStampPicker->SetToolTip( wxT("Pick Stamp") );
+	
+	fgSizer7->Add( m_toolStampPicker, 0, wxALL, 5 );
+	
+	m_toolCreateStamp = new wxBitmapButton( this, wxID_TOOL_CREATESTAMP, wxBitmap( tool_createstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolCreateStamp->SetToolTip( wxT("Create stamp from selection") );
+	
+	fgSizer7->Add( m_toolCreateStamp, 0, wxALL, 5 );
+	
+	m_toolRemoveStamp = new wxBitmapButton( this, wxID_TOOL_REMOVESTAMP, wxBitmap( tool_deletestamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolRemoveStamp->SetToolTip( wxT("Remove Stamp") );
+	
+	fgSizer7->Add( m_toolRemoveStamp, 0, wxALL, 5 );
+	
+	
+	bSizer52->Add( fgSizer7, 1, wxEXPAND, 5 );
+	
+	m_staticText13 = new wxStaticText( this, wxID_ANY, wxT("Collision Tools"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText13->Wrap( -1 );
+	bSizer52->Add( m_staticText13, 0, wxALIGN_CENTER, 5 );
+	
+	wxFlexGridSizer* fgSizer8;
+	fgSizer8 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer8->SetFlexibleDirection( wxBOTH );
+	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_toolPaintCollisionPixel = new wxBitmapButton( this, wxID_TOOL_COL_PAINTTERRAIN, wxBitmap( tool_paintcolpixel_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintCollisionPixel->SetToolTip( wxT("Paint Terrain (direct to map)") );
+	
+	fgSizer8->Add( m_toolPaintCollisionPixel, 0, wxALL, 5 );
+	
+	m_toolPaintCollisionSolid = new wxBitmapButton( this, wxID_TOOL_COL_PAINTSOLID, wxBitmap( tool_paintcolwall_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintCollisionSolid->SetToolTip( wxT("Paint Solid Wall/Ceiling") );
+	
+	fgSizer8->Add( m_toolPaintCollisionSolid, 0, wxALL, 5 );
+	
+	m_toolPaintCollisionHole = new wxBitmapButton( this, wxID_TOOL_COL_PAINTHOLE, wxBitmap( tool_paintcolwall_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintCollisionHole->SetToolTip( wxT("Paint Terrain Hole") );
+	
+	fgSizer8->Add( m_toolPaintCollisionHole, 0, wxALL, 5 );
+	
+	m_toolDeleteTerrainTile = new wxBitmapButton( this, wxID_TOOL_COL_DELETETERRTILE, wxBitmap( tool_deleteterraintile_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolDeleteTerrainTile->SetToolTip( wxT("Delete Terrain Tile") );
+	
+	fgSizer8->Add( m_toolDeleteTerrainTile, 0, wxALL, 5 );
+	
+	m_toolAddTerrainBezier = new wxBitmapButton( this, wxID_TOOL_COL_ADDTERRAINBEZIER, wxBitmap( tool_addterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolAddTerrainBezier->SetToolTip( wxT("Add Terrain Bezier") );
+	
+	fgSizer8->Add( m_toolAddTerrainBezier, 0, wxALL, 5 );
+	
+	m_toolEditTerrainBezier1 = new wxBitmapButton( this, wxID_TOOL_COL_EDITTERRAINBEZIER, wxBitmap( tool_editterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolEditTerrainBezier1->SetToolTip( wxT("Edit Terrain Bezier") );
+	
+	fgSizer8->Add( m_toolEditTerrainBezier1, 0, wxALL, 5 );
+	
+	m_toolDeleteTerrainBezier = new wxBitmapButton( this, wxID_TOOL_COL_DELETETERRAINBEZIER, wxBitmap( tool_editterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolDeleteTerrainBezier->SetToolTip( wxT("Delete Terrain Bezier") );
+	
+	fgSizer8->Add( m_toolDeleteTerrainBezier, 0, wxALL, 5 );
+	
+	
+	bSizer52->Add( fgSizer8, 1, wxEXPAND, 5 );
+	
+	
+	bSizer16->Add( bSizer52, 1, wxEXPAND, 5 );
+	
+	
+	bSizer16->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer53;
+	bSizer53 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText12 = new wxStaticText( this, wxID_ANY, wxT("Stamp Tools"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText12->Wrap( -1 );
+	bSizer53->Add( m_staticText12, 0, wxALIGN_CENTER, 5 );
 	
 	wxFlexGridSizer* fgSizer1;
 	fgSizer1 = new wxFlexGridSizer( 0, 2, 0, 0 );
@@ -819,95 +920,11 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	fgSizer1->Add( m_toolCopyToNewMap, 0, wxALL, 5 );
 	
 	
-	bSizer16->Add( fgSizer1, 1, wxEXPAND, 5 );
-	
-	m_staticText12 = new wxStaticText( this, wxID_ANY, wxT("Stamp Tools"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText12->Wrap( -1 );
-	bSizer16->Add( m_staticText12, 0, wxALIGN_CENTER, 5 );
-	
-	wxFlexGridSizer* fgSizer7;
-	fgSizer7 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer7->SetFlexibleDirection( wxBOTH );
-	fgSizer7->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-	
-	m_toolSelectStamp = new wxBitmapButton( this, wxID_TOOL_SELECTSTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolSelectStamp->SetToolTip( wxT("Select Stamp") );
-	
-	fgSizer7->Add( m_toolSelectStamp, 0, wxALL, 5 );
-	
-	m_toolPaintStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, wxBitmap( tool_paintstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolPaintStamp->SetToolTip( wxT("Paint Stamp") );
-	
-	fgSizer7->Add( m_toolPaintStamp, 0, wxALL, 5 );
-	
-	m_toolMveStamp = new wxBitmapButton( this, wxID_TOOL_MOVESTAMP, wxBitmap( tool_selectstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolMveStamp->SetToolTip( wxT("Select Stamp") );
-	
-	fgSizer7->Add( m_toolMveStamp, 0, wxALL, 5 );
-	
-	m_toolStampPicker = new wxBitmapButton( this, wxID_TOOL_STAMPPICKER, wxBitmap( tool_stamppicker_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolStampPicker->SetToolTip( wxT("Pick Stamp") );
-	
-	fgSizer7->Add( m_toolStampPicker, 0, wxALL, 5 );
-	
-	m_toolCreateStamp = new wxBitmapButton( this, wxID_TOOL_CREATESTAMP, wxBitmap( tool_createstamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolCreateStamp->SetToolTip( wxT("Create stamp from selection") );
-	
-	fgSizer7->Add( m_toolCreateStamp, 0, wxALL, 5 );
-	
-	m_toolRemoveStamp = new wxBitmapButton( this, wxID_TOOL_REMOVESTAMP, wxBitmap( tool_deletestamp_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolRemoveStamp->SetToolTip( wxT("Remove Stamp") );
-	
-	fgSizer7->Add( m_toolRemoveStamp, 0, wxALL, 5 );
-	
-	
-	bSizer16->Add( fgSizer7, 1, wxEXPAND, 5 );
-	
-	m_staticText13 = new wxStaticText( this, wxID_ANY, wxT("Collision Tools"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText13->Wrap( -1 );
-	bSizer16->Add( m_staticText13, 0, wxALIGN_CENTER, 5 );
-	
-	wxFlexGridSizer* fgSizer8;
-	fgSizer8 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer8->SetFlexibleDirection( wxBOTH );
-	fgSizer8->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-	
-	m_toolPaintCollisionPixel = new wxBitmapButton( this, wxID_TOOL_COL_PAINTTERRAIN, wxBitmap( tool_paintcolpixel_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolPaintCollisionPixel->SetToolTip( wxT("Paint Terrain (direct to map)") );
-	
-	fgSizer8->Add( m_toolPaintCollisionPixel, 0, wxALL, 5 );
-	
-	m_toolPaintCollisionSolid = new wxBitmapButton( this, wxID_TOOL_COL_PAINTSOLID, wxBitmap( tool_paintcolwall_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolPaintCollisionSolid->SetToolTip( wxT("Paint Solid Wall/Ceiling") );
-	
-	fgSizer8->Add( m_toolPaintCollisionSolid, 0, wxALL, 5 );
-	
-	m_toolPaintCollisionHole = new wxBitmapButton( this, wxID_TOOL_COL_PAINTHOLE, wxBitmap( tool_paintcolwall_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolPaintCollisionHole->SetToolTip( wxT("Paint Terrain Hole") );
-	
-	fgSizer8->Add( m_toolPaintCollisionHole, 0, wxALL, 5 );
-	
-	m_toolDeleteTerrainTile = new wxBitmapButton( this, wxID_TOOL_COL_DELETETERRTILE, wxBitmap( tool_deleteterraintile_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolDeleteTerrainTile->SetToolTip( wxT("Delete Terrain Tile") );
-	
-	fgSizer8->Add( m_toolDeleteTerrainTile, 0, wxALL, 5 );
-	
-	m_toolAddTerrainBezier = new wxBitmapButton( this, wxID_TOOL_COL_ADDTERRAINBEZIER, wxBitmap( tool_addterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolAddTerrainBezier->SetToolTip( wxT("Add Terrain Bezier") );
-	
-	fgSizer8->Add( m_toolAddTerrainBezier, 0, wxALL, 5 );
-	
-	m_toolEditTerrainBezier1 = new wxBitmapButton( this, wxID_TOOL_COL_EDITTERRAINBEZIER, wxBitmap( tool_editterrainbezier_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
-	m_toolEditTerrainBezier1->SetToolTip( wxT("Edit Terrain Bezier") );
-	
-	fgSizer8->Add( m_toolEditTerrainBezier1, 0, wxALL, 5 );
-	
-	
-	bSizer16->Add( fgSizer8, 1, wxEXPAND, 5 );
+	bSizer53->Add( fgSizer1, 1, wxEXPAND, 5 );
 	
 	m_staticText14 = new wxStaticText( this, wxID_ANY, wxT("Game Object Tools"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText14->Wrap( -1 );
-	bSizer16->Add( m_staticText14, 0, wxALIGN_CENTER, 5 );
+	bSizer53->Add( m_staticText14, 0, wxALIGN_CENTER, 5 );
 	
 	wxFlexGridSizer* fgSizer9;
 	fgSizer9 = new wxFlexGridSizer( 0, 2, 0, 0 );
@@ -940,7 +957,10 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	fgSizer9->Add( m_toolRemoveGameObject, 0, wxALL, 5 );
 	
 	
-	bSizer16->Add( fgSizer9, 1, wxEXPAND, 5 );
+	bSizer53->Add( fgSizer9, 1, wxEXPAND, 5 );
+	
+	
+	bSizer16->Add( bSizer53, 1, wxEXPAND, 5 );
 	
 	
 	this->SetSizer( bSizer16 );

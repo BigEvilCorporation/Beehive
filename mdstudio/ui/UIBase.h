@@ -89,32 +89,33 @@ class SpriteCanvas;
 #define wxID_BTN_COL_GEN_BEZIER 1034
 #define wxID_BTN_GAME_OBJ_TYPES 1035
 #define wxID_BTN_CANCEL 1036
-#define wxID_TOOL_SELECTTILE 1037
-#define wxID_TOOL_PAINT 1038
-#define wxID_TOOL_TILEPICKER 1039
-#define wxID_TOOL_FLIPX 1040
-#define wxID_TOOL_FLIPY 1041
-#define wxID_TOOL_FILL 1042
-#define wxID_TOOL_CLONE 1043
-#define wxID_TOOL_CREATE_SCENE_ANIM 1044
-#define wxID_TOOL_COPY_TO_NEW_MAP 1045
-#define wxID_TOOL_SELECTSTAMP 1046
-#define wxID_TOOL_STAMP 1047
-#define wxID_TOOL_MOVESTAMP 1048
-#define wxID_TOOL_STAMPPICKER 1049
-#define wxID_TOOL_CREATESTAMP 1050
-#define wxID_TOOL_REMOVESTAMP 1051
-#define wxID_TOOL_COL_PAINTTERRAIN 1052
-#define wxID_TOOL_COL_PAINTSOLID 1053
-#define wxID_TOOL_COL_PAINTHOLE 1054
-#define wxID_TOOL_COL_DELETETERRTILE 1055
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1056
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1057
-#define wxID_TOOL_SELECTGAMEOBJ 1058
-#define wxID_TOOL_PLACEGAMEOBJ 1059
-#define wxID_TOOL_MOVEGAMEOBJ 1060
-#define wxID_TOOL_ANIMATEGAMEOBJ 1061
-#define wxID_TOOL_REMOVEGAMEOBJ 1062
+#define wxID_TOOL_SELECTSTAMP 1037
+#define wxID_TOOL_STAMP 1038
+#define wxID_TOOL_MOVESTAMP 1039
+#define wxID_TOOL_STAMPPICKER 1040
+#define wxID_TOOL_CREATESTAMP 1041
+#define wxID_TOOL_REMOVESTAMP 1042
+#define wxID_TOOL_COL_PAINTTERRAIN 1043
+#define wxID_TOOL_COL_PAINTSOLID 1044
+#define wxID_TOOL_COL_PAINTHOLE 1045
+#define wxID_TOOL_COL_DELETETERRTILE 1046
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1047
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1048
+#define wxID_TOOL_COL_DELETETERRAINBEZIER 1049
+#define wxID_TOOL_SELECTTILE 1050
+#define wxID_TOOL_PAINT 1051
+#define wxID_TOOL_TILEPICKER 1052
+#define wxID_TOOL_FLIPX 1053
+#define wxID_TOOL_FLIPY 1054
+#define wxID_TOOL_FILL 1055
+#define wxID_TOOL_CLONE 1056
+#define wxID_TOOL_CREATE_SCENE_ANIM 1057
+#define wxID_TOOL_COPY_TO_NEW_MAP 1058
+#define wxID_TOOL_SELECTGAMEOBJ 1059
+#define wxID_TOOL_PLACEGAMEOBJ 1060
+#define wxID_TOOL_MOVEGAMEOBJ 1061
+#define wxID_TOOL_ANIMATEGAMEOBJ 1062
+#define wxID_TOOL_REMOVEGAMEOBJ 1063
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -413,16 +414,6 @@ class MapToolbox : public wxPanel
 	
 	protected:
 		wxStaticText* m_staticText11;
-		wxBitmapButton* m_toolSelectTile;
-		wxBitmapButton* m_toolPaint;
-		wxBitmapButton* m_toolTilePicker;
-		wxBitmapButton* m_toolFlipX;
-		wxBitmapButton* m_toolFlipY;
-		wxBitmapButton* m_toolFill;
-		wxBitmapButton* m_toolClone;
-		wxBitmapButton* m_toolCreateSceneAnim;
-		wxBitmapButton* m_toolCopyToNewMap;
-		wxStaticText* m_staticText12;
 		wxBitmapButton* m_toolSelectStamp;
 		wxBitmapButton* m_toolPaintStamp;
 		wxBitmapButton* m_toolMveStamp;
@@ -436,6 +427,17 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolDeleteTerrainTile;
 		wxBitmapButton* m_toolAddTerrainBezier;
 		wxBitmapButton* m_toolEditTerrainBezier1;
+		wxBitmapButton* m_toolDeleteTerrainBezier;
+		wxStaticText* m_staticText12;
+		wxBitmapButton* m_toolSelectTile;
+		wxBitmapButton* m_toolPaint;
+		wxBitmapButton* m_toolTilePicker;
+		wxBitmapButton* m_toolFlipX;
+		wxBitmapButton* m_toolFlipY;
+		wxBitmapButton* m_toolFill;
+		wxBitmapButton* m_toolClone;
+		wxBitmapButton* m_toolCreateSceneAnim;
+		wxBitmapButton* m_toolCopyToNewMap;
 		wxStaticText* m_staticText14;
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
@@ -445,7 +447,7 @@ class MapToolbox : public wxPanel
 	
 	public:
 		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 124,757 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 259,597 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
 		~MapToolbox();
 	
 };
