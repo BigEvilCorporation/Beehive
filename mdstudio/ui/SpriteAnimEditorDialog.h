@@ -41,6 +41,7 @@ public:
 		eTrackSpriteFrame,
 		eTrackPositionX,
 		eTrackPositionY,
+		eTrackSFX,
 		eTrack_MAX
 	};
 

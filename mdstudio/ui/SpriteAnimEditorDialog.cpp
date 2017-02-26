@@ -278,24 +278,49 @@ void SpriteAnimEditorDialog::OnTimelineCellChange(wxGridEvent& event)
 		int frame = event.GetCol();
 		TimelineTrack trackType = (TimelineTrack)event.GetRow();
 
-		if(trackType == eTrackPositionX || trackType == eTrackPositionY)
+		switch(trackType)
 		{
-			//Resize position track to match sprite frame track
-			int numExistingFrames = m_selectedAnim->m_trackPosition.GetNumKeyframes();
-			for(int i = numExistingFrames; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
+			case eTrackPositionX:
+			case eTrackPositionY:
 			{
-				m_selectedAnim->m_trackPosition.InsertKeyframe(ion::render::Keyframe<ion::Vector2i>((float)i, ion::Vector2i(0, 0)));
-			}
-			
-			//Set keyframe
-			ion::render::Keyframe<ion::Vector2i>& keyframe = m_selectedAnim->m_trackPosition.GetKeyframe(frame);
-			ion::Vector2i position = keyframe.GetValue();
-			if(trackType == eTrackPositionX)
-				event.GetString().ToLong((long*)&position.x, 10);
-			else
-				event.GetString().ToLong((long*)&position.y, 10);
+				//Resize position track to match sprite frame track
+				int numExistingFrames = m_selectedAnim->m_trackPosition.GetNumKeyframes();
+				for(int i = numExistingFrames; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
+				{
+					m_selectedAnim->m_trackPosition.InsertKeyframe(ion::render::Keyframe<ion::Vector2i>((float)i, ion::Vector2i(0, 0)));
+				}
 
-			keyframe.SetValue(position);
+				//Set keyframe
+				ion::render::Keyframe<ion::Vector2i>& keyframe = m_selectedAnim->m_trackPosition.GetKeyframe(frame);
+				ion::Vector2i position = keyframe.GetValue();
+				if(trackType == eTrackPositionX)
+					event.GetString().ToLong((long*)&position.x, 10);
+				else
+					event.GetString().ToLong((long*)&position.y, 10);
+
+				keyframe.SetValue(position);
+
+				break;
+			}
+
+			case eTrackSFX:
+			{
+				//Resize SFX track to match sprite frame track
+				int numExistingFrames = m_selectedAnim->m_trackSFX.GetNumKeyframes();
+				for(int i = numExistingFrames; i < m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes(); i++)
+				{
+					m_selectedAnim->m_trackSFX.InsertKeyframe(ion::render::Keyframe<std::string>((float)i, std::string()));
+				}
+
+				//Set keyframe
+				ion::render::Keyframe<std::string>& keyframe = m_selectedAnim->m_trackSFX.GetKeyframe(frame);
+				keyframe.SetValue(event.GetString().c_str().AsChar());
+
+				break;
+			}
+
+			default:
+				break;
 		}
 	}
 }
@@ -543,6 +568,10 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 			//Setup column
 			//Set all row content types to number
 			m_gridTimeline->SetColFormatNumber(i);
+
+			m_gridTimeline->SetCellRenderer(eTrackSFX, i, new wxGridCellAutoWrapStringRenderer);
+			m_gridTimeline->SetCellEditor(eTrackSFX, i, new wxGridCellAutoWrapStringEditor);
+
 			m_gridTimeline->SetColSize(i, iconWidth + (s_iconBorderX * 2));
 			m_gridTimeline->DisableColResize(i);
 			m_gridTimeline->SetCellRenderer(eTrackSpriteFrame, i, new GridCellBitmapRenderer(m_timelineImageList.get()));
@@ -577,6 +606,13 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 				textY << position.y;
 				m_gridTimeline->SetCellValue(textX, eTrackPositionX, i);
 				m_gridTimeline->SetCellValue(textY, eTrackPositionY, i);
+			}
+
+			//Get SFX
+			if(i < anim.m_trackSFX.GetNumKeyframes())
+			{
+				std::string sfxName = anim.m_trackSFX.GetKeyframe(i).GetValue();
+				m_gridTimeline->SetCellValue(sfxName, eTrackSFX, i);
 			}
 		}
 
