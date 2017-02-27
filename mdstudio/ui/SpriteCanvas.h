@@ -40,7 +40,6 @@ public:
 	void SetDrawPreview(bool drawPreview, u32 maxFrames);
 	void SetDrawGrid(bool drawGrid);
 	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& offset);
-	void SetDrawTileFrame(TileFrame tileFrame);
 	void SetDrawStamp(Stamp& stamp, const ion::Vector2i& offset);
 
 	//Refresh panel
@@ -80,7 +79,6 @@ private:
 	u32 m_drawPreviewMaxFrames;
 	SpriteSheetId m_drawSpriteSheet;
 	u32 m_drawSpriteSheetFrame;
-	TileFrame m_drawTileFrame;
 	ion::Vector2i m_drawOffset;
 	bool m_drawGrid;
 

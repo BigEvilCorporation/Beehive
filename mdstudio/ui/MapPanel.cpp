@@ -11,7 +11,7 @@
 
 #include "MapPanel.h"
 #include "MainWindow.h"
-#include "StampAnimEditorDialog.h"
+#include "SpriteAnimEditorDialog.h"
 
 #include <wx/Menu.h>
 #include <wx/msgdlg.h>

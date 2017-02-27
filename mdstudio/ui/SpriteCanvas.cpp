@@ -125,6 +125,7 @@ void SpriteCanvas::SetDrawStamp(Stamp& stamp, const ion::Vector2i& offset)
 	Refresh();
 }
 
+/*
 void SpriteCanvas::SetDrawTileFrame(TileFrame tileFrame)
 {
 	m_drawTileFrame = tileFrame;
@@ -157,6 +158,7 @@ void SpriteCanvas::SetDrawTileFrame(TileFrame tileFrame)
 
 	Refresh();
 }
+*/
 
 void SpriteCanvas::Refresh(bool eraseBackground, const wxRect *rect)
 {

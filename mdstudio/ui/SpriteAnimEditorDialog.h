@@ -31,6 +31,12 @@ public:
 	static const int s_iconBorderX = 16;
 	static const int s_iconBorderY = 2;
 
+	enum AnimEditMode
+	{
+		eAnimEditModeSpriteAnim,
+		eAnimEditModeStampAnim
+	};
+
 	enum ContextMenu
 	{
 		eMenuDeleteKeyframe = 1
@@ -45,8 +51,10 @@ public:
 		eTrack_MAX
 	};
 
-	SpriteAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
+	SpriteAnimEditorDialog(wxWindow* parent, AnimEditMode animEditMode, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual ~SpriteAnimEditorDialog();
+
+	void SetSelectedStamp(StampId stampId);
 
 	void EventHandlerTimer(wxTimerEvent& event);
 	void EventHandlerDragFrameListBegin(wxGridEvent& event);
@@ -80,30 +88,41 @@ protected:
 
 private:
 	void PopulateActorList();
+	void PopulateStampList();
 	void PopulateSpriteSheetList(const Actor& actor);
+	void PopulateStampAnimSheetList(const Stamp& stamp);
 	void PopulateSpriteFrames(const SpriteSheetId& spriteSheetId);
 	void PopulateAnimList(const SpriteSheet& spriteSheet);
 	void PopulateKeyframes(const SpriteSheetId& spriteSheetId, const SpriteAnimation& anim);
 		 
 	void SelectActor(int index);
+	void SelectStamp(int index);
 	void SelectSpriteSheet(int index);
 	void SelectAnimation(int index);
 
 	void FindAndDrawDropTarget(wxPoint mousePosDropSource, wxPoint mousePosDropTarget);
 
+	AnimEditMode m_animEditMode;
 	Project& m_project;
 	ion::render::Renderer& m_renderer;
 	RenderResources& m_renderResources;
 	wxGLContext& m_glContext;
 
+	//Sprite anim edit mode
 	ActorId m_selectedActorId;
 	Actor* m_selectedActor;
+	std::vector<ActorId> m_actorCache;
+
+	//Stamp anim edit mode
+	StampId m_selectedStampId;
+	Stamp* m_selectedStamp;
+	std::vector<StampId> m_stampCache;
+
 	SpriteSheetId m_selectedSpriteSheetId;
 	SpriteSheet* m_selectedSpriteSheet;
 	SpriteAnimId m_selectedAnimId;
 	SpriteAnimation* m_selectedAnim;
 
-	std::vector<ActorId> m_actorCache;
 	std::vector<SpriteSheetId> m_spriteSheetCache;
 	std::vector<SpriteAnimId> m_animCache;
 

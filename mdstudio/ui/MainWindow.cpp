@@ -943,6 +943,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerPalettes->SetPath(m_project->m_exportFilenames.palettes);
 		dialog.m_filePickerTileset->SetPath(m_project->m_exportFilenames.tileset);
 		dialog.m_filePickerStamps->SetPath(m_project->m_exportFilenames.stamps);
+		dialog.m_filePickerStampAnims->SetPath(m_project->m_exportFilenames.stampAnims);
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.terrainTiles);
 		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
 		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
@@ -951,6 +952,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_chkPalettes->SetValue(m_project->m_exportFilenames.palettesExportEnabled);
 		dialog.m_chkTileset->SetValue(m_project->m_exportFilenames.tilesetExportEnabled);
 		dialog.m_chkStamps->SetValue(m_project->m_exportFilenames.stampsExportEnabled);
+		dialog.m_chkStampAnims->SetValue(m_project->m_exportFilenames.stampAnimsExportEnabled);
 		dialog.m_chkTerrainTiles->SetValue(m_project->m_exportFilenames.terrainTilesExportEnabled);
 		dialog.m_chkSpriteSheets->SetValue(m_project->m_exportFilenames.spriteSheetsExportEnabled);
 		dialog.m_chkSpriteAnims->SetValue(m_project->m_exportFilenames.spriteAnimsExportEnabled);
@@ -973,6 +975,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.palettes = dialog.m_filePickerPalettes->GetPath();
 			m_project->m_exportFilenames.tileset = dialog.m_filePickerTileset->GetPath();
 			m_project->m_exportFilenames.stamps = dialog.m_filePickerStamps->GetPath();
+			m_project->m_exportFilenames.stampAnims = dialog.m_filePickerStampAnims->GetPath();
 			m_project->m_exportFilenames.terrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
 			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
@@ -981,6 +984,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.palettesExportEnabled = dialog.m_chkPalettes->GetValue();
 			m_project->m_exportFilenames.tilesetExportEnabled = dialog.m_chkTileset->GetValue();
 			m_project->m_exportFilenames.stampsExportEnabled = dialog.m_chkStamps->GetValue();
+			m_project->m_exportFilenames.stampAnimsExportEnabled = dialog.m_chkStampAnims->GetValue();
 			m_project->m_exportFilenames.terrainTilesExportEnabled = dialog.m_chkTerrainTiles->GetValue();
 			m_project->m_exportFilenames.spriteSheetsExportEnabled = dialog.m_chkSpriteSheets->GetValue();
 			m_project->m_exportFilenames.spriteAnimsExportEnabled = dialog.m_chkSpriteAnims->GetValue();
@@ -996,6 +1000,9 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			if(dialog.m_chkStamps->GetValue())
 				m_project->ExportStamps(m_project->m_exportFilenames.stamps, dialog.m_btnBinary->GetValue());
+
+			if(dialog.m_chkStampAnims->GetValue())
+				m_project->ExportStampAnims(m_project->m_exportFilenames.stampAnims, dialog.m_btnBinary->GetValue());
 
 			if(dialog.m_chkTerrainTiles->GetValue())
 				m_project->ExportTerrainTiles(m_project->m_exportFilenames.terrainTiles, dialog.m_btnBinary->GetValue());
@@ -1202,7 +1209,7 @@ void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		SpriteAnimEditorDialog dialog(this, *m_project, *m_renderer, *m_context, *m_renderResources);
+		SpriteAnimEditorDialog dialog(this, SpriteAnimEditorDialog::eAnimEditModeSpriteAnim, *m_project, *m_renderer, *m_context, *m_renderResources);
 		dialog.ShowModal();
 	}
 }

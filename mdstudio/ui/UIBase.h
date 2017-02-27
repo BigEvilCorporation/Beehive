@@ -531,6 +531,8 @@ class ExportDialogBase : public wxDialog
 		wxFilePickerCtrl* m_filePickerTileset;
 		wxCheckBox* m_chkStamps;
 		wxFilePickerCtrl* m_filePickerStamps;
+		wxCheckBox* m_chkStampAnims;
+		wxFilePickerCtrl* m_filePickerStampAnims;
 		wxCheckBox* m_chkTerrainTiles;
 		wxFilePickerCtrl* m_filePickerTerrainTiles;
 		wxCheckBox* m_chkSpriteSheets;
@@ -621,7 +623,7 @@ class ImportDialogSpriteSheetBase : public wxDialog
 		wxSpinCtrl* m_spinHeightCells;
 		wxSpinCtrl* m_spinCellCount;
 		
-		ImportDialogSpriteSheetBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite Sheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+		ImportDialogSpriteSheetBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite/Stamp Sheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
 		~ImportDialogSpriteSheetBase();
 	
 };
@@ -684,44 +686,8 @@ class SpriteAnimEditorDialogBase : public wxDialog
 	
 	public:
 		
-		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Stamp Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
 		~SpriteAnimEditorDialogBase();
-	
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class StampAnimEditorDialogBase
-///////////////////////////////////////////////////////////////////////////////
-class StampAnimEditorDialogBase : public wxDialog 
-{
-	private:
-	
-	protected:
-		wxStaticText* m_staticText39;
-		wxListBox* m_listAnimations;
-		wxButton* m_btnDeleteAnim;
-		SpriteCanvas* m_canvas;
-		wxStaticText* m_staticText32;
-		wxGrid* m_gridTimeline;
-		wxSlider* m_sliderTimeline;
-		wxBitmapButton* m_btnPlay;
-		wxBitmapButton* m_btnStop;
-		wxStaticText* m_staticText40;
-		wxSpinCtrl* m_spinCtrlSpeed;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnAnimSelected( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnSliderMove( wxScrollEvent& event ) { event.Skip(); }
-		virtual void OnBtnPlay( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnStop( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnSpinSpeedChange( wxSpinEvent& event ) { event.Skip(); }
-		
-	
-	public:
-		
-		StampAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Stamp Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
-		~StampAnimEditorDialogBase();
 	
 };
 

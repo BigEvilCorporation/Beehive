@@ -23,14 +23,19 @@
 #include <GL/glext.h>
 #include <GL/wglext.h>
 
-SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
+SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, AnimEditMode animEditMode, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
 	: SpriteAnimEditorDialogBase(parent)
+	, m_animEditMode(animEditMode)
 	, m_project(project)
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)
 	, m_glContext(glContext)
 	, m_timer(this)
 {
+	m_selectedActorId = InvalidActorId;
+	m_selectedActor = NULL;
+	m_selectedStampId = InvalidStampId;
+	m_selectedStamp = NULL;
 	m_selectedSpriteSheetId = InvalidSpriteSheetId;
 	m_selectedAnimId = InvalidSpriteAnimId;
 	m_selectedSpriteSheet = NULL;
@@ -43,7 +48,14 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, Project& projec
 	m_canvas->SetProject(&project);
 	m_canvas->SetupRendering(&renderer, &glContext, &renderResources);
 
-	PopulateActorList();
+	if(m_animEditMode == eAnimEditModeSpriteAnim)
+	{
+		PopulateActorList();
+	}
+	else if(m_animEditMode == eAnimEditModeStampAnim)
+	{
+		PopulateStampList();
+	}
 
 	//Subscribe to events
 	Bind(wxEVT_TIMER, &SpriteAnimEditorDialog::EventHandlerTimer, this, m_timer.GetId());
@@ -88,9 +100,29 @@ SpriteAnimEditorDialog::~SpriteAnimEditorDialog()
 
 }
 
+void SpriteAnimEditorDialog::SetSelectedStamp(StampId stampId)
+{
+	for(int i = 0; i < m_stampCache.size(); i++)
+	{
+		if(m_stampCache[i] == stampId)
+		{
+			m_listActors->SetSelection(i);
+			SelectStamp(i);
+			break;
+		}
+	}
+}
+
 void SpriteAnimEditorDialog::OnActorSelected(wxCommandEvent& event)
 {
-	SelectActor(event.GetSelection());
+	if(m_animEditMode == eAnimEditModeSpriteAnim)
+	{
+		SelectActor(event.GetSelection());
+	}
+	else if(m_animEditMode == eAnimEditModeStampAnim)
+	{
+		SelectStamp(event.GetSelection());
+	}
 }
 
 void SpriteAnimEditorDialog::OnSpriteSheetSelected(wxCommandEvent& event)
@@ -159,14 +191,14 @@ void SpriteAnimEditorDialog::OnBtnActorExport(wxCommandEvent& event)
 
 void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)
 {
-	if(m_selectedActor)
+	if(m_selectedActor || m_selectedStamp)
 	{
 		ImportDialogSpriteSheet dialog(this, m_project, m_renderer, m_glContext, m_renderResources);
 		if(dialog.ShowModal() == wxID_OK)
 		{
 			//Create new spriteSheet
-			SpriteSheetId spriteSheetId = m_selectedActor->CreateSpriteSheet();
-			SpriteSheet* spriteSheet = m_selectedActor->GetSpriteSheet(spriteSheetId);
+			SpriteSheetId spriteSheetId = m_selectedActor ? m_selectedActor->CreateSpriteSheet() : m_selectedStamp->CreateStampAnimSheet();
+			SpriteSheet* spriteSheet = m_selectedActor ? m_selectedActor->GetSpriteSheet(spriteSheetId) : m_selectedStamp->GetStampAnimSheet(spriteSheetId);
 
 			const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
@@ -178,7 +210,14 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)
 				m_renderResources.CreateSpriteSheetResources(spriteSheetId, *spriteSheet);
 
 				//Populate spriteSheet list
-				PopulateSpriteSheetList(*m_selectedActor);
+				if(m_selectedActor)
+				{
+					PopulateSpriteSheetList(*m_selectedActor);
+				}
+				else if(m_selectedStamp)
+				{
+					PopulateStampAnimSheetList(*m_selectedStamp);
+				}
 
 				//Select in list
 				int index = m_listSpriteSheets->FindString(spriteSheet->GetName());
@@ -199,11 +238,20 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetDelete(wxCommandEvent& event)
 {
 	if(m_selectedSpriteSheetId != InvalidSpriteSheetId)
 	{
-		m_selectedActor->DeleteSpriteSheet(m_selectedSpriteSheetId);
+		if(m_selectedActor)
+		{
+			m_selectedActor->DeleteSpriteSheet(m_selectedSpriteSheetId);
+			PopulateSpriteSheetList(*m_selectedActor);
+		}
+		else if(m_selectedStamp)
+		{
+			m_selectedStamp->DeleteStampAnimSheet(m_selectedSpriteSheetId);
+			PopulateStampAnimSheetList(*m_selectedStamp);
+		}
+
 		m_renderResources.DeleteSpriteSheetRenderResources(m_selectedSpriteSheetId);
 		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0, ion::Vector2i());
 
-		PopulateSpriteSheetList(*m_selectedActor);
 		m_listAnimations->Clear();
 		m_animCache.clear();
 
@@ -410,6 +458,39 @@ void SpriteAnimEditorDialog::PopulateActorList()
 	}
 }
 
+void SpriteAnimEditorDialog::PopulateStampList()
+{
+	m_listActors->Clear();
+	m_stampCache.clear();
+	m_selectedStampId = InvalidStampId;
+	m_selectedStamp = NULL;
+
+	typedef std::pair<std::string, ActorId> TNameIDPair;
+	typedef std::vector<TNameIDPair> TNameList;
+	TNameList nameList;
+
+	for(TStampMap::const_iterator it = m_project.StampsBegin(), end = m_project.StampsEnd(); it != end; ++it)
+	{
+		//Check if tiles are sorted sequentially
+		if(it->second.CheckTilesBatched())
+		{
+			std::string name = it->second.GetName().size() ? it->second.GetName() : "<Unnamed>";
+			nameList.push_back(std::make_pair(name, it->first));
+		}
+	}
+
+	std::sort(nameList.begin(), nameList.end(), [](TNameIDPair& a, TNameIDPair& b) { return a.first < b.first; });
+
+	for(int i = 0; i < nameList.size(); i++)
+	{
+		//Store by index
+		m_stampCache.push_back(nameList[i].second);
+
+		//Add to list
+		m_listActors->AppendString(nameList[i].first);
+	}
+}
+
 void SpriteAnimEditorDialog::PopulateSpriteSheetList(const Actor& actor)
 {
 	m_listSpriteSheets->Clear();
@@ -417,27 +498,52 @@ void SpriteAnimEditorDialog::PopulateSpriteSheetList(const Actor& actor)
 	m_selectedSpriteSheetId = InvalidSpriteSheetId;
 	m_selectedSpriteSheet = NULL;
 
-	if(m_selectedActor)
+	typedef std::pair<std::string, SpriteSheetId> TNameIDPair;
+	typedef std::vector<TNameIDPair> TNameList;
+	TNameList nameList;
+
+	for(TSpriteSheetMap::const_iterator it = actor.SpriteSheetsBegin(), end = actor.SpriteSheetsEnd(); it != end; ++it)
 	{
-		typedef std::pair<std::string, SpriteSheetId> TNameIDPair;
-		typedef std::vector<TNameIDPair> TNameList;
-		TNameList nameList;
+		nameList.push_back(std::make_pair(it->second.GetName(), it->first));
+	}
 
-		for(TSpriteSheetMap::const_iterator it = actor.SpriteSheetsBegin(), end = actor.SpriteSheetsEnd(); it != end; ++it)
-		{
-			nameList.push_back(std::make_pair(it->second.GetName(), it->first));
-		}
+	std::sort(nameList.begin(), nameList.end(), [](TNameIDPair& a, TNameIDPair& b) { return a.first < b.first; });
 
-		std::sort(nameList.begin(), nameList.end(), [](TNameIDPair& a, TNameIDPair& b) { return a.first < b.first; });
+	for(int i = 0; i < nameList.size(); i++)
+	{
+		//Store by index
+		m_spriteSheetCache.push_back(nameList[i].second);
 
-		for(int i = 0; i < nameList.size(); i++)
-		{
-			//Store by index
-			m_spriteSheetCache.push_back(nameList[i].second);
+		//Add to list
+		m_listSpriteSheets->AppendString(nameList[i].first);
+	}
+}
 
-			//Add to list
-			m_listSpriteSheets->AppendString(nameList[i].first);
-		}
+void SpriteAnimEditorDialog::PopulateStampAnimSheetList(const Stamp& stamp)
+{
+	m_listSpriteSheets->Clear();
+	m_spriteSheetCache.clear();
+	m_selectedSpriteSheetId = InvalidSpriteSheetId;
+	m_selectedSpriteSheet = NULL;
+
+	typedef std::pair<std::string, SpriteSheetId> TNameIDPair;
+	typedef std::vector<TNameIDPair> TNameList;
+	TNameList nameList;
+
+	for(TSpriteSheetMap::const_iterator it = stamp.StampAnimSheetsBegin(), end = stamp.StampAnimSheetsEnd(); it != end; ++it)
+	{
+		nameList.push_back(std::make_pair(it->second.GetName(), it->first));
+	}
+
+	std::sort(nameList.begin(), nameList.end(), [](TNameIDPair& a, TNameIDPair& b) { return a.first < b.first; });
+
+	for(int i = 0; i < nameList.size(); i++)
+	{
+		//Store by index
+		m_spriteSheetCache.push_back(nameList[i].second);
+
+		//Add to list
+		m_listSpriteSheets->AppendString(nameList[i].first);
 	}
 }
 
@@ -476,6 +582,14 @@ void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteShe
 {
 	//Get sprite resources
 	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
+
+	//TEMP - for stamps
+	if(!spriteResources && m_selectedStamp)
+	{
+		m_renderResources.CreateSpriteSheetResources(spriteSheetId, *m_selectedStamp->GetStampAnimSheet(spriteSheetId));
+		spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
+	}
+
 	ion::debug::Assert(spriteResources, "SpriteAnimEditorDialog::PopulateSpriteFrames() - No sprite resources");
 
 	//Clear existing
@@ -640,7 +754,6 @@ void SpriteAnimEditorDialog::SelectActor(int index)
 
 	m_listSpriteSheets->Clear();
 	m_listAnimations->Clear();
-	//m_listSpriteFrames->ClearAll();
 
 	if(m_actorCache.size() > 0)
 	{
@@ -650,6 +763,31 @@ void SpriteAnimEditorDialog::SelectActor(int index)
 			m_selectedActor = m_project.GetActor(m_selectedActorId);
 			ion::debug::Assert(m_selectedActor, "SpriteAnimEditorDialog::OnActorSelected() - Invalid actor ID");
 			PopulateSpriteSheetList(*m_selectedActor);
+		}
+	}
+}
+
+void SpriteAnimEditorDialog::SelectStamp(int index)
+{
+	if(m_selectedAnim)
+	{
+		m_selectedAnim->SetState(ion::render::Animation::eStopped);
+	}
+
+	m_selectedStampId = InvalidStampId;
+	m_selectedStamp = NULL;
+
+	m_listSpriteSheets->Clear();
+	m_listAnimations->Clear();
+
+	if(m_stampCache.size() > 0)
+	{
+		if(index >= 0 && index < m_stampCache.size())
+		{
+			m_selectedStampId = m_stampCache[index];
+			m_selectedStamp = m_project.GetStamp(m_selectedStampId);
+			ion::debug::Assert(m_selectedStamp, "SpriteAnimEditorDialog::OnStampSelected() - Invalid stamp ID");
+			PopulateStampAnimSheetList(*m_selectedStamp);
 		}
 	}
 }
@@ -665,17 +803,16 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 	m_selectedSpriteSheet = NULL;
 
 	m_listAnimations->Clear();
-	//m_listSpriteFrames->ClearAll();
 
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	if(m_selectedActor && m_spriteSheetCache.size() > 0)
+	if((m_selectedActor || m_selectedStamp) && m_spriteSheetCache.size() > 0)
 	{
 		if(index >= 0 && index < m_spriteSheetCache.size())
 		{
 			m_selectedSpriteSheetId = m_spriteSheetCache[index];
-			m_selectedSpriteSheet = m_selectedActor->GetSpriteSheet(m_selectedSpriteSheetId);
+			m_selectedSpriteSheet = m_selectedActor ? m_selectedActor->GetSpriteSheet(m_selectedSpriteSheetId) : m_selectedStamp->GetStampAnimSheet(m_selectedSpriteSheetId);
 			ion::debug::Assert(m_selectedSpriteSheet, "SpriteAnimEditorDialog::OnSpriteSheetSelected() - Invalid spriteSheet ID");
 			m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(m_selectedSpriteSheet->GetWidthTiles() * tileWidth, m_selectedSpriteSheet->GetHeightTiles() * tileHeight));
 			m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, 0, ion::Vector2i());
@@ -698,8 +835,6 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 
 	m_selectedAnimId = InvalidSpriteAnimId;
 	m_selectedAnim = NULL;
-
-	//m_listSpriteFrames->ClearAll();
 
 	if(m_selectedSpriteSheet)
 	{

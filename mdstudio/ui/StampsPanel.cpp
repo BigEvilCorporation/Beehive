@@ -9,11 +9,9 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 ///////////////////////////////////////////////////////
 
-#include <ion/beehive/StampAnimation.h>
-
 #include "StampsPanel.h"
 #include "MainWindow.h"
-#include "StampAnimEditorDialog.h"
+#include "SpriteAnimEditorDialog.h"
 #include "UpdateStampDialog.h"
 
 #include <wx/menu.h>
@@ -216,7 +214,8 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			contextMenu.Append(eMenuUpdatePalette, wxString("Update palette"));
 			contextMenu.Append(eMenuSubstituteStamp, wxString("Substitute stamp"));
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
-			contextMenu.Append(eMenuCreateStampAnim, wxString("Create stamp animation"));
+			contextMenu.Append(eMenuSortTilesSequentially, wxString("Sort tiles sequentially"));
+			contextMenu.Append(eMenuOpenInAnimEditor, wxString("Open in animation editor"));
 			contextMenu.Append(eMenuSetStampLowDrawPrio, wxString("Set stamp low draw priority"));
 			contextMenu.Append(eMenuSetStampHighDrawPrio, wxString("Set stamp high draw priority"));
 			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampsPanel::OnContextMenuClick, NULL, this);
@@ -356,36 +355,47 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
-	else if(event.GetId() == eMenuCreateStampAnim)
+	else if(event.GetId() == eMenuSortTilesSequentially)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
 		{
-			//Create new scene anim
-			StampAnimId stampAnimId = m_project.CreateStampAnimation();
+			//Re-arrange tiles sequentially to prepare for animation use
+			m_project.SortStampTilesSequentially(stamp);
 
-			if(StampAnimation* stampAnim = m_project.GetStampAnimation(stampAnimId))
+			//Refresh
+			m_mainWindow->RefreshAll();
+		}
+	}
+	else if(event.GetId() == eMenuOpenInAnimEditor)
+	{
+		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			//Check if sorted first
+			bool sequential = stamp->CheckTilesBatched();
+
+			if(!sequential)
 			{
-				//Create first frame
-				std::vector<std::pair<TileId, Tile*>> tiles;
-				tiles.reserve(stamp->GetWidth() * stamp->GetHeight());
-
-				for(int y = 0; y < stamp->GetHeight(); y++)
+				//Warn
+				if(wxMessageBox("Tiles are not sorted sequentially, this stamp isn't animation compatible. Sort tiles now?", "Stamp not suitable for animation", wxYES | wxNO | wxICON_WARNING) == wxYES)
 				{
-					for(int x = 0; x < stamp->GetWidth(); x++)
-					{
-						StampId stampId = stamp->GetTile(x, y);
-						tiles.push_back(std::make_pair(stampId, m_project.GetTileset().GetTile(stampId)));
-					}
+					//Sort
+					m_project.SortStampTilesSequentially(stamp);
+
+					//Refresh
+					m_mainWindow->RefreshAll();
+
+					sequential = true;
 				}
+			}
 
-				stampAnim->AddTileFrame(TileFrame(tiles, stamp->GetWidth(), stamp->GetHeight()));
-				stampAnim->m_trackTileFrame.InsertKeyframe(AnimKeyframeSpriteFrame(0.0f, 0));
-				stampAnim->SetName(stamp->GetName());
-
-				//Show editor
-				StampAnimEditorDialog stampAnimEditorDialog(*m_mainWindow, m_project, m_renderer, *m_glContext, m_renderResources);
-				stampAnimEditorDialog.ShowModal();
+			if(sequential)
+			{
+				//Show anim editor in stamp mode
+				SpriteAnimEditorDialog animEditorDialog(m_mainWindow, SpriteAnimEditorDialog::eAnimEditModeStampAnim, m_project, m_renderer, *m_glContext, m_renderResources);
+				animEditorDialog.SetSelectedStamp(m_hoverStamp);
+				animEditorDialog.ShowModal();
 			}
 		}
 	}
