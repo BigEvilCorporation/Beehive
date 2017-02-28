@@ -17,6 +17,7 @@
 #include <wx/menu.h>
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
+#include <wx/textdlg.h>
 
 StampsPanel::StampsPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
@@ -210,6 +211,7 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 			//Right-click menu
 			wxMenu contextMenu;
 
+			contextMenu.Append(eMenuRenameStamp, wxString("Rename stamp"));
 			contextMenu.Append(eMenuUpdateStamp, wxString("Update stamp"));
 			contextMenu.Append(eMenuUpdatePalette, wxString("Update palette"));
 			contextMenu.Append(eMenuSubstituteStamp, wxString("Substitute stamp"));
@@ -229,6 +231,18 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 {
+	if(event.GetId() == eMenuRenameStamp)
+	{
+		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
+		if(stamp)
+		{
+			wxTextEntryDialog dialog(m_mainWindow, "Rename Stamp");
+			if(dialog.ShowModal() == wxID_OK)
+			{
+				stamp->SetName(dialog.GetValue().c_str().AsChar());
+			}
+		}
+	}
 	if(event.GetId() == eMenuUpdateStamp)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);

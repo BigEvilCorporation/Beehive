@@ -41,6 +41,7 @@ private:
 
 	enum MenuItems
 	{
+		eMenuRenameStamp,
 		eMenuUpdateStamp,
 		eMenuUpdatePalette,
 		eMenuSubstituteStamp,
