@@ -49,6 +49,8 @@ private:
 	{
 		eContextMenuDeleteStamp,
 		eContextMenuBakeStamp,
+		eContextMenuStampBringToFront,
+		eContextMenuStampSendToBack,
 		eContextMenuGameObjAddToAnim,
 	};
 

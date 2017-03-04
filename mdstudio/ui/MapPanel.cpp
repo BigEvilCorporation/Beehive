@@ -540,6 +540,8 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 
 					contextMenu.Append(eContextMenuDeleteStamp, wxString("Delete stamp"));
 					contextMenu.Append(eContextMenuBakeStamp, wxString("Bake stamp"));
+					contextMenu.Append(eContextMenuStampBringToFront, wxString("Bring to front"));
+					contextMenu.Append(eContextMenuStampSendToBack, wxString("Send to back"));
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
 					PopupMenu(&contextMenu);
 				}
@@ -857,6 +859,36 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 				}
 			}
 		}
+	}
+	else if(event.GetId() == eContextMenuStampBringToFront)
+	{
+		m_project.GetEditingMap().StampBringToFront(m_hoverStamp);
+
+		//Paint all stamps
+		for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
+		{
+			if(Stamp* stamp = m_project.GetStamp(it->m_id))
+			{
+				PaintStamp(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
+			}
+		}
+
+		Refresh();
+	}
+	else if(event.GetId() == eContextMenuStampSendToBack)
+	{
+		m_project.GetEditingMap().StampSendToBack(m_hoverStamp);
+
+		//Paint all stamps
+		for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
+		{
+			if(Stamp* stamp = m_project.GetStamp(it->m_id))
+			{
+				PaintStamp(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
+			}
+		}
+
+		Refresh();
 	}
 	else if(event.GetId() == eContextMenuGameObjAddToAnim)
 	{
