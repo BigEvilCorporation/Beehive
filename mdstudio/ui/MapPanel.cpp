@@ -862,33 +862,19 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 	}
 	else if(event.GetId() == eContextMenuStampBringToFront)
 	{
-		m_project.GetEditingMap().StampBringToFront(m_hoverStamp);
+		m_project.GetEditingMap().StampBringToFront(m_hoverStampPos.x, m_hoverStampPos.y, m_hoverStamp);
 
-		//Paint all stamps
-		for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
-		{
-			if(Stamp* stamp = m_project.GetStamp(it->m_id))
-			{
-				PaintStamp(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
-			}
-		}
-
-		Refresh();
+		m_project.InvalidateMap(true);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_project.InvalidateMap(false);
 	}
 	else if(event.GetId() == eContextMenuStampSendToBack)
 	{
-		m_project.GetEditingMap().StampSendToBack(m_hoverStamp);
+		m_project.GetEditingMap().StampSendToBack(m_hoverStampPos.x, m_hoverStampPos.y, m_hoverStamp);
 
-		//Paint all stamps
-		for(TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
-		{
-			if(Stamp* stamp = m_project.GetStamp(it->m_id))
-			{
-				PaintStamp(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
-			}
-		}
-
-		Refresh();
+		m_project.InvalidateMap(true);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_project.InvalidateMap(false);
 	}
 	else if(event.GetId() == eContextMenuGameObjAddToAnim)
 	{
