@@ -30,6 +30,8 @@ protected:
 	virtual void OnToolGameObjRemove(wxCommandEvent& event);
 	virtual void OnToolVariableAdd(wxCommandEvent& event);
 	virtual void OnToolVariableRemove(wxCommandEvent& event);
+	virtual void OnToolOrderUp(wxCommandEvent& event);
+	virtual void OnToolOrderDown(wxCommandEvent& event);
 	virtual void OnSelectGameObjType(wxCommandEvent& event);
 	virtual void OnSelectVariable(wxListEvent& event);
 	virtual void OnBtnApplyObjChanges(wxCommandEvent& event);
@@ -48,6 +50,6 @@ private:
 	GameObjectTypeId m_currentTypeId;
 	GameObjectVariable* m_currentVariable;
 
-	std::map<u32, GameObjectTypeId> m_gameObjIndexMap;
+	std::vector<std::pair<int, GameObjectTypeId>> m_gameObjIndexMap;
 	std::vector<SpriteSheetId> m_spriteSheetCache;
 };

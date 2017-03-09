@@ -14,6 +14,7 @@
 #include "../FormBuilderProj/deletestamp.xpm"
 #include "../FormBuilderProj/deletetile.xpm"
 #include "../FormBuilderProj/deleteunusedtiles.xpm"
+#include "../FormBuilderProj/down_16_16.xpm"
 #include "../FormBuilderProj/gameobj.xpm"
 #include "../FormBuilderProj/gameobjpanel.xpm"
 #include "../FormBuilderProj/genterrain_beziers.xpm"
@@ -60,6 +61,7 @@
 #include "../FormBuilderProj/tool_selectstamp.xpm"
 #include "../FormBuilderProj/tool_stamppicker.xpm"
 #include "../FormBuilderProj/toolspanel.xpm"
+#include "../FormBuilderProj/up_16_16.xpm"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -1744,6 +1746,10 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	
 	m_toolRemoveGameObjType = m_toolBar1->AddTool( wxID_ANY, wxT("Remove Game Object Type"), wxBitmap( remove_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 	
+	m_toolOrderUp = m_toolBar1->AddTool( wxID_ANY, wxT("Add Variable"), wxBitmap( up_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
+	m_toolOrderDown = m_toolBar1->AddTool( wxID_ANY, wxT("Add Variable"), wxBitmap( down_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
+	
 	m_toolBar1->AddSeparator(); 
 	
 	m_toolAddVariable = m_toolBar1->AddTool( wxID_ANY, wxT("Add Variable"), wxBitmap( add_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
@@ -1766,6 +1772,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	wxFlexGridSizer* fgSizer4;
 	fgSizer4 = new wxFlexGridSizer( 3, 1, 0, 0 );
 	fgSizer4->AddGrowableCol( 0 );
+	fgSizer4->AddGrowableRow( 0 );
+	fgSizer4->AddGrowableRow( 2 );
 	fgSizer4->SetFlexibleDirection( wxHORIZONTAL );
 	fgSizer4->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
@@ -1817,6 +1825,10 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	
 	fgSizer5->Add( bSizer12, 1, wxEXPAND, 5 );
 	
+	m_staticText49 = new wxStaticText( this, wxID_ANY, wxT("Initialisation order:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText49->Wrap( -1 );
+	fgSizer5->Add( m_staticText49, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	
 	
 	fgSizer5->Add( 0, 0, 1, wxEXPAND, 5 );
 	
@@ -1828,8 +1840,14 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	
 	fgSizer4->Add( fgSizer5, 1, wxEXPAND, 5 );
 	
+	wxBoxSizer* bSizer50;
+	bSizer50 = new wxBoxSizer( wxVERTICAL );
+	
 	m_staticline2 = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-	fgSizer4->Add( m_staticline2, 0, wxALL|wxEXPAND, 5 );
+	bSizer50->Add( m_staticline2, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	fgSizer4->Add( bSizer50, 1, wxEXPAND, 5 );
 	
 	wxFlexGridSizer* fgSizer3;
 	fgSizer3 = new wxFlexGridSizer( 0, 2, 0, 0 );
@@ -1909,6 +1927,8 @@ GameObjTypeDialogBase::GameObjTypeDialogBase( wxWindow* parent, wxWindowID id, c
 	// Connect Events
 	this->Connect( m_toolAddGameObjType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolGameObjAdd ) );
 	this->Connect( m_toolRemoveGameObjType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolGameObjRemove ) );
+	this->Connect( m_toolOrderUp->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolOrderUp ) );
+	this->Connect( m_toolOrderDown->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolOrderDown ) );
 	this->Connect( m_toolAddVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolVariableAdd ) );
 	this->Connect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolVariableRemove ) );
 	m_listGameObjTypes->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypeDialogBase::OnSelectGameObjType ), NULL, this );
@@ -1927,6 +1947,8 @@ GameObjTypeDialogBase::~GameObjTypeDialogBase()
 	// Disconnect Events
 	this->Disconnect( m_toolAddGameObjType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolGameObjAdd ) );
 	this->Disconnect( m_toolRemoveGameObjType->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolGameObjRemove ) );
+	this->Disconnect( m_toolOrderUp->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolOrderUp ) );
+	this->Disconnect( m_toolOrderDown->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolOrderDown ) );
 	this->Disconnect( m_toolAddVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolVariableAdd ) );
 	this->Disconnect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjTypeDialogBase::OnToolVariableRemove ) );
 	m_listGameObjTypes->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypeDialogBase::OnSelectGameObjType ), NULL, this );

@@ -702,6 +702,8 @@ class GameObjTypeDialogBase : public wxDialog
 		wxToolBar* m_toolBar1;
 		wxToolBarToolBase* m_toolAddGameObjType; 
 		wxToolBarToolBase* m_toolRemoveGameObjType; 
+		wxToolBarToolBase* m_toolOrderUp; 
+		wxToolBarToolBase* m_toolOrderDown; 
 		wxToolBarToolBase* m_toolAddVariable; 
 		wxToolBarToolBase* m_toolRemoveVariable; 
 		wxListBox* m_listGameObjTypes;
@@ -713,6 +715,7 @@ class GameObjTypeDialogBase : public wxDialog
 		wxStaticText* m_staticText9;
 		wxSpinCtrl* m_spinWidth;
 		wxSpinCtrl* m_spinHeight;
+		wxStaticText* m_staticText49;
 		wxButton* m_btnApplyObjSettings;
 		wxStaticLine* m_staticline2;
 		wxStaticText* m_staticText6;
@@ -728,6 +731,8 @@ class GameObjTypeDialogBase : public wxDialog
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolGameObjAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolGameObjRemove( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolOrderUp( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolOrderDown( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectGameObjType( wxCommandEvent& event ) { event.Skip(); }

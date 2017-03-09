@@ -73,16 +73,40 @@ void GameObjectTypeDialog::OnToolVariableRemove(wxCommandEvent& event)
 	}
 }
 
+void GameObjectTypeDialog::OnToolOrderUp(wxCommandEvent& event)
+{
+	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	{
+		if(gameObjType->GetInitPriority() > 0)
+		{
+			gameObjType->SetInitPriority(gameObjType->GetInitPriority() - 1);
+			PopulateTypeList();
+		}
+	}
+}
+
+void GameObjectTypeDialog::OnToolOrderDown(wxCommandEvent& event)
+{
+	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	{
+		if(gameObjType->GetInitPriority() < 9999)
+		{
+			gameObjType->SetInitPriority(gameObjType->GetInitPriority() + 1);
+			PopulateTypeList();
+		}
+	}
+}
+
 void GameObjectTypeDialog::OnSelectGameObjType(wxCommandEvent& event)
 {
-	m_currentTypeId = m_gameObjIndexMap[event.GetInt()];
+	m_currentTypeId = m_gameObjIndexMap[event.GetInt()].second;
 
-if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
-{
-	PopulateTypeFields(gameObjType);
-	PopulateVarsList(gameObjType);
-	PopulateVarsFields(NULL);
-}
+	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	{
+		PopulateTypeFields(gameObjType);
+		PopulateVarsList(gameObjType);
+		PopulateVarsFields(NULL);
+	}
 }
 
 void GameObjectTypeDialog::OnSelectVariable(wxListEvent& event)
@@ -178,11 +202,20 @@ void GameObjectTypeDialog::PopulateTypeList()
 
 	const TGameObjectTypeMap& typesMap = m_project.GetGameObjectTypes();
 
-	int index = 0;
-	for(TGameObjectTypeMap::const_iterator it = typesMap.begin(), end = typesMap.end(); it != end; ++it, ++index)
+	//Sort by init priority
+	for(TGameObjectTypeMap::const_iterator it = typesMap.begin(), end = typesMap.end(); it != end; ++it)
 	{
-		m_listGameObjTypes->Insert(wxString(it->second.GetName()), index);
-		m_gameObjIndexMap.insert(std::make_pair(index, it->second.GetId()));
+		m_gameObjIndexMap.push_back(std::make_pair(it->second.GetInitPriority(), it->second.GetId()));
+	}
+
+	std::sort(m_gameObjIndexMap.begin(), m_gameObjIndexMap.end(), [](const std::pair<int, GameObjectTypeId>& elemA, const std::pair<int, GameObjectTypeId>& elemB) { return elemA.first < elemB.first; });
+
+	for(int i = 0; i < m_gameObjIndexMap.size(); i++)
+	{
+		if(const GameObjectType* objType = m_project.GetGameObjectType(m_gameObjIndexMap[i].second))
+		{
+			m_listGameObjTypes->Insert(wxString(objType->GetName()), i);
+		}
 	}
 }
 
