@@ -974,26 +974,26 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						//Control point is under cursor, and left button is held
 						m_currentBezier->GetPoint(m_currentBezierControlIdx, position, controlA, controlB);
 
-//Set new point/control handle position
-switch(m_currentBezierControlHndl)
-{
-case eBezierPosition:
-	position = mousePosF;
-	break;
-case eBezierControlA:
-	controlA = mousePosF - position;
-	break;
-case eBezierControlB:
-	controlB = mousePosF - position;
-	break;
-}
+						//Set new point/control handle position
+						switch(m_currentBezierControlHndl)
+						{
+						case eBezierPosition:
+							position = mousePosF;
+							break;
+						case eBezierControlA:
+							controlA = mousePosF - position;
+							break;
+						case eBezierControlB:
+							controlB = mousePosF - position;
+							break;
+						}
 
-//Set new preview pos
-m_currentBezierControlPos = mousePosF;
+						//Set new preview pos
+						m_currentBezierControlPos = mousePosF;
 
-//Set new point
-m_currentBezier->SetPoint(m_currentBezierControlIdx, position, controlA, controlB);
-redraw = true;
+						//Set new point
+						m_currentBezier->SetPoint(m_currentBezierControlIdx, position, controlA, controlB);
+						redraw = true;
 					}
 					else if((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
 					{
@@ -1060,10 +1060,13 @@ redraw = true;
 		{
 			m_currentBezier = NULL;
 			m_highlightedBezier = NULL;
-			bool deleted = false;
 
-			//Find bezier under cursor
-			for(int i = 0; i < m_project.GetEditingCollisionMap().GetNumTerrainBeziers() && m_currentBezier == NULL && m_highlightedBezier == NULL && !deleted; i++)
+			//Find bezier(s) under cursor
+			ion::gamekit::BezierPath* smallestBezier = NULL;
+			float smallestBezierSize = ion::maths::FLOAT_MAX;
+			int smallestBezierIndex = 0;
+
+			for(int i = 0; i < m_project.GetEditingCollisionMap().GetNumTerrainBeziers(); i++)
 			{
 				ion::gamekit::BezierPath* bezier = m_project.GetEditingCollisionMap().GetTerrainBezier(i);
 
@@ -1072,49 +1075,61 @@ redraw = true;
 
 				bezier->GetBounds(boundsMin, boundsMax);
 
-				//Ensure bounds are at least 1 tile thick
-				if(((boundsMax.x - boundsMin.x) / (float)tileWidth) < 1.0f)
+				//Ensure bounds are at least 2 tiles thick
+				if((ion::maths::Abs(boundsMax.x - boundsMin.x) / (float)tileWidth) < 2.0f)
 				{
-					boundsMax.x += (float)tileWidth;
+					boundsMax.x += (float)tileWidth * 2;
 				}
 
-				if(((boundsMax.y - boundsMin.y) / (float)tileHeight) < 1.0f)
+				if((ion::maths::Abs(boundsMax.y - boundsMin.y) / (float)tileHeight) < 2.0f)
 				{
-					boundsMax.y += (float)tileHeight;
+					boundsMax.y += (float)tileHeight * 2;
 				}
 
 				if(ion::maths::PointInsideBox(mousePosF, boundsMin, boundsMax))
 				{
-					if(buttonBits & eMouseLeft)
+					//Found a bezier, check if smallest
+					float size = (boundsMax - boundsMin).GetLength();
+
+					if(size < smallestBezierSize)
 					{
-						if(m_currentTool == eToolSelectTerrainBezier)
-						{
-							//Set current bezier
-							m_currentBezier = bezier;
-
-							//Set bezier draw tool
-							m_currentTool = eToolDrawTerrainBezier;
-						}
-						else if(m_currentTool == eToolDeleteTerrainBezier)
-						{
-							//Get collision map
-							CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
-
-							//Delete bezier
-							collisionMap.RemoveTerrainBezier(i);
-							deleted = true;
-						}
-
-						//Invalidate beziers and refresh this panel
-						m_project.InvalidateTerrainBeziers(true);
-						Refresh();
-						m_project.InvalidateTerrainBeziers(false);
+						smallestBezier = bezier;
+						smallestBezierSize = size;
+						smallestBezierIndex = i;
 					}
-					else
+				}
+			}
+
+			if(smallestBezier)
+			{
+				if(buttonBits & eMouseLeft)
+				{
+					if(m_currentTool == eToolSelectTerrainBezier)
 					{
-						//Set highlighted bezier
-						m_highlightedBezier = bezier;
+						//Set current bezier
+						m_currentBezier = smallestBezier;
+
+						//Set bezier draw tool
+						m_currentTool = eToolDrawTerrainBezier;
 					}
+					else if(m_currentTool == eToolDeleteTerrainBezier)
+					{
+						//Get collision map
+						CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
+
+						//Delete bezier
+						collisionMap.RemoveTerrainBezier(smallestBezierIndex);
+					}
+
+					//Invalidate beziers and refresh this panel
+					m_project.InvalidateTerrainBeziers(true);
+					Refresh();
+					m_project.InvalidateTerrainBeziers(false);
+				}
+				else
+				{
+					//Set highlighted bezier
+					m_highlightedBezier = smallestBezier;
 				}
 			}
 
@@ -1251,9 +1266,12 @@ redraw = true;
 
 												int sourceX = (flags & Map::eFlipX) ? (stamp->GetWidth() - 1 - offset.x) : offset.x;
 												int sourceY = (flags & Map::eFlipY) ? (stamp->GetHeight() - 1 - offset.y) : offset.y;
-												
-												tileId = stamp->GetTile(sourceX, sourceY);
-												flags ^= stamp->GetTileFlags(sourceX, sourceY);
+
+												if(sourceX >= 0 && sourceX < stamp->GetWidth() && sourceY >= 0 && sourceY < stamp->GetHeight())
+												{
+													tileId = stamp->GetTile(sourceX, sourceY);
+													flags ^= stamp->GetTileFlags(sourceX, sourceY);
+												}
 											}
 										}
 										else
@@ -1957,6 +1975,17 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 		ion::Vector2 boundsMax;
 
 		m_highlightedBezier->GetBounds(boundsMin, boundsMax);
+
+		//Ensure bounds are at least 2 tiles thick
+		if((ion::maths::Abs(boundsMax.x - boundsMin.x) / (float)tileWidth) < 2.0f)
+		{
+			boundsMax.x += (float)tileWidth * 2;
+		}
+
+		if((ion::maths::Abs(boundsMax.y - boundsMin.y) / (float)tileHeight) < 2.0f)
+		{
+			boundsMax.y += (float)tileHeight * 2;
+		}
 
 		ion::Vector2 size = boundsMax - boundsMin;
 
