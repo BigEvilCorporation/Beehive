@@ -293,7 +293,7 @@ void SpriteAnimEditorDialog::OnBtnAnimNew(wxCommandEvent& event)
 					anim->m_trackSpriteFrame.InsertKeyframe(AnimKeyframeSpriteFrame((float)i, i));
 				}
 
-				anim->SetLength((float)m_selectedSpriteSheet->GetNumFrames() );
+				anim->SetLength((float)m_selectedSpriteSheet->GetNumFrames());
 			}
 
 			//Populate list
@@ -1083,11 +1083,14 @@ void SpriteAnimEditorDialog::EventHandlerContextMenuClick(wxCommandEvent& event)
 			}
 
 			m_selectedAnim->m_trackSpriteFrame.Clear();
+			m_selectedAnim->SetLength(0.0f);
 
 			for(int i = 0; i < keyframes.size(); i++)
 			{
 				m_selectedAnim->m_trackSpriteFrame.InsertKeyframe(AnimKeyframeSpriteFrame((float)i, keyframes[i]));
 			}
+
+			m_selectedAnim->SetLength((float)m_selectedAnim->m_trackSpriteFrame.GetNumKeyframes());
 
 			//Re-populate keyframe view
 			PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
