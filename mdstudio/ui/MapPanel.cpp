@@ -1803,6 +1803,19 @@ void MapPanel::SetTool(ToolType tool)
 		break;
 	}
 
+	case eToolSelectTerrainBezier:
+	case eToolDeleteTerrainBezier:
+	{
+		//Calc bezier bounds
+		for(int i = 0; i < m_project.GetEditingCollisionMap().GetNumTerrainBeziers(); i++)
+		{
+			ion::gamekit::BezierPath* bezier = m_project.GetEditingCollisionMap().GetTerrainBezier(i);
+			bezier->CalculateBounds();
+		}
+
+		break;
+	}
+
 	default:
 		ResetToolData();
 	}
