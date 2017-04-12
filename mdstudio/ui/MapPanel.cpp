@@ -478,7 +478,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					if(Stamp* stamp = m_project.GetStamp(stampId))
 					{
 						//Remove stamp under cursor
-						map.RemoveStamp(x, y);
+						map.RemoveStamp(stampId, x, y);
 
 						//Clear hover stamp
 						m_hoverStamp = InvalidStampId;
@@ -811,7 +811,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		if(Stamp* stamp = m_project.GetStamp(m_hoverStamp))
 		{
 			//Remove stamp under cursor
-			map.RemoveStamp(m_hoverStampPos.x, m_hoverStampPos.y);
+			map.RemoveStamp(m_hoverStamp, m_hoverStampPos.x, m_hoverStampPos.y);
 
 			//Clear hover stamp
 			m_hoverStamp = InvalidStampId;
@@ -833,7 +833,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		if(Stamp* stamp = m_project.GetStamp(m_hoverStamp))
 		{
 			//Remove stamp under cursor
-			map.RemoveStamp(m_hoverStampPos.x, m_hoverStampPos.y);
+			map.RemoveStamp(m_hoverStamp, m_hoverStampPos.x, m_hoverStampPos.y);
 
 			//Bake stamp to map
 			map.BakeStamp(m_hoverStampPos.x, m_hoverStampPos.y, *stamp, m_hoverStampFlags);
