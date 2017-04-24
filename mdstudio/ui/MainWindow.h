@@ -155,7 +155,10 @@ private:
 
 	wxAuiManager m_auiManager;
 
-	wxWeakRef<MapToolbox> m_toolboxPanel;
+	wxWeakRef<MapToolboxTiles> m_toolboxPanelTiles;
+	wxWeakRef<MapToolboxStamps> m_toolboxPanelStamps;
+	wxWeakRef<MapToolboxTerrain> m_toolboxPanelTerrain;
+	wxWeakRef<MapToolboxGameObjs> m_toolboxPanelGameObjs;
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<MapListPanel> m_mapListPanel;

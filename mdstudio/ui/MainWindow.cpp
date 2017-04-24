@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "../buildconf.h"
 #include "MainWindow.h"
 #include "Dialogs.h"
 #include "ExportDialog.h"
@@ -78,6 +79,9 @@ MainWindow::MainWindow()
 
 	//Set default project
 	SetProject(defaultProject);
+
+	//Maximize
+	Maximize();
 
 	//Set window focus
 	SetFocus();
@@ -142,10 +146,28 @@ void MainWindow::SetProject(Project* project)
 			delete m_mapListPanel;
 		}
 
-		if(m_toolboxPanel)
+		if(m_toolboxPanelTiles)
 		{
-			m_auiManager.DetachPane(m_toolboxPanel);
-			delete m_toolboxPanel;
+			m_auiManager.DetachPane(m_toolboxPanelTiles);
+			delete m_toolboxPanelTiles;
+		}
+
+		if(m_toolboxPanelStamps)
+		{
+			m_auiManager.DetachPane(m_toolboxPanelStamps);
+			delete m_toolboxPanelStamps;
+		}
+
+		if(m_toolboxPanelTerrain)
+		{
+			m_auiManager.DetachPane(m_toolboxPanelTerrain);
+			delete m_toolboxPanelTerrain;
+		}
+
+		if(m_toolboxPanelGameObjs)
+		{
+			m_auiManager.DetachPane(m_toolboxPanelGameObjs);
+			delete m_toolboxPanelGameObjs;
 		}
 
 		if(m_stampsPanel)
@@ -402,9 +424,9 @@ void MainWindow::ShowPanelMapList()
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 150);
+			paneInfo.BestSize(300, 75);
 			paneInfo.Right();
-			paneInfo.Row(0);
+			paneInfo.Row(1);
 			paneInfo.Caption("Maps");
 			paneInfo.CaptionVisible(true);
 
@@ -423,7 +445,7 @@ void MainWindow::ShowPanelMapList()
 
 void MainWindow::ShowPanelToolbox()
 {
-	if(!m_toolboxPanel)
+	if(!m_toolboxPanelTiles)
 	{
 		wxAuiPaneInfo paneInfo;
 		paneInfo.Dockable(true);
@@ -431,28 +453,80 @@ void MainWindow::ShowPanelToolbox()
 		paneInfo.BestSize(100, 300);
 		paneInfo.Left();
 		paneInfo.Row(0);
-		paneInfo.Caption("Toolbox");
+		paneInfo.Caption("Tile Tools");
 		paneInfo.CaptionVisible(true);
 
-		m_toolboxPanel = new MapToolbox(m_dockArea, NewControlId());
-		m_auiManager.AddPane(m_toolboxPanel, paneInfo);
+		m_toolboxPanelTiles = new MapToolboxTiles(m_dockArea, NewControlId());
+		m_auiManager.AddPane(m_toolboxPanelTiles, paneInfo);
 
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTTILE);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTSTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINT);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_TILEPICKER);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMPPICKER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPX);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATE_SCENE_ANIM);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COPY_TO_NEW_MAP);
+
+		//Hide unused
+		#if !INCLUDE_UI_TOOLBOX_TILES_CLONE
+		delete m_toolboxPanelTiles->m_toolClone;
+		#endif
+
+		#if !INCLUDE_UI_TOOLBOX_TILES_CREATESCENEANIM
+		delete m_toolboxPanelTiles->m_toolCreateSceneAnim;
+		#endif
+
+		#if !INCLUDE_UI_TOOLBOX_TILES_COPYTONEWMAP
+		delete m_toolboxPanelTiles->m_toolCopyToNewMap;
+		#endif
+	}
+
+	if(!m_toolboxPanelStamps)
+	{
+		wxAuiPaneInfo paneInfo;
+		paneInfo.Dockable(true);
+		paneInfo.DockFixed(false);
+		paneInfo.BestSize(100, 300);
+		paneInfo.Left();
+		paneInfo.Row(0);
+		paneInfo.Caption("Stamp Tools");
+		paneInfo.CaptionVisible(true);
+
+		m_toolboxPanelStamps = new MapToolboxStamps(m_dockArea, NewControlId());
+		m_auiManager.AddPane(m_toolboxPanelStamps, paneInfo);
+
+		//Subscribe to toolbox buttons
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTSTAMP);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMP);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMPPICKER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVESTAMP);
+
+		//Hide unused
+#if !INCLUDE_UI_TOOLBOX_STAMPS_PAINT
+		delete m_toolboxPanelStamps->m_toolPaintStamp;
+#endif
+	}
+
+	if(!m_toolboxPanelTerrain)
+	{
+		wxAuiPaneInfo paneInfo;
+		paneInfo.Dockable(true);
+		paneInfo.DockFixed(false);
+		paneInfo.BestSize(100, 300);
+		paneInfo.Left();
+		paneInfo.Row(1);
+		paneInfo.Caption("Collision Tools");
+		paneInfo.CaptionVisible(true);
+
+		m_toolboxPanelTerrain = new MapToolboxTerrain(m_dockArea, NewControlId());
+		m_auiManager.AddPane(m_toolboxPanelTerrain, paneInfo);
+
+		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTHOLE);
@@ -460,16 +534,58 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_ADDTERRAINBEZIER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_EDITTERRAINBEZIER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRAINBEZIER);
+
+		//Hide unused
+#if !INCLUDE_UI_TOOLBOX_TERRAIN_PAINT
+		delete m_toolboxPanelTerrain->m_toolPaintCollisionPixel;
+#endif
+	}
+
+	if(!m_toolboxPanelGameObjs)
+	{
+		wxAuiPaneInfo paneInfo;
+		paneInfo.Dockable(true);
+		paneInfo.DockFixed(false);
+		paneInfo.BestSize(100, 300);
+		paneInfo.Left();
+		paneInfo.Row(1);
+		paneInfo.Caption("Object Tools");
+		paneInfo.CaptionVisible(true);
+
+		m_toolboxPanelGameObjs = new MapToolboxGameObjs(m_dockArea, NewControlId());
+		m_auiManager.AddPane(m_toolboxPanelGameObjs, paneInfo);
+
+		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_ANIMATEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
+
+		//Hide unused
+#if !INCLUDE_UI_TOOLBOX_GAMEOBJ_ANIMATE
+		delete m_toolboxPanelGameObjs->m_toolAnimateGameObject;
+#endif
 	}
 
-	if(!m_toolboxPanel->IsShown())
+	if(!m_toolboxPanelTiles->IsShown())
 	{
-		m_toolboxPanel->Show();
+		m_toolboxPanelTiles->Show();
+	}
+
+	if(!m_toolboxPanelStamps->IsShown())
+	{
+		m_toolboxPanelStamps->Show();
+	}
+
+	if(!m_toolboxPanelTerrain->IsShown())
+	{
+		m_toolboxPanelTerrain->Show();
+	}
+
+	if(!m_toolboxPanelGameObjs->IsShown())
+	{
+		m_toolboxPanelGameObjs->Show();
 	}
 }
 
@@ -1563,7 +1679,7 @@ void MainWindow::OnBtnGameObjTypes(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
 	{
-		GameObjectTypeDialog dialog(*this, *m_project);
+		GameObjectTypeDialog dialog(*this, *m_project, *m_renderResources);
 		dialog.ShowModal();
 	}
 }

@@ -2083,10 +2083,10 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 				material->Unbind();
 
-				if(gameObjectType->GetPreviewSpriteSheet() != InvalidSpriteSheetId)
+				if(gameObjectType->GetPreviewSpriteSheetId() != InvalidSpriteSheetId)
 				{
 					//Render spriteSheet
-					if(RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheet()))
+					if(RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheetId()))
 					{
 						ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
 						ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
@@ -2143,10 +2143,10 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 
-		if(gameObjectType->GetPreviewSpriteSheet() != InvalidSpriteSheetId)
+		if(gameObjectType->GetPreviewSpriteSheetId() != InvalidSpriteSheetId)
 		{
 			//Render spriteSheet
-			RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheet());
+			RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheetId());
 			ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
 			ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
 

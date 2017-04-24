@@ -14,9 +14,10 @@
 #include "GameObjectTypeDialog.h"
 #include "MainWindow.h"
 
-GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& project)
+GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& project, RenderResources& renderResources)
 	: GameObjTypeDialogBase((wxWindow*)&mainWindow)
 	, m_mainWindow(mainWindow)
+	, m_renderResources(renderResources)
 	, m_project(project)
 {
 	m_currentTypeId = InvalidGameObjectTypeId;
@@ -118,23 +119,30 @@ void GameObjectTypeDialog::OnSelectVariable(wxListEvent& event)
 	}
 }
 
+void GameObjectTypeDialog::OnBtnLoadSprite(wxCommandEvent& event)
+{
+	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	{
+		wxFileDialog dialog(this, _("Open BMP files"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+		if(dialog.ShowModal() == wxID_OK)
+		{
+			std::string filename = dialog.GetPath().GetData().AsChar();
+			if(gameObjType->LoadPreviewSprite(filename))
+			{
+				m_renderResources.DeleteSpriteSheetRenderResources(gameObjType->GetPreviewSpriteSheetId());
+				m_renderResources.CreateSpriteSheetResources(gameObjType->GetPreviewSpriteSheetId(), gameObjType->GetPreviewSpriteSheet());
+				m_mainWindow.RefreshPanel(MainWindow::ePanelMap);
+			}
+		}
+	}
+}
+
 void GameObjectTypeDialog::OnBtnApplyObjChanges(wxCommandEvent& event)
 {
 	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
 	{
 		gameObjType->SetName(m_textGameObjName->GetValue().c_str().AsChar());
 		gameObjType->SetDimensions(ion::Vector2i(m_spinWidth->GetValue(), m_spinHeight->GetValue()));
-
-		SpriteSheetId prevSpriteSheet = gameObjType->GetPreviewSpriteSheet();
-
-		if(m_spriteSheetCache.size() > 0)
-		{
-			int spriteSheetIndex = m_choiceSprites->GetCurrentSelection();
-			if(spriteSheetIndex >= 0 && spriteSheetIndex < m_spriteSheetCache.size())
-			{
-				gameObjType->SetPreviewSpriteSheet(m_spriteSheetCache[spriteSheetIndex]);
-			}
-		}
 
 		PopulateTypeList();
 	}
@@ -181,6 +189,10 @@ void GameObjectTypeDialog::OnBtnImport(wxCommandEvent& event)
 		m_project.ImportGameObjectTypes(filename);
 		PopulateTypeList();
 		PopulateVarsList(NULL);
+
+		m_renderResources.CreateSpriteSheetResources(m_project);
+
+		m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
 		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
 	}
 }
@@ -224,44 +236,28 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 	if(gameObjType)
 	{
 		m_textGameObjName->Enable(true);
-		m_choiceSprites->Enable(true);
 		m_spinWidth->Enable(true);
 		m_spinHeight->Enable(true);
 		m_listVariables->Enable(true);
 		m_btnApplyObjSettings->Enable(true);
+		m_btnLoadSprite->Enable(true);
 
 		m_textGameObjName->SetValue(gameObjType->GetName());
 		m_spinWidth->SetValue(gameObjType->GetDimensions().x);
 		m_spinHeight->SetValue(gameObjType->GetDimensions().y);
-
-		m_choiceSprites->Clear();
-		m_spriteSheetCache.clear();
-
-		for(TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
-		{
-			for(TSpriteSheetMap::const_iterator itSprite = it->second.SpriteSheetsBegin(), endSprite = it->second.SpriteSheetsEnd(); itSprite != endSprite; ++itSprite)
-			{
-				//Store by index
-				m_spriteSheetCache.push_back(itSprite->first);
-
-				//Add to list
-				m_choiceSprites->AppendString(itSprite->second.GetName());
-			}
-		}
 	}
 	else
 	{
 		m_textGameObjName->SetValue("");
-		m_choiceSprites->Clear();
 		m_spinWidth->SetValue(1);
 		m_spinHeight->SetValue(1);
 
 		m_textGameObjName->Enable(false);
-		m_choiceSprites->Enable(false);
 		m_spinWidth->Enable(false);
 		m_spinHeight->Enable(false);
 		m_listVariables->Enable(false);
 		m_btnApplyObjSettings->Enable(false);
+		m_btnLoadSprite->Enable(false);
 	}
 }
 

@@ -11,6 +11,7 @@ ApplyWxSDK beehivestudio ;
 
 local BEEHIVE_STUDIO_SRC = 
 	main.cpp
+	buildconf.h
 	beehivestudio.cpp
 	beehivestudio.h
 	;

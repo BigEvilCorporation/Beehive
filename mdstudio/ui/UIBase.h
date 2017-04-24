@@ -188,7 +188,7 @@ class MainWindowBase : public wxFrame
 	
 	public:
 		
-		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 720,489 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
+		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 		
 		~MainWindowBase();
 	
@@ -415,13 +415,11 @@ class MapToolbox : public wxPanel
 	protected:
 		wxStaticText* m_staticText11;
 		wxBitmapButton* m_toolSelectStamp;
-		wxBitmapButton* m_toolPaintStamp;
 		wxBitmapButton* m_toolMveStamp;
 		wxBitmapButton* m_toolStampPicker;
 		wxBitmapButton* m_toolCreateStamp;
 		wxBitmapButton* m_toolRemoveStamp;
 		wxStaticText* m_staticText13;
-		wxBitmapButton* m_toolPaintCollisionPixel;
 		wxBitmapButton* m_toolPaintCollisionSolid;
 		wxBitmapButton* m_toolPaintCollisionHole;
 		wxBitmapButton* m_toolDeleteTerrainTile;
@@ -435,20 +433,113 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolFlipX;
 		wxBitmapButton* m_toolFlipY;
 		wxBitmapButton* m_toolFill;
-		wxBitmapButton* m_toolClone;
-		wxBitmapButton* m_toolCreateSceneAnim;
-		wxBitmapButton* m_toolCopyToNewMap;
 		wxStaticText* m_staticText14;
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolMoveGameObject;
-		wxBitmapButton* m_toolAnimateGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
 	
 	public:
+		wxBitmapButton* m_toolPaintStamp;
+		wxBitmapButton* m_toolPaintCollisionPixel;
+		wxBitmapButton* m_toolClone;
+		wxBitmapButton* m_toolCreateSceneAnim;
+		wxBitmapButton* m_toolCopyToNewMap;
+		wxBitmapButton* m_toolAnimateGameObject;
 		
 		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 259,597 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
 		~MapToolbox();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MapToolboxGameObjs
+///////////////////////////////////////////////////////////////////////////////
+class MapToolboxGameObjs : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxBitmapButton* m_toolSelectGameObject;
+		wxBitmapButton* m_toolPlaceGameObject;
+		wxBitmapButton* m_toolMoveGameObject;
+		wxBitmapButton* m_toolRemoveGameObject;
+	
+	public:
+		wxBitmapButton* m_toolAnimateGameObject;
+		
+		MapToolboxGameObjs( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 115,181 ), long style = wxTAB_TRAVERSAL ); 
+		~MapToolboxGameObjs();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MapToolboxTerrain
+///////////////////////////////////////////////////////////////////////////////
+class MapToolboxTerrain : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxBitmapButton* m_toolPaintCollisionSolid;
+		wxBitmapButton* m_toolPaintCollisionHole;
+		wxBitmapButton* m_toolDeleteTerrainTile;
+		wxBitmapButton* m_toolAddTerrainBezier;
+		wxBitmapButton* m_toolEditTerrainBezier1;
+		wxBitmapButton* m_toolDeleteTerrainBezier;
+	
+	public:
+		wxBitmapButton* m_toolPaintCollisionPixel;
+		
+		MapToolboxTerrain( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 110,228 ), long style = wxTAB_TRAVERSAL ); 
+		~MapToolboxTerrain();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MapToolboxTiles
+///////////////////////////////////////////////////////////////////////////////
+class MapToolboxTiles : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxBitmapButton* m_toolSelectTile;
+		wxBitmapButton* m_toolPaint;
+		wxBitmapButton* m_toolTilePicker;
+		wxBitmapButton* m_toolFlipX;
+		wxBitmapButton* m_toolFlipY;
+		wxBitmapButton* m_toolFill;
+	
+	public:
+		wxBitmapButton* m_toolClone;
+		wxBitmapButton* m_toolCreateSceneAnim;
+		wxBitmapButton* m_toolCopyToNewMap;
+		
+		MapToolboxTiles( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 108,282 ), long style = wxTAB_TRAVERSAL ); 
+		~MapToolboxTiles();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MapToolboxStamps
+///////////////////////////////////////////////////////////////////////////////
+class MapToolboxStamps : public wxPanel 
+{
+	private:
+	
+	protected:
+		wxBitmapButton* m_toolSelectStamp;
+		wxBitmapButton* m_toolMveStamp;
+		wxBitmapButton* m_toolStampPicker;
+		wxBitmapButton* m_toolCreateStamp;
+		wxBitmapButton* m_toolRemoveStamp;
+	
+	public:
+		wxBitmapButton* m_toolPaintStamp;
+		
+		MapToolboxStamps( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 116,181 ), long style = wxTAB_TRAVERSAL ); 
+		~MapToolboxStamps();
 	
 };
 
@@ -710,13 +801,12 @@ class GameObjTypeDialogBase : public wxDialog
 		wxListCtrl* m_listVariables;
 		wxStaticText* m_staticText10;
 		wxTextCtrl* m_textGameObjName;
-		wxStaticText* m_staticText25;
-		wxChoice* m_choiceSprites;
 		wxStaticText* m_staticText9;
 		wxSpinCtrl* m_spinWidth;
 		wxSpinCtrl* m_spinHeight;
 		wxStaticText* m_staticText49;
 		wxButton* m_btnApplyObjSettings;
+		wxButton* m_btnLoadSprite;
 		wxStaticLine* m_staticline2;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* m_textVariableName;
@@ -740,6 +830,7 @@ class GameObjTypeDialogBase : public wxDialog
 		virtual void OnWidthChanged( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnHeightChanged( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnBtnApplyObjChanges( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnLoadSprite( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnApplyVarChanges( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }

@@ -800,6 +800,11 @@ void RenderResources::CreateSpriteSheetResources(const Project& project)
 			CreateSpriteSheetResources(it->first, it->second);
 		}
 	}
+
+	for(TGameObjectTypeMap::const_iterator it = project.GetGameObjectTypes().begin(), end = project.GetGameObjectTypes().end(); it != end; ++it)
+	{
+		CreateSpriteSheetResources(it->second.GetPreviewSpriteSheetId(), it->second.GetPreviewSpriteSheet());
+	}
 }
 
 void RenderResources::CreateSpriteSheetResources(SpriteSheetId spriteSheetId, const SpriteSheet& spriteSheet)

@@ -16,6 +16,7 @@
 #include <ion/beehive/SpriteSheet.h>
 
 #include "UIBase.h"
+#include "RenderResources.h"
 
 class MainWindow;
 class Project;
@@ -23,7 +24,7 @@ class Project;
 class GameObjectTypeDialog : public GameObjTypeDialogBase
 {
 public:
-	GameObjectTypeDialog(MainWindow& mainWindow, Project& project);
+	GameObjectTypeDialog(MainWindow& mainWindow, Project& project, RenderResources& renderResources);
 
 protected:
 	virtual void OnToolGameObjAdd(wxCommandEvent& event);
@@ -34,6 +35,7 @@ protected:
 	virtual void OnToolOrderDown(wxCommandEvent& event);
 	virtual void OnSelectGameObjType(wxCommandEvent& event);
 	virtual void OnSelectVariable(wxListEvent& event);
+	virtual void OnBtnLoadSprite(wxCommandEvent& event);
 	virtual void OnBtnApplyObjChanges(wxCommandEvent& event);
 	virtual void OnBtnApplyVarChanges(wxCommandEvent& event);
 	virtual void OnBtnImport(wxCommandEvent& event);
@@ -47,9 +49,9 @@ private:
 
 	MainWindow& m_mainWindow;
 	Project& m_project;
+	RenderResources& m_renderResources;
 	GameObjectTypeId m_currentTypeId;
 	GameObjectVariable* m_currentVariable;
 
 	std::vector<std::pair<int, GameObjectTypeId>> m_gameObjIndexMap;
-	std::vector<SpriteSheetId> m_spriteSheetCache;
 };
