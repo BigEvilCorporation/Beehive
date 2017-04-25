@@ -134,6 +134,7 @@ protected:
 	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnMapExportBMP(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnSaveLayout(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 	virtual void OnBtnShowOutlines(wxCommandEvent& event);
@@ -152,6 +153,11 @@ private:
 
 	//Set all panel captions
 	void SetPanelCaptions();
+
+	//Save/restore layout
+	void SaveWindowLayout();
+	void RestoreWindowLayout();
+	wxString GetWindowLayoutConfig() const;
 
 	wxAuiManager m_auiManager;
 
@@ -187,4 +193,8 @@ private:
 
 	//Refresh lock
 	int m_refreshLockStack;
+
+	//Window total width/height
+	int m_width;
+	int m_height;
 };

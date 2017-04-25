@@ -16,6 +16,7 @@
 #include <wx/dir.h>
 #include <wx/aui/framemanager.h>
 #include <wx/msgdlg.h>
+#include <wx/stdpaths.h>
 
 #include <string>
 
@@ -31,6 +32,9 @@
 #include "maths\Maths.h"
 
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
+
+#define PANEL_SIZE_X(x) (m_width / 100) * x
+#define PANEL_SIZE_Y(y) (m_height / 100) * y
 
 MainWindow::MainWindow()
 	: MainWindowBase(NULL)
@@ -77,11 +81,14 @@ MainWindow::MainWindow()
 		defaultProject->Load(path.c_str().AsChar());
 	}
 
-	//Set default project
-	SetProject(defaultProject);
-
 	//Maximize
 	Maximize();
+
+	//Get window size
+	GetSize(&m_width, &m_height);
+
+	//Set default project
+	SetProject(defaultProject);
 
 	//Set window focus
 	SetFocus();
@@ -250,6 +257,9 @@ void MainWindow::SetProject(Project* project)
 
 			//Sync settings widgets states
 			SyncSettingsWidgets();
+
+			//Restore window layout
+			RestoreWindowLayout();
 		}
 	}
 
@@ -278,6 +288,41 @@ void MainWindow::SetPanelCaptions()
 	}
 }
 
+void MainWindow::SaveWindowLayout()
+{
+	wxFileName filename(GetWindowLayoutConfig());
+	filename.Mkdir(511, wxPATH_MKDIR_FULL);
+	
+	ion::io::File file;
+	if(file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::eOpenWrite))
+	{
+		wxString data = m_auiManager.SavePerspective();
+		file.Write(data.c_str().AsChar(), data.size());
+		file.Close();
+	}
+}
+
+void MainWindow::RestoreWindowLayout()
+{
+	wxFileName filename(GetWindowLayoutConfig());
+
+	ion::io::File file;
+	if(file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::eOpenRead))
+	{
+		char* data = new char[file.GetSize() + 1];
+		file.Read(data, file.GetSize());
+		data[file.GetSize()] = 0;
+		m_auiManager.LoadPerspective(data);
+		file.Close();
+		delete data;
+	}
+}
+
+wxString MainWindow::GetWindowLayoutConfig() const
+{
+	return wxStandardPaths::Get().GetUserConfigDir() + "/BigEvilCorporation/Beehive/layout.cfg";
+}
+
 void MainWindow::ShowPanelPalettes()
 {
 	if(m_project.get())
@@ -285,9 +330,10 @@ void MainWindow::ShowPanelPalettes()
 		if(!m_palettesPanel)
 		{
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Palettes");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(50, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(10), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
 			paneInfo.Caption("Palettes");
 			paneInfo.CaptionVisible(true);
@@ -311,9 +357,10 @@ void MainWindow::ShowPanelTiles()
 		if(!m_tilesPanel)
 		{
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Tiles");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(450, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(45), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
@@ -339,9 +386,10 @@ void MainWindow::ShowPanelTerrainTiles()
 		if(!m_terrainTilesPanel)
 		{
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("TerrainTiles");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(30), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
@@ -367,9 +415,10 @@ void MainWindow::ShowPanelStamps()
 		if(!m_stampsPanel)
 		{
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Stamps");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 800);
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(70));
 			paneInfo.Right();
 			paneInfo.Row(1);
 			paneInfo.Caption("Stamps");
@@ -394,9 +443,10 @@ void MainWindow::ShowPanelMap()
 		if(!m_mapPanel)
 		{
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Map");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(800, 600);
+			paneInfo.BestSize(PANEL_SIZE_X(60), PANEL_SIZE_Y(40));
 			paneInfo.Centre();
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
@@ -422,9 +472,10 @@ void MainWindow::ShowPanelMapList()
 			wxSize clientSize = GetClientSize();
 
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("MapList");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 75);
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(10));
 			paneInfo.Right();
 			paneInfo.Row(1);
 			paneInfo.Caption("Maps");
@@ -448,9 +499,10 @@ void MainWindow::ShowPanelToolbox()
 	if(!m_toolboxPanelTiles)
 	{
 		wxAuiPaneInfo paneInfo;
+		paneInfo.Name("ToolboxTiles");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(100, 300);
+		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
 		paneInfo.Left();
 		paneInfo.Row(0);
 		paneInfo.Caption("Tile Tools");
@@ -487,9 +539,10 @@ void MainWindow::ShowPanelToolbox()
 	if(!m_toolboxPanelStamps)
 	{
 		wxAuiPaneInfo paneInfo;
+		paneInfo.Name("ToolboxStamps");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(100, 300);
+		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
 		paneInfo.Left();
 		paneInfo.Row(0);
 		paneInfo.Caption("Stamp Tools");
@@ -515,9 +568,10 @@ void MainWindow::ShowPanelToolbox()
 	if(!m_toolboxPanelTerrain)
 	{
 		wxAuiPaneInfo paneInfo;
+		paneInfo.Name("ToolboxTerrain");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(100, 300);
+		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_X(20));
 		paneInfo.Left();
 		paneInfo.Row(1);
 		paneInfo.Caption("Collision Tools");
@@ -544,9 +598,10 @@ void MainWindow::ShowPanelToolbox()
 	if(!m_toolboxPanelGameObjs)
 	{
 		wxAuiPaneInfo paneInfo;
+		paneInfo.Name("ToolboxObjects");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(100, 300);
+		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
 		paneInfo.Left();
 		paneInfo.Row(1);
 		paneInfo.Caption("Object Tools");
@@ -598,9 +653,10 @@ void MainWindow::ShowPanelTileEditor()
 			wxSize clientSize = GetClientSize();
 
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Tile");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(30), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
 			paneInfo.Caption("Tile");
 			paneInfo.CaptionVisible(true);
@@ -627,11 +683,12 @@ void MainWindow::ShowPanelTerrainEditor()
 			wxSize clientSize = GetClientSize();
 
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("TerrainTile");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(30), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
-			paneInfo.Caption("Collision Tile");
+			paneInfo.Caption("Terrain Tile");
 			paneInfo.CaptionVisible(true);
 
 			m_TerrainTileEditorPanel = new TerrainTileEditorPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
@@ -656,10 +713,11 @@ void MainWindow::ShowPanelGameObjectTypes()
 			wxSize clientSize = GetClientSize();
 
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Objects");
 			paneInfo.Dockable(true);
 			paneInfo.Float();
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(30), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
 			paneInfo.Caption("Game Object Types");
 			paneInfo.CaptionVisible(true);
@@ -686,10 +744,11 @@ void MainWindow::ShowPanelGameObjectParams()
 			wxSize clientSize = GetClientSize();
 
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("ObjectParams");
 			paneInfo.Dockable(true);
 			paneInfo.Float();
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(300, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(30), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
 			paneInfo.Caption("Game Object Params");
 			paneInfo.CaptionVisible(true);
@@ -716,10 +775,11 @@ void MainWindow::ShowPanelTimeline()
 			wxSize clientSize = GetClientSize();
 
 			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("AnimTimeline");
 			paneInfo.Dockable(true);
 			paneInfo.Float();
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(600, 300);
+			paneInfo.BestSize(PANEL_SIZE_X(60), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
 			paneInfo.Caption("Animation Timeline");
 			paneInfo.CaptionVisible(true);
@@ -1621,6 +1681,11 @@ void MainWindow::OnBtnMapExportBMP(wxRibbonButtonBarEvent& event)
 			m_project->ExportMapBitmaps(dialog.GetPath().c_str().AsChar());
 		}
 	}
+}
+
+void MainWindow::OnBtnSaveLayout(wxRibbonButtonBarEvent& event)
+{
+	SaveWindowLayout();
 }
 
 void MainWindow::OnBtnGridShow(wxCommandEvent& event)
