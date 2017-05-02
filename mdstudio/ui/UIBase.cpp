@@ -53,6 +53,7 @@
 #include "../FormBuilderProj/tool_flipy.xpm"
 #include "../FormBuilderProj/tool_movegameobj.xpm"
 #include "../FormBuilderProj/tool_movestamp.xpm"
+#include "../FormBuilderProj/tool_paintcolhole.xpm"
 #include "../FormBuilderProj/tool_paintcolpixel.xpm"
 #include "../FormBuilderProj/tool_paintcolwall.xpm"
 #include "../FormBuilderProj/tool_paintstamp.xpm"
@@ -1056,7 +1057,7 @@ MapToolboxTerrain::MapToolboxTerrain( wxWindow* parent, wxWindowID id, const wxP
 	
 	fgSizer8->Add( m_toolPaintCollisionSolid, 0, wxALL, 5 );
 	
-	m_toolPaintCollisionHole = new wxBitmapButton( this, wxID_TOOL_COL_PAINTHOLE, wxBitmap( tool_paintcolwall_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolPaintCollisionHole = new wxBitmapButton( this, wxID_TOOL_COL_PAINTHOLE, wxBitmap( tool_paintcolhole_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolPaintCollisionHole->SetToolTip( wxT("Paint Terrain Hole") );
 	
 	fgSizer8->Add( m_toolPaintCollisionHole, 0, wxALL, 5 );
@@ -1506,8 +1507,11 @@ ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_chkReplaceStamps = new wxCheckBox( this, wxID_ANY, wxT("Replace existing stamp(s)"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer13->Add( m_chkReplaceStamps, 0, wxALL, 5 );
 	
-	m_chkOnlyExisting = new wxCheckBox( this, wxID_ANY, wxT("Don't import new"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkOnlyExisting = new wxCheckBox( this, wxID_ANY, wxT("Don't import unrecognised stamps"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer13->Add( m_chkOnlyExisting, 0, wxALL, 5 );
+	
+	m_chkNoDuplicateTileCheck = new wxCheckBox( this, wxID_ANY, wxT("Don't discard duplicate tiles"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer13->Add( m_chkNoDuplicateTileCheck, 0, wxALL, 5 );
 	
 	
 	bSizer12->Add( bSizer13, 1, wxEXPAND, 5 );

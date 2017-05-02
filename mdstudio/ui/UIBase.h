@@ -671,12 +671,13 @@ class ImportDialogBase : public wxDialog
 		wxCheckBox* m_chkImportToStamp;
 		wxCheckBox* m_chkReplaceStamps;
 		wxCheckBox* m_chkOnlyExisting;
+		wxCheckBox* m_chkNoDuplicateTileCheck;
 		wxCheckBox* m_chkPalette1;
 		wxCheckBox* m_chkPalette2;
 		wxCheckBox* m_chkPalette3;
 		wxCheckBox* m_chkPalette4;
 		
-		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 512,432 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 503,466 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
 		~ImportDialogBase();
 	
 };

@@ -348,7 +348,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT5</td><td>{ADDD9067-2475-4A13-AE85-EEFF200DA0E3}</td><td>PROJECTS</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>SDL2.dll</td><td>{1573627A-30D9-46C1-A890-168DAEDA64AC}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>SDL2_image.dll</td><td>{E5E7D5B3-5FA0-4104-AAD4-1A93C41A0415}</td><td>INSTALLDIR</td><td>2</td><td/><td>sdl2_image.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>beehive.release.exe</td><td>{B63D2A7E-64E7-45BD-9037-77BE1AF7DAFF}</td><td>INSTALLDIR</td><td>2</td><td/><td>beehive.release.exe</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>beehivestudio.exe</td><td>{457D46AE-9ADA-4F19-B5A3-A9DA16CA8720}</td><td>INSTALLDIR</td><td>2</td><td/><td>beehivestudio.exe</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>cg.dll</td><td>{A48D667B-A495-4F78-9D80-F9B1010120A1}</td><td>INSTALLDIR</td><td>2</td><td/><td>cg.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>cgD3D10.dll</td><td>{21DA1403-D028-43BC-AEB7-85E0D0F3A56A}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d10.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>cgD3D11.dll</td><td>{569FC12A-86AF-4065-9554-0D397B9286FF}</td><td>INSTALLDIR</td><td>2</td><td/><td>cgd3d11.dll</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -1914,7 +1914,7 @@
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT5</td></row>
 		<row><td>AlwaysInstall</td><td>SDL2.dll</td></row>
 		<row><td>AlwaysInstall</td><td>SDL2_image.dll</td></row>
-		<row><td>AlwaysInstall</td><td>beehive.release.exe</td></row>
+		<row><td>AlwaysInstall</td><td>beehivestudio.exe</td></row>
 		<row><td>AlwaysInstall</td><td>cg.dll</td></row>
 		<row><td>AlwaysInstall</td><td>cgD3D10.dll</td></row>
 		<row><td>AlwaysInstall</td><td>cgD3D11.dll</td></row>
@@ -1955,9 +1955,9 @@
 		<col def="S255">ISBuildSourcePath</col>
 		<col def="I4">ISAttributes</col>
 		<col def="S72">ISComponentSubFolder_</col>
-		<row><td>beehive.release.exe</td><td>beehive.release.exe</td><td>BEEHIV~1.EXE|beehive.release.exe</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.exe</td><td>1</td><td/></row>
-		<row><td>beehive.release.exe.manifest</td><td>ISX_DEFAULTCOMPONENT</td><td>BEEHIV~1.MAN|beehive.release.exe.manifest</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.exe.manifest</td><td>1</td><td/></row>
-		<row><td>beehive.release.pdb</td><td>ISX_DEFAULTCOMPONENT</td><td>BEEHIV~1.PDB|beehive.release.pdb</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\_Build\win32-release\bigevilcorp\mdstudio\win32-release\beehive\beehive.release.pdb</td><td>1</td><td/></row>
+		<row><td>beehivestudio.exe</td><td>beehivestudio.exe</td><td>BEEHIV~1.EXE|beehivestudio.exe</td><td>0</td><td/><td/><td>0</td><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\_Build\win32\_intermediates_\win32-release\bigevilcorp\mdstudio\beehivestudio\beehivestudio.exe</td><td>1</td><td/></row>
+		<row><td>beehivestudio.exe.manifest</td><td>ISX_DEFAULTCOMPONENT</td><td>BEEHIV~1.MAN|beehivestudio.exe.manifest</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\_Build\win32\_intermediates_\win32-release\bigevilcorp\mdstudio\beehivestudio\beehivestudio.exe.manifest</td><td>1</td><td/></row>
+		<row><td>beehivestudio.pdb</td><td>ISX_DEFAULTCOMPONENT</td><td>BEEHIV~1.PDB|beehivestudio.pdb</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\_Build\win32\_intermediates_\win32-release\bigevilcorp\mdstudio\beehivestudio\beehivestudio.pdb</td><td>1</td><td/></row>
 		<row><td>cg.dll</td><td>cg.dll</td><td>cg.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\bin\cg.dll</td><td>1</td><td/></row>
 		<row><td>cgd3d10.dll</td><td>cgD3D10.dll</td><td>cgD3D10.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\bin\cgD3D10.dll</td><td>1</td><td/></row>
 		<row><td>cgd3d11.dll</td><td>cgD3D11.dll</td><td>cgD3D11.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\Users\mattp\OneDrive\Documents\Beehive\mdstudio\bin\cgD3D11.dll</td><td>1</td><td/></row>
@@ -2153,7 +2153,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT5</td><td/><td/><td>_919CEE5C_40A3_4B10_B0C9_59E2B51D936C_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>SDL2.dll</td><td/><td/><td>_10479A3E_AC06_4069_AC8D_1B1A9A91A0E1_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>SDL2_image.dll</td><td/><td/><td>_6975A586_4023_4805_9BE0_BD9879E4A37C_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>beehive.release.exe</td><td/><td/><td>_2881510E_E6BF_4CE8_8A11_774405079AB5_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>beehivestudio.exe</td><td/><td/><td>_7FEE29C3_3D6C_4917_994A_7537CA42C12F_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>cg.dll</td><td/><td/><td>_89ABD8E4_4251_4F40_89BE_F7CE51A863E6_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>cgD3D10.dll</td><td/><td/><td>_9FABB744_A14C_40AA_B9C7_2A1A97BB34D7_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>cgD3D11.dll</td><td/><td/><td>_D2117E96_D8B3_41E9_9EDC_3AC8F03F53CD_FILTER</td><td/><td/><td/><td/></row>
@@ -3616,6 +3616,7 @@
 		<row><td>IDS_SHORTCUT_DISPLAY_NAME3</td><td>1033</td><td>LAUNCH~1.EXE|Launch beehive.release.exe</td><td>0</td><td/><td>-459066443</td></row>
 		<row><td>IDS_SHORTCUT_DISPLAY_NAME4</td><td>1033</td><td>LAUNCH~1.EXE|Launch beehive.release.exe</td><td>0</td><td/><td>1923351722</td></row>
 		<row><td>IDS_SHORTCUT_DISPLAY_NAME5</td><td>1033</td><td>LAUNCH~1.EXE|Launch beehive.release.exe</td><td>0</td><td/><td>-1826339018</td></row>
+		<row><td>IDS_SHORTCUT_DISPLAY_NAME6</td><td>1033</td><td>LAUNCH~1.EXE|Launch beehivestudio.exe</td><td>0</td><td/><td>-769324113</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO</td><td>1033</td><td>From the list of servers below, select the database server you would like to target.</td><td>0</td><td/><td>-224169367</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_DB</td><td>1033</td><td>From the list of catalog names below, select the database catalog you would like to target.</td><td>0</td><td/><td>-224169367</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_TEMPLATE</td><td>1033</td><td>[IS_SQLBROWSE_INTRO]</td><td>0</td><td/><td>-224169367</td></row>
@@ -4021,6 +4022,7 @@
 		<row><td>beehive.release.ex_5F1AA3CD5BAF4DEEBBB1B3D109A72F11.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>beehive.release.ex_70FC1A0A87DD4168B68B2AA5BA0D6D51.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>beehive.release.ex_A28337BD98154F519FAD1CB385ACCF27.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
+		<row><td>beehivestudio.exe_7C792F486EF84E6C9B281FC9424354E9.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 	</table>
 
 	<table name="IniFile">
@@ -4532,7 +4534,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGRAMFILETOLAUNCHATEND</td><td>[INSTALLDIR]beehive.release.exe</td><td/></row>
 		<row><td>ProductCode</td><td>{FA770048-0FAD-4035-B0A0-9FF3B4877FE9}</td><td/></row>
 		<row><td>ProductName</td><td>Beehive</td><td/></row>
-		<row><td>ProductVersion</td><td>0.0.60</td><td/></row>
+		<row><td>ProductVersion</td><td>0.0.70</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>
@@ -4608,7 +4610,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="L255">FileName</col>
 		<col def="s72">DirProperty</col>
 		<col def="i2">InstallMode</col>
-		<row><td>beehive.release.exe</td><td>beehive.release.exe</td><td/><td>beehive</td><td>2</td></row>
+		<row><td>beehivestudio.exe</td><td>beehivestudio.exe</td><td/><td>beehive</td><td>2</td></row>
 	</table>
 
 	<table name="RemoveIniFile">
@@ -4694,7 +4696,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="S255">ISComments</col>
 		<col def="S255">ISShortcutName</col>
 		<col def="I4">ISAttributes</col>
-		<row><td>beehive.release.exe</td><td>beehive</td><td>##IDS_SHORTCUT_DISPLAY_NAME5##</td><td>beehive.release.exe</td><td>AlwaysInstall</td><td/><td/><td/><td>beehive.release.ex_A28337BD98154F519FAD1CB385ACCF27.exe</td><td>0</td><td>1</td><td>INSTALLDIR</td><td/><td/><td/><td/><td/><td/><td/></row>
+		<row><td>beehivestudio.exe</td><td>beehive</td><td>##IDS_SHORTCUT_DISPLAY_NAME6##</td><td>beehivestudio.exe</td><td>AlwaysInstall</td><td/><td/><td/><td>beehivestudio.exe_7C792F486EF84E6C9B281FC9424354E9.exe</td><td>0</td><td>1</td><td>INSTALLDIR</td><td/><td/><td/><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="Signature">

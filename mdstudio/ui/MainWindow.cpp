@@ -1264,9 +1264,9 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkInsertBGTile->GetValue())
 				flags |= Project::eBMPImportInsertBGTile;
 			if(dialog.m_chkOnlyExisting->GetValue())
-				flags |= Project::eBMPImportOnlyExisting;
-			if(dialog.m_chkOnlyExisting->GetValue())
-				flags |= Project::eBMPImportOnlyExisting;
+				flags |= Project::eBMPImportOnlyExistingStamps;
+			if(dialog.m_chkNoDuplicateTileCheck->GetValue())
+				flags |= Project::eBMPImportNoDuplicateTileCheck;
 
 			//Unsupported flags if multiple files/stamp directory selected
 			if((dialog.m_dirStamps->GetPath().size() == 0) || (dialog.m_paths.size() > 1))
@@ -1326,7 +1326,7 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 					}
 
 					//If only to import existing, stamp by this name must already exist
-					if(!(flags & Project::eBMPImportOnlyExisting) || m_project->FindStamp(stampName))
+					if(!(flags & Project::eBMPImportOnlyExistingStamps) || m_project->FindStamp(stampName))
 					{
 						filenames.Add(directoryPath + "\\" + filename);
 					}
