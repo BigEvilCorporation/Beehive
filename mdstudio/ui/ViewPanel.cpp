@@ -407,7 +407,6 @@ void ViewPanel::OnResize(wxSizeEvent& event)
 			{
 				m_prevPanelSize = m_panelSize;
 				m_viewport.Resize(m_panelSize.x, m_panelSize.y);
-				CentreCamera();
 			}
 		}
 

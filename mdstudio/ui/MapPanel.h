@@ -171,6 +171,7 @@ private:
 	//Current preview gameobj
 	GameObjectTypeId m_previewGameObjectType;
 	ion::Vector2i m_previewGameObjectPos;
+	bool m_moveGameObjByPixel;
 
 	///TERRAIN BEZIER tool
 	///////////////////////////////////////////////////

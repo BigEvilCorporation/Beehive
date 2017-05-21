@@ -870,6 +870,7 @@ void MainWindow::RefreshAll()
 			m_project->InvalidateTerrainTiles(false);
 			m_project->InvalidateTerrainBeziers(false);
 			m_project->InvalidateStamps(false);
+			m_project->InvalidateCamera(false);
 		}
 	}
 }

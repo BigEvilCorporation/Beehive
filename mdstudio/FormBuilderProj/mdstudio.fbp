@@ -26,7 +26,7 @@
         <property name="ui_table">UI</property>
         <property name="use_enum">0</property>
         <property name="use_microsoft_bom">0</property>
-        <object class="Frame" expanded="0">
+        <object class="Frame" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -44,7 +44,7 @@
             <property name="minimum_size"></property>
             <property name="name">MainWindowBase</property>
             <property name="pos"></property>
-            <property name="size">-1,-1</property>
+            <property name="size">971,240</property>
             <property name="style">wxDEFAULT_FRAME_STYLE|wxMAXIMIZE</property>
             <property name="subclass">; </property>
             <property name="title">BEEhive v0.1</property>
@@ -88,16 +88,16 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer1</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">0</property>
                     <property name="flag">wxALL|wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxRibbonBar" expanded="0">
+                    <object class="wxRibbonBar" expanded="1">
                         <property name="BottomDockable">0</property>
                         <property name="LeftDockable">0</property>
                         <property name="RightDockable">0</property>
@@ -940,7 +940,7 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="wxRibbonPage" expanded="0">
+                        <object class="wxRibbonPage" expanded="1">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -986,7 +986,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -1033,7 +1033,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -25915,7 +25915,7 @@
                 </object>
             </object>
         </object>
-        <object class="Panel" expanded="0">
+        <object class="Panel" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -25931,7 +25931,7 @@
             <property name="minimum_size"></property>
             <property name="name">TimelinePanelBase</property>
             <property name="pos"></property>
-            <property name="size">993,324</property>
+            <property name="size">993,184</property>
             <property name="subclass"></property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
@@ -25967,11 +25967,11 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxFlexGridSizer" expanded="0">
+            <object class="wxFlexGridSizer" expanded="1">
                 <property name="cols">1</property>
                 <property name="flexible_direction">wxBOTH</property>
                 <property name="growablecols">0</property>
-                <property name="growablerows">1</property>
+                <property name="growablerows">2</property>
                 <property name="hgap">0</property>
                 <property name="minimum_size"></property>
                 <property name="name">fgSizer24</property>
@@ -25979,11 +25979,11 @@
                 <property name="permission">none</property>
                 <property name="rows">2</property>
                 <property name="vgap">0</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxToolBar" expanded="0">
+                    <object class="wxToolBar" expanded="1">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -26517,7 +26517,7 @@
                         <property name="gripper">0</property>
                         <property name="hidden">0</property>
                         <property name="id">wxID_ANY</property>
-                        <property name="label">[All keyframes]</property>
+                        <property name="label">[No actor selected]</property>
                         <property name="max_size"></property>
                         <property name="maximize_button">0</property>
                         <property name="maximum_size"></property>

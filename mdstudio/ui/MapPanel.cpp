@@ -33,6 +33,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	m_stampPastePos.x = -1;
 	m_stampPastePos.y = -1;
 	m_previewGameObjectType = InvalidGameObjectTypeId;
+	m_moveGameObjByPixel = false;
 
 	ResetToolData();
 
@@ -90,6 +91,11 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 			m_previewTileFlipY = event.ControlDown();
 			Refresh();
 		}
+	}
+
+	if(m_currentTool == eToolMoveGameObject || m_currentTool == eToolPlaceGameObject)
+	{
+		m_moveGameObjByPixel = event.ShiftDown();
 	}
 
 	if(m_currentTool == eToolSelectTiles)
@@ -724,11 +730,7 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
 					{
 						m_mainWindow->SetSelectedGameObject(gameObject);
-
-						if(m_currentTool == eToolAnimateGameObject)
-						{
-							m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
-						}
+						m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
 
 						m_previewGameObjectType = gameObject->GetTypeId();
 						m_previewGameObjectPos.x = topLeft.x;
@@ -736,19 +738,16 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					}
 				}
 
-				if(m_currentTool == eToolAnimateGameObject)
+				if(buttonBits & eMouseRight)
 				{
-					if(buttonBits & eMouseRight)
+					if(m_hoverGameObject != InvalidGameObjectId)
 					{
-						if(m_hoverGameObject != InvalidGameObjectId)
-						{
-							//Right-click menu
-							wxMenu contextMenu;
+						//Right-click menu
+						wxMenu contextMenu;
 
-							contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
-							contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
-							PopupMenu(&contextMenu);
-						}
+						contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
+						contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
+						PopupMenu(&contextMenu);
 					}
 				}
 			}
@@ -885,6 +884,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 			if(anim)
 			{
 				anim->AddActor(m_hoverGameObject);
+				m_mainWindow->SetSelectedAnimObject(m_hoverGameObject);
 			}
 		}
 	}
@@ -1335,50 +1335,16 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 						const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-						m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, tileX, tileY);
-						gameObject->SetPosition(ion::Vector2i(tileX * tileWidth, tileY * tileHeight));
-					}
-				}
-			}
-
-			break;
-		}
-
-		//case eToolMoveGameObject:
-		//{
-		//	if(buttonBits & eMouseLeft)
-		//	{
-		//		ion::Vector2i topLeft;
-		//		m_hoverGameObject = m_project.GetEditingMap().FindGameObject(x, y, topLeft);
-		//
-		//		if(m_hoverGameObject != InvalidGameObjectId)
-		//		{
-		//			GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject);
-		//			if(gameObject)
-		//			{
-		//				gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
-		//				Refresh();
-		//			}
-		//		}
-		//	}
-		//	
-		//	break;
-		//}
-
-		case eToolAnimateGameObject:
-		{
-			if(buttonBits & eMouseLeft)
-			{
-				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
-
-				if(m_hoverGameObject != InvalidGameObjectId)
-				{
-					GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject);
-					if(gameObject)
-					{
-						gameObject->SetAnimDrawOffset(gameObject->GetAnimDrawOffset() + mouseDelta);
-						Refresh();
+						if(m_moveGameObjByPixel)
+						{
+							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, gameObject->GetPosition().x + mouseDelta.x, gameObject->GetPosition().y + mouseDelta.y);
+							gameObject->SetPosition(gameObject->GetPosition() + mouseDelta);
+						}
+						else
+						{
+							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, tileX, tileY);
+							gameObject->SetPosition(ion::Vector2i(tileX * tileWidth, tileY * tileHeight));
+						}
 					}
 				}
 			}
@@ -1502,6 +1468,12 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		if(m_project.TerrainBeziersAreInvalidated())
 		{
 			PaintTerrainBeziers(m_project);
+		}
+
+		//If camera invalidated
+		if(m_project.CameraIsInvalidated())
+		{
+			CentreCamera();
 		}
 
 		ViewPanel::Refresh(eraseBackground, rect);
@@ -2062,19 +2034,16 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 		{
 			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(itVec->m_gameObject.GetTypeId()))
 			{
-				const float x = itVec->m_position.x;
-				const float y_inv = mapHeight - 1 - itVec->m_position.y;
-				const float width = gameObjectType->GetDimensions().x / tileWidth;
-				const float height_inv = -gameObjectType->GetDimensions().y / tileHeight;
+				const float x = itVec->m_gameObject.GetPosition().x;
+				const float y_inv = (mapHeight * tileHeight) - 1 - itVec->m_gameObject.GetPosition().y;
+				const float width = gameObjectType->GetDimensions().x;
+				const float height_inv = -gameObjectType->GetDimensions().y;
 
 				//Render coloured box
 				ion::Vector3 scale(gameObjectType->GetDimensions().x / tileWidth, gameObjectType->GetDimensions().y / tileHeight, 1.0f);
 				ion::Matrix4 mtx;
-				ion::Vector3 pos(floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
-					floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
-
-				pos.x += itVec->m_gameObject.GetAnimDrawOffset().x;
-				pos.y -= itVec->m_gameObject.GetAnimDrawOffset().y;
+				ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
+					floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
 
 				mtx.SetTranslation(pos);
 				mtx.SetScale(scale);

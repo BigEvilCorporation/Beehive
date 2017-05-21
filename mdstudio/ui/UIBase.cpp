@@ -146,7 +146,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	
 	this->SetSizer( bSizer1 );
 	this->Layout();
-	bSizer1->Fit( this );
 	m_statusBar = this->CreateStatusBar( 1, wxST_SIZEGRIP, wxID_ANY );
 	
 	this->Centre( wxBOTH );
@@ -2337,7 +2336,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	wxFlexGridSizer* fgSizer24;
 	fgSizer24 = new wxFlexGridSizer( 2, 1, 0, 0 );
 	fgSizer24->AddGrowableCol( 0 );
-	fgSizer24->AddGrowableRow( 1 );
+	fgSizer24->AddGrowableRow( 2 );
 	fgSizer24->SetFlexibleDirection( wxBOTH );
 	fgSizer24->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
@@ -2377,7 +2376,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	
 	fgSizer24->Add( m_toolBarAnimation, 0, wxEXPAND, 5 );
 	
-	m_textCurrentActor = new wxStaticText( this, wxID_ANY, wxT("[All keyframes]"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCurrentActor = new wxStaticText( this, wxID_ANY, wxT("[No actor selected]"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_textCurrentActor->Wrap( -1 );
 	fgSizer24->Add( m_textCurrentActor, 0, wxALL, 5 );
 	

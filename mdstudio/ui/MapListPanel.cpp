@@ -59,8 +59,10 @@ void MapListPanel::OnMapSelected(wxListEvent& event)
 		m_project.SetEditingCollisionMap(m_mapIds[event.GetIndex()]);
 
 		m_project.InvalidateMap(true);
+		m_project.InvalidateCamera(true);
 		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
 		m_project.InvalidateMap(false);
+		m_project.InvalidateCamera(false);
 	}
 }
 
@@ -124,10 +126,42 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 				MapId mapId = it->first;
 				const Map& map = it->second;
 
-				m_project.CreateMap(mapId);
-				Map& newMap = m_project.GetMap(mapId);
+				MapId newMapId = m_project.CreateMap();
+				Map& newMap = m_project.GetMap(newMapId);
 				newMap.SetName(map.GetName());
 				newMap.Resize(map.GetWidth(), map.GetHeight(), false, false);
+
+				//Import collision map
+				const CollisionMap& collisionMap = project.GetCollisionMap(mapId);
+				CollisionMapId newCollisionMapId = m_project.CreateCollisionMap(newMapId);
+				CollisionMap& newCollisionMap = m_project.GetCollisionMap(newCollisionMapId);
+				newCollisionMap.Resize(collisionMap.GetWidth(), collisionMap.GetHeight(), false, false);
+
+				//Import all terrain tiles
+				for(int x = 0; x < collisionMap.GetWidth(); x++)
+				{
+					for(int y = 0; y < collisionMap.GetHeight(); y++)
+					{
+						TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
+						if(TerrainTile* terrainTile = project.GetTerrainTileset().GetTerrainTile(terrainTileId))
+						{
+							TerrainTileId existingTileId = m_project.GetTerrainTileset().FindDuplicate(*terrainTile);
+							if(existingTileId != InvalidTileId)
+							{
+								newCollisionMap.SetTerrainTile(x, y, existingTileId);
+							}
+						}
+
+						u32 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y);
+						newCollisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
+					}
+				}
+
+				//Import all terrain bezier paths
+				for(int i = 0; i < collisionMap.GetNumTerrainBeziers(); i++)
+				{
+					newCollisionMap.AddTerrainBezier(*collisionMap.GetTerrainBezier(i));
+				}
 
 				//Import all tiles
 				for(int x = 0; x < map.GetWidth(); x++)
@@ -205,43 +239,6 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 							wxMessageBox("Game object type ID mismatch, game objects will be missing", "Error", wxOK);
 						}
 					}
-				}
-			}
-
-			//Import all collision maps
-			for(TCollisionMapMap::const_iterator it = project.CollisionMapsBegin(), end = project.CollisionMapsEnd(); it != end; ++it)
-			{
-				CollisionMapId collisionMapId = it->first;
-				const CollisionMap& collisionMap = it->second;
-
-				m_project.CreateCollisionMap(collisionMapId);
-				CollisionMap& newCollisionMap = m_project.GetCollisionMap(collisionMapId);
-				newCollisionMap.Resize(collisionMap.GetWidth(), collisionMap.GetHeight(), false, false);
-
-				//Import all terrain tiles
-				for(int x = 0; x < collisionMap.GetWidth(); x++)
-				{
-					for(int y = 0; y < collisionMap.GetHeight(); y++)
-					{
-						TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
-						if(TerrainTile* terrainTile = project.GetTerrainTileset().GetTerrainTile(terrainTileId))
-						{
-							TerrainTileId existingTileId = m_project.GetTerrainTileset().FindDuplicate(*terrainTile);
-							if(existingTileId != InvalidTileId)
-							{
-								newCollisionMap.SetTerrainTile(x, y, existingTileId);
-							}
-						}
-
-						u32 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y);
-						newCollisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
-					}
-				}
-
-				//Import all terrain bezier paths
-				for(int i = 0; i < collisionMap.GetNumTerrainBeziers(); i++)
-				{
-					newCollisionMap.AddTerrainBezier(*collisionMap.GetTerrainBezier(i));
 				}
 			}
 

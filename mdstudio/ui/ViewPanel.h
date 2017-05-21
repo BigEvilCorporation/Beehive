@@ -49,6 +49,9 @@ public:
 	void EnableZoom(bool enabled) { m_enableZoom = enabled; }
 	void EnablePan(bool enabled) { m_enablePan = enabled; }
 
+	//Centre camera on canvas
+	void CentreCamera();
+
 protected:
 	//Event callbacks
 	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta);
@@ -82,9 +85,6 @@ protected:
 
 	//Find bounds from selected tile coords
 	void FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, int& top, int& right, int& bottom) const;
-
-	//Centre camera on canvas
-	void CentreCamera();
 
 	//Set camera zoom
 	void SetCameraZoom(float zoom);

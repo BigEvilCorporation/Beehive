@@ -60,6 +60,8 @@ private:
 		eMenuDeleteKeyframe,
 	};
 
+	void SetSliderFrame(float frame);
+
 	static const char* s_trackNames[eTrackCount];
 
 	MainWindow& m_mainWindow;
