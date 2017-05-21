@@ -184,9 +184,26 @@ void SpriteAnimEditorDialog::OnBtnActorDelete(wxCommandEvent& event)
 	}
 }
 
-void SpriteAnimEditorDialog::OnBtnActorExport(wxCommandEvent& event)
+void SpriteAnimEditorDialog::OnBtnImport(wxCommandEvent& event)
 {
+	wxFileDialog dialogue(this, _("Open Beehive GameObj file"), "", "", "Bee_Sprite files (*.bee_sprites)|*.bee_sprites", wxFD_OPEN);
+	if(dialogue.ShowModal() == wxID_OK)
+	{
+		std::string filename = dialogue.GetPath().c_str().AsChar();
+		m_project.ImportActors(filename);
+		PopulateActorList();
+		m_renderResources.CreateSpriteSheetResources(m_project);
+	}
+}
 
+void SpriteAnimEditorDialog::OnBtnExport(wxCommandEvent& event)
+{
+	wxFileDialog dialogue(this, _("Save Beehive Sprites file"), "", "", "Bee_Sprites files (*.bee_sprites)|*.bee_sprites", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	if(dialogue.ShowModal() == wxID_OK)
+	{
+		std::string filename = dialogue.GetPath().c_str().AsChar();
+		m_project.ExportActors(filename);
+	}
 }
 
 void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)

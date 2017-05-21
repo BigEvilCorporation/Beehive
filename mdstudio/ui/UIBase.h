@@ -641,6 +641,29 @@ class ExportDialogBase : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class ProjectSettingsDialog
+///////////////////////////////////////////////////////////////////////////////
+class ProjectSettingsDialog : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText51;
+		wxFilePickerCtrl* m_filePickerSpritesProj;
+		wxStaticText* m_staticText53;
+		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
+		wxStdDialogButtonSizer* m_sdbSizer7;
+		wxButton* m_sdbSizer7OK;
+		wxButton* m_sdbSizer7Cancel;
+	
+	public:
+		
+		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,169 ), long style = wxCAPTION|wxRESIZE_BORDER ); 
+		~ProjectSettingsDialog();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class ImportDialogBase
 ///////////////////////////////////////////////////////////////////////////////
 class ImportDialogBase : public wxDialog 
@@ -738,10 +761,10 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxListBox* m_listAnimations;
 		wxButton* m_btnNewActor;
 		wxButton* m_btnDeleteActor;
-		wxButton* m_btnActorExport;
-		wxButton* m_btnImportSpriteSheet;
-		wxButton* m_btnDeleteSprite;
+		wxButton* m_btnImport;
+		wxButton* m_btnExport;
 		wxButton* m_btnUsePalette;
+		wxButton* m_btnDeleteSprite;
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
 		SpriteCanvas* m_canvas;
@@ -764,10 +787,10 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		virtual void OnAnimSelected( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnActorNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnActorDelete( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnActorExport( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnSpriteSheetImport( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnSpriteSheetDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetUsePalette( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnSpriteSheetDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSliderMove( wxScrollEvent& event ) { event.Skip(); }
@@ -808,6 +831,8 @@ class GameObjTypeDialogBase : public wxDialog
 		wxSpinCtrl* m_spinWidth;
 		wxSpinCtrl* m_spinHeight;
 		wxStaticText* m_staticText49;
+		wxStaticText* m_staticText50;
+		wxChoice* m_choiceSpriteActor;
 		wxButton* m_btnApplyObjSettings;
 		wxButton* m_btnLoadSprite;
 		wxStaticLine* m_staticline2;
@@ -907,6 +932,8 @@ class TimelinePanelBase : public wxPanel
 		wxStaticText* m_staticText34;
 		wxSpinCtrl* m_spinSpeed;
 		wxStaticText* m_textCurrentActor;
+		wxStaticText* m_staticText49;
+		wxChoice* m_choiceSpriteAnim;
 		wxGrid* m_gridTimeline;
 		wxSlider* m_sliderTimeline;
 		
@@ -920,6 +947,7 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnToolStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRewind( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSliderTimelineChange( wxScrollEvent& event ) { event.Skip(); }
 		
 	

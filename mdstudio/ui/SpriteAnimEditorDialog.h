@@ -72,7 +72,8 @@ protected:
 	virtual void OnAnimSelected(wxCommandEvent& event);
 	virtual void OnBtnActorNew(wxCommandEvent& event);
 	virtual void OnBtnActorDelete(wxCommandEvent& event);
-	virtual void OnBtnActorExport(wxCommandEvent& event);
+	virtual void OnBtnImport(wxCommandEvent& event);
+	virtual void OnBtnExport(wxCommandEvent& event);
 	virtual void OnBtnSpriteSheetImport(wxCommandEvent& event);
 	virtual void OnBtnSpriteSheetDelete(wxCommandEvent& event);
 	virtual void OnBtnSpriteSheetUsePalette(wxCommandEvent& event);

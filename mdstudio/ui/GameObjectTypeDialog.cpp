@@ -143,6 +143,12 @@ void GameObjectTypeDialog::OnBtnApplyObjChanges(wxCommandEvent& event)
 	{
 		gameObjType->SetName(m_textGameObjName->GetValue().c_str().AsChar());
 		gameObjType->SetDimensions(ion::Vector2i(m_spinWidth->GetValue(), m_spinHeight->GetValue()));
+		
+		if(m_actorCache.size() > 0)
+		{
+			int index = m_choiceSpriteActor->GetSelection();
+			gameObjType->SetSpriteActorId(m_actorCache[index]);
+		}
 
 		PopulateTypeList();
 	}
@@ -241,16 +247,35 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_listVariables->Enable(true);
 		m_btnApplyObjSettings->Enable(true);
 		m_btnLoadSprite->Enable(true);
+		m_choiceSpriteActor->Enable(true);
 
 		m_textGameObjName->SetValue(gameObjType->GetName());
 		m_spinWidth->SetValue(gameObjType->GetDimensions().x);
 		m_spinHeight->SetValue(gameObjType->GetDimensions().y);
+
+		m_choiceSpriteActor->Clear();
+		m_actorCache.clear();
+
+		for(TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
+		{
+			//Store by index
+			m_actorCache.push_back(it->first);
+
+			//Add to list
+			m_choiceSpriteActor->AppendString(it->second.GetName());
+
+			if(it->first == gameObjType->GetSpriteActorId())
+			{
+				m_choiceSpriteActor->SetSelection(m_actorCache.size());
+			}
+		}
 	}
 	else
 	{
 		m_textGameObjName->SetValue("");
 		m_spinWidth->SetValue(1);
 		m_spinHeight->SetValue(1);
+		m_choiceSpriteActor->Clear();
 
 		m_textGameObjName->Enable(false);
 		m_spinWidth->Enable(false);
@@ -258,6 +283,7 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_listVariables->Enable(false);
 		m_btnApplyObjSettings->Enable(false);
 		m_btnLoadSprite->Enable(false);
+		m_choiceSpriteActor->Enable(false);
 	}
 }
 

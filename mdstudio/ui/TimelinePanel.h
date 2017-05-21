@@ -40,6 +40,7 @@ public:
 protected:
 
 	virtual void OnSelectAnimation(wxCommandEvent& event);
+	virtual void OnSelectSpriteAnim(wxCommandEvent& event);
 	virtual void OnToolAddAnim(wxCommandEvent& event);
 	virtual void OnToolDeleteAnim(wxCommandEvent& event);
 	virtual void OnToolKeyframeActor(wxCommandEvent& event);
@@ -61,6 +62,7 @@ private:
 	};
 
 	void SetSliderFrame(float frame);
+	void Keyframe(AnimationActor* actor);
 
 	static const char* s_trackNames[eTrackCount];
 
@@ -68,6 +70,7 @@ private:
 	Project& m_project;
 
 	std::vector<AnimationId> m_animCache;
+	std::vector<std::pair<SpriteSheetId, SpriteAnimId>> m_spriteSheetCache;
 
 	AnimationId m_animationId;
 	Animation* m_animation;

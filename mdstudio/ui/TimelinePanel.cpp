@@ -16,7 +16,8 @@
 
 const char* TimelinePanel::s_trackNames[eTrackCount] =
 {
-	"Position"
+	"Position",
+	"SpriteAnim"
 };
 
 TimelinePanel::TimelinePanel(MainWindow& mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
@@ -110,7 +111,7 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 	//Set drop-down
 	std::vector<AnimationId>::iterator it = std::find_if(m_animCache.begin(), m_animCache.end(), [&](const AnimationId& animId) { return animId == animation.GetId(); });
 	int index = std::distance(it, m_animCache.begin());
-	
+
 	if(m_choiceAnims->GetSelection() != index)
 	{
 		m_choiceAnims->SetSelection(index);
@@ -132,19 +133,56 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 			m_gridTimeline->SetColLabelValue(i, label.str());
 		}
 
-		//Set label
+		//Create all rows
+		m_gridTimeline->AppendRows(eTrackCount);
+
+		//Set row labels
+		for(int i = 0; i < eTrackCount; i++)
+		{
+			m_gridTimeline->SetRowLabelValue(i, s_trackNames[i]);
+		}
+
+		//if(const GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor->GetGameObjectId()))
+		//{
+		//	if(const* GameObjectType)
+		//}
+		//wxString choices[3] = { wxT("TEST"), wxT("TEST2"), wxT("TEST3") };
+		//m_gridTimeline->SetCellEditor(0, 0, new wxGridCellChoiceEditor(3, choices, false));
+		//m_gridTimeline->EnableCellEditControl(true);
+		//m_gridTimeline->ShowCellEditControl();
+
 		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor->GetGameObjectId()))
 		{
-			std::stringstream label;
-
-			std::string objName = gameObject->GetName();
-			if(objName.empty())
+			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
 			{
-				objName = "<No Name>";
-			}
+				//Populate position track
+				for(int i = 0; i < numKeyframes; i++)
+				{
+					std::stringstream label;
+					ion::Vector2i value = actor->m_trackPosition.GetKeyframe(i).GetValue();
+					label << "(" << value.x << "," << value.y << ")";
+					m_gridTimeline->SetCellValue(label.str(), eTrackPosition, i);
+				}
 
-			label << objName << " (object " << gameObject->GetId() << ")";
-			m_textCurrentActor->SetLabel(label.str());
+				//Populate sprite anim track
+				for(int i = 0; i < numKeyframes; i++)
+				{
+					std::stringstream label;
+					std::pair<SpriteSheetId, SpriteAnimId> value = actor->m_trackSpriteAnim.GetKeyframe(i).GetValue();
+					if(Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
+					{
+						if(SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(value.first))
+						{
+							if(SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(value.second))
+							{
+								std::stringstream label;
+								label << spriteSheet->GetName() << ":" << spriteAnim->GetName();
+								m_gridTimeline->SetCellValue(label.str(), eTrackSpriteAnim, i);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	else
@@ -163,21 +201,18 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 			m_gridTimeline->SetColLabelValue(i, label.str());
 		}
 
-		//Set label
-		m_textCurrentActor->SetLabel("[All keyframes]");
+		//Create all rows
+		m_gridTimeline->AppendRows(eTrackCount);
+
+		//Set row labels
+		for(int i = 0; i < eTrackCount; i++)
+		{
+			m_gridTimeline->SetRowLabelValue(i, s_trackNames[i]);
+		}
+
+		//Set game object label
+		m_textCurrentActor->SetLabel("[All objects]");
 	}
-
-
-	//Create all rows
-	m_gridTimeline->AppendRows(eTrackCount);
-
-	//Set row labels
-	for(int i = 0; i < eTrackCount; i++)
-	{
-		m_gridTimeline->SetRowLabelValue(i, s_trackNames[i]);
-	}
-
-	m_gridTimeline->SetColLabelValue(0, "0.0");
 }
 
 void TimelinePanel::SetCurrentActor(GameObjectId actorId)
@@ -194,7 +229,42 @@ void TimelinePanel::SetCurrentActor(GameObjectId actorId)
 
 				if(m_actor)
 				{
+					//Populate timeline
 					PopulateTimeline(*m_animation, m_actor);
+
+					//Set game object label
+					std::stringstream label;
+
+					std::string objName = gameObject->GetName();
+					if(objName.empty())
+					{
+						objName = "<No Name>";
+					}
+
+					label << objName << " (object " << gameObject->GetId() << ")";
+					m_textCurrentActor->SetLabel(label.str());
+
+					//Populate sprite actor choices
+					m_choiceSpriteAnim->Clear();
+					m_spriteSheetCache.clear();
+
+					if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+					{
+						ActorId spriteActorId = gameObjectType->GetSpriteActorId();
+						if(Actor* spriteActor = m_project.GetActor(spriteActorId))
+						{
+							for(TSpriteSheetMap::iterator spriteSheetIt = spriteActor->SpriteSheetsBegin(), spriteSheetEnd = spriteActor->SpriteSheetsEnd(); spriteSheetIt != spriteSheetEnd; ++spriteSheetIt)
+							{
+								for(TSpriteAnimMap::iterator animIt = spriteSheetIt->second.AnimationsBegin(), animEnd = spriteSheetIt->second.AnimationsEnd(); animIt != animEnd; ++animIt)
+								{
+									std::stringstream label;
+									label << spriteSheetIt->second.GetName() << ":" << animIt->second.GetName();
+									m_choiceSpriteAnim->AppendString(label.str());
+									m_spriteSheetCache.push_back(std::make_pair(spriteSheetIt->first, animIt->first));
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -251,6 +321,20 @@ void TimelinePanel::OnSelectAnimation(wxCommandEvent& event)
 	}
 }
 
+void TimelinePanel::OnSelectSpriteAnim(wxCommandEvent& event)
+{
+	if(m_animation && m_actor)
+	{
+		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_actor->GetGameObjectId()))
+		{
+			gameObject->SetSpriteSheetId(m_spriteSheetCache[m_choiceSpriteAnim->GetSelection()].first);
+			gameObject->SetSpriteAnim(m_spriteSheetCache[m_choiceSpriteAnim->GetSelection()].second);
+
+			PopulateTimeline(*m_animation, m_actor);
+		}
+	}
+}
+
 void TimelinePanel::OnToolAddAnim(wxCommandEvent& event)
 {
 	DialogNewAnim dialog(this);
@@ -275,42 +359,80 @@ void TimelinePanel::OnToolDeleteAnim(wxCommandEvent& event)
 		m_project.DeleteAnimation(m_animationId);
 		m_animationId = InvalidAnimationId;
 		m_animation = NULL;
+		m_actorId = InvalidActorId;
 
 		PopulateAnimations();
 	}
 }
 
-void TimelinePanel::OnToolKeyframeActor(wxCommandEvent& event)
+namespace
 {
-	if(m_animation && m_actor)
+	template <typename T> void AddOrEditKeyframe(const T& value, ion::render::AnimationTrack<T>& track, float frame)
+	{
+		if(ion::render::Keyframe<T>* keyframe = track.FindKeyframe(frame))
+		{
+			keyframe->SetValue(value);
+		}
+		else
+		{
+			track.InsertKeyframe(ion::render::Keyframe<T>(frame, value));
+		}
+	}
+
+	void KeyframeObjectCurrentState(Project& project, AnimationActor& actor, float frame)
+	{
+		if(GameObject* gameObject = project.GetEditingMap().GetGameObject(actor.GetGameObjectId()))
+		{
+			//Add/edit keyframes for all tracks
+			AddOrEditKeyframe(gameObject->GetPosition(), actor.m_trackPosition, frame);
+			AddOrEditKeyframe(std::make_pair(gameObject->GetSpriteSheetId(), gameObject->GetSpriteAnim()), actor.m_trackSpriteAnim, frame);
+		}
+	}
+}
+
+void TimelinePanel::Keyframe(AnimationActor* actor)
+{
+	if(m_animation)
 	{
 		//Get current frame
 		float frame = m_animation->GetFrame();
 
-		//Insert keyframe
-		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_actorId))
+		if(actor)
 		{
-			m_actor->m_trackPosition.InsertKeyframe(AnimKeyframePosition(frame, gameObject->GetPosition()));
+			//Edit or insert keyframe for current actor
+			KeyframeObjectCurrentState(m_project, *actor, frame);
+		}
+		else
+		{
+			//Edit or insert keyframe for all actors
+			for(TAnimActorMap::iterator it = m_animation->ActorsBegin(), end = m_animation->ActorsEnd(); it != end; ++it)
+			{
+				KeyframeObjectCurrentState(m_project, it->second, frame);
+			}
 		}
 
-		//Advance frame
-		frame += 1.0f;
-
-		//Adjust anim length
-		if(m_animation->GetLength() < frame)
+		//If at end, advance to next keyframe
+		if(frame >= m_animation->GetLength() - 1.0f)
 		{
-			m_animation->SetLength(frame);
+			//Advance frame
+			frame += 1.0f;
+
+			//Adjust anim length
+			if(m_animation->GetLength() < frame)
+			{
+				m_animation->SetLength(frame);
+			}
+
+			//Set next frame
+			m_animation->SetFrame(frame);
+
+			//Update sider
+			SetSliderFrame(frame);
 		}
 
-		//Set next frame
-		m_animation->SetFrame(frame);
-
-		//Update sider
-		SetSliderFrame(frame);
-
-		if(m_toolIsolateObject->IsToggled() && m_actor)
+		if(m_toolIsolateObject->IsToggled() && actor)
 		{
-			SyncActor(*m_actor);
+			SyncActor(*actor);
 		}
 		else
 		{
@@ -325,46 +447,17 @@ void TimelinePanel::OnToolKeyframeActor(wxCommandEvent& event)
 	}
 }
 
+void TimelinePanel::OnToolKeyframeActor(wxCommandEvent& event)
+{
+	if(m_actor)
+	{
+		Keyframe(m_actor);
+	}
+}
+
 void TimelinePanel::OnToolKeyframeAll(wxCommandEvent& event)
 {
-	if(m_animation && !m_toolIsolateObject->IsToggled())
-	{
-		//Get current frame
-		float frame = m_animation->GetFrame();
-
-		//Insert keyframes
-		for(TAnimActorMap::iterator it = m_animation->ActorsBegin(), end = m_animation->ActorsEnd(); it != end; ++it)
-		{
-			if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(it->first))
-			{
-				it->second.m_trackPosition.InsertKeyframe(AnimKeyframePosition(frame, gameObject->GetPosition()));
-			}
-		}
-
-		//Advance frame
-		frame += 1.0f;
-
-		//Adjust anim length
-		if(m_animation->GetLength() < frame)
-		{
-			m_animation->SetLength(frame);
-		}
-
-		//Set next frame
-		m_animation->SetFrame(frame);
-
-		//Update slider
-		SetSliderFrame(frame);
-
-		//Sync actor states
-		SyncAllActors();
-
-		//Redraw map panel
-		m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
-
-		//Populate timeline
-		PopulateTimeline(*m_animation, m_actor);
-	}
+	Keyframe(NULL);
 }
 
 void TimelinePanel::OnToolPlay(wxCommandEvent& event)

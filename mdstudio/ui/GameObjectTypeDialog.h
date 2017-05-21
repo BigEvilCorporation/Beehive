@@ -54,4 +54,5 @@ private:
 	GameObjectVariable* m_currentVariable;
 
 	std::vector<std::pair<int, GameObjectTypeId>> m_gameObjIndexMap;
+	std::vector<ActorId> m_actorCache;
 };
