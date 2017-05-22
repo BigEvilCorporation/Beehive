@@ -2032,10 +2032,12 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	{
 		for(std::vector<GameObjectMapEntry>::const_iterator itVec = itMap->second.begin(), endVec = itMap->second.end(); itVec != endVec; ++itVec)
 		{
-			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(itVec->m_gameObject.GetTypeId()))
+			const GameObject& gameObject = itVec->m_gameObject;
+
+			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject.GetTypeId()))
 			{
-				const float x = itVec->m_gameObject.GetPosition().x;
-				const float y_inv = (mapHeight * tileHeight) - 1 - itVec->m_gameObject.GetPosition().y;
+				const float x = gameObject.GetPosition().x;
+				const float y_inv = (mapHeight * tileHeight) - 1 - gameObject.GetPosition().y;
 				const float width = gameObjectType->GetDimensions().x;
 				const float height_inv = -gameObjectType->GetDimensions().y;
 
@@ -2052,16 +2054,32 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 				material->Unbind();
 
-				if(gameObjectType->GetPreviewSpriteSheetId() != InvalidSpriteSheetId)
+				//Use sprite sheet animation if available, else use default preview image
+				SpriteSheetId spriteSheetId = (gameObject.GetSpriteSheetId() != InvalidSpriteSheetId) ? gameObject.GetSpriteSheetId() : gameObjectType->GetPreviewSpriteSheetId();
+				SpriteAnimId spriteAnimId = gameObject.GetSpriteAnim();
+				int spriteFrame = 0;
+
+				if(const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
+				{
+					if(const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId))
+					{
+						if(const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
+						{
+							spriteFrame = spriteAnim->m_trackSpriteFrame.GetValue(spriteAnim->GetFrame());
+						}
+					}
+				}
+
+				if(spriteSheetId != InvalidSpriteSheetId)
 				{
 					//Render spriteSheet
-					if(RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheetId()))
+					if(RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(spriteSheetId))
 					{
 						ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
 						ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
 
 						ion::render::Primitive* spriteSheetPrimitive = spriteSheetResources->m_primitive;
-						ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[0].material;
+						ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[spriteFrame].material;
 						spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 						ion::Matrix4 spriteSheetMtx;

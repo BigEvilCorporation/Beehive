@@ -50,12 +50,10 @@ void TimelinePanel::EventHandlerTimer(wxTimerEvent& event)
 {
 	if(m_animation && m_animation->GetState() == ion::render::Animation::ePlaying)
 	{
-		float frameRate = 24.0f;
-		float frameRateMul = 1.0f / (frameRate / 10.0f);
-		float delta = (float)event.GetInterval() * ((float)m_spinSpeed->GetValue() / 100.0f) * frameRateMul;
-		float time = m_animation->GetFrame();
+		float delta = (float)event.GetInterval() / 10.0f;
 
 		m_animation->Update(delta);
+		float time = m_animation->GetFrame();
 		SetSliderFrame(time);
 		m_gridTimeline->GoToCell(0, ion::maths::Floor(time));
 
@@ -141,15 +139,6 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 		{
 			m_gridTimeline->SetRowLabelValue(i, s_trackNames[i]);
 		}
-
-		//if(const GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor->GetGameObjectId()))
-		//{
-		//	if(const* GameObjectType)
-		//}
-		//wxString choices[3] = { wxT("TEST"), wxT("TEST2"), wxT("TEST3") };
-		//m_gridTimeline->SetCellEditor(0, 0, new wxGridCellChoiceEditor(3, choices, false));
-		//m_gridTimeline->EnableCellEditControl(true);
-		//m_gridTimeline->ShowCellEditControl();
 
 		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor->GetGameObjectId()))
 		{
@@ -283,9 +272,34 @@ void TimelinePanel::SyncActor(AnimationActor& actor)
 		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor.GetGameObjectId()))
 		{
 			float frame = m_animation->GetFrame();
+			SpriteAnimId originalSpriteAnim = gameObject->GetSpriteAnim();
+
+			//Get all track values
 			ion::Vector2i position = actor.m_trackPosition.GetValue(frame);
+			std::pair<SpriteSheetId, SpriteAnimId> spriteAnim = actor.m_trackSpriteAnim.GetValue(frame);
+
+			//Apply to game object
 			m_project.GetEditingMap().MoveGameObject(actor.GetGameObjectId(), position.x, position.y);
 			gameObject->SetPosition(position);
+			gameObject->SetSpriteSheetId(spriteAnim.first);
+			gameObject->SetSpriteAnim(spriteAnim.second);
+
+			//Advance current sprite anim
+			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+			{
+				if(Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
+				{
+					if(SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteAnim.first))
+					{
+						if(SpriteAnimation* spriteAnimation = spriteSheet->GetAnimation(spriteAnim.second))
+						{
+							spriteAnimation->SetFrame(ion::maths::Fmod(frame * spriteAnimation->GetSpeed(), spriteAnimation->GetLength()));
+						}
+					}
+				}
+			}
+
+			//Refresh map panel
 			m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
 		}
 	}
@@ -306,6 +320,14 @@ void TimelinePanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(!m_mainWindow.IsRefreshLocked())
 	{
+	}
+}
+
+void TimelinePanel::OnSpinSpeed(wxSpinEvent& event)
+{
+	if(m_animation)
+	{
+		m_animation->SetPlaybackSpeed((float)m_spinSpeed->GetValue());
 	}
 }
 
@@ -331,6 +353,7 @@ void TimelinePanel::OnSelectSpriteAnim(wxCommandEvent& event)
 			gameObject->SetSpriteAnim(m_spriteSheetCache[m_choiceSpriteAnim->GetSelection()].second);
 
 			PopulateTimeline(*m_animation, m_actor);
+			m_mainWindow.RefreshPanel(MainWindow::ePanelMap);
 		}
 	}
 }
@@ -511,6 +534,10 @@ void TimelinePanel::OnSliderTimelineChange(wxScrollEvent& event)
 	{
 		float time = ion::maths::Lerp(0.0f, m_animation->GetLength(), (float)m_sliderTimeline->GetValue() / 100.0f);
 		m_animation->SetFrame(time);
+		
+		std::stringstream frameText;
+		frameText << "Frame: " << time;
+		m_textFrame->SetLabel(frameText.str());
 
 		if(m_toolIsolateObject->IsToggled() && m_actor)
 		{

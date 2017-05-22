@@ -39,6 +39,7 @@ public:
 
 protected:
 
+	virtual void OnSpinSpeed(wxSpinEvent& event);
 	virtual void OnSelectAnimation(wxCommandEvent& event);
 	virtual void OnSelectSpriteAnim(wxCommandEvent& event);
 	virtual void OnToolAddAnim(wxCommandEvent& event);

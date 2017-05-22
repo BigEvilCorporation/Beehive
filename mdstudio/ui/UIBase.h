@@ -947,13 +947,15 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnToolStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRewind( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSpinSpeed( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSliderTimelineChange( wxScrollEvent& event ) { event.Skip(); }
 		
 	
 	public:
+		wxStaticText* m_textFrame;
 		
-		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,184 ), long style = wxTAB_TRAVERSAL ); 
+		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,220 ), long style = wxTAB_TRAVERSAL ); 
 		~TimelinePanelBase();
 	
 };
