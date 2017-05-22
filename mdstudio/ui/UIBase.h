@@ -56,67 +56,68 @@ class SpriteCanvas;
 #define wxID_BTN_PROJ_NEW 1001
 #define wxID_BTN_PROJ_OPEN 1002
 #define wxID_BTN_PROJ_SAVE 1003
-#define wxID_BTN_PROJ_EXPORT 1004
-#define wxID_BTN_SAVE_LAYOUT 1005
-#define wxID_BTN_GRID_SHOW 1006
-#define wxID_BTN_GRID_SNAP 1007
-#define wxID_BTN_SHOW_OUTLINES 1008
-#define wxID_BTN_SHOW_COLLISION 1009
-#define wxID_BTN_SHOW_DISPLAYFRAME 1010
-#define wxID_BTN_TOOLS_MAPEDIT 1011
-#define wxID_BTN_TOOLS_TILES 1012
-#define wxID_BTN_TOOLS_STAMPS 1013
-#define wxID_BTN_TOOLS_PALETTES 1014
-#define wxID_BTN_TOOLS_GAMEOBJS 1015
-#define wxID_BTN_TOOLS_GAMEOBJPARAMS 1016
-#define wxID_BTN_TOOLS_TIMELINE 1017
-#define wxID_BTN_TOOLS_SPRITEANIM 1018
-#define wxID_BTN_MAP_CLEAR 1019
-#define wxID_BTN_MAP_RESIZE 1020
-#define wxID_BTN_MAP_EXPORT_BMP 1021
-#define wxID_BTN_TILES_IMPORT 1022
-#define wxID_BTN_TILES_CREATE 1023
-#define wxID_BTN_TILES_DELETE 1024
-#define wxID_BTN_TILES_CLEANUP 1025
-#define wxID_BTN_SPRITE_EDITOR 1026
-#define wxID_BTN_STAMPS_CREATE 1027
-#define wxID_BTN_STAMPS_DELETE 1028
-#define wxID_BTN_STAMPS_EXPORT_BMP 1029
-#define wxID_BTN_STAMPS_CLEANUP 1030
-#define wxID_BTN_COL_TILES_CREATE 1031
-#define wxID_BTN_COL_TILES_DELETE 1032
-#define wxID_BTN_COL_TILES_CLEANUP 1033
-#define wxID_BTN_COL_MAP_CLEAR 1034
-#define wxID_BTN_COL_GEN_BEZIER 1035
-#define wxID_BTN_GAME_OBJ_TYPES 1036
-#define wxID_BTN_CANCEL 1037
-#define wxID_TOOL_SELECTSTAMP 1038
-#define wxID_TOOL_STAMP 1039
-#define wxID_TOOL_MOVESTAMP 1040
-#define wxID_TOOL_STAMPPICKER 1041
-#define wxID_TOOL_CREATESTAMP 1042
-#define wxID_TOOL_REMOVESTAMP 1043
-#define wxID_TOOL_COL_PAINTTERRAIN 1044
-#define wxID_TOOL_COL_PAINTSOLID 1045
-#define wxID_TOOL_COL_PAINTHOLE 1046
-#define wxID_TOOL_COL_DELETETERRTILE 1047
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1048
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1049
-#define wxID_TOOL_COL_DELETETERRAINBEZIER 1050
-#define wxID_TOOL_SELECTTILE 1051
-#define wxID_TOOL_PAINT 1052
-#define wxID_TOOL_TILEPICKER 1053
-#define wxID_TOOL_FLIPX 1054
-#define wxID_TOOL_FLIPY 1055
-#define wxID_TOOL_FILL 1056
-#define wxID_TOOL_CLONE 1057
-#define wxID_TOOL_CREATE_SCENE_ANIM 1058
-#define wxID_TOOL_COPY_TO_NEW_MAP 1059
-#define wxID_TOOL_SELECTGAMEOBJ 1060
-#define wxID_TOOL_PLACEGAMEOBJ 1061
-#define wxID_TOOL_MOVEGAMEOBJ 1062
-#define wxID_TOOL_ANIMATEGAMEOBJ 1063
-#define wxID_TOOL_REMOVEGAMEOBJ 1064
+#define wxID_BTN_PROJ_SETTINGS 1004
+#define wxID_BTN_PROJ_EXPORT 1005
+#define wxID_BTN_SAVE_LAYOUT 1006
+#define wxID_BTN_GRID_SHOW 1007
+#define wxID_BTN_GRID_SNAP 1008
+#define wxID_BTN_SHOW_OUTLINES 1009
+#define wxID_BTN_SHOW_COLLISION 1010
+#define wxID_BTN_SHOW_DISPLAYFRAME 1011
+#define wxID_BTN_TOOLS_MAPEDIT 1012
+#define wxID_BTN_TOOLS_TILES 1013
+#define wxID_BTN_TOOLS_STAMPS 1014
+#define wxID_BTN_TOOLS_PALETTES 1015
+#define wxID_BTN_TOOLS_GAMEOBJS 1016
+#define wxID_BTN_TOOLS_GAMEOBJPARAMS 1017
+#define wxID_BTN_TOOLS_TIMELINE 1018
+#define wxID_BTN_TOOLS_SPRITEANIM 1019
+#define wxID_BTN_MAP_CLEAR 1020
+#define wxID_BTN_MAP_RESIZE 1021
+#define wxID_BTN_MAP_EXPORT_BMP 1022
+#define wxID_BTN_TILES_IMPORT 1023
+#define wxID_BTN_TILES_CREATE 1024
+#define wxID_BTN_TILES_DELETE 1025
+#define wxID_BTN_TILES_CLEANUP 1026
+#define wxID_BTN_SPRITE_EDITOR 1027
+#define wxID_BTN_STAMPS_CREATE 1028
+#define wxID_BTN_STAMPS_DELETE 1029
+#define wxID_BTN_STAMPS_EXPORT_BMP 1030
+#define wxID_BTN_STAMPS_CLEANUP 1031
+#define wxID_BTN_COL_TILES_CREATE 1032
+#define wxID_BTN_COL_TILES_DELETE 1033
+#define wxID_BTN_COL_TILES_CLEANUP 1034
+#define wxID_BTN_COL_MAP_CLEAR 1035
+#define wxID_BTN_COL_GEN_BEZIER 1036
+#define wxID_BTN_GAME_OBJ_TYPES 1037
+#define wxID_BTN_CANCEL 1038
+#define wxID_TOOL_SELECTSTAMP 1039
+#define wxID_TOOL_STAMP 1040
+#define wxID_TOOL_MOVESTAMP 1041
+#define wxID_TOOL_STAMPPICKER 1042
+#define wxID_TOOL_CREATESTAMP 1043
+#define wxID_TOOL_REMOVESTAMP 1044
+#define wxID_TOOL_COL_PAINTTERRAIN 1045
+#define wxID_TOOL_COL_PAINTSOLID 1046
+#define wxID_TOOL_COL_PAINTHOLE 1047
+#define wxID_TOOL_COL_DELETETERRTILE 1048
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1049
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1050
+#define wxID_TOOL_COL_DELETETERRAINBEZIER 1051
+#define wxID_TOOL_SELECTTILE 1052
+#define wxID_TOOL_PAINT 1053
+#define wxID_TOOL_TILEPICKER 1054
+#define wxID_TOOL_FLIPX 1055
+#define wxID_TOOL_FLIPY 1056
+#define wxID_TOOL_FILL 1057
+#define wxID_TOOL_CLONE 1058
+#define wxID_TOOL_CREATE_SCENE_ANIM 1059
+#define wxID_TOOL_COPY_TO_NEW_MAP 1060
+#define wxID_TOOL_SELECTGAMEOBJ 1061
+#define wxID_TOOL_PLACEGAMEOBJ 1062
+#define wxID_TOOL_MOVEGAMEOBJ 1063
+#define wxID_TOOL_ANIMATEGAMEOBJ 1064
+#define wxID_TOOL_REMOVEGAMEOBJ 1065
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -155,6 +156,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjOpen( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjSave( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnProjSettings( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjExport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnSaveLayout( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnGridShow( wxCommandEvent& event ) { event.Skip(); }
@@ -649,14 +651,14 @@ class ProjectSettingsDialog : public wxDialog
 	
 	protected:
 		wxStaticText* m_staticText51;
-		wxFilePickerCtrl* m_filePickerSpritesProj;
 		wxStaticText* m_staticText53;
-		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
 		wxStdDialogButtonSizer* m_sdbSizer7;
 		wxButton* m_sdbSizer7OK;
 		wxButton* m_sdbSizer7Cancel;
 	
 	public:
+		wxFilePickerCtrl* m_filePickerSpritesProj;
+		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
 		
 		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,169 ), long style = wxCAPTION|wxRESIZE_BORDER ); 
 		~ProjectSettingsDialog();

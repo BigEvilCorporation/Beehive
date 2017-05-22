@@ -1110,6 +1110,51 @@ void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
 	}
 }
 
+void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
+{
+	if(m_project.get())
+	{
+		ProjectSettingsDialog dialog(this);
+
+		dialog.m_filePickerGameObjTypesFile->SetPath(m_project->m_settings.gameObjectsExternalFile);
+		dialog.m_filePickerSpritesProj->SetPath(m_project->m_settings.spriteActorsExternalFile);
+
+		if(dialog.ShowModal() == wxID_OK)
+		{
+			std::string gameObjectsFile = dialog.m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
+			std::string spritesFile = dialog.m_filePickerSpritesProj->GetPath().c_str().AsChar();
+
+			if(m_project->m_settings.gameObjectsExternalFile != gameObjectsFile)
+			{
+				if(!gameObjectsFile.empty())
+				{
+					//Re-import game objects file
+					if(!m_project->ImportGameObjectTypes(gameObjectsFile))
+					{
+						wxMessageBox("Could not import external game object types, check settings.\nData may be lost if project is saved.", "Error", wxOK | wxICON_ERROR);
+					}
+				}
+
+				m_project->m_settings.gameObjectsExternalFile = gameObjectsFile;
+			}
+
+			if(m_project->m_settings.spriteActorsExternalFile != spritesFile)
+			{
+				if(!spritesFile.empty())
+				{
+					//Re-import sprites file
+					if(!m_project->ImportActors(gameObjectsFile))
+					{
+						wxMessageBox("Could not import external sprite actors, check settings.\nData may be lost if project is saved.", "Error", wxOK | wxICON_ERROR);
+					}
+				}
+
+				m_project->m_settings.spriteActorsExternalFile = spritesFile;
+			}
+		}
+	}
+}
+
 void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())

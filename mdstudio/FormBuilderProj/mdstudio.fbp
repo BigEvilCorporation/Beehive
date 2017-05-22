@@ -26,7 +26,7 @@
         <property name="ui_table">UI</property>
         <property name="use_enum">0</property>
         <property name="use_microsoft_bom">0</property>
-        <object class="Frame" expanded="0">
+        <object class="Frame" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -88,16 +88,16 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer1</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">0</property>
                     <property name="flag">wxALL|wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxRibbonBar" expanded="0">
+                    <object class="wxRibbonBar" expanded="1">
                         <property name="BottomDockable">0</property>
                         <property name="LeftDockable">0</property>
                         <property name="RightDockable">0</property>
@@ -182,7 +182,7 @@
                         <event name="OnSetFocus"></event>
                         <event name="OnSize"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="wxRibbonPage" expanded="0">
+                        <object class="wxRibbonPage" expanded="1">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -228,7 +228,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="0">
+                            <object class="wxRibbonPanel" expanded="1">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -275,7 +275,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="0">
+                                <object class="wxRibbonButtonBar" expanded="1">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -472,7 +472,7 @@
                                         <property name="font"></property>
                                         <property name="help"></property>
                                         <property name="hidden">0</property>
-                                        <property name="id">wxID_BTN_PROJ_SAVE</property>
+                                        <property name="id">wxID_BTN_PROJ_SETTINGS</property>
                                         <property name="label">Settings</property>
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
@@ -502,7 +502,7 @@
                                         <event name="OnMouseEvents"></event>
                                         <event name="OnMouseWheel"></event>
                                         <event name="OnPaint"></event>
-                                        <event name="OnRibbonButtonClicked">OnBtnProjSave</event>
+                                        <event name="OnRibbonButtonClicked">OnBtnProjSettings</event>
                                         <event name="OnRightDClick"></event>
                                         <event name="OnRightDown"></event>
                                         <event name="OnRightUp"></event>
@@ -16761,7 +16761,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="0">
+        <object class="Dialog" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -16823,7 +16823,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxFlexGridSizer" expanded="0">
+            <object class="wxFlexGridSizer" expanded="1">
                 <property name="cols">2</property>
                 <property name="flexible_direction">wxBOTH</property>
                 <property name="growablecols">1</property>
@@ -16962,7 +16962,7 @@
                         <property name="pane_border">1</property>
                         <property name="pane_position"></property>
                         <property name="pane_size"></property>
-                        <property name="permission">protected</property>
+                        <property name="permission">public</property>
                         <property name="pin_button">1</property>
                         <property name="pos"></property>
                         <property name="resize">Resizable</property>
@@ -16977,7 +16977,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.*</property>
+                        <property name="wildcard">*.bee_sprites</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
@@ -17134,7 +17134,7 @@
                         <property name="pane_border">1</property>
                         <property name="pane_position"></property>
                         <property name="pane_size"></property>
-                        <property name="permission">protected</property>
+                        <property name="permission">public</property>
                         <property name="pin_button">1</property>
                         <property name="pos"></property>
                         <property name="resize">Resizable</property>
@@ -17149,7 +17149,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.*</property>
+                        <property name="wildcard">*.bee_gameobj</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
@@ -26601,7 +26601,7 @@
                 </object>
             </object>
         </object>
-        <object class="Panel" expanded="1">
+        <object class="Panel" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -27687,11 +27687,11 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="sizeritem" expanded="1">
+                <object class="sizeritem" expanded="0">
                     <property name="border">5</property>
                     <property name="flag">wxALIGN_CENTER_VERTICAL|wxALL</property>
                     <property name="proportion">0</property>
-                    <object class="wxStaticText" expanded="1">
+                    <object class="wxStaticText" expanded="0">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
