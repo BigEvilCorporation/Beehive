@@ -256,18 +256,25 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_choiceSpriteActor->Clear();
 		m_actorCache.clear();
 
+		int selectedSpriteIdx = -1;
+
 		for(TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
 		{
+			if(it->first == gameObjType->GetSpriteActorId())
+			{
+				selectedSpriteIdx = m_actorCache.size();
+			}
+
 			//Store by index
 			m_actorCache.push_back(it->first);
 
 			//Add to list
 			m_choiceSpriteActor->AppendString(it->second.GetName());
+		}
 
-			if(it->first == gameObjType->GetSpriteActorId())
-			{
-				m_choiceSpriteActor->SetSelection(m_actorCache.size());
-			}
+		if(selectedSpriteIdx != -1)
+		{
+			m_choiceSpriteActor->SetSelection(selectedSpriteIdx);
 		}
 	}
 	else
