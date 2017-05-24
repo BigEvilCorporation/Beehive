@@ -51,6 +51,8 @@ protected:
 	virtual void OnToolRewind(wxCommandEvent& event);
 	virtual void OnToolIsolateObject(wxCommandEvent& event);
 	virtual void OnSliderTimelineChange(wxScrollEvent& event);
+	virtual void OnTimelineColResize(wxGridSizeEvent& event);
+	virtual void OnResize(wxSizeEvent& event);
 
 	//Right-click menu callback
 	void OnContextMenuClick(wxCommandEvent& event);
@@ -80,4 +82,6 @@ private:
 	AnimationActor* m_actor;
 
 	wxTimer m_timer;
+
+	int m_defaultColumnWidth;
 };

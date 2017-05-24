@@ -2510,6 +2510,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	this->Connect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
 	m_choiceSpriteAnim->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
+	m_gridTimeline->Connect( wxEVT_GRID_COL_SIZE, wxGridSizeEventHandler( TimelinePanelBase::OnTimelineColResize ), NULL, this );
 	m_sliderTimeline->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
 	m_sliderTimeline->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
 	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
@@ -2535,6 +2536,7 @@ TimelinePanelBase::~TimelinePanelBase()
 	this->Disconnect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
 	m_choiceSpriteAnim->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
+	m_gridTimeline->Disconnect( wxEVT_GRID_COL_SIZE, wxGridSizeEventHandler( TimelinePanelBase::OnTimelineColResize ), NULL, this );
 	m_sliderTimeline->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
 	m_sliderTimeline->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );
 	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( TimelinePanelBase::OnSliderTimelineChange ), NULL, this );

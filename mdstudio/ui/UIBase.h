@@ -951,6 +951,7 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpinSpeed( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTimelineColResize( wxGridSizeEvent& event ) { event.Skip(); }
 		virtual void OnSliderTimelineChange( wxScrollEvent& event ) { event.Skip(); }
 		
 	
