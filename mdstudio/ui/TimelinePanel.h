@@ -66,6 +66,7 @@ private:
 
 	void SetSliderFrame(float frame);
 	void Keyframe(AnimationActor* actor);
+	void BuildGridColPosCache();
 
 	static const char* s_trackNames[eTrackCount];
 
@@ -74,6 +75,7 @@ private:
 
 	std::vector<AnimationId> m_animCache;
 	std::vector<std::pair<SpriteSheetId, SpriteAnimId>> m_spriteSheetCache;
+	std::vector<int> m_gridColPosCache;
 
 	AnimationId m_animationId;
 	Animation* m_animation;
@@ -82,6 +84,4 @@ private:
 	AnimationActor* m_actor;
 
 	wxTimer m_timer;
-
-	int m_defaultColumnWidth;
 };

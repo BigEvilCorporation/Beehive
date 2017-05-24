@@ -30,7 +30,6 @@ TimelinePanel::TimelinePanel(MainWindow& mainWindow, Project& project, ion::rend
 	m_animation = NULL;
 	m_actorId = InvalidActorId;
 	m_actor = NULL;
-	m_defaultColumnWidth = 30;
 
 	PopulateAnimations();
 
@@ -143,6 +142,14 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 			m_gridTimeline->SetRowLabelValue(i + 1, s_trackNames[i]);
 		}
 
+		//Set column labels
+		for(int i = 0; i < numKeyframes; i++)
+		{
+			std::stringstream label;
+			label << i;
+			m_gridTimeline->SetColLabelValue(i, label.str());
+		}
+
 		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor->GetGameObjectId()))
 		{
 			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
@@ -226,7 +233,7 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 		m_textCurrentActor->SetLabel("[All objects]");
 	}
 
-	m_defaultColumnWidth = m_gridTimeline->GetColSize(0);
+	BuildGridColPosCache();
 }
 
 void TimelinePanel::SetCurrentActor(GameObjectId actorId)
@@ -495,6 +502,17 @@ void TimelinePanel::Keyframe(AnimationActor* actor)
 	}
 }
 
+void TimelinePanel::BuildGridColPosCache()
+{
+	m_gridColPosCache.clear();
+	m_gridColPosCache.reserve(m_gridTimeline->GetNumberCols());
+
+	for(int i = 0; i < m_gridTimeline->GetNumberCols(); i++)
+	{
+		m_gridColPosCache.push_back(m_gridTimeline->GetColumnWidth(i));
+	}
+}
+
 void TimelinePanel::OnToolKeyframeActor(wxCommandEvent& event)
 {
 	if(m_actor)
@@ -579,18 +597,26 @@ void TimelinePanel::OnSliderTimelineChange(wxScrollEvent& event)
 
 void TimelinePanel::OnTimelineColResize(wxGridSizeEvent& event)
 {
-	event.Skip();
+	TimelinePanelBase::OnTimelineColResize(event);
 
 	if(m_animation && m_actor)
 	{
 		int column = event.GetRowOrCol();
 		int keyframe = column;
 
-		if(keyframe < m_actor->m_trackPosition.GetNumKeyframes())
+		if(keyframe < m_actor->m_trackPosition.GetNumKeyframes() - 1)
 		{
-			int widthPixels = m_gridTimeline->GetColSize(column);
-			float time = (float)widthPixels / (float)m_defaultColumnWidth;
-			float delta = m_actor->m_trackPosition.GetKeyframe(keyframe + 1).GetTime();
+			int prevWidthPixels = m_gridColPosCache[column];
+			int newWidthPixels = m_gridTimeline->GetColumnWidth(column);
+			float currentTime = m_actor->m_trackPosition.GetKeyframe(keyframe + 1).GetTime();
+			float delta = ((float)newWidthPixels - (float)prevWidthPixels) / (float)m_gridTimeline->GetDefaultColSize();
+
+			const float minTime = 0.01f;
+
+			if((currentTime + delta) < minTime)
+			{
+				delta = currentTime = minTime;
+			}
 
 			//Adjust anim length
 			m_animation->SetLength(m_animation->GetLength() + delta);
@@ -604,14 +630,19 @@ void TimelinePanel::OnTimelineColResize(wxGridSizeEvent& event)
 
 			//Redraw
 			PopulateTimeline(*m_animation, m_actor);
+
+			m_gridTimeline->SetColumnWidth(column, newWidthPixels);
+			Refresh();
 		}
 	}
+
+	BuildGridColPosCache();
 }
 
 void TimelinePanel::OnResize(wxSizeEvent& event)
 {
 	event.Skip();
-	m_defaultColumnWidth = m_gridTimeline->GetColSize(0);
+	BuildGridColPosCache();
 }
 
 void TimelinePanel::OnContextMenuClick(wxCommandEvent& event)

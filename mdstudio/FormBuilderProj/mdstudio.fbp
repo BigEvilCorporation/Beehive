@@ -26,7 +26,7 @@
         <property name="ui_table">UI</property>
         <property name="use_enum">0</property>
         <property name="use_microsoft_bom">0</property>
-        <object class="Frame" expanded="1">
+        <object class="Frame" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -88,16 +88,16 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="1">
+            <object class="wxBoxSizer" expanded="0">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer1</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="1">
+                <object class="sizeritem" expanded="0">
                     <property name="border">0</property>
                     <property name="flag">wxALL|wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxRibbonBar" expanded="1">
+                    <object class="wxRibbonBar" expanded="0">
                         <property name="BottomDockable">0</property>
                         <property name="LeftDockable">0</property>
                         <property name="RightDockable">0</property>
@@ -182,7 +182,7 @@
                         <event name="OnSetFocus"></event>
                         <event name="OnSize"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="wxRibbonPage" expanded="1">
+                        <object class="wxRibbonPage" expanded="0">
                             <property name="bg"></property>
                             <property name="bitmap"></property>
                             <property name="context_help"></property>
@@ -228,7 +228,7 @@
                             <event name="OnSetFocus"></event>
                             <event name="OnSize"></event>
                             <event name="OnUpdateUI"></event>
-                            <object class="wxRibbonPanel" expanded="1">
+                            <object class="wxRibbonPanel" expanded="0">
                                 <property name="bg"></property>
                                 <property name="bitmap"></property>
                                 <property name="context_help"></property>
@@ -275,7 +275,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxRibbonButtonBar" expanded="1">
+                                <object class="wxRibbonButtonBar" expanded="0">
                                     <property name="bg"></property>
                                     <property name="context_help"></property>
                                     <property name="context_menu">1</property>
@@ -27476,8 +27476,8 @@
                         <property name="docking">Left</property>
                         <property name="drag_col_move">0</property>
                         <property name="drag_col_size">1</property>
-                        <property name="drag_grid_size">0</property>
-                        <property name="drag_row_size">1</property>
+                        <property name="drag_grid_size">1</property>
+                        <property name="drag_row_size">0</property>
                         <property name="editing">0</property>
                         <property name="enabled">1</property>
                         <property name="fg"></property>

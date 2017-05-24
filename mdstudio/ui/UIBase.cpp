@@ -2467,7 +2467,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	m_gridTimeline->CreateGrid( 2, 2 );
 	m_gridTimeline->EnableEditing( false );
 	m_gridTimeline->EnableGridLines( true );
-	m_gridTimeline->EnableDragGridSize( false );
+	m_gridTimeline->EnableDragGridSize( true );
 	m_gridTimeline->SetMargins( 0, 0 );
 	
 	// Columns
@@ -2477,7 +2477,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	m_gridTimeline->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Rows
-	m_gridTimeline->EnableDragRowSize( true );
+	m_gridTimeline->EnableDragRowSize( false );
 	m_gridTimeline->SetRowLabelSize( 80 );
 	m_gridTimeline->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
