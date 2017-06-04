@@ -1504,6 +1504,9 @@ void MapPanel::SetTool(ToolType tool)
 	Map& map = m_project.GetEditingMap();
 	CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
 
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
 	switch(tool)
 	{
 	case eToolFill:
@@ -1643,7 +1646,7 @@ void MapPanel::SetTool(ToolType tool)
 					for(int i = 0; i < beziers.size(); i++)
 					{
 						ion::gamekit::BezierPath bezier = *beziers[i];
-						bezier.Move(ion::Vector2(-left * m_project.GetPlatformConfig().tileWidth, -(map.GetHeight() - bottom - 1) * m_project.GetPlatformConfig().tileHeight));
+						bezier.Move(ion::Vector2(-left * tileWidth, -(map.GetHeight() - bottom - 1) * tileHeight));
 						newCollisionMap.AddTerrainBezier(bezier);
 					}
 
@@ -1654,7 +1657,7 @@ void MapPanel::SetTool(ToolType tool)
 					{
 						if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjects[i]->m_gameObject.GetTypeId()))
 						{
-							newMap.PlaceGameObject(gameObjects[i]->m_position.x - left, gameObjects[i]->m_position.y - top, gameObjects[i]->m_gameObject, *gameObjectType);
+							newMap.PlaceGameObject(gameObjects[i]->m_gameObject.GetPosition().x - (left * tileWidth), gameObjects[i]->m_gameObject.GetPosition().y - (top * tileHeight), gameObjects[i]->m_gameObject, *gameObjectType);
 						}
 					}
 

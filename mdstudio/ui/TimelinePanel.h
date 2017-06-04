@@ -53,6 +53,8 @@ protected:
 	virtual void OnSliderTimelineChange(wxScrollEvent& event);
 	virtual void OnTimelineColResize(wxGridSizeEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
+	virtual void OnTimelineKeyframeLeftClick(wxGridEvent& event);
+	virtual void OnTimelineKeyframeRightClick(wxGridEvent& event);
 
 	//Right-click menu callback
 	void OnContextMenuClick(wxCommandEvent& event);
@@ -60,13 +62,16 @@ protected:
 private:
 	enum MenuItems
 	{
-		eMenuInsertKeyframe,
+		eMenuInsertKeyframeLeft,
+		eMenuInsertKeyframeRight,
 		eMenuDeleteKeyframe,
+		eMenuSetSpriteAnimLength
 	};
 
 	void SetSliderFrame(float frame);
 	void Keyframe(AnimationActor* actor);
 	void BuildGridColPosCache();
+	void SetAnimLength(Animation& animation, const AnimationActor& actor);
 
 	static const char* s_trackNames[eTrackCount];
 
@@ -83,5 +88,9 @@ private:
 	GameObjectId m_actorId;
 	AnimationActor* m_actor;
 
+	//Timer
+	u64 m_prevClock;
 	wxTimer m_timer;
+
+	int m_contextMenuColIdx;
 };

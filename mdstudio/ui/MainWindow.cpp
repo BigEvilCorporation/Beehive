@@ -1124,6 +1124,8 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 			std::string gameObjectsFile = dialog.m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 			std::string spritesFile = dialog.m_filePickerSpritesProj->GetPath().c_str().AsChar();
 
+			bool buildSpriteResources = false;
+
 			if(m_project->m_settings.gameObjectsExternalFile != gameObjectsFile)
 			{
 				if(!gameObjectsFile.empty())
@@ -1136,6 +1138,7 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 				}
 
 				m_project->m_settings.gameObjectsExternalFile = gameObjectsFile;
+				buildSpriteResources = true;
 			}
 
 			if(m_project->m_settings.spriteActorsExternalFile != spritesFile)
@@ -1143,13 +1146,19 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 				if(!spritesFile.empty())
 				{
 					//Re-import sprites file
-					if(!m_project->ImportActors(gameObjectsFile))
+					if(!m_project->ImportActors(spritesFile))
 					{
 						wxMessageBox("Could not import external sprite actors, check settings.\nData may be lost if project is saved.", "Error", wxOK | wxICON_ERROR);
 					}
 				}
 
 				m_project->m_settings.spriteActorsExternalFile = spritesFile;
+				buildSpriteResources = true;
+			}
+
+			if(buildSpriteResources)
+			{
+				m_renderResources->CreateSpriteSheetResources(*m_project);
 			}
 		}
 	}

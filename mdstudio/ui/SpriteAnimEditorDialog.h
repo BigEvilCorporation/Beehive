@@ -148,4 +148,7 @@ private:
 
 	//System scrollbar height
 	int m_scrollbarHeight;
+
+	//Timer
+	u64 m_prevClock;
 };

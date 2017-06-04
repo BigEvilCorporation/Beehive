@@ -12,6 +12,10 @@
 #include "TimelinePanel.h"
 #include "MainWindow.h"
 
+#include <ion/core/time/Time.h>
+
+#include <wx/menu.h>
+
 #include <sstream>
 
 const char* TimelinePanel::s_trackNames[eTrackCount] =
@@ -30,6 +34,7 @@ TimelinePanel::TimelinePanel(MainWindow& mainWindow, Project& project, ion::rend
 	m_animation = NULL;
 	m_actorId = InvalidActorId;
 	m_actor = NULL;
+	m_prevClock = 0;
 
 	PopulateAnimations();
 
@@ -51,7 +56,11 @@ void TimelinePanel::EventHandlerTimer(wxTimerEvent& event)
 {
 	if(m_animation && m_animation->GetState() == ion::render::Animation::ePlaying)
 	{
-		float delta = (float)event.GetInterval() / 10.0f;
+		//Get accurate delta
+		u64 clock = ion::time::GetSystemTicks();
+		u64 diff = clock - m_prevClock;
+		m_prevClock = clock;
+		float delta = ion::time::TicksToSeconds(diff);
 
 		m_animation->Update(delta);
 		float time = m_animation->GetFrame();
@@ -169,9 +178,15 @@ void TimelinePanel::PopulateTimeline(const Animation& animation, const Animation
 						nextTime = m_animation->GetLength();
 					}
 
+					float length = (nextTime - currTime);
+
 					std::stringstream label;
-					label << (nextTime - currTime);
+					label << length;
 					m_gridTimeline->SetCellValue(label.str(), 0, i);
+
+					//Set column width
+					int colWidth = (int)(length * (float)m_gridTimeline->GetDefaultColSize());
+					m_gridTimeline->SetColumnWidth(i, colWidth);
 				}
 
 				//Populate position track
@@ -325,7 +340,18 @@ void TimelinePanel::SyncActor(AnimationActor& actor)
 					{
 						if(SpriteAnimation* spriteAnimation = spriteSheet->GetAnimation(spriteAnim.second))
 						{
-							spriteAnimation->SetFrame(ion::maths::Fmod(frame * spriteAnimation->GetSpeed(), spriteAnimation->GetLength()));
+							float spriteAnimStartTime = m_actor->m_trackSpriteAnim.GetPrevKeyframe(frame)->GetTime();
+							float spriteAnimFrame = (frame - spriteAnimStartTime) * spriteAnimation->GetPlaybackSpeed();
+							float spriteAnimLength = spriteAnimation->GetLength();
+
+							if(spriteAnimation->GetPlaybackBehaviour() == ion::render::Animation::eLoop)
+							{
+								spriteAnimation->SetFrame(ion::maths::Fmod(spriteAnimFrame, spriteAnimLength));
+							}
+							else
+							{
+								spriteAnimation->SetFrame(ion::maths::Clamp(spriteAnimFrame, 0.0f, spriteAnimLength));
+							}
 						}
 					}
 				}
@@ -385,7 +411,7 @@ void TimelinePanel::OnSelectSpriteAnim(wxCommandEvent& event)
 			gameObject->SetSpriteAnim(m_spriteSheetCache[m_choiceSpriteAnim->GetSelection()].second);
 
 			PopulateTimeline(*m_animation, m_actor);
-			m_mainWindow.RefreshPanel(MainWindow::ePanelMap);
+			m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
 		}
 	}
 }
@@ -472,18 +498,15 @@ void TimelinePanel::Keyframe(AnimationActor* actor)
 			//Advance frame
 			frame += 1.0f;
 
-			//Adjust anim length
-			if(m_animation->GetLength() < frame)
-			{
-				m_animation->SetLength(frame);
-			}
-
 			//Set next frame
 			m_animation->SetFrame(frame);
 
 			//Update sider
 			SetSliderFrame(frame);
 		}
+
+		//Adjust anim length
+		SetAnimLength(*m_animation, *actor);
 
 		if(m_toolIsolateObject->IsToggled() && actor)
 		{
@@ -500,6 +523,18 @@ void TimelinePanel::Keyframe(AnimationActor* actor)
 		//Populate timeline
 		PopulateTimeline(*m_animation, m_actor);
 	}
+}
+
+void TimelinePanel::SetAnimLength(Animation& animation, const AnimationActor& actor)
+{
+	float length = 1.0f;
+
+	for(int i = 0; i < actor.m_trackPosition.GetNumKeyframes(); i++)
+	{
+		length += actor.m_trackPosition.GetKeyframe(i).GetTime();
+	}
+
+	animation.SetLength(length);
 }
 
 void TimelinePanel::BuildGridColPosCache()
@@ -618,15 +653,15 @@ void TimelinePanel::OnTimelineColResize(wxGridSizeEvent& event)
 				delta = currentTime = minTime;
 			}
 
-			//Adjust anim length
-			m_animation->SetLength(m_animation->GetLength() + delta);
-
 			//Shift all keyframes beyond current
 			for(int i = keyframe + 1; i < m_actor->m_trackPosition.GetNumKeyframes(); i++)
 			{
 				m_actor->m_trackPosition.GetKeyframe(i).SetTime(m_actor->m_trackPosition.GetKeyframe(i).GetTime() + delta);
 				m_actor->m_trackSpriteAnim.GetKeyframe(i).SetTime(m_actor->m_trackSpriteAnim.GetKeyframe(i).GetTime() + delta);
 			}
+
+			//Adjust anim length
+			SetAnimLength(*m_animation, *m_actor);
 
 			//Redraw
 			PopulateTimeline(*m_animation, m_actor);
@@ -645,7 +680,107 @@ void TimelinePanel::OnResize(wxSizeEvent& event)
 	BuildGridColPosCache();
 }
 
+void TimelinePanel::OnTimelineKeyframeLeftClick(wxGridEvent& event)
+{
+	if(m_animation && m_actor)
+	{
+		int keyframeIdx = event.GetCol();
+
+		if(keyframeIdx < m_actor->m_trackSpriteAnim.GetNumKeyframes())
+		{
+			float frame = m_actor->m_trackSpriteAnim.GetKeyframe(keyframeIdx).GetTime();
+			m_animation->SetFrame(frame);
+			SetSliderFrame(frame);
+			SyncAllActors();
+		}
+	}
+}
+
+void TimelinePanel::OnTimelineKeyframeRightClick(wxGridEvent& event)
+{
+	if(m_animation && m_actor)
+	{
+		//Right-click menu
+		wxMenu contextMenu;
+
+		contextMenu.Append(eMenuInsertKeyframeLeft, wxString("Copy keyframe (to left)"));
+		contextMenu.Append(eMenuInsertKeyframeRight, wxString("Copy keyframe (to right)"));
+		contextMenu.Append(eMenuDeleteKeyframe, wxString("Delete keyframe"));
+		contextMenu.Append(eMenuSetSpriteAnimLength, wxString("Set to sprite anim length"));
+		contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&TimelinePanel::OnContextMenuClick, NULL, this);
+		m_contextMenuColIdx = event.GetCol();
+
+		PopupMenu(&contextMenu);
+	}
+}
+
 void TimelinePanel::OnContextMenuClick(wxCommandEvent& event)
 {
+	if(m_animation && m_actor)
+	{
+		switch(event.GetId())
+		{
+			case eMenuInsertKeyframeLeft:
+				break;
+			case eMenuInsertKeyframeRight:
+				break;
+			case eMenuDeleteKeyframe:
+				break;
+			case eMenuSetSpriteAnimLength:
+			{
+				int keyframeIdx = m_contextMenuColIdx;
 
+				if(m_actor->m_trackSpriteAnim.GetNumKeyframes() > keyframeIdx + 1)
+				{
+					AnimKeyframeSpriteAnim& keyframe = m_actor->m_trackSpriteAnim.GetKeyframe(keyframeIdx);
+					SpriteSheetId spriteSheetId = keyframe.GetValue().first;
+					SpriteAnimId spriteAnimId = keyframe.GetValue().second;
+
+					if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_actor->GetGameObjectId()))
+					{
+						if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+						{
+							if(Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
+							{
+								if(SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId))
+								{
+									if(SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
+									{
+										float spriteAnimLength = spriteAnim->GetLength() / spriteAnim->GetPlaybackSpeed();
+
+										float prevTimeA = keyframe.GetTime();
+										float prevTimeB = m_actor->m_trackSpriteAnim.GetKeyframe(keyframeIdx + 1).GetTime();
+										float prevLength = prevTimeB - prevTimeA;
+										float delta = spriteAnimLength - prevLength;
+
+										const float minTime = 0.01f;
+
+										if(spriteAnimLength < minTime)
+										{
+											delta = spriteAnimLength = minTime;
+										}
+
+										//Shift all keyframes beyond current
+										for(int i = keyframeIdx + 1; i < m_actor->m_trackPosition.GetNumKeyframes(); i++)
+										{
+											m_actor->m_trackPosition.GetKeyframe(i).SetTime(m_actor->m_trackPosition.GetKeyframe(i).GetTime() + delta);
+											m_actor->m_trackSpriteAnim.GetKeyframe(i).SetTime(m_actor->m_trackSpriteAnim.GetKeyframe(i).GetTime() + delta);
+										}
+
+										//Adjust anim length
+										SetAnimLength(*m_animation, *m_actor);
+
+										//Redraw
+										PopulateTimeline(*m_animation, m_actor);
+									}
+								}
+							}
+						}
+					}
+				}
+
+				break;
+			}
+		}
+	}
 }

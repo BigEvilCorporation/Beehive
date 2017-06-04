@@ -765,8 +765,9 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxButton* m_btnDeleteActor;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
-		wxButton* m_btnUsePalette;
+		wxButton* m_btnImportSpriteSheet;
 		wxButton* m_btnDeleteSprite;
+		wxButton* m_btnUsePalette;
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
 		SpriteCanvas* m_canvas;
@@ -791,8 +792,9 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		virtual void OnBtnActorDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnSpriteSheetUsePalette( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnSpriteSheetImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnSpriteSheetUsePalette( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSliderMove( wxScrollEvent& event ) { event.Skip(); }
@@ -952,6 +954,8 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnSpinSpeed( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnTimelineColResize( wxGridSizeEvent& event ) { event.Skip(); }
+		virtual void OnTimelineKeyframeLeftClick( wxGridEvent& event ) { event.Skip(); }
+		virtual void OnTimelineKeyframeRightClick( wxGridEvent& event ) { event.Skip(); }
 		virtual void OnSliderTimelineChange( wxScrollEvent& event ) { event.Skip(); }
 		
 	

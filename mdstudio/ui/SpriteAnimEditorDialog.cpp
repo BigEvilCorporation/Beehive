@@ -13,6 +13,8 @@
 #include "SpriteCanvas.h"
 #include "Dialogs.h"
 
+#include <ion/core/time/Time.h>
+
 #include <wx/msgdlg.h>
 #include <wx/imaglist.h>
 #include <wx/dc.h>
@@ -44,6 +46,8 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, AnimEditMode an
 	m_draggingSpriteFrameItem = -1;
 	m_draggingTimelineItem = -1;
 	m_dragImage = NULL;
+
+	m_prevClock = 0;
 
 	m_canvas->SetProject(&project);
 	m_canvas->SetupRendering(&renderer, &glContext, &renderResources);
@@ -410,6 +414,7 @@ void SpriteAnimEditorDialog::OnBtnPlay(wxCommandEvent& event)
 	{
 		m_selectedAnim->SetState(ion::render::Animation::ePlaying);
 		m_timer.Start(1);
+		m_prevClock = ion::time::GetSystemTicks();
 	}
 }
 
@@ -427,7 +432,7 @@ void SpriteAnimEditorDialog::OnSpinSpeedChange(wxSpinEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetSpeed(event.GetValue());
+		m_selectedAnim->SetPlaybackSpeed((float)event.GetValue());
 	}
 }
 
@@ -865,7 +870,7 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 
 				PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
 
-				m_spinCtrlSpeed->SetValue(m_selectedAnim->GetSpeed());
+				m_spinCtrlSpeed->SetValue((int)m_selectedAnim->GetPlaybackSpeed());
 			}
 		}
 	}
@@ -875,9 +880,12 @@ void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		float frameRate = 24.0f;
-		float frameRateMul = 1.0f / (frameRate / 10.0f);
-		float delta = (float)event.GetInterval() * ((float)m_spinCtrlSpeed->GetValue() / 100.0f) * frameRateMul;
+		//Get accurate delta
+		u64 clock = ion::time::GetSystemTicks();
+		u64 diff = clock - m_prevClock;
+		m_prevClock = clock;
+		float delta = ion::time::TicksToSeconds(diff);
+
 		float time = m_selectedAnim->GetFrame();
 		float lerpTime = ion::maths::UnLerp(0.0f, m_selectedAnim->GetLength(), time);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);

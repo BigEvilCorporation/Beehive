@@ -24,6 +24,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	GridCellRenderer.h
 	ExportDialog.cpp
 	ExportDialog.h
+	KeyframePanel.cpp
+	KeyframePanel.h
 	MapPanel.cpp
 	MapPanel.h
 	MapListPanel.cpp
