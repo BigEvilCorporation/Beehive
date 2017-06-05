@@ -123,6 +123,7 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 			slotMenu.AppendSubMenu(loadMenu, "Load");
 			slotMenu.Append(eMenuImport, wxString("Import..."));
 			slotMenu.Append(eMenuExport, wxString("Export..."));
+			slotMenu.Append(eMenuExportBMP, wxString("Export as BMP..."));
 			saveMenu->AppendSeparator();
 			slotMenu.Append(eMenuSetAsBg, wxString("Set as Background/Transparency Colour"));
 				
@@ -221,6 +222,46 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 		{
 			std::string filename = dialogue.GetPath().c_str().AsChar();
 			m_project.ExportPaletteSlots(filename);
+		}
+	}
+	else if(menuItemId & eMenuExportBMP)
+	{
+		wxFileDialog dialogue(this, _("Save BMP swatch"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		if(dialogue.ShowModal() == wxID_OK)
+		{
+			std::string filename = dialogue.GetPath().c_str().AsChar();
+			
+			if(Palette* palette = m_project.GetPalette(m_selectedPaletteId))
+			{
+				BMPReader writer;
+
+				static const int colourWidth = 8;
+				static const int colourHeight = 8;
+
+				writer.SetDimensions(colourWidth * Palette::coloursPerPalette, colourHeight);
+
+				for(int i = 0; i < Palette::coloursPerPalette; i++)
+				{
+					//Write colour
+					Colour paletteColour = palette->IsColourUsed(i) ? palette->GetColour(i) : Colour(255, 255, 255);
+					BMPReader::Colour bmpColour(paletteColour.GetRed(), paletteColour.GetGreen(), paletteColour.GetBlue());
+					writer.SetPaletteEntry(i, bmpColour);
+
+					//Write index to a swatch square
+					for(int x = (i * colourWidth); x < ((i + 1) * colourWidth); x++)
+					{
+						for(int y = 0; y < colourHeight; y++)
+						{
+							writer.SetColourIndex(x, y, i);
+						}
+					}
+				}
+
+				if(!writer.Write(filename))
+				{
+					ion::debug::Popup("Error exporting palette", "Error");
+				}
+			}
 		}
 	}
 	else if(menuItemId & eMenuSetAsBg)
