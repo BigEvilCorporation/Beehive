@@ -14,6 +14,7 @@
 #include <wx/panel.h>
 #include <wx/stattext.h>
 #include <wx/tooltip.h>
+#include <wx/overlay.h>
 
 #include <ion/core/cryptography/UUID.h>
 
@@ -40,6 +41,11 @@ public:
 	void SetTime(float time);
 	float GetTime() const;
 
+	void SetLength(float length);
+
+	//Clear all sections, tracks, and keyframes
+	void Clear();
+
 	//Add a section (group of tracks)
 	SectionId AddSection(const std::string& name);
 	void RemoveSection(SectionId sectionId);
@@ -57,6 +63,7 @@ public:
 	virtual void OnKeyframeInserted(SectionId sectionId, TrackId trackId, KeyframeId keyframeId, float time) {}
 	virtual void OnKeyframeDeleted(SectionId sectionId, TrackId trackId, KeyframeId keyframeId, float time) {}
 	virtual void OnKeyframeMoved(SectionId sectionId, TrackId trackId, KeyframeId keyframeId, float oldTime, float newTime) {}
+	virtual void OnKeyframeResized(SectionId sectionId, TrackId trackId, KeyframeId keyframeId, float oldLength, float newLength) {}
 
 protected:
 	struct Keyframe
@@ -66,6 +73,7 @@ protected:
 		float time;
 		float length;
 		std::string label;
+		wxRect bounds;
 	};
 
 	struct Track
@@ -84,6 +92,21 @@ protected:
 		std::string name;
 	};
 
+	enum MouseOperation
+	{
+		eMouseOperationNone,
+		eMouseOperationMoveKeyframe,
+		eMouseOperationResizeKeyframe
+	};
+
+	enum ContextMenuItems
+	{
+		eContextMenuCopyKeyframeLeft,
+		eContextMenuCopyKeyframeRight,
+		eContextMenuDeleteKeyframe,
+		eContextMenuUserActionStart
+	};
+
 	static const int s_timelineWidthPerSecond = 64;
 	static const int s_sectionLabelDrawHeight = 20;
 	static const int s_trackLabelMarginWidth = 128;
@@ -94,19 +117,47 @@ protected:
 	static const int s_keyframeDrawBorder = 32;
 	static const int s_keyframeDrawDotRadius = 4;
 	static const int s_keyframeDrawTextBorder = 4;
+	static const int s_keyframeResizeBorder = 8;
 
 	Section& FindSection(SectionId sectionId);
 	Track& FindTrack(SectionId sectionId, TrackId trackId);
 	Keyframe& FindKeyframe(SectionId sectionId, TrackId trackId, KeyframeId keyframeId);
+	bool PickKeyframe(int x, int y);
 
+	void EventHandlerMouse(wxMouseEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
 	void EventHandlerPaint(wxPaintEvent& event);
+	void EventHandlerContextMenu(wxCommandEvent& event);
+
 	void Render(wxDC& dc);
 
 	void DrawAll(wxDC& dc);
-	void DrawSection(wxDC& dc, const Section& section, int& offsetY);
-	void DrawTrack(wxDC& dc, const Track& track, int& offsetY);
-	void DrawKeyframe(wxDC& dc, const Keyframe& keyframe, int offsetY);
+	void DrawSection(wxDC& dc, Section& section, int& offsetY);
+	void DrawTrack(wxDC& dc, Track& track, int& offsetY);
+	void DrawKeyframe(wxDC& dc, Keyframe& keyframe, int offsetY, bool selected);
+	void DrawTransport(wxDC& dc, int offsetY);
+
+	wxOverlay m_mainLayerSnapshot;
 
 	std::vector<std::pair<SectionId, Section>> m_sections;
+
+	MouseOperation m_currentMouseOperation;
+
+	float m_animationTime;
+	float m_animationLength;
+
+	SectionId m_selectedSectionId;
+	TrackId m_selectedTrackId;
+	KeyframeId m_selectedKeyframeId;
+
+	Section* m_selectedSection;
+	Track* m_selectedTrack;
+	Keyframe* m_selectedKeyframe;
+
+	int m_mousePrevX;
+	int m_mousePrevY;
+
+	bool m_invalidateMainLayer;
+	bool m_invalidateOverlay;
+	int m_lastDrawHeight;
 };

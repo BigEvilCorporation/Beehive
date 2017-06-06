@@ -13,32 +13,39 @@
 
 #include <wx/dc.h>
 #include <wx/dcclient.h>
+#include <wx/menu.h>
 
 #include <algorithm>
 
 #include <ion/core/debug/Debug.h>
+#include <ion/maths/Maths.h>
 
 KeyframePanel::KeyframePanel(wxWindow* parent, wxWindowID windowId, const wxPoint& position, const wxSize& size, long style, const wxString& name)
 	: wxPanel(parent, windowId, position, size, style, name)
 {
 	SetMinSize(wxSize(120, 300));
 
+	m_selectedSectionId = 0;
+	m_selectedTrackId = 0;
+	m_selectedKeyframeId = 0;
+	m_selectedKeyframe = NULL;
+
+	m_invalidateMainLayer = true;
+	m_invalidateOverlay = true;
+
+	m_tooltip = NULL;
+
+	m_currentMouseOperation = eMouseOperationNone;
+
+	m_animationTime = 0.0f;
+	m_animationLength = 10.0f;
+	
+	Bind(wxEVT_LEFT_DOWN, &KeyframePanel::EventHandlerMouse, this, GetId());
+	Bind(wxEVT_LEFT_UP, &KeyframePanel::EventHandlerMouse, this, GetId());
+	Bind(wxEVT_RIGHT_DOWN, &KeyframePanel::EventHandlerMouse, this, GetId());
+	Bind(wxEVT_MOTION, &KeyframePanel::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_SIZE, &KeyframePanel::EventHandlerResize, this, GetId());
 	Bind(wxEVT_PAINT, &KeyframePanel::EventHandlerPaint, this, GetId());
-
-	SectionId section1 = AddSection("Test Section 1");
-	TrackId track1 = AddTrack(section1, "Test Track 1");
-	TrackId track2 = AddTrack(section1, "Test Track 2");
-	TrackId track3 = AddTrack(section1, "Test Track 3");
-	AddKeyframe(section1, track1, 0.0f, 1.0f, "Test Keyframe 1");
-	AddKeyframe(section1, track1, 3.0f, 6.0f, "Test Keyframe 2");
-	AddKeyframe(section1, track2, 1.0f, 2.0f, "Test Keyframe 3");
-	AddKeyframe(section1, track2, 3.0f, 0.1f, "Test Keyframe 4");
-
-	SectionId section2 = AddSection("Test Section 2");
-	TrackId track4 = AddTrack(section2, "Test Track 4");
-	AddKeyframe(section2, track4, 7.0f, 2.0f, "Test Keyframe 5");
-	AddKeyframe(section2, track4, 9.0f, 6.6f, "Test Keyframe 6");
 }
 
 KeyframePanel::~KeyframePanel()
@@ -46,10 +53,33 @@ KeyframePanel::~KeyframePanel()
 
 }
 
+void KeyframePanel::SetTime(float time)
+{
+	m_animationTime = time;
+	m_invalidateOverlay = true;
+	Refresh();
+}
+
+float KeyframePanel::GetTime() const
+{
+	return m_animationTime;
+}
+
+void KeyframePanel::SetLength(float length)
+{
+	m_animationLength = length;
+}
+
+void KeyframePanel::Clear()
+{
+	m_sections.clear();
+}
+
 KeyframePanel::SectionId KeyframePanel::AddSection(const std::string& name)
 {
 	SectionId sectionId = ion::GenerateUUID64();
 	m_sections.push_back(std::make_pair(sectionId, Section(name)));
+	m_invalidateMainLayer = true;
 	return sectionId;
 }
 
@@ -63,6 +93,7 @@ KeyframePanel::TrackId KeyframePanel::AddTrack(SectionId sectionId, const std::s
 	TrackId trackId = ion::GenerateUUID64();
 	Section& section = FindSection(sectionId);
 	section.tracks.push_back(std::make_pair(trackId, Track(name)));
+	m_invalidateMainLayer = true;
 	return trackId;
 }
 
@@ -76,6 +107,7 @@ KeyframePanel::KeyframeId KeyframePanel::AddKeyframe(SectionId sectionId, TrackI
 	KeyframeId keyframeId = ion::GenerateUUID64();
 	Track& track = FindTrack(sectionId, trackId);
 	track.keyframes.push_back(std::make_pair(keyframeId, Keyframe(time, length, label)));
+	m_invalidateMainLayer = true;
 	return keyframeId;
 }
 
@@ -107,6 +139,135 @@ KeyframePanel::Keyframe& KeyframePanel::FindKeyframe(SectionId sectionId, TrackI
 	return it->second;
 }
 
+bool KeyframePanel::PickKeyframe(int x, int y)
+{
+	for(int i = 0; i < m_sections.size(); i++)
+	{
+		Section& section = m_sections[i].second;
+
+		for(int j = 0; j < section.tracks.size(); j++)
+		{
+			Track& track = section.tracks[j].second;
+
+			for(int k = 0; k < track.keyframes.size(); k++)
+			{
+				Keyframe& keyframe = track.keyframes[k].second;
+
+				if(x >= keyframe.bounds.GetLeft()
+					&& x < keyframe.bounds.GetRight()
+					&& y >= keyframe.bounds.GetTop()
+					&& y < keyframe.bounds.GetBottom())
+				{
+					m_selectedSectionId = m_sections[i].first;
+					m_selectedTrackId = section.tracks[j].first;
+					m_selectedKeyframeId = track.keyframes[k].first;
+
+					m_selectedSection = &section;
+					m_selectedTrack = &track;
+					m_selectedKeyframe = &keyframe;
+
+					return true;
+				}
+			}
+		}
+	}
+
+	m_selectedSectionId = 0;
+	m_selectedTrackId = 0;
+	m_selectedKeyframeId = 0;
+
+	m_selectedSection = NULL;
+	m_selectedTrack = NULL;
+	m_selectedKeyframe = NULL;
+
+	return false;
+}
+
+void KeyframePanel::EventHandlerMouse(wxMouseEvent& event)
+{
+	if(event.GetEventType() == wxEVT_LEFT_DOWN)
+	{
+		PickKeyframe(event.GetX(), event.GetY());
+		m_invalidateMainLayer = true;
+		Refresh();
+	}
+	if(event.GetEventType() == wxEVT_LEFT_UP)
+	{
+		m_currentMouseOperation = eMouseOperationNone;
+	}
+	if(event.GetEventType() == wxEVT_RIGHT_DOWN)
+	{
+		//Right-click menu
+		wxMenu contextMenu;
+
+		contextMenu.Append(eContextMenuDeleteKeyframe, wxString("Duplicate keyframe (to left)"));
+		contextMenu.Append(eContextMenuDeleteKeyframe, wxString("Duplicate keyframe (to right)"));
+		contextMenu.Append(eContextMenuDeleteKeyframe, wxString("Delete keyframe"));
+		contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&KeyframePanel::EventHandlerContextMenu, NULL, this);
+
+		PopupMenu(&contextMenu);
+	}
+	else if(event.GetEventType() == wxEVT_MOTION)
+	{
+		//Standard cursor by default
+		wxCursor cursor(wxCURSOR_ARROW);
+
+		int x = event.GetX();
+		int y = event.GetY();
+		int mouseDeltaX = m_mousePrevX - x;
+		int mouseDeltaY = m_mousePrevY - y;
+
+		if(m_selectedKeyframe)
+		{
+			if(x >= m_selectedKeyframe->bounds.GetLeft() && x < m_selectedKeyframe->bounds.GetRight()
+				&& y >= m_selectedKeyframe->bounds.GetTop() && y < m_selectedKeyframe->bounds.GetBottom())
+			{
+				//If at keyframe edge, set to resize
+				if((m_currentMouseOperation == eMouseOperationNone || m_currentMouseOperation == eMouseOperationResizeKeyframe)
+					&& x >= (m_selectedKeyframe->bounds.GetRight() - s_keyframeResizeBorder))
+				{
+					//Resizing
+					cursor = wxCURSOR_SIZEWE;
+
+					if(event.Dragging())
+					{
+						float prevLength = m_selectedKeyframe->length;
+						m_selectedKeyframe->length += (float)-mouseDeltaX / (float)s_timelineWidthPerSecond;
+						m_selectedKeyframe->length = ion::maths::Clamp(m_selectedKeyframe->length, 0.1f, m_animationLength - m_selectedKeyframe->time);
+						OnKeyframeResized(m_selectedSectionId, m_selectedTrackId, m_selectedKeyframeId, prevLength, m_selectedKeyframe->length);
+						m_invalidateMainLayer = true;
+						Refresh();
+
+						m_currentMouseOperation = eMouseOperationResizeKeyframe;
+					}
+				}
+				else if(m_currentMouseOperation == eMouseOperationNone || m_currentMouseOperation == eMouseOperationMoveKeyframe)
+				{
+					//Moving
+					if(event.Dragging())
+					{
+						float prevTime = m_selectedKeyframe->time;
+						m_selectedKeyframe->time += (float)-mouseDeltaX / (float)s_timelineWidthPerSecond;
+						m_selectedKeyframe->time = ion::maths::Clamp(m_selectedKeyframe->time, 0.0f, m_animationLength - m_selectedKeyframe->length);
+						OnKeyframeMoved(m_selectedSectionId, m_selectedTrackId, m_selectedKeyframeId, prevTime, m_selectedKeyframe->time);
+						m_invalidateMainLayer = true;
+						Refresh();
+
+						m_currentMouseOperation = eMouseOperationMoveKeyframe;
+					}
+				}
+			}
+		}
+
+		m_mousePrevX = event.GetX();
+		m_mousePrevY = event.GetY();
+
+		wxSetCursor(cursor);
+	}
+
+	event.Skip();
+}
+
 void KeyframePanel::EventHandlerResize(wxSizeEvent& event)
 {
 	event.Skip();
@@ -116,6 +277,29 @@ void KeyframePanel::EventHandlerPaint(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
 	Render(dc);
+	event.Skip();
+}
+
+void KeyframePanel::EventHandlerContextMenu(wxCommandEvent& event)
+{
+	switch(event.GetId())
+	{
+	case eContextMenuCopyKeyframeLeft:
+		break;
+	case eContextMenuCopyKeyframeRight:
+		break;
+	case eContextMenuDeleteKeyframe:
+		if(m_selectedTrack && m_selectedKeyframe)
+		{
+			OnKeyframeDeleted(m_selectedSectionId, m_selectedTrackId, m_selectedKeyframeId, m_selectedKeyframe->time);
+			m_selectedTrack->keyframes.erase(std::remove_if(m_selectedTrack->keyframes.begin(), m_selectedTrack->keyframes.end(), [&](const std::pair<KeyframeId, Keyframe>& rhs) { return rhs.first == m_selectedKeyframeId; }), m_selectedTrack->keyframes.end());
+			m_selectedKeyframe = NULL;
+			m_selectedKeyframeId = 0;
+			m_invalidateMainLayer = true;
+			Refresh();
+		}
+		break;
+	}
 }
 
 void KeyframePanel::Render(wxDC& dc)
@@ -130,27 +314,66 @@ void KeyframePanel::DrawAll(wxDC& dc)
 {
 	int offsetY = 0;
 
-	//Draw time bar
-	dc.SetTextForeground(*wxWHITE);
-	char textBuff[64] = { 0 };
-	float time = 0.0f;
-	for(int x = s_trackLabelMarginWidth; x < GetSize().GetWidth(); x += s_timelineWidthPerSecond)
+	dc.SetPen(*wxBLACK_PEN);
+
+	if(m_invalidateMainLayer)
 	{
-		sprintf_s(textBuff, 64, "%.2f", time);
-		time += 1.0f;
-		dc.DrawText(textBuff, x, offsetY);
+		//Draw time bar
+		dc.SetTextForeground(*wxWHITE);
+		char textBuff[64] = { 0 };
+		float time = 0.0f;
+		for(int x = s_trackLabelMarginWidth; x < GetSize().GetWidth(); x += s_timelineWidthPerSecond)
+		{
+			sprintf_s(textBuff, 64, "%.2f", time);
+			time += 1.0f;
+			dc.DrawText(textBuff, x, offsetY);
+		}
+
+		offsetY += s_sectionLabelDrawHeight;
+
+		//Draw sections
+		for(int i = 0; i < m_sections.size(); i++)
+		{
+			Section& section = m_sections[i].second;
+			DrawSection(dc, section, offsetY);
+		}
+
+		m_lastDrawHeight = offsetY;
+
+		m_invalidateMainLayer = false;
+		m_invalidateOverlay = true;
+
+		//Take snapshot of current window
+		m_mainLayerSnapshot.Reset();
 	}
 
-	offsetY += s_sectionLabelDrawHeight;
-
-	for(int i = 0; i < m_sections.size(); i++)
+	if(m_invalidateOverlay)
 	{
-		const Section& section = m_sections[i].second;
-		DrawSection(dc, section, offsetY);
+		//Restore snapshot of current window
+		wxDCOverlay overlayDC(m_mainLayerSnapshot, &dc);
+		overlayDC.Clear();
+
+		//Draw transport
+		DrawTransport(dc, m_lastDrawHeight);
+
+		m_invalidateOverlay = false;
 	}
 }
 
-void KeyframePanel::DrawSection(wxDC& dc, const Section& section, int& offsetY)
+void KeyframePanel::DrawTransport(wxDC& dc, int offsetY)
+{
+	//Draw current time position
+	int timeX = s_trackLabelMarginWidth + (int)(m_animationTime * (float)s_timelineWidthPerSecond);
+	dc.SetPen(*wxWHITE_PEN);
+	dc.DrawLine(timeX, 0, timeX, offsetY);
+
+	//Draw animation length boundary
+	int lengthX = s_trackLabelMarginWidth + (int)(m_animationLength * (float)s_timelineWidthPerSecond);
+	dc.SetPen(*wxRED_PEN);
+	dc.DrawLine(lengthX, 0, lengthX, offsetY);
+}
+
+void KeyframePanel::DrawSection(wxDC& dc, Section& section, int& offsetY)
 {
 	int height = (section.tracks.size() * (s_trackDrawHeight + s_trackDrawBorder)) + s_trackDrawBorder;
 
@@ -169,7 +392,7 @@ void KeyframePanel::DrawSection(wxDC& dc, const Section& section, int& offsetY)
 	//Draw section
 	for(int i = 0; i < section.tracks.size(); i++)
 	{
-		const Track& track = section.tracks[i].second;
+		Track& track = section.tracks[i].second;
 		DrawTrack(dc, track, offsetY);
 	}
 
@@ -178,7 +401,7 @@ void KeyframePanel::DrawSection(wxDC& dc, const Section& section, int& offsetY)
 	dc.DrawLine(s_trackLabelMarginWidth, sectionStartY, s_trackLabelMarginWidth, offsetY);
 }
 
-void KeyframePanel::DrawTrack(wxDC& dc, const Track& track, int& offsetY)
+void KeyframePanel::DrawTrack(wxDC& dc, Track& track, int& offsetY)
 {
 	dc.SetBrush(*wxBLUE_BRUSH);
 	dc.DrawRectangle(0, offsetY, GetSize().GetWidth(), s_trackDrawHeight);
@@ -186,7 +409,7 @@ void KeyframePanel::DrawTrack(wxDC& dc, const Track& track, int& offsetY)
 	//Draw track time notches
 	for(int x = s_trackLabelMarginWidth; x < GetSize().GetWidth(); x += s_timelineWidthPerSecond)
 	{
-		dc.SetBrush(*wxBLACK_BRUSH);
+		dc.SetBrush(*wxWHITE_BRUSH);
 		dc.DrawLine(x, offsetY, x, offsetY + s_trackDrawHeight);
 	}
 
@@ -194,34 +417,40 @@ void KeyframePanel::DrawTrack(wxDC& dc, const Track& track, int& offsetY)
 	dc.SetTextForeground(*wxBLACK);
 	dc.DrawText(track.name, s_trackDrawBorder, offsetY);
 
-	//Draw track keyframes
-	for(int i = 0; i < track.keyframes.size(); i++)
+	//Draw track keyframes (in reverse)
+	for(int i = track.keyframes.size() - 1; i >= 0; i--)
 	{
-		const Keyframe& keyframe = track.keyframes[i].second;
-		DrawKeyframe(dc, keyframe, offsetY);
+		Keyframe& keyframe = track.keyframes[i].second;
+		bool selected = (track.keyframes[i].first == m_selectedKeyframeId);
+		DrawKeyframe(dc, keyframe, offsetY, selected);
 	}
 
 	offsetY += s_trackDrawHeight;
 }
 
-void KeyframePanel::DrawKeyframe(wxDC& dc, const Keyframe& keyframe, int offsetY)
+void KeyframePanel::DrawKeyframe(wxDC& dc, Keyframe& keyframe, int offsetY, bool selected)
 {
-	int offsetX = s_trackLabelMarginWidth + ceil(keyframe.time * (float)s_timelineWidthPerSecond);
+	int offsetX = s_trackLabelMarginWidth + (keyframe.time * (float)s_timelineWidthPerSecond);
 	offsetY += (s_trackDrawHeight / 2) - (s_keyframeDrawHeight / 2);
-	int drawWidth = ceil(keyframe.length * (float)s_timelineWidthPerSecond);
+	int drawWidth = keyframe.length * (float)s_timelineWidthPerSecond;
 
 	if(drawWidth < s_keyframeDrawMinWidth)
 	{
 		drawWidth = s_keyframeDrawMinWidth;
 	}
 
-	dc.SetBrush(*wxWHITE_BRUSH);
+	if(selected)
+		dc.SetBrush(*wxYELLOW_BRUSH);
+	else
+		dc.SetBrush(*wxWHITE_BRUSH);
+
 	dc.DrawRectangle(offsetX, offsetY, drawWidth, s_keyframeDrawHeight);
 
-	//If text fits, draw it
+	//If text fits, or selected, draw it
 	wxSize textSize = dc.GetTextExtent(keyframe.label);
+	bool textFits = (textSize.GetWidth() < (drawWidth - (s_keyframeDrawTextBorder * 2)));
 
-	if(textSize.GetWidth() < (drawWidth - (s_keyframeDrawTextBorder*2)))
+	if(selected || textFits)
 	{
 		dc.SetTextForeground(*wxBLACK);
 		dc.DrawText(keyframe.label, offsetX + s_keyframeDrawTextBorder, offsetY);
@@ -232,4 +461,9 @@ void KeyframePanel::DrawKeyframe(wxDC& dc, const Keyframe& keyframe, int offsetY
 		dc.SetBrush(*wxBLACK_BRUSH);
 		dc.DrawCircle(offsetX + (drawWidth / 2), offsetY + (s_keyframeDrawHeight / 2), s_keyframeDrawDotRadius);
 	}
+
+	keyframe.bounds.SetLeft(offsetX);
+	keyframe.bounds.SetTop(offsetY);
+	keyframe.bounds.SetWidth(drawWidth);
+	keyframe.bounds.SetHeight(s_keyframeDrawHeight);
 }
