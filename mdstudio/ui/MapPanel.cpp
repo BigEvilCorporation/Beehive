@@ -2044,23 +2044,11 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				const float width = gameObjectType->GetDimensions().x;
 				const float height_inv = -gameObjectType->GetDimensions().y;
 
-				//Render coloured box
-				ion::Vector3 scale(gameObjectType->GetDimensions().x / tileWidth, gameObjectType->GetDimensions().y / tileHeight, 1.0f);
-				ion::Matrix4 mtx;
-				ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
-					floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
-
-				mtx.SetTranslation(pos);
-				mtx.SetScale(scale);
-
-				material->Bind(mtx, cameraInverseMtx, projectionMtx);
-				renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-				material->Unbind();
-
 				//Use sprite sheet animation if available, else use default preview image
 				SpriteSheetId spriteSheetId = (gameObject.GetSpriteSheetId() != InvalidSpriteSheetId) ? gameObject.GetSpriteSheetId() : gameObjectType->GetPreviewSpriteSheetId();
 				SpriteAnimId spriteAnimId = gameObject.GetSpriteAnim();
 				int spriteFrame = 0;
+				ion::Vector3 animPosOffset;
 
 				if(const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
 				{
@@ -2068,9 +2056,29 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 					{
 						if(const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
 						{
+							ion::Vector2i position = spriteAnim->m_trackPosition.GetValue(spriteAnim->GetFrame());
 							spriteFrame = spriteAnim->m_trackSpriteFrame.GetValue(spriteAnim->GetFrame());
+
+							animPosOffset.x = (float)position.x;
+							animPosOffset.y = (float)position.y;
 						}
 					}
+				}
+
+				//Render coloured box
+				ion::Vector3 scale(gameObjectType->GetDimensions().x / tileWidth, gameObjectType->GetDimensions().y / tileHeight, 1.0f);
+				ion::Matrix4 mtx;
+				ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
+					floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
+
+				mtx.SetTranslation(pos + animPosOffset);
+				mtx.SetScale(scale);
+
+				if(m_project.GetShowStampOutlines())
+				{
+					material->Bind(mtx, cameraInverseMtx, projectionMtx);
+					renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+					material->Unbind();
 				}
 
 				if(spriteSheetId != InvalidSpriteSheetId)
@@ -2086,7 +2094,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 						spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 						ion::Matrix4 spriteSheetMtx;
-						spriteSheetMtx.SetTranslation(pos);
+						spriteSheetMtx.SetTranslation(pos + animPosOffset);
 
 						spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
 						renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());

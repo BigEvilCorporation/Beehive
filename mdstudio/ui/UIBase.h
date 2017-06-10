@@ -10,6 +10,7 @@
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
+class KeyframePanel;
 class SpriteCanvas;
 
 #include <wx/string.h>
@@ -927,40 +928,38 @@ class TimelinePanelBase : public wxPanel
 		wxChoice* m_choiceAnims;
 		wxToolBarToolBase* m_toolAddAnim; 
 		wxToolBarToolBase* m_toolDeleteAnim; 
+		wxToolBarToolBase* m_toolKeyframeTrack; 
 		wxToolBarToolBase* m_toolKeyframeActor; 
 		wxToolBarToolBase* m_toolKeyframeAll; 
 		wxToolBarToolBase* m_toolPlay; 
 		wxToolBarToolBase* m_toolStop; 
 		wxToolBarToolBase* m_toolRewind; 
+		wxToolBarToolBase* m_toolFastForward; 
 		wxToolBarToolBase* m_toolIsolateObject; 
 		wxStaticText* m_staticText34;
 		wxSpinCtrl* m_spinSpeed;
 		wxStaticText* m_textCurrentActor;
 		wxStaticText* m_staticText49;
 		wxChoice* m_choiceSpriteAnim;
-		wxGrid* m_gridTimeline;
-		wxSlider* m_sliderTimeline;
+		KeyframePanel* m_timeline;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnSelectAnimation( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolAddAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolDeleteAnim( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframeTrack( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolKeyframeActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolKeyframeAll( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolPlay( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRewind( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolFastForward( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpinSpeed( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnTimelineColResize( wxGridSizeEvent& event ) { event.Skip(); }
-		virtual void OnTimelineKeyframeLeftClick( wxGridEvent& event ) { event.Skip(); }
-		virtual void OnTimelineKeyframeRightClick( wxGridEvent& event ) { event.Skip(); }
-		virtual void OnSliderTimelineChange( wxScrollEvent& event ) { event.Skip(); }
 		
 	
 	public:
-		wxStaticText* m_textFrame;
 		
 		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,220 ), long style = wxTAB_TRAVERSAL ); 
 		~TimelinePanelBase();

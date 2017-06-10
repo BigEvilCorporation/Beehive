@@ -21,6 +21,14 @@
 #include <map>
 #include <vector>
 
+extern const wxEventType EVT_TIME_CHANGED;
+extern const wxEventType EVT_TRACK_SELECTED;
+extern const wxEventType EVT_KEYFRAME_SELECTED;
+extern const wxEventType EVT_KEYFRAME_INSERTED;
+extern const wxEventType EVT_KEYFRAME_DELETED;
+extern const wxEventType EVT_KEYFRAME_MOVED;
+extern const wxEventType EVT_KEYFRAME_RESIZED;
+
 class KeyframePanel : public wxPanel
 {
 public:
@@ -82,6 +90,7 @@ protected:
 		Track(const std::string& _name) { name = _name; }
 		std::vector<std::pair<KeyframeId, Keyframe>> keyframes;
 		std::string name;
+		wxRect bounds;
 	};
 
 	struct Section
@@ -122,6 +131,8 @@ protected:
 	Section& FindSection(SectionId sectionId);
 	Track& FindTrack(SectionId sectionId, TrackId trackId);
 	Keyframe& FindKeyframe(SectionId sectionId, TrackId trackId, KeyframeId keyframeId);
+	bool PickTime(int x, int y);
+	bool PickTrack(int x, int y);
 	bool PickKeyframe(int x, int y);
 
 	void EventHandlerMouse(wxMouseEvent& event);
@@ -133,9 +144,13 @@ protected:
 
 	void DrawAll(wxDC& dc);
 	void DrawSection(wxDC& dc, Section& section, int& offsetY);
-	void DrawTrack(wxDC& dc, Track& track, int& offsetY);
+	void DrawTrack(wxDC& dc, Track& track, int& offsetY, bool selected);
 	void DrawKeyframe(wxDC& dc, Keyframe& keyframe, int offsetY, bool selected);
 	void DrawTransport(wxDC& dc, int offsetY);
+
+	void PostTimeEvent(const wxEventType& eventType);
+	void PostTrackEvent(const wxEventType& eventType);
+	void PostKeyframeEvent(const wxEventType& eventType);
 
 	wxOverlay m_mainLayerSnapshot;
 
@@ -161,3 +176,84 @@ protected:
 	bool m_invalidateOverlay;
 	int m_lastDrawHeight;
 };
+
+class TimeEvent : public wxCommandEvent
+{
+public:
+	TimeEvent(wxEventType commandType = EVT_TIME_CHANGED, int id = 0)
+		: wxCommandEvent(commandType, id)
+	{
+	}
+
+	TimeEvent(const TimeEvent &event)
+		: wxCommandEvent(event)
+	{
+		m_time = event.m_time;
+	}
+
+	wxEvent* Clone() const { return new TimeEvent(*this); }
+
+	float m_time;
+};
+
+class TrackEvent : public wxCommandEvent
+{
+public:
+	TrackEvent(wxEventType commandType = EVT_TRACK_SELECTED, int id = 0)
+		: wxCommandEvent(commandType, id)
+	{
+	}
+
+	TrackEvent(const TrackEvent &event)
+		: wxCommandEvent(event)
+	{
+		m_sectionId = event.m_sectionId;
+		m_trackId = event.m_trackId;
+	}
+
+	wxEvent* Clone() const { return new TrackEvent(*this); }
+
+	KeyframePanel::SectionId m_sectionId;
+	KeyframePanel::TrackId m_trackId;
+};
+
+class KeyframeEvent : public wxCommandEvent
+{
+public:
+	KeyframeEvent(wxEventType commandType = EVT_KEYFRAME_SELECTED, int id = 0)
+		: wxCommandEvent(commandType, id)
+	{
+	}
+
+	KeyframeEvent(const KeyframeEvent &event)
+		: wxCommandEvent(event)
+	{
+		m_sectionId = event.m_sectionId;
+		m_trackId = event.m_trackId;
+		m_keyframeId = event.m_keyframeId;
+		m_time = event.m_time;
+		m_length = event.m_length;
+	}
+
+	wxEvent* Clone() const { return new KeyframeEvent(*this); }
+
+	KeyframePanel::SectionId m_sectionId;
+	KeyframePanel::TrackId m_trackId;
+	KeyframePanel::KeyframeId m_keyframeId;
+
+	float m_time;
+	float m_length;
+};
+
+typedef void (wxEvtHandler::*TimeEventFunction)(TimeEvent&);
+typedef void (wxEvtHandler::*TrackEventFunction)(TrackEvent&);
+typedef void (wxEvtHandler::*KeyframeEventFunction)(KeyframeEvent&);
+
+#define TimeEventHandler(func) \
+    wxEVENT_HANDLER_CAST(TimeEventFunction, func)
+
+#define TrackEventHandler(func) \
+    wxEVENT_HANDLER_CAST(TrackEventFunction, func)
+
+#define KeyframeEventHandler(func) \
+    wxEVENT_HANDLER_CAST(KeyframeEventFunction, func)
