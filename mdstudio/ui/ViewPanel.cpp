@@ -2,9 +2,10 @@
 #include "MainWindow.h"
 
 ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: wxGLCanvas(parent, glContext, winid, pos, size, style, name, NULL, wxNullPalette)
+	: wxGLCanvas(parent, winid, NULL, pos, size, style, name, wxNullPalette)
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)
+	, m_glContext(glContext)
 	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
 	, m_project(project)
 {
@@ -74,6 +75,9 @@ void ViewPanel::EventHandlerPaint(wxPaintEvent& event)
 {
 	if(!m_mainWindow->IsRefreshLocked())
 	{
+		//Set GL context
+		SetCurrent(*m_glContext);
+
 		//Begin rendering to current viewport
 		m_renderer.BeginFrame(m_viewport, GetHDC());
 		m_renderer.ClearColour();

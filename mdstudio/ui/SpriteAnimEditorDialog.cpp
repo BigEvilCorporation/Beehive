@@ -94,7 +94,7 @@ SpriteAnimEditorDialog::SpriteAnimEditorDialog(wxWindow* parent, AnimEditMode an
 	m_gridTimeline->EnableDragCell(true);
 
 	//Append 1 row per keyframe track
-	m_gridTimeline->AppendRows(eTrack_MAX - m_gridTimeline->GetRows());
+	m_gridTimeline->AppendRows(eTrack_MAX - m_gridTimeline->GetNumberRows());
 
 	Maximize();
 }
@@ -740,15 +740,15 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 				wxString textY;
 				textX << position.x;
 				textY << position.y;
-				m_gridTimeline->SetCellValue(textX, eTrackPositionX, i);
-				m_gridTimeline->SetCellValue(textY, eTrackPositionY, i);
+				m_gridTimeline->SetCellValue(eTrackPositionX, i, textX);
+				m_gridTimeline->SetCellValue(eTrackPositionY, i, textY);
 			}
 
 			//Get SFX
 			if(i < anim.m_trackSFX.GetNumKeyframes())
 			{
 				std::string sfxName = anim.m_trackSFX.GetKeyframe(i).GetValue();
-				m_gridTimeline->SetCellValue(sfxName, eTrackSFX, i);
+				m_gridTimeline->SetCellValue(eTrackSFX, i, sfxName);
 			}
 		}
 

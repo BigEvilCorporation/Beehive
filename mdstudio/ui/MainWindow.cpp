@@ -58,10 +58,17 @@ MainWindow::MainWindow()
 	Bind(wxEVT_KEY_UP, &MainWindow::EventHandlerKeyboard, this, GetId());
 
 	//Create blank OpenGL panel to create global DC
-	wxGLCanvas* m_blankCanvas = new wxGLCanvas(this, wxID_ANY, NULL);
+	wxGLAttributes dispAttrs;
+	dispAttrs.PlatformDefaults().Defaults().EndList();
+	m_blankCanvas = new wxGLCanvas(this, dispAttrs, wxID_ANY);
 
 	//Create GL context
 	m_context = new wxGLContext(m_blankCanvas);
+
+	if(!m_context->IsOK())
+	{
+		ion::debug::Error("MainWindow::MainWindow() - Invalid OpenGL context created");
+	}
 
 	//Create renderer (from global DC
 	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
@@ -937,7 +944,9 @@ void MainWindow::RefreshTileset()
 		if(m_project.get())
 		{
 			//Recreate tileset texture
+			m_renderer->LockContext(m_blankCanvas->GetHDC());
 			m_renderResources->CreateTilesetTexture();
+			m_renderer->UnlockContext();
 		}
 	}
 }
@@ -949,8 +958,10 @@ void MainWindow::RefreshTerrainTileset()
 		if(m_project.get())
 		{
 			//Recreate collision set texture
+			m_renderer->LockContext(m_blankCanvas->GetHDC());
 			m_renderResources->CreateCollisionTypesTexture();
 			m_renderResources->CreateTerrainTilesTexture();
+			m_renderer->UnlockContext();
 		}
 	}
 }
@@ -959,7 +970,9 @@ void MainWindow::RefreshSpriteSheets()
 {
 	if(m_project.get())
 	{
+		m_renderer->LockContext(m_blankCanvas->GetHDC());
 		m_renderResources->CreateSpriteSheetResources(*m_project.get());
+		m_renderer->UnlockContext();
 	}
 }
 

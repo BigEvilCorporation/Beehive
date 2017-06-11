@@ -105,6 +105,9 @@ protected:
 	//Rendering resources
 	RenderResources& m_renderResources;
 
+	//GL context
+	wxGLContext* m_glContext;
+
 	//Viewport
 	ion::render::Viewport m_viewport;
 

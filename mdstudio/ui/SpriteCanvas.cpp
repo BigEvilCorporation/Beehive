@@ -12,7 +12,7 @@
 #include "SpriteCanvas.h"
 
 SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: wxGLCanvas(parent, id, pos, size, style, name)
+	: wxGLCanvas(parent, id, NULL, pos, size, style, name)
 	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
 {
 	m_gridPrimitive = NULL;
