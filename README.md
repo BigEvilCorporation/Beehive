@@ -4,23 +4,15 @@ Beehive: A complete content tool for the SEGA Mega Drive (and soon to be more)
 # Getting Started
 
 Beehive (and all other ion::engine projects) use the JamPlus build system (see https://github.com/jamplus/jamplus).
-JamPlus includes support for XCode and other IDEs, but the .sh files need fetching from JamPlus source and I haven't
-used it in a long time so mileage may vary.
+JamPlus includes support for XCode and other IDEs, but I haven't tested building this particular project with it, nor are the dependencies for other platforms included here.
 
 - Grab ion::engine from https://github.com/BigEvilCorporation/ion-engine
-- Run ion_symlink.bat AS ADMINISTRATOR to link up the engine
+- Run ion_symlink.bat FROM AN ELEVATED COMMAND LINE (on Win10: right-click Start button, "Command Prompt (Admin)") to link up the engine
 - Run mdstudio/GenerateWorkspace_VS20XX.bat to create and open a Visual Studio workspace
 
 # Dependencies
 
-You'll need:
-
-- NVIDIA Cg 3.1
-- wxWidgets 3.0.2
-
-I've added binary dependencies for Win32, MSBuild v11 (VS2013) here:
-
- http://www.mediafire.com/download/yl22ar67eszy5r6/beehive_ion_dependencies.7z
+All dependencies are now included with ion::engine, you shouldn't need to download/do anything special.
 
 # Running
 
