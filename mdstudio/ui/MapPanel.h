@@ -52,6 +52,7 @@ private:
 		eContextMenuStampBringToFront,
 		eContextMenuStampSendToBack,
 		eContextMenuGameObjAddToAnim,
+		eContextMenuSetTerrainFlagSpecial,
 	};
 
 	enum CursorOrigin
@@ -184,6 +185,7 @@ private:
 
 	ion::gamekit::BezierPath* m_currentBezier;
 	ion::gamekit::BezierPath* m_highlightedBezier;
+	u32 m_highlightedBezierIdx;
 	int m_currentBezierControlIdx;
 	eBezierModifyHandle m_currentBezierControlHndl;
 	ion::Vector2 m_currentBezierControlPos;

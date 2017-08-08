@@ -888,6 +888,11 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
+	else if(event.GetId() == eContextMenuSetTerrainFlagSpecial)
+	{
+		u16 currentFlags = m_project.GetEditingCollisionMap().GetTerrainBezierFlags(m_highlightedBezierIdx);
+		m_project.GetEditingCollisionMap().SetTerrainBezierFlags(m_highlightedBezierIdx, currentFlags ^ eCollisionTileFlagSpecial);
+	}
 }
 
 void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int tileX, int tileY)
@@ -1126,10 +1131,22 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					Refresh();
 					m_project.InvalidateTerrainBeziers(false);
 				}
+				else if(buttonBits & eMouseRight)
+				{
+					//Right-click menu
+					wxMenu contextMenu;
+
+					wxMenuItem* item = contextMenu.Append(eContextMenuSetTerrainFlagSpecial, wxString("Special terrain"));
+					item->SetCheckable(true);
+					item->Check(m_project.GetEditingCollisionMap().GetTerrainBezierFlags(m_highlightedBezierIdx) & eCollisionTileFlagSpecial);
+					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
+					PopupMenu(&contextMenu);
+				}
 				else
 				{
 					//Set highlighted bezier
 					m_highlightedBezier = smallestBezier;
+					m_highlightedBezierIdx = smallestBezierIndex;
 				}
 			}
 
