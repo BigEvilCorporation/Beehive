@@ -8,6 +8,7 @@ ApplyIonRenderer beehivestudio ;
 ApplyIonGameKit beehivestudio ;
 ApplyIonLib beehivestudio : beehive ;
 ApplyWxSDK beehivestudio ;
+ApplySLZSDK beehivestudio ;
 
 local BEEHIVE_STUDIO_SRC = 
 	main.cpp

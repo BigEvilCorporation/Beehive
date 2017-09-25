@@ -621,6 +621,7 @@ class ExportDialogBase : public wxDialog
 		wxTextCtrl* m_txtProjectName;
 		wxRadioButton* m_btnText;
 		wxRadioButton* m_btnBinary;
+		wxRadioButton* m_btnCompressed;
 		wxCheckBox* m_chkPalettes;
 		wxFilePickerCtrl* m_filePickerPalettes;
 		wxCheckBox* m_chkTileset;

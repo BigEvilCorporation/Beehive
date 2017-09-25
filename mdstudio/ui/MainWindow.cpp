@@ -1203,6 +1203,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_chkSpritePalettes->SetValue(m_project->m_exportFilenames.spritePalettesExportEnabled);
 
 		dialog.m_btnBinary->SetValue(m_project->m_exportFilenames.exportBinary);
+		dialog.m_btnCompressed->SetValue(m_project->m_exportFilenames.exportCompressed);
 		dialog.m_btnText->SetValue(!m_project->m_exportFilenames.exportBinary);
 
 		int mapIndex = 0;
@@ -1235,27 +1236,31 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.spritePalettesExportEnabled = dialog.m_chkSpritePalettes->GetValue();
 
 			m_project->m_exportFilenames.exportBinary = dialog.m_btnBinary->GetValue();
+			m_project->m_exportFilenames.exportCompressed = dialog.m_btnBinary->GetValue();
+
+			bool binary = dialog.m_btnBinary->GetValue() | dialog.m_btnCompressed->GetValue();
+			bool compressed = dialog.m_btnCompressed->GetValue();
 			
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes);
 			
 			if(dialog.m_chkTileset->GetValue())
-				m_project->ExportTiles(m_project->m_exportFilenames.tileset, dialog.m_btnBinary->GetValue());
+				m_project->ExportTiles(m_project->m_exportFilenames.tileset, binary, compressed);
 
 			if(dialog.m_chkStamps->GetValue())
-				m_project->ExportStamps(m_project->m_exportFilenames.stamps, dialog.m_btnBinary->GetValue());
+				m_project->ExportStamps(m_project->m_exportFilenames.stamps, binary);
 
 			if(dialog.m_chkStampAnims->GetValue())
-				m_project->ExportStampAnims(m_project->m_exportFilenames.stampAnims, dialog.m_btnBinary->GetValue());
+				m_project->ExportStampAnims(m_project->m_exportFilenames.stampAnims, binary);
 
 			if(dialog.m_chkTerrainTiles->GetValue())
-				m_project->ExportTerrainTiles(m_project->m_exportFilenames.terrainTiles, dialog.m_btnBinary->GetValue());
+				m_project->ExportTerrainTiles(m_project->m_exportFilenames.terrainTiles, binary);
 
 			if(dialog.m_chkSpriteSheets->GetValue())
-				m_project->ExportSpriteSheets(m_project->m_exportFilenames.spriteSheets, dialog.m_btnBinary->GetValue());
+				m_project->ExportSpriteSheets(m_project->m_exportFilenames.spriteSheets, binary);
 			
 			if(dialog.m_chkSpriteAnims->GetValue())
-				m_project->ExportSpriteAnims(m_project->m_exportFilenames.spriteAnims, dialog.m_btnBinary->GetValue());
+				m_project->ExportSpriteAnims(m_project->m_exportFilenames.spriteAnims, binary);
 			
 			if(dialog.m_chkSpritePalettes->GetValue())
 				m_project->ExportSpritePalettes(m_project->m_exportFilenames.spritePalettes);
@@ -1284,25 +1289,25 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				}
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
-					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, dialog.m_btnBinary->GetValue());
+					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, binary);
 
 				if(it->second.m_exportFilenames.blocksExportEnabled)
-					m_project->ExportBlocks(it->first, it->second.m_exportFilenames.blocks, dialog.m_btnBinary->GetValue(), blockWidth, blockHeight);
+					m_project->ExportBlocks(it->first, it->second.m_exportFilenames.blocks, binary, blockWidth, blockHeight);
 
 				if(it->second.m_exportFilenames.blockMapExportEnabled)
-					m_project->ExportBlockMap(it->first, it->second.m_exportFilenames.blockMap, dialog.m_btnBinary->GetValue(), blockWidth, blockHeight);
+					m_project->ExportBlockMap(it->first, it->second.m_exportFilenames.blockMap, binary, blockWidth, blockHeight);
 
 				if(it->second.m_exportFilenames.stampMapExportEnabled)
-					m_project->ExportStampMap(it->first, it->second.m_exportFilenames.stampMap, dialog.m_btnBinary->GetValue());
+					m_project->ExportStampMap(it->first, it->second.m_exportFilenames.stampMap, binary);
 				
 				if(it->second.m_exportFilenames.collisionMapExportEnabled)
-					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, dialog.m_btnBinary->GetValue());
+					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, binary);
 
 				if(it->second.m_exportFilenames.terrainBlocksExportEnabled)
-					m_project->ExportTerrainBlocks(it->first, it->second.m_exportFilenames.terrainBlocks, dialog.m_btnBinary->GetValue(), terrainBlockWidth, terrainBlockHeight);
+					m_project->ExportTerrainBlocks(it->first, it->second.m_exportFilenames.terrainBlocks, binary, terrainBlockWidth, terrainBlockHeight);
 
 				if(it->second.m_exportFilenames.terrainBlockMapExportEnabled)
-					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, dialog.m_btnBinary->GetValue(), terrainBlockWidth, terrainBlockHeight);
+					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, binary, terrainBlockWidth, terrainBlockHeight);
 				
 				if(it->second.m_exportFilenames.gameObjectsExportEnabled)
 					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects);
@@ -1705,27 +1710,6 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 
 				if(shiftRight && width > originalWidth)
 				{
-					//Move terrain beziers
-					for(int i = 0; i < m_project->GetEditingCollisionMap().GetNumTerrainBeziers(); i++)
-					{
-						ion::gamekit::BezierPath* bezier = m_project->GetEditingCollisionMap().GetTerrainBezier(i);
-						if(bezier)
-						{
-							for(int j = 0; j < bezier->GetNumPoints(); j++)
-							{
-								ion::Vector2 position;
-								ion::Vector2 controlA;
-								ion::Vector2 controlB;
-								bezier->GetPoint(j, position, controlA, controlB);
-				
-								position.x += (width - originalWidth) * (float)tileWidth;
-				
-								bezier->SetPoint(j, position, controlA, controlB);
-							}
-				
-						}
-					}
-				
 					//Repaint all
 					m_project->InvalidateTerrainBeziers(true);
 				}

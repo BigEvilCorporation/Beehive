@@ -1347,6 +1347,9 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_btnBinary = new wxRadioButton( this, wxID_ANY, wxT("Binary"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer16->Add( m_btnBinary, 0, wxALL, 5 );
 	
+	m_btnCompressed = new wxRadioButton( this, wxID_ANY, wxT("Compressed"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer16->Add( m_btnCompressed, 0, wxALL, 5 );
+	
 	
 	fgSizer32->Add( bSizer16, 1, wxEXPAND, 5 );
 	

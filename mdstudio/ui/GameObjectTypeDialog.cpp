@@ -147,7 +147,10 @@ void GameObjectTypeDialog::OnBtnApplyObjChanges(wxCommandEvent& event)
 		if(m_actorCache.size() > 0)
 		{
 			int index = m_choiceSpriteActor->GetSelection();
-			gameObjType->SetSpriteActorId(m_actorCache[index]);
+			if(index >= 0)
+			{
+				gameObjType->SetSpriteActorId(m_actorCache[index]);
+			}
 		}
 
 		PopulateTypeList();
