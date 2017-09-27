@@ -1186,6 +1186,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_txtProjectName->SetValue(m_project->GetName());
 		dialog.m_filePickerPalettes->SetPath(m_project->m_exportFilenames.palettes);
 		dialog.m_filePickerTileset->SetPath(m_project->m_exportFilenames.tileset);
+		dialog.m_filePickerBlocks->SetPath(m_project->m_exportFilenames.blocks);
 		dialog.m_filePickerStamps->SetPath(m_project->m_exportFilenames.stamps);
 		dialog.m_filePickerStampAnims->SetPath(m_project->m_exportFilenames.stampAnims);
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.terrainTiles);
@@ -1195,6 +1196,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		dialog.m_chkPalettes->SetValue(m_project->m_exportFilenames.palettesExportEnabled);
 		dialog.m_chkTileset->SetValue(m_project->m_exportFilenames.tilesetExportEnabled);
+		dialog.m_chkBlocks->SetValue(m_project->m_exportFilenames.blockExportEnabled);
 		dialog.m_chkStamps->SetValue(m_project->m_exportFilenames.stampsExportEnabled);
 		dialog.m_chkStampAnims->SetValue(m_project->m_exportFilenames.stampAnimsExportEnabled);
 		dialog.m_chkTerrainTiles->SetValue(m_project->m_exportFilenames.terrainTilesExportEnabled);
@@ -1219,6 +1221,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->SetName(std::string(dialog.m_txtProjectName->GetValue()));
 			m_project->m_exportFilenames.palettes = dialog.m_filePickerPalettes->GetPath();
 			m_project->m_exportFilenames.tileset = dialog.m_filePickerTileset->GetPath();
+			m_project->m_exportFilenames.blocks = dialog.m_filePickerBlocks->GetPath();
 			m_project->m_exportFilenames.stamps = dialog.m_filePickerStamps->GetPath();
 			m_project->m_exportFilenames.stampAnims = dialog.m_filePickerStampAnims->GetPath();
 			m_project->m_exportFilenames.terrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
@@ -1228,6 +1231,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			m_project->m_exportFilenames.palettesExportEnabled = dialog.m_chkPalettes->GetValue();
 			m_project->m_exportFilenames.tilesetExportEnabled = dialog.m_chkTileset->GetValue();
+			m_project->m_exportFilenames.blockExportEnabled = dialog.m_chkBlocks->GetValue();
 			m_project->m_exportFilenames.stampsExportEnabled = dialog.m_chkStamps->GetValue();
 			m_project->m_exportFilenames.stampAnimsExportEnabled = dialog.m_chkStampAnims->GetValue();
 			m_project->m_exportFilenames.terrainTilesExportEnabled = dialog.m_chkTerrainTiles->GetValue();
@@ -1270,16 +1274,16 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			int terrainBlockWidth = 4;
 			int terrainBlockHeight = 4;
 
+			if(dialog.m_chkBlocks->GetValue())
+			{
+				//Export blocks
+				m_project->ExportBlocks(m_project->m_exportFilenames.blocks, binary, blockWidth, blockHeight);
+			}
+
 			int mapIndex = 0;
 			for(TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
 			{
 				dialog.GetMapFormValues(mapIndex, it->second.m_exportFilenames);
-
-				if(it->second.m_exportFilenames.blocksExportEnabled || it->second.m_exportFilenames.blockMapExportEnabled)
-				{
-					//Generate blocks
-					it->second.GenerateBlocks(*m_project, blockWidth, blockHeight);
-				}
 
 				if(it->second.m_exportFilenames.terrainBlocksExportEnabled || it->second.m_exportFilenames.terrainBlockMapExportEnabled)
 				{
@@ -1290,9 +1294,6 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
 					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, binary);
-
-				if(it->second.m_exportFilenames.blocksExportEnabled)
-					m_project->ExportBlocks(it->first, it->second.m_exportFilenames.blocks, binary, blockWidth, blockHeight);
 
 				if(it->second.m_exportFilenames.blockMapExportEnabled)
 					m_project->ExportBlockMap(it->first, it->second.m_exportFilenames.blockMap, binary, blockWidth, blockHeight);

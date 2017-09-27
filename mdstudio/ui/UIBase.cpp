@@ -1374,6 +1374,12 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
 	
+	m_chkBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer33->Add( m_chkBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer33->Add( m_filePickerBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+	
 	m_chkStamps = new wxCheckBox( this, wxID_ANY, wxT("Export stamps:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkStamps, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
@@ -2560,12 +2566,6 @@ ExportDialogMapTab::ExportDialogMapTab( wxWindow* parent, wxWindowID id, const w
 	
 	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer34->Add( m_chkBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer34->Add( m_filePickerBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 	
 	m_chkBlockMap = new wxCheckBox( this, wxID_ANY, wxT("Export block map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkBlockMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
