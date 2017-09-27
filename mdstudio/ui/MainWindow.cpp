@@ -1190,6 +1190,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerStamps->SetPath(m_project->m_exportFilenames.stamps);
 		dialog.m_filePickerStampAnims->SetPath(m_project->m_exportFilenames.stampAnims);
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.terrainTiles);
+		dialog.m_filePickerTerrainBlocks->SetPath(m_project->m_exportFilenames.terrainBlocks);
 		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
 		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
 		dialog.m_dirPickerSpritePalettes->SetPath(m_project->m_exportFilenames.spritePalettes);
@@ -1200,6 +1201,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_chkStamps->SetValue(m_project->m_exportFilenames.stampsExportEnabled);
 		dialog.m_chkStampAnims->SetValue(m_project->m_exportFilenames.stampAnimsExportEnabled);
 		dialog.m_chkTerrainTiles->SetValue(m_project->m_exportFilenames.terrainTilesExportEnabled);
+		dialog.m_chkTerrainBlocks->SetValue(m_project->m_exportFilenames.terrainBlockExportEnabled);
 		dialog.m_chkSpriteSheets->SetValue(m_project->m_exportFilenames.spriteSheetsExportEnabled);
 		dialog.m_chkSpriteAnims->SetValue(m_project->m_exportFilenames.spriteAnimsExportEnabled);
 		dialog.m_chkSpritePalettes->SetValue(m_project->m_exportFilenames.spritePalettesExportEnabled);
@@ -1225,6 +1227,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.stamps = dialog.m_filePickerStamps->GetPath();
 			m_project->m_exportFilenames.stampAnims = dialog.m_filePickerStampAnims->GetPath();
 			m_project->m_exportFilenames.terrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
+			m_project->m_exportFilenames.terrainBlocks = dialog.m_filePickerTerrainBlocks->GetPath();
 			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
 			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
 			m_project->m_exportFilenames.spritePalettes = dialog.m_dirPickerSpritePalettes->GetPath();
@@ -1235,6 +1238,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.stampsExportEnabled = dialog.m_chkStamps->GetValue();
 			m_project->m_exportFilenames.stampAnimsExportEnabled = dialog.m_chkStampAnims->GetValue();
 			m_project->m_exportFilenames.terrainTilesExportEnabled = dialog.m_chkTerrainTiles->GetValue();
+			m_project->m_exportFilenames.terrainBlockExportEnabled = dialog.m_chkTerrainBlocks->GetValue();
 			m_project->m_exportFilenames.spriteSheetsExportEnabled = dialog.m_chkSpriteSheets->GetValue();
 			m_project->m_exportFilenames.spriteAnimsExportEnabled = dialog.m_chkSpriteAnims->GetValue();
 			m_project->m_exportFilenames.spritePalettesExportEnabled = dialog.m_chkSpritePalettes->GetValue();
@@ -1280,17 +1284,16 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				m_project->ExportBlocks(m_project->m_exportFilenames.blocks, binary, blockWidth, blockHeight);
 			}
 
+			if(dialog.m_chkTerrainBlocks->GetValue())
+			{
+				//Export terrain blocks
+				m_project->ExportTerrainBlocks(m_project->m_exportFilenames.terrainBlocks, binary, blockWidth, blockHeight);
+			}
+
 			int mapIndex = 0;
 			for(TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
 			{
 				dialog.GetMapFormValues(mapIndex, it->second.m_exportFilenames);
-
-				if(it->second.m_exportFilenames.terrainBlocksExportEnabled || it->second.m_exportFilenames.terrainBlockMapExportEnabled)
-				{
-					//Generate terrain blocks
-					CollisionMap& collisionMap = m_project->GetCollisionMap(it->first);
-					collisionMap.GenerateBlocks(*m_project, terrainBlockWidth, terrainBlockHeight);
-				}
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
 					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, binary);
@@ -1303,9 +1306,6 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				
 				if(it->second.m_exportFilenames.collisionMapExportEnabled)
 					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, binary);
-
-				if(it->second.m_exportFilenames.terrainBlocksExportEnabled)
-					m_project->ExportTerrainBlocks(it->first, it->second.m_exportFilenames.terrainBlocks, binary, terrainBlockWidth, terrainBlockHeight);
 
 				if(it->second.m_exportFilenames.terrainBlockMapExportEnabled)
 					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, binary, terrainBlockWidth, terrainBlockHeight);

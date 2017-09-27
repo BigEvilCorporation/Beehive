@@ -634,6 +634,8 @@ class ExportDialogBase : public wxDialog
 		wxFilePickerCtrl* m_filePickerStampAnims;
 		wxCheckBox* m_chkTerrainTiles;
 		wxFilePickerCtrl* m_filePickerTerrainTiles;
+		wxCheckBox* m_chkTerrainBlocks;
+		wxFilePickerCtrl* m_filePickerTerrainBlocks;
 		wxCheckBox* m_chkSpriteSheets;
 		wxDirPickerCtrl* m_dirPickerSpriteSheets;
 		wxCheckBox* m_chkSpritePalettes;
@@ -1005,8 +1007,6 @@ class ExportDialogMapTab : public wxPanel
 		wxFilePickerCtrl* m_filePickerStampMap;
 		wxCheckBox* m_chkCollisionMap;
 		wxFilePickerCtrl* m_filePickerCollisionMap;
-		wxCheckBox* m_chkCollisionBlocks;
-		wxFilePickerCtrl* m_filePickerCollisionBlocks;
 		wxCheckBox* m_chkCollisionBlockMap;
 		wxFilePickerCtrl* m_filePickerCollisionBlockMap;
 		wxCheckBox* m_chkGameObj;

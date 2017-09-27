@@ -1398,6 +1398,12 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTerrainTiles, 0, wxALL|wxEXPAND, 5 );
 	
+	m_chkTerrainBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export terrain blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer33->Add( m_chkTerrainBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_filePickerTerrainBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer33->Add( m_filePickerTerrainBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+	
 	m_chkSpriteSheets = new wxCheckBox( this, wxID_ANY, wxT("Export sprite sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkSpriteSheets, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
@@ -2584,12 +2590,6 @@ ExportDialogMapTab::ExportDialogMapTab( wxWindow* parent, wxWindowID id, const w
 	
 	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerCollisionMap, 0, wxALL|wxEXPAND, 5 );
-	
-	m_chkCollisionBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export terrain blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer34->Add( m_chkCollisionBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	m_filePickerCollisionBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
-	fgSizer34->Add( m_filePickerCollisionBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 	
 	m_chkCollisionBlockMap = new wxCheckBox( this, wxID_ANY, wxT("Export terrain block map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkCollisionBlockMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
