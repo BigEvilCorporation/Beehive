@@ -163,7 +163,7 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 					newCollisionMap.AddTerrainBezier(*collisionMap.GetTerrainBezier(i));
 				}
 
-				//Import all tiles
+				//Import all map tiles
 				for(int x = 0; x < map.GetWidth(); x++)
 				{
 					for(int y = 0; y < map.GetHeight(); y++)
@@ -173,11 +173,16 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 						if(const Tile* tile = tileset.GetTile(tileId))
 						{
 							TileId existingTileId = m_project.GetTileset().FindDuplicate(*tile, tileFlags);
-							if(existingTileId != InvalidTileId)
+							if(existingTileId == InvalidTileId)
 							{
-								newMap.SetTile(x, y, existingTileId);
-								newMap.SetTileFlags(x, y, tileFlags);
+								//Import new tile
+								existingTileId = m_project.GetTileset().AddTile();
+								Tile* newTile = m_project.GetTileset().GetTile(existingTileId);
+								*newTile = *tile;
 							}
+
+							newMap.SetTile(x, y, existingTileId);
+							newMap.SetTileFlags(x, y, tileFlags);
 						}
 					}
 				}
@@ -199,11 +204,16 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 								{
 									u32 existingFlags = 0;
 									TileId existingTileId = m_project.GetTileset().FindDuplicate(*tile, existingFlags);
-									if(existingTileId != InvalidTileId)
+									if(existingTileId == InvalidTileId)
 									{
-										tempStamp.SetTile(x, y, existingTileId);
-										tempStamp.SetTileFlags(x, y, tileFlags ^ existingFlags);
+										//Import new tile
+										existingTileId = m_project.GetTileset().AddTile();
+										Tile* newTile = m_project.GetTileset().GetTile(existingTileId);
+										*newTile = *tile;
 									}
+
+									tempStamp.SetTile(x, y, existingTileId);
+									tempStamp.SetTileFlags(x, y, tileFlags ^ existingFlags);
 								}
 							}
 						}
@@ -242,9 +252,11 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 				}
 			}
 
+			m_project.InvalidateTiles(true);
 			m_project.InvalidateMap(true);
 			m_project.InvalidateTerrainTiles(true);
 			m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+			m_project.InvalidateTiles(false);
 			m_project.InvalidateTerrainTiles(false);
 			m_project.InvalidateMap(false);
 
