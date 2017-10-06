@@ -1287,7 +1287,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkTerrainBlocks->GetValue())
 			{
 				//Export terrain blocks
-				m_project->ExportTerrainBlocks(m_project->m_exportFilenames.terrainBlocks, binary, blockWidth, blockHeight);
+				m_project->ExportTerrainBlocks(m_project->m_exportFilenames.terrainBlocks, binary, terrainBlockWidth, terrainBlockHeight);
 			}
 
 			int mapIndex = 0;
