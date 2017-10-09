@@ -1709,11 +1709,8 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 				map.Resize(width, height, shiftRight, shiftDown);
 				collisionMap.Resize(width, height, shiftRight, shiftDown);
 
-				if(shiftRight && width > originalWidth)
-				{
-					//Repaint all
-					m_project->InvalidateTerrainBeziers(true);
-				}
+				//Repaint all
+				m_project->InvalidateTerrainBeziers(true);
 
 				//Refresh map panel
 				RefreshPanel(ePanelMap);
