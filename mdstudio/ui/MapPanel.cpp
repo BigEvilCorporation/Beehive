@@ -893,6 +893,11 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		u16 currentFlags = m_project.GetEditingCollisionMap().GetTerrainBezierFlags(m_highlightedBezierIdx);
 		m_project.GetEditingCollisionMap().SetTerrainBezierFlags(m_highlightedBezierIdx, currentFlags ^ eCollisionTileFlagSpecial);
 	}
+	else if(event.GetId() == eContextMenuSetTerrainFlagWater)
+	{
+		u16 currentFlags = m_project.GetEditingCollisionMap().GetTerrainBezierFlags(m_highlightedBezierIdx);
+		m_project.GetEditingCollisionMap().SetTerrainBezierFlags(m_highlightedBezierIdx, currentFlags ^ eCollisionTileFlagWater);
+	}
 }
 
 void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int tileX, int tileY)
@@ -1083,12 +1088,14 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				//Ensure bounds are at least 2 tiles thick
 				if((ion::maths::Abs(boundsMax.x - boundsMin.x) / (float)tileWidth) < 2.0f)
 				{
-					boundsMax.x += (float)tileWidth * 2;
+					boundsMin.x -= (float)tileWidth;
+					boundsMax.x += (float)tileWidth;
 				}
 
 				if((ion::maths::Abs(boundsMax.y - boundsMin.y) / (float)tileHeight) < 2.0f)
 				{
-					boundsMax.y += (float)tileHeight * 2;
+					boundsMin.y -= (float)tileHeight;
+					boundsMax.y += (float)tileHeight;
 				}
 
 				if(ion::maths::PointInsideBox(mousePosF, boundsMin, boundsMax))
@@ -1139,6 +1146,11 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					wxMenuItem* item = contextMenu.Append(eContextMenuSetTerrainFlagSpecial, wxString("Special terrain"));
 					item->SetCheckable(true);
 					item->Check(m_project.GetEditingCollisionMap().GetTerrainBezierFlags(m_highlightedBezierIdx) & eCollisionTileFlagSpecial);
+
+					item = contextMenu.Append(eContextMenuSetTerrainFlagWater, wxString("Water terrain"));
+					item->SetCheckable(true);
+					item->Check(m_project.GetEditingCollisionMap().GetTerrainBezierFlags(m_highlightedBezierIdx) & eCollisionTileFlagWater);
+
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
 					PopupMenu(&contextMenu);
 				}
@@ -1984,12 +1996,14 @@ void MapPanel::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion
 		//Ensure bounds are at least 2 tiles thick
 		if((ion::maths::Abs(boundsMax.x - boundsMin.x) / (float)tileWidth) < 2.0f)
 		{
-			boundsMax.x += (float)tileWidth * 2;
+			boundsMin.x -= (float)tileWidth;
+			boundsMax.x += (float)tileWidth;
 		}
 
 		if((ion::maths::Abs(boundsMax.y - boundsMin.y) / (float)tileHeight) < 2.0f)
 		{
-			boundsMax.y += (float)tileHeight * 2;
+			boundsMin.y -= (float)tileHeight;
+			boundsMax.y += (float)tileHeight;
 		}
 
 		ion::Vector2 size = boundsMax - boundsMin;

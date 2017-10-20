@@ -53,6 +53,7 @@ private:
 		eContextMenuStampSendToBack,
 		eContextMenuGameObjAddToAnim,
 		eContextMenuSetTerrainFlagSpecial,
+		eContextMenuSetTerrainFlagWater,
 	};
 
 	enum CursorOrigin
