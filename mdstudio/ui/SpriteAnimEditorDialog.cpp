@@ -167,7 +167,7 @@ void SpriteAnimEditorDialog::OnBtnActorDelete(wxCommandEvent& event)
 			m_renderResources.DeleteSpriteSheetRenderResources(it->first);
 		}
 
-		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0, ion::Vector2i());
+		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0, ion::Vector2i(), ion::Vector2i(), ion::Vector2i(), ion::Vector2i());
 
 		m_project.DeleteActor(m_selectedActorId);
 
@@ -271,7 +271,7 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetDelete(wxCommandEvent& event)
 		}
 
 		m_renderResources.DeleteSpriteSheetRenderResources(m_selectedSpriteSheetId);
-		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0, ion::Vector2i());
+		m_canvas->SetDrawSpriteSheet(InvalidSpriteSheetId, 0, ion::Vector2i(), ion::Vector2i(), ion::Vector2i(), ion::Vector2i());
 
 		m_listAnimations->Clear();
 		m_animCache.clear();
@@ -401,9 +401,11 @@ void SpriteAnimEditorDialog::OnSliderMove(wxScrollEvent& event)
 		float time = ion::maths::Lerp(0.0f, m_selectedAnim->GetLength(), (float)m_sliderTimeline->GetValue() / 100.0f);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);
 		const ion::Vector2i& offset = m_selectedAnim->m_trackPosition.GetValue(time);
+		ion::Vector2i size(m_selectedSpriteSheet->GetWidthTiles() * m_project.GetPlatformConfig().tileWidth, m_selectedSpriteSheet->GetHeightTiles() * m_project.GetPlatformConfig().tileHeight);
+		SpriteSheet::SpriteFrameDimensions dimensions = m_selectedSpriteSheet->GetDimensionData(frame);
 
 		m_selectedAnim->SetFrame(time);
-		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame, offset);
+		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame, size, offset, dimensions.topLeft, dimensions.bottomRight);
 		m_gridTimeline->GoToCell(0, frame);
 	}
 }
@@ -837,7 +839,7 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 			m_selectedSpriteSheet = m_selectedActor ? m_selectedActor->GetSpriteSheet(m_selectedSpriteSheetId) : m_selectedStamp->GetStampAnimSheet(m_selectedSpriteSheetId);
 			ion::debug::Assert(m_selectedSpriteSheet, "SpriteAnimEditorDialog::OnSpriteSheetSelected() - Invalid spriteSheet ID");
 			m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(m_selectedSpriteSheet->GetWidthTiles() * tileWidth, m_selectedSpriteSheet->GetHeightTiles() * tileHeight));
-			m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, 0, ion::Vector2i());
+			m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, 0, ion::Vector2i(), ion::Vector2i(), ion::Vector2i(), ion::Vector2i());
 			m_canvas->CreateGrid(m_selectedSpriteSheet->GetWidthTiles() * tileWidth, m_selectedSpriteSheet->GetHeightTiles() * tileHeight, m_selectedSpriteSheet->GetWidthTiles(), m_selectedSpriteSheet->GetHeightTiles());
 			m_canvas->SetGridColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 			m_canvas->SetDrawGrid(true);
@@ -890,9 +892,11 @@ void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 		float lerpTime = ion::maths::UnLerp(0.0f, m_selectedAnim->GetLength(), time);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);
 		const ion::Vector2i& offset = m_selectedAnim->m_trackPosition.GetValue(time);
+		ion::Vector2i size(m_selectedSpriteSheet->GetWidthTiles() * m_project.GetPlatformConfig().tileWidth, m_selectedSpriteSheet->GetHeightTiles() * m_project.GetPlatformConfig().tileHeight);
+		SpriteSheet::SpriteFrameDimensions dimensions = m_selectedSpriteSheet->GetDimensionData(frame);
 
 		m_selectedAnim->Update(delta);
-		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame, offset);
+		m_canvas->SetDrawSpriteSheet(m_selectedSpriteSheetId, frame, size, offset, dimensions.topLeft, dimensions.bottomRight);
 		m_sliderTimeline->SetValue((int)ion::maths::Round(lerpTime * 100.0f));
 		m_gridTimeline->GoToCell(0, frame);
 	}

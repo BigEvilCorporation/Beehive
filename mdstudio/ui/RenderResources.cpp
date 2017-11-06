@@ -98,7 +98,8 @@ RenderResources::RenderResources(Project& project)
 
 	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(0.5f, 0.5f));
 	m_primitives[ePrimitiveTileQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
-	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
+	m_primitives[ePrimitiveTileLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
+	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(0.5f, 0.5f));
 	m_primitives[ePrimitiveScreenLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(screenWidth / 2.0f, screenHeight / 2.0f));
 }
 
@@ -207,7 +208,7 @@ void RenderResources::CreateTerrainTilesTexture()
 	u8* data = new u8[textureSize];
 	ion::memory::MemSet(data, 0, textureSize);
 
-	const ion::Colour setColour(0.0f, 1.0f, 0.0f, 0.7f);
+	const ion::Colour setColour(1.0f, 0.7f, 1.0f, 1.0f);
 	const ion::Colour unsetColour(0.0f, 0.0f, 0.0f, 0.0f);
 
 	for(int i = 0; i < tileset.GetCount(); i++)

@@ -39,7 +39,7 @@ public:
 
 	void SetDrawPreview(bool drawPreview, u32 maxFrames);
 	void SetDrawGrid(bool drawGrid);
-	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& offset);
+	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& size, const ion::Vector2i& offset, const ion::Vector2i& topLeft, const ion::Vector2i& bottomRight);
 	void SetDrawStamp(Stamp& stamp, const ion::Vector2i& offset);
 
 	//Refresh panel
@@ -62,6 +62,7 @@ private:
 	void RenderTileFrame(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderBounds(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
 	Project* m_project;
 
@@ -73,6 +74,7 @@ private:
 
 	//Rendering primitives
 	ion::render::Grid* m_gridPrimitive;
+	ion::render::LineQuad* m_boundsPrimitive;
 	ion::render::Chessboard* m_tileFramePrimitive;
 
 	bool m_drawPreview;
@@ -80,6 +82,8 @@ private:
 	SpriteSheetId m_drawSpriteSheet;
 	u32 m_drawSpriteSheetFrame;
 	ion::Vector2i m_drawOffset;
+	ion::Vector2i m_topLeft;
+	ion::Vector2i m_bottomRight;
 	bool m_drawGrid;
 
 	//Mouse

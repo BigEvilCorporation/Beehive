@@ -16,6 +16,7 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
 {
 	m_gridPrimitive = NULL;
+	m_boundsPrimitive = NULL;
 	m_cameraZoom = 1.0f;
 	m_gridColour = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);
 	m_drawPreview = false;
@@ -38,6 +39,8 @@ SpriteCanvas::~SpriteCanvas()
 {
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
+	if(m_boundsPrimitive)
+		delete m_boundsPrimitive;
 }
 
 void SpriteCanvas::SetupRendering(ion::render::Renderer* renderer, wxGLContext* glContext, RenderResources* renderResources)
@@ -84,11 +87,21 @@ void SpriteCanvas::SetDrawGrid(bool drawGrid)
 	Refresh();
 }
 
-void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& offset)
+void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& size, const ion::Vector2i& offset, const ion::Vector2i& topLeft, const ion::Vector2i& bottomRight)
 {
 	m_drawSpriteSheet = spriteSheet;
 	m_drawSpriteSheetFrame = frame;
 	m_drawOffset = offset;
+	m_topLeft = topLeft;
+	m_bottomRight = bottomRight;
+
+	if(m_boundsPrimitive)
+		delete m_boundsPrimitive;
+
+	ion::Vector2 boundsHalfExtents((float)(bottomRight.x - topLeft.x) / 2.0f, (float)(bottomRight.y - topLeft.y) / 2.0f);
+	ion::Vector2 boundsOffset((float)((-size.x / 2.0f) + boundsHalfExtents.x + topLeft.x), (float)((size.y / 2.0f) - boundsHalfExtents.y - topLeft.y));
+	m_boundsPrimitive = new ion::render::LineQuad(ion::render::LineQuad::xy, boundsHalfExtents, boundsOffset);
+
 	Refresh();
 }
 
@@ -239,6 +252,10 @@ void SpriteCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4&
 	//Render grid
 	RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 	z += zOffset;
+
+	//Render bounding box
+	RenderBounds(renderer, cameraInverseMtx, projectionMtx, z);
+	z += zOffset;
 }
 
 void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -359,6 +376,25 @@ void SpriteCanvas::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix
 		material->SetDiffuseColour(m_gridColour);
 		material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
+		material->Unbind();
+	}
+}
+
+void SpriteCanvas::RenderBounds(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	if(m_boundsPrimitive)
+	{
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialFlatColour);
+		const ion::Colour& colour = m_renderResources->GetColour(RenderResources::eColourOutline);
+
+		ion::Matrix4 outlineMtx;
+		ion::Vector2i size = (m_bottomRight - m_topLeft);
+		outlineMtx.SetTranslation(ion::Vector3(m_drawOffset.x * m_cameraZoom, m_drawOffset.y * m_cameraZoom, z));
+		outlineMtx.SetScale(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
+
+		material->SetDiffuseColour(colour);
+		material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_boundsPrimitive->GetVertexBuffer());
 		material->Unbind();
 	}
 }

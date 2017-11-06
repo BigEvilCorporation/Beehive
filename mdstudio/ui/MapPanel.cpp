@@ -2346,7 +2346,7 @@ void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::M
 	ion::render::Shader* vertexShader = m_renderResources.GetVertexShader(RenderResources::eShaderFlatColour);
 	ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
 
-	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitLineQuad);
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileLineQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
 

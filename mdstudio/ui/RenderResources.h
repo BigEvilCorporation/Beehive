@@ -65,6 +65,7 @@ public:
 	{
 		ePrimitiveUnitQuad,
 		ePrimitiveTileQuad,
+		ePrimitiveTileLineQuad,
 		ePrimitiveUnitLineQuad,
 		ePrimitiveScreenLineQuad,
 		ePrimitiveMax
