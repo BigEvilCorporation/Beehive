@@ -44,6 +44,7 @@ enum ToolType
 	eToolFlipY,
 	eToolSelectGameObject,
 	eToolPlaceGameObject,
+	eToolDrawGameObject,
 	eToolMoveGameObject,
 	eToolAnimateGameObject,
 	eToolRemoveGameObject,

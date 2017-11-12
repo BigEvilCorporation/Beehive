@@ -119,6 +119,7 @@ class SpriteCanvas;
 #define wxID_TOOL_MOVEGAMEOBJ 1063
 #define wxID_TOOL_ANIMATEGAMEOBJ 1064
 #define wxID_TOOL_REMOVEGAMEOBJ 1065
+#define wxID_TOOL_DRAWGAMEOBJ 1066
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -467,6 +468,7 @@ class MapToolboxGameObjs : public wxPanel
 	protected:
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
+		wxBitmapButton* m_toolDrawGameObject;
 		wxBitmapButton* m_toolMoveGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
 	

@@ -1009,6 +1009,11 @@ MapToolboxGameObjs::MapToolboxGameObjs( wxWindow* parent, wxWindowID id, const w
 	
 	fgSizer9->Add( m_toolPlaceGameObject, 0, wxALL, 5 );
 	
+	m_toolDrawGameObject = new wxBitmapButton( this, wxID_TOOL_DRAWGAMEOBJ, wxBitmap( tool_placegameobj_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
+	m_toolDrawGameObject->SetToolTip( wxT("Draw Game Object") );
+	
+	fgSizer9->Add( m_toolDrawGameObject, 0, wxALL, 5 );
+	
 	m_toolMoveGameObject = new wxBitmapButton( this, wxID_TOOL_MOVEGAMEOBJ, wxBitmap( tool_movegameobj_xpm ), wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW );
 	m_toolMoveGameObject->SetToolTip( wxT("Move Game Object") );
 	

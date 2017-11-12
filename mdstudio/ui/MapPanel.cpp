@@ -93,7 +93,7 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		}
 	}
 
-	if(m_currentTool == eToolMoveGameObject || m_currentTool == eToolPlaceGameObject)
+	if(m_currentTool == eToolMoveGameObject || m_currentTool == eToolPlaceGameObject || m_currentTool == eToolDrawGameObject)
 	{
 		m_moveGameObjByPixel = event.ShiftDown();
 	}
@@ -770,6 +770,53 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType);
 						Refresh();
 					}
+				}
+			}
+			break;
+		}
+
+		case eToolDrawGameObject:
+		{
+			if(inMaprange)
+			{
+				if(buttonBits & eMouseLeft)
+				{
+					if(m_boxSelectStart.x == -1)
+					{
+						//Mouse first down, take start pos
+						m_boxSelectStart.x = x;
+						m_boxSelectStart.y = y;
+					}
+					else
+					{
+						//Start pos already taken, take end pos
+						m_boxSelectEnd.x = x;
+						m_boxSelectEnd.y = y;
+					}
+				}
+				else
+				{
+					if(m_boxSelectStart.x != -1 && m_boxSelectEnd.x != -1)
+					{
+						//Mouse up, box drawn
+						GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
+						if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
+						{
+							int boxX = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
+							int boxY = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
+							int boxWidth = ion::maths::Abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1;
+							int boxHeight = ion::maths::Abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1;
+
+							m_project.GetEditingMap().PlaceGameObject(boxX, boxY, boxWidth, boxHeight, *gameObjectType);
+							Refresh();
+						}
+					}
+
+					//Reset box
+					m_boxSelectStart.x = -1;
+					m_boxSelectStart.y = -1;
+					m_boxSelectEnd.x = -1;
+					m_boxSelectEnd.y = -1;
 				}
 			}
 			break;
@@ -2072,8 +2119,10 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 			{
 				const float x = gameObject.GetPosition().x;
 				const float y_inv = (mapHeight * tileHeight) - 1 - gameObject.GetPosition().y;
-				const float width = gameObjectType->GetDimensions().x;
-				const float height_inv = -gameObjectType->GetDimensions().y;
+				const float width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType->GetDimensions().x;
+				const float height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
+				const float height_inv = -height;
+				const bool customSize = (gameObject.GetDimensions().x > 0);
 
 				//Use sprite sheet animation if available, else use default preview image
 				SpriteSheetId spriteSheetId = (gameObject.GetSpriteSheetId() != InvalidSpriteSheetId) ? gameObject.GetSpriteSheetId() : gameObjectType->GetPreviewSpriteSheetId();
@@ -2097,7 +2146,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				}
 
 				//Render coloured box
-				ion::Vector3 scale(gameObjectType->GetDimensions().x / tileWidth, gameObjectType->GetDimensions().y / tileHeight, 1.0f);
+				ion::Vector3 scale(width / tileWidth, height / tileHeight, 1.0f);
 				ion::Matrix4 mtx;
 				ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
 					floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
@@ -2127,8 +2176,16 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 						ion::Matrix4 spriteSheetMtx;
 						spriteSheetMtx.SetTranslation(pos + animPosOffset);
 
+						if(customSize)
+						{
+							spriteSheetPrimitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+							spriteSheetMtx.SetScale(ion::Vector3(width, height_inv, 1.0f));
+						}
+
 						spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
+						renderer.SetFaceCulling(ion::render::Renderer::eNoCull);
 						renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
+						renderer.SetFaceCulling(ion::render::Renderer::eCounterClockwise);
 						spriteSheetMaterial->Unbind();
 					}
 				}
