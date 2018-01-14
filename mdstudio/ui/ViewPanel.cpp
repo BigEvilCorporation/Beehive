@@ -145,6 +145,8 @@ void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), cellsX, cellsY);
 }
 
+#pragma optimize("",off)
+
 void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 {
 	//Set texture coords for cell
@@ -152,6 +154,8 @@ void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 	m_renderResources.GetTileTexCoords(tileId, coords, flipFlags);
 	m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 }
+
+#pragma optimize("",on)
 
 void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 {
@@ -367,18 +371,21 @@ void ViewPanel::OnKeyboard(wxKeyEvent& event)
 
 void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	//No depth test (stops grid cells Z fighting)
-	renderer.SetDepthTest(ion::render::Renderer::eAlways);
+	if(m_canvasPrimitive)
+	{
+		//No depth test (stops grid cells Z fighting)
+		renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
-	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
+		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
 
-	//Draw map
-	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
-	renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
-	material->Unbind();
+		//Draw map
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
+		material->Unbind();
 
-	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+		renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+	}
 }
 
 void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

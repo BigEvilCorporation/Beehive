@@ -24,6 +24,7 @@
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "StampsPanel.h"
+#include "BlocksPanel.h"
 #include "MapPanel.h"
 #include "MapListPanel.h"
 #include "TileEditorPanel.h"
@@ -44,6 +45,7 @@ public:
 		ePanelMap,
 		ePanelMapList,
 		ePanelStamps,
+		ePanelBlocks,
 		ePanelTiles,
 		ePanelPalettes,
 		ePanelTileEditor,
@@ -60,6 +62,7 @@ public:
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
+	void ShowPanelBlocks();
 	void ShowPanelMap();
 	void ShowPanelMapList();
 	void ShowPanelTileEditor();
@@ -171,6 +174,7 @@ private:
 	wxWeakRef<MapListPanel> m_mapListPanel;
 	wxWeakRef<TilesPanel> m_tilesPanel;
 	wxWeakRef<StampsPanel> m_stampsPanel;
+	wxWeakRef<BlocksPanel> m_blocksPanel;
 	wxWeakRef<TileEditorPanel> m_tileEditorPanel;
 	wxWeakRef<TerrainTilesPanel> m_terrainTilesPanel;
 	wxWeakRef<TerrainTileEditorPanel> m_TerrainTileEditorPanel;

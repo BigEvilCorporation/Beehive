@@ -190,6 +190,12 @@ void MainWindow::SetProject(Project* project)
 			delete m_stampsPanel;
 		}
 
+		if(m_blocksPanel)
+		{
+			m_auiManager.DetachPane(m_blocksPanel);
+			delete m_blocksPanel;
+		}
+
 		if(m_tileEditorPanel)
 		{
 			m_auiManager.DetachPane(m_tileEditorPanel);
@@ -258,6 +264,7 @@ void MainWindow::SetProject(Project* project)
 
 			//Open right panels
 			ShowPanelStamps();
+			ShowPanelBlocks();
 
 			//Open centre panels
 			ShowPanelMap();
@@ -290,6 +297,15 @@ void MainWindow::SetPanelCaptions()
 		wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(m_terrainTilesPanel.get());
 		wxString caption;
 		caption << "Terrain Tileset " << "(" << m_project->GetTerrainTileset().GetCount() << ")";
+		paneInfo.Caption(caption);
+		m_auiManager.Update();
+	}
+
+	if(m_blocksPanel.get())
+	{
+		wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(m_blocksPanel.get());
+		wxString caption;
+		caption << "Blocks " << "(" << m_blocksPanel->GetUniqueBlockCount() << ")";
 		paneInfo.Caption(caption);
 		m_auiManager.Update();
 	}
@@ -439,6 +455,34 @@ void MainWindow::ShowPanelStamps()
 		if(!m_stampsPanel->IsShown())
 		{
 			m_stampsPanel->Show();
+		}
+	}
+}
+
+void MainWindow::ShowPanelBlocks()
+{
+	if(m_project.get())
+	{
+		if(!m_blocksPanel)
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Blocks");
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(70));
+			paneInfo.Right();
+			paneInfo.Row(1);
+			paneInfo.Caption("Blocks");
+			paneInfo.CaptionVisible(true);
+
+			m_blocksPanel = new BlocksPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_blocksPanel, paneInfo);
+			m_blocksPanel->Show();
+		}
+
+		if(!m_blocksPanel->IsShown())
+		{
+			m_blocksPanel->Show();
 		}
 	}
 }
@@ -867,6 +911,7 @@ void MainWindow::RefreshAll()
 			m_project->InvalidateTerrainTiles(true);
 			m_project->InvalidateTerrainBeziers(true);
 			m_project->InvalidateStamps(true);
+			m_project->InvalidateBlocks(true);
 		}
 
 		RedrawAll();
@@ -878,6 +923,7 @@ void MainWindow::RefreshAll()
 			m_project->InvalidateTerrainTiles(false);
 			m_project->InvalidateTerrainBeziers(false);
 			m_project->InvalidateStamps(false);
+			m_project->InvalidateBlocks(false);
 			m_project->InvalidateCamera(false);
 		}
 	}
@@ -924,6 +970,9 @@ void MainWindow::RedrawAll()
 
 	if(m_stampsPanel)
 		m_stampsPanel->Refresh();
+
+	if(m_blocksPanel)
+		m_blocksPanel->Refresh();
 
 	if(m_tileEditorPanel)
 		m_tileEditorPanel->Refresh();
@@ -988,6 +1037,7 @@ void MainWindow::RefreshPanel(Panel panel)
 			m_project->InvalidateTerrainTiles(true);
 			m_project->InvalidateTerrainBeziers(true);
 			m_project->InvalidateStamps(true);
+			m_project->InvalidateBlocks(true);
 
 		}
 
@@ -1001,6 +1051,7 @@ void MainWindow::RefreshPanel(Panel panel)
 			m_project->InvalidateTerrainTiles(false);
 			m_project->InvalidateTerrainBeziers(false);
 			m_project->InvalidateStamps(false);
+			m_project->InvalidateBlocks(false);
 		}
 	}
 }
@@ -1020,6 +1071,10 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelStamps:
 		if(m_stampsPanel)
 			m_stampsPanel->Refresh();
+		break;
+	case ePanelBlocks:
+		if(m_blocksPanel)
+			m_blocksPanel->Refresh();
 		break;
 	case ePanelTiles:
 		if(m_tilesPanel)
@@ -1274,10 +1329,10 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			if(dialog.m_chkSpritePalettes->GetValue())
 				m_project->ExportSpritePalettes(m_project->m_exportFilenames.spritePalettes);
 
-			int blockWidth = 4;
-			int blockHeight = 4;
-			int terrainBlockWidth = 4;
-			int terrainBlockHeight = 4;
+			int blockWidth = m_project->GetPlatformConfig().blockWidth;
+			int blockHeight = m_project->GetPlatformConfig().blockHeight;
+			int terrainBlockWidth = m_project->GetPlatformConfig().terrainBlockWidth;
+			int terrainBlockHeight = m_project->GetPlatformConfig().terrainBlockHeight;
 
 			if(dialog.m_chkBlocks->GetValue())
 			{
@@ -1317,6 +1372,9 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			SetStatusText("Export complete");
 			wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
+
+			//Update counts
+			SetPanelCaptions();
 		}
 	}
 }
