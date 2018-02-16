@@ -264,7 +264,7 @@ void MainWindow::SetProject(Project* project)
 
 			//Open right panels
 			ShowPanelStamps();
-			ShowPanelBlocks();
+			//ShowPanelBlocks();
 
 			//Open centre panels
 			ShowPanelMap();
@@ -1109,7 +1109,7 @@ void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
 		DialogNewProject dialog(this);
 		if(dialog.ShowModal() == wxID_OK)
 		{
-			PlatformConfig config;
+			PlatformConfig config = PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive];
 			config.tileWidth = dialog.m_spinCtrlTileWidth->GetValue();
 			config.tileHeight = dialog.m_spinCtrlTileHeight->GetValue();
 			config.scrollPlaneWidthTiles = dialog.m_spinCtrlMapWidth->GetValue();
