@@ -1,5 +1,7 @@
 SubDir bigevilcorp mdstudio ;
 
+ion_renderer_opts = shader ;
+
 ApplyIonDefines beehivestudio ;
 ApplyIonIncludes beehivestudio ;
 ApplyIonCore beehivestudio ;

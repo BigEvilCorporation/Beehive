@@ -50,7 +50,8 @@ private:
 		eMenuImport =	(1 << 3) << 8,
 		eMenuExport =	(1 << 4) << 8,
 		eMenuExportBMP =(1 << 5) << 8,
-		eMenuSetAsBg =	(1 << 6) << 8,
+		eMenuImportDiff = (1 << 6) << 8,
+		eMenuSetAsBg =	(1 << 7) << 8,
 	};
 
 	Project& m_project;

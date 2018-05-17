@@ -1988,7 +1988,7 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	m_staticText40->Wrap( -1 );
 	bSizer28->Add( m_staticText40, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 	
-	m_spinCtrlSpeed = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10000, 10 );
+	m_spinCtrlSpeed = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 11 );
 	bSizer28->Add( m_spinCtrlSpeed, 0, wxALL, 5 );
 	
 	m_staticText43 = new wxStaticText( this, wxID_ANY, wxT("Blend mode:"), wxDefaultPosition, wxDefaultSize, 0 );

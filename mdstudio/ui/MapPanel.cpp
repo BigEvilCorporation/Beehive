@@ -718,120 +718,113 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 		case eToolSelectGameObject:
 		case eToolAnimateGameObject:
 		{
-			if(inMaprange)
+			ion::Vector2i topLeft;
+			m_hoverGameObject = m_project.GetEditingMap().FindGameObject(x, y, topLeft);
+
+			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 			{
-				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project.GetEditingMap().FindGameObject(x, y, topLeft);
+				m_selectedGameObject = m_hoverGameObject;
 
-				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+				if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
 				{
-					m_selectedGameObject = m_hoverGameObject;
+					m_mainWindow->SetSelectedGameObject(gameObject);
+					m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
 
-					if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
-					{
-						m_mainWindow->SetSelectedGameObject(gameObject);
-						m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
-
-						m_previewGameObjectType = gameObject->GetTypeId();
-						m_previewGameObjectPos.x = topLeft.x;
-						m_previewGameObjectPos.y = topLeft.y;
-					}
-				}
-
-				if(buttonBits & eMouseRight)
-				{
-					if(m_hoverGameObject != InvalidGameObjectId)
-					{
-						//Right-click menu
-						wxMenu contextMenu;
-
-						contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
-						contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
-						PopupMenu(&contextMenu);
-					}
+					m_previewGameObjectType = gameObject->GetTypeId();
+					m_previewGameObjectPos.x = topLeft.x;
+					m_previewGameObjectPos.y = topLeft.y;
 				}
 			}
+
+			if(buttonBits & eMouseRight)
+			{
+				if(m_hoverGameObject != InvalidGameObjectId)
+				{
+					//Right-click menu
+					wxMenu contextMenu;
+
+					contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
+					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
+					PopupMenu(&contextMenu);
+				}
+			}
+
 			break;
 		}
 
 		case eToolPlaceGameObject:
 		{
-			if(inMaprange)
-			{
-				m_previewGameObjectType = m_project.GetPaintGameObjectType();
-				m_previewGameObjectPos.x = x;
-				m_previewGameObjectPos.y = y;
+			m_previewGameObjectType = m_project.GetPaintGameObjectType();
+			m_previewGameObjectPos.x = x;
+			m_previewGameObjectPos.y = y;
 
-				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+			{
+				GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
+				if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
 				{
-					GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
-					if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
-					{
-						m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType);
-						Refresh();
-					}
+					m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
+					Refresh();
 				}
 			}
+
 			break;
 		}
 
 		case eToolDrawGameObject:
 		{
-			if(inMaprange)
+			if(buttonBits & eMouseLeft)
 			{
-				if(buttonBits & eMouseLeft)
+				if(m_boxSelectStart.x == -1)
 				{
-					if(m_boxSelectStart.x == -1)
-					{
-						//Mouse first down, take start pos
-						m_boxSelectStart.x = x;
-						m_boxSelectStart.y = y;
-					}
-					else
-					{
-						//Start pos already taken, take end pos
-						m_boxSelectEnd.x = x;
-						m_boxSelectEnd.y = y;
-					}
+					//Mouse first down, take start pos
+					m_boxSelectStart.x = x;
+					m_boxSelectStart.y = y;
 				}
 				else
 				{
-					if(m_boxSelectStart.x != -1 && m_boxSelectEnd.x != -1)
-					{
-						//Mouse up, box drawn
-						GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
-						if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
-						{
-							int boxX = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
-							int boxY = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
-							int boxWidth = ion::maths::Abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1;
-							int boxHeight = ion::maths::Abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1;
-
-							m_project.GetEditingMap().PlaceGameObject(boxX, boxY, boxWidth, boxHeight, *gameObjectType);
-							Refresh();
-						}
-					}
-
-					//Reset box
-					m_boxSelectStart.x = -1;
-					m_boxSelectStart.y = -1;
-					m_boxSelectEnd.x = -1;
-					m_boxSelectEnd.y = -1;
+					//Start pos already taken, take end pos
+					m_boxSelectEnd.x = x;
+					m_boxSelectEnd.y = y;
 				}
 			}
+			else
+			{
+				if(m_boxSelectStart.x != -1 && m_boxSelectEnd.x != -1)
+				{
+					//Mouse up, box drawn
+					GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
+					if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
+					{
+						int boxX = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
+						int boxY = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int boxWidth = ion::maths::Abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1;
+						int boxHeight = ion::maths::Abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1;
+
+						m_project.GetEditingMap().PlaceGameObject(boxX, boxY, boxWidth, boxHeight, *gameObjectType);
+						Refresh();
+					}
+				}
+
+				//Reset box
+				m_boxSelectStart.x = -1;
+				m_boxSelectStart.y = -1;
+				m_boxSelectEnd.x = -1;
+				m_boxSelectEnd.y = -1;
+			}
+
 			break;
 		}
 
 		case eToolRemoveGameObject:
 		{
-			if(inMaprange)
+			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 			{
-				if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
-				{
-					m_project.GetEditingMap().RemoveGameObject(x, y);
-					Refresh();
-				}
+				m_project.GetEditingMap().RemoveGameObject(x, y);
+				Refresh();
 			}
+
 			break;
 		}
 	}
@@ -1500,6 +1493,12 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	if(m_project.GetShowStampOutlines())
 	{
 		RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
+	}
+
+	//Render physics world outline
+	//if(m_project.GetShowPhysicsworldOutline())
+	{
+		RenderPhysicsWorldOutline(renderer, cameraInverseMtx, projectionMtx, z);
 	}
 
 	//Render display frame
@@ -2425,6 +2424,56 @@ void MapPanel::RenderStampOutlines(ion::render::Renderer& renderer, const ion::M
 			renderer.DrawVertexBuffer(primitive->GetVertexBuffer());
 		}
 	}
+
+	material->Unbind();
+}
+
+void MapPanel::RenderPhysicsWorldOutline(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	ion::Matrix4 worldViewProjMtx;
+	ion::Matrix4 outlineMtx;
+	ion::render::Shader* vertexShader = m_renderResources.GetVertexShader(RenderResources::eShaderFlatColour);
+	ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParamV = vertexShader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
+
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileLineQuad);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour colourTiles(0.0f, 0.0f, 1.0f, 1.0f);
+	const ion::Colour colourBlocks(1.0f, 0.0f, 0.0f, 1.0f);
+
+	const Map& map = m_project.GetEditingMap();
+	const CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
+	const ion::Vector2i mapSize(map.GetWidth(), map.GetHeight());
+
+	ion::Vector2i physicsWorldTopLeftTiles;
+	ion::Vector2i physicsWorldSizeTiles;
+	ion::Vector2i physicsWorldTopLeftBlocks;
+	ion::Vector2i physicsWorldSizeBlocks;
+	collisionMap.GetPhysicsWorldBounds(physicsWorldTopLeftTiles, physicsWorldSizeTiles);
+	collisionMap.GetPhysicsWorldBoundsBlocks(physicsWorldTopLeftBlocks, physicsWorldSizeBlocks);
+	physicsWorldTopLeftBlocks = physicsWorldTopLeftBlocks * ion::Vector2i(m_project.GetPlatformConfig().blockWidth, m_project.GetPlatformConfig().blockHeight);
+	physicsWorldSizeBlocks = physicsWorldSizeBlocks * ion::Vector2i(m_project.GetPlatformConfig().blockWidth, m_project.GetPlatformConfig().blockHeight);
+
+	//Tiles
+	material->SetDiffuseColour(colourTiles);
+	material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
+
+	outlineMtx = m_renderResources.CalcBoxMatrix(physicsWorldTopLeftTiles, physicsWorldSizeTiles, mapSize, z);
+	worldViewProjMtx = outlineMtx * cameraInverseMtx * projectionMtx;
+	worldViewProjParamV.SetValue(worldViewProjMtx);
+
+	renderer.DrawVertexBuffer(primitive->GetVertexBuffer());
+
+	material->Unbind();
+
+	//Blocks
+	material->SetDiffuseColour(colourBlocks);
+	material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
+
+	outlineMtx = m_renderResources.CalcBoxMatrix(physicsWorldTopLeftBlocks, physicsWorldSizeBlocks, mapSize, z);
+	worldViewProjMtx = outlineMtx * cameraInverseMtx * projectionMtx;
+	worldViewProjParamV.SetValue(worldViewProjMtx);
+
+	renderer.DrawVertexBuffer(primitive->GetVertexBuffer());
 
 	material->Unbind();
 }

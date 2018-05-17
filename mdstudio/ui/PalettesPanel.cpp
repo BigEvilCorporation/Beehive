@@ -124,6 +124,7 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 			slotMenu.Append(eMenuImport, wxString("Import..."));
 			slotMenu.Append(eMenuExport, wxString("Export..."));
 			slotMenu.Append(eMenuExportBMP, wxString("Export as BMP..."));
+			slotMenu.Append(eMenuImportDiff, wxString("Import diff..."));
 			saveMenu->AppendSeparator();
 			slotMenu.Append(eMenuSetAsBg, wxString("Set as Background/Transparency Colour"));
 				
@@ -262,6 +263,77 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 					ion::debug::Popup("Error exporting palette", "Error");
 				}
 			}
+		}
+	}
+	else if(menuItemId & eMenuImportDiff)
+	{
+		wxFileDialog referenceDialogue(this, _("Open reference palette BMP"), "", "", "BMP files (*.BMP)|*.bmp", wxFD_OPEN);
+		wxFileDialog newDialogue(this, _("Open new palette BMP"), "", "", "BMP files (*.BMP)|*.bmp", wxFD_OPEN);
+		bool success = false;
+
+		if(referenceDialogue.ShowModal() == wxID_OK)
+		{
+			if(newDialogue.ShowModal() == wxID_OK)
+			{
+				std::string referenceFilename = referenceDialogue.GetPath().c_str().AsChar();
+				std::string newFilename = newDialogue.GetPath().c_str().AsChar();
+
+				BMPReader referenceReader;
+				BMPReader newReader;
+
+				if(referenceReader.Read(referenceFilename))
+				{
+					if(newReader.Read(newFilename))
+					{
+						if(referenceReader.GetPaletteSize() != newReader.GetPaletteSize())
+						{
+							ion::debug::Popup("Reference palette colour count differs from new palette", "Error");
+							return;
+						}
+
+						Palette* currentPalette = m_project.GetPalette(m_selectedPaletteId);
+						Palette newPalette;
+						
+						//Create remap from current palette to reference palette
+						for(int i = 0; i < referenceReader.GetPaletteSize(); i++)
+						{
+							if(!currentPalette->IsColourUsed(i))
+							{
+								ion::debug::Popup("Reference palette colour count differs from current palette", "Error");
+								return;
+							}
+
+							BMPReader::Colour referenceColourBMP = referenceReader.GetPaletteEntry(i);
+							Colour referenceColour(referenceColourBMP.r, referenceColourBMP.g, referenceColourBMP.b);
+
+							int remapIndex = 0;
+							if(!currentPalette->GetNearestColourIdx(referenceColour, Palette::eExact, remapIndex))
+							{
+								ion::debug::Popup("Reference palette cannot be mapped to current palette", "Error");
+								return;
+							}
+
+							BMPReader::Colour newColourBMP = referenceReader.GetPaletteEntry(i);
+							Colour newColour(newColourBMP.r, newColourBMP.g, newColourBMP.b);
+
+							newPalette.SetColour(remapIndex, newColour);
+						}
+
+						//Set as new palette
+						*currentPalette = newPalette;
+
+						//Refresh all
+						m_mainWindow->RefreshAll();
+
+						success = true;
+					}
+				}
+			}
+		}
+
+		if(!success)
+		{
+			ion::debug::Popup("Error loading reference palettes", "Error");
 		}
 	}
 	else if(menuItemId & eMenuSetAsBg)

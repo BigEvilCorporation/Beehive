@@ -1,5 +1,7 @@
 SubDir bigevilcorp mdstudio ui ;
 
+ion_renderer_opts = shader ;
+
 ApplyIonDefines ui ;
 ApplyIonIncludes ui ;
 ApplyIonCore ui ;
@@ -7,6 +9,7 @@ ApplyIonIo ui ;
 ApplyIonRenderer ui ;
 ApplyIonGameKit ui ;
 ApplyIonLib ui : beehive ;
+ApplyOpenGLSDK ui ;
 ApplyWxSDK ui ;
 
 local BEEHIVE_STUDIO_UI_SRC = 

@@ -27,12 +27,16 @@ void GameObjectTypesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		m_listGameObjTypes->Clear();
 		m_gameObjectTypeMap.clear();
 		const TGameObjectTypeMap& types = m_project.GetGameObjectTypes();
+		const TGameObjectPosMap& objectPosMap = m_project.GetEditingMap().GetGameObjects();
 
 		int index = 0;
 		for(TGameObjectTypeMap::const_iterator it = types.begin(), end = types.end(); it != end; ++it, ++index)
 		{
 			m_gameObjectTypeMap.push_back(it->second.GetId());
-			m_listGameObjTypes->Insert(wxString(it->second.GetName()), index);
+
+			std::stringstream nameCount;
+			nameCount << it->second.GetName() << " (" << objectPosMap.find(it->first)->second.size() << ")";
+			m_listGameObjTypes->Insert(wxString(nameCount.str()), index);
 		}
 	}
 }
