@@ -1114,6 +1114,18 @@ void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
 			config.tileHeight = dialog.m_spinCtrlTileHeight->GetValue();
 			config.scrollPlaneWidthTiles = dialog.m_spinCtrlMapWidth->GetValue();
 			config.scrollPlaneHeightTiles = dialog.m_spinCtrlMapHeight->GetValue();
+			config.stampWidth = dialog.m_spinCtrlStampWidth->GetValue();
+			config.stampHeight = dialog.m_spinCtrlStampHeight->GetValue();
+
+			if (config.stampWidth > 0)
+			{
+				config.scrollPlaneWidthTiles = ion::maths::RoundUpToNearest(config.scrollPlaneWidthTiles, config.stampWidth);
+			}
+
+			if (config.stampHeight > 0)
+			{
+				config.scrollPlaneHeightTiles = ion::maths::RoundUpToNearest(config.scrollPlaneHeightTiles, config.stampHeight);
+			}
 
 			SetProject(new Project(config));
 		}
@@ -1764,6 +1776,18 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 
 			if(width > 0 && width <= 10000 && height > 0 && height <= 10000)
 			{
+				const PlatformConfig& config = m_project->GetPlatformConfig();
+
+				if (config.stampWidth > 0)
+				{
+					width = ion::maths::RoundUpToNearest(width, config.stampWidth);
+				}
+
+				if (config.stampHeight > 0)
+				{
+					height = ion::maths::RoundUpToNearest(height, config.stampHeight);
+				}
+
 				//Resize map
 				map.Resize(width, height, shiftRight, shiftDown);
 				collisionMap.Resize(width, height, shiftRight, shiftDown);

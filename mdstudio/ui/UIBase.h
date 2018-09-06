@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jun 17 2015)
+// C++ code generated with wxFormBuilder (version Sep  5 2018)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO "NOT" EDIT THIS FILE!
+// PLEASE DO *NOT* EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef __UIBASE_H__
-#define __UIBASE_H__
+#pragma once
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
@@ -124,10 +123,10 @@ class SpriteCanvas;
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
 ///////////////////////////////////////////////////////////////////////////////
-class MainWindowBase : public wxFrame 
+class MainWindowBase : public wxFrame
 {
 	private:
-	
+
 	protected:
 		wxRibbonBar* m_ribbonBar;
 		wxRibbonPage* m_ribbonPageProject;
@@ -153,7 +152,7 @@ class MainWindowBase : public wxFrame
 		wxRibbonButtonBar* m_ribbonButtonBarGameObj;
 		wxPanel* m_dockArea;
 		wxStatusBar* m_statusBar;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnProjNew( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnProjOpen( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -190,53 +189,53 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnColMapClear( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColGenTerrainBezier( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnGameObjTypes( wxRibbonButtonBarEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
+
 		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 971,240 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
-		
+
 		~MainWindowBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogMapSizeBase
 ///////////////////////////////////////////////////////////////////////////////
-class DialogMapSizeBase : public wxDialog 
+class DialogMapSizeBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_text1;
 		wxStaticText* m_text2;
 		wxStaticText* m_text3;
 		wxButton* m_buttonOk;
 		wxButton* m_buttonCancel;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxSpinCtrl* m_spinCtrlWidth;
 		wxSpinCtrl* m_spinCtrlHeight;
 		wxRadioBox* m_radioBoxShiftY;
 		wxRadioBox* m_radioBoxShiftX;
-		
-		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,189 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		DialogMapSizeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,189 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogMapSizeBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogUpdateStampBase
 ///////////////////////////////////////////////////////////////////////////////
-class DialogUpdateStampBase : public wxDialog 
+class DialogUpdateStampBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxFilePickerCtrl* m_filePicker10;
 		wxCheckBox* m_chkReplacePalette;
@@ -246,29 +245,29 @@ class DialogUpdateStampBase : public wxDialog
 		wxCheckBox* m_chkFlipY;
 		wxButton* m_buttonOk;
 		wxButton* m_buttonCancel;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnFileBrowse( wxFileDirPickerEvent& event ) { event.Skip(); }
 		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxRadioBox* m_radioBoxShiftY;
 		wxRadioBox* m_radioBoxShiftX;
-		
-		DialogUpdateStampBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Update Stamp"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 688,485 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		DialogUpdateStampBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Update Stamp"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 688,485 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogUpdateStampBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogNewMap
 ///////////////////////////////////////////////////////////////////////////////
-class DialogNewMap : public wxDialog 
+class DialogNewMap : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText50;
 		wxStaticText* m_text1;
@@ -277,24 +276,24 @@ class DialogNewMap : public wxDialog
 		wxStdDialogButtonSizer* m_sdbSizer7;
 		wxButton* m_sdbSizer7OK;
 		wxButton* m_sdbSizer7Cancel;
-	
+
 	public:
 		wxTextCtrl* m_textMapName;
 		wxSpinCtrl* m_spinCtrlWidth;
 		wxSpinCtrl* m_spinCtrlHeight;
-		
-		DialogNewMap( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,139 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		DialogNewMap( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Map"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 415,139 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogNewMap();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogNewProjectBase
 ///////////////////////////////////////////////////////////////////////////////
-class DialogNewProjectBase : public wxDialog 
+class DialogNewProjectBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText49;
 		wxChoice* m_choicePreset;
@@ -302,122 +301,126 @@ class DialogNewProjectBase : public wxDialog
 		wxStaticText* m_text3;
 		wxStaticText* m_text11;
 		wxStaticText* m_text31;
+		wxStaticText* m_staticText53;
+		wxStaticText* m_staticText54;
 		wxButton* m_buttonOk;
 		wxButton* m_buttonCancel;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnChoicePreset( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxSpinCtrl* m_spinCtrlTileWidth;
 		wxSpinCtrl* m_spinCtrlTileHeight;
 		wxSpinCtrl* m_spinCtrlMapWidth;
 		wxSpinCtrl* m_spinCtrlMapHeight;
-		
-		DialogNewProjectBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Project"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
+		wxSpinCtrl* m_spinCtrlStampWidth;
+		wxSpinCtrl* m_spinCtrlStampHeight;
+
+		DialogNewProjectBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Project"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 454,202 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogNewProjectBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogNewSpriteAnim
 ///////////////////////////////////////////////////////////////////////////////
-class DialogNewSpriteAnim : public wxDialog 
+class DialogNewSpriteAnim : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_text1;
 		wxStdDialogButtonSizer* m_sdbSizer4;
 		wxButton* m_sdbSizer4OK;
 		wxButton* m_sdbSizer4Cancel;
-	
+
 	public:
 		wxTextCtrl* m_textName;
 		wxCheckBox* m_chkAutoGenerate;
-		
-		DialogNewSpriteAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New sprite animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		DialogNewSpriteAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New sprite animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogNewSpriteAnim();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogNewAnim
 ///////////////////////////////////////////////////////////////////////////////
-class DialogNewAnim : public wxDialog 
+class DialogNewAnim : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_text1;
 		wxStdDialogButtonSizer* m_sdbSizer4;
 		wxButton* m_sdbSizer4OK;
 		wxButton* m_sdbSizer4Cancel;
-	
+
 	public:
 		wxTextCtrl* m_textName;
-		
-		DialogNewAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		DialogNewAnim( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New animation"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,127 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogNewAnim();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogNewActor
 ///////////////////////////////////////////////////////////////////////////////
-class DialogNewActor : public wxDialog 
+class DialogNewActor : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_text1;
 		wxStdDialogButtonSizer* m_sdbSizer4;
 		wxButton* m_sdbSizer4OK;
 		wxButton* m_sdbSizer4Cancel;
-	
+
 	public:
 		wxTextCtrl* m_textName;
-		
-		DialogNewActor( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Actor/Prop"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,99 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		DialogNewActor( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Actor/Prop"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 261,99 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogNewActor();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DialogTerrainGenBase
 ///////////////////////////////////////////////////////////////////////////////
-class DialogTerrainGenBase : public wxDialog 
+class DialogTerrainGenBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_text1;
 		wxButton* m_buttonOk;
 		wxButton* m_buttonCancel;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnOk( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxSpinCtrl* m_spinCtrlGranularity;
-		
-		DialogTerrainGenBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Generate Terrain"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		DialogTerrainGenBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Generate Terrain"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogTerrainGenBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MapToolbox
 ///////////////////////////////////////////////////////////////////////////////
-class MapToolbox : public wxPanel 
+class MapToolbox : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText11;
 		wxBitmapButton* m_toolSelectStamp;
@@ -444,7 +447,7 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolMoveGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
-	
+
 	public:
 		wxBitmapButton* m_toolPaintStamp;
 		wxBitmapButton* m_toolPaintCollisionPixel;
@@ -452,41 +455,41 @@ class MapToolbox : public wxPanel
 		wxBitmapButton* m_toolCreateSceneAnim;
 		wxBitmapButton* m_toolCopyToNewMap;
 		wxBitmapButton* m_toolAnimateGameObject;
-		
-		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 259,597 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
+
+		MapToolbox( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 259,597 ), long style = wxTAB_TRAVERSAL|wxVSCROLL, const wxString& name = wxEmptyString );
 		~MapToolbox();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MapToolboxGameObjs
 ///////////////////////////////////////////////////////////////////////////////
-class MapToolboxGameObjs : public wxPanel 
+class MapToolboxGameObjs : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolDrawGameObject;
 		wxBitmapButton* m_toolMoveGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
-	
+
 	public:
 		wxBitmapButton* m_toolAnimateGameObject;
-		
-		MapToolboxGameObjs( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 115,181 ), long style = wxTAB_TRAVERSAL ); 
+
+		MapToolboxGameObjs( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 115,181 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~MapToolboxGameObjs();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MapToolboxTerrain
 ///////////////////////////////////////////////////////////////////////////////
-class MapToolboxTerrain : public wxPanel 
+class MapToolboxTerrain : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxBitmapButton* m_toolPaintCollisionSolid;
 		wxBitmapButton* m_toolPaintCollisionHole;
@@ -494,22 +497,22 @@ class MapToolboxTerrain : public wxPanel
 		wxBitmapButton* m_toolAddTerrainBezier;
 		wxBitmapButton* m_toolEditTerrainBezier1;
 		wxBitmapButton* m_toolDeleteTerrainBezier;
-	
+
 	public:
 		wxBitmapButton* m_toolPaintCollisionPixel;
-		
-		MapToolboxTerrain( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 110,228 ), long style = wxTAB_TRAVERSAL ); 
+
+		MapToolboxTerrain( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 110,228 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~MapToolboxTerrain();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MapToolboxTiles
 ///////////////////////////////////////////////////////////////////////////////
-class MapToolboxTiles : public wxPanel 
+class MapToolboxTiles : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxBitmapButton* m_toolSelectTile;
 		wxBitmapButton* m_toolPaint;
@@ -517,108 +520,108 @@ class MapToolboxTiles : public wxPanel
 		wxBitmapButton* m_toolFlipX;
 		wxBitmapButton* m_toolFlipY;
 		wxBitmapButton* m_toolFill;
-	
+
 	public:
 		wxBitmapButton* m_toolClone;
 		wxBitmapButton* m_toolCreateSceneAnim;
 		wxBitmapButton* m_toolCopyToNewMap;
-		
-		MapToolboxTiles( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 108,282 ), long style = wxTAB_TRAVERSAL ); 
+
+		MapToolboxTiles( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 108,282 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~MapToolboxTiles();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MapToolboxStamps
 ///////////////////////////////////////////////////////////////////////////////
-class MapToolboxStamps : public wxPanel 
+class MapToolboxStamps : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxBitmapButton* m_toolSelectStamp;
 		wxBitmapButton* m_toolMveStamp;
 		wxBitmapButton* m_toolStampPicker;
 		wxBitmapButton* m_toolCreateStamp;
 		wxBitmapButton* m_toolRemoveStamp;
-	
+
 	public:
 		wxBitmapButton* m_toolPaintStamp;
-		
-		MapToolboxStamps( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 116,181 ), long style = wxTAB_TRAVERSAL ); 
+
+		MapToolboxStamps( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 116,181 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~MapToolboxStamps();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MapListPanelBase
 ///////////////////////////////////////////////////////////////////////////////
-class MapListPanelBase : public wxPanel 
+class MapListPanelBase : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxToolBar* m_toolBar1;
-		wxToolBarToolBase* m_toolAddMap; 
-		wxToolBarToolBase* m_toolRemoveMap; 
-		wxToolBarToolBase* m_toolRename; 
-		wxToolBarToolBase* m_toolImport; 
+		wxToolBarToolBase* m_toolAddMap;
+		wxToolBarToolBase* m_toolRemoveMap;
+		wxToolBarToolBase* m_toolRename;
+		wxToolBarToolBase* m_toolImport;
 		wxListCtrl* m_listMaps;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolAddMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRemoveMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRenameMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolImportMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapSelected( wxListEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
-		MapListPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 375,425 ), long style = wxTAB_TRAVERSAL|wxVSCROLL ); 
+
+		MapListPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 375,425 ), long style = wxTAB_TRAVERSAL|wxVSCROLL, const wxString& name = wxEmptyString );
 		~MapListPanelBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GameObjTypesPanelBase
 ///////////////////////////////////////////////////////////////////////////////
-class GameObjTypesPanelBase : public wxPanel 
+class GameObjTypesPanelBase : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxListBox* m_listGameObjTypes;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnGameObjectTypeSelected( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
-		GameObjTypesPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 342,231 ), long style = wxTAB_TRAVERSAL ); 
+
+		GameObjTypesPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 342,231 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~GameObjTypesPanelBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ExportDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class ExportDialogBase : public wxDialog 
+class ExportDialogBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_static1;
 		wxNotebook* m_notebookMapTabs;
 		wxButton* m_btnCancel;
 		wxButton* m_btnExportAll;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnCancel( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnExportAll( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxTextCtrl* m_txtProjectName;
 		wxRadioButton* m_btnText;
@@ -644,42 +647,42 @@ class ExportDialogBase : public wxDialog
 		wxDirPickerCtrl* m_dirPickerSpritePalettes;
 		wxCheckBox* m_chkSpriteAnims;
 		wxDirPickerCtrl* m_dirPickerSpriteAnims;
-		
-		ExportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 976,793 ), long style = wxCAPTION|wxRESIZE_BORDER ); 
+
+		ExportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 976,793 ), long style = wxCAPTION|wxRESIZE_BORDER );
 		~ExportDialogBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ProjectSettingsDialog
 ///////////////////////////////////////////////////////////////////////////////
-class ProjectSettingsDialog : public wxDialog 
+class ProjectSettingsDialog : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText51;
 		wxStaticText* m_staticText53;
 		wxStdDialogButtonSizer* m_sdbSizer7;
 		wxButton* m_sdbSizer7OK;
 		wxButton* m_sdbSizer7Cancel;
-	
+
 	public:
 		wxFilePickerCtrl* m_filePickerSpritesProj;
 		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
-		
-		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,169 ), long style = wxCAPTION|wxRESIZE_BORDER ); 
+
+		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,169 ), long style = wxCAPTION|wxRESIZE_BORDER );
 		~ProjectSettingsDialog();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ImportDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class ImportDialogBase : public wxDialog 
+class ImportDialogBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText8;
 		wxTextCtrl* m_filenames;
@@ -688,11 +691,11 @@ class ImportDialogBase : public wxDialog
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 		wxButton* m_sdbSizer2Cancel;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBtnBrowse( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxDirPickerCtrl* m_dirStamps;
 		wxCheckBox* m_chkClearTiles;
@@ -709,19 +712,19 @@ class ImportDialogBase : public wxDialog
 		wxCheckBox* m_chkPalette2;
 		wxCheckBox* m_chkPalette3;
 		wxCheckBox* m_chkPalette4;
-		
-		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 503,466 ), long style = wxCAPTION|wxSTAY_ON_TOP ); 
+
+		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 503,466 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~ImportDialogBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ImportDialogSpriteSheetBase
 ///////////////////////////////////////////////////////////////////////////////
-class ImportDialogSpriteSheetBase : public wxDialog 
+class ImportDialogSpriteSheetBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText8;
 		wxStaticText* m_staticText24;
@@ -734,34 +737,34 @@ class ImportDialogSpriteSheetBase : public wxDialog
 		wxStdDialogButtonSizer* m_sdbSizer2;
 		wxButton* m_sdbSizer2OK;
 		wxButton* m_sdbSizer2Cancel;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnFileOpened( wxFileDirPickerEvent& event ) { event.Skip(); }
 		virtual void OnGridColourChanged( wxColourPickerEvent& event ) { event.Skip(); }
 		virtual void OnSpinWidthCells( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpinHeightCells( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpinCellCount( wxSpinEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxFilePickerCtrl* m_filePicker;
 		wxTextCtrl* m_textName;
 		wxSpinCtrl* m_spinWidthCells;
 		wxSpinCtrl* m_spinHeightCells;
 		wxSpinCtrl* m_spinCellCount;
-		
-		ImportDialogSpriteSheetBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite/Stamp Sheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+
+		ImportDialogSpriteSheetBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite/Stamp Sheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU );
 		~ImportDialogSpriteSheetBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class SpriteAnimEditorDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class SpriteAnimEditorDialogBase : public wxDialog 
+class SpriteAnimEditorDialogBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText36;
 		wxStaticText* m_staticText38;
@@ -791,7 +794,7 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxStaticText* m_staticText43;
 		wxRadioButton* m_radioBlendLerp;
 		wxRadioButton* m_radioBlendSnap;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnActorSelected( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteSheetSelected( wxCommandEvent& event ) { event.Skip(); }
@@ -811,30 +814,30 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		virtual void OnSpinSpeedChange( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnRadioBlendLerp( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRadioBlendSnap( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
-		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Stamp Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU ); 
+
+		SpriteAnimEditorDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Sprite and Stamp Animation Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1378,772 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU );
 		~SpriteAnimEditorDialogBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GameObjTypeDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class GameObjTypeDialogBase : public wxDialog 
+class GameObjTypeDialogBase : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxToolBar* m_toolBar1;
-		wxToolBarToolBase* m_toolAddGameObjType; 
-		wxToolBarToolBase* m_toolRemoveGameObjType; 
-		wxToolBarToolBase* m_toolOrderUp; 
-		wxToolBarToolBase* m_toolOrderDown; 
-		wxToolBarToolBase* m_toolAddVariable; 
-		wxToolBarToolBase* m_toolRemoveVariable; 
+		wxToolBarToolBase* m_toolAddGameObjType;
+		wxToolBarToolBase* m_toolRemoveGameObjType;
+		wxToolBarToolBase* m_toolOrderUp;
+		wxToolBarToolBase* m_toolOrderDown;
+		wxToolBarToolBase* m_toolAddVariable;
+		wxToolBarToolBase* m_toolRemoveVariable;
 		wxListBox* m_listGameObjTypes;
 		wxListCtrl* m_listVariables;
 		wxStaticText* m_staticText10;
@@ -857,7 +860,7 @@ class GameObjTypeDialogBase : public wxDialog
 		wxButton* m_btnApplyVarSettings;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolGameObjAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolGameObjRemove( wxCommandEvent& event ) { event.Skip(); }
@@ -875,26 +878,26 @@ class GameObjTypeDialogBase : public wxDialog
 		virtual void OnBtnApplyVarChanges( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
-		GameObjTypeDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Game Object Types"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 973,667 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+
+		GameObjTypeDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Game Object Types"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 973,667 ), long style = wxDEFAULT_DIALOG_STYLE );
 		~GameObjTypeDialogBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GameObjParamsPanelBase
 ///////////////////////////////////////////////////////////////////////////////
-class GameObjParamsPanelBase : public wxPanel 
+class GameObjParamsPanelBase : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxToolBar* m_toolBar1;
-		wxToolBarToolBase* m_toolAddVariable; 
-		wxToolBarToolBase* m_toolRemoveVariable; 
+		wxToolBarToolBase* m_toolAddVariable;
+		wxToolBarToolBase* m_toolRemoveVariable;
 		wxStaticText* m_staticText42;
 		wxTextCtrl* m_textObjectName;
 		wxButton* m_btnApplyObjectName;
@@ -906,7 +909,7 @@ class GameObjParamsPanelBase : public wxPanel
 		wxStaticText* m_staticText8;
 		wxTextCtrl* m_textValue;
 		wxButton* m_btnApplyVarParams;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
@@ -914,42 +917,42 @@ class GameObjParamsPanelBase : public wxPanel
 		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnApplyVariableChanges( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
-		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 747,512 ), long style = wxTAB_TRAVERSAL ); 
+
+		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 747,512 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~GameObjParamsPanelBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class TimelinePanelBase
 ///////////////////////////////////////////////////////////////////////////////
-class TimelinePanelBase : public wxPanel 
+class TimelinePanelBase : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxToolBar* m_toolBarAnimation;
 		wxChoice* m_choiceAnims;
-		wxToolBarToolBase* m_toolAddAnim; 
-		wxToolBarToolBase* m_toolDeleteAnim; 
-		wxToolBarToolBase* m_toolKeyframeTrack; 
-		wxToolBarToolBase* m_toolKeyframeActor; 
-		wxToolBarToolBase* m_toolKeyframeAll; 
-		wxToolBarToolBase* m_toolPlay; 
-		wxToolBarToolBase* m_toolStop; 
-		wxToolBarToolBase* m_toolRewind; 
-		wxToolBarToolBase* m_toolFastForward; 
-		wxToolBarToolBase* m_toolIsolateObject; 
+		wxToolBarToolBase* m_toolAddAnim;
+		wxToolBarToolBase* m_toolDeleteAnim;
+		wxToolBarToolBase* m_toolKeyframeTrack;
+		wxToolBarToolBase* m_toolKeyframeActor;
+		wxToolBarToolBase* m_toolKeyframeAll;
+		wxToolBarToolBase* m_toolPlay;
+		wxToolBarToolBase* m_toolStop;
+		wxToolBarToolBase* m_toolRewind;
+		wxToolBarToolBase* m_toolFastForward;
+		wxToolBarToolBase* m_toolIsolateObject;
 		wxStaticText* m_staticText34;
 		wxSpinCtrl* m_spinSpeed;
 		wxStaticText* m_textCurrentActor;
 		wxStaticText* m_staticText49;
 		wxChoice* m_choiceSpriteAnim;
 		KeyframePanel* m_timeline;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnSelectAnimation( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolAddAnim( wxCommandEvent& event ) { event.Skip(); }
@@ -964,42 +967,42 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpinSpeed( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
-		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,220 ), long style = wxTAB_TRAVERSAL ); 
+
+		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,220 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~TimelinePanelBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class SpriteAnimPanelBase
 ///////////////////////////////////////////////////////////////////////////////
-class SpriteAnimPanelBase : public wxPanel 
+class SpriteAnimPanelBase : public wxPanel
 {
 	private:
-	
+
 	protected:
 		wxListBox* m_listSpriteAnims;
 		wxSlider* m_sliderTimeline;
-	
+
 	public:
-		
-		SpriteAnimPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,130 ), long style = wxTAB_TRAVERSAL ); 
+
+		SpriteAnimPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,130 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~SpriteAnimPanelBase();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ExportDialogMapTab
 ///////////////////////////////////////////////////////////////////////////////
-class ExportDialogMapTab : public wxPanel 
+class ExportDialogMapTab : public wxPanel
 {
 	private:
-	
+
 	protected:
-	
+
 	public:
 		wxCheckBox* m_chkMap;
 		wxFilePickerCtrl* m_filePickerMap;
@@ -1013,10 +1016,9 @@ class ExportDialogMapTab : public wxPanel
 		wxFilePickerCtrl* m_filePickerCollisionBlockMap;
 		wxCheckBox* m_chkGameObj;
 		wxFilePickerCtrl* m_filePickerGameObj;
-		
-		ExportDialogMapTab( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL ); 
+
+		ExportDialogMapTab( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~ExportDialogMapTab();
-	
+
 };
 
-#endif //__UIBASE_H__

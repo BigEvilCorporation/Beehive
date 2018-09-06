@@ -673,6 +673,20 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 					m_cursorOrigin = (CursorOrigin)(++cursorOrigin % eCursor_MAX);
 				}
 
+				//If fixed stamp size, snap to grid
+				int fixedStampWidth = m_project.GetPlatformConfig().stampWidth;
+				int fixedStampHeight = m_project.GetPlatformConfig().stampHeight;
+
+				if (fixedStampWidth > 0)
+				{
+					x = ion::maths::RoundDownToNearest(x, fixedStampWidth);
+				}
+
+				if (fixedStampHeight > 0)
+				{
+					y = ion::maths::RoundDownToNearest(y, fixedStampHeight);
+				}
+
 				//Update paste pos
 				m_stampPastePos.x = x;
 				m_stampPastePos.y = y;
@@ -1487,6 +1501,11 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
 
 		z += zOffset;
+
+		if (m_project.GetPlatformConfig().stampWidth > 0)
+		{
+			RenderStampGrid(renderer, cameraInverseMtx, projectionMtx, z);
+		}
 	}
 
 	//Render stamp outlines
@@ -2538,6 +2557,21 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 			renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 		}
 	}
+}
+
+void MapPanel::RenderStampGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	//Draw grid
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
+
+	ion::Matrix4 gridMtx;
+	gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
+	gridMtx.SetScale(ion::Vector3((float)m_project.GetPlatformConfig().stampWidth, (float)m_project.GetPlatformConfig().stampHeight, 1.0f));
+	material->SetDiffuseColour(colour);
+	material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
+	material->Unbind();
 }
 
 void MapPanel::PaintMap(const Map& map)
