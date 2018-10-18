@@ -410,10 +410,10 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 						m_selectedTiles.clear();
 
 						//Sanitise loop order
-						int top = min(m_boxSelectStart.y, m_boxSelectEnd.y);
-						int left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
-						int bottom = max(m_boxSelectStart.y, m_boxSelectEnd.y);
-						int right = max(m_boxSelectStart.x, m_boxSelectEnd.x);
+						int top = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int left = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
+						int bottom = ion::maths::Max(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int right = ion::maths::Max(m_boxSelectStart.x, m_boxSelectEnd.x);
 
 						//Add all tiles in box
 						for(int tileX = left; tileX <= right; tileX++)
@@ -2317,8 +2317,8 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 	if(m_boxSelectStart.x >= 0 && m_boxSelectEnd.x >= 0)
 	{
 		//Draw overlay over box selection
-		const float bottom = min(mapHeight - 1 - m_boxSelectStart.y, mapHeight - 1 - m_boxSelectEnd.y);
-		const float left = min(m_boxSelectStart.x, m_boxSelectEnd.x);
+		const float bottom = ion::maths::Min(mapHeight - 1 - m_boxSelectStart.y, mapHeight - 1 - m_boxSelectEnd.y);
+		const float left = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
 
 		ion::Vector3 boxScale((float)abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1.0f, (float)abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1.0f, 0.0f);
 		ion::Vector3 boxPos(floor((left - (mapWidth / 2.0f) + (boxScale.x / 2.0f)) * tileWidth),
@@ -2534,8 +2534,8 @@ void MapPanel::RenderStampSelection(ion::render::Renderer& renderer, const ion::
 
 			ion::Vector2i hoverStampEnd = m_hoverStampPos + ion::Vector2i(stamp->GetWidth() - 1, stamp->GetHeight() - 1);
 
-			float bottom = min(mapHeight - 1 - m_hoverStampPos.y, mapHeight - 1 - hoverStampEnd.y);
-			float left = min(m_hoverStampPos.x, hoverStampEnd.x);
+			float bottom = ion::maths::Min(mapHeight - 1 - m_hoverStampPos.y, mapHeight - 1 - hoverStampEnd.y);
+			float left = ion::maths::Min(m_hoverStampPos.x, hoverStampEnd.x);
 
 			ion::Matrix4 boxMtx;
 			ion::Vector3 boxScale((float)abs(hoverStampEnd.x - m_hoverStampPos.x) + 1.0f, (float)abs(hoverStampEnd.y - m_hoverStampPos.y) + 1.0f, 0.0f);

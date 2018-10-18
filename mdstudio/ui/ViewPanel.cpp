@@ -9,6 +9,8 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Rend
 	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
 	, m_project(project)
 {
+	SetCurrent(*glContext);
+
 	m_mainWindow = mainWindow;
 	m_canvasPrimitive = NULL;
 	m_gridPrimitive = NULL;
@@ -189,10 +191,10 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 void ViewPanel::FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2)
 {
 	//Sanitise ordering before looping
-	int top = min(boxCorner1.y, boxCorner2.y);
-	int left = min(boxCorner1.x, boxCorner2.x);
-	int bottom = max(boxCorner1.y, boxCorner2.y);
-	int right = max(boxCorner1.x, boxCorner2.x);
+	int top = ion::maths::Min(boxCorner1.y, boxCorner2.y);
+	int left = ion::maths::Min(boxCorner1.x, boxCorner2.x);
+	int bottom = ion::maths::Max(boxCorner1.y, boxCorner2.y);
+	int right = ion::maths::Max(boxCorner1.x, boxCorner2.x);
 
 	for(int x = left; x <= right; x++)
 	{

@@ -521,7 +521,7 @@ void StampsPanel::ArrangeStamps(const ion::Vector2& panelSize)
 		stampsSorted.push_back(std::make_pair(size, &stamp));
 
 		//If wider than current canvas width, grow canvas
-		m_canvasSize.x = max(m_canvasSize.x, it->second.GetWidth());
+		m_canvasSize.x = ion::maths::Max(m_canvasSize.x, it->second.GetWidth());
 	}
 
 	std::sort(stampsSorted.begin(), stampsSorted.end(), [](const std::pair<int, const Stamp*>& a, const std::pair<int, const Stamp*>& b) { return a.first < b.first; });
@@ -560,10 +560,10 @@ void StampsPanel::ArrangeStamps(const ion::Vector2& panelSize)
 		}
 
 		//Record tallest stamp on current row
-		rowHeight = max(rowHeight, stampSize.y);
+		rowHeight = ion::maths::Max(rowHeight, stampSize.y);
 
 		//If Y pos + height extends beyond canvas height, grow canvas
-		m_canvasSize.y = max(m_canvasSize.y, currPos.y + rowHeight);
+		m_canvasSize.y = ion::maths::Max(m_canvasSize.y, currPos.y + rowHeight);
 
 		//Add stamp to position map
 		m_stampPosMap.push_back(std::make_pair(stamp.GetId(), stampPos));

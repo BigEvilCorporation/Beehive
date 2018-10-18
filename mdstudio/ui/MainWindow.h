@@ -15,6 +15,7 @@
 
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Texture.h>
+#include <ion/io/ResourceManager.h>
 #include <ion/beehive/Project.h>
 
 #include "UIBase.h"
@@ -183,6 +184,9 @@ private:
 	wxWeakRef<TimelinePanel> m_timelinePanel;
 
 	ProjectPtr m_project;
+
+	//Resource manager
+	ion::io::ResourceManager* m_resourceManager;
 
 	//Renderer
 	ion::render::Renderer* m_renderer;

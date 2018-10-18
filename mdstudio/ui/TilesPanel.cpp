@@ -259,7 +259,7 @@ ion::Vector2i TilesPanel::CalcCanvasSize()
 	wxSize panelSize = GetClientSize();
 	int numTiles = m_project.GetTileset().GetCount();
 	int numCols = ion::maths::Ceil((float)panelSize.x / 8.0f / tileWidth);
-	int numRows = max(numCols, (int)ion::maths::Ceil((float)numTiles / (float)numCols));
+	int numRows = ion::maths::Max(numCols, (int)ion::maths::Ceil((float)numTiles / (float)numCols));
 	return ion::Vector2i(numCols, numRows);
 }
 
@@ -287,8 +287,8 @@ void TilesPanel::PaintTiles()
 
 	for(int i = 0; i < tileset.GetCount(); i++)
 	{
-		int x = max(0, i % m_canvasSize.x);
-		int y = max(0, m_canvasSize.y - 1 - (i / m_canvasSize.x));
+		int x = ion::maths::Max(0, i % m_canvasSize.x);
+		int y = ion::maths::Max(0, m_canvasSize.y - 1 - (i / m_canvasSize.x));
 
 		PaintTile(i, x, y, 0);
 	}

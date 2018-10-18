@@ -230,7 +230,7 @@ ion::Vector2i TerrainTilesPanel::CalcCanvasSize()
 	wxSize panelSize = GetClientSize();
 	int numTerrainTiles = m_project.GetTerrainTileset().GetCount();
 	int numCols = ion::maths::Ceil((float)panelSize.x / tileWidth / s_TerrainTileSize);
-	int numRows = max(numCols, (int)ion::maths::Ceil((float)numTerrainTiles / (float)numCols / s_TerrainTileSize));
+	int numRows = ion::maths::Max(numCols, (int)ion::maths::Ceil((float)numTerrainTiles / (float)numCols / s_TerrainTileSize));
 	return ion::Vector2i(numCols, numRows);
 }
 
@@ -258,8 +258,8 @@ void TerrainTilesPanel::PaintCollisionTerrainTiles()
 
 	for(int i = 0; i < TerrainTileset.GetCount(); i++)
 	{
-		int x = max(0, i % m_canvasSize.x);
-		int y = max(0, m_canvasSize.y - 1 - (i / m_canvasSize.x));
+		int x = ion::maths::Max(0, i % m_canvasSize.x);
+		int y = ion::maths::Max(0, m_canvasSize.y - 1 - (i / m_canvasSize.x));
 
 		PaintCollisionTerrainTile(i, x, y);
 	}
@@ -276,10 +276,10 @@ void TerrainTilesPanel::PaintCollisionTerrainTile(TerrainTileId tileId, int x, i
 void TerrainTilesPanel::FillTerrainTiles(TerrainTileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2)
 {
 	//Sanitise ordering before looping
-	int top = min(boxCorner1.y, boxCorner2.y);
-	int left = min(boxCorner1.x, boxCorner2.x);
-	int bottom = max(boxCorner1.y, boxCorner2.y);
-	int right = max(boxCorner1.x, boxCorner2.x);
+	int top = ion::maths::Min(boxCorner1.y, boxCorner2.y);
+	int left = ion::maths::Min(boxCorner1.x, boxCorner2.x);
+	int bottom = ion::maths::Max(boxCorner1.y, boxCorner2.y);
+	int right = ion::maths::Max(boxCorner1.x, boxCorner2.x);
 
 	for(int x = left; x <= right; x++)
 	{

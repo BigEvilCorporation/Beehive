@@ -12,33 +12,25 @@
 #include "RenderResources.h"
 
 #include <ion/core/memory/Memory.h>
+#include <ion/core/thread/Sleep.h>
 
-RenderResources::RenderResources(Project& project)
+RenderResources::RenderResources(Project& project, ion::io::ResourceManager& resourceManager)
  : m_project(project)
 {
 	m_tilesetSizeSq = 1;
 	m_terrainTilesetSizeSq = 1;
 	m_cellSizeTexSpaceSq = 1.0f;
 
-	//Create shaders
-	for(int i = 0; i < eShaderMax; i++)
-	{
-		m_vertexShaders[i] = ion::render::Shader::Create();
-		m_pixelShaders[i] = ion::render::Shader::Create();
-	}
-
 	//Load shaders
-	if(!m_vertexShaders[eShaderFlatColour]->Load("shaders/flat_v.ion.shader"))
-		ion::debug::Error("Error loading vertex shader");
+	m_vertexShaders[eShaderFlatColour] = resourceManager.GetResource<ion::render::Shader>("flatcoloured_v");
+	m_pixelShaders[eShaderFlatColour] = resourceManager.GetResource<ion::render::Shader>("flatcoloured_p");
+	m_vertexShaders[eShaderFlatTextured] = resourceManager.GetResource<ion::render::Shader>("flattextured_v");
+	m_pixelShaders[eShaderFlatTextured] = resourceManager.GetResource<ion::render::Shader>("flattextured_p");
 
-	if(!m_pixelShaders[eShaderFlatColour]->Load("shaders/flat_p.ion.shader"))
-		ion::debug::Error("Error loading pixel shader");
-
-	if(!m_vertexShaders[eShaderFlatTextured]->Load("shaders/flattextured_v.ion.shader"))
-		ion::debug::Error("Error loading vertex shader");
-
-	if(!m_pixelShaders[eShaderFlatTextured]->Load("shaders/flattextured_p.ion.shader"))
-		ion::debug::Error("Error loading pixel shader");
+	while (resourceManager.GetNumResourcesWaiting() > 0)
+	{
+		ion::thread::Sleep(5);
+	}
 
 	//Create textures
 	for(int i = 0; i < eTextureMax; i++)
@@ -54,32 +46,32 @@ RenderResources::RenderResources(Project& project)
 
 	//Setup flat material
 	m_materials[eMaterialFlatColour]->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 0.0f));
-	m_materials[eMaterialFlatColour]->SetVertexShader(m_vertexShaders[eShaderFlatColour]);
-	m_materials[eMaterialFlatColour]->SetPixelShader(m_pixelShaders[eShaderFlatColour]);
+	m_materials[eMaterialFlatColour]->SetVertexShader(m_vertexShaders[eShaderFlatColour].Get());
+	m_materials[eMaterialFlatColour]->SetPixelShader(m_pixelShaders[eShaderFlatColour].Get());
 
 	//Setup textured tileset material
 	m_materials[eMaterialTileset]->AddDiffuseMap(m_textures[eTextureTileset]);
 	m_materials[eMaterialTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
-	m_materials[eMaterialTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+	m_materials[eMaterialTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
+	m_materials[eMaterialTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
 
 	//Setup textured collision types material
 	m_materials[eMaterialCollisionTypes]->AddDiffuseMap(m_textures[eTextureCollisionTypes]);
 	m_materials[eMaterialCollisionTypes]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialCollisionTypes]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
-	m_materials[eMaterialCollisionTypes]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+	m_materials[eMaterialCollisionTypes]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
+	m_materials[eMaterialCollisionTypes]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
 
 	//Setup textured terrain tileset material
 	m_materials[eMaterialTerrainTileset]->AddDiffuseMap(m_textures[eTextureTerrainTileset]);
 	m_materials[eMaterialTerrainTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialTerrainTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
-	m_materials[eMaterialTerrainTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+	m_materials[eMaterialTerrainTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
+	m_materials[eMaterialTerrainTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
 
 	//Setup textured spriteSheet material
 	m_materials[eMaterialSpriteSheet]->AddDiffuseMap(m_textures[eTextureSpriteSheetPreview]);
 	m_materials[eMaterialSpriteSheet]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialSpriteSheet]->SetVertexShader(m_vertexShaders[eShaderFlatTextured]);
-	m_materials[eMaterialSpriteSheet]->SetPixelShader(m_pixelShaders[eShaderFlatTextured]);
+	m_materials[eMaterialSpriteSheet]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
+	m_materials[eMaterialSpriteSheet]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
 
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
@@ -122,8 +114,8 @@ RenderResources::~RenderResources()
 
 	for(int i = 0; i < eShaderMax; i++)
 	{
-		delete m_vertexShaders[i];
-		delete m_pixelShaders[i];
+		m_vertexShaders[i].Clear();
+		m_pixelShaders[i].Clear();
 	}
 }
 
@@ -135,7 +127,7 @@ void RenderResources::CreateTilesetTexture()
 	const Tileset& tileset = m_project.GetTileset();
 
 	u32 numTiles = tileset.GetCount();
-	m_tilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
+	m_tilesetSizeSq = ion::maths::Max(1, (int)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
 	u32 textureWidth = m_tilesetSizeSq * tileWidth;
 	u32 textureHeight = m_tilesetSizeSq * tileHeight;
 	u32 bytesPerPixel = 3;
@@ -181,7 +173,7 @@ void RenderResources::CreateTilesetTexture()
 		}
 	}
 
-	m_textures[eTextureTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, false, data);
 	m_textures[eTextureTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
@@ -198,7 +190,7 @@ void RenderResources::CreateTerrainTilesTexture()
 	const TerrainTileset& tileset = m_project.GetTerrainTileset();
 
 	u32 numTiles = tileset.GetCount() + 1;
-	m_terrainTilesetSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
+	m_terrainTilesetSizeSq = ion::maths::Max(1, (int)ion::maths::Ceil(ion::maths::Sqrt((float)numTiles)));
 	u32 textureWidth = m_terrainTilesetSizeSq * tileWidth;
 	u32 textureHeight = m_terrainTilesetSizeSq * tileHeight;
 	u32 bytesPerPixel = 4;
@@ -240,7 +232,7 @@ void RenderResources::CreateTerrainTilesTexture()
 		}
 	}
 
-	m_textures[eTextureTerrainTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureTerrainTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, false, data);
 	m_textures[eTextureTerrainTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureTerrainTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureTerrainTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
@@ -252,7 +244,7 @@ void RenderResources::CreateCollisionTypesTexture()
 {
 	const int numCollisionTypes = 4;
 
-	u32 collisionTexSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes)));
+	u32 collisionTexSizeSq = ion::maths::Max(1, (int)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes)));
 	u32 textureWidth = collisionTexSizeSq;
 	u32 textureHeight = collisionTexSizeSq;
 	u32 bytesPerPixel = 4;
@@ -285,7 +277,7 @@ void RenderResources::CreateCollisionTypesTexture()
 		data[dataOffset + 3] = colour.a * 255;
 	}
 
-	m_textures[eTextureCollisionTypes]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureCollisionTypes]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, false, data);
 	m_textures[eTextureCollisionTypes]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureCollisionTypes]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::eWrapClamp);
@@ -318,7 +310,7 @@ void RenderResources::CreateSpriteSheetPreviewTexture(const BMPReader& reader)
 		}
 	}
 
-	m_textures[eTextureSpriteSheetPreview]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, data);
+	m_textures[eTextureSpriteSheetPreview]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, false, data);
 	m_textures[eTextureSpriteSheetPreview]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureSpriteSheetPreview]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 	m_textures[eTextureSpriteSheetPreview]->SetWrapping(ion::render::Texture::eWrapClamp);
@@ -401,7 +393,7 @@ void RenderResources::GetCollisionTypeTexCoords(u16 collisionFlags, ion::render:
 {
 	const int numCollisionTypes = 4;
 
-	u32 collisionTexSizeSq = max(1, (u32)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes)));
+	u32 collisionTexSizeSq = ion::maths::Max(1, (int)ion::maths::Ceil(ion::maths::Sqrt((float)numCollisionTypes)));
 	float cellSizeCollisionTexSpaceSq = 1.0f / (float)collisionTexSizeSq;
 
 	int collisionType = 0;
@@ -757,7 +749,7 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 			}
 		}
 
-		renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, data);
+		renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, false, data);
 		renderFrame.texture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
 		renderFrame.texture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
 		renderFrame.texture->SetWrapping(ion::render::Texture::eWrapClamp);
@@ -812,7 +804,7 @@ void RenderResources::CreateSpriteSheetResources(SpriteSheetId spriteSheetId, co
 {
 	m_spriteSheetRenderResources.erase(spriteSheetId);
 	std::pair<std::map<SpriteSheetId, SpriteSheetRenderResources>::iterator, bool> it = m_spriteSheetRenderResources.insert(std::make_pair(spriteSheetId, SpriteSheetRenderResources()));
-	it.first->second.Load(spriteSheet, m_pixelShaders[eShaderFlatTextured], m_vertexShaders[eShaderFlatTextured], &m_project);
+	it.first->second.Load(spriteSheet, m_pixelShaders[eShaderFlatTextured].Get(), m_vertexShaders[eShaderFlatTextured].Get(), &m_project);
 }
 
 void RenderResources::DeleteSpriteSheetRenderResources(SpriteSheetId spriteSheetId)

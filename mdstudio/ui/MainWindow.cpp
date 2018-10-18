@@ -46,6 +46,11 @@ MainWindow::MainWindow()
 	//Lock refresh during init
 	LockRefresh();
 
+	//Create resource manager and set resource directories
+	m_resourceManager = new ion::io::ResourceManager();
+	m_resourceManager->SetResourceDirectory<ion::render::Shader>("shaders", ".ion.shader");
+	m_resourceManager->SetResourceDirectory<ion::render::Texture>("textures", ".ion.texture");
+
 	//Setup panel docking manager
 	m_auiManager.SetManagedWindow(m_dockArea);
 	m_auiManager.SetFlags(	wxAUI_MGR_ALLOW_FLOATING			//Allow floating panels
@@ -71,13 +76,15 @@ MainWindow::MainWindow()
 	}
 
 	//Create renderer (from global DC
-	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC());
+	m_renderer = ion::render::Renderer::Create(m_blankCanvas->GetHDC(), m_context->GetGLRC());
 
 	//Create default Mega Drive project
 	Project* defaultProject = new Project(PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive]);
 
 	//Create and load rendering resources
-	m_renderResources = new RenderResources(*defaultProject);
+	m_renderer->LockContext(m_blankCanvas->GetHDC());
+	m_renderResources = new RenderResources(*defaultProject, *m_resourceManager);
+	m_renderer->UnlockContext();
 
 	//Open welcome project
 	static bool openWelcomeProject = true;
@@ -115,6 +122,9 @@ MainWindow::~MainWindow()
 	//Delete renderer and OpenGL context
 	delete m_renderer;
 	delete m_context;
+
+	//Delete resource manager
+	delete m_resourceManager;
 }
 
 void MainWindow::EventHandlerKeyboard(wxKeyEvent& event)
@@ -244,7 +254,9 @@ void MainWindow::SetProject(Project* project)
 		if(project)
 		{
 			//Create render resources
-			m_renderResources = new RenderResources(*m_project);
+			m_renderer->LockContext(m_blankCanvas->GetHDC());
+			m_renderResources = new RenderResources(*m_project, *m_resourceManager);
+			m_renderer->UnlockContext();
 
 			//Recreate tileset/collision set/spriteSheet textures, and tile index cache
 			RefreshTileset();

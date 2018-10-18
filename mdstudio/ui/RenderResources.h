@@ -20,6 +20,8 @@
 #include <ion/renderer/imageformats/BMPReader.h>
 #include <ion/beehive/Project.h>
 #include <ion/beehive/SpriteSheet.h>
+#include <ion/io/ResourceManager.h>
+#include <ion/io/ResourceHandle.h>
 
 class RenderResources
 {
@@ -71,7 +73,7 @@ public:
 		ePrimitiveMax
 	};
 
-	RenderResources(Project& project);
+	RenderResources(Project& project, ion::io::ResourceManager& resourceManager);
 	~RenderResources();
 
 	//Create and redraw tileset texture
@@ -104,8 +106,8 @@ public:
 
 	//Get resources
 	ion::render::Material* GetMaterial(MaterialType type) { return m_materials[type]; }
-	ion::render::Shader* GetVertexShader(ShaderType type) { return m_vertexShaders[type]; }
-	ion::render::Shader* GetPixelhader(ShaderType type) { return m_pixelShaders[type]; }
+	ion::render::Shader* GetVertexShader(ShaderType type) { return m_vertexShaders[type].Get(); }
+	ion::render::Shader* GetPixelhader(ShaderType type) { return m_pixelShaders[type].Get(); }
 	ion::render::Primitive* GetPrimitive(PrimitiveType type) const { return m_primitives[type]; }
 	const ion::Colour& GetColour(ColourType type) const { return m_colours[type]; }
 
@@ -160,8 +162,8 @@ private:
 	Project& m_project;
 
 	//Resources
-	ion::render::Shader* m_vertexShaders[eShaderMax];
-	ion::render::Shader* m_pixelShaders[eShaderMax];
+	ion::io::ResourceHandle<ion::render::Shader> m_vertexShaders[eShaderMax];
+	ion::io::ResourceHandle<ion::render::Shader> m_pixelShaders[eShaderMax];
 	ion::render::Texture* m_textures[eTextureMax];
 	ion::render::Material* m_materials[eMaterialMax];
 	ion::render::Primitive* m_primitives[ePrimitiveMax];
