@@ -212,7 +212,7 @@ void GameObjectTypeDialog::OnBtnExport(wxCommandEvent& event)
 	if(dialogue.ShowModal() == wxID_OK)
 	{
 		std::string filename = dialogue.GetPath().c_str().AsChar();
-		m_project.ExportGameObjectTypes(filename);
+		m_project.ExportGameObjectTypes(filename, Project::ExportFormat::Beehive);
 	}
 }
 

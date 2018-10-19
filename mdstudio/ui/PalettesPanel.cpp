@@ -222,7 +222,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 		if(dialogue.ShowModal() == wxID_OK)
 		{
 			std::string filename = dialogue.GetPath().c_str().AsChar();
-			m_project.ExportPaletteSlots(filename);
+			m_project.ExportPaletteSlots(filename, Project::ExportFormat::Beehive);
 		}
 	}
 	else if(menuItemId & eMenuExportBMP)

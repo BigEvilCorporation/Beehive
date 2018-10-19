@@ -206,7 +206,7 @@ void SpriteAnimEditorDialog::OnBtnExport(wxCommandEvent& event)
 	if(dialogue.ShowModal() == wxID_OK)
 	{
 		std::string filename = dialogue.GetPath().c_str().AsChar();
-		m_project.ExportActors(filename);
+		m_project.ExportActors(filename, Project::ExportFormat::Beehive);
 	}
 }
 
