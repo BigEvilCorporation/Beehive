@@ -1271,6 +1271,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerStampAnims->SetPath(m_project->m_exportFilenames.stampAnims);
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.terrainTiles);
 		dialog.m_filePickerTerrainBlocks->SetPath(m_project->m_exportFilenames.terrainBlocks);
+		dialog.m_filePickerGameObjTypes->SetPath(m_project->m_exportFilenames.gameObjTypes);
 		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
 		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
 		dialog.m_dirPickerSpritePalettes->SetPath(m_project->m_exportFilenames.spritePalettes);
@@ -1282,6 +1283,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_chkStampAnims->SetValue(m_project->m_exportFilenames.stampAnimsExportEnabled);
 		dialog.m_chkTerrainTiles->SetValue(m_project->m_exportFilenames.terrainTilesExportEnabled);
 		dialog.m_chkTerrainBlocks->SetValue(m_project->m_exportFilenames.terrainBlockExportEnabled);
+		dialog.m_chkGameObjTypes->SetValue(m_project->m_exportFilenames.gameObjTypesExportEnabled);
 		dialog.m_chkSpriteSheets->SetValue(m_project->m_exportFilenames.spriteSheetsExportEnabled);
 		dialog.m_chkSpriteAnims->SetValue(m_project->m_exportFilenames.spriteAnimsExportEnabled);
 		dialog.m_chkSpritePalettes->SetValue(m_project->m_exportFilenames.spritePalettesExportEnabled);
@@ -1308,6 +1310,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.stampAnims = dialog.m_filePickerStampAnims->GetPath();
 			m_project->m_exportFilenames.terrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.terrainBlocks = dialog.m_filePickerTerrainBlocks->GetPath();
+			m_project->m_exportFilenames.gameObjTypes = dialog.m_filePickerGameObjTypes->GetPath();
 			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
 			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
 			m_project->m_exportFilenames.spritePalettes = dialog.m_dirPickerSpritePalettes->GetPath();
@@ -1319,6 +1322,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.stampAnimsExportEnabled = dialog.m_chkStampAnims->GetValue();
 			m_project->m_exportFilenames.terrainTilesExportEnabled = dialog.m_chkTerrainTiles->GetValue();
 			m_project->m_exportFilenames.terrainBlockExportEnabled = dialog.m_chkTerrainBlocks->GetValue();
+			m_project->m_exportFilenames.gameObjTypesExportEnabled = dialog.m_chkGameObjTypes->GetValue();
 			m_project->m_exportFilenames.spriteSheetsExportEnabled = dialog.m_chkSpriteSheets->GetValue();
 			m_project->m_exportFilenames.spriteAnimsExportEnabled = dialog.m_chkSpriteAnims->GetValue();
 			m_project->m_exportFilenames.spritePalettesExportEnabled = dialog.m_chkSpritePalettes->GetValue();
@@ -1353,6 +1357,9 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			if(dialog.m_chkTerrainTiles->GetValue())
 				m_project->ExportTerrainTiles(m_project->m_exportFilenames.terrainTiles, format);
+
+			if (dialog.m_chkGameObjTypes->GetValue())
+				m_project->ExportGameObjectTypes(m_project->m_exportFilenames.gameObjTypes, format);
 
 			if(dialog.m_chkSpriteSheets->GetValue())
 				m_project->ExportSpriteSheets(m_project->m_exportFilenames.spriteSheets, format);

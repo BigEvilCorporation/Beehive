@@ -1529,6 +1529,12 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTerrainTiles, 0, wxALL|wxEXPAND, 5 );
 
+	m_chkGameObjTypes = new wxCheckBox( this, wxID_ANY, wxT("Export game object types:"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer33->Add( m_chkGameObjTypes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_filePickerGameObjTypes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer33->Add( m_filePickerGameObjTypes, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+
 	m_chkTerrainBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export terrain blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTerrainBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
