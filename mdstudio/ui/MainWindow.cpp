@@ -1359,7 +1359,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				m_project->ExportTerrainTiles(m_project->m_exportFilenames.terrainTiles, format);
 
 			if (dialog.m_chkGameObjTypes->GetValue())
-				m_project->ExportGameObjectTypes(m_project->m_exportFilenames.gameObjTypes, format);
+				m_project->ExportGameObjectTypes(m_project->m_exportFilenames.gameObjTypes, format, true);
 
 			if(dialog.m_chkSpriteSheets->GetValue())
 				m_project->ExportSpriteSheets(m_project->m_exportFilenames.spriteSheets, format);
