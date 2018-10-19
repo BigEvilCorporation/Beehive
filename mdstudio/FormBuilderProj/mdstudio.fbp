@@ -6357,7 +6357,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="1">
+        <object class="Dialog" expanded="0">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -6432,16 +6432,16 @@
             <event name="OnShow"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="1">
+            <object class="wxBoxSizer" expanded="0">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer2</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="1">
+                <object class="sizeritem" expanded="0">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND</property>
                     <property name="proportion">1</property>
-                    <object class="wxFlexGridSizer" expanded="1">
+                    <object class="wxFlexGridSizer" expanded="0">
                         <property name="cols">1</property>
                         <property name="flexible_direction">wxBOTH</property>
                         <property name="growablecols"></property>
@@ -16689,7 +16689,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="0">
+        <object class="Dialog" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -17735,7 +17735,7 @@
                                 <property name="validator_type">wxDefaultValidator</property>
                                 <property name="validator_variable"></property>
                                 <property name="value"></property>
-                                <property name="wildcard">*.asm</property>
+                                <property name="wildcard">*.asm;*.bee</property>
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
@@ -17926,7 +17926,7 @@
                                 <property name="validator_type">wxDefaultValidator</property>
                                 <property name="validator_variable"></property>
                                 <property name="value"></property>
-                                <property name="wildcard">*.asm</property>
+                                <property name="wildcard">*.asm;*.bee</property>
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
@@ -18117,7 +18117,7 @@
                                 <property name="validator_type">wxDefaultValidator</property>
                                 <property name="validator_variable"></property>
                                 <property name="value"></property>
-                                <property name="wildcard">*.asm</property>
+                                <property name="wildcard">*.asm;*.bee</property>
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
@@ -18308,7 +18308,7 @@
                                 <property name="validator_type">wxDefaultValidator</property>
                                 <property name="validator_variable"></property>
                                 <property name="value"></property>
-                                <property name="wildcard">*.asm</property>
+                                <property name="wildcard">*.asm;*.bee</property>
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
@@ -18499,7 +18499,7 @@
                                 <property name="validator_type">wxDefaultValidator</property>
                                 <property name="validator_variable"></property>
                                 <property name="value"></property>
-                                <property name="wildcard">*.asm</property>
+                                <property name="wildcard">*.asm;*.bee</property>
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
@@ -18690,7 +18690,7 @@
                                 <property name="validator_type">wxDefaultValidator</property>
                                 <property name="validator_variable"></property>
                                 <property name="value"></property>
-                                <property name="wildcard">*.asm</property>
+                                <property name="wildcard">*.asm;*.bee</property>
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
@@ -32018,7 +32018,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.asm</property>
+                        <property name="wildcard">*.asm;*.bee</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
@@ -32209,7 +32209,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.asm</property>
+                        <property name="wildcard">*.asm;*.bee</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
@@ -32400,7 +32400,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.asm</property>
+                        <property name="wildcard">*.asm;*.bee</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
@@ -32591,7 +32591,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.asm</property>
+                        <property name="wildcard">*.asm;*.bee</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
@@ -32782,7 +32782,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.asm</property>
+                        <property name="wildcard">*.asm;*.bee</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>
@@ -32973,7 +32973,7 @@
                         <property name="validator_type">wxDefaultValidator</property>
                         <property name="validator_variable"></property>
                         <property name="value"></property>
-                        <property name="wildcard">*.asm</property>
+                        <property name="wildcard">*.asm;*.bee</property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
                         <property name="window_style"></property>

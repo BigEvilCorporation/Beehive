@@ -1496,43 +1496,43 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export map palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkPalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
 
 	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTileset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
 
 	m_chkBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
 	m_chkStamps = new wxCheckBox( this, wxID_ANY, wxT("Export stamps:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkStamps, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerStamps = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerStamps = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerStamps, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
 
 	m_chkStampAnims = new wxCheckBox( this, wxID_ANY, wxT("Export stamp animations:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkStampAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerStampAnims = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerStampAnims = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerStampAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
 	m_chkTerrainTiles = new wxCheckBox( this, wxID_ANY, wxT("Export terrain tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTerrainTiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTerrainTiles, 0, wxALL|wxEXPAND, 5 );
 
 	m_chkTerrainBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export terrain blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTerrainBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerTerrainBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerTerrainBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTerrainBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
 	m_chkSpriteSheets = new wxCheckBox( this, wxID_ANY, wxT("Export sprite sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -2715,37 +2715,37 @@ ExportDialogMapTab::ExportDialogMapTab( wxWindow* parent, wxWindowID id, const w
 	m_chkMap = new wxCheckBox( this, wxID_ANY, wxT("Export tile map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerMap, 0, wxALL|wxEXPAND, 5 );
 
 	m_chkBlockMap = new wxCheckBox( this, wxID_ANY, wxT("Export block map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkBlockMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerBlockMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerBlockMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerBlockMap, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
 	m_chkStampMap = new wxCheckBox( this, wxID_ANY, wxT("Export stamp map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkStampMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerStampMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerStampMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerStampMap, 0, wxALL|wxEXPAND, 5 );
 
 	m_chkCollisionMap = new wxCheckBox( this, wxID_ANY, wxT("Export terrain map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkCollisionMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerCollisionMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerCollisionMap, 0, wxALL|wxEXPAND, 5 );
 
 	m_chkCollisionBlockMap = new wxCheckBox( this, wxID_ANY, wxT("Export terrain block map:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkCollisionBlockMap, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerCollisionBlockMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerCollisionBlockMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerCollisionBlockMap, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
 	m_chkGameObj = new wxCheckBox( this, wxID_ANY, wxT("Export game objects:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkGameObj, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerGameObj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerGameObj, 0, wxALL|wxEXPAND, 5 );
 
 
