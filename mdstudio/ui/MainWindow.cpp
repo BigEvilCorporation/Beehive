@@ -82,9 +82,7 @@ MainWindow::MainWindow()
 	Project* defaultProject = new Project(PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive]);
 
 	//Create and load rendering resources
-	m_renderer->LockContext(m_blankCanvas->GetHDC());
 	m_renderResources = new RenderResources(*defaultProject, *m_resourceManager);
-	m_renderer->UnlockContext();
 
 	//Open welcome project
 	static bool openWelcomeProject = true;
@@ -254,9 +252,7 @@ void MainWindow::SetProject(Project* project)
 		if(project)
 		{
 			//Create render resources
-			m_renderer->LockContext(m_blankCanvas->GetHDC());
 			m_renderResources = new RenderResources(*m_project, *m_resourceManager);
-			m_renderer->UnlockContext();
 
 			//Recreate tileset/collision set/spriteSheet textures, and tile index cache
 			RefreshTileset();
@@ -1006,9 +1002,7 @@ void MainWindow::RefreshTileset()
 		if(m_project.get())
 		{
 			//Recreate tileset texture
-			m_renderer->LockContext(m_blankCanvas->GetHDC());
 			m_renderResources->CreateTilesetTexture();
-			m_renderer->UnlockContext();
 		}
 	}
 }
@@ -1020,10 +1014,8 @@ void MainWindow::RefreshTerrainTileset()
 		if(m_project.get())
 		{
 			//Recreate collision set texture
-			m_renderer->LockContext(m_blankCanvas->GetHDC());
 			m_renderResources->CreateCollisionTypesTexture();
 			m_renderResources->CreateTerrainTilesTexture();
-			m_renderer->UnlockContext();
 		}
 	}
 }
@@ -1032,9 +1024,7 @@ void MainWindow::RefreshSpriteSheets()
 {
 	if(m_project.get())
 	{
-		m_renderer->LockContext(m_blankCanvas->GetHDC());
 		m_renderResources->CreateSpriteSheetResources(*m_project.get());
-		m_renderer->UnlockContext();
 	}
 }
 
