@@ -640,6 +640,8 @@ class ExportDialogBase : public wxDialog
 		wxFilePickerCtrl* m_filePickerStampAnims;
 		wxCheckBox* m_chkTerrainTiles;
 		wxFilePickerCtrl* m_filePickerTerrainTiles;
+		wxCheckBox* m_chkTerrainAngles;
+		wxFilePickerCtrl* m_filePickerTerrainAngles;
 		wxCheckBox* m_chkGameObjTypes;
 		wxFilePickerCtrl* m_filePickerGameObjTypes;
 		wxCheckBox* m_chkTerrainBlocks;

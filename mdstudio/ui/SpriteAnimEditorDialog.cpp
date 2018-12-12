@@ -648,7 +648,7 @@ void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteShe
 			//Fetch texture, convert to wxImage
 			const ion::render::Texture* texture = spriteResources->m_frames[i].texture;
 			wxImage image(texture->GetWidth(), texture->GetHeight());
-			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::eRGB, ion::render::Texture::eBPP24, image.GetData());
+			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, image.GetData());
 
 			//Invert Y for OpenGL
 			image = image.Mirror(false);
@@ -720,7 +720,7 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 			//Fetch texture, convert to wxImage
 			const ion::render::Texture* texture = spriteResources->m_frames[spriteFrame].texture;
 			wxImage image(texture->GetWidth(), texture->GetHeight());
-			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::eRGB, ion::render::Texture::eBPP24, image.GetData());
+			texture->GetPixels(ion::Vector2i(0, 0), ion::Vector2i(texture->GetWidth(), texture->GetHeight()), ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, image.GetData());
 
 			//Invert Y for OpenGL
 			image = image.Mirror(false);

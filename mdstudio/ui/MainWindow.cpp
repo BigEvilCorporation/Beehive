@@ -1261,6 +1261,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_filePickerStampAnims->SetPath(m_project->m_exportFilenames.stampAnims);
 		dialog.m_filePickerTerrainTiles->SetPath(m_project->m_exportFilenames.terrainTiles);
 		dialog.m_filePickerTerrainBlocks->SetPath(m_project->m_exportFilenames.terrainBlocks);
+		dialog.m_filePickerTerrainAngles->SetPath(m_project->m_exportFilenames.terrainAngles);
 		dialog.m_filePickerGameObjTypes->SetPath(m_project->m_exportFilenames.gameObjTypes);
 		dialog.m_dirPickerSpriteSheets->SetPath(m_project->m_exportFilenames.spriteSheets);
 		dialog.m_dirPickerSpriteAnims->SetPath(m_project->m_exportFilenames.spriteAnims);
@@ -1273,14 +1274,15 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		dialog.m_chkStampAnims->SetValue(m_project->m_exportFilenames.stampAnimsExportEnabled);
 		dialog.m_chkTerrainTiles->SetValue(m_project->m_exportFilenames.terrainTilesExportEnabled);
 		dialog.m_chkTerrainBlocks->SetValue(m_project->m_exportFilenames.terrainBlockExportEnabled);
+		dialog.m_chkTerrainAngles->SetValue(m_project->m_exportFilenames.terrainAngleExportEnabled);
 		dialog.m_chkGameObjTypes->SetValue(m_project->m_exportFilenames.gameObjTypesExportEnabled);
 		dialog.m_chkSpriteSheets->SetValue(m_project->m_exportFilenames.spriteSheetsExportEnabled);
 		dialog.m_chkSpriteAnims->SetValue(m_project->m_exportFilenames.spriteAnimsExportEnabled);
 		dialog.m_chkSpritePalettes->SetValue(m_project->m_exportFilenames.spritePalettesExportEnabled);
 
-		dialog.m_btnBinary->SetValue(m_project->m_exportFilenames.exportBinary);
-		dialog.m_btnCompressed->SetValue(m_project->m_exportFilenames.exportCompressed);
-		dialog.m_btnText->SetValue(!m_project->m_exportFilenames.exportBinary);
+		dialog.m_btnBinary->SetValue(m_project->m_exportFilenames.exportFormat == Project::ExportFormat::Binary);
+		dialog.m_btnCompressed->SetValue(m_project->m_exportFilenames.exportFormat == Project::ExportFormat::BinaryCompressed);
+		dialog.m_btnText->SetValue(m_project->m_exportFilenames.exportFormat == Project::ExportFormat::Text);
 
 		int mapIndex = 0;
 		for(TMapMap::const_iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
@@ -1300,6 +1302,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.stampAnims = dialog.m_filePickerStampAnims->GetPath();
 			m_project->m_exportFilenames.terrainTiles = dialog.m_filePickerTerrainTiles->GetPath();
 			m_project->m_exportFilenames.terrainBlocks = dialog.m_filePickerTerrainBlocks->GetPath();
+			m_project->m_exportFilenames.terrainAngles = dialog.m_filePickerTerrainAngles->GetPath();
 			m_project->m_exportFilenames.gameObjTypes = dialog.m_filePickerGameObjTypes->GetPath();
 			m_project->m_exportFilenames.spriteSheets = dialog.m_dirPickerSpriteSheets->GetPath();
 			m_project->m_exportFilenames.spriteAnims = dialog.m_dirPickerSpriteAnims->GetPath();
@@ -1312,13 +1315,11 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			m_project->m_exportFilenames.stampAnimsExportEnabled = dialog.m_chkStampAnims->GetValue();
 			m_project->m_exportFilenames.terrainTilesExportEnabled = dialog.m_chkTerrainTiles->GetValue();
 			m_project->m_exportFilenames.terrainBlockExportEnabled = dialog.m_chkTerrainBlocks->GetValue();
+			m_project->m_exportFilenames.terrainAngleExportEnabled = dialog.m_chkTerrainAngles->GetValue();
 			m_project->m_exportFilenames.gameObjTypesExportEnabled = dialog.m_chkGameObjTypes->GetValue();
 			m_project->m_exportFilenames.spriteSheetsExportEnabled = dialog.m_chkSpriteSheets->GetValue();
 			m_project->m_exportFilenames.spriteAnimsExportEnabled = dialog.m_chkSpriteAnims->GetValue();
 			m_project->m_exportFilenames.spritePalettesExportEnabled = dialog.m_chkSpritePalettes->GetValue();
-
-			m_project->m_exportFilenames.exportBinary = dialog.m_btnBinary->GetValue();
-			m_project->m_exportFilenames.exportCompressed = dialog.m_btnBinary->GetValue();
 
 			bool binary = dialog.m_btnBinary->GetValue();
 			bool compressed = dialog.m_btnCompressed->GetValue();
@@ -1332,6 +1333,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				format = Project::ExportFormat::BinaryCompressed;
 			else if (binary)
 				format = Project::ExportFormat::Binary;
+
+			m_project->m_exportFilenames.exportFormat = format;
 			
 			if(dialog.m_chkPalettes->GetValue())
 				m_project->ExportPalettes(m_project->m_exportFilenames.palettes, format);
@@ -1375,6 +1378,12 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			{
 				//Export terrain blocks
 				m_project->ExportTerrainBlocks(m_project->m_exportFilenames.terrainBlocks, format, terrainBlockWidth, terrainBlockHeight);
+			}
+
+			if (dialog.m_chkTerrainAngles->GetValue())
+			{
+				//Export terrain angle data
+				m_project->ExportTerrainAngles(m_project->m_exportFilenames.terrainAngles, format);
 			}
 
 			int mapIndex = 0;

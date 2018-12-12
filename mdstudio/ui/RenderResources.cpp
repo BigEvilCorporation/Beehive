@@ -173,10 +173,10 @@ void RenderResources::CreateTilesetTexture()
 		}
 	}
 
-	m_textures[eTextureTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, false, data);
-	m_textures[eTextureTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_textures[eTextureTileset]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGB, ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	m_textures[eTextureTileset]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTileset]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTileset]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 	delete data;
 }
@@ -232,10 +232,10 @@ void RenderResources::CreateTerrainTilesTexture()
 		}
 	}
 
-	m_textures[eTextureTerrainTileset]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, false, data);
-	m_textures[eTextureTerrainTileset]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureTerrainTileset]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureTerrainTileset]->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_textures[eTextureTerrainTileset]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	m_textures[eTextureTerrainTileset]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTerrainTileset]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTerrainTileset]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 	delete data;
 }
@@ -277,10 +277,10 @@ void RenderResources::CreateCollisionTypesTexture()
 		data[dataOffset + 3] = colour.a * 255;
 	}
 
-	m_textures[eTextureCollisionTypes]->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, false, data);
-	m_textures[eTextureCollisionTypes]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureCollisionTypes]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_textures[eTextureCollisionTypes]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	m_textures[eTextureCollisionTypes]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureCollisionTypes]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 	delete data;
 }
@@ -310,10 +310,10 @@ void RenderResources::CreateSpriteSheetPreviewTexture(const BMPReader& reader)
 		}
 	}
 
-	m_textures[eTextureSpriteSheetPreview]->Load(textureWidth, textureHeight, ion::render::Texture::eRGB, ion::render::Texture::eRGB, ion::render::Texture::eBPP24, false, false, data);
-	m_textures[eTextureSpriteSheetPreview]->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureSpriteSheetPreview]->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-	m_textures[eTextureSpriteSheetPreview]->SetWrapping(ion::render::Texture::eWrapClamp);
+	m_textures[eTextureSpriteSheetPreview]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGB, ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	m_textures[eTextureSpriteSheetPreview]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureSpriteSheetPreview]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureSpriteSheetPreview]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 	delete data;
 }
@@ -749,10 +749,10 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 			}
 		}
 
-		renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::eRGBA, ion::render::Texture::eRGBA, ion::render::Texture::eBPP24, false, false, data);
-		renderFrame.texture->SetMinifyFilter(ion::render::Texture::eFilterNearest);
-		renderFrame.texture->SetMagnifyFilter(ion::render::Texture::eFilterNearest);
-		renderFrame.texture->SetWrapping(ion::render::Texture::eWrapClamp);
+		renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+		renderFrame.texture->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+		renderFrame.texture->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+		renderFrame.texture->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 		//Create material
 		renderFrame.material = new ion::render::Material();
