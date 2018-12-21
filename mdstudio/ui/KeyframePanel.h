@@ -21,6 +21,9 @@
 #include <map>
 #include <vector>
 
+//Work in progress
+#define VARIABLE_LENGTH_KEYFRAMES 0
+
 extern const wxEventType EVT_TIME_CHANGED;
 extern const wxEventType EVT_TRACK_SELECTED;
 extern const wxEventType EVT_KEYFRAME_SELECTED;

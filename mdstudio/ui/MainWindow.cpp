@@ -1406,8 +1406,11 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				if(it->second.m_exportFilenames.terrainBlockMapExportEnabled)
 					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, format, terrainBlockWidth, terrainBlockHeight);
 				
-				if(it->second.m_exportFilenames.gameObjectsExportEnabled)
+				if (it->second.m_exportFilenames.gameObjectsExportEnabled)
 					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects, format);
+
+				if(it->second.m_exportFilenames.sceneAnimExportEnabled)
+					m_project->ExportSceneAnimations(it->first, it->second.m_exportFilenames.sceneAnims, format);
 			}
 
 			SetStatusText("Export complete");

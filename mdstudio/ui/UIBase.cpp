@@ -26,6 +26,7 @@
 #include "../FormBuilderProj/importtiles.xpm"
 #include "../FormBuilderProj/key_16_16.xpm"
 #include "../FormBuilderProj/keyall_16_16.xpm"
+#include "../FormBuilderProj/loop_16_16.xpm"
 #include "../FormBuilderProj/megadrive2.xpm"
 #include "../FormBuilderProj/newproj.xpm"
 #include "../FormBuilderProj/newstamp.xpm"
@@ -1447,13 +1448,15 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
 	wxFlexGridSizer* fgSizer3;
-	fgSizer3 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer3 = new wxFlexGridSizer( 4, 1, 0, 0 );
 	fgSizer3->AddGrowableCol( 0 );
+	fgSizer3->AddGrowableRow( 1 );
+	fgSizer3->AddGrowableRow( 2 );
 	fgSizer3->SetFlexibleDirection( wxBOTH );
 	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	wxFlexGridSizer* fgSizer32;
-	fgSizer32 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer32 = new wxFlexGridSizer( 2, 2, 0, 0 );
 	fgSizer32->AddGrowableCol( 1 );
 	fgSizer32->SetFlexibleDirection( wxBOTH );
 	fgSizer32->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
@@ -1487,86 +1490,106 @@ ExportDialogBase::ExportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 
 	fgSizer3->Add( fgSizer32, 1, wxEXPAND, 5 );
 
+	wxBoxSizer* bSizer62;
+	bSizer62 = new wxBoxSizer( wxVERTICAL );
+
+	m_scrolledWindow1 = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
+	m_scrolledWindow1->SetScrollRate( 5, 5 );
+	wxFlexGridSizer* fgSizer41;
+	fgSizer41 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer41->AddGrowableCol( 0 );
+	fgSizer41->SetFlexibleDirection( wxBOTH );
+	fgSizer41->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
 	wxFlexGridSizer* fgSizer33;
 	fgSizer33 = new wxFlexGridSizer( 0, 2, 0, 0 );
 	fgSizer33->AddGrowableCol( 1 );
 	fgSizer33->SetFlexibleDirection( wxBOTH );
 	fgSizer33->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	m_chkPalettes = new wxCheckBox( this, wxID_ANY, wxT("Export map palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkPalettes = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export map palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkPalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerPalettes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerPalettes = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerPalettes, 0, wxALL|wxEXPAND, 5 );
 
-	m_chkTileset = new wxCheckBox( this, wxID_ANY, wxT("Export tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTileset = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTileset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerTileset = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerTileset = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTileset, 0, wxALL|wxEXPAND, 5 );
 
-	m_chkBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkBlocks = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerBlocks = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
-	m_chkStamps = new wxCheckBox( this, wxID_ANY, wxT("Export stamps:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkStamps = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export stamps:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkStamps, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerStamps = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerStamps = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerStamps, 0, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );
 
-	m_chkStampAnims = new wxCheckBox( this, wxID_ANY, wxT("Export stamp animations:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkStampAnims = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export stamp animations:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkStampAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerStampAnims = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerStampAnims = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerStampAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
-	m_chkTerrainTiles = new wxCheckBox( this, wxID_ANY, wxT("Export terrain tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTerrainTiles = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export terrain tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTerrainTiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerTerrainTiles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerTerrainTiles = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTerrainTiles, 0, wxALL|wxEXPAND, 5 );
 
-	m_chkTerrainAngles = new wxCheckBox( this, wxID_ANY, wxT("Export terrain angles:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTerrainAngles = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export terrain angles:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTerrainAngles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerTerrainAngles = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerTerrainAngles = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTerrainAngles, 0, wxALL|wxEXPAND, 5 );
 
-	m_chkGameObjTypes = new wxCheckBox( this, wxID_ANY, wxT("Export game object types:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkGameObjTypes = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export game object types:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkGameObjTypes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerGameObjTypes = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerGameObjTypes = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerGameObjTypes, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
-	m_chkTerrainBlocks = new wxCheckBox( this, wxID_ANY, wxT("Export terrain blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkTerrainBlocks = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export terrain blocks:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkTerrainBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_filePickerTerrainBlocks = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	m_filePickerTerrainBlocks = new wxFilePickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer33->Add( m_filePickerTerrainBlocks, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
 
-	m_chkSpriteSheets = new wxCheckBox( this, wxID_ANY, wxT("Export sprite sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpriteSheets = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export sprite sheets:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkSpriteSheets, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_dirPickerSpriteSheets = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	m_dirPickerSpriteSheets = new wxDirPickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer33->Add( m_dirPickerSpriteSheets, 0, wxALL|wxEXPAND, 5 );
 
-	m_chkSpritePalettes = new wxCheckBox( this, wxID_ANY, wxT("Export sprite palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpritePalettes = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export sprite palettes:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkSpritePalettes, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_dirPickerSpritePalettes = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	m_dirPickerSpritePalettes = new wxDirPickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer33->Add( m_dirPickerSpritePalettes, 0, wxALL|wxEXPAND, 5 );
 
-	m_chkSpriteAnims = new wxCheckBox( this, wxID_ANY, wxT("Export sprite animations:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_chkSpriteAnims = new wxCheckBox( m_scrolledWindow1, wxID_ANY, wxT("Export sprite animations:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer33->Add( m_chkSpriteAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_dirPickerSpriteAnims = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	m_dirPickerSpriteAnims = new wxDirPickerCtrl( m_scrolledWindow1, wxID_ANY, wxEmptyString, wxT("Select sprites directory"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer33->Add( m_dirPickerSpriteAnims, 0, wxALL|wxEXPAND, 5 );
 
 
-	fgSizer3->Add( fgSizer33, 1, wxEXPAND, 5 );
+	fgSizer41->Add( fgSizer33, 1, wxEXPAND, 5 );
+
+
+	m_scrolledWindow1->SetSizer( fgSizer41 );
+	m_scrolledWindow1->Layout();
+	fgSizer41->Fit( m_scrolledWindow1 );
+	bSizer62->Add( m_scrolledWindow1, 1, wxEXPAND | wxALL, 5 );
+
+
+	fgSizer3->Add( bSizer62, 1, wxEXPAND, 5 );
 
 	m_notebookMapTabs = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 
@@ -2608,6 +2631,8 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 
 	m_toolKeyframeAll = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe"), wxBitmap( keyall_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Keyframe All"), wxEmptyString, NULL );
 
+	m_toolToggleLoop = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Loop"), wxBitmap( loop_16_16_xpm ), wxNullBitmap, wxITEM_CHECK, wxT("Looping"), wxEmptyString, NULL );
+
 	m_toolBarAnimation->AddSeparator();
 
 	m_toolPlay = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxBitmap( play_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Play"), wxEmptyString, NULL );
@@ -2620,7 +2645,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 
 	m_toolBarAnimation->AddSeparator();
 
-	m_toolIsolateObject = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxBitmap( obj_16_16_xpm ), wxNullBitmap, wxITEM_CHECK, wxT("Isolate Object"), wxEmptyString, NULL );
+	m_toolIsolateObject = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Isolate"), wxBitmap( obj_16_16_xpm ), wxNullBitmap, wxITEM_CHECK, wxT("Isolate Object"), wxEmptyString, NULL );
 
 	m_staticText34 = new wxStaticText( m_toolBarAnimation, wxID_ANY, wxT("Speed:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText34->Wrap( -1 );
@@ -2634,9 +2659,18 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	wxBoxSizer* bSizer59;
 	bSizer59 = new wxBoxSizer( wxHORIZONTAL );
 
+	m_staticText491 = new wxStaticText( this, wxID_ANY, wxT("Actor:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText491->Wrap( -1 );
+	bSizer59->Add( m_staticText491, 0, wxALL, 5 );
+
+	wxArrayString m_choiceActorChoices;
+	m_choiceActor = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxSize( 200,-1 ), m_choiceActorChoices, 0 );
+	m_choiceActor->SetSelection( 0 );
+	bSizer59->Add( m_choiceActor, 0, wxALL, 5 );
+
 	m_textCurrentActor = new wxStaticText( this, wxID_ANY, wxT("[No actor selected]"), wxDefaultPosition, wxSize( 300,-1 ), 0 );
 	m_textCurrentActor->Wrap( -1 );
-	bSizer59->Add( m_textCurrentActor, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	bSizer59->Add( m_textCurrentActor, 0, wxALL, 5 );
 
 	m_staticText49 = new wxStaticText( this, wxID_ANY, wxT("Sprite animation:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText49->Wrap( -1 );
@@ -2664,12 +2698,14 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	this->Connect( m_toolKeyframeTrack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeTrack ) );
 	this->Connect( m_toolKeyframeActor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeActor ) );
 	this->Connect( m_toolKeyframeAll->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeAll ) );
+	this->Connect( m_toolToggleLoop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolLoopToggle ) );
 	this->Connect( m_toolPlay->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolPlay ) );
 	this->Connect( m_toolStop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStop ) );
 	this->Connect( m_toolRewind->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolRewind ) );
 	this->Connect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Connect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
+	m_choiceActor->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectActor ), NULL, this );
 	m_choiceSpriteAnim->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
 }
 
@@ -2682,12 +2718,14 @@ TimelinePanelBase::~TimelinePanelBase()
 	this->Disconnect( m_toolKeyframeTrack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeTrack ) );
 	this->Disconnect( m_toolKeyframeActor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeActor ) );
 	this->Disconnect( m_toolKeyframeAll->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeAll ) );
+	this->Disconnect( m_toolToggleLoop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolLoopToggle ) );
 	this->Disconnect( m_toolPlay->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolPlay ) );
 	this->Disconnect( m_toolStop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStop ) );
 	this->Disconnect( m_toolRewind->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolRewind ) );
 	this->Disconnect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Disconnect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
+	m_choiceActor->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectActor ), NULL, this );
 	m_choiceSpriteAnim->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
 
 }
@@ -2753,6 +2791,12 @@ ExportDialogMapTab::ExportDialogMapTab( wxWindow* parent, wxWindowID id, const w
 
 	m_filePickerCollisionBlockMap = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	fgSizer34->Add( m_filePickerCollisionBlockMap, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+
+	m_chkSceneAnims = new wxCheckBox( this, wxID_ANY, wxT("Export scene animations:"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer34->Add( m_chkSceneAnims, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_filePickerSceneAnimations = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.bee"), wxDefaultPosition, wxDefaultSize, wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
+	fgSizer34->Add( m_filePickerSceneAnimations, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	m_chkGameObj = new wxCheckBox( this, wxID_ANY, wxT("Export game objects:"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer34->Add( m_chkGameObj, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );

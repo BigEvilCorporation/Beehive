@@ -44,6 +44,7 @@ class SpriteCanvas;
 #include <wx/listctrl.h>
 #include <wx/listbox.h>
 #include <wx/radiobut.h>
+#include <wx/scrolwin.h>
 #include <wx/notebook.h>
 #include <wx/clrpicker.h>
 #include <wx/grid.h>
@@ -613,6 +614,7 @@ class ExportDialogBase : public wxDialog
 
 	protected:
 		wxStaticText* m_static1;
+		wxScrolledWindow* m_scrolledWindow1;
 		wxNotebook* m_notebookMapTabs;
 		wxButton* m_btnCancel;
 		wxButton* m_btnExportAll;
@@ -653,7 +655,7 @@ class ExportDialogBase : public wxDialog
 		wxCheckBox* m_chkSpriteAnims;
 		wxDirPickerCtrl* m_dirPickerSpriteAnims;
 
-		ExportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 976,793 ), long style = wxCAPTION|wxRESIZE_BORDER );
+		ExportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Export"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 976,667 ), long style = wxCAPTION|wxRESIZE_BORDER );
 		~ExportDialogBase();
 
 };
@@ -953,6 +955,8 @@ class TimelinePanelBase : public wxPanel
 		wxToolBarToolBase* m_toolIsolateObject;
 		wxStaticText* m_staticText34;
 		wxSpinCtrl* m_spinSpeed;
+		wxStaticText* m_staticText491;
+		wxChoice* m_choiceActor;
 		wxStaticText* m_textCurrentActor;
 		wxStaticText* m_staticText49;
 		wxChoice* m_choiceSpriteAnim;
@@ -965,16 +969,19 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnToolKeyframeTrack( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolKeyframeActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolKeyframeAll( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolLoopToggle( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolPlay( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRewind( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolFastForward( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpinSpeed( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnSelectActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
+		wxToolBarToolBase* m_toolToggleLoop;
 
 		TimelinePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 993,220 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~TimelinePanelBase();
@@ -1019,6 +1026,8 @@ class ExportDialogMapTab : public wxPanel
 		wxFilePickerCtrl* m_filePickerCollisionMap;
 		wxCheckBox* m_chkCollisionBlockMap;
 		wxFilePickerCtrl* m_filePickerCollisionBlockMap;
+		wxCheckBox* m_chkSceneAnims;
+		wxFilePickerCtrl* m_filePickerSceneAnimations;
 		wxCheckBox* m_chkGameObj;
 		wxFilePickerCtrl* m_filePickerGameObj;
 

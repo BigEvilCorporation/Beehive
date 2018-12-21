@@ -42,6 +42,7 @@ protected:
 	virtual void OnSelectSpriteAnim(wxCommandEvent& event);
 	virtual void OnToolAddAnim(wxCommandEvent& event);
 	virtual void OnToolDeleteAnim(wxCommandEvent& event);
+	virtual void OnToolLoopToggle(wxCommandEvent& event);
 	virtual void OnToolKeyframeTrack(wxCommandEvent& event);
 	virtual void OnToolKeyframeActor(wxCommandEvent& event);
 	virtual void OnToolKeyframeAll(wxCommandEvent& event);

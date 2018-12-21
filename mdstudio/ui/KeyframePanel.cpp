@@ -292,11 +292,14 @@ void KeyframePanel::EventHandlerMouse(wxMouseEvent& event)
 	}
 	else if(event.GetEventType() == wxEVT_LEFT_UP)
 	{
+#if VARIABLE_LENGTH_KEYFRAMES
 		if(m_currentMouseOperation == eMouseOperationResizeKeyframe)
 		{
 			PostKeyframeEvent(EVT_KEYFRAME_RESIZED);
 		}
-		else if(m_currentMouseOperation == eMouseOperationMoveKeyframe)
+		else
+#endif
+		if(m_currentMouseOperation == eMouseOperationMoveKeyframe)
 		{
 			PostKeyframeEvent(EVT_KEYFRAME_MOVED);
 		}
@@ -338,6 +341,7 @@ void KeyframePanel::EventHandlerMouse(wxMouseEvent& event)
 				if(x >= m_selectedKeyframe->bounds.GetLeft() && x < m_selectedKeyframe->bounds.GetRight()
 					&& y >= m_selectedKeyframe->bounds.GetTop() && y < m_selectedKeyframe->bounds.GetBottom())
 				{
+#if VARIABLE_LENGTH_KEYFRAMES
 					//If at keyframe edge, set to resize
 					if((m_currentMouseOperation == eMouseOperationNone || m_currentMouseOperation == eMouseOperationResizeKeyframe)
 						&& x >= (m_selectedKeyframe->bounds.GetRight() - s_keyframeResizeBorder))
@@ -357,7 +361,9 @@ void KeyframePanel::EventHandlerMouse(wxMouseEvent& event)
 							m_currentMouseOperation = eMouseOperationResizeKeyframe;
 						}
 					}
-					else if(m_currentMouseOperation == eMouseOperationNone || m_currentMouseOperation == eMouseOperationMoveKeyframe)
+					else
+#endif
+					if(m_currentMouseOperation == eMouseOperationNone || m_currentMouseOperation == eMouseOperationMoveKeyframe)
 					{
 						//Moving
 						if(event.Dragging())
@@ -497,7 +503,7 @@ void KeyframePanel::DrawSection(wxDC& dc, Section& section, int& offsetY)
 	int height = (section.tracks.size() * (s_trackDrawHeight + s_trackDrawBorder)) + s_trackDrawBorder;
 
 	//Draw section background
-	dc.SetBrush(*wxBLUE_BRUSH);
+	dc.SetBrush(*wxGREY_BRUSH);
 	dc.DrawRectangle(0, offsetY, GetSize().GetWidth(), height);
 
 	//Draw section header text
@@ -523,9 +529,9 @@ void KeyframePanel::DrawSection(wxDC& dc, Section& section, int& offsetY)
 void KeyframePanel::DrawTrack(wxDC& dc, Track& track, int& offsetY, bool selected)
 {
 	if(selected)
-		dc.SetBrush(*wxGREEN_BRUSH);
+		dc.SetBrush(*wxMEDIUM_GREY_BRUSH);
 	else
-		dc.SetBrush(*wxBLUE_BRUSH);
+		dc.SetBrush(*wxLIGHT_GREY_BRUSH);
 
 	dc.DrawRectangle(0, offsetY, GetSize().GetWidth(), s_trackDrawHeight);
 
@@ -558,9 +564,15 @@ void KeyframePanel::DrawTrack(wxDC& dc, Track& track, int& offsetY, bool selecte
 
 void KeyframePanel::DrawKeyframe(wxDC& dc, Keyframe& keyframe, int offsetY, bool selected)
 {
+#if VARIABLE_LENGTH_KEYFRAMES
+	float keyframeLength = keyframe.length;
+#else
+	float keyframeLength = 1.0f;
+#endif
+
 	int offsetX = s_trackLabelMarginWidth + (keyframe.time * (float)s_timelineWidthPerSecond);
 	offsetY += (s_trackDrawHeight / 2) - (s_keyframeDrawHeight / 2);
-	int drawWidth = keyframe.length * (float)s_timelineWidthPerSecond;
+	int drawWidth = keyframeLength * (float)s_timelineWidthPerSecond;
 
 	if(drawWidth < s_keyframeDrawMinWidth)
 	{
@@ -578,16 +590,21 @@ void KeyframePanel::DrawKeyframe(wxDC& dc, Keyframe& keyframe, int offsetY, bool
 	wxSize textSize = dc.GetTextExtent(keyframe.label);
 	bool textFits = (textSize.GetWidth() < (drawWidth - (s_keyframeDrawTextBorder * 2)));
 
-	if(selected || textFits)
-	{
-		dc.SetTextForeground(*wxBLACK);
-		dc.DrawText(keyframe.label, offsetX + s_keyframeDrawTextBorder, offsetY);
-	}
-	else
+#if VARIABLE_LENGTH_KEYFRAMES
+	if(!selected && !textFits)
+#endif
 	{
 		//Draw dot
 		dc.SetBrush(*wxBLACK_BRUSH);
 		dc.DrawCircle(offsetX + (drawWidth / 2), offsetY + (s_keyframeDrawHeight / 2), s_keyframeDrawDotRadius);
+	}
+#if VARIABLE_LENGTH_KEYFRAMES
+	else
+#endif
+	{
+		//Draw text
+		dc.SetTextForeground(*wxBLACK);
+		dc.DrawText(keyframe.label, offsetX + s_keyframeDrawTextBorder, offsetY);
 	}
 
 	keyframe.bounds.SetLeft(offsetX);

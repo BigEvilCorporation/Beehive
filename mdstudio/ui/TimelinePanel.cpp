@@ -132,7 +132,7 @@ void TimelinePanel::EventHandlerTimeline(TimeEvent& event)
 {
 	if(event.GetEventType() == EVT_TIME_CHANGED)
 	{
-		m_animation->SetFrame(event.m_time);
+		m_animation->SetFrame(ion::maths::Min(event.m_time, m_animation->GetLength()));
 
 		if(m_toolIsolateObject->IsToggled() && m_selectedActor)
 		{
@@ -282,7 +282,7 @@ void TimelinePanel::PopulateTimeline(Animation& animation, const AnimationActor*
 {
 	//Set drop-down
 	std::vector<AnimationId>::iterator it = std::find_if(m_animCache.begin(), m_animCache.end(), [&](const AnimationId& animId) { return animId == animation.GetId(); });
-	int index = std::distance(it, m_animCache.begin());
+	int index = std::distance(m_animCache.begin(), it);
 
 	if(m_choiceAnims->GetSelection() != index)
 	{
@@ -487,14 +487,14 @@ void TimelinePanel::RecalculateLenth(Animation& animation)
 		{
 			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
 			{
-				float lengthPosTrack = actorIt->second.m_trackPosition.GetLength() + 1.0f;
+				float lengthPosTrack = actorIt->second.m_trackPosition.GetLength();
 
 				if(lengthPosTrack > length)
 				{
 					length = lengthPosTrack;
 				}
 
-				float lengthSpriteAnimTrack = actorIt->second.m_trackSpriteAnim.GetLength() + 1.0f;
+				float lengthSpriteAnimTrack = actorIt->second.m_trackSpriteAnim.GetLength();
 
 				if(lengthSpriteAnimTrack > length)
 				{
@@ -531,6 +531,7 @@ void TimelinePanel::OnSelectAnimation(wxCommandEvent& event)
 	if(m_animation)
 	{
 		m_animation->SetState(ion::render::Animation::eStopped);
+		m_toolToggleLoop->Toggle(m_animation->GetPlaybackBehaviour() == ion::render::Animation::eLoop);
 		PopulateTimeline(*m_animation, NULL);
 	}
 }
@@ -584,6 +585,18 @@ void TimelinePanel::Keyframe(AnimationActor* actor, int trackMask)
 		//Get current frame
 		float frame = m_animation->GetFrame();
 
+#if !VARIABLE_LENGTH_KEYFRAMES
+		frame = ion::maths::Floor(frame);
+#endif
+
+		//If at end, advance to next keyframe
+		float nextFrame = frame;
+		if (frame >= m_animation->GetLength())
+		{
+			//Advance frame
+			nextFrame += 1.0f;
+		}
+
 		if(actor)
 		{
 			//Edit or insert keyframe for current actor
@@ -598,18 +611,11 @@ void TimelinePanel::Keyframe(AnimationActor* actor, int trackMask)
 			}
 		}
 
-		//If at end, advance to next keyframe
-		if(frame >= m_animation->GetLength() - 1.0f)
-		{
-			//Advance frame
-			frame += 1.0f;
+		//Set next frame
+		m_animation->SetFrame(nextFrame);
 
-			//Set next frame
-			m_animation->SetFrame(frame);
-
-			//Update sider
-			SetSliderFrame(frame);
-		}
+		//Update sider
+		SetSliderFrame(nextFrame);
 
 		//Adjust anim length
 		RecalculateLenth(*m_animation);
@@ -648,6 +654,14 @@ void TimelinePanel::OnToolKeyframeTrack(wxCommandEvent& event)
 	if(m_selectedActor)
 	{
 		Keyframe(m_selectedActor, (1 << m_selectedTrackId));
+	}
+}
+
+void TimelinePanel::OnToolLoopToggle(wxCommandEvent& event)
+{
+	if (m_animation)
+	{
+		m_animation->SetPlaybackBehaviour(event.IsChecked() ? ion::render::Animation::eLoop : ion::render::Animation::ePlayOnce);
 	}
 }
 
@@ -727,8 +741,10 @@ void TimelinePanel::OnToolIsolateObject(wxCommandEvent& event)
 {
 	if(event.IsChecked() && !m_selectedActor)
 	{
-		m_toolIsolateObject->SetToggle(false);
+		m_toolIsolateObject->Toggle(false);
 	}
+
+	event.Skip();
 }
 
 void TimelinePanel::OnResize(wxSizeEvent& event)
