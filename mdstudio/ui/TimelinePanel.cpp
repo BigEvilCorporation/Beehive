@@ -278,6 +278,50 @@ void TimelinePanel::PopulateAnimations()
 	}
 }
 
+void TimelinePanel::PopulateActors()
+{
+	m_choiceActor->Clear();
+	m_actorCache.clear();
+
+	if (m_animation)
+	{
+		typedef std::pair<std::string, AnimationActor*> TNameIDPair;
+		typedef std::vector<TNameIDPair> TNameList;
+		TNameList nameList;
+
+		int numUnnamedObjs = 0;
+		for (TAnimActorMap::iterator it = m_animation->ActorsBegin(), end = m_animation->ActorsEnd(); it != end; ++it)
+		{
+			std::string name;
+
+			if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(it->first))
+			{
+				if (gameObject->GetName().size() > 0)
+				{
+					name = gameObject->GetName();
+				}
+				else
+				{
+					name = "<unnamed " + std::to_string(numUnnamedObjs++) + ">";
+				}
+			}
+
+			nameList.push_back(std::make_pair(name, &it->second));
+		}
+
+		std::sort(nameList.begin(), nameList.end(), [](TNameIDPair& a, TNameIDPair& b) { return a.first < b.first; });
+
+		for (int i = 0; i < nameList.size(); i++)
+		{
+			//Store by index
+			m_actorCache.push_back(nameList[i].second);
+
+			//Add to list
+			m_choiceActor->AppendString(nameList[i].first);
+		}
+	}
+}
+
 void TimelinePanel::PopulateTimeline(Animation& animation, const AnimationActor* actor)
 {
 	//Set drop-down
@@ -353,6 +397,8 @@ void TimelinePanel::SetCurrentActor(GameObjectId actorId)
 {
 	if(actorId != m_selectedActorId)
 	{
+		m_choiceActor->SetSelection(0);
+
 		if(const GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actorId))
 		{
 			m_selectedActorId = actorId;
@@ -365,6 +411,14 @@ void TimelinePanel::SetCurrentActor(GameObjectId actorId)
 				{
 					//Populate timeline
 					PopulateTimeline(*m_animation, m_selectedActor);
+
+					//Set actor in list
+					std::vector<AnimationActor*>::iterator actorIt = std::find(m_actorCache.begin(), m_actorCache.end(), m_selectedActor);
+					int actorIdx = std::distance(m_actorCache.begin(), actorIt);
+					if (actorIdx >= 0)
+					{
+						m_choiceActor->SetSelection(actorIdx);
+					}
 
 					//Set game object label
 					std::stringstream label;
@@ -512,6 +566,10 @@ void TimelinePanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(!m_mainWindow.IsRefreshLocked())
 	{
+		if (m_timeline)
+		{
+			m_timeline->Refresh();
+		}
 	}
 }
 
@@ -533,7 +591,15 @@ void TimelinePanel::OnSelectAnimation(wxCommandEvent& event)
 		m_animation->SetState(ion::render::Animation::eStopped);
 		m_toolToggleLoop->Toggle(m_animation->GetPlaybackBehaviour() == ion::render::Animation::eLoop);
 		PopulateTimeline(*m_animation, NULL);
+		PopulateActors();
 	}
+}
+
+void TimelinePanel::OnSelectActor(wxCommandEvent& event)
+{
+	int index = event.GetSelection();
+	GameObjectId actorId = m_actorCache[index]->GetGameObjectId();
+	SetCurrentActor(actorId);
 }
 
 void TimelinePanel::OnSelectSpriteAnim(wxCommandEvent& event)
@@ -562,6 +628,7 @@ void TimelinePanel::OnToolAddAnim(wxCommandEvent& event)
 		m_animation->SetName(dialog.m_textName->GetValue().GetData().AsChar());
 		PopulateAnimations();
 		PopulateTimeline(*m_animation, NULL);
+		PopulateActors();
 	}
 }
 
@@ -575,6 +642,7 @@ void TimelinePanel::OnToolDeleteAnim(wxCommandEvent& event)
 		m_selectedActorId = InvalidActorId;
 
 		PopulateAnimations();
+		PopulateActors();
 	}
 }
 
@@ -749,6 +817,14 @@ void TimelinePanel::OnToolIsolateObject(wxCommandEvent& event)
 
 void TimelinePanel::OnResize(wxSizeEvent& event)
 {
+	if (!m_mainWindow.IsRefreshLocked())
+	{
+		if (m_timeline)
+		{
+			m_timeline->Refresh();
+		}
+	}
+
 	event.Skip();
 }
 

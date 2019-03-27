@@ -29,7 +29,7 @@ const wxEventType EVT_KEYFRAME_MOVED = wxNewEventType();
 const wxEventType EVT_KEYFRAME_RESIZED = wxNewEventType();
 
 KeyframePanel::KeyframePanel(wxWindow* parent, wxWindowID windowId, const wxPoint& position, const wxSize& size, long style, const wxString& name)
-	: wxPanel(parent, windowId, position, size, style, name)
+	: wxScrolledWindow(parent, windowId, position, size, style, name)
 {
 	SetMinSize(wxSize(120, 300));
 
@@ -47,6 +47,10 @@ KeyframePanel::KeyframePanel(wxWindow* parent, wxWindowID windowId, const wxPoin
 
 	m_animationTime = 0.0f;
 	m_animationLength = 10.0f;
+
+	m_lastDrawHeight = 0;
+	m_lastScrollX = 0;
+	m_lastScrollY = 0;
 	
 	Bind(wxEVT_LEFT_DOWN, &KeyframePanel::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP, &KeyframePanel::EventHandlerMouse, this, GetId());
@@ -393,13 +397,27 @@ void KeyframePanel::EventHandlerMouse(wxMouseEvent& event)
 
 void KeyframePanel::EventHandlerResize(wxSizeEvent& event)
 {
+	//Redraw all
+	m_invalidateMainLayer = true;
+	m_invalidateOverlay = true;
+
+	Refresh();
 	event.Skip();
 }
 
 void KeyframePanel::EventHandlerPaint(wxPaintEvent& event)
 {
+	//Only redraw overlay by default, reuse snapshot of background
+	m_invalidateOverlay = true;
+
 	wxPaintDC dc(this);
 	Render(dc);
+	event.Skip();
+}
+
+void KeyframePanel::EventHandlerScroll(wxScrollWinEvent& event)
+{
+	//Refresh();
 	event.Skip();
 }
 
@@ -429,20 +447,28 @@ void KeyframePanel::EventHandlerContextMenu(wxCommandEvent& event)
 
 void KeyframePanel::Render(wxDC& dc)
 {
-	dc.SetBrush(*wxGREY_BRUSH);
-	dc.DrawRectangle(0, 0, GetSize().GetWidth(), GetSize().GetHeight());
-
 	DrawAll(dc);
 }
 
 void KeyframePanel::DrawAll(wxDC& dc)
 {
-	int offsetY = 0;
+	int scrollX = GetScrollPos(wxHORIZONTAL);
+	int scrollY = GetScrollPos(wxVERTICAL);
+	int offsetY = -scrollY;
+
+	if (scrollX != m_lastScrollX || scrollY != m_lastScrollY)
+	{
+		m_invalidateMainLayer = true;
+	}
 
 	dc.SetPen(*wxBLACK_PEN);
 
 	if(m_invalidateMainLayer)
 	{
+		//Draw background
+		dc.SetBrush(*wxGREY_BRUSH);
+		dc.DrawRectangle(0, 0, GetSize().GetWidth(), GetSize().GetHeight());
+
 		//Draw time bar
 		dc.SetTextForeground(*wxWHITE);
 		char textBuff[64] = { 0 };
@@ -463,7 +489,15 @@ void KeyframePanel::DrawAll(wxDC& dc)
 			DrawSection(dc, section, offsetY);
 		}
 
-		m_lastDrawHeight = offsetY;
+		if (m_lastDrawHeight != (offsetY + scrollY))
+		{
+			//Set scrolled area size
+			SetScrollbars(1, 1, GetBestVirtualSize().x, offsetY, 0, 0);
+		}
+
+		m_lastDrawHeight = offsetY + scrollY;
+		m_lastScrollX = scrollX;
+		m_lastScrollY = scrollY;
 
 		m_invalidateMainLayer = false;
 		m_invalidateOverlay = true;

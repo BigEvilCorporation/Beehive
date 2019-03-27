@@ -77,6 +77,7 @@ void GameObjectParamsPanel::OnButtonApplyObjectName(wxCommandEvent& event)
 	if(m_gameObject)
 	{
 		m_gameObject->SetName(m_textObjectName->GetValue().c_str().AsChar());
+		m_mainWindow.RefreshAnimActors();
 	}
 }
 

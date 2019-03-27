@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <wx/panel.h>
+#include <wx/scrolwin.h>
 #include <wx/stattext.h>
 #include <wx/tooltip.h>
 #include <wx/overlay.h>
@@ -32,7 +32,7 @@ extern const wxEventType EVT_KEYFRAME_DELETED;
 extern const wxEventType EVT_KEYFRAME_MOVED;
 extern const wxEventType EVT_KEYFRAME_RESIZED;
 
-class KeyframePanel : public wxPanel
+class KeyframePanel : public wxScrolledWindow
 {
 public:
 	typedef ion::UUID64 SectionId;
@@ -141,6 +141,7 @@ protected:
 	void EventHandlerMouse(wxMouseEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
 	void EventHandlerPaint(wxPaintEvent& event);
+	void EventHandlerScroll(wxScrollWinEvent& event);
 	void EventHandlerContextMenu(wxCommandEvent& event);
 
 	void Render(wxDC& dc);
@@ -178,6 +179,8 @@ protected:
 	bool m_invalidateMainLayer;
 	bool m_invalidateOverlay;
 	int m_lastDrawHeight;
+	int m_lastScrollX;
+	int m_lastScrollY;
 };
 
 class TimeEvent : public wxCommandEvent

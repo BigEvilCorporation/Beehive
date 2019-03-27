@@ -2656,6 +2656,12 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 
 	fgSizer24->Add( m_toolBarAnimation, 0, wxEXPAND, 5 );
 
+	wxFlexGridSizer* fgSizer42;
+	fgSizer42 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer42->AddGrowableRow( 1 );
+	fgSizer42->SetFlexibleDirection( wxBOTH );
+	fgSizer42->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
 	wxBoxSizer* bSizer59;
 	bSizer59 = new wxBoxSizer( wxHORIZONTAL );
 
@@ -2682,10 +2688,14 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	bSizer59->Add( m_choiceSpriteAnim, 0, wxALL, 5 );
 
 
-	fgSizer24->Add( bSizer59, 1, wxEXPAND, 5 );
+	fgSizer42->Add( bSizer59, 1, wxEXPAND, 5 );
 
-	m_timeline = new KeyframePanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	fgSizer24->Add( m_timeline, 1, wxEXPAND | wxALL, 5 );
+	m_timeline = new KeyframePanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
+	m_timeline->SetScrollRate( 5, 5 );
+	fgSizer42->Add( m_timeline, 1, wxEXPAND | wxALL, 5 );
+
+
+	fgSizer24->Add( fgSizer42, 1, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( fgSizer24 );

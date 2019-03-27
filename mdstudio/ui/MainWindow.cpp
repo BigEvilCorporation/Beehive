@@ -893,6 +893,14 @@ void MainWindow::SetSelectedAnimObject(GameObjectId gameObjectId)
 	}
 }
 
+void MainWindow::RefreshAnimActors()
+{
+	if (m_timelinePanel)
+	{
+		m_timelinePanel->PopulateActors();
+	}
+}
+
 void MainWindow::SyncSettingsWidgets()
 {
 	if(m_project.get())

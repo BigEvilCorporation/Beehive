@@ -88,6 +88,9 @@ public:
 	//Set selected animation object
 	void SetSelectedAnimObject(GameObjectId gameObjectId);
 
+	//Refresh anim actors list
+	void RefreshAnimActors();
+
 	//Sync project settings and their respective UI widget states
 	void SyncSettingsWidgets();
 

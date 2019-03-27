@@ -25,6 +25,8 @@ public:
 	TimelinePanel(MainWindow& mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 	virtual ~TimelinePanel();
 
+	void PopulateActors();
+
 	void SetCurrentActor(GameObjectId actorId);
 	AnimationId GetCurrentAnimation() const;
 
@@ -39,6 +41,7 @@ protected:
 
 	virtual void OnSpinSpeed(wxSpinEvent& event);
 	virtual void OnSelectAnimation(wxCommandEvent& event);
+	virtual void OnSelectActor(wxCommandEvent& event);
 	virtual void OnSelectSpriteAnim(wxCommandEvent& event);
 	virtual void OnToolAddAnim(wxCommandEvent& event);
 	virtual void OnToolDeleteAnim(wxCommandEvent& event);
@@ -86,6 +89,7 @@ private:
 	Project& m_project;
 
 	std::vector<AnimationId> m_animCache;
+	std::vector<AnimationActor*> m_actorCache;
 	std::vector<std::pair<SpriteSheetId, SpriteAnimId>> m_spriteSheetCache;
 
 	//Track cache, for matching KeyframePanel callbacks to tracks

@@ -938,6 +938,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 			if(anim)
 			{
 				anim->AddActor(m_hoverGameObject);
+				m_mainWindow->RefreshAnimActors();
 				m_mainWindow->SetSelectedAnimObject(m_hoverGameObject);
 			}
 		}
