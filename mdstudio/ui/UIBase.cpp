@@ -24,7 +24,9 @@
 #include "../FormBuilderProj/grid.xpm"
 #include "../FormBuilderProj/gridsnap.xpm"
 #include "../FormBuilderProj/importtiles.xpm"
-#include "../FormBuilderProj/key_16_16.xpm"
+#include "../FormBuilderProj/key_delete_16_16.xpm"
+#include "../FormBuilderProj/key_end_16_16.xpm"
+#include "../FormBuilderProj/key_insert_16_16.xpm"
 #include "../FormBuilderProj/keyall_16_16.xpm"
 #include "../FormBuilderProj/loop_16_16.xpm"
 #include "../FormBuilderProj/megadrive2.xpm"
@@ -42,6 +44,8 @@
 #include "../FormBuilderProj/save.xpm"
 #include "../FormBuilderProj/showoutlines.xpm"
 #include "../FormBuilderProj/stampspanel.xpm"
+#include "../FormBuilderProj/stepleft_16_16.xpm"
+#include "../FormBuilderProj/stepright_16_16.xpm"
 #include "../FormBuilderProj/stop_16_16.xpm"
 #include "../FormBuilderProj/tilespanel.xpm"
 #include "../FormBuilderProj/tool_addterrainbezier.xpm"
@@ -2625,11 +2629,13 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 
 	m_toolBarAnimation->AddSeparator();
 
-	m_toolKeyframeTrack = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe Track"), wxBitmap( key_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Keyframe Track"), wxEmptyString, NULL );
+	m_toolKeyframeReplace = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe Actor"), wxBitmap( keyall_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Overwrite current keyframe"), wxEmptyString, NULL );
 
-	m_toolKeyframeActor = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe Actor"), wxBitmap( key_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Keyframe Actor"), wxEmptyString, NULL );
+	m_toolKeyframeInsert = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe Actor"), wxBitmap( key_insert_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Insert new keyframe at current time"), wxEmptyString, NULL );
 
-	m_toolKeyframeAll = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe"), wxBitmap( keyall_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Keyframe All"), wxEmptyString, NULL );
+	m_toolKeyframeEnd = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe"), wxBitmap( key_end_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Add new keyframe at end"), wxEmptyString, NULL );
+
+	m_toolKeyframeDelete = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Keyframe"), wxBitmap( key_delete_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Delete keyframe at current time"), wxEmptyString, NULL );
 
 	m_toolToggleLoop = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Loop"), wxBitmap( loop_16_16_xpm ), wxNullBitmap, wxITEM_CHECK, wxT("Looping"), wxEmptyString, NULL );
 
@@ -2638,6 +2644,10 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	m_toolPlay = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxBitmap( play_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Play"), wxEmptyString, NULL );
 
 	m_toolStop = m_toolBarAnimation->AddTool( wxID_ANY, wxT("tool"), wxBitmap( stop_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Stop"), wxEmptyString, NULL );
+
+	m_toolStepLeft = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Rewind"), wxBitmap( stepleft_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Rewind"), wxEmptyString, NULL );
+
+	m_toolStepRight = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Rewind"), wxBitmap( stepright_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Rewind"), wxEmptyString, NULL );
 
 	m_toolRewind = m_toolBarAnimation->AddTool( wxID_ANY, wxT("Rewind"), wxBitmap( rewind_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxT("Rewind"), wxEmptyString, NULL );
 
@@ -2705,12 +2715,15 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	m_choiceAnims->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectAnimation ), NULL, this );
 	this->Connect( m_toolAddAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolAddAnim ) );
 	this->Connect( m_toolDeleteAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolDeleteAnim ) );
-	this->Connect( m_toolKeyframeTrack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeTrack ) );
-	this->Connect( m_toolKeyframeActor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeActor ) );
-	this->Connect( m_toolKeyframeAll->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeAll ) );
+	this->Connect( m_toolKeyframeReplace->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeReplace ) );
+	this->Connect( m_toolKeyframeInsert->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeInsert ) );
+	this->Connect( m_toolKeyframeEnd->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeEnd ) );
+	this->Connect( m_toolKeyframeDelete->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeDelete ) );
 	this->Connect( m_toolToggleLoop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolLoopToggle ) );
 	this->Connect( m_toolPlay->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolPlay ) );
 	this->Connect( m_toolStop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStop ) );
+	this->Connect( m_toolStepLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStepLeft ) );
+	this->Connect( m_toolStepRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStepRight ) );
 	this->Connect( m_toolRewind->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolRewind ) );
 	this->Connect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Connect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
@@ -2725,12 +2738,15 @@ TimelinePanelBase::~TimelinePanelBase()
 	m_choiceAnims->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectAnimation ), NULL, this );
 	this->Disconnect( m_toolAddAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolAddAnim ) );
 	this->Disconnect( m_toolDeleteAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolDeleteAnim ) );
-	this->Disconnect( m_toolKeyframeTrack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeTrack ) );
-	this->Disconnect( m_toolKeyframeActor->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeActor ) );
-	this->Disconnect( m_toolKeyframeAll->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeAll ) );
+	this->Disconnect( m_toolKeyframeReplace->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeReplace ) );
+	this->Disconnect( m_toolKeyframeInsert->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeInsert ) );
+	this->Disconnect( m_toolKeyframeEnd->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeEnd ) );
+	this->Disconnect( m_toolKeyframeDelete->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolKeyframeDelete ) );
 	this->Disconnect( m_toolToggleLoop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolLoopToggle ) );
 	this->Disconnect( m_toolPlay->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolPlay ) );
 	this->Disconnect( m_toolStop->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStop ) );
+	this->Disconnect( m_toolStepLeft->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStepLeft ) );
+	this->Disconnect( m_toolStepRight->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolStepRight ) );
 	this->Disconnect( m_toolRewind->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolRewind ) );
 	this->Disconnect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Disconnect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );

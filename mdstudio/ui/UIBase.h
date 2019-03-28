@@ -945,11 +945,14 @@ class TimelinePanelBase : public wxPanel
 		wxChoice* m_choiceAnims;
 		wxToolBarToolBase* m_toolAddAnim;
 		wxToolBarToolBase* m_toolDeleteAnim;
-		wxToolBarToolBase* m_toolKeyframeTrack;
-		wxToolBarToolBase* m_toolKeyframeActor;
-		wxToolBarToolBase* m_toolKeyframeAll;
+		wxToolBarToolBase* m_toolKeyframeReplace;
+		wxToolBarToolBase* m_toolKeyframeInsert;
+		wxToolBarToolBase* m_toolKeyframeEnd;
+		wxToolBarToolBase* m_toolKeyframeDelete;
 		wxToolBarToolBase* m_toolPlay;
 		wxToolBarToolBase* m_toolStop;
+		wxToolBarToolBase* m_toolStepLeft;
+		wxToolBarToolBase* m_toolStepRight;
 		wxToolBarToolBase* m_toolRewind;
 		wxToolBarToolBase* m_toolFastForward;
 		wxToolBarToolBase* m_toolIsolateObject;
@@ -966,12 +969,15 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnSelectAnimation( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolAddAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolDeleteAnim( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnToolKeyframeTrack( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnToolKeyframeActor( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnToolKeyframeAll( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframeReplace( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframeInsert( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframeEnd( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolKeyframeDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolLoopToggle( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolPlay( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolStop( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolStepLeft( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolStepRight( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolRewind( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolFastForward( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }

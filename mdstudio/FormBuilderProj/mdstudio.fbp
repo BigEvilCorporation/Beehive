@@ -31050,11 +31050,11 @@
                 <property name="permission">none</property>
                 <property name="rows">0</property>
                 <property name="vgap">0</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxToolBar" expanded="0">
+                    <object class="wxToolBar" expanded="1">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -31275,65 +31275,86 @@
                         <object class="toolSeparator" expanded="0">
                             <property name="permission">protected</property>
                         </object>
-                        <object class="tool" expanded="0">
-                            <property name="bitmap">Load From File; key_16_16.xpm</property>
-                            <property name="context_menu">0</property>
-                            <property name="id">wxID_ANY</property>
-                            <property name="kind">wxITEM_NORMAL</property>
-                            <property name="label">Keyframe Track</property>
-                            <property name="name">m_toolKeyframeTrack</property>
-                            <property name="permission">protected</property>
-                            <property name="statusbar"></property>
-                            <property name="tooltip">Keyframe Track</property>
-                            <event name="OnAuiToolBarBeginDrag"></event>
-                            <event name="OnAuiToolBarMiddleClick"></event>
-                            <event name="OnAuiToolBarOverflowClick"></event>
-                            <event name="OnAuiToolBarRightClick"></event>
-                            <event name="OnAuiToolBarToolDropDown"></event>
-                            <event name="OnMenuSelection"></event>
-                            <event name="OnToolClicked">OnToolKeyframeTrack</event>
-                            <event name="OnToolEnter"></event>
-                            <event name="OnToolRClicked"></event>
-                            <event name="OnUpdateUI"></event>
-                        </object>
-                        <object class="tool" expanded="0">
-                            <property name="bitmap">Load From File; key_16_16.xpm</property>
-                            <property name="context_menu">0</property>
-                            <property name="id">wxID_ANY</property>
-                            <property name="kind">wxITEM_NORMAL</property>
-                            <property name="label">Keyframe Actor</property>
-                            <property name="name">m_toolKeyframeActor</property>
-                            <property name="permission">protected</property>
-                            <property name="statusbar"></property>
-                            <property name="tooltip">Keyframe Actor</property>
-                            <event name="OnAuiToolBarBeginDrag"></event>
-                            <event name="OnAuiToolBarMiddleClick"></event>
-                            <event name="OnAuiToolBarOverflowClick"></event>
-                            <event name="OnAuiToolBarRightClick"></event>
-                            <event name="OnAuiToolBarToolDropDown"></event>
-                            <event name="OnMenuSelection"></event>
-                            <event name="OnToolClicked">OnToolKeyframeActor</event>
-                            <event name="OnToolEnter"></event>
-                            <event name="OnToolRClicked"></event>
-                            <event name="OnUpdateUI"></event>
-                        </object>
-                        <object class="tool" expanded="0">
+                        <object class="tool" expanded="1">
                             <property name="bitmap">Load From File; keyall_16_16.xpm</property>
                             <property name="context_menu">0</property>
                             <property name="id">wxID_ANY</property>
                             <property name="kind">wxITEM_NORMAL</property>
-                            <property name="label">Keyframe</property>
-                            <property name="name">m_toolKeyframeAll</property>
+                            <property name="label">Keyframe Actor</property>
+                            <property name="name">m_toolKeyframeReplace</property>
                             <property name="permission">protected</property>
                             <property name="statusbar"></property>
-                            <property name="tooltip">Keyframe All</property>
+                            <property name="tooltip">Overwrite current keyframe</property>
                             <event name="OnAuiToolBarBeginDrag"></event>
                             <event name="OnAuiToolBarMiddleClick"></event>
                             <event name="OnAuiToolBarOverflowClick"></event>
                             <event name="OnAuiToolBarRightClick"></event>
                             <event name="OnAuiToolBarToolDropDown"></event>
                             <event name="OnMenuSelection"></event>
-                            <event name="OnToolClicked">OnToolKeyframeAll</event>
+                            <event name="OnToolClicked">OnToolKeyframeReplace</event>
+                            <event name="OnToolEnter"></event>
+                            <event name="OnToolRClicked"></event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="tool" expanded="0">
+                            <property name="bitmap">Load From File; key_insert_16_16.xpm</property>
+                            <property name="context_menu">0</property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">Keyframe Actor</property>
+                            <property name="name">m_toolKeyframeInsert</property>
+                            <property name="permission">protected</property>
+                            <property name="statusbar"></property>
+                            <property name="tooltip">Insert new keyframe at current time</property>
+                            <event name="OnAuiToolBarBeginDrag"></event>
+                            <event name="OnAuiToolBarMiddleClick"></event>
+                            <event name="OnAuiToolBarOverflowClick"></event>
+                            <event name="OnAuiToolBarRightClick"></event>
+                            <event name="OnAuiToolBarToolDropDown"></event>
+                            <event name="OnMenuSelection"></event>
+                            <event name="OnToolClicked">OnToolKeyframeInsert</event>
+                            <event name="OnToolEnter"></event>
+                            <event name="OnToolRClicked"></event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="tool" expanded="0">
+                            <property name="bitmap">Load From File; key_end_16_16.xpm</property>
+                            <property name="context_menu">0</property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">Keyframe</property>
+                            <property name="name">m_toolKeyframeEnd</property>
+                            <property name="permission">protected</property>
+                            <property name="statusbar"></property>
+                            <property name="tooltip">Add new keyframe at end</property>
+                            <event name="OnAuiToolBarBeginDrag"></event>
+                            <event name="OnAuiToolBarMiddleClick"></event>
+                            <event name="OnAuiToolBarOverflowClick"></event>
+                            <event name="OnAuiToolBarRightClick"></event>
+                            <event name="OnAuiToolBarToolDropDown"></event>
+                            <event name="OnMenuSelection"></event>
+                            <event name="OnToolClicked">OnToolKeyframeEnd</event>
+                            <event name="OnToolEnter"></event>
+                            <event name="OnToolRClicked"></event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="tool" expanded="1">
+                            <property name="bitmap">Load From File; key_delete_16_16.xpm</property>
+                            <property name="context_menu">0</property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">Keyframe</property>
+                            <property name="name">m_toolKeyframeDelete</property>
+                            <property name="permission">protected</property>
+                            <property name="statusbar"></property>
+                            <property name="tooltip">Delete keyframe at current time</property>
+                            <event name="OnAuiToolBarBeginDrag"></event>
+                            <event name="OnAuiToolBarMiddleClick"></event>
+                            <event name="OnAuiToolBarOverflowClick"></event>
+                            <event name="OnAuiToolBarRightClick"></event>
+                            <event name="OnAuiToolBarToolDropDown"></event>
+                            <event name="OnMenuSelection"></event>
+                            <event name="OnToolClicked">OnToolKeyframeDelete</event>
                             <event name="OnToolEnter"></event>
                             <event name="OnToolRClicked"></event>
                             <event name="OnUpdateUI"></event>
@@ -31400,6 +31421,48 @@
                             <event name="OnAuiToolBarToolDropDown"></event>
                             <event name="OnMenuSelection"></event>
                             <event name="OnToolClicked">OnToolStop</event>
+                            <event name="OnToolEnter"></event>
+                            <event name="OnToolRClicked"></event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="tool" expanded="1">
+                            <property name="bitmap">Load From File; stepleft_16_16.xpm</property>
+                            <property name="context_menu">0</property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">Rewind</property>
+                            <property name="name">m_toolStepLeft</property>
+                            <property name="permission">protected</property>
+                            <property name="statusbar"></property>
+                            <property name="tooltip">Rewind</property>
+                            <event name="OnAuiToolBarBeginDrag"></event>
+                            <event name="OnAuiToolBarMiddleClick"></event>
+                            <event name="OnAuiToolBarOverflowClick"></event>
+                            <event name="OnAuiToolBarRightClick"></event>
+                            <event name="OnAuiToolBarToolDropDown"></event>
+                            <event name="OnMenuSelection"></event>
+                            <event name="OnToolClicked">OnToolStepLeft</event>
+                            <event name="OnToolEnter"></event>
+                            <event name="OnToolRClicked"></event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="tool" expanded="1">
+                            <property name="bitmap">Load From File; stepright_16_16.xpm</property>
+                            <property name="context_menu">0</property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">Rewind</property>
+                            <property name="name">m_toolStepRight</property>
+                            <property name="permission">protected</property>
+                            <property name="statusbar"></property>
+                            <property name="tooltip">Rewind</property>
+                            <event name="OnAuiToolBarBeginDrag"></event>
+                            <event name="OnAuiToolBarMiddleClick"></event>
+                            <event name="OnAuiToolBarOverflowClick"></event>
+                            <event name="OnAuiToolBarRightClick"></event>
+                            <event name="OnAuiToolBarToolDropDown"></event>
+                            <event name="OnMenuSelection"></event>
+                            <event name="OnToolClicked">OnToolStepRight</event>
                             <event name="OnToolEnter"></event>
                             <event name="OnToolRClicked"></event>
                             <event name="OnUpdateUI"></event>

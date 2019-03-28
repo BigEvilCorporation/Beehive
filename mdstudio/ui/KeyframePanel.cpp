@@ -202,7 +202,7 @@ bool KeyframePanel::PickTime(int x, int y)
 	int maxWidth = (int)(m_animationLength * (float)s_timelineWidthPerSecond);
 	if(y >= 0 && y <= s_sectionLabelDrawHeight)
 	{
-		m_animationTime = ion::maths::Max(0.0f, (float)(x - s_trackLabelMarginWidth) / (float)s_timelineWidthPerSecond);
+		m_animationTime = ion::maths::Clamp(ion::maths::Max(0.0f, (float)(x - s_trackLabelMarginWidth) / (float)s_timelineWidthPerSecond), 0.0f, m_animationLength);
 		return true;
 	}
 
@@ -353,6 +353,14 @@ void KeyframePanel::EventHandlerMouse(wxMouseEvent& event)
 		{
 			PostKeyframeEvent(EVT_KEYFRAME_MOVED);
 		}
+#endif
+
+#if !VARIABLE_LENGTH_KEYFRAMES
+		//Snap to keyframe
+		SetTime(ion::maths::Clamp(ion::maths::Floor(m_animationTime), 0.0f, m_animationLength));
+		PostTimeEvent(EVT_TIME_CHANGED);
+		m_invalidateOverlay = true;
+		Refresh(false);
 #endif
 
 		m_currentMouseOperation = eMouseOperationNone;

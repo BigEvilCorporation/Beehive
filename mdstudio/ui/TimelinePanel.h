@@ -47,11 +47,14 @@ protected:
 	virtual void OnToolAddAnim(wxCommandEvent& event);
 	virtual void OnToolDeleteAnim(wxCommandEvent& event);
 	virtual void OnToolLoopToggle(wxCommandEvent& event);
-	virtual void OnToolKeyframeTrack(wxCommandEvent& event);
-	virtual void OnToolKeyframeActor(wxCommandEvent& event);
-	virtual void OnToolKeyframeAll(wxCommandEvent& event);
+	virtual void OnToolKeyframeReplace(wxCommandEvent& event);
+	virtual void OnToolKeyframeInsert(wxCommandEvent& event);
+	virtual void OnToolKeyframeEnd(wxCommandEvent& event);
+	virtual void OnToolKeyframeDelete(wxCommandEvent& event);
 	virtual void OnToolPlay(wxCommandEvent& event);
 	virtual void OnToolStop(wxCommandEvent& event);
+	virtual void OnToolStepLeft(wxCommandEvent& event);
+	virtual void OnToolStepRight(wxCommandEvent& event);
 	virtual void OnToolRewind(wxCommandEvent& event);
 	virtual void OnToolFastForward(wxCommandEvent& event);
 	virtual void OnToolIsolateObject(wxCommandEvent& event);
@@ -78,8 +81,10 @@ private:
 	void RecalculateLenth(Animation& animation);
 
 	void SetSliderFrame(float frame);
-	void Keyframe(AnimationActor* actor, int trackMask = ((1 << eTrackCount)-1));
+	void Keyframe(AnimationActor* actor, float frame, int trackMask = ((1 << eTrackCount)-1));
 	void SetAnimLength(Animation& animation, const AnimationActor& actor);
+	void ShuffleKeyframesRight(AnimationActor& actor, float time);
+	void RecalcKeyframeTimes(AnimationActor& actor);
 
 	void KeyframeModified(KeyframePanel::KeyframeId keyframeId, float time, float length);
 	void KeyframeDeleted(KeyframePanel::KeyframeId keyframeId);

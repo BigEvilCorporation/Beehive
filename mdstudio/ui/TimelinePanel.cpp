@@ -27,7 +27,7 @@ const char* TimelinePanel::s_trackNames[eTrackCount] =
 
 namespace
 {
-	template <typename T> float GetKeyframLength(Animation& animation, int index, ion::render::AnimationTrack<T>& track)
+	template <typename T> float GetKeyframeLength(Animation& animation, int index, ion::render::AnimationTrack<T>& track)
 	{
 		if(index < track.GetNumKeyframes())
 		{
@@ -377,7 +377,7 @@ void TimelinePanel::PopulateTimeline(Animation& animation)
 				{
 					AnimKeyframePosition& keyframe = actorIt->second.m_trackPosition.GetKeyframe(i);
 					float time = keyframe.GetTime();
-					float length = GetKeyframLength(animation, i, actorIt->second.m_trackPosition);
+					float length = GetKeyframeLength(animation, i, actorIt->second.m_trackPosition);
 					std::stringstream label;
 					label << "(" << keyframe.GetValue().x << "," << keyframe.GetValue().y << ")";
 					KeyframePanel::KeyframeId keyframeId = m_timeline->AddKeyframe(sectionId, positionTrackId, time, length, label.str());
@@ -388,7 +388,7 @@ void TimelinePanel::PopulateTimeline(Animation& animation)
 				{
 					AnimKeyframeSpriteAnim& keyframe = actorIt->second.m_trackSpriteAnim.GetKeyframe(i);
 					float time = keyframe.GetTime();
-					float length = GetKeyframLength(animation, i, actorIt->second.m_trackSpriteAnim);
+					float length = GetKeyframeLength(animation, i, actorIt->second.m_trackSpriteAnim);
 
 					std::stringstream label;
 					std::pair<SpriteSheetId, SpriteAnimId> value = actorIt->second.m_trackSpriteAnim.GetKeyframe(i).GetValue();
@@ -560,24 +560,25 @@ void TimelinePanel::SyncAllActors()
 
 void TimelinePanel::RecalculateLenth(Animation& animation)
 {
+#if VARIABLE_LENGTH_KEYFRAMES
 	float length = animation.GetLength();
 
-	for(TAnimActorMap::iterator actorIt = animation.ActorsBegin(), actorEnd = animation.ActorsEnd(); actorIt != actorEnd; ++actorIt)
+	for (TAnimActorMap::iterator actorIt = animation.ActorsBegin(), actorEnd = animation.ActorsEnd(); actorIt != actorEnd; ++actorIt)
 	{
-		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actorIt->second.GetGameObjectId()))
+		if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actorIt->second.GetGameObjectId()))
 		{
-			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+			if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
 			{
 				float lengthPosTrack = actorIt->second.m_trackPosition.GetLength();
 
-				if(lengthPosTrack > length)
+				if (lengthPosTrack > length)
 				{
 					length = lengthPosTrack;
 				}
 
 				float lengthSpriteAnimTrack = actorIt->second.m_trackSpriteAnim.GetLength();
 
-				if(lengthSpriteAnimTrack > length)
+				if (lengthSpriteAnimTrack > length)
 				{
 					length = lengthSpriteAnimTrack;
 				}
@@ -587,6 +588,14 @@ void TimelinePanel::RecalculateLenth(Animation& animation)
 
 	animation.SetLength(length);
 	m_timeline->SetLength(length);
+#else
+	if (animation.GetActorCount() > 0)
+	{
+		int numKeyframes = animation.ActorsBegin()->second.m_trackPosition.GetNumKeyframes();
+		animation.SetLength((float)numKeyframes - 1);
+		m_timeline->SetLength((float)numKeyframes - 1);
+	}
+#endif
 }
 
 void TimelinePanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -673,24 +682,13 @@ void TimelinePanel::OnToolDeleteAnim(wxCommandEvent& event)
 	}
 }
 
-void TimelinePanel::Keyframe(AnimationActor* actor, int trackMask)
+void TimelinePanel::Keyframe(AnimationActor* actor, float frame, int trackMask)
 {
 	if(m_animation)
 	{
-		//Get current frame
-		float frame = m_animation->GetFrame();
-
 #if !VARIABLE_LENGTH_KEYFRAMES
 		frame = ion::maths::Floor(frame);
 #endif
-
-		//If at end, advance to next keyframe
-		float nextFrame = frame;
-		if (frame >= m_animation->GetLength())
-		{
-			//Advance frame
-			nextFrame += 1.0f;
-		}
 
 		if(actor)
 		{
@@ -706,11 +704,13 @@ void TimelinePanel::Keyframe(AnimationActor* actor, int trackMask)
 			}
 		}
 
+		//TODO: Auto-advance toggle button
+
 		//Set next frame
-		m_animation->SetFrame(nextFrame);
+		m_animation->SetFrame(frame + 1.0f);
 
 		//Update sider
-		SetSliderFrame(nextFrame);
+		SetSliderFrame(frame + 1.0f);
 
 		//Adjust anim length
 		RecalculateLenth(*m_animation);
@@ -734,21 +734,103 @@ void TimelinePanel::Keyframe(AnimationActor* actor, int trackMask)
 
 void TimelinePanel::SetAnimLength(Animation& animation, const AnimationActor& actor)
 {
+#if VARIABLE_LENGTH_KEYFRAMES
 	float length = 1.0f;
 
-	for(int i = 0; i < actor.m_trackPosition.GetNumKeyframes(); i++)
+	for (int i = 0; i < actor.m_trackPosition.GetNumKeyframes(); i++)
 	{
 		length += actor.m_trackPosition.GetKeyframe(i).GetTime();
 	}
 
 	animation.SetLength(length);
+#else
+	animation.SetLength(actor.m_trackPosition.GetNumKeyframes() - 1);
+#endif
 }
 
-void TimelinePanel::OnToolKeyframeTrack(wxCommandEvent& event)
+void TimelinePanel::ShuffleKeyframesRight(AnimationActor& actor, float time)
 {
-	if(m_selectedActor)
+	//Shuffle along
+	for (int i = (int)time; i < actor.m_trackPosition.GetNumKeyframes(); i++)
 	{
-		Keyframe(m_selectedActor, (1 << m_selectedTrackId));
+		AnimKeyframeSpritePosition& keyframe = actor.m_trackPosition.GetKeyframe(i);
+		keyframe.SetTime(i + 1);
+	}
+
+	for (int i = (int)time; i < actor.m_trackSpriteAnim.GetNumKeyframes(); i++)
+	{
+		AnimKeyframeSpriteAnim& keyframe = actor.m_trackSpriteAnim.GetKeyframe(i);
+		keyframe.SetTime(i + 1);
+	}
+}
+
+void TimelinePanel::RecalcKeyframeTimes(AnimationActor& actor)
+{
+	for (int i = 0; i < actor.m_trackPosition.GetNumKeyframes(); i++)
+	{
+		AnimKeyframeSpritePosition& keyframe = actor.m_trackPosition.GetKeyframe(i);
+		keyframe.SetTime(i);
+	}
+
+	for (int i = 0; i < actor.m_trackSpriteAnim.GetNumKeyframes(); i++)
+	{
+		AnimKeyframeSpriteAnim& keyframe = actor.m_trackSpriteAnim.GetKeyframe(i);
+		keyframe.SetTime(i);
+	}
+}
+
+void TimelinePanel::OnToolKeyframeReplace(wxCommandEvent& event)
+{
+	if (m_animation && m_animation->GetActorCount() > 0)
+	{
+		Keyframe(NULL, ion::maths::Floor(m_animation->GetFrame()));
+	}
+}
+
+void TimelinePanel::OnToolKeyframeInsert(wxCommandEvent& event)
+{
+	if (m_animation && m_animation->GetActorCount() > 0)
+	{
+		float insertTime = ion::maths::Floor(m_animation->GetFrame());
+
+		for (TAnimActorMap::iterator it = m_animation->ActorsBegin(), end = m_animation->ActorsEnd(); it != end; ++it)
+		{
+			ShuffleKeyframesRight(it->second, insertTime);
+		}
+
+		Keyframe(NULL, insertTime);
+	}
+}
+
+void TimelinePanel::OnToolKeyframeEnd(wxCommandEvent& event)
+{
+	if (m_animation && m_animation->GetActorCount() > 0)
+	{
+		Keyframe(NULL, ion::maths::Floor(m_animation->GetLength()) + 1.0f);
+	}
+}
+
+void TimelinePanel::OnToolKeyframeDelete(wxCommandEvent& event)
+{
+	if (m_animation && m_animation->GetActorCount() > 0)
+	{
+		float deleteTime = ion::maths::Floor(m_animation->GetFrame());
+
+		for (TAnimActorMap::iterator it = m_animation->ActorsBegin(), end = m_animation->ActorsEnd(); it != end; ++it)
+		{
+			it->second.m_trackPosition.RemoveKeyframe((int)deleteTime);
+			it->second.m_trackSpriteAnim.RemoveKeyframe((int)deleteTime);
+			RecalcKeyframeTimes(it->second);
+		}
+
+		//Adjust anim length
+		RecalculateLenth(*m_animation);
+
+		//Redraw map panel
+		m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
+
+		//Populate timeline
+		PopulateTimeline(*m_animation);
 	}
 }
 
@@ -758,19 +840,6 @@ void TimelinePanel::OnToolLoopToggle(wxCommandEvent& event)
 	{
 		m_animation->SetPlaybackBehaviour(event.IsChecked() ? ion::render::Animation::eLoop : ion::render::Animation::ePlayOnce);
 	}
-}
-
-void TimelinePanel::OnToolKeyframeActor(wxCommandEvent& event)
-{
-	if(m_selectedActor)
-	{
-		Keyframe(m_selectedActor);
-	}
-}
-
-void TimelinePanel::OnToolKeyframeAll(wxCommandEvent& event)
-{
-	Keyframe(NULL);
 }
 
 void TimelinePanel::OnToolPlay(wxCommandEvent& event)
@@ -787,7 +856,63 @@ void TimelinePanel::OnToolStop(wxCommandEvent& event)
 	if(m_animation)
 	{
 		m_animation->SetState(ion::render::Animation::eStopped);
+		m_animation->SetFrame(ion::maths::Floor(m_animation->GetFrame()));
+
+		SetSliderFrame(m_animation->GetFrame());
+
+		if (m_toolIsolateObject->IsToggled() && m_selectedActor)
+		{
+			SyncActor(*m_selectedActor);
+		}
+		else
+		{
+			SyncAllActors();
+		}
+
+		m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
 	}
+}
+
+void TimelinePanel::OnToolStepLeft(wxCommandEvent& event)
+{
+	if (m_animation)
+	{
+		m_animation->SetFrame(ion::maths::Clamp(ion::maths::Floor(m_animation->GetFrame() - 1), 0, m_animation->GetLength()));
+	}
+
+	SetSliderFrame(m_animation->GetFrame());
+
+	if (m_toolIsolateObject->IsToggled() && m_selectedActor)
+	{
+		SyncActor(*m_selectedActor);
+	}
+	else
+	{
+		SyncAllActors();
+	}
+
+	m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
+}
+
+void TimelinePanel::OnToolStepRight(wxCommandEvent& event)
+{
+	if (m_animation)
+	{
+		m_animation->SetFrame(ion::maths::Clamp(ion::maths::Floor(m_animation->GetFrame() + 1), 0, m_animation->GetLength()));
+	}
+
+	SetSliderFrame(m_animation->GetFrame());
+
+	if (m_toolIsolateObject->IsToggled() && m_selectedActor)
+	{
+		SyncActor(*m_selectedActor);
+	}
+	else
+	{
+		SyncAllActors();
+	}
+
+	m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
 }
 
 void TimelinePanel::OnToolRewind(wxCommandEvent& event)
