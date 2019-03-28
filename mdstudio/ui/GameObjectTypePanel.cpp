@@ -34,8 +34,15 @@ void GameObjectTypesPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		{
 			m_gameObjectTypeMap.push_back(it->second.GetId());
 
+			int count = 0;
+			TGameObjectPosMap::const_iterator mapIt = objectPosMap.find(it->first);
+			if (mapIt != objectPosMap.end())
+			{
+				count = mapIt->second.size();
+			}
+
 			std::stringstream nameCount;
-			nameCount << it->second.GetName() << " (" << objectPosMap.find(it->first)->second.size() << ")";
+			nameCount << it->second.GetName() << " (" << count << ")";
 			m_listGameObjTypes->Insert(wxString(nameCount.str()), index);
 		}
 	}
