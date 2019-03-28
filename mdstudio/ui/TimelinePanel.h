@@ -35,6 +35,7 @@ public:
 	void EventHandlerTimer(wxTimerEvent& event);
 	void EventHandlerTimeline(TimeEvent& event);
 	void EventHandlerTrack(TrackEvent& event);
+	void EventHandlerSection(SectionEvent& event);
 	void EventHandlerKeyframe(KeyframeEvent& event);
 
 protected:
@@ -69,7 +70,7 @@ private:
 	};
 
 	void PopulateAnimations();
-	void PopulateTimeline(Animation& animation, const AnimationActor* actor);
+	void PopulateTimeline(Animation& animation);
 
 	void SyncActor(AnimationActor& actor);
 	void SyncAllActors();
@@ -100,6 +101,7 @@ private:
 		AnimationTracks trackType;
 	};
 
+	std::map<KeyframePanel::SectionId, AnimationActor*> m_sectionCache;
 	std::map<KeyframePanel::TrackId, TrackCache> m_trackCache;
 
 	//Keyframe cache, for matching KeyframePanel callbacks to keyframes

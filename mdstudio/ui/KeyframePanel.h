@@ -22,10 +22,15 @@
 #include <vector>
 
 //Work in progress
-#define VARIABLE_LENGTH_KEYFRAMES 0
+#define ALLOW_KEYFRAME_MOVE			0
+#define ALLOW_KEYFRAME_RESIZE		0
+#define ALLOW_KEYFRAME_DUPLICATE	0
+#define ALLOW_KEYFRAME_DELETE		0
+#define DRAW_KEYFRAME_TEXT			0
 
 extern const wxEventType EVT_TIME_CHANGED;
 extern const wxEventType EVT_TRACK_SELECTED;
+extern const wxEventType EVT_SECTION_SELECTED;
 extern const wxEventType EVT_KEYFRAME_SELECTED;
 extern const wxEventType EVT_KEYFRAME_INSERTED;
 extern const wxEventType EVT_KEYFRAME_DELETED;
@@ -60,6 +65,7 @@ public:
 	//Add a section (group of tracks)
 	SectionId AddSection(const std::string& name);
 	void RemoveSection(SectionId sectionId);
+	void SetSelectedSection(SectionId sectionId);
 
 	//Add a track to a section
 	TrackId AddTrack(SectionId section, const std::string& name);
@@ -102,6 +108,7 @@ protected:
 		Section(const std::string& _name) { name = _name; }
 		std::vector<std::pair<TrackId, Track>> tracks;
 		std::string name;
+		wxRect bounds;
 	};
 
 	enum MouseOperation
@@ -119,7 +126,7 @@ protected:
 		eContextMenuUserActionStart
 	};
 
-	static const int s_timelineWidthPerSecond = 64;
+	static const int s_timelineWidthPerSecond = 16;
 	static const int s_sectionLabelDrawHeight = 20;
 	static const int s_trackLabelMarginWidth = 128;
 	static const int s_trackDrawHeight = 24;
@@ -137,6 +144,7 @@ protected:
 	bool PickTime(int x, int y);
 	bool PickTrack(int x, int y);
 	bool PickKeyframe(int x, int y);
+	bool PickSection(int x, int y);
 
 	void EventHandlerMouse(wxMouseEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
@@ -149,11 +157,12 @@ protected:
 	void DrawAll(wxDC& dc);
 	void DrawSection(wxDC& dc, Section& section, int& offsetY);
 	void DrawTrack(wxDC& dc, Track& track, int& offsetY, bool selected);
-	void DrawKeyframe(wxDC& dc, Keyframe& keyframe, int offsetY, bool selected);
+	void DrawKeyframe(wxDC& dc, Keyframe& keyframe, int offsetY, bool selected, bool timeHighlight);
 	void DrawTransport(wxDC& dc, int offsetY);
 
 	void PostTimeEvent(const wxEventType& eventType);
 	void PostTrackEvent(const wxEventType& eventType);
+	void PostSectionEvent(const wxEventType& eventType);
 	void PostKeyframeEvent(const wxEventType& eventType);
 
 	wxOverlay m_mainLayerSnapshot;
@@ -164,6 +173,7 @@ protected:
 
 	float m_animationTime;
 	float m_animationLength;
+	int m_keyframeTimeHighlightIndex;
 
 	SectionId m_selectedSectionId;
 	TrackId m_selectedTrackId;
@@ -223,6 +233,25 @@ public:
 	KeyframePanel::TrackId m_trackId;
 };
 
+class SectionEvent : public wxCommandEvent
+{
+public:
+	SectionEvent(wxEventType commandType = EVT_SECTION_SELECTED, int id = 0)
+		: wxCommandEvent(commandType, id)
+	{
+	}
+
+	SectionEvent(const SectionEvent &event)
+		: wxCommandEvent(event)
+	{
+		m_sectionId = event.m_sectionId;
+	}
+
+	wxEvent* Clone() const { return new SectionEvent(*this); }
+
+	KeyframePanel::SectionId m_sectionId;
+};
+
 class KeyframeEvent : public wxCommandEvent
 {
 public:
@@ -253,6 +282,7 @@ public:
 
 typedef void (wxEvtHandler::*TimeEventFunction)(TimeEvent&);
 typedef void (wxEvtHandler::*TrackEventFunction)(TrackEvent&);
+typedef void (wxEvtHandler::*SectionEventFunction)(SectionEvent&);
 typedef void (wxEvtHandler::*KeyframeEventFunction)(KeyframeEvent&);
 
 #define TimeEventHandler(func) \
@@ -260,6 +290,9 @@ typedef void (wxEvtHandler::*KeyframeEventFunction)(KeyframeEvent&);
 
 #define TrackEventHandler(func) \
     wxEVENT_HANDLER_CAST(TrackEventFunction, func)
+
+#define SectionEventHandler(func) \
+    wxEVENT_HANDLER_CAST(SectionEventFunction, func)
 
 #define KeyframeEventHandler(func) \
     wxEVENT_HANDLER_CAST(KeyframeEventFunction, func)
