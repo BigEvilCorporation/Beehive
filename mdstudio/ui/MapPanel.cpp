@@ -743,10 +743,6 @@ void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
 				{
 					m_mainWindow->SetSelectedGameObject(gameObject);
 					m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
-
-					m_previewGameObjectType = gameObject->GetTypeId();
-					m_previewGameObjectPos.x = topLeft.x;
-					m_previewGameObjectPos.y = topLeft.y;
 				}
 			}
 
@@ -1423,6 +1419,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						{
 							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, gameObject->GetPosition().x + mouseDelta.x, gameObject->GetPosition().y + mouseDelta.y);
 							gameObject->SetPosition(gameObject->GetPosition() + mouseDelta);
+							Refresh();
 						}
 						else
 						{
@@ -2123,10 +2120,8 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 
 	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
-	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
 	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
-	material->SetDiffuseColour(colour);
 
 	for(TGameObjectPosMap::const_iterator itMap = gameObjects.begin(), endMap = gameObjects.end(); itMap != endMap; ++itMap)
 	{
@@ -2164,17 +2159,26 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 					}
 				}
 
-				//Render coloured box
-				ion::Vector3 scale(width / tileWidth, height / tileHeight, 1.0f);
-				ion::Matrix4 mtx;
-				ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
-					floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
-
-				mtx.SetTranslation(pos + animPosOffset);
-				mtx.SetScale(scale);
-
+				//Render outline
 				if(m_project.GetShowStampOutlines())
 				{
+					ion::Colour colour(1.0f, 1.0f, 1.0f, 0.0f);
+
+					if (gameObject.GetId() == m_selectedGameObject)
+						colour = m_renderResources.GetColour(RenderResources::eColourSelected);
+					else if (gameObject.GetId() == m_hoverGameObject)
+						colour = m_renderResources.GetColour(RenderResources::eColourOutline);
+
+					material->SetDiffuseColour(colour);
+
+					ion::Vector3 scale(width / tileWidth, height / tileHeight, 1.0f);
+					ion::Matrix4 mtx;
+					ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
+						floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
+
+					mtx.SetTranslation(pos + animPosOffset);
+					mtx.SetScale(scale);
+
 					material->Bind(mtx, cameraInverseMtx, projectionMtx);
 					renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 					material->Unbind();
@@ -2193,6 +2197,10 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 						spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 
 						ion::Matrix4 spriteSheetMtx;
+
+						ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
+							floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
+
 						spriteSheetMtx.SetTranslation(pos + animPosOffset);
 
 						if(customSize)
