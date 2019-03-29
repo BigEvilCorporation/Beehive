@@ -108,9 +108,9 @@ void BlocksPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void BlocksPanel::OnMouseTileEvent(int buttonBits, int x, int y)
+void BlocksPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(buttonBits, x, y);
+	ViewPanel::OnMouseTileEvent(buttonBits, tileDelta, x, y);
 
 	m_hoverPos.x = ion::maths::RoundDownToNearest(x, m_project.GetPlatformConfig().blockWidth);
 	m_hoverPos.y = ion::maths::RoundDownToNearest(y, m_project.GetPlatformConfig().blockHeight);

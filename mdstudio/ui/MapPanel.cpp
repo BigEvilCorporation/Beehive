@@ -187,7 +187,7 @@ void MapPanel::BucketFill(Map& map, ion::Vector2i position, ion::Vector2i prevPo
 	}
 }
 
-void MapPanel::OnMouseTileEvent(int buttonBits, int x, int y)
+void MapPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
 {
 	Map& map = m_project.GetEditingMap();
 	Tileset& tileset = m_project.GetTileset();
@@ -951,7 +951,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 	}
 }
 
-void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, int buttonBits, int tileX, int tileY)
+void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
 {
 	Map& map = m_project.GetEditingMap();
 	Tileset& tileset = m_project.GetTileset();
@@ -1400,14 +1400,14 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 		case eToolMoveGameObject:
 		{
+			if (!(m_prevMouseBits & eMouseLeft))
+			{
+				ion::Vector2i topLeft;
+				m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+			}
+
 			if(buttonBits & eMouseLeft)
 			{
-				if(!(m_prevMouseBits & eMouseLeft))
-				{
-					ion::Vector2i topLeft;
-					m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
-				}
-
 				if(m_hoverGameObject != InvalidGameObjectId)
 				{
 					if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
@@ -1418,13 +1418,12 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						if(m_moveGameObjByPixel)
 						{
 							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, gameObject->GetPosition().x + mouseDelta.x, gameObject->GetPosition().y + mouseDelta.y);
-							gameObject->SetPosition(gameObject->GetPosition() + mouseDelta);
 							Refresh();
 						}
 						else
 						{
-							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, tileX, tileY);
-							gameObject->SetPosition(ion::Vector2i(tileX * tileWidth, tileY * tileHeight));
+							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, gameObject->GetPosition().x + (tileDelta.x * tileWidth), gameObject->GetPosition().y + (tileDelta.y * tileHeight));
+							Refresh();
 						}
 					}
 				}

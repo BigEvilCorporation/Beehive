@@ -19,7 +19,7 @@ public:
 	ToolSelectStamp(MapPanel& mapPanel);
 
 	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(int buttonBits, int x, int y) = 0;
+	virtual void OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y) = 0;
 
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset) = 0;

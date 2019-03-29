@@ -111,9 +111,9 @@ void TerrainTilesPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void TerrainTilesPanel::OnMouseTileEvent(int buttonBits, int x, int y)
+void TerrainTilesPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(buttonBits, x, y);
+	ViewPanel::OnMouseTileEvent(buttonBits, tileDelta, x, y);
 
 	TerrainTileId selectedTerrainTile = InvalidTerrainTileId;
 

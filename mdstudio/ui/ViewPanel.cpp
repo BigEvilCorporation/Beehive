@@ -285,10 +285,12 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 	if(event.RightIsDown())
 		buttonBits |= eMouseRight;
 
+	ion::Vector2i tileDelta(x - m_prevMouseOverTilePos.x, y - m_prevMouseOverTilePos.y);
+
 	if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))
 	{
 		//Mouse button clicked or changed grid pos
-		OnMouseTileEvent(buttonBits, x, y);
+		OnMouseTileEvent(buttonBits, tileDelta, x, y);
 
 		m_prevMouseOverTilePos.x = x;
 		m_prevMouseOverTilePos.y = y;
@@ -297,7 +299,7 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 	if((buttonBits != m_prevMouseBits) || (mousePixelPosCanvas.x != m_prevMouseOverPixelPos.x) || (mousePixelPosCanvas.y != m_prevMouseOverPixelPos.y))
 	{
 		//Mouse button clicked or changed pixel pos
-		OnMousePixelEvent(mousePixelPosCanvas, mouseDelta, buttonBits, x, y);
+		OnMousePixelEvent(mousePixelPosCanvas, mouseDelta, tileDelta, buttonBits, x, y);
 		m_prevMouseOverPixelPos = mousePixelPosCanvas;
 	}
 

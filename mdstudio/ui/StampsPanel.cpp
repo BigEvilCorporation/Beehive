@@ -124,9 +124,9 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void StampsPanel::OnMouseTileEvent(int buttonBits, int x, int y)
+void StampsPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(buttonBits, x, y);
+	ViewPanel::OnMouseTileEvent(buttonBits, tileDelta, x, y);
 
 	StampId selectedStamp = InvalidStampId;
 	ion::Vector2i stampTopLeft;

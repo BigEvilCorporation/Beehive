@@ -62,7 +62,7 @@ void TileEditorPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void TileEditorPanel::OnMouseTileEvent(int buttonBits, int x, int y)
+void TileEditorPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
 {
 	const u8 tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const u8 tileHeight = m_project.GetPlatformConfig().tileWidth;

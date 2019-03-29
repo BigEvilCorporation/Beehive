@@ -707,10 +707,10 @@ void TimelinePanel::Keyframe(AnimationActor* actor, float frame, int trackMask)
 		//TODO: Auto-advance toggle button
 
 		//Set next frame
-		m_animation->SetFrame(frame + 1.0f);
+		m_animation->SetFrame(frame);
 
 		//Update sider
-		SetSliderFrame(frame + 1.0f);
+		SetSliderFrame(frame);
 
 		//Adjust anim length
 		RecalculateLenth(*m_animation);
