@@ -931,11 +931,25 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		{
 			AnimationId animId = m_mainWindow->GetSelectedAnimation();
 			Animation* anim = m_project.GetAnimation(animId);
-			if(anim)
+			if(anim && !anim->GetActor(m_hoverGameObject))
 			{
-				anim->AddActor(m_hoverGameObject);
-				m_mainWindow->RefreshAnimActors();
-				m_mainWindow->SetSelectedAnimObject(m_hoverGameObject);
+				if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
+				{
+					anim->AddActor(m_hoverGameObject);
+
+					//Match keyframe count of existing actors
+					if (AnimationActor* animActor = anim->GetActor(m_hoverGameObject))
+					{
+						for (int i = 0; i < (int)anim->GetLength(); i++)
+						{
+							animActor->m_trackPosition.InsertKeyframe(AnimKeyframePosition((float)i, gameObject->GetPosition()));
+							animActor->m_trackSpriteAnim.InsertKeyframe(AnimKeyframeSpriteAnim((float)i, std::make_pair(InvalidSpriteSheetId, InvalidSpriteAnimId)));
+						}
+					}
+
+					m_mainWindow->RefreshAnimActors();
+					m_mainWindow->SetSelectedAnimObject(m_hoverGameObject);
+				}
 			}
 		}
 	}
