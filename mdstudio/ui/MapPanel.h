@@ -13,7 +13,9 @@
 
 #include <ion/maths/Geometry.h>
 #include <ion/gamekit/Bezier.h>
+
 #include "ViewPanel.h"
+#include "Gizmo.h"
 
 class MapPanel : public ViewPanel
 {
@@ -121,6 +123,13 @@ private:
 
 	//Current cursor origin mode
 	CursorOrigin m_cursorOrigin;
+
+	//Move gizmo
+	Gizmo m_gizmo;
+
+	//Gizmo cursors
+	wxCursor* m_cursorHorizontal;
+	wxCursor* m_cursorVertical;
 
 	///////////////////////////////////////////////////
 	// SELECT tool

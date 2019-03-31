@@ -18,6 +18,7 @@
 
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
+	, m_gizmo(renderResources)
 {
 	m_currentTool = eToolPaintTile;
 	m_cursorOrigin = eCursorTopLeft;
@@ -34,6 +35,9 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	m_stampPastePos.y = -1;
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 	m_moveGameObjByPixel = false;
+
+	m_cursorHorizontal = new wxCursor(wxCURSOR_SIZEWE);
+	m_cursorVertical = new wxCursor(wxCURSOR_SIZENS);
 
 	ResetToolData();
 
@@ -59,6 +63,9 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 
 MapPanel::~MapPanel()
 {
+	delete m_cursorHorizontal;
+	delete m_cursorVertical;
+
 	ResetToolData();
 }
 
@@ -980,6 +987,24 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 	ion::Vector2 mousePosF((float)mousePos.x, (float)(mapHeight * tileHeight) - (float)mousePos.y);
 	int y_inv = (mapHeight - 1 - tileY);
 
+	//Update Gizmo mouse cursor
+	ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
+	m_gizmo.OnMouse(mousePos, mouseDelta, buttonBits, m_cameraZoom, mapSizePx);
+	ion::Vector2i gizmoDelta = m_gizmo.GetLastDelta();
+
+	switch (m_gizmo.GetCurrentConstraint())
+	{
+	case Gizmo::Constraint::Vertical:
+		SetCursor(*m_cursorVertical);
+		break;
+	case Gizmo::Constraint::Horizontal:
+		SetCursor(*m_cursorHorizontal);
+		break;
+	default:
+		SetCursor(*wxSTANDARD_CURSOR);
+		break;
+	}
+
 	switch(m_currentTool)
 	{
 		case eToolDrawTerrainBezier:
@@ -1414,33 +1439,58 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 		case eToolMoveGameObject:
 		{
-			if (!(m_prevMouseBits & eMouseLeft))
+			ion::Vector2i moveDelta = m_gizmo.IsEnabled() ? gizmoDelta : mouseDelta;
+			bool mouseOverGizmo = m_gizmo.IsEnabled() && (m_gizmo.GetCurrentConstraint() != Gizmo::Constraint::None);
+
+			if (!mouseOverGizmo)
 			{
-				ion::Vector2i topLeft;
-				m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+				if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+				{
+					ion::Vector2i topLeft;
+					m_selectedGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+				}
+				else
+				{
+					ion::Vector2i topLeft;
+					m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+				}
 			}
 
-			if(buttonBits & eMouseLeft)
+			if (m_selectedGameObject != InvalidGameObjectId)
 			{
-				if(m_hoverGameObject != InvalidGameObjectId)
+				//Object selected
+				m_gizmo.SetEnabled(true);
+
+				if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
 				{
-					if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
+					if(buttonBits & eMouseLeft)
 					{
 						const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 						const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-						if(m_moveGameObjByPixel)
+						if(m_moveGameObjByPixel || m_gizmo.IsEnabled())
 						{
-							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, gameObject->GetPosition().x + mouseDelta.x, gameObject->GetPosition().y + mouseDelta.y);
+							m_project.GetEditingMap().MoveGameObject(m_selectedGameObject, gameObject->GetPosition().x + moveDelta.x, gameObject->GetPosition().y + moveDelta.y);
 							Refresh();
 						}
-						else
+						else if(!m_gizmo.IsEnabled())
 						{
-							m_project.GetEditingMap().MoveGameObject(m_hoverGameObject, gameObject->GetPosition().x + (tileDelta.x * tileWidth), gameObject->GetPosition().y + (tileDelta.y * tileHeight));
+							m_project.GetEditingMap().MoveGameObject(m_selectedGameObject, gameObject->GetPosition().x + (tileDelta.x * tileWidth), gameObject->GetPosition().y + (tileDelta.y * tileHeight));
 							Refresh();
 						}
 					}
+
+					GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId());
+
+					//Update gizmo pos
+					ion::Vector2i centre = gameObject->GetPosition() + (gameObjectType->GetDimensions() / 2);
+					m_gizmo.SetPosition(ion::Vector2i(centre.x, mapSizePx.y - centre.y));
 				}
+			}
+			else
+			{
+				//No object selected
+				m_gizmo.SetEnabled(false);
 			}
 
 			break;
@@ -1523,19 +1573,26 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	if(m_project.GetShowStampOutlines())
 	{
 		RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
 	}
 
 	//Render physics world outline
 	//if(m_project.GetShowPhysicsworldOutline())
 	{
 		RenderPhysicsWorldOutline(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
 	}
 
 	//Render display frame
 	if(m_project.GetShowDisplayFrame())
 	{
 		RenderDisplayFrame(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
 	}
+
+	//Render gizmo
+	ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
+	m_gizmo.OnRender(renderer, cameraInverseMtx, projectionMtx, z, mapSizePx);
 }
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -1896,6 +1953,19 @@ void MapPanel::SetTool(ToolType tool)
 		break;
 	}
 
+	case eToolSelectGameObject:
+	case eToolMoveGameObject:
+	{
+		if (m_selectedGameObject != InvalidGameObjectId)
+		{
+			if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
+			{
+				m_gizmo.SetEnabled(true);
+				m_gizmo.SetPosition(gameObject->GetPosition());
+			}
+		}
+	}
+
 	default:
 		ResetToolData();
 	}
@@ -1903,6 +1973,9 @@ void MapPanel::SetTool(ToolType tool)
 
 void MapPanel::ResetToolData()
 {
+	//Disable gizmo
+	m_gizmo.SetEnabled(false);
+
 	//Invalidate preview tile
 	m_previewTile = InvalidTileId;
 	m_previewTileFlipX = false;

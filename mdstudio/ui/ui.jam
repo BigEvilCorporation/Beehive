@@ -27,6 +27,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	GameObjectTypeDialog.h
 	GridCellRenderer.cpp
 	GridCellRenderer.h
+	Gizmo.cpp
+	Gizmo.h
 	ExportDialog.cpp
 	ExportDialog.h
 	KeyframePanel.cpp
