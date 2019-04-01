@@ -29,14 +29,48 @@ GameObjectTypeDialog::GameObjectTypeDialog(MainWindow& mainWindow, Project& proj
 
 void GameObjectTypeDialog::OnToolGameObjAdd(wxCommandEvent& event)
 {
-	m_currentTypeId = m_project.AddGameObjectType();
+	DialogNewObjectType newObjDlg(*this, m_project);
 
-	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	if (newObjDlg.ShowModal() == wxID_OK)
 	{
-		PopulateTypeList();
-		PopulateTypeFields(gameObjType);
-		PopulateVarsList(gameObjType);
-		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
+		m_currentTypeId = m_project.AddGameObjectType();
+
+		if (GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+		{
+			//Set name
+			gameObjType->SetName(newObjDlg.m_textName->GetValue().c_str().AsChar());
+			
+			//Set actor
+			TActorMap::const_iterator it = std::find_if(m_project.ActorsBegin(), m_project.ActorsEnd(), [&](const std::pair<ActorId, Actor>& rhs) { return rhs.second.GetName() == std::string(newObjDlg.m_choiceActor->GetStringSelection().c_str()); });
+			if (it != m_project.ActorsEnd())
+			{
+				gameObjType->SetSpriteActorId(it->first);
+
+				//Make a best guess at dimensions from first sprite frame
+				if (it->second.GetSpriteSheets().size() > 0)
+				{
+					gameObjType->SetDimensions(ion::Vector2i(it->second.GetSpriteSheets().begin()->second.GetWidthTiles() * 8, it->second.GetSpriteSheets().begin()->second.GetHeightTiles() * 8));
+				}
+			}
+
+			//Add auto variables
+			for (int i = 0; i < newObjDlg.m_listVarsAdded->GetCount(); i++)
+			{
+				std::vector<GameObject::AutoVar>::const_iterator it = std::find_if(GameObject::s_autoVars.begin(), GameObject::s_autoVars.end(), [&](const GameObject::AutoVar& rhs) { return rhs.name == newObjDlg.m_listVarsAdded->GetString(i); });
+				if (it != GameObject::s_autoVars.end())
+				{
+					GameObjectVariable& variable = gameObjType->AddVariable();
+					variable.m_name = it->prefix;
+					variable.m_size = it->size;
+					variable.m_value = std::string("&") + it->label;
+				}
+			}
+
+			PopulateTypeList();
+			PopulateTypeFields(gameObjType);
+			PopulateVarsList(gameObjType);
+			m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectTypes);
+		}
 	}
 }
 
@@ -388,5 +422,46 @@ void GameObjectTypeDialog::PopulateVarsFields(GameObjectVariable* variable)
 		m_textValue->Enable(false);
 		m_choiceSize->Enable(false);
 		m_btnApplyVarSettings->Enable(false);
+	}
+}
+
+DialogNewObjectType::DialogNewObjectType(wxWindow& parent, Project& project)
+	: DialogNewObjectTypeBase(&parent)
+{
+	PopulateActors(project);
+	PopulateAutoVars();
+}
+
+void DialogNewObjectType::OnBtnRemoveVar(wxCommandEvent& event)
+{
+	if (m_listVarsAdded->GetSelection() >= 0)
+	{
+		m_listVarsNotAdded->Append(m_listVarsAdded->GetStringSelection());
+		m_listVarsAdded->Delete(m_listVarsAdded->GetSelection());
+	}
+}
+
+void DialogNewObjectType::OnBtnAddVar(wxCommandEvent& event)
+{
+	if (m_listVarsNotAdded->GetSelection() >= 0)
+	{
+		m_listVarsAdded->Append(m_listVarsNotAdded->GetStringSelection());
+		m_listVarsNotAdded->Delete(m_listVarsNotAdded->GetSelection());
+	}
+}
+
+void DialogNewObjectType::PopulateActors(Project& project)
+{
+	for (TActorMap::const_iterator it = project.ActorsBegin(), end = project.ActorsEnd(); it != end; ++it)
+	{
+		m_choiceActor->AppendString(it->second.GetName());
+	}
+}
+
+void DialogNewObjectType::PopulateAutoVars()
+{
+	for (int i = 0; i < GameObject::s_autoVars.size(); i++)
+	{
+		m_listVarsNotAdded->Append(wxString(GameObject::s_autoVars[i].name));
 	}
 }

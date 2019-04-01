@@ -56,3 +56,20 @@ private:
 	std::vector<std::pair<int, GameObjectTypeId>> m_gameObjIndexMap;
 	std::vector<ActorId> m_actorCache;
 };
+
+class DialogNewObjectType : public DialogNewObjectTypeBase
+{
+public:
+	DialogNewObjectType(wxWindow& parent, Project& project);
+
+	virtual void OnBtnRemoveVar(wxCommandEvent& event);
+	virtual void OnBtnAddVar(wxCommandEvent& event);
+
+	std::vector<const GameObject::AutoVar*> m_addedAutoVars;
+
+private:
+	void PopulateActors(Project& project);
+	void PopulateAutoVars();
+
+	std::vector<const GameObject::AutoVar*> m_notAddedAutoVars;
+};

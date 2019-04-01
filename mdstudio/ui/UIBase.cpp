@@ -2756,6 +2756,144 @@ TimelinePanelBase::~TimelinePanelBase()
 
 }
 
+DialogNewObjectTypeBase::DialogNewObjectTypeBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxFlexGridSizer* fgSizer43;
+	fgSizer43 = new wxFlexGridSizer( 3, 1, 0, 0 );
+	fgSizer43->AddGrowableRow( 2 );
+	fgSizer43->SetFlexibleDirection( wxBOTH );
+	fgSizer43->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	wxFlexGridSizer* fgSizer48;
+	fgSizer48 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer48->AddGrowableCol( 1 );
+	fgSizer48->SetFlexibleDirection( wxHORIZONTAL );
+	fgSizer48->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText61 = new wxStaticText( this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText61->Wrap( -1 );
+	fgSizer48->Add( m_staticText61, 0, wxALL, 5 );
+
+	m_textName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer48->Add( m_textName, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer43->Add( fgSizer48, 1, wxEXPAND, 5 );
+
+	wxFlexGridSizer* fgSizer50;
+	fgSizer50 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer50->AddGrowableCol( 1 );
+	fgSizer50->SetFlexibleDirection( wxBOTH );
+	fgSizer50->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText62 = new wxStaticText( this, wxID_ANY, wxT("Sprite actor:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText62->Wrap( -1 );
+	fgSizer50->Add( m_staticText62, 0, wxALL, 5 );
+
+	wxArrayString m_choiceActorChoices;
+	m_choiceActor = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceActorChoices, 0 );
+	m_choiceActor->SetSelection( 0 );
+	fgSizer50->Add( m_choiceActor, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer43->Add( fgSizer50, 1, wxEXPAND, 5 );
+
+	wxFlexGridSizer* fgSizer47;
+	fgSizer47 = new wxFlexGridSizer( 1, 3, 0, 0 );
+	fgSizer47->AddGrowableCol( 0 );
+	fgSizer47->AddGrowableCol( 2 );
+	fgSizer47->AddGrowableRow( 0 );
+	fgSizer47->SetFlexibleDirection( wxBOTH );
+	fgSizer47->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	wxFlexGridSizer* fgSizer44;
+	fgSizer44 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer44->AddGrowableRow( 1 );
+	fgSizer44->SetFlexibleDirection( wxBOTH );
+	fgSizer44->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText59 = new wxStaticText( this, wxID_ANY, wxT("Auto Variables - Not Added"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText59->Wrap( -1 );
+	fgSizer44->Add( m_staticText59, 0, wxALL|wxEXPAND, 5 );
+
+	m_listVarsNotAdded = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	fgSizer44->Add( m_listVarsNotAdded, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer47->Add( fgSizer44, 1, wxEXPAND, 5 );
+
+	wxFlexGridSizer* fgSizer45;
+	fgSizer45 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer45->SetFlexibleDirection( wxBOTH );
+	fgSizer45->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_btnAddVar = new wxButton( this, wxID_ANY, wxT(">"), wxDefaultPosition, wxSize( 20,-1 ), 0 );
+	fgSizer45->Add( m_btnAddVar, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_btnRemoveVar = new wxButton( this, wxID_ANY, wxT("<"), wxDefaultPosition, wxSize( 20,-1 ), 0 );
+	fgSizer45->Add( m_btnRemoveVar, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+
+	fgSizer47->Add( fgSizer45, 1, wxALIGN_CENTER_VERTICAL, 5 );
+
+	wxFlexGridSizer* fgSizer46;
+	fgSizer46 = new wxFlexGridSizer( 2, 1, 0, 0 );
+	fgSizer46->AddGrowableRow( 1 );
+	fgSizer46->SetFlexibleDirection( wxBOTH );
+	fgSizer46->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText60 = new wxStaticText( this, wxID_ANY, wxT("Auto Variables - Added"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText60->Wrap( -1 );
+	fgSizer46->Add( m_staticText60, 0, wxALL|wxEXPAND, 5 );
+
+	m_listVarsAdded = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	fgSizer46->Add( m_listVarsAdded, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer47->Add( fgSizer46, 1, wxEXPAND, 5 );
+
+
+	fgSizer43->Add( fgSizer47, 1, wxEXPAND, 5 );
+
+	wxFlexGridSizer* fgSizer49;
+	fgSizer49 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer49->AddGrowableCol( 0 );
+	fgSizer49->SetFlexibleDirection( wxBOTH );
+	fgSizer49->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_sdbSizer8 = new wxStdDialogButtonSizer();
+	m_sdbSizer8OK = new wxButton( this, wxID_OK );
+	m_sdbSizer8->AddButton( m_sdbSizer8OK );
+	m_sdbSizer8Cancel = new wxButton( this, wxID_CANCEL );
+	m_sdbSizer8->AddButton( m_sdbSizer8Cancel );
+	m_sdbSizer8->Realize();
+
+	fgSizer49->Add( m_sdbSizer8, 1, wxEXPAND, 5 );
+
+
+	fgSizer43->Add( fgSizer49, 1, wxALIGN_RIGHT|wxEXPAND, 5 );
+
+
+	this->SetSizer( fgSizer43 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_btnAddVar->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewObjectTypeBase::OnBtnAddVar ), NULL, this );
+	m_btnRemoveVar->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewObjectTypeBase::OnBtnRemoveVar ), NULL, this );
+}
+
+DialogNewObjectTypeBase::~DialogNewObjectTypeBase()
+{
+	// Disconnect Events
+	m_btnAddVar->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewObjectTypeBase::OnBtnAddVar ), NULL, this );
+	m_btnRemoveVar->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogNewObjectTypeBase::OnBtnRemoveVar ), NULL, this );
+
+}
+
 SpriteAnimPanelBase::SpriteAnimPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
 	wxFlexGridSizer* fgSizer27;

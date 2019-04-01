@@ -995,6 +995,40 @@ class TimelinePanelBase : public wxPanel
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class DialogNewObjectTypeBase
+///////////////////////////////////////////////////////////////////////////////
+class DialogNewObjectTypeBase : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText61;
+		wxStaticText* m_staticText62;
+		wxStaticText* m_staticText59;
+		wxButton* m_btnAddVar;
+		wxButton* m_btnRemoveVar;
+		wxStaticText* m_staticText60;
+		wxStdDialogButtonSizer* m_sdbSizer8;
+		wxButton* m_sdbSizer8OK;
+		wxButton* m_sdbSizer8Cancel;
+
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnBtnAddVar( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnRemoveVar( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+		wxTextCtrl* m_textName;
+		wxChoice* m_choiceActor;
+		wxListBox* m_listVarsNotAdded;
+		wxListBox* m_listVarsAdded;
+
+		DialogNewObjectTypeBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("New Game Object Type"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 346,413 ), long style = wxCAPTION );
+		~DialogNewObjectTypeBase();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class SpriteAnimPanelBase
 ///////////////////////////////////////////////////////////////////////////////
 class SpriteAnimPanelBase : public wxPanel

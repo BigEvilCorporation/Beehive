@@ -2232,7 +2232,14 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 
 				if(const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
 				{
-					if(const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId))
+					const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+					if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
+					{
+						spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
+						spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
+					}
+
+					if(spriteSheet)
 					{
 						if(const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
 						{
@@ -2342,10 +2349,20 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 
-		if(gameObjectType->GetPreviewSpriteSheetId() != InvalidSpriteSheetId)
+		SpriteSheetId spriteSheetId = gameObjectType->GetPreviewSpriteSheetId();
+
+		if (const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
+		{
+			if (!spriteActor->GetSpriteSheet(spriteSheetId) && spriteActor->GetSpriteSheetCount() > 0)
+			{
+				spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
+			}
+		}
+
+		if(spriteSheetId != InvalidSpriteSheetId)
 		{
 			//Render spriteSheet
-			RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(gameObjectType->GetPreviewSpriteSheetId());
+			RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
 			ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
 			ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
 
