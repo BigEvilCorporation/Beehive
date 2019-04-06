@@ -73,6 +73,12 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 	m_materials[eMaterialSpriteSheet]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
 	m_materials[eMaterialSpriteSheet]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
 
+	//Setup textured reference material
+	m_materials[eMaterialReferenceImage]->AddDiffuseMap(m_textures[eTextureReferenceImage]);
+	m_materials[eMaterialReferenceImage]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialReferenceImage]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
+	m_materials[eMaterialReferenceImage]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
 	m_colours[eColourSelected] = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
@@ -281,6 +287,39 @@ void RenderResources::CreateCollisionTypesTexture()
 	m_textures[eTextureCollisionTypes]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureCollisionTypes]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
+
+	delete data;
+}
+
+void RenderResources::CreateReferenceImageTexture(const BMPReader& reader)
+{
+	u32 textureWidth = reader.GetWidth();
+	u32 textureHeight = reader.GetHeight();
+	u32 bytesPerPixel = 3;
+	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
+
+	u8* data = new u8[textureSize];
+	ion::memory::MemSet(data, 0, textureSize);
+
+	for (int x = 0; x < textureWidth; x++)
+	{
+		for (int y = 0; y < textureHeight; y++)
+		{
+			const BMPReader::Colour& colour = reader.GetPixel(x, y);
+
+			u32 pixelIdx = (y * textureWidth) + x;
+			u32 dataOffset = pixelIdx * bytesPerPixel;
+			ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
+			data[dataOffset] = colour.GetRed();
+			data[dataOffset + 1] = colour.GetGreen();
+			data[dataOffset + 2] = colour.GetBlue();
+		}
+	}
+
+	m_textures[eTextureReferenceImage]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGB, ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	m_textures[eTextureReferenceImage]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureReferenceImage]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureReferenceImage]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 	delete data;
 }

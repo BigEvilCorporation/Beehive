@@ -670,6 +670,7 @@ class ProjectSettingsDialog : public wxDialog
 	protected:
 		wxStaticText* m_staticText51;
 		wxStaticText* m_staticText53;
+		wxStaticText* m_staticText531;
 		wxStdDialogButtonSizer* m_sdbSizer7;
 		wxButton* m_sdbSizer7OK;
 		wxButton* m_sdbSizer7Cancel;
@@ -677,6 +678,7 @@ class ProjectSettingsDialog : public wxDialog
 	public:
 		wxFilePickerCtrl* m_filePickerSpritesProj;
 		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
+		wxFilePickerCtrl* m_filePickerReference;
 
 		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,169 ), long style = wxCAPTION|wxRESIZE_BORDER );
 		~ProjectSettingsDialog();
@@ -1013,6 +1015,7 @@ class DialogNewObjectTypeBase : public wxDialog
 		wxButton* m_sdbSizer8Cancel;
 
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnChoiceActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAddVar( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnRemoveVar( wxCommandEvent& event ) { event.Skip(); }
 

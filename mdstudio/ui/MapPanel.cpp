@@ -1505,6 +1505,11 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	z += zOffset;
 
+	//Render reference image
+	RenderReferenceImage(renderer, cameraInverseMtx, projectionMtx, z);
+
+	z += zOffset;
+
 	//Render game objects
 	RenderGameObjects(renderer, cameraInverseMtx, projectionMtx, z);
 
@@ -2314,6 +2319,35 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	}
 
 	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+}
+
+void MapPanel::RenderReferenceImage(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialReferenceImage);
+
+	if (material->GetDiffuseMap(0)->GetWidth() > 0)
+	{
+		const Map& map = m_project.GetEditingMap();
+		const float mapWidth = map.GetWidth();
+		const float mapHeight = map.GetHeight();
+
+		const float x = 0.0f;
+		const float y = 0.0f;
+		const float y_inv = mapHeight - 1 - y;
+		const float width = material->GetDiffuseMap(0)->GetWidth();
+		const float height = material->GetDiffuseMap(0)->GetHeight();
+
+		ion::Matrix4 matrix;
+		ion::Vector3 scale(width, height, 1.0f);
+		ion::Vector3 position(x, y, z);
+		matrix.SetTranslation(position);
+		matrix.SetScale(scale);
+
+		material->Bind(matrix, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+		material->Unbind();
+	}
 }
 
 void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)

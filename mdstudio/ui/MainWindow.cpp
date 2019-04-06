@@ -1214,6 +1214,7 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 		{
 			std::string gameObjectsFile = dialog.m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 			std::string spritesFile = dialog.m_filePickerSpritesProj->GetPath().c_str().AsChar();
+			std::string referenceFile = dialog.m_filePickerReference->GetPath().c_str().AsChar();
 
 			bool buildSpriteResources = false;
 
@@ -1245,6 +1246,15 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 
 				m_project->m_settings.spriteActorsExternalFile = spritesFile;
 				buildSpriteResources = true;
+			}
+
+			if (referenceFile.size() > 0)
+			{
+				BMPReader reader;
+				if (reader.Read(referenceFile))
+				{
+					m_renderResources->CreateReferenceImageTexture(reader);
+				}
 			}
 
 			if(buildSpriteResources)

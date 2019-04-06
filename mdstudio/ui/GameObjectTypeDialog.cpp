@@ -450,6 +450,14 @@ void DialogNewObjectType::OnBtnAddVar(wxCommandEvent& event)
 	}
 }
 
+void DialogNewObjectType::OnChoiceActor(wxCommandEvent& event)
+{
+	if (m_textName->GetValue().Length() == 0)
+	{
+		m_textName->SetValue(m_choiceActor->GetStringSelection());
+	}
+}
+
 void DialogNewObjectType::PopulateActors(Project& project)
 {
 	for (TActorMap::const_iterator it = project.ActorsBegin(), end = project.ActorsEnd(); it != end; ++it)

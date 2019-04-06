@@ -64,6 +64,7 @@ public:
 
 	virtual void OnBtnRemoveVar(wxCommandEvent& event);
 	virtual void OnBtnAddVar(wxCommandEvent& event);
+	virtual void OnChoiceActor(wxCommandEvent& event);
 
 	std::vector<const GameObject::AutoVar*> m_addedAutoVars;
 

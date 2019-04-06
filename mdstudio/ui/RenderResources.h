@@ -40,6 +40,7 @@ public:
 		eMaterialCollisionTypes,
 		eMaterialTerrainTileset,
 		eMaterialSpriteSheet,
+		eMaterialReferenceImage,
 		eMaterialMax
 	};
 
@@ -49,6 +50,7 @@ public:
 		eTextureCollisionTypes,
 		eTextureTerrainTileset,
 		eTextureSpriteSheetPreview,
+		eTextureReferenceImage,
 		eTextureMax
 	};
 
@@ -88,6 +90,9 @@ public:
 	//Create spriteSheet preview texture
 	void CreateSpriteSheetPreviewTexture(const BMPReader& reader);
 	ion::render::Texture* CreateSpriteSheetPreviewTexture(const SpriteSheet& spriteSheet);
+
+	//Create reference image texture
+	void CreateReferenceImageTexture(const BMPReader& reader);
 
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;
