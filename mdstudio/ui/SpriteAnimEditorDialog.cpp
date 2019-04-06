@@ -19,6 +19,7 @@
 #include <wx/imaglist.h>
 #include <wx/dc.h>
 #include <wx/menu.h>
+#include <wx/textdlg.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -337,6 +338,48 @@ void SpriteAnimEditorDialog::OnBtnAnimDelete(wxCommandEvent& event)
 		m_selectedAnimId = InvalidSpriteAnimId;
 		m_selectedAnim = NULL;
 		Refresh();
+	}
+}
+
+void SpriteAnimEditorDialog::OnBtnRenameActor(wxCommandEvent& event)
+{
+	if (m_selectedActor)
+	{
+		wxTextEntryDialog dialog(this, "Rename Actor/Prop");
+		dialog.SetValue(m_selectedActor->GetName());
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			m_selectedActor->SetName(dialog.GetValue().c_str().AsChar());
+			Refresh(false, NULL);
+		}
+	}
+}
+
+void SpriteAnimEditorDialog::OnBtnRenameSheet(wxCommandEvent& event)
+{
+	if (m_selectedSpriteSheet)
+	{
+		wxTextEntryDialog dialog(this, "Rename Sprite Sheet");
+		dialog.SetValue(m_selectedSpriteSheet->GetName());
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			m_selectedSpriteSheet->SetName(dialog.GetValue().c_str().AsChar());
+			Refresh(false, NULL);
+		}
+	}
+}
+
+void SpriteAnimEditorDialog::OnBtnRenameAnim(wxCommandEvent& event)
+{
+	if (m_selectedAnim)
+	{
+		wxTextEntryDialog dialog(this, "Rename Sprite Sheet");
+		dialog.SetValue(m_selectedAnim->GetName());
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			m_selectedAnim->SetName(dialog.GetValue().c_str().AsChar());
+			Refresh(false, NULL);
+		}
 	}
 }
 

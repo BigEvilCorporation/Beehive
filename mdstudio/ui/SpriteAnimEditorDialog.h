@@ -86,6 +86,9 @@ protected:
 	virtual void OnSpinSpeedChange(wxSpinEvent& event);
 	virtual void OnRadioBlendLerp(wxCommandEvent& event);
 	virtual void OnRadioBlendSnap(wxCommandEvent& event);
+	virtual void OnBtnRenameActor(wxCommandEvent& event);
+	virtual void OnBtnRenameSheet(wxCommandEvent& event);
+	virtual void OnBtnRenameAnim(wxCommandEvent& event);
 
 private:
 	void PopulateActorList();

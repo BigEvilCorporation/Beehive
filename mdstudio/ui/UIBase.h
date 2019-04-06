@@ -785,11 +785,14 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		wxButton* m_btnDeleteActor;
 		wxButton* m_btnImport;
 		wxButton* m_btnExport;
+		wxButton* m_btnRenameActor;
 		wxButton* m_btnImportSpriteSheet;
 		wxButton* m_btnDeleteSprite;
 		wxButton* m_btnUsePalette;
+		wxButton* m_btnRenameSheet;
 		wxButton* m_btnNewAnim;
 		wxButton* m_btnDeleteAnim;
+		wxButton* m_btnRenameAnim;
 		SpriteCanvas* m_canvas;
 		wxStaticText* m_staticText33;
 		wxGrid* m_gridSpriteFrames;
@@ -812,11 +815,14 @@ class SpriteAnimEditorDialogBase : public wxDialog
 		virtual void OnBtnActorDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnExport( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnRenameActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetDelete( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteSheetUsePalette( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnRenameSheet( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimNew( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnAnimDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnRenameAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSliderMove( wxScrollEvent& event ) { event.Skip(); }
 		virtual void OnBtnPlay( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnStop( wxCommandEvent& event ) { event.Skip(); }

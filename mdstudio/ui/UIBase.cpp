@@ -2029,6 +2029,15 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 
 	bSizer35->Add( bSizer60, 1, wxEXPAND, 5 );
 
+	wxBoxSizer* bSizer601;
+	bSizer601 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_btnRenameActor = new wxButton( this, wxID_ANY, wxT("Rename..."), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer601->Add( m_btnRenameActor, 0, wxALL, 5 );
+
+
+	bSizer35->Add( bSizer601, 1, wxEXPAND, 5 );
+
 
 	fgSizer25->Add( bSizer35, 1, wxEXPAND, 5 );
 
@@ -2053,6 +2062,9 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	m_btnUsePalette = new wxButton( this, wxID_ANY, wxT("Use Palette"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer61->Add( m_btnUsePalette, 0, wxALL, 5 );
 
+	m_btnRenameSheet = new wxButton( this, wxID_ANY, wxT("Rename..."), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer61->Add( m_btnRenameSheet, 0, wxALL, 5 );
+
 
 	bSizer26->Add( bSizer61, 1, wxEXPAND, 5 );
 
@@ -2060,13 +2072,28 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	fgSizer25->Add( bSizer26, 1, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer27;
-	bSizer27 = new wxBoxSizer( wxHORIZONTAL );
+	bSizer27 = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* bSizer69;
+	bSizer69 = new wxBoxSizer( wxHORIZONTAL );
 
 	m_btnNewAnim = new wxButton( this, wxID_ANY, wxT("New..."), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer27->Add( m_btnNewAnim, 0, wxALL, 5 );
+	bSizer69->Add( m_btnNewAnim, 0, wxALL, 5 );
 
 	m_btnDeleteAnim = new wxButton( this, wxID_ANY, wxT("Delete"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer27->Add( m_btnDeleteAnim, 0, wxALL, 5 );
+	bSizer69->Add( m_btnDeleteAnim, 0, wxALL, 5 );
+
+
+	bSizer27->Add( bSizer69, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer271;
+	bSizer271 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_btnRenameAnim = new wxButton( this, wxID_ANY, wxT("Rename..."), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer271->Add( m_btnRenameAnim, 0, wxALL, 5 );
+
+
+	bSizer27->Add( bSizer271, 1, wxEXPAND, 5 );
 
 
 	fgSizer25->Add( bSizer27, 1, wxEXPAND, 5 );
@@ -2212,11 +2239,14 @@ SpriteAnimEditorDialogBase::SpriteAnimEditorDialogBase( wxWindow* parent, wxWind
 	m_btnDeleteActor->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnActorDelete ), NULL, this );
 	m_btnImport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnImport ), NULL, this );
 	m_btnExport->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnExport ), NULL, this );
+	m_btnRenameActor->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnRenameActor ), NULL, this );
 	m_btnImportSpriteSheet->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetImport ), NULL, this );
 	m_btnDeleteSprite->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetDelete ), NULL, this );
 	m_btnUsePalette->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetUsePalette ), NULL, this );
+	m_btnRenameSheet->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnRenameSheet ), NULL, this );
 	m_btnNewAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimNew ), NULL, this );
 	m_btnDeleteAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimDelete ), NULL, this );
+	m_btnRenameAnim->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnRenameAnim ), NULL, this );
 	m_sliderTimeline->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
 	m_sliderTimeline->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
 	m_sliderTimeline->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
@@ -2243,11 +2273,14 @@ SpriteAnimEditorDialogBase::~SpriteAnimEditorDialogBase()
 	m_btnDeleteActor->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnActorDelete ), NULL, this );
 	m_btnImport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnImport ), NULL, this );
 	m_btnExport->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnExport ), NULL, this );
+	m_btnRenameActor->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnRenameActor ), NULL, this );
 	m_btnImportSpriteSheet->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetImport ), NULL, this );
 	m_btnDeleteSprite->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetDelete ), NULL, this );
 	m_btnUsePalette->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnSpriteSheetUsePalette ), NULL, this );
+	m_btnRenameSheet->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnRenameSheet ), NULL, this );
 	m_btnNewAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimNew ), NULL, this );
 	m_btnDeleteAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnAnimDelete ), NULL, this );
+	m_btnRenameAnim->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteAnimEditorDialogBase::OnBtnRenameAnim ), NULL, this );
 	m_sliderTimeline->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
 	m_sliderTimeline->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
 	m_sliderTimeline->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( SpriteAnimEditorDialogBase::OnSliderMove ), NULL, this );
