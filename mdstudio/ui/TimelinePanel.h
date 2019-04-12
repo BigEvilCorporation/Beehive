@@ -58,6 +58,7 @@ protected:
 	virtual void OnToolRewind(wxCommandEvent& event);
 	virtual void OnToolFastForward(wxCommandEvent& event);
 	virtual void OnToolIsolateObject(wxCommandEvent& event);
+	virtual void OnChkExportLocalSpace(wxCommandEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
 	//Right-click menu callback

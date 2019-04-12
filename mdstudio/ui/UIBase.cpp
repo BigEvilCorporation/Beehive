@@ -2702,6 +2702,10 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	m_toolBarAnimation->AddControl( m_staticText34 );
 	m_spinSpeed = new wxSpinCtrl( m_toolBarAnimation, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1000, 0 );
 	m_toolBarAnimation->AddControl( m_spinSpeed );
+	m_toolBarAnimation->AddSeparator();
+
+	m_chkExportLocalSpace = new wxCheckBox( m_toolBarAnimation, wxID_ANY, wxT("Export Local Space"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_toolBarAnimation->AddControl( m_chkExportLocalSpace );
 	m_toolBarAnimation->Realize();
 
 	fgSizer24->Add( m_toolBarAnimation, 0, wxEXPAND, 5 );
@@ -2768,6 +2772,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	this->Connect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Connect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
+	m_chkExportLocalSpace->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnChkExportLocalSpace ), NULL, this );
 	m_choiceActor->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectActor ), NULL, this );
 	m_choiceSpriteAnim->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
 }
@@ -2791,6 +2796,7 @@ TimelinePanelBase::~TimelinePanelBase()
 	this->Disconnect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Disconnect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
+	m_chkExportLocalSpace->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnChkExportLocalSpace ), NULL, this );
 	m_choiceActor->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectActor ), NULL, this );
 	m_choiceSpriteAnim->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
 

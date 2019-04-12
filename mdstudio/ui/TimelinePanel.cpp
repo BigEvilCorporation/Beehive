@@ -967,6 +967,16 @@ void TimelinePanel::OnToolIsolateObject(wxCommandEvent& event)
 	event.Skip();
 }
 
+void TimelinePanel::OnChkExportLocalSpace(wxCommandEvent& event)
+{
+	if (m_animation)
+	{
+		m_animation->SetExportLocalSpace(event.IsChecked());
+	}
+
+	event.Skip();
+}
+
 void TimelinePanel::OnResize(wxSizeEvent& event)
 {
 	if (!m_mainWindow.IsRefreshLocked())

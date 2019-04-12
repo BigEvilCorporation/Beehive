@@ -966,6 +966,7 @@ class TimelinePanelBase : public wxPanel
 		wxToolBarToolBase* m_toolIsolateObject;
 		wxStaticText* m_staticText34;
 		wxSpinCtrl* m_spinSpeed;
+		wxCheckBox* m_chkExportLocalSpace;
 		wxStaticText* m_staticText491;
 		wxChoice* m_choiceActor;
 		wxStaticText* m_textCurrentActor;
@@ -990,6 +991,7 @@ class TimelinePanelBase : public wxPanel
 		virtual void OnToolFastForward( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolIsolateObject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpinSpeed( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnChkExportLocalSpace( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
 
