@@ -1279,7 +1279,93 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 					std::vector<luminary::Entity> entities;
 					if (entityParser.ParseDirectory(projectDir, entities))
 					{
+						for (int i = 0; i < entities.size(); i++)
+						{
+							//Find or add game object type
+							GameObjectType* gameObjectType = m_project->FindGameObjectType(entities[i].name);
+							if (!gameObjectType)
+							{
+								GameObjectTypeId gameObjectTypeId = m_project->AddGameObjectType();
+								gameObjectType = m_project->GetGameObjectType(gameObjectTypeId);
+								gameObjectType->SetName(entities[i].name);
+							}
 
+							//Add all variables from entity and all components,
+							//but keep the original values(if they exist) and keep the order
+							int numVariables = entities[i].spawnData.params.size();
+
+							for (int j = 0; j < entities[i].components.size(); j++)
+							{
+								numVariables += entities[i].components[j].spawnData.params.size();
+							}
+
+							std::vector<GameObjectVariable> variables;
+							variables.resize(numVariables);
+
+							int variableIdx = 0;
+
+							//Add entity variables
+							for (int j = 0; j < entities[i].spawnData.params.size(); j++, variableIdx++)
+							{
+								if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].spawnData.params[j].name))
+								{
+									variables[variableIdx] = *variable;
+								}
+								else
+								{
+									variables[variableIdx].m_name = entities[i].spawnData.params[j].name;
+								}
+
+								switch (entities[i].spawnData.params[j].size)
+								{
+								case luminary::ParamSize::Byte:
+									variables[variableIdx].m_size = eSizeByte;
+									break;
+								case luminary::ParamSize::Word:
+									variables[variableIdx].m_size = eSizeWord;
+									break;
+								case luminary::ParamSize::Long:
+									variables[variableIdx].m_size = eSizeLong;
+									break;
+								}
+							}
+
+							//Add component variables
+							for (int j = 0; j < entities[i].components.size(); j++)
+							{
+								for (int k = 0; k < entities[i].components[j].spawnData.params.size(); k++, variableIdx++)
+								{
+									if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].components[j].spawnData.params[k].name))
+									{
+										variables[variableIdx] = *variable;
+									}
+									else
+									{
+										variables[variableIdx].m_name = entities[i].components[j].spawnData.params[k].name;
+									}
+
+									switch (entities[i].components[j].spawnData.params[k].size)
+									{
+									case luminary::ParamSize::Byte:
+										variables[variableIdx].m_size = eSizeByte;
+										break;
+									case luminary::ParamSize::Word:
+										variables[variableIdx].m_size = eSizeWord;
+										break;
+									case luminary::ParamSize::Long:
+										variables[variableIdx].m_size = eSizeLong;
+										break;
+									}
+								}
+							}
+
+							gameObjectType->ClearVariables();
+
+							for (int j = 0; j < numVariables; j++)
+							{
+								gameObjectType->AddVariable() = variables[j];
+							}
+						}
 					}
 #endif
 				}
