@@ -32,7 +32,9 @@
 #include "maths\Maths.h"
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
+#include <luminary/Types.h>
 #include <luminary/EntityParser.h>
+#include <luminary/SceneExporter.h>
 #endif
 
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
@@ -1344,6 +1346,9 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 										variables[variableIdx].m_name = entities[i].components[j].spawnData.params[k].name;
 									}
 
+									variables[variableIdx].m_componentIdx = j;
+									variables[variableIdx].m_componentName = entities[i].components[j].name;
+
 									switch (entities[i].components[j].spawnData.params[k].size)
 									{
 									case luminary::ParamSize::Byte:
@@ -1534,12 +1539,100 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 				if(it->second.m_exportFilenames.terrainBlockMapExportEnabled)
 					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, format, terrainBlockWidth, terrainBlockHeight);
-				
-				if (it->second.m_exportFilenames.gameObjectsExportEnabled)
-					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects, format);
 
 				if(it->second.m_exportFilenames.sceneAnimExportEnabled)
 					m_project->ExportSceneAnimations(it->first, it->second.m_exportFilenames.sceneAnims, format);
+
+#if defined BEEHIVE_PLUGIN_LUMINARY
+				//Export Luminary entities
+				std::vector<luminary::Entity> entities;
+				const Map& map = m_project->GetMap(it->first);
+				const TGameObjectPosMap& gameObjMap = map.GetGameObjects();
+				int entityIdx = 0;
+
+				for (TGameObjectPosMap::const_iterator it = gameObjMap.begin(), end = gameObjMap.end(); it != end; ++it)
+				{
+					const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
+					if (gameObjectType)
+					{
+						entities.resize(entities.size() + it->second.size());
+						const std::vector<GameObjectVariable>& variables = gameObjectType->GetVariables();
+
+						for (int i = 0; i < it->second.size(); i++, entityIdx++)
+						{
+							const GameObject& gameObject = it->second[i].m_gameObject;
+							
+							luminary::Entity& entity = entities[entityIdx];
+
+							//Type name
+							entity.name = gameObjectType->GetName();
+
+							//Entity name
+							if (gameObject.GetName().size() > 0)
+								entity.spawnData.name = gameObject.GetName();
+							else
+								entity.spawnData.name = std::string("ent") + std::to_string(gameObject.GetId());
+
+							entity.spawnData.positionX = gameObject.GetPosition().x + GameObject::spriteSheetBorderX;
+							entity.spawnData.positionY = gameObject.GetPosition().y + GameObject::spriteSheetBorderY;
+
+							//Create entity and component spawn params
+							int paramIdx = 0;
+							int componentIdx = -1;
+
+							for (int j = 0; j < variables.size(); j++, paramIdx++)
+							{
+								const GameObjectVariable& variable = variables[j];
+								luminary::Param* param = nullptr;
+
+								if (variable.m_componentIdx == -1)
+								{
+									//Entity param
+									entity.spawnData.params.resize(paramIdx + 1);
+									param = &entity.spawnData.params[paramIdx];
+								}
+								else
+								{
+									//Component param
+									if (componentIdx != variable.m_componentIdx)
+									{
+										componentIdx = variable.m_componentIdx;
+										entity.components.resize(componentIdx + 1);
+										entity.components[componentIdx].name = variable.m_componentName;
+										paramIdx = 0;
+									}
+
+									entity.components[componentIdx].spawnData.params.resize(paramIdx + 1);
+									param = &entity.components[componentIdx].spawnData.params[paramIdx];
+								}
+
+								param->name = variable.m_name;
+								param->value = variable.m_value;
+
+								switch (variable.m_size)
+								{
+								case eSizeByte:
+									param->size = luminary::ParamSize::Byte;
+									break;
+								case eSizeWord:
+									param->size = luminary::ParamSize::Word;
+									break;
+								case eSizeLong:
+									param->size = luminary::ParamSize::Long;
+									break;
+								}
+							}
+						}
+					}
+				}
+
+				luminary::SceneExporter sceneExporter;
+				sceneExporter.ExportScene(it->second.m_exportFilenames.gameObjects, map.GetName(), entities);
+#else
+				//Export TW entities
+				if (it->second.m_exportFilenames.gameObjectsExportEnabled)
+					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects, format);
+#endif
 			}
 
 			SetStatusText("Export complete");
