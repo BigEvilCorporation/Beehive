@@ -1,5 +1,7 @@
 SubDir bigevilcorp mdstudio ;
 
+include_plugin_luminary = 1 ;
+
 ion_renderer_opts = shader ;
 
 ApplyIonDefines beehivestudio ;
@@ -18,6 +20,14 @@ local BEEHIVE_STUDIO_SRC =
 	beehivestudio.cpp
 	beehivestudio.h
 	;
+
+if ( include_plugin_luminary )
+{
+	SubInclude bigevilcorp .. LUMINARY TOOLS BeehivePlugins luminary ;
+	C.Defines * : BEEHIVE_PLUGIN_LUMINARY ;
+	C.IncludeDirectories * : $(bigevilcorp)/../LUMINARY/TOOLS/BeehivePlugins ;
+	C.LinkLibraries beehivestudio : luminary ;
+}
 
 SubInclude bigevilcorp mdstudio ui : ui ;
 SubInclude bigevilcorp ion renderer imageformats : imageformats ;

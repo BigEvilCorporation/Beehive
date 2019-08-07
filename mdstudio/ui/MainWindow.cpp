@@ -31,6 +31,10 @@
 
 #include "maths\Maths.h"
 
+#if defined BEEHIVE_PLUGIN_LUMINARY
+#include <luminary/EntityParser.h>
+#endif
+
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
 
 #define PANEL_SIZE_X(x) (m_width / 100) * x
@@ -1207,11 +1211,15 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 	{
 		ProjectSettingsDialog dialog(this);
 
+		dialog.m_dirPickerProject->SetPath(m_project->m_settings.projectExportDir);
+		dialog.m_dirPickerScene->SetPath(m_project->m_settings.sceneExportDir);
 		dialog.m_filePickerGameObjTypesFile->SetPath(m_project->m_settings.gameObjectsExternalFile);
 		dialog.m_filePickerSpritesProj->SetPath(m_project->m_settings.spriteActorsExternalFile);
 
 		if(dialog.ShowModal() == wxID_OK)
 		{
+			std::string projectDir = dialog.m_dirPickerProject->GetPath().c_str().AsChar();
+			m_project->m_settings.sceneExportDir = dialog.m_dirPickerScene->GetPath().c_str().AsChar();
 			std::string gameObjectsFile = dialog.m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 			std::string spritesFile = dialog.m_filePickerSpritesProj->GetPath().c_str().AsChar();
 			std::string referenceFile = dialog.m_filePickerReference->GetPath().c_str().AsChar();
@@ -1260,6 +1268,23 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 			if(buildSpriteResources)
 			{
 				m_renderResources->CreateSpriteSheetResources(*m_project);
+			}
+
+			if (projectDir != m_project->m_settings.projectExportDir)
+			{
+				if (wxMessageBox("Project directory has changed, would you like to re-scan for entity types?", "Scan for entities", wxOK | wxCANCEL) == wxOK)
+				{
+#if defined BEEHIVE_PLUGIN_LUMINARY
+					luminary::EntityParser entityParser;
+					std::vector<luminary::Entity> entities;
+					if (entityParser.ParseDirectory(projectDir, entities))
+					{
+
+					}
+#endif
+				}
+
+				m_project->m_settings.projectExportDir = projectDir;
 			}
 		}
 	}

@@ -1642,6 +1642,20 @@ ProjectSettingsDialog::ProjectSettingsDialog( wxWindow* parent, wxWindowID id, c
 	fgSizer40->SetFlexibleDirection( wxBOTH );
 	fgSizer40->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
+	m_staticText511 = new wxStaticText( this, wxID_ANY, wxT("Project dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText511->Wrap( -1 );
+	fgSizer40->Add( m_staticText511, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerProject = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerProject, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText5111 = new wxStaticText( this, wxID_ANY, wxT("Scene export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5111->Wrap( -1 );
+	fgSizer40->Add( m_staticText5111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerScene = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerScene, 0, wxALL|wxEXPAND, 5 );
+
 	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Sprites file:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText51->Wrap( -1 );
 	fgSizer40->Add( m_staticText51, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
@@ -1658,7 +1672,7 @@ ProjectSettingsDialog::ProjectSettingsDialog( wxWindow* parent, wxWindowID id, c
 
 	m_staticText531 = new wxStaticText( this, wxID_ANY, wxT("Reference image:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText531->Wrap( -1 );
-	fgSizer40->Add( m_staticText531, 0, wxALIGN_RIGHT|wxALL, 5 );
+	fgSizer40->Add( m_staticText531, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
 	m_filePickerReference = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer40->Add( m_filePickerReference, 0, wxALL|wxEXPAND, 5 );

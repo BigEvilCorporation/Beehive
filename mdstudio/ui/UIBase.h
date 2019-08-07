@@ -668,6 +668,8 @@ class ProjectSettingsDialog : public wxDialog
 	private:
 
 	protected:
+		wxStaticText* m_staticText511;
+		wxStaticText* m_staticText5111;
 		wxStaticText* m_staticText51;
 		wxStaticText* m_staticText53;
 		wxStaticText* m_staticText531;
@@ -676,11 +678,13 @@ class ProjectSettingsDialog : public wxDialog
 		wxButton* m_sdbSizer7Cancel;
 
 	public:
+		wxDirPickerCtrl* m_dirPickerProject;
+		wxDirPickerCtrl* m_dirPickerScene;
 		wxFilePickerCtrl* m_filePickerSpritesProj;
 		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
 		wxFilePickerCtrl* m_filePickerReference;
 
-		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,169 ), long style = wxCAPTION|wxRESIZE_BORDER );
+		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,241 ), long style = wxCAPTION|wxRESIZE_BORDER );
 		~ProjectSettingsDialog();
 
 };
