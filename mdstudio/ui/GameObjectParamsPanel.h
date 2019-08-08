@@ -34,11 +34,11 @@ public:
 
 private:
 	void PopulateVarsList();
-	void PopulateVarsFields(GameObjectVariable* variable);
+	void PopulateVarsFields(const GameObjectVariable* variable);
 
 	Project& m_project;
 	MainWindow& m_mainWindow;
 
 	GameObject* m_gameObject;
-	GameObjectVariable* m_currentVariable;
+	const GameObjectVariable* m_currentVariable;
 };

@@ -12,6 +12,8 @@
 #include "GameObjectParamsPanel.h"
 #include "MainWindow.h"
 
+static const std::string s_defaultVarName = "[ DEFAULT_VALUE ]";
+
 GameObjectParamsPanel::GameObjectParamsPanel(MainWindow& mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: GameObjParamsPanelBase(parent, id, pos, size, style)
 	, m_project(project)
@@ -20,6 +22,12 @@ GameObjectParamsPanel::GameObjectParamsPanel(MainWindow& mainWindow, Project& pr
 	m_gameObject = NULL;
 	m_currentVariable = NULL;
 	PopulateVarsList();
+
+	// TODO: Remove from UI, uses game object type layout now
+	m_toolAddVariable->Enable(false);
+	m_toolRemoveVariable->Enable(false);
+	m_textVariableName->Enable(false);
+	m_choiceSize->Enable(false);
 }
 
 void GameObjectParamsPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -67,7 +75,11 @@ void GameObjectParamsPanel::OnSelectVariable(wxListEvent& event)
 {
 	if(m_gameObject)
 	{
-		m_currentVariable = m_gameObject->GetVariable(event.GetIndex());
+		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
+		{
+			m_currentVariable = gameObjectType->GetVariable(event.GetIndex());
+		}
+		
 		PopulateVarsFields(m_currentVariable);
 	}
 }
@@ -87,23 +99,17 @@ void GameObjectParamsPanel::OnBtnApplyVariableChanges(wxCommandEvent& event)
 	{
 		if(m_currentVariable)
 		{
-			m_currentVariable->m_name = m_textVariableName->GetValue().c_str().AsChar();
-			m_currentVariable->m_value = m_textValue->GetValue().c_str().AsChar();
-
-			switch(m_choiceSize->GetSelection())
+			if (m_textValue->GetValue() != s_defaultVarName)
 			{
-			case 0:
-				m_currentVariable->m_size = eSizeByte;
-				break;
-			case 1:
-				m_currentVariable->m_size = eSizeWord;
-				break;
-			case 2:
-				m_currentVariable->m_size = eSizeLong;
-				break;
-			default:
-				ion::debug::Error("GameObjectParamsPanel::OnVariableSizeChanged() - Bad size");
-				break;
+				//Find or add overridden var on game object
+				GameObjectVariable* variable = m_gameObject->FindVariable(m_textVariableName->GetValue().c_str().AsChar());
+				if (!variable)
+				{
+					variable = &m_gameObject->AddVariable();
+					variable->m_name = m_textVariableName->GetValue().c_str().AsChar();
+				}
+
+				variable->m_value = m_textValue->GetValue().c_str().AsChar();
 			}
 		}
 
@@ -134,37 +140,49 @@ void GameObjectParamsPanel::PopulateVarsList()
 
 	if(m_gameObject)
 	{
-		const std::vector<GameObjectVariable>& variables = m_gameObject->GetVariables();
-
-		for(int i = 0; i < variables.size(); i++)
+		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
 		{
-			wxListItem item;
-			item.SetId(i);
-			m_listVariables->InsertItem(item);
+			//Populate var names and layout from game object type, but take values from game object
+			const std::vector<GameObjectVariable>& variables = gameObjectType->GetVariables();
 
-			std::string sizeText;
-
-			switch(variables[i].m_size)
+			for (int i = 0; i < variables.size(); i++)
 			{
-			case eSizeByte:
-				sizeText = "Byte";
-				break;
-			case eSizeWord:
-				sizeText = "Word";
-				break;
-			case eSizeLong:
-				sizeText = "Long";
-				break;
-			}
+				wxListItem item;
+				item.SetId(i);
+				m_listVariables->InsertItem(item);
 
-			m_listVariables->SetItem(i, 0, wxString(variables[i].m_name));
-			m_listVariables->SetItem(i, 1, wxString(sizeText));
-			m_listVariables->SetItem(i, 2, wxString(variables[i].m_value));
+				std::string sizeText;
+
+				switch (variables[i].m_size)
+				{
+				case eSizeByte:
+					sizeText = "Byte";
+					break;
+				case eSizeWord:
+					sizeText = "Word";
+					break;
+				case eSizeLong:
+					sizeText = "Long";
+					break;
+				}
+
+				m_listVariables->SetItem(i, 0, wxString(variables[i].m_name));
+				m_listVariables->SetItem(i, 1, wxString(sizeText));
+
+				if (const GameObjectVariable* overriddenVar = m_gameObject->FindVariable(variables[i].m_name))
+				{
+					m_listVariables->SetItem(i, 2, wxString(overriddenVar->m_value));
+				}
+				else
+				{
+					m_listVariables->SetItem(i, 2, wxString(s_defaultVarName));
+				}
+			}
 		}
 	}
 }
 
-void GameObjectParamsPanel::PopulateVarsFields(GameObjectVariable* variable)
+void GameObjectParamsPanel::PopulateVarsFields(const GameObjectVariable* variable)
 {
 	if(variable)
 	{

@@ -1609,6 +1609,12 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								param->name = variable.m_name;
 								param->value = variable.m_value;
 
+								//If game object has overridden the variable, take that value instead
+								if (const GameObjectVariable* overriddenVar = gameObject.FindVariable(variable.m_name))
+								{
+									param->value = overriddenVar->m_value;
+								}
+
 								switch (variable.m_size)
 								{
 								case eSizeByte:
