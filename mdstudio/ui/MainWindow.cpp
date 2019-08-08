@@ -365,7 +365,11 @@ void MainWindow::ShowPanelPalettes()
 {
 	if(m_project.get())
 	{
-		if(!m_palettesPanel)
+		if (m_palettesPanel)
+		{
+			m_auiManager.GetPane("Palettes").Show();
+		}
+		else
 		{
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Name("Palettes");
@@ -378,13 +382,10 @@ void MainWindow::ShowPanelPalettes()
 
 			m_palettesPanel = new PalettesPanel(this, *m_project, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_palettesPanel, paneInfo);
-			m_palettesPanel->Show();
+			paneInfo.Show();
 		}
 
-		if(!m_palettesPanel->IsShown())
-		{
-			m_palettesPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -392,7 +393,11 @@ void MainWindow::ShowPanelTiles()
 {
 	if(m_project.get())
 	{
-		if(!m_tilesPanel)
+		if (m_tilesPanel)
+		{
+			m_auiManager.GetPane("Tiles").Show();
+		}
+		else
 		{
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Name("Tiles");
@@ -405,13 +410,10 @@ void MainWindow::ShowPanelTiles()
 			
 			m_tilesPanel = new TilesPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
-			m_tilesPanel->Show();
+			paneInfo.Show();
 		}
 
-		if(!m_tilesPanel->IsShown())
-		{
-			m_tilesPanel->Show();
-		}
+		m_auiManager.Update();
 
 		SetPanelCaptions();
 	}
@@ -421,7 +423,11 @@ void MainWindow::ShowPanelTerrainTiles()
 {
 	if(m_project.get())
 	{
-		if(!m_terrainTilesPanel)
+		if (m_terrainTilesPanel)
+		{
+			m_auiManager.GetPane("TerrainTiles").Show();
+		}
+		else
 		{
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Name("TerrainTiles");
@@ -434,13 +440,10 @@ void MainWindow::ShowPanelTerrainTiles()
 
 			m_terrainTilesPanel = new TerrainTilesPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_terrainTilesPanel, paneInfo);
-			m_terrainTilesPanel->Show();
+			paneInfo.Show();
 		}
 
-		if(!m_terrainTilesPanel->IsShown())
-		{
-			m_terrainTilesPanel->Show();
-		}
+		m_auiManager.Update();
 
 		SetPanelCaptions();
 	}
@@ -450,7 +453,11 @@ void MainWindow::ShowPanelStamps()
 {
 	if(m_project.get())
 	{
-		if(!m_stampsPanel)
+		if (m_stampsPanel)
+		{
+			m_auiManager.GetPane("Stamps").Show();
+		}
+		else
 		{
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Name("Stamps");
@@ -464,13 +471,10 @@ void MainWindow::ShowPanelStamps()
 
 			m_stampsPanel = new StampsPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_stampsPanel, paneInfo);
-			m_stampsPanel->Show();
+			paneInfo.Show();
 		}
 
-		if(!m_stampsPanel->IsShown())
-		{
-			m_stampsPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -478,7 +482,11 @@ void MainWindow::ShowPanelBlocks()
 {
 	if(m_project.get())
 	{
-		if(!m_blocksPanel)
+		if (m_blocksPanel)
+		{
+			m_auiManager.GetPane("Blocks").Show();
+		}
+		else
 		{
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Name("Blocks");
@@ -492,13 +500,10 @@ void MainWindow::ShowPanelBlocks()
 
 			m_blocksPanel = new BlocksPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_blocksPanel, paneInfo);
-			m_blocksPanel->Show();
+			paneInfo.Show();
 		}
 
-		if(!m_blocksPanel->IsShown())
-		{
-			m_blocksPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -506,7 +511,11 @@ void MainWindow::ShowPanelMap()
 {
 	if(m_project.get())
 	{
-		if(!m_mapPanel)
+		if (m_mapPanel)
+		{
+			m_auiManager.GetPane("Map").Show();
+		}
+		else
 		{
 			wxAuiPaneInfo paneInfo;
 			paneInfo.Name("Map");
@@ -519,13 +528,10 @@ void MainWindow::ShowPanelMap()
 
 			m_mapPanel = new MapPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
-			m_mapPanel->Show();
+			paneInfo.Show();
 		}
 
-		if(!m_mapPanel->IsShown())
-		{
-			m_mapPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -533,7 +539,11 @@ void MainWindow::ShowPanelMapList()
 {
 	if(m_project.get())
 	{
-		if(!m_gameObjectTypePanel)
+		if (m_gameObjectTypePanel)
+		{
+			m_auiManager.GetPane("MapList").Show();
+		}
+		else
 		{
 			wxSize clientSize = GetClientSize();
 
@@ -549,20 +559,20 @@ void MainWindow::ShowPanelMapList()
 
 			m_mapListPanel = new MapListPanel(this, *m_project.get(), m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_mapListPanel, paneInfo);
-			m_mapListPanel->Show();
-			m_auiManager.Update();
+			paneInfo.Show();
 		}
 
-		if(!m_mapListPanel->IsShown())
-		{
-			m_mapListPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
 void MainWindow::ShowPanelToolbox()
 {
-	if(!m_toolboxPanelTiles)
+	if (m_toolboxPanelTiles)
+	{
+		m_auiManager.GetPane("ToolboxTiles").Show();
+	}
+	else
 	{
 		wxAuiPaneInfo paneInfo;
 		paneInfo.Name("ToolboxTiles");
@@ -576,6 +586,7 @@ void MainWindow::ShowPanelToolbox()
 
 		m_toolboxPanelTiles = new MapToolboxTiles(m_dockArea, NewControlId());
 		m_auiManager.AddPane(m_toolboxPanelTiles, paneInfo);
+		paneInfo.Show();
 
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTTILE);
@@ -602,7 +613,11 @@ void MainWindow::ShowPanelToolbox()
 		#endif
 	}
 
-	if(!m_toolboxPanelStamps)
+	if (m_toolboxPanelStamps)
+	{
+		m_auiManager.GetPane("ToolboxStamps").Show();
+	}
+	else
 	{
 		wxAuiPaneInfo paneInfo;
 		paneInfo.Name("ToolboxStamps");
@@ -616,6 +631,7 @@ void MainWindow::ShowPanelToolbox()
 
 		m_toolboxPanelStamps = new MapToolboxStamps(m_dockArea, NewControlId());
 		m_auiManager.AddPane(m_toolboxPanelStamps, paneInfo);
+		paneInfo.Show();
 
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTSTAMP);
@@ -631,7 +647,11 @@ void MainWindow::ShowPanelToolbox()
 #endif
 	}
 
-	if(!m_toolboxPanelTerrain)
+	if (m_toolboxPanelTerrain)
+	{
+		m_auiManager.GetPane("ToolboxTerrain").Show();
+	}
+	else
 	{
 		wxAuiPaneInfo paneInfo;
 		paneInfo.Name("ToolboxTerrain");
@@ -645,6 +665,7 @@ void MainWindow::ShowPanelToolbox()
 
 		m_toolboxPanelTerrain = new MapToolboxTerrain(m_dockArea, NewControlId());
 		m_auiManager.AddPane(m_toolboxPanelTerrain, paneInfo);
+		paneInfo.Show();
 
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
@@ -661,7 +682,11 @@ void MainWindow::ShowPanelToolbox()
 #endif
 	}
 
-	if(!m_toolboxPanelGameObjs)
+	if (m_toolboxPanelGameObjs)
+	{
+		m_auiManager.GetPane("ToolboxObjects").Show();
+	}
+	else
 	{
 		wxAuiPaneInfo paneInfo;
 		paneInfo.Name("ToolboxObjects");
@@ -675,6 +700,7 @@ void MainWindow::ShowPanelToolbox()
 
 		m_toolboxPanelGameObjs = new MapToolboxGameObjs(m_dockArea, NewControlId());
 		m_auiManager.AddPane(m_toolboxPanelGameObjs, paneInfo);
+		paneInfo.Show();
 
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
@@ -690,32 +716,18 @@ void MainWindow::ShowPanelToolbox()
 #endif
 	}
 
-	if(!m_toolboxPanelTiles->IsShown())
-	{
-		m_toolboxPanelTiles->Show();
-	}
-
-	if(!m_toolboxPanelStamps->IsShown())
-	{
-		m_toolboxPanelStamps->Show();
-	}
-
-	if(!m_toolboxPanelTerrain->IsShown())
-	{
-		m_toolboxPanelTerrain->Show();
-	}
-
-	if(!m_toolboxPanelGameObjs->IsShown())
-	{
-		m_toolboxPanelGameObjs->Show();
-	}
+	m_auiManager.Update();
 }
 
 void MainWindow::ShowPanelTileEditor()
 {
 	if(m_project.get())
 	{
-		if(!m_tileEditorPanel)
+		if (m_tileEditorPanel)
+		{
+			m_auiManager.GetPane("Tile").Show();
+		}
+		else
 		{
 			wxSize clientSize = GetClientSize();
 
@@ -730,14 +742,10 @@ void MainWindow::ShowPanelTileEditor()
 
 			m_tileEditorPanel = new TileEditorPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
-			m_tileEditorPanel->Show();
-			m_auiManager.Update();
+			paneInfo.Show();
 		}
 
-		if(!m_tileEditorPanel->IsShown())
-		{
-			m_tileEditorPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -745,7 +753,11 @@ void MainWindow::ShowPanelTerrainEditor()
 {
 	if(m_project.get())
 	{
-		if(!m_TerrainTileEditorPanel)
+		if (m_TerrainTileEditorPanel)
+		{
+			m_auiManager.GetPane("TerrainTile").Show();
+		}
+		else
 		{
 			wxSize clientSize = GetClientSize();
 
@@ -760,14 +772,11 @@ void MainWindow::ShowPanelTerrainEditor()
 
 			m_TerrainTileEditorPanel = new TerrainTileEditorPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_TerrainTileEditorPanel, paneInfo);
-			m_TerrainTileEditorPanel->Show();
-			m_auiManager.Update();
+			paneInfo.Show();
+			
 		}
 
-		if(!m_TerrainTileEditorPanel->IsShown())
-		{
-			m_TerrainTileEditorPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -775,7 +784,11 @@ void MainWindow::ShowPanelGameObjectTypes()
 {
 	if(m_project.get())
 	{
-		if(!m_gameObjectTypePanel)
+		if (m_gameObjectTypePanel)
+		{
+			m_auiManager.GetPane("Objects").Show();
+		}
+		else
 		{
 			wxSize clientSize = GetClientSize();
 
@@ -791,14 +804,11 @@ void MainWindow::ShowPanelGameObjectTypes()
 
 			m_gameObjectTypePanel = new GameObjectTypesPanel(this, *m_project.get(), m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_gameObjectTypePanel, paneInfo);
-			m_gameObjectTypePanel->Show();
-			m_auiManager.Update();
+			paneInfo.Show();
+			
 		}
 
-		if(!m_gameObjectTypePanel->IsShown())
-		{
-			m_gameObjectTypePanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -806,7 +816,11 @@ void MainWindow::ShowPanelGameObjectParams()
 {
 	if(m_project.get())
 	{
-		if(!m_gameObjectParamsPanel)
+		if (m_gameObjectParamsPanel)
+		{
+			m_auiManager.GetPane("ObjectParams").Show();
+		}
+		else
 		{
 			wxSize clientSize = GetClientSize();
 
@@ -822,14 +836,10 @@ void MainWindow::ShowPanelGameObjectParams()
 
 			m_gameObjectParamsPanel = new GameObjectParamsPanel(*this, *m_project.get(), m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_gameObjectParamsPanel, paneInfo);
-			m_gameObjectParamsPanel->Show();
-			m_auiManager.Update();
+			paneInfo.Show();
 		}
 
-		if(!m_gameObjectParamsPanel->IsShown())
-		{
-			m_gameObjectParamsPanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
@@ -837,7 +847,11 @@ void MainWindow::ShowPanelTimeline()
 {
 	if(m_project.get())
 	{
-		if(!m_timelinePanel)
+		if (m_timelinePanel)
+		{
+			m_auiManager.GetPane("AnimTimeline").Show();
+		}
+		else
 		{
 			wxSize clientSize = GetClientSize();
 
@@ -853,14 +867,10 @@ void MainWindow::ShowPanelTimeline()
 
 			m_timelinePanel = new TimelinePanel(*this, *m_project.get(), *m_renderer, *m_context, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_timelinePanel, paneInfo);
-			m_timelinePanel->Show();
-			m_auiManager.Update();
+			paneInfo.Show();
 		}
 
-		if(!m_timelinePanel->IsShown())
-		{
-			m_timelinePanel->Show();
-		}
+		m_auiManager.Update();
 	}
 }
 
