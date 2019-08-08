@@ -33,6 +33,14 @@ public:
 	void SetGameObject(GameObject* gameObject);
 
 private:
+	enum class Columns
+	{
+		Name,
+		Size,
+		Value,
+		Tags
+	};
+
 	void PopulateVarsList();
 	void PopulateVarsFields(const GameObjectVariable* variable);
 

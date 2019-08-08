@@ -661,14 +661,15 @@ class ExportDialogBase : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class ProjectSettingsDialog
+/// Class ProjectSettingsDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class ProjectSettingsDialog : public wxDialog
+class ProjectSettingsDialogBase : public wxDialog
 {
 	private:
 
 	protected:
 		wxStaticText* m_staticText511;
+		wxButton* m_btnParseProject;
 		wxStaticText* m_staticText5111;
 		wxStaticText* m_staticText51;
 		wxStaticText* m_staticText53;
@@ -677,6 +678,11 @@ class ProjectSettingsDialog : public wxDialog
 		wxButton* m_sdbSizer7OK;
 		wxButton* m_sdbSizer7Cancel;
 
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
+		virtual void OnBtnScanProject( wxCommandEvent& event ) { event.Skip(); }
+
+
 	public:
 		wxDirPickerCtrl* m_dirPickerProject;
 		wxDirPickerCtrl* m_dirPickerScene;
@@ -684,8 +690,8 @@ class ProjectSettingsDialog : public wxDialog
 		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
 		wxFilePickerCtrl* m_filePickerReference;
 
-		ProjectSettingsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,241 ), long style = wxCAPTION|wxRESIZE_BORDER );
-		~ProjectSettingsDialog();
+		ProjectSettingsDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,241 ), long style = wxCAPTION|wxRESIZE_BORDER );
+		~ProjectSettingsDialogBase();
 
 };
 
@@ -940,7 +946,7 @@ class GameObjParamsPanelBase : public wxPanel
 
 	public:
 
-		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 747,512 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 781,512 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~GameObjParamsPanelBase();
 
 };

@@ -1632,12 +1632,12 @@ ExportDialogBase::~ExportDialogBase()
 
 }
 
-ProjectSettingsDialog::ProjectSettingsDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
 	wxFlexGridSizer* fgSizer40;
-	fgSizer40 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer40 = new wxFlexGridSizer( 0, 3, 0, 0 );
 	fgSizer40->AddGrowableCol( 1 );
 	fgSizer40->SetFlexibleDirection( wxBOTH );
 	fgSizer40->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
@@ -1649,12 +1649,18 @@ ProjectSettingsDialog::ProjectSettingsDialog( wxWindow* parent, wxWindowID id, c
 	m_dirPickerProject = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer40->Add( m_dirPickerProject, 0, wxALL|wxEXPAND, 5 );
 
+	m_btnParseProject = new wxButton( this, wxID_ANY, wxT("Scan Project"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer40->Add( m_btnParseProject, 0, wxALL, 5 );
+
 	m_staticText5111 = new wxStaticText( this, wxID_ANY, wxT("Scene export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText5111->Wrap( -1 );
 	fgSizer40->Add( m_staticText5111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
 	m_dirPickerScene = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer40->Add( m_dirPickerScene, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
 
 	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Sprites file:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText51->Wrap( -1 );
@@ -1663,6 +1669,9 @@ ProjectSettingsDialog::ProjectSettingsDialog( wxWindow* parent, wxWindowID id, c
 	m_filePickerSpritesProj = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bee_sprites"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer40->Add( m_filePickerSpritesProj, 0, wxALL|wxEXPAND, 5 );
 
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
 	m_staticText53 = new wxStaticText( this, wxID_ANY, wxT("Game Object Types file:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText53->Wrap( -1 );
 	fgSizer40->Add( m_staticText53, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
@@ -1670,12 +1679,18 @@ ProjectSettingsDialog::ProjectSettingsDialog( wxWindow* parent, wxWindowID id, c
 	m_filePickerGameObjTypesFile = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bee_gameobj"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer40->Add( m_filePickerGameObjTypesFile, 0, wxALL|wxEXPAND, 5 );
 
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
 	m_staticText531 = new wxStaticText( this, wxID_ANY, wxT("Reference image:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText531->Wrap( -1 );
 	fgSizer40->Add( m_staticText531, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
 	m_filePickerReference = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer40->Add( m_filePickerReference, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
 
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
@@ -1694,10 +1709,18 @@ ProjectSettingsDialog::ProjectSettingsDialog( wxWindow* parent, wxWindowID id, c
 	this->Layout();
 
 	this->Centre( wxBOTH );
+
+	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( ProjectSettingsDialogBase::OnClose ) );
+	m_btnParseProject->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ProjectSettingsDialogBase::OnBtnScanProject ), NULL, this );
 }
 
-ProjectSettingsDialog::~ProjectSettingsDialog()
+ProjectSettingsDialogBase::~ProjectSettingsDialogBase()
 {
+	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( ProjectSettingsDialogBase::OnClose ) );
+	m_btnParseProject->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ProjectSettingsDialogBase::OnBtnScanProject ), NULL, this );
+
 }
 
 ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
@@ -2554,6 +2577,7 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 
 	wxFlexGridSizer* fgSizer31;
 	fgSizer31 = new wxFlexGridSizer( 3, 1, 0, 0 );
+	fgSizer31->AddGrowableCol( 0 );
 	fgSizer31->AddGrowableRow( 2 );
 	fgSizer31->SetFlexibleDirection( wxBOTH );
 	fgSizer31->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
@@ -2586,14 +2610,20 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 
 	fgSizer31->Add( fgSizer30, 1, wxEXPAND, 5 );
 
-	wxBoxSizer* bSizer11;
-	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
+	wxFlexGridSizer* fgSizer51;
+	fgSizer51 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer51->AddGrowableCol( 0 );
+	fgSizer51->AddGrowableCol( 1 );
+	fgSizer51->AddGrowableRow( 0 );
+	fgSizer51->SetFlexibleDirection( wxBOTH );
+	fgSizer51->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	m_listVariables = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxLC_REPORT );
-	bSizer11->Add( m_listVariables, 0, wxALL|wxEXPAND, 5 );
+	fgSizer51->Add( m_listVariables, 0, wxEXPAND, 5 );
 
 	wxFlexGridSizer* fgSizer3;
 	fgSizer3 = new wxFlexGridSizer( 4, 2, 0, 0 );
+	fgSizer3->AddGrowableCol( 1 );
 	fgSizer3->SetFlexibleDirection( wxBOTH );
 	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
@@ -2601,7 +2631,7 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	m_staticText6->Wrap( -1 );
 	fgSizer3->Add( m_staticText6, 0, wxALIGN_RIGHT|wxALL, 5 );
 
-	m_textVariableName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 300,-1 ), 0 );
+	m_textVariableName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( -1,-1 ), 0 );
 	fgSizer3->Add( m_textVariableName, 0, wxALL|wxEXPAND, 5 );
 
 	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("Size:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -2630,10 +2660,10 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	fgSizer3->Add( m_btnApplyVarParams, 0, wxALL, 5 );
 
 
-	bSizer11->Add( fgSizer3, 1, wxEXPAND, 5 );
+	fgSizer51->Add( fgSizer3, 1, wxEXPAND, 5 );
 
 
-	fgSizer31->Add( bSizer11, 1, wxEXPAND, 5 );
+	fgSizer31->Add( fgSizer51, 1, wxEXPAND, 5 );
 
 
 	bSizer10->Add( fgSizer31, 1, wxEXPAND, 5 );

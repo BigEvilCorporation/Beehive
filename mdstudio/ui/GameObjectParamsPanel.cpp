@@ -123,20 +123,24 @@ void GameObjectParamsPanel::PopulateVarsList()
 	m_listVariables->ClearAll();
 
 	wxListItem col0;
-	col0.SetId(0);
+	col0.SetId((int)Columns::Name);
 	col0.SetText(_("Name"));
-	col0.SetWidth(50);
-	m_listVariables->InsertColumn(0, col0);
+	m_listVariables->InsertColumn((int)Columns::Name, col0);
 
 	wxListItem col1;
-	col1.SetId(1);
+	col1.SetId((int)Columns::Size);
 	col1.SetText(_("Size"));
-	m_listVariables->InsertColumn(1, col1);
+	m_listVariables->InsertColumn((int)Columns::Size, col1);
 
 	wxListItem col2;
-	col1.SetId(2);
-	col1.SetText(_("Value"));
-	m_listVariables->InsertColumn(2, col2);
+	col2.SetId((int)Columns::Value);
+	col2.SetText(_("Value"));
+	m_listVariables->InsertColumn((int)Columns::Value, col2);
+
+	wxListItem col3;
+	col3.SetId((int)Columns::Tags);
+	col3.SetText(_("Tags"));
+	m_listVariables->InsertColumn((int)Columns::Tags, col3);
 
 	if(m_gameObject)
 	{
@@ -166,17 +170,25 @@ void GameObjectParamsPanel::PopulateVarsList()
 					break;
 				}
 
-				m_listVariables->SetItem(i, 0, wxString(variables[i].m_name));
-				m_listVariables->SetItem(i, 1, wxString(sizeText));
+				m_listVariables->SetItem(i,(int)Columns::Name, wxString(variables[i].m_name));
+				m_listVariables->SetItem(i, (int)Columns::Size, wxString(sizeText));
 
 				if (const GameObjectVariable* overriddenVar = m_gameObject->FindVariable(variables[i].m_name))
 				{
-					m_listVariables->SetItem(i, 2, wxString(overriddenVar->m_value));
+					m_listVariables->SetItem(i, (int)Columns::Value, wxString(overriddenVar->m_value));
 				}
 				else
 				{
-					m_listVariables->SetItem(i, 2, wxString(s_defaultVarName));
+					m_listVariables->SetItem(i, (int)Columns::Value, wxString(s_defaultVarName));
 				}
+
+				std::string tags;
+				for (int j = 0; j < variables[i].m_tags.size(); j++)
+				{
+					tags += variables[i].m_tags[j] + " ";
+				}
+
+				m_listVariables->SetItem(i, (int)Columns::Tags, wxString(tags));
 			}
 		}
 	}
@@ -205,6 +217,10 @@ void GameObjectParamsPanel::PopulateVarsFields(const GameObjectVariable* variabl
 		}
 
 		m_choiceSize->SetSelection(choice);
+
+		//Vars with tags can't be edited, they're auto-populated by exporter
+		m_textValue->Enable(variable->m_tags.size() == 0);
+		m_btnApplyVarParams->Enable(variable->m_tags.size() == 0);
 	}
 	else
 	{

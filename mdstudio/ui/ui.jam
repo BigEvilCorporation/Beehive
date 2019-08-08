@@ -41,6 +41,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	ViewPanel.h
 	PalettesPanel.cpp
 	PalettesPanel.h
+	ProjectSettingsDialog.cpp
+	ProjectSettingsDialog.h
 	RenderResources.cpp
 	RenderResources.h
 	SpriteCanvas.cpp
