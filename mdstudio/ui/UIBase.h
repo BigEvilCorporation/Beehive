@@ -926,6 +926,10 @@ class GameObjParamsPanelBase : public wxPanel
 		wxStaticText* m_staticText42;
 		wxTextCtrl* m_textObjectName;
 		wxButton* m_btnApplyObjectName;
+		wxStaticText* m_staticText63;
+		wxChoice* m_choiceSpriteActor;
+		wxStaticText* m_staticText64;
+		wxChoice* m_choiceSpriteSheet;
 		wxListCtrl* m_listVariables;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* m_textVariableName;
@@ -939,6 +943,8 @@ class GameObjParamsPanelBase : public wxPanel
 		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonApplyObjectName( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectSpriteActor( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectSpriteSheet( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnApplyVariableChanges( wxCommandEvent& event ) { event.Skip(); }
@@ -946,7 +952,7 @@ class GameObjParamsPanelBase : public wxPanel
 
 	public:
 
-		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 781,512 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		GameObjParamsPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 676,512 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~GameObjParamsPanelBase();
 
 };

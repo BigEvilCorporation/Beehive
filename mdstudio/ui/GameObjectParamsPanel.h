@@ -29,6 +29,8 @@ public:
 	virtual void OnSelectVariable(wxListEvent& event);
 	virtual void OnButtonApplyObjectName(wxCommandEvent& event);
 	virtual void OnBtnApplyVariableChanges(wxCommandEvent& event);
+	virtual void OnSelectSpriteActor(wxCommandEvent& event);
+	virtual void OnSelectSpriteSheet(wxCommandEvent& event);
 	
 	void SetGameObject(GameObject* gameObject);
 
@@ -41,6 +43,8 @@ private:
 		Tags
 	};
 
+	void PopulateSpriteActorList();
+	void PopulateSpriteSheetList();
 	void PopulateVarsList();
 	void PopulateVarsFields(const GameObjectVariable* variable);
 

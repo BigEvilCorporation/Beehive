@@ -47,6 +47,7 @@ void GameObjectParamsPanel::SetGameObject(GameObject* gameObject)
 		m_textObjectName->SetValue(m_gameObject->GetName());
 	}
 
+	PopulateSpriteActorList();
 	PopulateVarsList();
 }
 
@@ -115,6 +116,63 @@ void GameObjectParamsPanel::OnBtnApplyVariableChanges(wxCommandEvent& event)
 
 		PopulateVarsList();
 		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectParams);
+	}
+}
+
+void GameObjectParamsPanel::OnSelectSpriteActor(wxCommandEvent& event)
+{
+	m_gameObject->SetSpriteActorId(m_project.FindActorId(m_choiceSpriteActor->GetStringSelection().c_str().AsChar()));
+	PopulateSpriteSheetList();
+}
+
+void GameObjectParamsPanel::OnSelectSpriteSheet(wxCommandEvent& event)
+{
+	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
+	{
+		m_gameObject->SetSpriteSheetId(actor->FindSpriteSheetId(m_choiceSpriteSheet->GetStringSelection().c_str().AsChar()));
+	}
+}
+
+void GameObjectParamsPanel::PopulateSpriteActorList()
+{
+	m_choiceSpriteActor->Clear();
+
+	for (TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
+	{
+		m_choiceSpriteActor->AppendString(it->second.GetName());
+	}
+
+	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
+	{
+		m_choiceSpriteActor->SetStringSelection(actor->GetName());
+		PopulateSpriteSheetList();
+	}
+	else
+	{
+		m_choiceSpriteActor->SetSelection(-1);
+		m_choiceSpriteSheet->SetSelection(-1);
+	}
+}
+
+void GameObjectParamsPanel::PopulateSpriteSheetList()
+{
+	m_choiceSpriteSheet->Clear();
+
+	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
+	{
+		for (TSpriteSheetMap::const_iterator it = actor->SpriteSheetsBegin(), end = actor->SpriteSheetsEnd(); it != end; ++it)
+		{
+			m_choiceSpriteSheet->AppendString(it->second.GetName());
+		}
+
+		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(m_gameObject->GetSpriteSheetId()))
+		{
+			m_choiceSpriteSheet->SetStringSelection(spriteSheet->GetName());
+		}
+	}
+	else
+	{
+		m_choiceSpriteSheet->SetSelection(-1);
 	}
 }
 

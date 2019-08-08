@@ -34,8 +34,10 @@
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 #include <luminary/Types.h>
+#include <luminary/Tags.h>
 #include <luminary/EntityParser.h>
 #include <luminary/SceneExporter.h>
+#include <luminary/SpriteExporter.h>
 #endif
 
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
@@ -1419,8 +1421,27 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 							else
 								entity.spawnData.name = std::string("ent") + std::to_string(gameObject.GetId());
 
+							//Spawn position
 							entity.spawnData.positionX = gameObject.GetPosition().x + GameObject::spriteSheetBorderX;
 							entity.spawnData.positionY = gameObject.GetPosition().y + GameObject::spriteSheetBorderY;
+
+							//Sprite
+							std::string spriteActorName = "";
+							std::string spriteSheetName = "";
+							int spriteSizeTiles = 0;
+							u8 spriteLayout = 0;
+
+							if (const Actor* actor = m_project->GetActor(gameObject.GetSpriteActorId()))
+							{
+								spriteActorName = actor->GetName();
+
+								if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(gameObject.GetSpriteSheetId()))
+								{
+									spriteSheetName = spriteSheet->GetName();
+									spriteSizeTiles = spriteSheet->GetWidthTiles() * spriteSheet->GetHeightTiles();
+									spriteLayout = (u8)luminary::SpriteExporter::GetSpriteLayout(spriteSheet->GetWidthTiles(), spriteSheet->GetHeightTiles());
+								}
+							}
 
 							//Create entity and component spawn params
 							int paramIdx = 0;
@@ -1453,12 +1474,48 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								}
 
 								param->name = variable.m_name;
-								param->value = variable.m_value;
+								param->value = "0x0";
 
-								//If game object has overridden the variable, take that value instead
-								if (const GameObjectVariable* overriddenVar = gameObject.FindVariable(variable.m_name))
+								//Search for supported tags
+								if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionX)))
 								{
-									param->value = overriddenVar->m_value;
+									param->value = std::to_string(gameObject.GetPosition().x + GameObject::spriteSheetBorderX);
+								}
+								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionY)))
+								{
+									param->value = std::to_string(gameObject.GetPosition().y + GameObject::spriteSheetBorderY);
+								}
+								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileData)))
+								{
+									if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+									{
+										std::stringstream stream;
+										stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0";
+										param->value = stream.str();
+									}
+								}
+								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileCount)))
+								{
+									if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+									{
+										std::stringstream stream;
+										stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0_size_t";
+										param->value = stream.str();
+									}
+								}
+								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteLayout)))
+								{
+									param->value = std::to_string(spriteLayout);
+								}
+								else
+								{
+									param->value = variable.m_value;
+
+									//If game object has overridden the variable, take that value instead
+									if (const GameObjectVariable* overriddenVar = gameObject.FindVariable(variable.m_name))
+									{
+										param->value = overriddenVar->m_value;
+									}
 								}
 
 								switch (variable.m_size)

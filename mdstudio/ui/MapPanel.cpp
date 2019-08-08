@@ -2230,30 +2230,44 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				const bool customSize = (gameObject.GetDimensions().x > 0);
 
 				//Use sprite sheet animation if available, else use default preview image
-				SpriteSheetId spriteSheetId = (gameObject.GetSpriteSheetId() != InvalidSpriteSheetId) ? gameObject.GetSpriteSheetId() : gameObjectType->GetPreviewSpriteSheetId();
+				SpriteSheetId spriteSheetId = gameObjectType->GetPreviewSpriteSheetId();
 				SpriteAnimId spriteAnimId = gameObject.GetSpriteAnim();
+				const SpriteSheet* spriteSheet = nullptr;
 				int spriteFrame = 0;
 				ion::Vector3 animPosOffset;
 
-				if(const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
+				if (const Actor* spriteActor = m_project.GetActor(gameObject.GetSpriteActorId()))
 				{
-					const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+					const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(gameObject.GetSpriteSheetId());
 					if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
 					{
 						spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
 						spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
 					}
+				}
 
-					if(spriteSheet)
+				if (!spriteSheet)
+				{
+					if (const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
 					{
-						if(const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
+						const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+						if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
 						{
-							ion::Vector2i position = spriteAnim->m_trackPosition.GetValue(spriteAnim->GetFrame());
-							spriteFrame = spriteAnim->m_trackSpriteFrame.GetValue(spriteAnim->GetFrame());
-
-							animPosOffset.x = (float)position.x;
-							animPosOffset.y = (float)position.y;
+							spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
+							spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
 						}
+					}
+				}
+
+				if (spriteSheet)
+				{
+					if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
+					{
+						ion::Vector2i position = spriteAnim->m_trackPosition.GetValue(spriteAnim->GetFrame());
+						spriteFrame = spriteAnim->m_trackSpriteFrame.GetValue(spriteAnim->GetFrame());
+
+						animPosOffset.x = (float)position.x;
+						animPosOffset.y = (float)position.y;
 					}
 				}
 
