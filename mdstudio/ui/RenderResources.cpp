@@ -81,7 +81,8 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
-	m_colours[eColourSelected] = ion::Colour(0.1f, 0.5f, 0.7f, 0.8f);
+	m_colours[eColourSelected] = ion::Colour(0.7f, 0.7f, 0.7f, 0.8f);
+	m_colours[eColourUnselected] = ion::Colour(0.3f, 0.3f, 0.3f, 0.6f);
 	m_colours[eColourPreview] = ion::Colour(1.0f, 1.0f, 1.0f, 0.8f);
 	m_colours[eColourOutline] = ion::Colour(1.0f, 1.0f, 0.0f, 1.0f);
 	m_colours[eColourGrid] = ion::Colour(0.0f, 0.0f, 0.0f, 1.0f);

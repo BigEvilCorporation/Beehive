@@ -55,6 +55,7 @@
 #include "../FormBuilderProj/tool_deletestamp.xpm"
 #include "../FormBuilderProj/tool_deleteterrainbezier.xpm"
 #include "../FormBuilderProj/tool_deleteterraintile.xpm"
+#include "../FormBuilderProj/tool_duplicategameobj.xpm"
 #include "../FormBuilderProj/tool_editterrainbezier.xpm"
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
@@ -1112,6 +1113,13 @@ MapToolboxGameObjs::MapToolboxGameObjs( wxWindow* parent, wxWindowID id, const w
 	m_toolRemoveGameObject->SetToolTip( wxT("Remove Game Object") );
 
 	fgSizer9->Add( m_toolRemoveGameObject, 0, wxALL, 5 );
+
+	m_toolDuplicateGameObject = new wxBitmapButton( this, wxID_TOOL_DUPLICATEGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_toolDuplicateGameObject->SetBitmap( wxBitmap( tool_duplicategameobj_xpm ) );
+	m_toolDuplicateGameObject->SetToolTip( wxT("Duplicate Game Object") );
+
+	fgSizer9->Add( m_toolDuplicateGameObject, 0, wxALL, 5 );
 
 
 	bSizer53->Add( fgSizer9, 1, wxEXPAND, 5 );

@@ -120,6 +120,7 @@ class SpriteCanvas;
 #define wxID_TOOL_ANIMATEGAMEOBJ 1064
 #define wxID_TOOL_REMOVEGAMEOBJ 1065
 #define wxID_TOOL_DRAWGAMEOBJ 1066
+#define wxID_TOOL_DUPLICATEGAMEOBJ 1067
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -475,11 +476,12 @@ class MapToolboxGameObjs : public wxPanel
 		wxBitmapButton* m_toolDrawGameObject;
 		wxBitmapButton* m_toolMoveGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
+		wxBitmapButton* m_toolDuplicateGameObject;
 
 	public:
 		wxBitmapButton* m_toolAnimateGameObject;
 
-		MapToolboxGameObjs( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 115,181 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		MapToolboxGameObjs( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 115,271 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~MapToolboxGameObjs();
 
 };

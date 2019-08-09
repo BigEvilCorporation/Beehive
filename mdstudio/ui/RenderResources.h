@@ -58,6 +58,7 @@ public:
 	{
 		eColourHighlight,
 		eColourSelected,
+		eColourUnselected,
 		eColourPreview,
 		eColourOutline,
 		eColourGrid,

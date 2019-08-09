@@ -45,6 +45,7 @@ enum ToolType
 	eToolSelectGameObject,
 	eToolPlaceGameObject,
 	eToolDrawGameObject,
+	eToolDuplicateGameObject,
 	eToolMoveGameObject,
 	eToolAnimateGameObject,
 	eToolRemoveGameObject,

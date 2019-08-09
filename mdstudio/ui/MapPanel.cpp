@@ -100,7 +100,10 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		}
 	}
 
-	if(m_currentTool == eToolMoveGameObject || m_currentTool == eToolPlaceGameObject || m_currentTool == eToolDrawGameObject)
+	if(m_currentTool == eToolMoveGameObject
+		|| m_currentTool == eToolPlaceGameObject
+		|| m_currentTool == eToolDrawGameObject
+		|| m_currentTool == eToolDuplicateGameObject)
 	{
 		m_moveGameObjByPixel = event.ShiftDown();
 	}
@@ -783,6 +786,34 @@ void MapPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, 
 					m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType);
 					m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
 					Refresh();
+				}
+			}
+
+			break;
+		}
+
+		case eToolDuplicateGameObject:
+		{
+			if (const GameObject* original = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
+			{
+				if (GameObjectType* gameObjectType = m_project.GetGameObjectType(original->GetTypeId()))
+				{
+					m_previewGameObjectType = original->GetTypeId();
+					m_previewGameObjectPos.x = x;
+					m_previewGameObjectPos.y = y;
+
+					if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+					{
+						std::string name = ion::string::AddNumericPostfix(original->GetName(), 1);
+						while (m_project.GetEditingMap().FindGameObject(name))
+						{
+							name = ion::string::AddNumericPostfix(name, 1);
+						}
+
+						m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType, *original, name);
+						m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
+						Refresh();
+					}
 				}
 			}
 
@@ -1960,6 +1991,7 @@ void MapPanel::SetTool(ToolType tool)
 
 	case eToolSelectGameObject:
 	case eToolMoveGameObject:
+	case eToolDuplicateGameObject:
 	{
 		if (m_selectedGameObject != InvalidGameObjectId)
 		{
@@ -1968,6 +2000,12 @@ void MapPanel::SetTool(ToolType tool)
 				m_gizmo.SetEnabled(true);
 				m_gizmo.SetPosition(gameObject->GetPosition());
 			}
+		}
+
+		if (tool == eToolDuplicateGameObject && previousTool == eToolSelectGameObject)
+		{
+			//Don't reset tool data if about to duplicate
+			break;
 		}
 	}
 
@@ -2280,6 +2318,8 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 						colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 					else if (gameObject.GetId() == m_hoverGameObject)
 						colour = m_renderResources.GetColour(RenderResources::eColourOutline);
+					else
+						colour = m_renderResources.GetColour(RenderResources::eColourUnselected);
 
 					material->SetDiffuseColour(colour);
 

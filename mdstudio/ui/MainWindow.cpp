@@ -707,6 +707,7 @@ void MainWindow::ShowPanelToolbox()
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_DUPLICATEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_DRAWGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_ANIMATEGAMEOBJ);
@@ -2121,6 +2122,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_PLACEGAMEOBJ:
 			m_mapPanel->SetTool(eToolPlaceGameObject);
+			break;
+		case wxID_TOOL_DUPLICATEGAMEOBJ:
+			m_mapPanel->SetTool(eToolDuplicateGameObject);
 			break;
 		case wxID_TOOL_DRAWGAMEOBJ:
 			m_mapPanel->SetTool(eToolDrawGameObject);
