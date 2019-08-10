@@ -1486,6 +1486,15 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								{
 									param->value = std::to_string(gameObject.GetPosition().y + GameObject::spriteSheetBorderY);
 								}
+								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet)))
+								{
+									if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+									{
+										std::stringstream stream;
+										stream << "actor_" << spriteActorName << "_spritesheet_" << spriteSheetName;
+										param->value = stream.str();
+									}
+								}
 								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileData)))
 								{
 									if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
