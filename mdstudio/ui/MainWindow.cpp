@@ -1528,7 +1528,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 									if (spriteActorName.size() > 0 && spriteSheetName.size() > 0 && spriteAnimName.size() > 0)
 									{
 										std::stringstream stream;
-										stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_anim" << spriteAnimName;
+										stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_anim_" << spriteAnimName;
 										param->value = stream.str();
 									}
 								}
