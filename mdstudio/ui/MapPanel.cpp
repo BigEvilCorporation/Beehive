@@ -2276,24 +2276,13 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 
 				if (const Actor* spriteActor = m_project.GetActor(gameObject.GetSpriteActorId()))
 				{
-					const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(gameObject.GetSpriteSheetId());
+					spriteSheet = spriteActor->GetSpriteSheet(gameObject.GetSpriteSheetId());
+					spriteSheetId = gameObject.GetSpriteSheetId();
+
 					if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
 					{
 						spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
 						spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
-					}
-				}
-
-				if (!spriteSheet)
-				{
-					if (const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
-					{
-						const SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
-						if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
-						{
-							spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
-							spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
-						}
 					}
 				}
 
