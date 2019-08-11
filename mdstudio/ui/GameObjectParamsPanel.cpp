@@ -183,6 +183,7 @@ void GameObjectParamsPanel::PopulateSpriteSheetList()
 		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(m_gameObject->GetSpriteSheetId()))
 		{
 			m_choiceSpriteSheet->SetStringSelection(spriteSheet->GetName());
+			PopulateSpriteAnimList();
 		}
 	}
 }
@@ -199,6 +200,11 @@ void GameObjectParamsPanel::PopulateSpriteAnimList()
 			for (TSpriteAnimMap::const_iterator it = spriteSheet->AnimationsBegin(), end = spriteSheet->AnimationsEnd(); it != end; ++it)
 			{
 				m_choiceSpriteAnim->AppendString(it->second.GetName());
+			}
+
+			if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(m_gameObject->GetSpriteAnim()))
+			{
+				m_choiceSpriteAnim->SetStringSelection(spriteAnim->GetName());
 			}
 		}
 	}
