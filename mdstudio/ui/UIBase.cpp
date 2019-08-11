@@ -2627,14 +2627,26 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 
 	fgSizer30->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_staticText64 = new wxStaticText( this, wxID_ANY, wxT("Sprite Sheet:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText64->Wrap( -1 );
-	fgSizer30->Add( m_staticText64, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	m_staticText641 = new wxStaticText( this, wxID_ANY, wxT("Sprite Sheet:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText641->Wrap( -1 );
+	fgSizer30->Add( m_staticText641, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	wxArrayString m_choiceSpriteSheetChoices;
 	m_choiceSpriteSheet = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceSpriteSheetChoices, 0 );
 	m_choiceSpriteSheet->SetSelection( 0 );
 	fgSizer30->Add( m_choiceSpriteSheet, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer30->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText64 = new wxStaticText( this, wxID_ANY, wxT("Sprite Anim:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText64->Wrap( -1 );
+	fgSizer30->Add( m_staticText64, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	wxArrayString m_choiceSpriteAnimChoices;
+	m_choiceSpriteAnim = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceSpriteAnimChoices, 0 );
+	m_choiceSpriteAnim->SetSelection( 0 );
+	fgSizer30->Add( m_choiceSpriteAnim, 0, wxALL|wxEXPAND, 5 );
 
 
 	fgSizer31->Add( fgSizer30, 1, wxEXPAND, 5 );
@@ -2707,6 +2719,7 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	m_btnApplyObjectName->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonApplyObjectName ), NULL, this );
 	m_choiceSpriteActor->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteActor ), NULL, this );
 	m_choiceSpriteSheet->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteSheet ), NULL, this );
+	m_choiceSpriteAnim->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteAnim ), NULL, this );
 	m_listVariables->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( GameObjParamsPanelBase::OnSelectVariable ), NULL, this );
 	m_choiceSize->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnVariableSizeChanged ), NULL, this );
 	m_btnApplyVarParams->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnBtnApplyVariableChanges ), NULL, this );
@@ -2720,6 +2733,7 @@ GameObjParamsPanelBase::~GameObjParamsPanelBase()
 	m_btnApplyObjectName->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonApplyObjectName ), NULL, this );
 	m_choiceSpriteActor->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteActor ), NULL, this );
 	m_choiceSpriteSheet->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteSheet ), NULL, this );
+	m_choiceSpriteAnim->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteAnim ), NULL, this );
 	m_listVariables->Disconnect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( GameObjParamsPanelBase::OnSelectVariable ), NULL, this );
 	m_choiceSize->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnVariableSizeChanged ), NULL, this );
 	m_btnApplyVarParams->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnBtnApplyVariableChanges ), NULL, this );

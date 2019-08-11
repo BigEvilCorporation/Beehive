@@ -930,8 +930,10 @@ class GameObjParamsPanelBase : public wxPanel
 		wxButton* m_btnApplyObjectName;
 		wxStaticText* m_staticText63;
 		wxChoice* m_choiceSpriteActor;
-		wxStaticText* m_staticText64;
+		wxStaticText* m_staticText641;
 		wxChoice* m_choiceSpriteSheet;
+		wxStaticText* m_staticText64;
+		wxChoice* m_choiceSpriteAnim;
 		wxListCtrl* m_listVariables;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* m_textVariableName;
@@ -947,6 +949,7 @@ class GameObjParamsPanelBase : public wxPanel
 		virtual void OnButtonApplyObjectName( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteSheet( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnApplyVariableChanges( wxCommandEvent& event ) { event.Skip(); }

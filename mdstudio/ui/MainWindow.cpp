@@ -1429,6 +1429,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 							//Sprite
 							std::string spriteActorName = "";
 							std::string spriteSheetName = "";
+							std::string spriteAnimName = "";
 							int spriteSizeTiles = 0;
 							u8 spriteLayout = 0;
 
@@ -1441,6 +1442,11 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 									spriteSheetName = spriteSheet->GetName();
 									spriteSizeTiles = spriteSheet->GetWidthTiles() * spriteSheet->GetHeightTiles();
 									spriteLayout = (u8)luminary::SpriteExporter::GetSpriteLayout(spriteSheet->GetWidthTiles(), spriteSheet->GetHeightTiles());
+
+									if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(gameObject.GetSpriteAnim()))
+									{
+										spriteAnimName = spriteAnim->GetName();
+									}
 								}
 							}
 
@@ -1516,6 +1522,15 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteLayout)))
 								{
 									param->value = std::to_string(spriteLayout);
+								}
+								else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteAnimation)))
+								{
+									if (spriteActorName.size() > 0 && spriteSheetName.size() > 0 && spriteAnimName.size() > 0)
+									{
+										std::stringstream stream;
+										stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_anim" << spriteAnimName;
+										param->value = stream.str();
+									}
 								}
 								else
 								{

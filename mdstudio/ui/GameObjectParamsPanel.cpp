@@ -130,12 +130,29 @@ void GameObjectParamsPanel::OnSelectSpriteSheet(wxCommandEvent& event)
 	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
 	{
 		m_gameObject->SetSpriteSheetId(actor->FindSpriteSheetId(m_choiceSpriteSheet->GetStringSelection().c_str().AsChar()));
+		PopulateSpriteAnimList();
+	}
+}
+
+void GameObjectParamsPanel::OnSelectSpriteAnim(wxCommandEvent& event)
+{
+	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
+	{
+		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(m_gameObject->GetSpriteSheetId()))
+		{
+			m_gameObject->SetSpriteAnim(spriteSheet->FindAnimationId(m_choiceSpriteAnim->GetStringSelection().c_str().AsChar()));
+		}
 	}
 }
 
 void GameObjectParamsPanel::PopulateSpriteActorList()
 {
 	m_choiceSpriteActor->Clear();
+	m_choiceSpriteSheet->Clear();
+	m_choiceSpriteAnim->Clear();
+	m_choiceSpriteActor->SetSelection(-1);
+	m_choiceSpriteSheet->SetSelection(-1);
+	m_choiceSpriteAnim->SetSelection(-1);
 
 	for (TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
 	{
@@ -147,16 +164,14 @@ void GameObjectParamsPanel::PopulateSpriteActorList()
 		m_choiceSpriteActor->SetStringSelection(actor->GetName());
 		PopulateSpriteSheetList();
 	}
-	else
-	{
-		m_choiceSpriteActor->SetSelection(-1);
-		m_choiceSpriteSheet->SetSelection(-1);
-	}
 }
 
 void GameObjectParamsPanel::PopulateSpriteSheetList()
 {
 	m_choiceSpriteSheet->Clear();
+	m_choiceSpriteAnim->Clear();
+	m_choiceSpriteSheet->SetSelection(-1);
+	m_choiceSpriteAnim->SetSelection(-1);
 
 	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
 	{
@@ -170,9 +185,22 @@ void GameObjectParamsPanel::PopulateSpriteSheetList()
 			m_choiceSpriteSheet->SetStringSelection(spriteSheet->GetName());
 		}
 	}
-	else
+}
+
+void GameObjectParamsPanel::PopulateSpriteAnimList()
+{
+	m_choiceSpriteAnim->Clear();
+	m_choiceSpriteAnim->SetSelection(-1);
+
+	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
 	{
-		m_choiceSpriteSheet->SetSelection(-1);
+		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(m_gameObject->GetSpriteSheetId()))
+		{
+			for (TSpriteAnimMap::const_iterator it = spriteSheet->AnimationsBegin(), end = spriteSheet->AnimationsEnd(); it != end; ++it)
+			{
+				m_choiceSpriteAnim->AppendString(it->second.GetName());
+			}
+		}
 	}
 }
 
