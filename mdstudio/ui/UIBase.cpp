@@ -1650,6 +1650,24 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 	fgSizer40->SetFlexibleDirection( wxBOTH );
 	fgSizer40->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
+	m_staticText691 = new wxStaticText( this, wxID_ANY, wxT("Project name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText691->Wrap( -1 );
+	fgSizer40->Add( m_staticText691, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_textProjectName = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	#ifdef __WXGTK__
+	if ( !m_textProjectName->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_textProjectName->SetMaxLength( 8 );
+	}
+	#else
+	m_textProjectName->SetMaxLength( 8 );
+	#endif
+	fgSizer40->Add( m_textProjectName, 0, wxALL, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
 	m_staticText511 = new wxStaticText( this, wxID_ANY, wxT("Project dir:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText511->Wrap( -1 );
 	fgSizer40->Add( m_staticText511, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
@@ -1660,7 +1678,7 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 	m_btnParseProject = new wxButton( this, wxID_ANY, wxT("Scan Project"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer40->Add( m_btnParseProject, 0, wxALL, 5 );
 
-	m_staticText5111 = new wxStaticText( this, wxID_ANY, wxT("Scene export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5111 = new wxStaticText( this, wxID_ANY, wxT("Scene data export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText5111->Wrap( -1 );
 	fgSizer40->Add( m_staticText5111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
@@ -1670,7 +1688,17 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Sprites file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText51111 = new wxStaticText( this, wxID_ANY, wxT("Sprite data export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText51111->Wrap( -1 );
+	fgSizer40->Add( m_staticText51111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerSprites = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerSprites, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Sprites definition file:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText51->Wrap( -1 );
 	fgSizer40->Add( m_staticText51, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
@@ -1680,7 +1708,7 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_staticText53 = new wxStaticText( this, wxID_ANY, wxT("Game Object Types file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText53 = new wxStaticText( this, wxID_ANY, wxT("Game Objects definition file:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText53->Wrap( -1 );
 	fgSizer40->Add( m_staticText53, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
@@ -1696,6 +1724,26 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	m_filePickerReference = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer40->Add( m_filePickerReference, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText68 = new wxStaticText( this, wxID_ANY, wxT("Stamp width (tiles):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText68->Wrap( -1 );
+	fgSizer40->Add( m_staticText68, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_spinStampWidth = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 16 );
+	fgSizer40->Add( m_spinStampWidth, 0, wxALL, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText69 = new wxStaticText( this, wxID_ANY, wxT("Stamp height (tiles):"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText69->Wrap( -1 );
+	fgSizer40->Add( m_staticText69, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_spinStampHeight = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024, 16 );
+	fgSizer40->Add( m_spinStampHeight, 0, wxALL, 5 );
 
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );

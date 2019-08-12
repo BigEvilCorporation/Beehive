@@ -28,10 +28,13 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	, m_project(project)
 	, m_renderResources(renderResources)
 {
+	m_textProjectName->SetValue(m_project.GetName());
 	m_dirPickerProject->SetPath(m_project.m_settings.projectExportDir);
 	m_dirPickerScene->SetPath(m_project.m_settings.sceneExportDir);
 	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.gameObjectsExternalFile);
 	m_filePickerSpritesProj->SetPath(m_project.m_settings.spriteActorsExternalFile);
+	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
+	m_spinStampHeight->SetValue(m_project.GetPlatformConfig().stampHeight);
 
 	Connect(wxID_OK, wxEVT_BUTTON, wxCommandEventHandler(ProjectSettingsDialog::OnBtnOK));
 	Connect(wxID_CANCEL, wxEVT_BUTTON, wxCommandEventHandler(ProjectSettingsDialog::OnBtnCancel));
@@ -48,8 +51,10 @@ void ProjectSettingsDialog::OnBtnScanProject(wxCommandEvent& event)
 
 void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 {
+	m_project.SetName(m_textProjectName->GetValue().c_str().AsChar());
 	std::string projectDir = m_dirPickerProject->GetPath().c_str().AsChar();
 	m_project.m_settings.sceneExportDir = m_dirPickerScene->GetPath().c_str().AsChar();
+	m_project.m_settings.spritesExportDir = m_dirPickerSprites->GetPath().c_str().AsChar();
 	std::string gameObjectsFile = m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 	std::string spritesFile = m_filePickerSpritesProj->GetPath().c_str().AsChar();
 	std::string referenceFile = m_filePickerReference->GetPath().c_str().AsChar();
@@ -109,6 +114,9 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 
 		m_project.m_settings.projectExportDir = projectDir;
 	}
+
+	m_project.GetPlatformConfig().stampWidth = m_spinStampWidth->GetValue();
+	m_project.GetPlatformConfig().stampHeight = m_spinStampHeight->GetValue();
 
 	EndModal(wxID_OK);
 }
