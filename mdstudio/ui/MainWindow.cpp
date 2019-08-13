@@ -39,6 +39,7 @@
 #include <luminary/SceneExporter.h>
 #include <luminary/SpriteExporter.h>
 #include <luminary/TilesetExporter.h>
+#include <luminary/MapExporter.h>
 #endif
 
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
@@ -1238,14 +1239,16 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 #if defined BEEHIVE_PLUGIN_LUMINARY
 		luminary::TilesetExporter tilesetExporter;
 		luminary::SceneExporter sceneExporter;
+		luminary::MapExporter mapExporter;
 
 		std::vector<std::pair<std::string,std::string>> includeFilenames;
 
 		//Export Luminary tileset
+		std::string tilesetLabel = std::string("tileset_") + m_project->GetName();
 		std::string tilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "TILESET.BIN";
 		if (tilesetExporter.ExportTileset(tilesetFilename, m_project->GetTileset()))
 		{
-			includeFilenames.push_back(std::make_pair(std::string("tileset_") + m_project->GetName(), tilesetFilename));
+			includeFilenames.push_back(std::make_pair(tilesetLabel, tilesetFilename));
 		}
 
 		//Export Luminary stamp set
@@ -1258,17 +1261,27 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			}
 		}
 
+		std::string stampsetLabel = std::string("stampset_") + m_project->GetName();
 		std::string stampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "STAMPSET.BIN";
 		if (tilesetExporter.ExportStamps(stampsetFilename, stamps, m_project->GetTileset(), m_project->GetBackgroundTile()))
 		{
-			includeFilenames.push_back(std::make_pair(std::string("stampset_") + m_project->GetName(), stampsetFilename));
+			includeFilenames.push_back(std::make_pair(stampsetLabel, stampsetFilename));
 		}
 
 		//Export Luminary maps
+		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
+		{
+			const Map& map = m_project->GetMap(it->first);
+			std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
+			std::string mapFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(map.GetName()) + ".BIN";
+			if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
+			{
+				includeFilenames.push_back(std::make_pair(mapLabel, mapFilename));
+			}
+		}
 
 		//Export Luminary scenes
-		int mapIndex = 0;
-		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it, ++mapIndex)
+		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
 		{
 			std::vector<luminary::Entity> entities;
 			const Map& map = m_project->GetMap(it->first);
@@ -1436,8 +1449,10 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				}
 			}
 
+			std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
+			std::string sceneName = m_project->GetName() + "_" + map.GetName();
 			std::string sceneFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(map.GetName()) + ".ASM";
-			if (sceneExporter.ExportScene(sceneFilename, map.GetName(), entities))
+			if (sceneExporter.ExportScene(sceneFilename, sceneName, tilesetLabel, stampsetLabel, mapLabel, entities))
 			{
 				includeFilenames.push_back(std::make_pair(std::string("scene_") + m_project->GetName() + "_" + map.GetName(), sceneFilename));
 			}
