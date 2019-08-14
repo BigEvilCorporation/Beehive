@@ -40,6 +40,7 @@
 #include <luminary/SpriteExporter.h>
 #include <luminary/TilesetExporter.h>
 #include <luminary/MapExporter.h>
+#include <luminary/PaletteExporter.h>
 #endif
 
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
@@ -1240,8 +1241,33 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		luminary::TilesetExporter tilesetExporter;
 		luminary::SceneExporter sceneExporter;
 		luminary::MapExporter mapExporter;
+		luminary::PaletteExporter paletteExporter;
 
 		std::vector<std::pair<std::string,std::string>> includeFilenames;
+
+		//Export luminary palettes
+		int numPalettes = 0;
+		std::string palettesLabel = std::string("palettes_") + m_project->GetName();
+		std::string palettesFilename = m_project->m_settings.sceneExportDir + "\\" + "PALETTES.ASM";
+		if (m_project->GetNumPalettes() > 0)
+		{
+			std::vector<Palette> palettes;
+
+			for (int i = 0; i < m_project->GetNumPalettes(); i++)
+			{
+				if (m_project->GetPalette(i)->GetUsedColourMask() > 0)
+				{
+					palettes.push_back(*m_project->GetPalette(i));
+				}
+			}
+
+			if (paletteExporter.ExportPalettes(palettesFilename, palettes))
+			{
+				includeFilenames.push_back(std::make_pair(palettesLabel, palettesFilename));
+			}
+
+			numPalettes = palettes.size();
+		}
 
 		//Export Luminary tileset
 		std::string tilesetLabel = std::string("tileset_") + m_project->GetName();
@@ -1252,6 +1278,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		}
 
 		//Export Luminary stamp set
+		m_project->CompactStampIds();
 		std::vector<Stamp> stamps;
 		for (int i = 0; i < m_project->GetStampCount(); i++)
 		{
@@ -1283,24 +1310,25 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		//Export Luminary scenes
 		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
 		{
-			std::vector<luminary::Entity> entities;
 			const Map& map = m_project->GetMap(it->first);
 			const TGameObjectPosMap& gameObjMap = map.GetGameObjects();
 			int entityIdx = 0;
+
+			luminary::SceneExporter::SceneData sceneData;
 
 			for (TGameObjectPosMap::const_iterator it = gameObjMap.begin(), end = gameObjMap.end(); it != end; ++it)
 			{
 				const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
 				if (gameObjectType)
 				{
-					entities.resize(entities.size() + it->second.size());
+					sceneData.entities.resize(sceneData.entities.size() + it->second.size());
 					const std::vector<GameObjectVariable>& variables = gameObjectType->GetVariables();
 
 					for (int i = 0; i < it->second.size(); i++, entityIdx++)
 					{
 						const GameObject& gameObject = it->second[i].m_gameObject;
 
-						luminary::Entity& entity = entities[entityIdx];
+						luminary::Entity& entity = sceneData.entities[entityIdx];
 
 						//Type name
 						entity.name = gameObjectType->GetName();
@@ -1449,12 +1477,21 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				}
 			}
 
-			std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
+			sceneData.palettesLabel = palettesLabel;
+			sceneData.numPalettes = numPalettes;
+			sceneData.mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
+			sceneData.stampsetLabel = stampsetLabel;
+			sceneData.tilesetLabel = tilesetLabel;
+			sceneData.numTiles = m_project->GetTileset().GetCount();
+			sceneData.numStamps = m_project->GetStampCount();
+			sceneData.mapWidthStamps = map.GetWidth() / m_project->GetPlatformConfig().stampWidth;
+			sceneData.mapHeightStamps = map.GetHeight() / m_project->GetPlatformConfig().stampHeight;
+
 			std::string sceneName = m_project->GetName() + "_" + map.GetName();
 			std::string sceneFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(map.GetName()) + ".ASM";
-			if (sceneExporter.ExportScene(sceneFilename, sceneName, tilesetLabel, stampsetLabel, mapLabel, entities))
+			if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
 			{
-				includeFilenames.push_back(std::make_pair(std::string("scene_") + m_project->GetName() + "_" + map.GetName(), sceneFilename));
+				includeFilenames.push_back(std::make_pair(std::string("scene_") + sceneName, sceneFilename));
 			}
 		}
 
