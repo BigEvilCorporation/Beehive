@@ -19,6 +19,8 @@
 #include <wx/msgdlg.h>
 #include <wx/textdlg.h>
 
+#include <ion/core/utils/STL.h>
+
 StampsPanel::StampsPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
@@ -124,9 +126,9 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void StampsPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
+void StampsPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(buttonBits, tileDelta, x, y);
+	ViewPanel::OnMouseTileEvent(mousePos, mouseDelta, tileDelta, buttonBits, x, y);
 
 	StampId selectedStamp = InvalidStampId;
 	ion::Vector2i stampTopLeft;
@@ -157,6 +159,25 @@ void StampsPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int 
 	//Set mouse hover stamp
 	m_hoverStamp = selectedStamp;
 	m_hoverStampPos = stampTopLeft;
+
+	if (buttonBits == 0)
+	{
+		const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+		const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+		if (const Stamp* stamp = m_project.GetStamp(selectedStamp))
+		{
+			std::stringstream tipStr;
+			tipStr << "Stamp 0x" << SSTREAM_HEX4(selectedStamp) << " (" << selectedStamp << ")" << std::endl;
+			tipStr << "Size: " << stamp->GetWidth() << ", " << stamp->GetHeight() << std::endl;
+			tipStr << "Addr: 0x" << SSTREAM_HEX8(selectedStamp * tileWidth * tileHeight * 2) << std::endl;
+			SetToolTip(tipStr.str().c_str());
+		}
+		else
+		{
+			UnsetToolTip();
+		}
+	}
 
 	if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 	{

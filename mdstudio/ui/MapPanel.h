@@ -37,7 +37,7 @@ public:
 protected:
 
 	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y);
+	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y);
 
 	//Mouse click or changed pixel callback
 	virtual void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY);

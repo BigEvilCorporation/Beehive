@@ -45,6 +45,9 @@ public:
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
+	//Always take focus, even if we have child widgets
+	virtual bool AcceptsFocus() { return true; }
+
 	//Allow default zoom/pan behaviour
 	void EnableZoom(bool enabled) { m_enableZoom = enabled; }
 	void EnablePan(bool enabled) { m_enablePan = enabled; }
@@ -59,7 +62,7 @@ protected:
 	virtual void OnResize(wxSizeEvent& event);
 
 	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y) {}
+	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y) {}
 
 	//Mouse click or changed pixel callback
 	virtual void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY) {}

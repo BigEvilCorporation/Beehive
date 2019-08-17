@@ -290,7 +290,7 @@ void ViewPanel::OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta)
 	if((buttonBits != m_prevMouseBits) || (x != m_prevMouseOverTilePos.x) || (y != m_prevMouseOverTilePos.y))
 	{
 		//Mouse button clicked or changed grid pos
-		OnMouseTileEvent(buttonBits, tileDelta, x, y);
+		OnMouseTileEvent(mousePixelPosCanvas, mouseDelta, tileDelta, buttonBits, x, y);
 
 		m_prevMouseOverTilePos.x = x;
 		m_prevMouseOverTilePos.y = y;

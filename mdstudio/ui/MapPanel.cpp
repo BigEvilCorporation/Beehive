@@ -16,6 +16,8 @@
 #include <wx/Menu.h>
 #include <wx/msgdlg.h>
 
+#include <ion/core/utils/STL.h>
+
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 	, m_gizmo(renderResources)
@@ -197,13 +199,15 @@ void MapPanel::BucketFill(Map& map, ion::Vector2i position, ion::Vector2i prevPo
 	}
 }
 
-void MapPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
+void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
 {
 	Map& map = m_project.GetEditingMap();
 	Tileset& tileset = m_project.GetTileset();
 
 	const int mapWidth = map.GetWidth();
 	const int mapHeight = map.GetHeight();
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	//Invert for OpenGL
 	int y_inv = (mapHeight - 1 - y);
@@ -455,6 +459,23 @@ void MapPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, 
 			m_hoverStamp = stampId;
 			m_hoverStampPos = stampPos;
 			m_hoverStampFlags = stampFlags;
+
+			if (buttonBits == 0)
+			{
+				if (const Stamp* stamp = m_project.GetStamp(stampId))
+				{
+					std::stringstream tipStr;
+					tipStr << "Stamp 0x" << SSTREAM_HEX4(stampId) << " (" << stampId << ")" << std::endl;
+					tipStr << "Pos: " << stampPos.x << ", " << stampPos.y << std::endl;
+					tipStr << "Size: " << stamp->GetWidth() << ", " << stamp->GetHeight() << std::endl;
+					tipStr << "Addr: 0x" << SSTREAM_HEX8(stampId * tileWidth * tileHeight * 2) << std::endl;
+					SetToolTip(tipStr.str().c_str());
+				}
+				else
+				{
+					UnsetToolTip();
+				}
+			}
 
 			if(buttonBits & eMouseLeft && !(m_prevMouseBits & eMouseLeft))
 			{

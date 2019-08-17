@@ -108,9 +108,9 @@ void TilesPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void TilesPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
+void TilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
 {
-	ViewPanel::OnMouseTileEvent(buttonBits, tileDelta, x, y);
+	ViewPanel::OnMouseTileEvent(mousePos, mouseDelta, tileDelta, buttonBits, x, y);
 
 	TileId selectedTile = InvalidTileId;
 

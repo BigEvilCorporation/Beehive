@@ -31,7 +31,7 @@ public:
 protected:
 
 	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y);
+	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y);
 
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);

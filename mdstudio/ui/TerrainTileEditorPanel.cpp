@@ -62,7 +62,7 @@ void TerrainTileEditorPanel::OnResize(wxSizeEvent& event)
 	}
 }
 
-void TerrainTileEditorPanel::OnMouseTileEvent(int buttonBits, ion::Vector2i tileDelta, int x, int y)
+void TerrainTileEditorPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
 {
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
