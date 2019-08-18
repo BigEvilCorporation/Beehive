@@ -85,11 +85,8 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		Refresh();
 	}
 
-#if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+#if !BEEHIVE_FIXED_STAMP_MODE //Fixed grid placement only in fixed mode
 	if (m_currentTool == eToolPaintStamp)
-#else
-	if(m_currentTool == eToolPaintTile || m_currentTool == eToolPaintStamp)
-#endif
 	{
 		if(m_previewTileFlipX != event.ShiftDown())
 		{
@@ -119,6 +116,7 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		//Store CTRL held state for multiple selection
 		m_multipleSelection = event.ControlDown();
 	}
+#endif
 
 	ViewPanel::OnKeyboard(event);
 }
@@ -1409,7 +1407,22 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 				{
 					ion::Vector2i topLeft;
 					m_hoverStamp = m_project.GetEditingMap().FindStamp(tileX, tileY, topLeft, m_hoverStampFlags, m_hoverStampMapEntry);
+
 					m_hoverStampPos = topLeft;
+				}
+
+				//If fixed stamp size, snap to grid
+				int fixedStampWidth = m_project.GetPlatformConfig().stampWidth;
+				int fixedStampHeight = m_project.GetPlatformConfig().stampHeight;
+
+				if (fixedStampWidth > 0)
+				{
+					tileX = ion::maths::RoundDownToNearest(tileX, fixedStampWidth);
+				}
+
+				if (fixedStampHeight > 0)
+				{
+					tileY = ion::maths::RoundDownToNearest(tileY, fixedStampHeight);
 				}
 
 				if(tileX != m_hoverStampPos.x || tileY != m_hoverStampPos.y)
