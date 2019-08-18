@@ -63,6 +63,13 @@ private:
 	void RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderBounds(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+
+	//Canvas drawing
+	void PaintTerrainBeziers(Project& project);
+	void PaintCollisionStamp(const Stamp& stamp);
+	void PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y);
 
 	Project* m_project;
 
@@ -76,6 +83,10 @@ private:
 	ion::render::Grid* m_gridPrimitive;
 	ion::render::LineQuad* m_boundsPrimitive;
 	ion::render::Chessboard* m_tileFramePrimitive;
+	ion::render::Chessboard* m_terrainCanvasPrimitive;
+	std::vector<ion::render::Primitive*> m_primitiveBeziers;
+	ion::render::Primitive* m_primitiveBezierPoints;
+	ion::render::Primitive* m_primitiveBezierHandles;
 
 	bool m_drawPreview;
 	u32 m_drawPreviewMaxFrames;
@@ -90,6 +101,9 @@ private:
 	ion::Vector2i m_mousePrevPos;
 	float m_cameraZoom;
 
+	//Canvas size (tiles)
+	ion::Vector2i m_canvasSize;
+
 	//Panel size (pixels)
 	ion::Vector2i m_panelSize;
 
@@ -102,4 +116,19 @@ private:
 
 	//Grid colour
 	ion::Colour m_gridColour;
+
+	//Beziers
+	enum eBezierModifyHandle
+	{
+		eBezierPosition,
+		eBezierControlA,
+		eBezierControlB
+	};
+
+	ion::gamekit::BezierPath* m_currentBezier;
+	ion::gamekit::BezierPath* m_highlightedBezier;
+	u32 m_highlightedBezierIdx;
+	int m_currentBezierControlIdx;
+	eBezierModifyHandle m_currentBezierControlHndl;
+	ion::Vector2 m_currentBezierControlPos;
 };
