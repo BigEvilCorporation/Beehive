@@ -96,6 +96,18 @@ MainWindow::MainWindow()
 	//Create and load rendering resources
 	m_renderResources = new RenderResources(*defaultProject, *m_resourceManager);
 
+#if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+	delete m_ribbonPanelTiles;
+	delete m_ribbonPanelCollision;
+	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_CREATE);
+	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_GRID_SNAP);
+	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_SHOW_COLLISION);
+#endif
+
+#if BEEHIVE_LEAN_UI
+	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_DELETE);
+#endif
+
 	//Open welcome project
 	static bool openWelcomeProject = true;
 	if(openWelcomeProject)
@@ -271,20 +283,30 @@ void MainWindow::SetProject(Project* project)
 			RefreshTerrainTileset();
 			RefreshSpriteSheets();
 
+#if !BEEHIVE_LEAN_UI
 			//Open bottom panels
 			ShowPanelPalettes();
+			ShowPanelMapList();
+#endif
+
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 			ShowPanelTiles();
 			ShowPanelTerrainEditor();
 			ShowPanelTerrainTiles();
 			ShowPanelTileEditor();
-			ShowPanelMapList();
+#endif
 
 			//Open left panels
-			ShowPanelToolbox();
+			ShowToolboxStamps();
+			ShowToolboxObjects();
+
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+			ShowToolboxTiles();
+			ShowToolboxCollision();
+#endif
 
 			//Open right panels
 			ShowPanelStamps();
-			//ShowPanelBlocks();
 
 			//Open centre panels
 			ShowPanelMap();
@@ -571,7 +593,7 @@ void MainWindow::ShowPanelMapList()
 	}
 }
 
-void MainWindow::ShowPanelToolbox()
+void MainWindow::ShowToolboxTiles()
 {
 	if (m_toolboxPanelTiles)
 	{
@@ -595,29 +617,89 @@ void MainWindow::ShowPanelToolbox()
 
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTTILE);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINT);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_TILEPICKER);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATE_SCENE_ANIM);
+		
+
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PAINT);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPX);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FLIPY);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_FILL);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CLONE);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATE_SCENE_ANIM);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COPY_TO_NEW_MAP);
+#endif
 
-		//Hide unused
-		#if !INCLUDE_UI_TOOLBOX_TILES_CLONE
+#if BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode
+		delete m_toolboxPanelTiles->m_toolPaint;
+		delete m_toolboxPanelTiles->m_toolFlipX;
+		delete m_toolboxPanelTiles->m_toolFlipY;
+		delete m_toolboxPanelTiles->m_toolFill;
 		delete m_toolboxPanelTiles->m_toolClone;
-		#endif
-
-		#if !INCLUDE_UI_TOOLBOX_TILES_CREATESCENEANIM
-		delete m_toolboxPanelTiles->m_toolCreateSceneAnim;
-		#endif
-
-		#if !INCLUDE_UI_TOOLBOX_TILES_COPYTONEWMAP
 		delete m_toolboxPanelTiles->m_toolCopyToNewMap;
-		#endif
+#else
+		//Hide unused
+#if !INCLUDE_UI_TOOLBOX_TILES_CLONE
+		delete m_toolboxPanelTiles->m_toolClone;
+#endif
+
+#if !INCLUDE_UI_TOOLBOX_TILES_CREATESCENEANIM
+		delete m_toolboxPanelTiles->m_toolCreateSceneAnim;
+#endif
+
+#if !INCLUDE_UI_TOOLBOX_TILES_COPYTONEWMAP
+		delete m_toolboxPanelTiles->m_toolCopyToNewMap;
+#endif
+#endif
 	}
 
+	m_auiManager.Update();
+}
+
+void MainWindow::ShowToolboxCollision()
+{
+	if (m_toolboxPanelTerrain)
+	{
+		m_auiManager.GetPane("ToolboxTerrain").Show();
+	}
+	else
+	{
+		wxAuiPaneInfo paneInfo;
+		paneInfo.Name("ToolboxTerrain");
+		paneInfo.Dockable(true);
+		paneInfo.DockFixed(false);
+		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_X(20));
+		paneInfo.Left();
+		paneInfo.Row(1);
+		paneInfo.Caption("Collision Tools");
+		paneInfo.CaptionVisible(true);
+
+		m_toolboxPanelTerrain = new MapToolboxTerrain(m_dockArea, NewControlId());
+		m_auiManager.AddPane(m_toolboxPanelTerrain, paneInfo);
+		paneInfo.Show();
+
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+		//Subscribe to toolbox buttons
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTHOLE);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRTILE);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_ADDTERRAINBEZIER);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_EDITTERRAINBEZIER);
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRAINBEZIER);
+#endif
+
+		//Hide unused
+#if !INCLUDE_UI_TOOLBOX_TERRAIN_PAINT
+		delete m_toolboxPanelTerrain->m_toolPaintCollisionPixel;
+#endif
+	}
+
+	m_auiManager.Update();
+}
+
+void MainWindow::ShowToolboxStamps()
+{
 	if (m_toolboxPanelStamps)
 	{
 		m_auiManager.GetPane("ToolboxStamps").Show();
@@ -642,51 +724,28 @@ void MainWindow::ShowPanelToolbox()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTSTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMPPICKER);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVESTAMP);
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
+#endif
+
+#if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+		delete m_toolboxPanelStamps->m_toolCreateStamp;
+#else
 		//Hide unused
 #if !INCLUDE_UI_TOOLBOX_STAMPS_PAINT
 		delete m_toolboxPanelStamps->m_toolPaintStamp;
 #endif
-	}
-
-	if (m_toolboxPanelTerrain)
-	{
-		m_auiManager.GetPane("ToolboxTerrain").Show();
-	}
-	else
-	{
-		wxAuiPaneInfo paneInfo;
-		paneInfo.Name("ToolboxTerrain");
-		paneInfo.Dockable(true);
-		paneInfo.DockFixed(false);
-		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_X(20));
-		paneInfo.Left();
-		paneInfo.Row(1);
-		paneInfo.Caption("Collision Tools");
-		paneInfo.CaptionVisible(true);
-
-		m_toolboxPanelTerrain = new MapToolboxTerrain(m_dockArea, NewControlId());
-		m_auiManager.AddPane(m_toolboxPanelTerrain, paneInfo);
-		paneInfo.Show();
-
-		//Subscribe to toolbox buttons
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTTERRAIN);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTSOLID);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_PAINTHOLE);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRTILE);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_ADDTERRAINBEZIER);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_EDITTERRAINBEZIER);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_COL_DELETETERRAINBEZIER);
-
-		//Hide unused
-#if !INCLUDE_UI_TOOLBOX_TERRAIN_PAINT
-		delete m_toolboxPanelTerrain->m_toolPaintCollisionPixel;
 #endif
 	}
 
+	m_auiManager.Update();
+}
+
+void MainWindow::ShowToolboxObjects()
+{
 	if (m_toolboxPanelGameObjs)
 	{
 		m_auiManager.GetPane("ToolboxObjects").Show();
@@ -699,9 +758,14 @@ void MainWindow::ShowPanelToolbox()
 		paneInfo.DockFixed(false);
 		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
 		paneInfo.Left();
-		paneInfo.Row(1);
 		paneInfo.Caption("Object Tools");
 		paneInfo.CaptionVisible(true);
+
+#if BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode, fewer toolboxes
+		paneInfo.Row(0);
+#else
+		paneInfo.Row(1);
+#endif
 
 		m_toolboxPanelGameObjs = new MapToolboxGameObjs(m_dockArea, NewControlId());
 		m_auiManager.AddPane(m_toolboxPanelGameObjs, paneInfo);
@@ -1681,6 +1745,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		ImportDialog dialog(this);
@@ -1812,6 +1877,7 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 			SetStatusText("Import complete");
 		}
 	}
+#endif
 }
 
 void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
@@ -1848,6 +1914,7 @@ void MainWindow::OnBtnStampsCleanup(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		//Add new tile
@@ -1866,10 +1933,12 @@ void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 		RefreshPanel(ePanelTiles);
 		RefreshPanel(ePanelTileEditor);
 	}
+#endif
 }
 
 void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		TileId tileId = m_project->GetPaintTile();
@@ -1888,10 +1957,12 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 			RefreshAll();
 		}
 	}
+#endif
 }
 
 void MainWindow::OnBtnTilesCleanup(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		if(m_project->CleanupTiles())
@@ -1899,19 +1970,23 @@ void MainWindow::OnBtnTilesCleanup(wxRibbonButtonBarEvent& event)
 			RefreshAll();
 		}
 	}
+#endif
 }
 
 void MainWindow::OnBtnColMapClear(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		m_project->GetEditingCollisionMap().Clear();
 		RefreshAll();
 	}
+#endif
 }
 
 void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		DialogTerrainGen dialog(this);
@@ -1931,10 +2006,12 @@ void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
 			}
 		}
 	}
+#endif
 }
 
 void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		if(m_project->CleanupTerrainTiles(true))
@@ -1942,10 +2019,12 @@ void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
 			RefreshAll();
 		}
 	}
+#endif
 }
 
 void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		//Add new collision tile
@@ -1971,10 +2050,12 @@ void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 			RefreshPanel(ePanelTerrainTileEditor);
 		}
 	}
+#endif
 }
 
 void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 {
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
 		TerrainTileId tileId = m_project->GetPaintTerrainTile();
@@ -1996,11 +2077,18 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 			RefreshAll();
 		}
 	}
+#endif
 }
 
 void MainWindow::OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event )
 {
-	ShowPanelToolbox();
+	ShowToolboxStamps();
+	ShowToolboxObjects();
+
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+	ShowToolboxTiles();
+	ShowToolboxCollision();
+#endif
 }
 
 void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )
@@ -2176,17 +2264,9 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 	{
 		switch(event.GetId())
 		{
-		case wxID_TOOL_SELECTTILE:
-			m_mapPanel->SetTool(eToolSelectTiles);
-			break;
-		case wxID_TOOL_SELECTSTAMP:
-			m_mapPanel->SetTool(eToolSelectStamp);
-			break;
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		case wxID_TOOL_PAINT:
 			m_mapPanel->SetTool(eToolPaintTile);
-			break;
-		case wxID_TOOL_STAMP:
-			m_mapPanel->SetTool(eToolPaintStamp);
 			break;
 		case wxID_TOOL_COL_PAINTTERRAIN:
 			m_mapPanel->SetTool(eToolPaintCollisionTerrain);
@@ -2209,12 +2289,6 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 		case wxID_TOOL_COL_DELETETERRAINBEZIER:
 			m_mapPanel->SetTool(eToolDeleteTerrainBezier);
 			break;
-		case wxID_TOOL_TILEPICKER:
-			m_mapPanel->SetTool(eToolTilePicker);
-			break;
-		case wxID_TOOL_STAMPPICKER:
-			m_mapPanel->SetTool(eToolStampPicker);
-			break;
 		case wxID_TOOL_FLIPX:
 			m_mapPanel->SetTool(eToolFlipX);
 			break;
@@ -2227,20 +2301,36 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 		case wxID_TOOL_CLONE:
 			m_mapPanel->SetTool(eToolClone);
 			break;
-		case wxID_TOOL_CREATE_SCENE_ANIM:
-			m_mapPanel->SetTool(eToolCreateStampAnim);
-			break;
 		case wxID_TOOL_COPY_TO_NEW_MAP:
 			m_mapPanel->SetTool(eToolCopyToNewMap);
 			break;
 		case wxID_TOOL_CREATESTAMP:
 			m_mapPanel->SetTool(eToolCreateStamp);
 			break;
-		case wxID_TOOL_REMOVESTAMP:
-			m_mapPanel->SetTool(eToolRemoveStamp);
+#endif
+		case wxID_TOOL_SELECTTILE:
+			m_mapPanel->SetTool(eToolSelectTiles);
+			break;
+		case wxID_TOOL_SELECTSTAMP:
+			m_mapPanel->SetTool(eToolSelectStamp);
+			break;
+		case wxID_TOOL_STAMP:
+			m_mapPanel->SetTool(eToolPaintStamp);
+			break;
+		case wxID_TOOL_TILEPICKER:
+			m_mapPanel->SetTool(eToolTilePicker);
+			break;
+		case wxID_TOOL_STAMPPICKER:
+			m_mapPanel->SetTool(eToolStampPicker);
+			break;
+		case wxID_TOOL_CREATE_SCENE_ANIM:
+			m_mapPanel->SetTool(eToolCreateStampAnim);
 			break;
 		case wxID_TOOL_MOVESTAMP:
 			m_mapPanel->SetTool(eToolMoveStamp);
+			break;
+		case wxID_TOOL_REMOVESTAMP:
+			m_mapPanel->SetTool(eToolRemoveStamp);
 			break;
 		case wxID_TOOL_SELECTGAMEOBJ:
 			m_mapPanel->SetTool(eToolSelectGameObject);

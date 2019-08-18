@@ -134,8 +134,10 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDel
 		//Set as current painting tile
 		m_project.SetPaintTile(selectedTile);
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode
 		//Set tile paint tool
 		m_mainWindow->SetMapTool(eToolPaintTile);
+#endif
 
 		//Refresh tile editor panel
 		m_mainWindow->RefreshPanel(MainWindow::ePanelTileEditor);
@@ -144,6 +146,7 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDel
 		m_mainWindow->RefreshPanel(MainWindow::ePanelTerrainTileEditor);
 	}
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode
 	if(buttonBits & eMouseRight)
 	{
 		if(m_hoverTile != InvalidTileId)
@@ -157,6 +160,7 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDel
 			PopupMenu(&contextMenu);
 		}
 	}
+#endif
 
 	//Redraw
 	Refresh();

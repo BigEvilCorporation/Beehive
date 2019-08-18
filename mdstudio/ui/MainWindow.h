@@ -74,7 +74,10 @@ public:
 	void ShowPanelTimeline();
 
 	//Open toolbox
-	void ShowPanelToolbox();
+	void ShowToolboxTiles();
+	void ShowToolboxCollision();
+	void ShowToolboxStamps();
+	void ShowToolboxObjects();
 
 	//Set current map editing tool
 	void SetMapTool(ToolType tool);

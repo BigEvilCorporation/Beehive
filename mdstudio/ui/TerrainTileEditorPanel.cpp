@@ -67,6 +67,7 @@ void TerrainTileEditorPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vecto
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No collision editing in fixed mode
 	if((buttonBits & eMouseLeft) || (buttonBits & eMouseRight))
 	{
 		TerrainTileId tileId = m_project.GetPaintTerrainTile();
@@ -101,6 +102,7 @@ void TerrainTileEditorPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vecto
 			}
 		}
 	}
+#endif
 }
 
 void TerrainTileEditorPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)

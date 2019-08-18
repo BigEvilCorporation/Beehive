@@ -50,9 +50,11 @@ private:
 	enum ContextMenuItems
 	{
 		eContextMenuDeleteStamp,
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		eContextMenuBakeStamp,
 		eContextMenuStampBringToFront,
 		eContextMenuStampSendToBack,
+#endif
 		eContextMenuGameObjAddToAnim,
 		eContextMenuSetTerrainFlagSpecial,
 		eContextMenuSetTerrainFlagWater,

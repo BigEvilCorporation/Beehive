@@ -2,6 +2,15 @@ SubDir bigevilcorp mdstudio ;
 
 include_plugin_luminary = 1 ;
 
+# Fixed stamps mode:
+# - no individual tile editing
+# - collision editing per-stamp only
+# - removes legacy UI
+beehive_config_fixed_stamps = 1 ;
+
+# Lean mode - hides advanced features
+beehive_config_lean_ui = 1 ;
+
 ion_renderer_opts = shader ;
 
 ApplyIonDefines beehivestudio ;
@@ -27,6 +36,16 @@ if ( include_plugin_luminary )
 	C.Defines * : BEEHIVE_PLUGIN_LUMINARY ;
 	C.IncludeDirectories * : $(bigevilcorp)/../LUMINARY/TOOLS/BeehivePlugins ;
 	C.LinkLibraries beehivestudio : luminary ;
+}
+
+if ( beehive_config_fixed_stamps )
+{
+	C.Defines * : BEEHIVE_FIXED_STAMP_MODE ;
+}
+
+if ( beehive_config_lean_ui )
+{
+	C.Defines * : BEEHIVE_LEAN_UI ;
 }
 
 SubInclude bigevilcorp mdstudio ui : ui ;

@@ -146,8 +146,6 @@ class MainWindowBase : public wxFrame
 		wxRibbonButtonBar* m_ribbonButtonBarTiles;
 		wxRibbonPanel* m_ribbonPanelSprites;
 		wxRibbonButtonBar* m_ribbonButtonBarSprites;
-		wxRibbonPanel* m_ribbonPanelStamps;
-		wxRibbonButtonBar* m_ribbonButtonBarStamps;
 		wxRibbonPanel* m_ribbonPanelCollision;
 		wxRibbonButtonBar* m_ribbonButtonBarCollision;
 		wxRibbonPanel* m_ribbonPanelGameObj;
@@ -194,6 +192,8 @@ class MainWindowBase : public wxFrame
 
 
 	public:
+		wxRibbonPanel* m_ribbonPanelStamps;
+		wxRibbonButtonBar* m_ribbonButtonBarStamps;
 
 		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 971,240 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 
@@ -517,14 +517,14 @@ class MapToolboxTiles : public wxPanel
 	private:
 
 	protected:
+
+	public:
 		wxBitmapButton* m_toolSelectTile;
 		wxBitmapButton* m_toolPaint;
 		wxBitmapButton* m_toolTilePicker;
 		wxBitmapButton* m_toolFlipX;
 		wxBitmapButton* m_toolFlipY;
 		wxBitmapButton* m_toolFill;
-
-	public:
 		wxBitmapButton* m_toolClone;
 		wxBitmapButton* m_toolCreateSceneAnim;
 		wxBitmapButton* m_toolCopyToNewMap;
@@ -545,11 +545,11 @@ class MapToolboxStamps : public wxPanel
 		wxBitmapButton* m_toolSelectStamp;
 		wxBitmapButton* m_toolMveStamp;
 		wxBitmapButton* m_toolStampPicker;
-		wxBitmapButton* m_toolCreateStamp;
 		wxBitmapButton* m_toolRemoveStamp;
 
 	public:
 		wxBitmapButton* m_toolPaintStamp;
+		wxBitmapButton* m_toolCreateStamp;
 
 		MapToolboxStamps( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 116,181 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~MapToolboxStamps();

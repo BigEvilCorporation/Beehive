@@ -22,7 +22,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 	, m_gizmo(renderResources)
 {
-	m_currentTool = eToolPaintTile;
+	m_currentTool = eToolSelectTiles;
 	m_cursorOrigin = eCursorTopLeft;
 	m_tempStamp = NULL;
 	m_terrainCanvasPrimitive = NULL;
@@ -85,7 +85,11 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		Refresh();
 	}
 
+#if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+	if (m_currentTool == eToolPaintStamp)
+#else
 	if(m_currentTool == eToolPaintTile || m_currentTool == eToolPaintStamp)
+#endif
 	{
 		if(m_previewTileFlipX != event.ShiftDown())
 		{
@@ -217,6 +221,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 
 	switch(m_currentTool)
 	{
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		case eToolPaintTile:
 		{
 			if(inMaprange)
@@ -380,6 +385,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 
 			break;
 		}
+#endif
 
 		case eToolSelectTiles:
 		{
@@ -576,9 +582,11 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					wxMenu contextMenu;
 
 					contextMenu.Append(eContextMenuDeleteStamp, wxString("Delete stamp"));
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 					contextMenu.Append(eContextMenuBakeStamp, wxString("Bake stamp"));
 					contextMenu.Append(eContextMenuStampBringToFront, wxString("Bring to front"));
 					contextMenu.Append(eContextMenuStampSendToBack, wxString("Send to back"));
+#endif
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
 					PopupMenu(&contextMenu);
 				}
@@ -623,8 +631,10 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					//Set as preview tile
 					m_previewTile = tileId;
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 					//Set paint tool
 					SetTool(eToolPaintTile);
+#endif
 
 					//Refresh tile edit panel
 					m_mainWindow->RedrawPanel(MainWindow::ePanelTileEditor);
@@ -638,6 +648,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 			break;
 		}
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		case eToolFlipX:
 		{
 			if(inMaprange)
@@ -690,6 +701,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 			}
 			break;
 		}
+#endif
 
 		case eToolPaintStamp:
 		{
@@ -936,6 +948,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	else if(event.GetId() == eContextMenuBakeStamp)
 	{
 		if(Stamp* stamp = m_project.GetStamp(m_hoverStamp))
@@ -984,6 +997,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
 		m_project.InvalidateMap(false);
 	}
+#endif
 	else if(event.GetId() == eContextMenuGameObjAddToAnim)
 	{
 		if(m_hoverGameObject != InvalidGameObjectId)
@@ -1059,6 +1073,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 	switch(m_currentTool)
 	{
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		case eToolDrawTerrainBezier:
 		{
 			const float boxHalfExtents = 2.0f;
@@ -1384,6 +1399,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 			break;
 		}
+#endif
 
 		case eToolMoveStamp:
 		{
@@ -1728,6 +1744,7 @@ void MapPanel::SetTool(ToolType tool)
 
 	switch(tool)
 	{
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	case eToolFill:
 		//If previous tool was selectTiles, fill selection and leave previous tool data
 		if(m_selectedTiles.size() > 0)
@@ -1768,14 +1785,17 @@ void MapPanel::SetTool(ToolType tool)
 		ResetToolData();
 		m_previewTile = m_project.GetPaintTile();
 		break;
+#endif
 
 	case eToolPaintStamp:
 	{
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		//If coming from stamp clone tool, don't wipe preview data
 		if(previousTool != eToolClone)
 		{
 			ResetToolData();
 		}
+#endif
 
 		//Get temp cloning stamp, else get current painting stamp
 		Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
@@ -1793,6 +1813,7 @@ void MapPanel::SetTool(ToolType tool)
 		break;
 	}
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	case eToolCopyToNewMap:
 	{
 		//Must previously have been in Select mode
@@ -2009,6 +2030,7 @@ void MapPanel::SetTool(ToolType tool)
 
 		break;
 	}
+#endif
 
 	case eToolSelectGameObject:
 	case eToolMoveGameObject:

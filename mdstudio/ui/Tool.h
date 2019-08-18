@@ -21,8 +21,7 @@ class MapPanel;
 
 enum ToolType
 {
-	eToolSelectTiles,
-	eToolSelectStamp,
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	eToolPaintTile,
 	eToolPaintTerrainTile,
 	eToolPaintCollisionTerrain,
@@ -32,16 +31,22 @@ enum ToolType
 	eToolDrawTerrainBezier,
 	eToolSelectTerrainBezier,
 	eToolDeleteTerrainBezier,
-	eToolPaintStamp,
 	eToolClone,
 	eToolCreateStamp,
-	eToolRemoveStamp,
-	eToolMoveStamp,
 	eToolFill,
-	eToolTilePicker,
-	eToolStampPicker,
 	eToolFlipX,
 	eToolFlipY,
+	eToolGenerateTerrain,
+	eToolCopyToNewMap,
+#endif
+
+	eToolSelectTiles,
+	eToolSelectStamp,
+	eToolPaintStamp,
+	eToolMoveStamp,
+	eToolRemoveStamp,
+	eToolTilePicker,
+	eToolStampPicker,
 	eToolSelectGameObject,
 	eToolPlaceGameObject,
 	eToolDrawGameObject,
@@ -49,9 +54,7 @@ enum ToolType
 	eToolMoveGameObject,
 	eToolAnimateGameObject,
 	eToolRemoveGameObject,
-	eToolGenerateTerrain,
 	eToolCreateStampAnim,
-	eToolCopyToNewMap
 };
 
 class Tool

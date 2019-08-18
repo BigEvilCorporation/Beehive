@@ -71,6 +71,7 @@ void TileEditorPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mou
 	{
 		TileId tileId = m_project.GetPaintTile();
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode
 		if(buttonBits & eMouseLeft)
 		{
 			if(Tile* tile = m_project.GetTileset().GetTile(tileId))
@@ -106,6 +107,7 @@ void TileEditorPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mou
 				}
 			}
 		}
+#endif
 	}
 }
 
