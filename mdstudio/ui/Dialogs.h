@@ -55,6 +55,19 @@ protected:
 	virtual void OnBtnBrowse(wxCommandEvent& event);
 };
 
+class ImportStampsDialog : public ImportStampsDialogBase
+{
+public:
+	ImportStampsDialog(wxWindow* parent);
+
+	wxArrayString m_paths;
+
+protected:
+	virtual void OnBtnBrowse(wxCommandEvent& event);
+	virtual void OnRadioImportFile(wxCommandEvent& event);
+	virtual void OnRadioImportDir(wxCommandEvent& event);
+};
+
 class ImportDialogSpriteSheet : public ImportDialogSpriteSheetBase
 {
 public:

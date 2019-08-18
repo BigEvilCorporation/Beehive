@@ -51,7 +51,7 @@ wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
 MainWindow::MainWindow()
 	: MainWindowBase(NULL)
 {
-	SetStatusText("BEEhive v0.11");
+	SetStatusText("Beehive Studio v0.5");
 
 	m_refreshLockStack = 0;
 
@@ -96,18 +96,6 @@ MainWindow::MainWindow()
 	//Create and load rendering resources
 	m_renderResources = new RenderResources(*defaultProject, *m_resourceManager);
 
-#if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
-	delete m_ribbonPanelTiles;
-	delete m_ribbonPanelCollision;
-	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_CREATE);
-	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_GRID_SNAP);
-	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_SHOW_COLLISION);
-#endif
-
-#if BEEHIVE_LEAN_UI
-	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_DELETE);
-#endif
-
 	//Open welcome project
 	static bool openWelcomeProject = true;
 	if(openWelcomeProject)
@@ -147,6 +135,30 @@ MainWindow::~MainWindow()
 
 	//Delete resource manager
 	delete m_resourceManager;
+}
+
+void MainWindow::OnPostInit()
+{
+#if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+	delete m_ribbonPanelTiles;
+	m_ribbonBar->Realise();
+	delete m_ribbonPanelCollision;
+	m_ribbonBar->Realise();
+	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_CREATE);
+	m_ribbonBar->Realise();
+	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_GRID_SNAP);
+	m_ribbonBar->Realise();
+	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_SHOW_COLLISION);
+	m_ribbonBar->Realise();
+#endif
+
+#if BEEHIVE_LEAN_UI
+	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_DELETE);
+#endif
+
+#if BEEHIVE_FIXED_STAMP_MODE || BEEHIVE_LEAN_UI
+	m_ribbonBar->Realise();
+#endif
 }
 
 void MainWindow::EventHandlerKeyboard(wxKeyEvent& event)
@@ -1209,10 +1221,16 @@ void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
 			PlatformConfig config = PlatformPresets::s_configs[PlatformPresets::ePresetMegaDrive];
 			config.tileWidth = dialog.m_spinCtrlTileWidth->GetValue();
 			config.tileHeight = dialog.m_spinCtrlTileHeight->GetValue();
-			config.scrollPlaneWidthTiles = dialog.m_spinCtrlMapWidth->GetValue();
-			config.scrollPlaneHeightTiles = dialog.m_spinCtrlMapHeight->GetValue();
 			config.stampWidth = dialog.m_spinCtrlStampWidth->GetValue();
 			config.stampHeight = dialog.m_spinCtrlStampHeight->GetValue();
+
+#if BEEHIVE_FIXED_STAMP_MODE
+			config.scrollPlaneWidthTiles = dialog.m_spinCtrlMapWidth->GetValue() * config.stampWidth;
+			config.scrollPlaneHeightTiles = dialog.m_spinCtrlMapHeight->GetValue() * config.stampHeight;
+#else
+			config.scrollPlaneWidthTiles = dialog.m_spinCtrlMapWidth->GetValue();
+			config.scrollPlaneHeightTiles = dialog.m_spinCtrlMapHeight->GetValue();
+#endif
 
 			if (config.stampWidth > 0)
 			{
@@ -1880,6 +1898,123 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 #endif
 }
 
+void MainWindow::OnBtnStampsImport(wxRibbonButtonBarEvent& event)
+{
+	if (m_project.get())
+	{
+		ImportStampsDialog dialog(this);
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			SetStatusText("Importing...");
+
+			//Importing from stamp(s)
+			u32 flags = Project::eBMPImportToStamp;
+
+			//Enumerate flags
+			if (dialog.m_chkReplaceStamps->GetValue())
+				flags |= Project::eBMPImportReplaceStamp;
+
+			//Unsupported flags if multiple files/stamp directory selected
+			if (!dialog.m_radioStampDir->GetValue())
+			{
+				if (dialog.m_chkImportPalette->GetValue())
+					flags |= Project::eBMPImportWholePalette;
+				if (dialog.m_chkClearPalettes->GetValue())
+					flags |= Project::eBMPImportClearPalettes;
+			}
+
+			u32 palettes = (1 << dialog.m_radioBoxPal->GetSelection());
+
+			//Clear palette if checked
+			if (dialog.m_chkClearPalettes->GetValue())
+			{
+				m_project->GetPalette(dialog.m_radioBoxPal->GetSelection())->Clear();
+			}
+
+			wxArrayString filenames;
+
+			if (dialog.m_radioStampDir->GetValue() && dialog.m_dirStamps->GetPath().size() > 0)
+			{
+				//Enumerate all files in directory
+				wxString directoryPath = dialog.m_dirStamps->GetDirName().GetPath();
+				wxDir dir(directoryPath);
+
+				wxString filename;
+				bool next = dir.GetFirst(&filename, "*.bmp", wxDIR_FILES | wxDIR_NO_FOLLOW);
+				while (next)
+				{
+					//Get stamp name
+					std::string stampName = filename;
+
+					const size_t lastSlash = stampName.find_last_of('\\');
+					if (std::string::npos != lastSlash)
+					{
+						stampName.erase(0, lastSlash + 1);
+					}
+
+					// Remove extension if present.
+					const size_t period = stampName.rfind('.');
+					if (std::string::npos != period)
+					{
+						stampName.erase(period);
+					}
+
+					//If only to import existing, stamp by this name must already exist
+					if (!(flags & Project::eBMPImportOnlyExistingStamps) || m_project->FindStamp(stampName))
+					{
+						filenames.Add(directoryPath + "\\" + filename);
+					}
+
+					next = dir.GetNext(&filename);
+				}
+			}
+			else if(dialog.m_radioSingleStamp->GetValue())
+			{
+				//Use files from file selection dlg
+				filenames = dialog.m_paths;
+			}
+
+			for (int i = 0; i < filenames.size(); i++)
+			{
+				Stamp* stampToReplace = NULL;
+
+				if (flags & Project::eBMPImportReplaceStamp)
+				{
+					std::string stampName = filenames[i].c_str().AsChar();
+
+					const size_t lastSlash = stampName.find_last_of('\\');
+					if (std::string::npos != lastSlash)
+					{
+						stampName.erase(0, lastSlash + 1);
+					}
+
+					// Remove extension if present.
+					const size_t period = stampName.rfind('.');
+					if (std::string::npos != period)
+					{
+						stampName.erase(period);
+					}
+
+					stampToReplace = m_project->FindStamp(stampName);
+				}
+
+				m_project->ImportBitmap(filenames[i].c_str().AsChar(), flags, palettes, stampToReplace);
+			}
+
+			//Refresh tileset
+			RefreshTileset();
+
+			//Refresh collison tileset
+			RefreshTerrainTileset();
+
+			//Refresh whole application
+			RefreshAll();
+
+			SetStatusText("Import complete");
+		}
+	}
+}
+
 void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
@@ -2132,9 +2267,16 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 	{
 		Map& map = m_project->GetEditingMap();
 		CollisionMap& collisionMap = m_project->GetEditingCollisionMap();
+		const PlatformConfig& config = m_project->GetPlatformConfig();
 
+#if BEEHIVE_FIXED_STAMP_MODE
+		const int originalWidth = map.GetWidth() / config.stampWidth;
+		const int originalHeight = map.GetHeight() / config.stampHeight;
+#else
 		const int originalWidth = map.GetWidth();
 		const int originalHeight = map.GetHeight();
+#endif
+
 		const int tileWidth = m_project->GetPlatformConfig().tileWidth;
 		const int tileHeight = m_project->GetPlatformConfig().tileHeight;
 
@@ -2144,8 +2286,13 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 
 		if(dialog.ShowModal() == wxID_OK)
 		{
+#if BEEHIVE_FIXED_STAMP_MODE
+			int width = dialog.m_spinCtrlWidth->GetValue() * config.stampWidth;
+			int height = dialog.m_spinCtrlHeight->GetValue() * config.stampHeight;
+#else
 			int width = dialog.m_spinCtrlWidth->GetValue();
 			int height = dialog.m_spinCtrlHeight->GetValue();
+#endif
 
 			bool shiftRight = dialog.m_radioBoxShiftX->GetSelection() != 0;
 			bool shiftDown = dialog.m_radioBoxShiftY->GetSelection() != 0;

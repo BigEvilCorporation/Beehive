@@ -117,6 +117,8 @@ public:
 	void UnlockRefresh();
 	bool IsRefreshLocked() const;
 
+	void OnPostInit();
+
 protected:
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);
@@ -128,6 +130,7 @@ protected:
 	virtual void OnBtnTilesDelete(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnTilesCleanup(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnSpriteEditor(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnStampsImport(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnStampsExportBMPs(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnStampsCleanup(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnColMapClear(wxRibbonButtonBarEvent& event);

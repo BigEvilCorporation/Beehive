@@ -81,46 +81,47 @@ class SpriteCanvas;
 #define wxID_BTN_TILES_DELETE 1025
 #define wxID_BTN_TILES_CLEANUP 1026
 #define wxID_BTN_SPRITE_EDITOR 1027
-#define wxID_BTN_STAMPS_CREATE 1028
-#define wxID_BTN_STAMPS_DELETE 1029
-#define wxID_BTN_STAMPS_EXPORT_BMP 1030
-#define wxID_BTN_STAMPS_CLEANUP 1031
-#define wxID_BTN_COL_TILES_CREATE 1032
-#define wxID_BTN_COL_TILES_DELETE 1033
-#define wxID_BTN_COL_TILES_CLEANUP 1034
-#define wxID_BTN_COL_MAP_CLEAR 1035
-#define wxID_BTN_COL_GEN_BEZIER 1036
-#define wxID_BTN_GAME_OBJ_TYPES 1037
-#define wxID_BTN_CANCEL 1038
-#define wxID_TOOL_SELECTSTAMP 1039
-#define wxID_TOOL_STAMP 1040
-#define wxID_TOOL_MOVESTAMP 1041
-#define wxID_TOOL_STAMPPICKER 1042
-#define wxID_TOOL_CREATESTAMP 1043
-#define wxID_TOOL_REMOVESTAMP 1044
-#define wxID_TOOL_COL_PAINTTERRAIN 1045
-#define wxID_TOOL_COL_PAINTSOLID 1046
-#define wxID_TOOL_COL_PAINTHOLE 1047
-#define wxID_TOOL_COL_DELETETERRTILE 1048
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1049
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1050
-#define wxID_TOOL_COL_DELETETERRAINBEZIER 1051
-#define wxID_TOOL_SELECTTILE 1052
-#define wxID_TOOL_PAINT 1053
-#define wxID_TOOL_TILEPICKER 1054
-#define wxID_TOOL_FLIPX 1055
-#define wxID_TOOL_FLIPY 1056
-#define wxID_TOOL_FILL 1057
-#define wxID_TOOL_CLONE 1058
-#define wxID_TOOL_CREATE_SCENE_ANIM 1059
-#define wxID_TOOL_COPY_TO_NEW_MAP 1060
-#define wxID_TOOL_SELECTGAMEOBJ 1061
-#define wxID_TOOL_PLACEGAMEOBJ 1062
-#define wxID_TOOL_MOVEGAMEOBJ 1063
-#define wxID_TOOL_ANIMATEGAMEOBJ 1064
-#define wxID_TOOL_REMOVEGAMEOBJ 1065
-#define wxID_TOOL_DRAWGAMEOBJ 1066
-#define wxID_TOOL_DUPLICATEGAMEOBJ 1067
+#define wxID_BTN_STAMPS_IMPORT 1028
+#define wxID_BTN_STAMPS_CREATE 1029
+#define wxID_BTN_STAMPS_DELETE 1030
+#define wxID_BTN_STAMPS_EXPORT_BMP 1031
+#define wxID_BTN_STAMPS_CLEANUP 1032
+#define wxID_BTN_COL_TILES_CREATE 1033
+#define wxID_BTN_COL_TILES_DELETE 1034
+#define wxID_BTN_COL_TILES_CLEANUP 1035
+#define wxID_BTN_COL_MAP_CLEAR 1036
+#define wxID_BTN_COL_GEN_BEZIER 1037
+#define wxID_BTN_GAME_OBJ_TYPES 1038
+#define wxID_BTN_CANCEL 1039
+#define wxID_TOOL_SELECTSTAMP 1040
+#define wxID_TOOL_STAMP 1041
+#define wxID_TOOL_MOVESTAMP 1042
+#define wxID_TOOL_STAMPPICKER 1043
+#define wxID_TOOL_CREATESTAMP 1044
+#define wxID_TOOL_REMOVESTAMP 1045
+#define wxID_TOOL_COL_PAINTTERRAIN 1046
+#define wxID_TOOL_COL_PAINTSOLID 1047
+#define wxID_TOOL_COL_PAINTHOLE 1048
+#define wxID_TOOL_COL_DELETETERRTILE 1049
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1050
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1051
+#define wxID_TOOL_COL_DELETETERRAINBEZIER 1052
+#define wxID_TOOL_SELECTTILE 1053
+#define wxID_TOOL_PAINT 1054
+#define wxID_TOOL_TILEPICKER 1055
+#define wxID_TOOL_FLIPX 1056
+#define wxID_TOOL_FLIPY 1057
+#define wxID_TOOL_FILL 1058
+#define wxID_TOOL_CLONE 1059
+#define wxID_TOOL_CREATE_SCENE_ANIM 1060
+#define wxID_TOOL_COPY_TO_NEW_MAP 1061
+#define wxID_TOOL_SELECTGAMEOBJ 1062
+#define wxID_TOOL_PLACEGAMEOBJ 1063
+#define wxID_TOOL_MOVEGAMEOBJ 1064
+#define wxID_TOOL_ANIMATEGAMEOBJ 1065
+#define wxID_TOOL_REMOVEGAMEOBJ 1066
+#define wxID_TOOL_DRAWGAMEOBJ 1067
+#define wxID_TOOL_DUPLICATEGAMEOBJ 1068
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -181,6 +182,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnTilesDelete( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteEditor( wxRibbonButtonBarEvent& event ) { event.Skip(); }
+		virtual void OnBtnStampsImport( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnStampsExportBMPs( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnStampsCleanup( wxRibbonButtonBarEvent& event ) { event.Skip(); }
 		virtual void OnBtnColTilesCreate( wxRibbonButtonBarEvent& event ) { event.Skip(); }
@@ -195,7 +197,7 @@ class MainWindowBase : public wxFrame
 		wxRibbonPanel* m_ribbonPanelStamps;
 		wxRibbonButtonBar* m_ribbonButtonBarStamps;
 
-		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("BEEhive v0.1"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 971,240 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
+		MainWindowBase( wxWindow* parent, wxWindowID id = wxID_MAINWINDOW, const wxString& title = wxT("Beehive Studio v0.5"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 971,240 ), long style = wxDEFAULT_FRAME_STYLE|wxMAXIMIZE|wxTAB_TRAVERSAL );
 
 		~MainWindowBase();
 
@@ -744,6 +746,40 @@ class ImportDialogBase : public wxDialog
 
 		ImportDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 503,466 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~ImportDialogBase();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class ImportStampsDialogBase
+///////////////////////////////////////////////////////////////////////////////
+class ImportStampsDialogBase : public wxDialog
+{
+	private:
+
+	protected:
+		wxTextCtrl* m_filenames;
+		wxButton* m_btnSelectFiles;
+		wxStdDialogButtonSizer* m_sdbSizer2;
+		wxButton* m_sdbSizer2OK;
+		wxButton* m_sdbSizer2Cancel;
+
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnRadioImportFile( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnBrowse( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnRadioImportDir( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+		wxRadioButton* m_radioSingleStamp;
+		wxRadioButton* m_radioStampDir;
+		wxDirPickerCtrl* m_dirStamps;
+		wxCheckBox* m_chkClearPalettes;
+		wxCheckBox* m_chkImportPalette;
+		wxCheckBox* m_chkReplaceStamps;
+		wxRadioBox* m_radioBoxPal;
+
+		ImportStampsDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 503,332 ), long style = wxCAPTION|wxSTAY_ON_TOP );
+		~ImportStampsDialogBase();
 
 };
 

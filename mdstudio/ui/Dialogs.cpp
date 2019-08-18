@@ -38,8 +38,16 @@ void DialogNewProject::PopulatePreset(int index)
 	PlatformConfig& config = PlatformPresets::s_configs[index];
 	m_spinCtrlTileWidth->SetValue(config.tileWidth);
 	m_spinCtrlTileHeight->SetValue(config.tileHeight);
+	m_spinCtrlStampWidth->SetValue(config.stampWidth);
+	m_spinCtrlStampHeight->SetValue(config.stampHeight);
+
+#if BEEHIVE_FIXED_STAMP_MODE
+	m_spinCtrlMapWidth->SetValue(config.scrollPlaneWidthTiles / config.stampWidth);
+	m_spinCtrlMapHeight->SetValue(config.scrollPlaneHeightTiles / config.stampHeight);
+#else
 	m_spinCtrlMapWidth->SetValue(config.scrollPlaneWidthTiles);
 	m_spinCtrlMapHeight->SetValue(config.scrollPlaneHeightTiles);
+#endif
 }
 
 ImportDialog::ImportDialog(wxWindow* parent) : ImportDialogBase(parent)
@@ -69,6 +77,47 @@ void ImportDialog::OnBtnBrowse(wxCommandEvent& event)
 			m_filenames->SetValue(wxString(text));
 		}
 	}
+}
+
+ImportStampsDialog::ImportStampsDialog(wxWindow* parent) : ImportStampsDialogBase(parent)
+{
+
+}
+
+void ImportStampsDialog::OnBtnBrowse(wxCommandEvent& event)
+{
+	wxFileDialog dialog(this, _("Open BMP files"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		dialog.GetPaths(m_paths);
+
+		if (m_paths.size() == 0)
+		{
+			m_filenames->Clear();
+		}
+		else if (m_paths.size() == 1)
+		{
+			m_filenames->SetValue(m_paths[0]);
+		}
+		else
+		{
+			char text[128] = { 0 };
+			sprintf(text, "(%u) BMP files", m_paths.size());
+			m_filenames->SetValue(wxString(text));
+		}
+	}
+}
+
+void ImportStampsDialog::OnRadioImportFile(wxCommandEvent& event)
+{
+	m_chkImportPalette->Enable(true);
+	m_chkClearPalettes->Enable(true);
+}
+
+void ImportStampsDialog::OnRadioImportDir(wxCommandEvent& event)
+{
+	m_chkImportPalette->Enable(false);
+	m_chkClearPalettes->Enable(false);
 }
 
 ImportDialogSpriteSheet::ImportDialogSpriteSheet(wxWindow* parent, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)

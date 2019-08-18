@@ -132,6 +132,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarSprites->AddButton( wxID_BTN_SPRITE_EDITOR, wxT("Sprite Editor"), wxBitmap( importtiles_xpm ), wxEmptyString);
 	m_ribbonPanelStamps = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Stamps") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarStamps = new wxRibbonButtonBar( m_ribbonPanelStamps, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_IMPORT, wxT("Import"), wxBitmap( importtiles_xpm ), wxEmptyString);
 	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_CREATE, wxT("Create"), wxBitmap( newstamp_xpm ), wxEmptyString);
 	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_DELETE, wxT("Delete"), wxBitmap( deletestamp_xpm ), wxEmptyString);
 	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_EXPORT_BMP, wxT("Export As BMPs"), wxBitmap( save_xpm ), wxEmptyString);
@@ -188,6 +189,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Connect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
 	this->Connect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
 	this->Connect( wxID_BTN_SPRITE_EDITOR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpriteEditor ) );
+	this->Connect( wxID_BTN_STAMPS_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsImport ) );
 	this->Connect( wxID_BTN_STAMPS_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsExportBMPs ) );
 	this->Connect( wxID_BTN_STAMPS_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsCleanup ) );
 	this->Connect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
@@ -228,6 +230,7 @@ MainWindowBase::~MainWindowBase()
 	this->Disconnect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
 	this->Disconnect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
 	this->Disconnect( wxID_BTN_SPRITE_EDITOR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpriteEditor ) );
+	this->Disconnect( wxID_BTN_STAMPS_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsImport ) );
 	this->Disconnect( wxID_BTN_STAMPS_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsExportBMPs ) );
 	this->Disconnect( wxID_BTN_STAMPS_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsCleanup ) );
 	this->Disconnect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
@@ -1899,6 +1902,124 @@ ImportDialogBase::~ImportDialogBase()
 {
 	// Disconnect Events
 	m_btnSelectFiles->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ImportDialogBase::OnBtnBrowse ), NULL, this );
+
+}
+
+ImportStampsDialogBase::ImportStampsDialogBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer10;
+	bSizer10 = new wxBoxSizer( wxVERTICAL );
+
+	wxFlexGridSizer* fgSizer54;
+	fgSizer54 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer54->AddGrowableCol( 0 );
+	fgSizer54->SetFlexibleDirection( wxBOTH );
+	fgSizer54->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	wxFlexGridSizer* fgSizer52;
+	fgSizer52 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer52->AddGrowableCol( 0 );
+	fgSizer52->SetFlexibleDirection( wxBOTH );
+	fgSizer52->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	wxFlexGridSizer* fgSizer57;
+	fgSizer57 = new wxFlexGridSizer( 0, 3, 0, 0 );
+	fgSizer57->AddGrowableCol( 1 );
+	fgSizer57->SetFlexibleDirection( wxBOTH );
+	fgSizer57->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_radioSingleStamp = new wxRadioButton( this, wxID_ANY, wxT("Import single file:"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+	m_radioSingleStamp->SetValue( true );
+	fgSizer57->Add( m_radioSingleStamp, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_filenames = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer57->Add( m_filenames, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+
+	m_btnSelectFiles = new wxButton( this, wxID_ANY, wxT("Browse"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer57->Add( m_btnSelectFiles, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+
+	fgSizer52->Add( fgSizer57, 1, wxEXPAND, 5 );
+
+	wxFlexGridSizer* fgSizer59;
+	fgSizer59 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer59->AddGrowableCol( 1 );
+	fgSizer59->SetFlexibleDirection( wxBOTH );
+	fgSizer59->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_radioStampDir = new wxRadioButton( this, wxID_ANY, wxT("Import directory:"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer59->Add( m_radioStampDir, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_dirStamps = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE|wxDIRP_DIR_MUST_EXIST );
+	fgSizer59->Add( m_dirStamps, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxEXPAND, 5 );
+
+
+	fgSizer52->Add( fgSizer59, 1, wxEXPAND, 5 );
+
+
+	fgSizer54->Add( fgSizer52, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer77;
+	bSizer77 = new wxBoxSizer( wxHORIZONTAL );
+
+	wxFlexGridSizer* fgSizer55;
+	fgSizer55 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer55->SetFlexibleDirection( wxBOTH );
+	fgSizer55->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_chkClearPalettes = new wxCheckBox( this, wxID_ANY, wxT("Clear palettes"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer55->Add( m_chkClearPalettes, 0, wxALL, 5 );
+
+	m_chkImportPalette = new wxCheckBox( this, wxID_ANY, wxT("Import whole palette"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer55->Add( m_chkImportPalette, 0, wxALL, 5 );
+
+	m_chkReplaceStamps = new wxCheckBox( this, wxID_ANY, wxT("Replace existing stamp(s)"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer55->Add( m_chkReplaceStamps, 0, wxALL, 5 );
+
+	wxString m_radioBoxPalChoices[] = { wxT("1"), wxT("2"), wxT("3"), wxT("4") };
+	int m_radioBoxPalNChoices = sizeof( m_radioBoxPalChoices ) / sizeof( wxString );
+	m_radioBoxPal = new wxRadioBox( this, wxID_ANY, wxT("Palette"), wxDefaultPosition, wxDefaultSize, m_radioBoxPalNChoices, m_radioBoxPalChoices, 1, wxRA_SPECIFY_COLS );
+	m_radioBoxPal->SetSelection( 0 );
+	fgSizer55->Add( m_radioBoxPal, 0, wxALL|wxEXPAND, 5 );
+
+
+	bSizer77->Add( fgSizer55, 1, wxEXPAND, 5 );
+
+
+	fgSizer54->Add( bSizer77, 1, wxEXPAND, 5 );
+
+	m_sdbSizer2 = new wxStdDialogButtonSizer();
+	m_sdbSizer2OK = new wxButton( this, wxID_OK );
+	m_sdbSizer2->AddButton( m_sdbSizer2OK );
+	m_sdbSizer2Cancel = new wxButton( this, wxID_CANCEL );
+	m_sdbSizer2->AddButton( m_sdbSizer2Cancel );
+	m_sdbSizer2->Realize();
+
+	fgSizer54->Add( m_sdbSizer2, 1, wxALIGN_RIGHT, 5 );
+
+
+	bSizer10->Add( fgSizer54, 1, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer10 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_radioSingleStamp->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( ImportStampsDialogBase::OnRadioImportFile ), NULL, this );
+	m_btnSelectFiles->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ImportStampsDialogBase::OnBtnBrowse ), NULL, this );
+	m_radioStampDir->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( ImportStampsDialogBase::OnRadioImportDir ), NULL, this );
+}
+
+ImportStampsDialogBase::~ImportStampsDialogBase()
+{
+	// Disconnect Events
+	m_radioSingleStamp->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( ImportStampsDialogBase::OnRadioImportFile ), NULL, this );
+	m_btnSelectFiles->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ImportStampsDialogBase::OnBtnBrowse ), NULL, this );
+	m_radioStampDir->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( ImportStampsDialogBase::OnRadioImportDir ), NULL, this );
 
 }
 

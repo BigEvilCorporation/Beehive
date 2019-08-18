@@ -32,6 +32,7 @@ bool BeehiveWxApp::OnInit()
 	m_mainWindow = new MainWindow();
 	SetTopWindow(m_mainWindow);
     m_mainWindow->Show(true);
+	m_mainWindow->OnPostInit();
 
 	return true;
 }
