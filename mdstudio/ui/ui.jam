@@ -19,6 +19,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	Dialogs.h
 	MainWindow.cpp
 	MainWindow.h
+	EditStampCollisionDialog.cpp
+	EditStampCollisionDialog.h
 	GameObjectParamsPanel.cpp
 	GameObjectParamsPanel.h
 	GameObjectTypePanel.cpp

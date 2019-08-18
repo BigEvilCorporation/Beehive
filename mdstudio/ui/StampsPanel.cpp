@@ -13,6 +13,7 @@
 #include "MainWindow.h"
 #include "SpriteAnimEditorDialog.h"
 #include "UpdateStampDialog.h"
+#include "EditStampCollisionDialog.h"
 
 #include <wx/menu.h>
 #include <wx/filedlg.h>
@@ -233,14 +234,21 @@ void StampsPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 			wxMenu contextMenu;
 
 			contextMenu.Append(eMenuRenameStamp, wxString("Rename stamp"));
+#if !BEEHIVE_LEAN_UI
 			contextMenu.Append(eMenuUpdateStamp, wxString("Update stamp"));
 			contextMenu.Append(eMenuUpdatePalette, wxString("Update palette"));
 			contextMenu.Append(eMenuSubstituteStamp, wxString("Substitute stamp"));
+#endif
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
+			contextMenu.Append(eMenuEditCollision, wxString("Edit collision"));
+#if !BEEHIVE_LEAN_UI
 			contextMenu.Append(eMenuSortTilesSequentially, wxString("Sort tiles sequentially"));
 			contextMenu.Append(eMenuOpenInAnimEditor, wxString("Open in animation editor"));
+#endif
+#if !BEEHIVE_FIXED_STAMP_MODE
 			contextMenu.Append(eMenuSetStampLowDrawPrio, wxString("Set stamp low draw priority"));
 			contextMenu.Append(eMenuSetStampHighDrawPrio, wxString("Set stamp high draw priority"));
+#endif
 			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampsPanel::OnContextMenuClick, NULL, this);
 			PopupMenu(&contextMenu);
 		}
@@ -264,7 +272,8 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
-	if(event.GetId() == eMenuUpdateStamp)
+#if !BEEHIVE_LEAN_UI
+	else if(event.GetId() == eMenuUpdateStamp)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
@@ -350,6 +359,7 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			m_mode = eModeSubstitute;
 		}
 	}
+#endif
 	else if(event.GetId() == eMenuDeleteStamp)
 	{
 		//Delete stamp
@@ -362,6 +372,19 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 		//Refresh
 		m_mainWindow->RefreshAll();
 	}
+	else if (event.GetId() == eMenuEditCollision)
+	{
+		//Show collision editor dialog
+		if (Stamp* stamp = m_project.GetStamp(m_hoverStamp))
+		{
+			DialogEditStampCollision dialog(m_mainWindow, *stamp, m_project, m_renderer, *m_glContext, m_renderResources);
+			dialog.ShowModal();
+
+			//Refresh
+			m_mainWindow->RefreshAll();
+		}
+	}
+#if !BEEHIVE_FIXED_STAMP_MODE
 	else if(event.GetId() == eMenuSetStampLowDrawPrio)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
@@ -390,6 +413,8 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
+#endif
+#if !BEEHIVE_LEAN_UI
 	else if(event.GetId() == eMenuSortTilesSequentially)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
@@ -434,6 +459,7 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
+#endif
 }
 
 void StampsPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)

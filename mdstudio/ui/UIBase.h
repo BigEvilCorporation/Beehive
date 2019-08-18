@@ -37,9 +37,9 @@ class SpriteCanvas;
 #include <wx/dialog.h>
 #include <wx/filepicker.h>
 #include <wx/checkbox.h>
+#include <wx/bmpbuttn.h>
 #include <wx/textctrl.h>
 #include <wx/choice.h>
-#include <wx/bmpbuttn.h>
 #include <wx/toolbar.h>
 #include <wx/listctrl.h>
 #include <wx/listbox.h>
@@ -93,19 +93,19 @@ class SpriteCanvas;
 #define wxID_BTN_COL_GEN_BEZIER 1037
 #define wxID_BTN_GAME_OBJ_TYPES 1038
 #define wxID_BTN_CANCEL 1039
-#define wxID_TOOL_SELECTSTAMP 1040
-#define wxID_TOOL_STAMP 1041
-#define wxID_TOOL_MOVESTAMP 1042
-#define wxID_TOOL_STAMPPICKER 1043
-#define wxID_TOOL_CREATESTAMP 1044
-#define wxID_TOOL_REMOVESTAMP 1045
-#define wxID_TOOL_COL_PAINTTERRAIN 1046
-#define wxID_TOOL_COL_PAINTSOLID 1047
-#define wxID_TOOL_COL_PAINTHOLE 1048
-#define wxID_TOOL_COL_DELETETERRTILE 1049
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1050
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1051
-#define wxID_TOOL_COL_DELETETERRAINBEZIER 1052
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1040
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1041
+#define wxID_TOOL_COL_DELETETERRAINBEZIER 1042
+#define wxID_TOOL_SELECTSTAMP 1043
+#define wxID_TOOL_STAMP 1044
+#define wxID_TOOL_MOVESTAMP 1045
+#define wxID_TOOL_STAMPPICKER 1046
+#define wxID_TOOL_CREATESTAMP 1047
+#define wxID_TOOL_REMOVESTAMP 1048
+#define wxID_TOOL_COL_PAINTTERRAIN 1049
+#define wxID_TOOL_COL_PAINTSOLID 1050
+#define wxID_TOOL_COL_PAINTHOLE 1051
+#define wxID_TOOL_COL_DELETETERRTILE 1052
 #define wxID_TOOL_SELECTTILE 1053
 #define wxID_TOOL_PAINT 1054
 #define wxID_TOOL_TILEPICKER 1055
@@ -262,6 +262,33 @@ class DialogUpdateStampBase : public wxDialog
 
 		DialogUpdateStampBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Update Stamp"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 688,485 ), long style = wxCAPTION|wxSTAY_ON_TOP );
 		~DialogUpdateStampBase();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DialogEditStampCollisionBase
+///////////////////////////////////////////////////////////////////////////////
+class DialogEditStampCollisionBase : public wxDialog
+{
+	private:
+
+	protected:
+		wxPanel* m_toolbox;
+		wxBitmapButton* m_toolAddTerrainBezier;
+		wxBitmapButton* m_toolEditTerrainBezier;
+		wxBitmapButton* m_toolDeleteTerrainBezier;
+		SpriteCanvas* m_canvas;
+
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnToolAddBezier( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolEditBezier( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolDeleteBezier( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		DialogEditStampCollisionBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Edit Stamp Collision"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 688,485 ), long style = wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxSTAY_ON_TOP|wxSYSTEM_MENU );
+		~DialogEditStampCollisionBase();
 
 };
 

@@ -42,14 +42,21 @@ private:
 	enum MenuItems
 	{
 		eMenuRenameStamp,
+		eMenuDeleteStamp,
+		eMenuEditCollision,
+
+#if !BEEHIVE_FIXED_STAMP_MODE
+		eMenuSetStampLowDrawPrio,
+		eMenuSetStampHighDrawPrio,
+#endif
+
+#if !BEEHIVE_LEAN_UI
 		eMenuUpdateStamp,
 		eMenuUpdatePalette,
 		eMenuSubstituteStamp,
-		eMenuDeleteStamp,
-		eMenuSetStampLowDrawPrio,
-		eMenuSetStampHighDrawPrio,
 		eMenuSortTilesSequentially,
 		eMenuOpenInAnimEditor,
+#endif
 	};
 
 	enum Mode

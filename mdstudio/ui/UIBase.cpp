@@ -420,6 +420,80 @@ DialogUpdateStampBase::~DialogUpdateStampBase()
 
 }
 
+DialogEditStampCollisionBase::DialogEditStampCollisionBase( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer2;
+	bSizer2 = new wxBoxSizer( wxVERTICAL );
+
+	wxFlexGridSizer* fgSizer41;
+	fgSizer41 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer41->AddGrowableCol( 1 );
+	fgSizer41->AddGrowableRow( 0 );
+	fgSizer41->SetFlexibleDirection( wxBOTH );
+	fgSizer41->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_toolbox = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxFlexGridSizer* fgSizer63;
+	fgSizer63 = new wxFlexGridSizer( 0, 1, 0, 0 );
+	fgSizer63->SetFlexibleDirection( wxBOTH );
+	fgSizer63->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_toolAddTerrainBezier = new wxBitmapButton( m_toolbox, wxID_TOOL_COL_ADDTERRAINBEZIER, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_toolAddTerrainBezier->SetBitmap( wxBitmap( tool_addterrainbezier_xpm ) );
+	m_toolAddTerrainBezier->SetToolTip( wxT("Add Terrain Bezier") );
+
+	fgSizer63->Add( m_toolAddTerrainBezier, 0, wxALL, 5 );
+
+	m_toolEditTerrainBezier = new wxBitmapButton( m_toolbox, wxID_TOOL_COL_EDITTERRAINBEZIER, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_toolEditTerrainBezier->SetBitmap( wxBitmap( tool_editterrainbezier_xpm ) );
+	m_toolEditTerrainBezier->SetToolTip( wxT("Edit Terrain Bezier") );
+
+	fgSizer63->Add( m_toolEditTerrainBezier, 0, wxALL, 5 );
+
+	m_toolDeleteTerrainBezier = new wxBitmapButton( m_toolbox, wxID_TOOL_COL_DELETETERRAINBEZIER, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_toolDeleteTerrainBezier->SetBitmap( wxBitmap( tool_deleteterrainbezier_xpm ) );
+	m_toolDeleteTerrainBezier->SetToolTip( wxT("Delete Terrain Bezier") );
+
+	fgSizer63->Add( m_toolDeleteTerrainBezier, 0, wxALL, 5 );
+
+
+	m_toolbox->SetSizer( fgSizer63 );
+	m_toolbox->Layout();
+	fgSizer63->Fit( m_toolbox );
+	fgSizer41->Add( m_toolbox, 1, wxEXPAND | wxALL, 5 );
+
+	m_canvas = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	fgSizer41->Add( m_canvas, 1, wxEXPAND | wxALL, 5 );
+
+
+	bSizer2->Add( fgSizer41, 1, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer2 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_toolAddTerrainBezier->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolAddBezier ), NULL, this );
+	m_toolEditTerrainBezier->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolEditBezier ), NULL, this );
+	m_toolDeleteTerrainBezier->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolDeleteBezier ), NULL, this );
+}
+
+DialogEditStampCollisionBase::~DialogEditStampCollisionBase()
+{
+	// Disconnect Events
+	m_toolAddTerrainBezier->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolAddBezier ), NULL, this );
+	m_toolEditTerrainBezier->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolEditBezier ), NULL, this );
+	m_toolDeleteTerrainBezier->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolDeleteBezier ), NULL, this );
+
+}
+
 DialogNewMap::DialogNewMap( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
