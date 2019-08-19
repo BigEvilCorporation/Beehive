@@ -72,6 +72,7 @@ void DialogEditStampCollision::OnToolGenerateTerrain(wxCommandEvent& event)
 			//Invalid terrain tiles and refresh stamp canvas
 			m_project.InvalidateTerrainTiles(true);
 			m_canvas->Refresh();
+			m_project.InvalidateTerrainTiles(false);
 		}
 	}
 }
