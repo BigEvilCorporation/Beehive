@@ -345,10 +345,10 @@ DialogUpdateStampBase::DialogUpdateStampBase( wxWindow* parent, wxWindowID id, c
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_canvasOld = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_canvasOld = new StampCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	bSizer3->Add( m_canvasOld, 1, wxEXPAND | wxALL, 5 );
 
-	m_canvasNew = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_canvasNew = new StampCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	bSizer3->Add( m_canvasNew, 1, wxEXPAND | wxALL, 5 );
 
 
@@ -467,7 +467,7 @@ DialogEditStampCollisionBase::DialogEditStampCollisionBase( wxWindow* parent, wx
 	fgSizer63->Fit( m_toolbox );
 	fgSizer41->Add( m_toolbox, 1, wxEXPAND | wxALL, 5 );
 
-	m_canvas = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_canvas = new StampCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	fgSizer41->Add( m_canvas, 1, wxEXPAND | wxALL, 5 );
 
 

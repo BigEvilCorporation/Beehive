@@ -12,6 +12,7 @@
 class KeyframePanel;
 class SpriteCanvas;
 
+#include "StampCanvas.h"
 #include <wx/string.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
@@ -243,8 +244,8 @@ class DialogUpdateStampBase : public wxDialog
 	protected:
 		wxFilePickerCtrl* m_filePicker10;
 		wxCheckBox* m_chkReplacePalette;
-		SpriteCanvas* m_canvasOld;
-		SpriteCanvas* m_canvasNew;
+		StampCanvas* m_canvasOld;
+		StampCanvas* m_canvasNew;
 		wxCheckBox* m_chkFlipX;
 		wxCheckBox* m_chkFlipY;
 		wxButton* m_buttonOk;
@@ -277,7 +278,7 @@ class DialogEditStampCollisionBase : public wxDialog
 		wxBitmapButton* m_toolAddTerrainBezier;
 		wxBitmapButton* m_toolEditTerrainBezier;
 		wxBitmapButton* m_toolDeleteTerrainBezier;
-		SpriteCanvas* m_canvas;
+		StampCanvas* m_canvas;
 
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolAddBezier( wxCommandEvent& event ) { event.Skip(); }
@@ -287,7 +288,7 @@ class DialogEditStampCollisionBase : public wxDialog
 
 	public:
 
-		DialogEditStampCollisionBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Edit Stamp Collision"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 688,485 ), long style = wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxSTAY_ON_TOP|wxSYSTEM_MENU );
+		DialogEditStampCollisionBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Edit Stamp Collision"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 688,485 ), long style = wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU );
 		~DialogEditStampCollisionBase();
 
 };

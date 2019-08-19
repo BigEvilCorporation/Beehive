@@ -53,6 +53,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	SpriteAnimEditorDialog.h
 	SpriteAnimPanel.cpp
 	SpriteAnimPanel.h
+	StampCanvas.cpp
+	StampCanvas.h
 	StampsPanel.cpp
 	StampsPanel.h
 	TerrainTileEditorPanel.cpp

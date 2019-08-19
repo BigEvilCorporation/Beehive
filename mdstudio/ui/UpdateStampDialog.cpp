@@ -89,7 +89,7 @@ void DialogUpdateStamp::Draw(Stamp* stampA, Stamp* stampB)
 		m_canvasOld->CreateGrid(stampA->GetWidth() * tileWidth, stampA->GetHeight() * tileHeight, stampA->GetWidth(), stampA->GetHeight());
 		m_canvasOld->SetGridColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 		m_canvasOld->SetDrawGrid(true);
-		m_canvasOld->SetDrawStamp(*stampA, /* TODO: */ ion::Vector2i());
+		m_canvasOld->SetStamp(*stampA, /* TODO: */ ion::Vector2i());
 		m_canvasOld->Refresh();
 	}
 
@@ -98,7 +98,7 @@ void DialogUpdateStamp::Draw(Stamp* stampA, Stamp* stampB)
 		m_canvasNew->CreateGrid(stampB->GetWidth() * tileWidth, stampB->GetHeight() * tileHeight, stampB->GetWidth(), stampB->GetHeight());
 		m_canvasNew->SetGridColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 		m_canvasNew->SetDrawGrid(true);
-		m_canvasNew->SetDrawStamp(*stampB, /* TODO: */ ion::Vector2i());
+		m_canvasNew->SetStamp(*stampB, /* TODO: */ ion::Vector2i());
 		m_canvasNew->Refresh();
 	}
 }

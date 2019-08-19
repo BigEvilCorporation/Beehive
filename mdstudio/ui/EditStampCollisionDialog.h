@@ -22,6 +22,10 @@ public:
 	DialogEditStampCollision(wxWindow* parent, Stamp& stamp, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual ~DialogEditStampCollision();
 
+	virtual void OnToolAddBezier(wxCommandEvent& event);
+	virtual void OnToolEditBezier(wxCommandEvent& event);
+	virtual void OnToolDeleteBezier(wxCommandEvent& event);
+
 private:
 	void Draw();
 

@@ -4876,7 +4876,7 @@
                                         <property name="resize">Resizable</property>
                                         <property name="show">1</property>
                                         <property name="size"></property>
-                                        <property name="subclass">SpriteCanvas; SpriteCanvas.h</property>
+                                        <property name="subclass">StampCanvas; StampCanvas.h; Not forward_declare</property>
                                         <property name="toolbar_pane">0</property>
                                         <property name="tooltip"></property>
                                         <property name="window_extra_style"></property>
@@ -4963,7 +4963,7 @@
                                         <property name="resize">Resizable</property>
                                         <property name="show">1</property>
                                         <property name="size"></property>
-                                        <property name="subclass">SpriteCanvas; SpriteCanvas.h</property>
+                                        <property name="subclass">StampCanvas; StampCanvas.h; Not forward_declare</property>
                                         <property name="toolbar_pane">0</property>
                                         <property name="tooltip"></property>
                                         <property name="window_extra_style"></property>
@@ -5649,7 +5649,7 @@
             <property name="name">DialogEditStampCollisionBase</property>
             <property name="pos"></property>
             <property name="size">688,485</property>
-            <property name="style">wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxSTAY_ON_TOP|wxSYSTEM_MENU</property>
+            <property name="style">wxCAPTION|wxCLOSE_BOX|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU</property>
             <property name="subclass"></property>
             <property name="title">Edit Stamp Collision</property>
             <property name="tooltip"></property>
@@ -6184,7 +6184,7 @@
                                 <property name="resize">Resizable</property>
                                 <property name="show">1</property>
                                 <property name="size"></property>
-                                <property name="subclass">SpriteCanvas; SpriteCanvas.h</property>
+                                <property name="subclass">StampCanvas; StampCanvas.h; Not forward_declare</property>
                                 <property name="toolbar_pane">0</property>
                                 <property name="tooltip"></property>
                                 <property name="window_extra_style"></property>

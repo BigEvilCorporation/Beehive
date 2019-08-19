@@ -31,6 +31,21 @@ DialogEditStampCollision::~DialogEditStampCollision()
 
 }
 
+void DialogEditStampCollision::OnToolAddBezier(wxCommandEvent& event)
+{
+	m_canvas->SetTool(eToolDrawTerrainBezier);
+}
+
+void DialogEditStampCollision::OnToolEditBezier(wxCommandEvent& event)
+{
+	m_canvas->SetTool(eToolSelectTerrainBezier);
+}
+
+void DialogEditStampCollision::OnToolDeleteBezier(wxCommandEvent& event)
+{
+	m_canvas->SetTool(eToolDeleteTerrainBezier);
+}
+
 void DialogEditStampCollision::Draw()
 {
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -39,6 +54,6 @@ void DialogEditStampCollision::Draw()
 	m_canvas->CreateGrid(m_stamp.GetWidth() * tileWidth, m_stamp.GetHeight() * tileHeight, m_stamp.GetWidth(), m_stamp.GetHeight());
 	m_canvas->SetGridColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	m_canvas->SetDrawGrid(true);
-	m_canvas->SetDrawStamp(m_stamp, ion::Vector2i());
+	m_canvas->SetStamp(m_stamp, ion::Vector2i());
 	m_canvas->Refresh();
 }

@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "UIBase.h"
 #include "RenderResources.h"
 
 #include <ion/renderer/Renderer.h>
@@ -20,6 +19,7 @@
 #include <ion/renderer/Primitive.h>
 #include <ion/renderer/Material.h>
 
+#include <wx/wx.h>
 #include <wx/glcanvas.h>
 
 class SpriteCanvas : public wxGLCanvas
@@ -40,7 +40,6 @@ public:
 	void SetDrawPreview(bool drawPreview, u32 maxFrames);
 	void SetDrawGrid(bool drawGrid);
 	void SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, const ion::Vector2i& size, const ion::Vector2i& offset, const ion::Vector2i& topLeft, const ion::Vector2i& bottomRight);
-	void SetDrawStamp(Stamp& stamp, const ion::Vector2i& offset);
 
 	//Refresh panel
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
@@ -51,11 +50,16 @@ protected:
 	//Render callback
 	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
-private:
 	//Event handlers
 	void EventHandlerPaint(wxPaintEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
 	void EventHandlerMouse(wxMouseEvent& event);
+
+	//Mouse click or changed tile callback
+	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y) {}
+
+	//Mouse click or changed pixel callback
+	virtual void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY) {}
 
 	//Rendering
 	void RenderSpriteSheet(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
@@ -63,13 +67,8 @@ private:
 	void RenderPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderBounds(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
-	void RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
-	void RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
-	//Canvas drawing
-	void PaintTerrainBeziers(Project& project);
-	void PaintCollisionStamp(const Stamp& stamp);
-	void PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y);
+	void SetCameraZoom(float zoom);
 
 	Project* m_project;
 
@@ -83,10 +82,6 @@ private:
 	ion::render::Grid* m_gridPrimitive;
 	ion::render::LineQuad* m_boundsPrimitive;
 	ion::render::Chessboard* m_tileFramePrimitive;
-	ion::render::Chessboard* m_terrainCanvasPrimitive;
-	std::vector<ion::render::Primitive*> m_primitiveBeziers;
-	ion::render::Primitive* m_primitiveBezierPoints;
-	ion::render::Primitive* m_primitiveBezierHandles;
 
 	bool m_drawPreview;
 	u32 m_drawPreviewMaxFrames;
@@ -99,6 +94,9 @@ private:
 
 	//Mouse
 	ion::Vector2i m_mousePrevPos;
+	ion::Vector2i m_prevMouseOverTilePos;
+	ion::Vector2i m_prevMouseOverPixelPos;
+	int m_prevMouseBits;
 	float m_cameraZoom;
 
 	//Canvas size (tiles)
@@ -116,19 +114,4 @@ private:
 
 	//Grid colour
 	ion::Colour m_gridColour;
-
-	//Beziers
-	enum eBezierModifyHandle
-	{
-		eBezierPosition,
-		eBezierControlA,
-		eBezierControlB
-	};
-
-	ion::gamekit::BezierPath* m_currentBezier;
-	ion::gamekit::BezierPath* m_highlightedBezier;
-	u32 m_highlightedBezierIdx;
-	int m_currentBezierControlIdx;
-	eBezierModifyHandle m_currentBezierControlHndl;
-	ion::Vector2 m_currentBezierControlPos;
 };
