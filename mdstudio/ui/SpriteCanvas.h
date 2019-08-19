@@ -45,6 +45,7 @@ public:
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 	virtual void OnResize(wxSizeEvent& event);
 	virtual void OnMouse(wxMouseEvent& event, const ion::Vector2i& mouseDelta);
+	virtual void OnKeyboard(wxKeyEvent& event) {}
 
 protected:
 	//Render callback
@@ -54,6 +55,7 @@ protected:
 	void EventHandlerPaint(wxPaintEvent& event);
 	void EventHandlerResize(wxSizeEvent& event);
 	void EventHandlerMouse(wxMouseEvent& event);
+	void EventHandlerKeyboard(wxKeyEvent& event);
 
 	//Mouse click or changed tile callback
 	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y) {}

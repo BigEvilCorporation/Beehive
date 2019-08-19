@@ -135,6 +135,19 @@ void StampCanvas::SetTool(ToolType tool)
 		delete m_primitiveBezierHandles;
 		m_primitiveBezierHandles = NULL;
 	}
+
+	Refresh();
+}
+
+void StampCanvas::OnKeyboard(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_ESCAPE || event.GetKeyCode() == WXK_SPACE || event.GetKeyCode() == WXK_RETURN)
+	{
+		SetTool(eToolNone);
+		Refresh();
+	}
+
+	SpriteCanvas::OnKeyboard(event);
 }
 
 void StampCanvas::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
@@ -305,7 +318,7 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 					else if ((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
 					{
 						//Finalise bezier
-						m_currentBezier = NULL;
+						SetTool(eToolNone);
 						redraw = true;
 					}
 				}
@@ -324,7 +337,6 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 			case eToolDeleteTerrainBezier:
 			{
 				m_currentBezier = NULL;
-				m_highlightedBezier = NULL;
 
 				//Find bezier(s) under cursor
 				ion::gamekit::BezierPath* smallestBezier = NULL;
@@ -367,6 +379,9 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 					}
 				}
 
+				ion::gamekit::BezierPath* highlightedBezier = nullptr;
+				u32 highlightedBezierIdx = 0;
+
 				if (smallestBezier)
 				{
 					if (buttonBits & eMouseLeft)
@@ -391,10 +406,17 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 					}
 					else
 					{
-						//Set highlighted bezier
-						m_highlightedBezier = smallestBezier;
-						m_highlightedBezierIdx = smallestBezierIndex;
+						highlightedBezier = smallestBezier;
+						highlightedBezierIdx = highlightedBezierIdx;
 					}
+				}
+
+				//Set highlighted bezier
+				if (m_highlightedBezier != highlightedBezier)
+				{
+					m_highlightedBezier = highlightedBezier;
+					m_highlightedBezierIdx = highlightedBezierIdx;
+					Refresh();
 				}
 
 				break;

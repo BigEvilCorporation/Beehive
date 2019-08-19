@@ -43,6 +43,9 @@ private:
 	//Mouse click or changed pixel callback
 	virtual void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY);
 
+	//To end/cancel current tool
+	virtual void OnKeyboard(wxKeyEvent& event);
+
 	//Rendering
 	void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 	void RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);

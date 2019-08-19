@@ -45,6 +45,8 @@ SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 	Bind(wxEVT_RIGHT_UP, &SpriteCanvas::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_MOTION, &SpriteCanvas::EventHandlerMouse, this, GetId());
 	Bind(wxEVT_MOUSEWHEEL, &SpriteCanvas::EventHandlerMouse, this, GetId());
+	Bind(wxEVT_KEY_DOWN, &SpriteCanvas::EventHandlerKeyboard, this, GetId());
+	Bind(wxEVT_KEY_UP, &SpriteCanvas::EventHandlerKeyboard, this, GetId());
 }
 
 SpriteCanvas::~SpriteCanvas()
@@ -432,6 +434,12 @@ void SpriteCanvas::EventHandlerMouse(wxMouseEvent& event)
 	m_mousePrevPos = mousePosScreenSpace;
 
 	OnMouse(event, mouseDelta);
+	event.Skip();
+}
+
+void SpriteCanvas::EventHandlerKeyboard(wxKeyEvent& event)
+{
+	OnKeyboard(event);
 	event.Skip();
 }
 
