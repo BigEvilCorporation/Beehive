@@ -97,32 +97,33 @@ class SpriteCanvas;
 #define wxID_TOOL_COL_ADDTERRAINBEZIER 1040
 #define wxID_TOOL_COL_EDITTERRAINBEZIER 1041
 #define wxID_TOOL_COL_DELETETERRAINBEZIER 1042
-#define wxID_TOOL_SELECTSTAMP 1043
-#define wxID_TOOL_STAMP 1044
-#define wxID_TOOL_MOVESTAMP 1045
-#define wxID_TOOL_STAMPPICKER 1046
-#define wxID_TOOL_CREATESTAMP 1047
-#define wxID_TOOL_REMOVESTAMP 1048
-#define wxID_TOOL_COL_PAINTTERRAIN 1049
-#define wxID_TOOL_COL_PAINTSOLID 1050
-#define wxID_TOOL_COL_PAINTHOLE 1051
-#define wxID_TOOL_COL_DELETETERRTILE 1052
-#define wxID_TOOL_SELECTTILE 1053
-#define wxID_TOOL_PAINT 1054
-#define wxID_TOOL_TILEPICKER 1055
-#define wxID_TOOL_FLIPX 1056
-#define wxID_TOOL_FLIPY 1057
-#define wxID_TOOL_FILL 1058
-#define wxID_TOOL_CLONE 1059
-#define wxID_TOOL_CREATE_SCENE_ANIM 1060
-#define wxID_TOOL_COPY_TO_NEW_MAP 1061
-#define wxID_TOOL_SELECTGAMEOBJ 1062
-#define wxID_TOOL_PLACEGAMEOBJ 1063
-#define wxID_TOOL_MOVEGAMEOBJ 1064
-#define wxID_TOOL_ANIMATEGAMEOBJ 1065
-#define wxID_TOOL_REMOVEGAMEOBJ 1066
-#define wxID_TOOL_DRAWGAMEOBJ 1067
-#define wxID_TOOL_DUPLICATEGAMEOBJ 1068
+#define wxID_TOOL_GENERATETERRAIN 1043
+#define wxID_TOOL_SELECTSTAMP 1044
+#define wxID_TOOL_STAMP 1045
+#define wxID_TOOL_MOVESTAMP 1046
+#define wxID_TOOL_STAMPPICKER 1047
+#define wxID_TOOL_CREATESTAMP 1048
+#define wxID_TOOL_REMOVESTAMP 1049
+#define wxID_TOOL_COL_PAINTTERRAIN 1050
+#define wxID_TOOL_COL_PAINTSOLID 1051
+#define wxID_TOOL_COL_PAINTHOLE 1052
+#define wxID_TOOL_COL_DELETETERRTILE 1053
+#define wxID_TOOL_SELECTTILE 1054
+#define wxID_TOOL_PAINT 1055
+#define wxID_TOOL_TILEPICKER 1056
+#define wxID_TOOL_FLIPX 1057
+#define wxID_TOOL_FLIPY 1058
+#define wxID_TOOL_FILL 1059
+#define wxID_TOOL_CLONE 1060
+#define wxID_TOOL_CREATE_SCENE_ANIM 1061
+#define wxID_TOOL_COPY_TO_NEW_MAP 1062
+#define wxID_TOOL_SELECTGAMEOBJ 1063
+#define wxID_TOOL_PLACEGAMEOBJ 1064
+#define wxID_TOOL_MOVEGAMEOBJ 1065
+#define wxID_TOOL_ANIMATEGAMEOBJ 1066
+#define wxID_TOOL_REMOVEGAMEOBJ 1067
+#define wxID_TOOL_DRAWGAMEOBJ 1068
+#define wxID_TOOL_DUPLICATEGAMEOBJ 1069
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -278,12 +279,14 @@ class DialogEditStampCollisionBase : public wxDialog
 		wxBitmapButton* m_toolAddTerrainBezier;
 		wxBitmapButton* m_toolEditTerrainBezier;
 		wxBitmapButton* m_toolDeleteTerrainBezier;
+		wxBitmapButton* m_toolGenerateTerrain;
 		StampCanvas* m_canvas;
 
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolAddBezier( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolEditBezier( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolDeleteBezier( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolGenerateTerrain( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:

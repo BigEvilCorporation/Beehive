@@ -16,21 +16,25 @@
 
 #include <wx/glcanvas.h>
 
+class MainWindow;
+
 class DialogEditStampCollision : public DialogEditStampCollisionBase
 {
 public:
-	DialogEditStampCollision(wxWindow* parent, Stamp& stamp, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
+	DialogEditStampCollision(MainWindow& mainWindow, Stamp& stamp, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources);
 	virtual ~DialogEditStampCollision();
 
 	virtual void OnToolAddBezier(wxCommandEvent& event);
 	virtual void OnToolEditBezier(wxCommandEvent& event);
 	virtual void OnToolDeleteBezier(wxCommandEvent& event);
+	virtual void OnToolGenerateTerrain(wxCommandEvent& event);
 
 private:
 	void Draw();
 
 	Stamp& m_stamp;
 
+	MainWindow& m_mainWindow;
 	Project& m_project;
 	ion::render::Renderer& m_renderer;
 	RenderResources& m_renderResources;

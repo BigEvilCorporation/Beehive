@@ -11,9 +11,12 @@
 
 #include "EditStampCollisionDialog.h"
 #include "SpriteCanvas.h"
+#include "Dialogs.h"
+#include "MainWindow.h"
 
-DialogEditStampCollision::DialogEditStampCollision(wxWindow* parent, Stamp& stamp, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
-	: DialogEditStampCollisionBase(parent)
+DialogEditStampCollision::DialogEditStampCollision(MainWindow& mainWindow, Stamp& stamp, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
+	: DialogEditStampCollisionBase(&mainWindow)
+	, m_mainWindow(mainWindow)
 	, m_stamp(stamp)
 	, m_project(project)
 	, m_renderer(renderer)
@@ -44,6 +47,33 @@ void DialogEditStampCollision::OnToolEditBezier(wxCommandEvent& event)
 void DialogEditStampCollision::OnToolDeleteBezier(wxCommandEvent& event)
 {
 	m_canvas->SetTool(eToolDeleteTerrainBezier);
+}
+
+void DialogEditStampCollision::OnToolGenerateTerrain(wxCommandEvent& event)
+{
+	m_canvas->SetTool(eToolNone);
+
+	DialogTerrainGen dialog(this);
+
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		int granularity = dialog.m_spinCtrlGranularity->GetValue();
+
+		if (wxMessageBox("This will clear all terrain tiles and regenerate for all stamps, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
+		{
+			if (!m_project.GenerateTerrainFromBeziers(granularity))
+			{
+				wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
+			}
+
+			//Refresh all to redraw terrain tiles
+			m_mainWindow.RefreshAll();
+
+			//Invalid terrain tiles and refresh stamp canvas
+			m_project.InvalidateTerrainTiles(true);
+			m_canvas->Refresh();
+		}
+	}
 }
 
 void DialogEditStampCollision::Draw()
