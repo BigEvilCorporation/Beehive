@@ -694,6 +694,35 @@ ion::render::Primitive* RenderResources::CreateBezierHandlesPrimitive(const ion:
 	return primitive;
 }
 
+ion::render::Primitive* RenderResources::CreateBezierNormalsPrimitive(const ion::gamekit::BezierPath& bezier, float lineLength, float distPerNormal)
+{
+	int numNormals = ion::maths::Max(1.0f, bezier.GetLength() / distPerNormal);
+	std::vector<ion::Vector3> points;
+	points.reserve(numNormals);
+
+	for (int i = 0; i < numNormals; i++)
+	{
+		float time = (float)i / (float)numNormals;
+
+		ion::Vector2 position = bezier.GetPosition(time);
+		ion::Vector2 normal = bezier.GetNormal(time);
+		ion::Vector2 end = position + (normal * lineLength);
+
+		//Lines
+		points.push_back(ion::Vector3(position.x, position.y, 0.0f));
+		points.push_back(ion::Vector3(end.x, end.y, 0.0f));
+	}
+
+	ion::render::LineSegments* primitive = NULL;
+
+	if (points.size() > 0)
+	{
+		primitive = new ion::render::LineSegments(points);
+	}
+
+	return primitive;
+}
+
 RenderResources::SpriteSheetRenderResources::SpriteSheetRenderResources()
 {
 	m_primitive = NULL;

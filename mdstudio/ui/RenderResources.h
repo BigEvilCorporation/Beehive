@@ -122,6 +122,7 @@ public:
 	ion::render::Primitive* CreateBezierPrimitive(const ion::gamekit::BezierPath& bezier);
 	ion::render::Primitive* CreateBezierPointsPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
 	ion::render::Primitive* CreateBezierHandlesPrimitive(const ion::gamekit::BezierPath& bezier, float handleBoxHalfExtents);
+	ion::render::Primitive* CreateBezierNormalsPrimitive(const ion::gamekit::BezierPath& bezier, float lineLength, float distPerNormal);
 
 	//SpriteSheet rendering
 	class SpriteSheetRenderResources

@@ -61,6 +61,7 @@ private:
 	std::vector<ion::render::Primitive*> m_primitiveBeziers;
 	ion::render::Primitive* m_primitiveBezierPoints;
 	ion::render::Primitive* m_primitiveBezierHandles;
+	ion::render::Primitive* m_primitiveBezierNormals;
 
 	//Beziers
 	enum eBezierModifyHandle

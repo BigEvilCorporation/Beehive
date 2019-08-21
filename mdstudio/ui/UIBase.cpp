@@ -482,7 +482,7 @@ DialogEditStampCollisionBase::DialogEditStampCollisionBase( wxWindow* parent, wx
 	m_toolGenerateTerrain = new wxBitmapButton( m_toolbox, wxID_TOOL_GENERATETERRAIN, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
 	m_toolGenerateTerrain->SetBitmap( wxBitmap( tool_genterrain_beziers_xpm ) );
-	m_toolGenerateTerrain->SetToolTip( wxT("Delete Terrain Bezier") );
+	m_toolGenerateTerrain->SetToolTip( wxT("Generate Terrain") );
 
 	fgSizer68->Add( m_toolGenerateTerrain, 0, wxALIGN_BOTTOM|wxALL, 5 );
 

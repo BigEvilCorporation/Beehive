@@ -19,6 +19,7 @@ StampCanvas::StampCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 	m_terrainCanvasPrimitive = NULL;
 	m_primitiveBezierPoints = NULL;
 	m_primitiveBezierHandles = NULL;
+	m_primitiveBezierNormals = NULL;
 	m_highlightedBezier = NULL;
 	m_currentBezier = NULL;
 	m_currentBezierControlIdx = -1;
@@ -501,6 +502,17 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 		material->Unbind();
 	}
 
+	//Draw normals
+	if (m_primitiveBezierNormals)
+	{
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 0.0f, 1.0f));
+		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.SetLineWidth(2.0f);
+		renderer.DrawVertexBuffer(m_primitiveBezierNormals->GetVertexBuffer());
+		renderer.SetLineWidth(1.0f);
+		material->Unbind();
+	}
+
 	//Draw selected handle
 	if (m_currentBezierControlIdx != -1)
 	{
@@ -646,6 +658,12 @@ void StampCanvas::PaintTerrainBeziers(const Stamp& stamp)
 		m_primitiveBezierHandles = NULL;
 	}
 
+	if (m_primitiveBezierNormals)
+	{
+		delete m_primitiveBezierNormals;
+		m_primitiveBezierNormals = NULL;
+	}
+
 	for (int i = 0; i < stamp.GetNumTerrainBeziers(); i++)
 	{
 		const ion::gamekit::BezierPath* bezier = stamp.GetTerrainBezier(i);
@@ -656,5 +674,6 @@ void StampCanvas::PaintTerrainBeziers(const Stamp& stamp)
 	{
 		m_primitiveBezierPoints = m_renderResources->CreateBezierPointsPrimitive(*m_currentBezier, 2.0f);
 		m_primitiveBezierHandles = m_renderResources->CreateBezierHandlesPrimitive(*m_currentBezier, 1.0f);
+		m_primitiveBezierNormals = m_renderResources->CreateBezierNormalsPrimitive(*m_currentBezier, 10.0f, 10.0f);
 	}
 }
