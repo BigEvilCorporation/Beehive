@@ -86,11 +86,12 @@ void StampCanvas::SetStamp(Stamp& stamp, const ion::Vector2i& offset)
 		for (int y = 0; y < height; y++)
 		{
 			TileId tileId = stamp.GetTile(x, y);
+			u32 tileFlags = stamp.GetTileFlags(x, y);
 			int y_inv = height - 1 - y;
 
 			//Set texture coords for cell
 			ion::render::TexCoord coords[4];
-			m_renderResources->GetTileTexCoords(tileId, coords, 0);
+			m_renderResources->GetTileTexCoords(tileId, coords, tileFlags);
 			m_tileFramePrimitive->SetTexCoords((y_inv * width) + x, coords);
 		}
 	}
@@ -437,8 +438,11 @@ void StampCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 	z += zOffset;
 
 	//Render grid
-	RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
-	z += zOffset;
+	if (m_project->GetShowGrid())
+	{
+		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
+	}
 
 	//Render terrain
 	RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
