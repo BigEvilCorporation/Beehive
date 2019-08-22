@@ -41,6 +41,7 @@
 #include <luminary/TilesetExporter.h>
 #include <luminary/MapExporter.h>
 #include <luminary/PaletteExporter.h>
+#include <luminary/TerrainExporter.h>
 #endif
 
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
@@ -1324,6 +1325,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		luminary::SceneExporter sceneExporter;
 		luminary::MapExporter mapExporter;
 		luminary::PaletteExporter paletteExporter;
+		luminary::TerrainExporter terrainExporter;
 
 		std::vector<std::pair<std::string,std::string>> includeFilenames;
 
@@ -1353,7 +1355,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		//Export Luminary tileset
 		std::string tilesetLabel = std::string("tileset_") + m_project->GetName();
-		std::string tilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "TILESET.BIN";
+		std::string tilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "GTILES.BIN";
 		if (tilesetExporter.ExportTileset(tilesetFilename, m_project->GetTileset()))
 		{
 			includeFilenames.push_back(std::make_pair(tilesetLabel, tilesetFilename));
@@ -1371,7 +1373,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		}
 
 		std::string stampsetLabel = std::string("stampset_") + m_project->GetName();
-		std::string stampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "STAMPSET.BIN";
+		std::string stampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "GSTAMPS.BIN";
 		if (tilesetExporter.ExportStamps(stampsetFilename, stamps, m_project->GetTileset(), m_project->GetBackgroundTile()))
 		{
 			includeFilenames.push_back(std::make_pair(stampsetLabel, stampsetFilename));
@@ -1382,10 +1384,38 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		{
 			const Map& map = m_project->GetMap(it->first);
 			std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
-			std::string mapFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(map.GetName()) + ".BIN";
+			std::string mapFilename = m_project->m_settings.sceneExportDir + "\\G" + ion::string::ToUpper(map.GetName()) + ".BIN";
 			if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
 			{
 				includeFilenames.push_back(std::make_pair(mapLabel, mapFilename));
+			}
+		}
+
+		//Export Luminary terrain tileset
+		std::string terrainTilesetLabel = std::string("collision_tileset_") + m_project->GetName();
+		std::string terrainTilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "CTILES.BIN";
+		if (terrainExporter.ExportTerrainTileset(terrainTilesetFilename, m_project->GetTerrainTileset(), m_project->GetPlatformConfig().tileWidth))
+		{
+			includeFilenames.push_back(std::make_pair(terrainTilesetLabel, terrainTilesetFilename));
+		}
+
+		//Export Luminary terrain stamps
+		std::string terrainStampsetLabel = std::string("collision_stampset_") + m_project->GetName();
+		std::string terrainStampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "CSTAMPS.BIN";
+		if (terrainExporter.ExportTerrainStamps(terrainStampsetFilename, stamps, m_project->GetTerrainTileset(), m_project->GetDefaultTerrainTile()))
+		{
+			includeFilenames.push_back(std::make_pair(terrainStampsetLabel, terrainStampsetFilename));
+		}
+
+		//Export Luminary terrain maps
+		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
+		{
+			const Map& map = m_project->GetMap(it->first);
+			std::string terrainMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + map.GetName();
+			std::string terrainMapFilename = m_project->m_settings.sceneExportDir + "\\C" + ion::string::ToUpper(map.GetName()) + ".BIN";
+			if (terrainExporter.ExportTerrainMap(terrainMapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
+			{
+				includeFilenames.push_back(std::make_pair(terrainMapLabel, terrainMapFilename));
 			}
 		}
 
