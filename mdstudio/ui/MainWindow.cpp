@@ -1591,13 +1591,22 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			sceneData.palettesLabel = palettesLabel;
 			sceneData.numPalettes = numPalettes;
+
 			sceneData.mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
 			sceneData.stampsetLabel = stampsetLabel;
 			sceneData.tilesetLabel = tilesetLabel;
+			sceneData.collisionMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + map.GetName();
+			sceneData.collisionStampsetLabel = terrainStampsetLabel;
+			sceneData.collisionTilesetLabel = terrainTilesetLabel;
+
 			sceneData.numTiles = m_project->GetTileset().GetCount();
 			sceneData.numStamps = m_project->GetStampCount();
 			sceneData.mapWidthStamps = map.GetWidth() / m_project->GetPlatformConfig().stampWidth;
 			sceneData.mapHeightStamps = map.GetHeight() / m_project->GetPlatformConfig().stampHeight;
+			sceneData.numCollisionTiles = m_project->GetTerrainTileset().GetCount();
+			sceneData.numCollisionStamps = terrainExporter.GetNumUniqueTerrainStamps();
+			sceneData.collisionMapWidthStamps = map.GetWidth() / m_project->GetPlatformConfig().stampWidth;
+			sceneData.collisionMapHeightStamps = map.GetHeight() / m_project->GetPlatformConfig().stampHeight;
 
 			std::string sceneName = m_project->GetName() + "_" + map.GetName();
 			std::string sceneFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(map.GetName()) + ".ASM";

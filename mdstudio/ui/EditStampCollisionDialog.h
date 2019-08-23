@@ -12,11 +12,15 @@
 #pragma once
 
 #include "UIBase.h"
-#include "RenderResources.h"
+
+#include <ion/renderer/Renderer.h>
 
 #include <wx/glcanvas.h>
 
 class MainWindow;
+class Stamp;
+class Project;
+class RenderResources;
 
 class DialogEditStampCollision : public DialogEditStampCollisionBase
 {

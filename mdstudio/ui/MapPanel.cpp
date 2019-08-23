@@ -12,6 +12,7 @@
 #include "MapPanel.h"
 #include "MainWindow.h"
 #include "SpriteAnimEditorDialog.h"
+#include "EditStampCollisionDialog.h"
 
 #include <wx/Menu.h>
 #include <wx/msgdlg.h>
@@ -580,6 +581,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					wxMenu contextMenu;
 
 					contextMenu.Append(eContextMenuDeleteStamp, wxString("Delete stamp"));
+					contextMenu.Append(eContextMenuEditStampCollision, wxString("Edit stamp collision"));
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 					contextMenu.Append(eContextMenuBakeStamp, wxString("Bake stamp"));
 					contextMenu.Append(eContextMenuStampBringToFront, wxString("Bring to front"));
@@ -944,6 +946,15 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 					PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
 				}
 			}
+		}
+	}
+	else if (event.GetId() == eContextMenuEditStampCollision)
+	{
+		//Show collision editor dialog
+		if (Stamp* stamp = m_project.GetStamp(m_hoverStamp))
+		{
+			DialogEditStampCollision dialog(*m_mainWindow, *stamp, m_project, m_renderer, *m_glContext, m_renderResources);
+			dialog.ShowModal();
 		}
 	}
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode

@@ -13,6 +13,7 @@
 #include "SpriteCanvas.h"
 #include "Dialogs.h"
 #include "MainWindow.h"
+#include "RenderResources.h"
 
 DialogEditStampCollision::DialogEditStampCollision(MainWindow& mainWindow, Stamp& stamp, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
 	: DialogEditStampCollisionBase(&mainWindow)

@@ -50,6 +50,7 @@ private:
 	enum ContextMenuItems
 	{
 		eContextMenuDeleteStamp,
+		eContextMenuEditStampCollision,
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		eContextMenuBakeStamp,
 		eContextMenuStampBringToFront,

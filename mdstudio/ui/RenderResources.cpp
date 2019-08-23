@@ -207,7 +207,8 @@ void RenderResources::CreateTerrainTilesTexture()
 	u8* data = new u8[textureSize];
 	ion::memory::MemSet(data, 0, textureSize);
 
-	const ion::Colour setColour(1.0f, 0.7f, 1.0f, 1.0f);
+	const ion::Colour floorColour(1.0f, 0.7f, 1.0f, 1.0f);
+	const ion::Colour ceilColour(1.0f, 1.0f, 0.0f, 1.0f);
 	const ion::Colour unsetColour(0.0f, 0.0f, 0.0f, 0.0f);
 
 	for(int i = 0; i < tileset.GetCount(); i++)
@@ -220,11 +221,16 @@ void RenderResources::CreateTerrainTilesTexture()
 		for(int pixelX = 0; pixelX < tileWidth; pixelX++)
 		{
 			//Get height at X
-			u16 height = tile.GetHeight(pixelX);
+			s8 height = tile.GetHeight(pixelX);
 
 			for(int pixelY = 0; pixelY < tileHeight; pixelY++)
 			{
-				const ion::Colour& colour = pixelY < height ? setColour : unsetColour;
+				ion::Colour colour;
+				
+				if(height >= 0)
+					colour = pixelY < height ? floorColour : unsetColour;
+				else
+					colour = pixelY >= -height ? ceilColour : unsetColour;
 
 				int destPixelX = (x * tileWidth) + pixelX;
 				int destPixelY = (y * tileHeight) + pixelY;
