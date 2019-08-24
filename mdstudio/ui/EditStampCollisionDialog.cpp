@@ -59,27 +59,20 @@ void DialogEditStampCollision::OnToolGenerateTerrain(wxCommandEvent& event)
 {
 	m_canvas->SetTool(eToolNone);
 
-	DialogTerrainGen dialog(this);
-
-	if (dialog.ShowModal() == wxID_OK)
+	if (wxMessageBox("This will clear all terrain tiles and regenerate for all stamps, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
 	{
-		int granularity = dialog.m_spinCtrlGranularity->GetValue();
-
-		if (wxMessageBox("This will clear all terrain tiles and regenerate for all stamps, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
+		if (!m_project.GenerateTerrainFromBeziers())
 		{
-			if (!m_project.GenerateTerrainFromBeziers(granularity))
-			{
-				wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
-			}
-
-			//Refresh all to redraw terrain tiles
-			m_mainWindow.RefreshAll();
-
-			//Invalid terrain tiles and refresh stamp canvas
-			m_project.InvalidateTerrainTiles(true);
-			m_canvas->Refresh();
-			m_project.InvalidateTerrainTiles(false);
+			wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
 		}
+
+		//Refresh all to redraw terrain tiles
+		m_mainWindow.RefreshAll();
+
+		//Invalid terrain tiles and refresh stamp canvas
+		m_project.InvalidateTerrainTiles(true);
+		m_canvas->Refresh();
+		m_project.InvalidateTerrainTiles(false);
 	}
 }
 

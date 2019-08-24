@@ -586,18 +586,22 @@ ion::Matrix4 RenderResources::CalcBoxMatrix(const ion::Vector2i& position, const
 
 ion::render::Primitive* RenderResources::CreateBezierPrimitive(const ion::gamekit::BezierPath& bezier)
 {
-	const float granularity = 1.0f;
-	const int maxPoints = bezier.GetNumPoints();
-	const int numPoints = ion::maths::Floor((float)maxPoints / granularity);
+	const float granularity = 0.3f;
+	const int numPoints = bezier.GetLength() * granularity;
+
 	std::vector<ion::Vector2> points2d;
 	std::vector<ion::Vector3> points3d;
-	points2d.reserve(numPoints);
-	points3d.reserve(numPoints);
-	bezier.GetPositions(points2d, 0.0f, 1.0f, 100); // numPoints);
 
-	for(int i = 0; i < points2d.size(); i++)
+	if (numPoints > 0)
 	{
-		points3d.push_back(ion::Vector3(points2d[i].x, points2d[i].y, 0.0f));
+		points2d.reserve(numPoints);
+		points3d.reserve(numPoints);
+		bezier.GetDistributedPositions(points2d, numPoints);
+
+		for (int i = 0; i < points2d.size(); i++)
+		{
+			points3d.push_back(ion::Vector3(points2d[i].x, points2d[i].y, 0.0f));
+		}
 	}
 
 	return new ion::render::LineStrip(points3d);
@@ -703,21 +707,28 @@ ion::render::Primitive* RenderResources::CreateBezierHandlesPrimitive(const ion:
 ion::render::Primitive* RenderResources::CreateBezierNormalsPrimitive(const ion::gamekit::BezierPath& bezier, float lineLength, float distPerNormal)
 {
 	int numNormals = ion::maths::Max(1.0f, bezier.GetLength() / distPerNormal);
+	std::vector<ion::Vector2> normals;
+	std::vector<ion::Vector2> positions;
 	std::vector<ion::Vector3> points;
 	points.reserve(numNormals);
-
+	points.reserve(numNormals);
+	
+	bezier.GetDistributedPositions(positions, numNormals);
+	bezier.GetDistributedNormals(normals, numNormals);
+	
 	for (int i = 0; i < numNormals; i++)
 	{
-		float time = (float)i / (float)numNormals;
-
-		ion::Vector2 position = bezier.GetPosition(time);
-		ion::Vector2 normal = bezier.GetNormal(time);
+		ion::Vector2 position = positions[i];
+		ion::Vector2 normal = normals[i];
 		ion::Vector2 end = position + (normal * lineLength);
-
+	
 		//Lines
 		points.push_back(ion::Vector3(position.x, position.y, 0.0f));
 		points.push_back(ion::Vector3(end.x, end.y, 0.0f));
 	}
+
+	points.push_back(ion::Vector3());
+	points.push_back(ion::Vector3());
 
 	ion::render::LineSegments* primitive = NULL;
 

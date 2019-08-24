@@ -219,7 +219,7 @@
                             <property name="name">m_ribbonPageProject</property>
                             <property name="permission">protected</property>
                             <property name="pos"></property>
-                            <property name="select">0</property>
+                            <property name="select">1</property>
                             <property name="size"></property>
                             <property name="subclass"></property>
                             <property name="tooltip"></property>
@@ -1144,7 +1144,7 @@
                             <property name="name">m_ribbonPageTools</property>
                             <property name="permission">protected</property>
                             <property name="pos"></property>
-                            <property name="select">1</property>
+                            <property name="select">0</property>
                             <property name="size"></property>
                             <property name="subclass"></property>
                             <property name="tooltip"></property>

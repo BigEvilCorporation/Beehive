@@ -2163,21 +2163,14 @@ void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
 	{
-		DialogTerrainGen dialog(this);
-
-		if(dialog.ShowModal() == wxID_OK)
+		if(wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
 		{
-			int granularity = dialog.m_spinCtrlGranularity->GetValue();
-
-			if(wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
+			if(!m_project->GenerateTerrainFromBeziers())
 			{
-				if(!m_project->GenerateTerrainFromBeziers(granularity))
-				{
-					wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
-				}
-				
-				RefreshAll();
+				wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
 			}
+				
+			RefreshAll();
 		}
 	}
 #endif
