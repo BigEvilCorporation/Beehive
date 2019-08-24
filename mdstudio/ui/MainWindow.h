@@ -140,7 +140,8 @@ protected:
 	virtual void OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsMapEdit(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsTiles(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event) { event.Skip(); }
+	virtual void OnBtnToolsCollisionTiles(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsPalettes(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnToolsGameObjParams(wxRibbonButtonBarEvent& event);

@@ -2270,6 +2270,16 @@ void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )
 	ShowPanelTiles();
 }
 
+void MainWindow::OnBtnToolsCollisionTiles(wxRibbonButtonBarEvent& event)
+{
+	ShowPanelTerrainTiles();
+}
+
+void MainWindow::OnBtnToolsStamps(wxRibbonButtonBarEvent& event)
+{
+	ShowPanelStamps();
+}
+
 void MainWindow::OnBtnToolsPalettes( wxRibbonButtonBarEvent& event )
 {
 	ShowPanelPalettes();

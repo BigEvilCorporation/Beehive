@@ -128,6 +128,7 @@ void TerrainTilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i m
 	m_hoverTerrainTilePos.x = x;
 	m_hoverTerrainTilePos.y = y;
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No collision editing in fixed mode
 	if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 	{
 		//Left click, set current terrain tile
@@ -137,16 +138,13 @@ void TerrainTilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i m
 		//Set as current painting terrain tile
 		m_project.SetPaintTerrainTile(selectedTerrainTile);
 
-#if !BEEHIVE_FIXED_STAMP_MODE //No collision editing in fixed mode
 		//Set terrain tile paint tool
 		m_mainWindow->SetMapTool(eToolPaintTerrainTile);
-#endif
 
 		//Refresh terrain tile editor panel
 		m_mainWindow->RefreshPanel(MainWindow::ePanelTerrainTileEditor);
 	}
 
-#if !BEEHIVE_FIXED_STAMP_MODE //No collision editing in fixed mode
 	if(buttonBits & eMouseRight)
 	{
 		if(m_hoverTerrainTile != InvalidTerrainTileId)
