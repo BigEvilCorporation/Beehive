@@ -89,6 +89,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonBar = new wxRibbonBar( this, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxRIBBON_BAR_DEFAULT_STYLE|wxRIBBON_BAR_FLOW_HORIZONTAL|wxRIBBON_BAR_SHOW_PAGE_ICONS|wxRIBBON_BAR_SHOW_PAGE_LABELS|wxRIBBON_BAR_SHOW_PANEL_MINIMISE_BUTTONS|wxBORDER_NONE );
 	m_ribbonBar->SetArtProvider(new wxRibbonDefaultArtProvider);
 	m_ribbonPageProject = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Project") , wxNullBitmap , 0 );
+	m_ribbonBar->SetActivePage( m_ribbonPageProject );
 	m_ribbonPanelProject = new wxRibbonPanel( m_ribbonPageProject, wxID_ANY, wxT("Project") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarProject = new wxRibbonButtonBar( m_ribbonPanelProject, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_NEW, wxT("New"), wxBitmap( newproj_xpm ), wxEmptyString);
@@ -106,7 +107,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_SHOW_COLLISION, wxT("Show Collision"), wxBitmap( showoutlines_xpm ), wxEmptyString);
 	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_SHOW_DISPLAYFRAME, wxT("Show Display Frame"), wxBitmap( showoutlines_xpm ), wxEmptyString);
 	m_ribbonPageTools = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Tools") , wxNullBitmap , 0 );
-	m_ribbonBar->SetActivePage( m_ribbonPageTools );
 	m_ribbonPanelTools = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tool Panels") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBarTools = new wxRibbonButtonBar( m_ribbonPanelTools, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAPEDIT, wxT("Toolbox"), wxBitmap( toolspanel_xpm ), wxEmptyString);

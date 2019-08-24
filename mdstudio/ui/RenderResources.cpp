@@ -230,7 +230,7 @@ void RenderResources::CreateTerrainTilesTexture()
 				if(height >= 0)
 					colour = pixelY < height ? floorColour : unsetColour;
 				else
-					colour = pixelY >= -height ? ceilColour : unsetColour;
+					colour = pixelY >= (tileHeight+height) ? ceilColour : unsetColour;
 
 				int destPixelX = (x * tileWidth) + pixelX;
 				int destPixelY = (y * tileHeight) + pixelY;

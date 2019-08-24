@@ -12,6 +12,8 @@
 #include "TerrainTilesPanel.h"
 #include "MainWindow.h"
 
+#include <ion/core/utils/STL.h>
+
 #include <wx/Menu.h>
 
 #include <algorithm>
@@ -116,6 +118,7 @@ void TerrainTilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i m
 	ViewPanel::OnMouseTileEvent(mousePos, mouseDelta, tileDelta, buttonBits, x, y);
 
 	TerrainTileId selectedTerrainTile = InvalidTerrainTileId;
+	int tileWidth = m_project.GetPlatformConfig().tileWidth;
 
 	//If in range, get terrain tile under mouse cursor
 	if(x >= 0 && y >= 0 && x < m_canvasSize.x && y < m_canvasSize.y)
@@ -159,6 +162,27 @@ void TerrainTilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i m
 		}
 	}
 #endif
+
+	if (const TerrainTile* tile = m_project.GetTerrainTileset().GetTerrainTile(m_hoverTerrainTile))
+	{
+		std::stringstream tipStr;
+		tipStr << "Tile 0x" << SSTREAM_HEX4(m_hoverTerrainTile) << " (" << m_hoverTerrainTile << ")" << std::endl;
+		tipStr << "Addr: 0x" << SSTREAM_HEX8(m_hoverTerrainTile * tileWidth) << std::endl;
+		tipStr << "Data: ";
+
+		for (int i = 0; i < tileWidth; i++)
+		{
+			tipStr << SSTREAM_HEX2(tile->GetHeight(i)) << " ";
+		}
+
+		tipStr << std::endl;
+
+		SetToolTip(tipStr.str().c_str());
+	}
+	else
+	{
+		UnsetToolTip();
+	}
 
 	//Redraw
 	Refresh();
