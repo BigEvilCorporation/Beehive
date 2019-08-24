@@ -218,6 +218,17 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 	//Check in map range
 	bool inMaprange = ((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight));
 
+	//if (inMaprange)
+	//{
+	//	std::stringstream tipStr;
+	//	tipStr << "Cursor: " << x << ", " << y << std::endl;
+	//	SetToolTip(tipStr.str().c_str());
+	//}
+	//else
+	//{
+	//	UnsetToolTip();
+	//}
+
 	switch(m_currentTool)
 	{
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
@@ -470,6 +481,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				if (const Stamp* stamp = m_project.GetStamp(stampId))
 				{
 					std::stringstream tipStr;
+					tipStr << "Cursor: " << x << ", " << y << std::endl;
 					tipStr << "Stamp 0x" << SSTREAM_HEX4(stampId) << " (" << stampId << ")" << std::endl;
 					tipStr << "Pos: " << stampPos.x << ", " << stampPos.y << std::endl;
 					tipStr << "Size: " << stamp->GetWidth() << ", " << stamp->GetHeight() << std::endl;

@@ -32,6 +32,7 @@ public:
 	virtual void OnToolEditBezier(wxCommandEvent& event);
 	virtual void OnToolDeleteBezier(wxCommandEvent& event);
 	virtual void OnToolGenerateTerrain(wxCommandEvent& event);
+	virtual void OnToolPaintSolid(wxCommandEvent& event);
 
 private:
 	void Draw();

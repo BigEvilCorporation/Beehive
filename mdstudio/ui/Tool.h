@@ -27,8 +27,6 @@ enum ToolType
 	eToolPaintTile,
 	eToolPaintTerrainTile,
 	eToolPaintCollisionTerrain,
-	eToolPaintCollisionSolid,
-	eToolPaintCollisionHole,
 	eToolDeleteTerrainTile,
 	eToolClone,
 	eToolCreateStamp,
@@ -64,6 +62,8 @@ enum ToolType
 	eToolDrawTerrainBezier,
 	eToolSelectTerrainBezier,
 	eToolDeleteTerrainBezier,
+	eToolPaintCollisionSolid,
+	eToolPaintCollisionHole,
 };
 
 class Tool

@@ -50,6 +50,11 @@ void DialogEditStampCollision::OnToolDeleteBezier(wxCommandEvent& event)
 	m_canvas->SetTool(eToolDeleteTerrainBezier);
 }
 
+void DialogEditStampCollision::OnToolPaintSolid(wxCommandEvent& event)
+{
+	m_canvas->SetTool(eToolPaintCollisionSolid);
+}
+
 void DialogEditStampCollision::OnToolGenerateTerrain(wxCommandEvent& event)
 {
 	m_canvas->SetTool(eToolNone);

@@ -468,6 +468,13 @@ DialogEditStampCollisionBase::DialogEditStampCollisionBase( wxWindow* parent, wx
 
 	fgSizer67->Add( m_toolDeleteTerrainBezier, 0, wxALL, 5 );
 
+	m_toolPaintCollisionSolid = new wxBitmapButton( m_toolbox, wxID_TOOL_COL_PAINTSOLID, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_toolPaintCollisionSolid->SetBitmap( wxBitmap( tool_paintcolwall_xpm ) );
+	m_toolPaintCollisionSolid->SetToolTip( wxT("Paint Solid Wall/Ceiling") );
+
+	fgSizer67->Add( m_toolPaintCollisionSolid, 0, wxALL, 5 );
+
 
 	fgSizer63->Add( fgSizer67, 1, wxEXPAND, 5 );
 
@@ -511,6 +518,7 @@ DialogEditStampCollisionBase::DialogEditStampCollisionBase( wxWindow* parent, wx
 	m_toolAddTerrainBezier->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolAddBezier ), NULL, this );
 	m_toolEditTerrainBezier->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolEditBezier ), NULL, this );
 	m_toolDeleteTerrainBezier->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolDeleteBezier ), NULL, this );
+	m_toolPaintCollisionSolid->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolPaintSolid ), NULL, this );
 	m_toolGenerateTerrain->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolGenerateTerrain ), NULL, this );
 }
 
@@ -520,6 +528,7 @@ DialogEditStampCollisionBase::~DialogEditStampCollisionBase()
 	m_toolAddTerrainBezier->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolAddBezier ), NULL, this );
 	m_toolEditTerrainBezier->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolEditBezier ), NULL, this );
 	m_toolDeleteTerrainBezier->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolDeleteBezier ), NULL, this );
+	m_toolPaintCollisionSolid->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolPaintSolid ), NULL, this );
 	m_toolGenerateTerrain->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DialogEditStampCollisionBase::OnToolGenerateTerrain ), NULL, this );
 
 }

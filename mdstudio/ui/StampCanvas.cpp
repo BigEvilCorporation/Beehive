@@ -17,6 +17,7 @@ StampCanvas::StampCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 	: SpriteCanvas(parent, id, pos, size, style, name)
 {
 	m_terrainCanvasPrimitive = NULL;
+	m_collisionCanvasPrimitive = NULL;
 	m_primitiveBezierPoints = NULL;
 	m_primitiveBezierHandles = NULL;
 	m_primitiveBezierNormals = NULL;
@@ -29,6 +30,12 @@ StampCanvas::StampCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 
 StampCanvas::~StampCanvas()
 {
+	if (m_tileFramePrimitive)
+		delete m_tileFramePrimitive;
+	if (m_terrainCanvasPrimitive)
+		delete m_terrainCanvasPrimitive;
+	if (m_collisionCanvasPrimitive)
+		delete m_collisionCanvasPrimitive;
 	if (m_primitiveBezierPoints)
 		delete m_primitiveBezierPoints;
 	if (m_primitiveBezierHandles)
@@ -69,6 +76,8 @@ void StampCanvas::SetStamp(Stamp& stamp, const ion::Vector2i& offset)
 		delete m_tileFramePrimitive;
 	if (m_terrainCanvasPrimitive)
 		delete m_terrainCanvasPrimitive;
+	if (m_collisionCanvasPrimitive)
+		delete m_collisionCanvasPrimitive;
 
 	const int tileWidth = m_project->GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project->GetPlatformConfig().tileHeight;
@@ -80,6 +89,7 @@ void StampCanvas::SetStamp(Stamp& stamp, const ion::Vector2i& offset)
 
 	m_tileFramePrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
 	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
 
 	for (int x = 0; x < width; x++)
 	{
@@ -186,8 +196,40 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 		ion::Vector2 mousePosF((float)mousePos.x, (float)(stampHeight * tileHeight) - (float)mousePos.y);
 		int y_inv = (stampHeight - 1 - tileY);
 
+		bool inRange = ((tileX >= 0) && (tileX < stampWidth) && (tileY >= 0) && (tileY < stampHeight));
+
 		switch (m_currentTool)
 		{
+			case eToolPaintCollisionSolid:
+			{
+				if (inRange)
+				{
+					//If clicking/dragging, paint solid collision tile
+					if (buttonBits & eMouseLeft)
+					{
+						//Set solid tile
+						u16 collisionTileFlags = m_stamp->GetCollisionTileFlags(tileX, tileY) | eCollisionTileFlagSolid;
+						m_stamp->SetCollisionTileFlags(tileX, tileY, collisionTileFlags);
+
+						//Paint to canvas
+						PaintCollisionTile(m_stamp->GetTerrainTile(tileX, tileY), collisionTileFlags, tileX, y_inv);
+						Refresh();
+					}
+					else if (buttonBits & eMouseRight)
+					{
+						//Clear solid tile
+						u16 collisionTileFlags = m_stamp->GetCollisionTileFlags(tileX, tileY) & ~eCollisionTileFlagSolid;
+						m_stamp->SetCollisionTileFlags(tileX, tileY, collisionTileFlags);
+
+						//Paint to canvas
+						PaintCollisionTile(m_stamp->GetTerrainTile(tileX, tileY), collisionTileFlags, tileX, y_inv);
+						Refresh();
+					}
+				}
+
+				break;
+			}
+
 			case eToolDrawTerrainBezier:
 			{
 				const float boxHalfExtents = 2.0f;
@@ -444,6 +486,10 @@ void StampCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 		z += zOffset;
 	}
 
+	//Render collision
+	RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+	z += zOffset;
+
 	//Render terrain
 	RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
 	z += zOffset;
@@ -610,6 +656,24 @@ void StampCanvas::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion
 	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
+void StampCanvas::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+{
+	//No depth test (stops grid cells Z fighting)
+	renderer.SetDepthTest(ion::render::Renderer::eAlways);
+
+	ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialCollisionTypes);
+
+	//Draw map
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
+	material->Unbind();
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+
+	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+}
+
 void StampCanvas::PaintCollisionStamp(const Stamp& stamp)
 {
 	int width = stamp.GetWidth();
@@ -639,6 +703,10 @@ void StampCanvas::PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionF
 	ion::render::TexCoord coords[4];
 	m_renderResources->GetTerrainTileTexCoords(terrainTileId, coords);
 	m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+
+	//Set texture coords for collision cell
+	m_renderResources->GetCollisionTypeTexCoords(collisionFlags, coords);
+	m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 }
 
 void StampCanvas::PaintTerrainBeziers(const Stamp& stamp)

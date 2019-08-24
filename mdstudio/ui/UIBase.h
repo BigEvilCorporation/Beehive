@@ -97,15 +97,15 @@ class SpriteCanvas;
 #define wxID_TOOL_COL_ADDTERRAINBEZIER 1040
 #define wxID_TOOL_COL_EDITTERRAINBEZIER 1041
 #define wxID_TOOL_COL_DELETETERRAINBEZIER 1042
-#define wxID_TOOL_GENERATETERRAIN 1043
-#define wxID_TOOL_SELECTSTAMP 1044
-#define wxID_TOOL_STAMP 1045
-#define wxID_TOOL_MOVESTAMP 1046
-#define wxID_TOOL_STAMPPICKER 1047
-#define wxID_TOOL_CREATESTAMP 1048
-#define wxID_TOOL_REMOVESTAMP 1049
-#define wxID_TOOL_COL_PAINTTERRAIN 1050
-#define wxID_TOOL_COL_PAINTSOLID 1051
+#define wxID_TOOL_COL_PAINTSOLID 1043
+#define wxID_TOOL_GENERATETERRAIN 1044
+#define wxID_TOOL_SELECTSTAMP 1045
+#define wxID_TOOL_STAMP 1046
+#define wxID_TOOL_MOVESTAMP 1047
+#define wxID_TOOL_STAMPPICKER 1048
+#define wxID_TOOL_CREATESTAMP 1049
+#define wxID_TOOL_REMOVESTAMP 1050
+#define wxID_TOOL_COL_PAINTTERRAIN 1051
 #define wxID_TOOL_COL_PAINTHOLE 1052
 #define wxID_TOOL_COL_DELETETERRTILE 1053
 #define wxID_TOOL_SELECTTILE 1054
@@ -279,6 +279,7 @@ class DialogEditStampCollisionBase : public wxDialog
 		wxBitmapButton* m_toolAddTerrainBezier;
 		wxBitmapButton* m_toolEditTerrainBezier;
 		wxBitmapButton* m_toolDeleteTerrainBezier;
+		wxBitmapButton* m_toolPaintCollisionSolid;
 		wxBitmapButton* m_toolGenerateTerrain;
 		StampCanvas* m_canvas;
 
@@ -286,6 +287,7 @@ class DialogEditStampCollisionBase : public wxDialog
 		virtual void OnToolAddBezier( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolEditBezier( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolDeleteBezier( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolPaintSolid( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolGenerateTerrain( wxCommandEvent& event ) { event.Skip(); }
 
 

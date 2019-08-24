@@ -50,6 +50,7 @@ private:
 	void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 	void RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
+	void RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 
 	//Canvas drawing
 	void PaintTerrainBeziers(const Stamp& stamp);
@@ -58,6 +59,7 @@ private:
 
 	//Rendering primitives
 	ion::render::Chessboard* m_terrainCanvasPrimitive;
+	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	std::vector<ion::render::Primitive*> m_primitiveBeziers;
 	ion::render::Primitive* m_primitiveBezierPoints;
 	ion::render::Primitive* m_primitiveBezierHandles;
