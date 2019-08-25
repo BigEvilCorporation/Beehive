@@ -643,14 +643,26 @@ void StampCanvas::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion
 	//No depth test (stops grid cells Z fighting)
 	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
-	ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTileset);
-
-	//Draw terrain
 	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
-	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
-	renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
-	material->Unbind();
+
+	//Draw terrain heightmaps
+	{
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
+		material->Unbind();
+	}
+
+	//Draw terrain widthmaps
+	{
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetWidth);
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
+		material->Unbind();
+	}
+
 	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 
 	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);

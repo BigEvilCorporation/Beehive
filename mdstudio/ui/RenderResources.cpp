@@ -61,11 +61,16 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 	m_materials[eMaterialCollisionTypes]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
 	m_materials[eMaterialCollisionTypes]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
 
-	//Setup textured terrain tileset material
-	m_materials[eMaterialTerrainTileset]->AddDiffuseMap(m_textures[eTextureTerrainTileset]);
-	m_materials[eMaterialTerrainTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialTerrainTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
-	m_materials[eMaterialTerrainTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+	//Setup textured terrain tileset materials
+	m_materials[eMaterialTerrainTilesetHeight]->AddDiffuseMap(m_textures[eTextureTerrainTilesetHeight]);
+	m_materials[eMaterialTerrainTilesetHeight]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialTerrainTilesetHeight]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
+	m_materials[eMaterialTerrainTilesetHeight]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+
+	m_materials[eMaterialTerrainTilesetWidth]->AddDiffuseMap(m_textures[eTextureTerrainTilesetWidth]);
+	m_materials[eMaterialTerrainTilesetWidth]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialTerrainTilesetWidth]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
+	m_materials[eMaterialTerrainTilesetWidth]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
 
 	//Setup textured spriteSheet material
 	m_materials[eMaterialSpriteSheet]->AddDiffuseMap(m_textures[eTextureSpriteSheetPreview]);
@@ -147,34 +152,38 @@ void RenderResources::CreateTilesetTexture()
 	for(int i = 0; i < tileset.GetCount(); i++)
 	{
 		const Tile& tile = *tileset.GetTile(i);
-		PaletteId paletteId = tile.GetPaletteId();
-		Palette* palette = m_project.GetPalette(paletteId);
 
-		u32 x = i % m_tilesetSizeSq;
-		u32 y = i / m_tilesetSizeSq;
-
-		for(int pixelY = 0; pixelY < tileHeight; pixelY++)
+		if (tile.GetHash() != 0)
 		{
-			for(int pixelX = 0; pixelX < tileWidth; pixelX++)
+			PaletteId paletteId = tile.GetPaletteId();
+			Palette* palette = m_project.GetPalette(paletteId);
+
+			u32 x = i % m_tilesetSizeSq;
+			u32 y = i / m_tilesetSizeSq;
+
+			for (int pixelY = 0; pixelY < tileHeight; pixelY++)
 			{
-				//Invert Y for OpenGL
-				int pixelY_OGL = tileHeight - 1 - pixelY;
-
-				u8 colourIdx = tile.GetPixelColour(pixelX, pixelY_OGL);
-
-				//Protect against blank tiles
-				if(palette->IsColourUsed(colourIdx))
+				for (int pixelX = 0; pixelX < tileWidth; pixelX++)
 				{
-					const Colour& colour = palette->GetColour(colourIdx);
+					//Invert Y for OpenGL
+					int pixelY_OGL = tileHeight - 1 - pixelY;
 
-					int destPixelX = (x * tileWidth) + pixelX;
-					int destPixelY = (y * tileHeight) + pixelY;
-					u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-					u32 dataOffset = pixelIdx * bytesPerPixel;
-					ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
-					data[dataOffset] = colour.GetRed();
-					data[dataOffset + 1] = colour.GetGreen();
-					data[dataOffset + 2] = colour.GetBlue();
+					u8 colourIdx = tile.GetPixelColour(pixelX, pixelY_OGL);
+
+					//Protect against blank tiles
+					if (palette->IsColourUsed(colourIdx))
+					{
+						const Colour& colour = palette->GetColour(colourIdx);
+
+						int destPixelX = (x * tileWidth) + pixelX;
+						int destPixelY = (y * tileHeight) + pixelY;
+						u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+						u32 dataOffset = pixelIdx * bytesPerPixel;
+						ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
+						data[dataOffset] = colour.GetRed();
+						data[dataOffset + 1] = colour.GetGreen();
+						data[dataOffset + 2] = colour.GetBlue();
+					}
 				}
 			}
 		}
@@ -188,7 +197,7 @@ void RenderResources::CreateTilesetTexture()
 	delete data;
 }
 
-void RenderResources::CreateTerrainTilesTexture()
+void RenderResources::CreateTerrainTilesTextures()
 {
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
@@ -204,53 +213,91 @@ void RenderResources::CreateTerrainTilesTexture()
 	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
 	m_cellSizeTerrainTilesetTexSpaceSq = 1.0f / (float)m_terrainTilesetSizeSq;
 
-	u8* data = new u8[textureSize];
-	ion::memory::MemSet(data, 0, textureSize);
+	u8* heightData = new u8[textureSize];
+	u8* widthData = new u8[textureSize];
+	ion::memory::MemSet(heightData, 0, textureSize);
+	ion::memory::MemSet(widthData, 0, textureSize);
 
 	const ion::Colour floorColour(1.0f, 0.7f, 1.0f, 1.0f);
 	const ion::Colour ceilColour(1.0f, 1.0f, 0.0f, 1.0f);
+	const ion::Colour wallLeftColour(0.0f, 0.0f, 1.0f, 0.4f);
+	const ion::Colour wallRightColour(1.0f, 0.0f, 0.0f, 0.4f);
 	const ion::Colour unsetColour(0.0f, 0.0f, 0.0f, 0.0f);
 
 	for(int i = 0; i < tileset.GetCount(); i++)
 	{
 		const TerrainTile& tile = *tileset.GetTerrainTile(i);
-
-		u32 x = i % m_terrainTilesetSizeSq;
-		u32 y = i / m_terrainTilesetSizeSq;
-		
-		for(int pixelX = 0; pixelX < tileWidth; pixelX++)
+		if (tile.GetHash() != 0)
 		{
-			//Get height at X
-			s8 height = tile.GetHeight(pixelX);
+			u32 x = i % m_terrainTilesetSizeSq;
+			u32 y = i / m_terrainTilesetSizeSq;
 
-			for(int pixelY = 0; pixelY < tileHeight; pixelY++)
+			for (int pixelX = 0; pixelX < tileWidth; pixelX++)
 			{
-				ion::Colour colour;
-				
-				if(height >= 0)
-					colour = pixelY < height ? floorColour : unsetColour;
-				else
-					colour = pixelY >= (tileHeight+height) ? ceilColour : unsetColour;
+				//Get height at X
+				s8 height = tile.GetHeight(pixelX);
 
-				int destPixelX = (x * tileWidth) + pixelX;
-				int destPixelY = (y * tileHeight) + pixelY;
-				u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-				u32 dataOffset = pixelIdx * bytesPerPixel;
-				ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
-				data[dataOffset] = colour.r * 255;
-				data[dataOffset + 1] = colour.g * 255;
-				data[dataOffset + 2] = colour.b * 255;
-				data[dataOffset + 3] = colour.a * 255;
+				for (int pixelY = 0; pixelY < tileHeight; pixelY++)
+				{
+					ion::Colour colour;
+
+					if (height >= 0)
+						colour = pixelY < height ? floorColour : unsetColour;
+					else
+						colour = pixelY >= (tileHeight + height) ? ceilColour : unsetColour;
+
+					int destPixelX = (x * tileWidth) + pixelX;
+					int destPixelY = (y * tileHeight) + pixelY;
+					u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+					u32 dataOffset = pixelIdx * bytesPerPixel;
+					ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
+					heightData[dataOffset] = colour.r * 255;
+					heightData[dataOffset + 1] = colour.g * 255;
+					heightData[dataOffset + 2] = colour.b * 255;
+					heightData[dataOffset + 3] = colour.a * 255;
+				}
+			}
+
+			for (int pixelY = 0; pixelY < tileHeight; pixelY++)
+			{
+				//Get width at Y
+				s8 width = tile.GetWidth(pixelY);
+
+				for (int pixelX = 0; pixelX < tileWidth; pixelX++)
+				{
+					ion::Colour colour;
+
+					if (width >= 0)
+						colour = pixelX < width ? wallLeftColour : unsetColour;
+					else
+						colour = pixelX >= (tileWidth + width) ? wallRightColour : unsetColour;
+
+					int destPixelX = (x * tileWidth) + pixelX;
+					int destPixelY = (y * tileHeight) + pixelY;
+					u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+					u32 dataOffset = pixelIdx * bytesPerPixel;
+					ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
+					widthData[dataOffset] = colour.r * 255;
+					widthData[dataOffset + 1] = colour.g * 255;
+					widthData[dataOffset + 2] = colour.b * 255;
+					widthData[dataOffset + 3] = colour.a * 255;
+				}
 			}
 		}
 	}
 
-	m_textures[eTextureTerrainTileset]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
-	m_textures[eTextureTerrainTileset]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
-	m_textures[eTextureTerrainTileset]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
-	m_textures[eTextureTerrainTileset]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
+	m_textures[eTextureTerrainTilesetHeight]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, heightData);
+	m_textures[eTextureTerrainTilesetHeight]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTerrainTilesetHeight]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTerrainTilesetHeight]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
-	delete data;
+	m_textures[eTextureTerrainTilesetWidth]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, widthData);
+	m_textures[eTextureTerrainTilesetWidth]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTerrainTilesetWidth]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+	m_textures[eTextureTerrainTilesetWidth]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
+
+	delete heightData;
+	delete widthData;
 }
 
 void RenderResources::CreateCollisionTypesTexture()
@@ -544,7 +591,7 @@ void RenderResources::SetTilesetTexPixel(TileId tileId, const ion::Vector2i& pix
 
 void RenderResources::SetTerrainTileHeight(TerrainTileId terrainTileId, int x, s8 height)
 {
-	if(m_textures[eTextureTerrainTileset])
+	if(m_textures[eTextureTerrainTilesetHeight])
 	{
 		if(TerrainTile* tile = m_project.GetTerrainTileset().GetTerrainTile(terrainTileId))
 		{
@@ -562,7 +609,7 @@ void RenderResources::SetTerrainTileHeight(TerrainTileId terrainTileId, int x, s
 			{
 				const ion::Colour& colour = (y < height) ? setColour : unsetColour;
 				ion::Vector2i pixelPos((tileX * tileWidth) + x, (tileY * tileHeight) + y);
-				m_textures[eTextureTerrainTileset]->SetPixel(pixelPos, colour);
+				m_textures[eTextureTerrainTilesetHeight]->SetPixel(pixelPos, colour);
 			}
 		}
 	}

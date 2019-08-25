@@ -1123,7 +1123,7 @@ void MainWindow::RefreshTerrainTileset()
 		{
 			//Recreate collision set texture
 			m_renderResources->CreateCollisionTypesTexture();
-			m_renderResources->CreateTerrainTilesTexture();
+			m_renderResources->CreateTerrainTilesTextures();
 		}
 	}
 }

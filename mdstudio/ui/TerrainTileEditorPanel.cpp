@@ -148,7 +148,7 @@ void TerrainTileEditorPanel::RenderTile(ion::render::Renderer& renderer, const i
 void TerrainTileEditorPanel::RenderCollision(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//Draw collision tile
-	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
 	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);

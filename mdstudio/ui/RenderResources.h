@@ -38,7 +38,8 @@ public:
 		eMaterialFlatColour,
 		eMaterialTileset,
 		eMaterialCollisionTypes,
-		eMaterialTerrainTileset,
+		eMaterialTerrainTilesetHeight,
+		eMaterialTerrainTilesetWidth,
 		eMaterialSpriteSheet,
 		eMaterialReferenceImage,
 		eMaterialMax
@@ -48,7 +49,8 @@ public:
 	{
 		eTextureTileset,
 		eTextureCollisionTypes,
-		eTextureTerrainTileset,
+		eTextureTerrainTilesetWidth,
+		eTextureTerrainTilesetHeight,
 		eTextureSpriteSheetPreview,
 		eTextureReferenceImage,
 		eTextureMax
@@ -82,8 +84,8 @@ public:
 	//Create and redraw tileset texture
 	void CreateTilesetTexture();
 
-	//Create and redraw terrain tileset texture
-	void CreateTerrainTilesTexture();
+	//Create and redraw terrain widthmap/heightmap tileset textures
+	void CreateTerrainTilesTextures();
 
 	//Create and redraw collision texture
 	void CreateCollisionTypesTexture();

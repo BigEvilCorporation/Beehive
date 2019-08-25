@@ -2303,7 +2303,7 @@ void MapPanel::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::M
 	//No depth test (stops grid cells Z fighting)
 	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
-	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
+	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
 
 	//Draw map
 	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);

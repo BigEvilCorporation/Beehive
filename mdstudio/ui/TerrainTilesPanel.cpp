@@ -119,6 +119,7 @@ void TerrainTilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i m
 
 	TerrainTileId selectedTerrainTile = InvalidTerrainTileId;
 	int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	//If in range, get terrain tile under mouse cursor
 	if(x >= 0 && y >= 0 && x < m_canvasSize.x && y < m_canvasSize.y)
@@ -168,11 +169,21 @@ void TerrainTilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i m
 		std::stringstream tipStr;
 		tipStr << "Tile 0x" << SSTREAM_HEX4(m_hoverTerrainTile) << " (" << m_hoverTerrainTile << ")" << std::endl;
 		tipStr << "Addr: 0x" << SSTREAM_HEX8(m_hoverTerrainTile * tileWidth) << std::endl;
-		tipStr << "Data: ";
+		tipStr << "Data:" << std::endl;
+		tipStr << " H: ";
 
 		for (int i = 0; i < tileWidth; i++)
 		{
 			tipStr << SSTREAM_HEX2(tile->GetHeight(i)) << " ";
+		}
+
+		tipStr << std::endl;
+
+		tipStr << " W: ";
+
+		for (int i = 0; i < tileHeight; i++)
+		{
+			tipStr << SSTREAM_HEX2(tile->GetWidth(i)) << " ";
 		}
 
 		tipStr << std::endl;
@@ -325,14 +336,27 @@ void TerrainTilesPanel::RenderCanvas(ion::render::Renderer& renderer, const ion:
 	//No depth test (stops grid cells Z fighting)
 	renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
-	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTileset);
-	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourHighlight);
+	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
 
-	//Draw map
-	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
-	renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
-	material->Unbind();
+	//Draw terrain heightmaps
+	{
+		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
+		material->Unbind();
+	}
+
+	//Draw terrain widthmaps
+	{
+		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTilesetWidth);
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
+		material->Unbind();
+	}
+
+	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 
 	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
