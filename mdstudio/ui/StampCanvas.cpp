@@ -12,6 +12,7 @@
 #include "StampCanvas.h"
 
 #include <ion/maths/Geometry.h>
+#include <ion/core/utils/STL.h>
 
 StampCanvas::StampCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: SpriteCanvas(parent, id, pos, size, style, name)
@@ -177,8 +178,44 @@ void StampCanvas::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 		//Check in map range
 		bool inMaprange = ((x >= 0) && (x < stampWidth) && (y >= 0) && (y < stampHeight));
 
+		TerrainTileId hoverTileId = inMaprange ? m_stamp->GetTerrainTile(x, y) : InvalidTerrainTileId;
+
 		switch (m_currentTool)
 		{
+			case eToolNone:
+			{
+				if (const TerrainTile* tile = m_project->GetTerrainTileset().GetTerrainTile(hoverTileId))
+				{
+					std::stringstream tipStr;
+					tipStr << "Cursor: 0x" << SSTREAM_HEX2(x) << ", 0x" << SSTREAM_HEX2(y) << " (" << x << ", " << y << ")" << std::endl;
+					tipStr << "Tile: 0x" << SSTREAM_HEX4(hoverTileId) << " (" << hoverTileId << ")" << std::endl;
+					tipStr << "Addr: 0x" << SSTREAM_HEX8(hoverTileId * tileWidth) << std::endl;
+					tipStr << "Data:" << std::endl;
+					tipStr << " H: ";
+
+					for (int i = 0; i < tileWidth; i++)
+					{
+						tipStr << SSTREAM_HEX2(tile->GetHeight(i)) << " ";
+					}
+
+					tipStr << std::endl;
+
+					tipStr << " W: ";
+
+					for (int i = 0; i < tileHeight; i++)
+					{
+						tipStr << SSTREAM_HEX2(tile->GetWidth(i)) << " ";
+					}
+
+					tipStr << std::endl;
+
+					SetToolTip(tipStr.str().c_str());
+				}
+				else
+				{
+					UnsetToolTip();
+				}
+			}
 		}
 	}
 }
