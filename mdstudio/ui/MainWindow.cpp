@@ -1454,6 +1454,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 						//Spawn position
 						entity.spawnData.positionX = gameObject.GetPosition().x + GameObject::spriteSheetBorderX;
 						entity.spawnData.positionY = gameObject.GetPosition().y + GameObject::spriteSheetBorderY;
+						entity.spawnData.width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType->GetDimensions().x;
+						entity.spawnData.height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
 
 						//Sprite
 						std::string spriteActorName = "";
