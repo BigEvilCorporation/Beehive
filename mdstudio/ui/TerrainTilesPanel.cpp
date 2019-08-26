@@ -168,6 +168,7 @@ void TerrainTilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i m
 	{
 		std::stringstream tipStr;
 		tipStr << "Tile 0x" << SSTREAM_HEX4(m_hoverTerrainTile) << " (" << m_hoverTerrainTile << ")" << std::endl;
+		//tipStr << "Angle: " << tile->GetAngle() << " (" << ion::maths::RadiansToDegrees(tile->GetAngle()) << " deg)" << std::endl;
 		tipStr << "Addr: 0x" << SSTREAM_HEX8(m_hoverTerrainTile * tileWidth) << std::endl;
 		tipStr << "Data:" << std::endl;
 		tipStr << " H: ";
