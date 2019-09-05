@@ -2162,17 +2162,25 @@ void MainWindow::OnBtnColMapClear(wxRibbonButtonBarEvent& event)
 
 void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
 {
-#if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
+#if !BEEHIVE_PLUGIN_LUMINARY
 	if(m_project.get())
 	{
-		if(wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
+		DialogTerrainGen dialog(this);
+
+		if (dialog.ShowModal() == wxID_OK)
 		{
-			if(!m_project->GenerateTerrainFromBeziers())
+			int granularity = dialog.m_spinCtrlGranularity->GetValue();
+
+			if (wxMessageBox("This will clear all terrain tiles, are you sure?", "Generate Terrain", wxOK | wxCANCEL) == wxOK)
 			{
-				wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
+				//Heights only legacy mode
+				if (!m_project->GenerateTerrainFromBeziers_HeightsOnly(granularity))
+				{
+					wxMessageBox("Error generating terrain - out of tile space", "Error", wxOK, this);
+				}
+
+				RefreshAll();
 			}
-				
-			RefreshAll();
 		}
 	}
 #endif
