@@ -76,10 +76,14 @@ void GameObjectParamsPanel::OnSelectVariable(wxListEvent& event)
 {
 	if(m_gameObject)
 	{
+#if BEEHIVE_PLUGIN_LUMINARY
 		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
 		{
 			m_currentVariable = gameObjectType->GetVariable(event.GetIndex());
 		}
+#else
+		m_currentVariable = m_gameObject->GetVariable(event.GetIndex());
+#endif
 		
 		PopulateVarsFields(m_currentVariable);
 	}
@@ -236,10 +240,15 @@ void GameObjectParamsPanel::PopulateVarsList()
 
 	if(m_gameObject)
 	{
+#if BEEHIVE_PLUGIN_LUMINARY
 		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
 		{
 			//Populate var names and layout from game object type, but take values from game object
 			const std::vector<GameObjectVariable>& variables = gameObjectType->GetVariables();
+#else
+		const std::vector<GameObjectVariable>& variables = m_gameObject->GetVariables();
+		{
+#endif
 
 			for (int i = 0; i < variables.size(); i++)
 			{
