@@ -23,11 +23,13 @@ GameObjectParamsPanel::GameObjectParamsPanel(MainWindow& mainWindow, Project& pr
 	m_currentVariable = NULL;
 	PopulateVarsList();
 
+#if BEEHIVE_PLUGIN_LUMINARY
 	// TODO: Remove from UI, uses game object type layout now
 	m_toolAddVariable->Enable(false);
 	m_toolRemoveVariable->Enable(false);
 	m_textVariableName->Enable(false);
 	m_choiceSize->Enable(false);
+#endif
 }
 
 void GameObjectParamsPanel::Refresh(bool eraseBackground, const wxRect *rect)
