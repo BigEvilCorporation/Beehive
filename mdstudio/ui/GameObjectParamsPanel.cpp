@@ -117,6 +117,23 @@ void GameObjectParamsPanel::OnBtnApplyVariableChanges(wxCommandEvent& event)
 				}
 
 				variable->m_value = m_textValue->GetValue().c_str().AsChar();
+
+#if !BEEHIVE_PLUGIN_LUMINARY
+				switch (m_choiceSize->GetSelection())
+				{
+				case 0:
+					variable->m_size = eSizeByte;
+					break;
+				case 1:
+					variable->m_size = eSizeWord;
+					break;
+				case 2:
+					variable->m_size = eSizeLong;
+					break;
+				default:
+					ion::debug::Error("GameObjectParamsPanel::OnVariableSizeChanged() - Bad size");
+				}
+#endif
 			}
 		}
 
