@@ -1,27 +1,35 @@
 SubDir bigevilcorp mdstudio ;
 
-include_plugin_luminary = 1 ;
+include_plugin_luminary = 0 ;
 
 # Fixed stamps mode:
 # - no individual tile editing
 # - collision editing per-stamp only
 # - removes legacy UI
-beehive_config_fixed_stamps = 1 ;
+beehive_config_fixed_stamps = 0 ;
 
 # Lean mode - hides advanced features
-beehive_config_lean_ui = 1 ;
+beehive_config_lean_ui = 0 ;
 
-ion_renderer_opts = shader ;
+ion_renderer_api ?= opengl ;
+ion_renderer_opts ?= shader ;
+ion_renderer_shader_language ?= cggl ;
 
 ApplyIonDefines beehivestudio ;
 ApplyIonIncludes beehivestudio ;
 ApplyIonCore beehivestudio ;
 ApplyIonIo beehivestudio ;
-ApplyIonRenderer beehivestudio ;
+ApplyIonRenderer beehivestudio : $(ion_renderer_api) ;
+ApplyIonShaders behivestudio ;
 ApplyIonGameKit beehivestudio ;
 ApplyIonLib beehivestudio : beehive ;
 ApplyWxSDK beehivestudio ;
 ApplySLZSDK beehivestudio ;
+
+if ( shader in $(ion_renderer_opts) )
+{
+	ApplyIonShaders $(TARGET) ;
+}
 
 local BEEHIVE_STUDIO_SRC = 
 	main.cpp
@@ -30,7 +38,7 @@ local BEEHIVE_STUDIO_SRC =
 	beehivestudio.h
 	;
 
-if ( include_plugin_luminary )
+if ( $(include_plugin_luminary) = 1 )
 {
 	SubInclude bigevilcorp .. LUMINARY TOOLS BeehivePlugins luminary ;
 	C.Defines * : BEEHIVE_PLUGIN_LUMINARY ;
@@ -38,12 +46,12 @@ if ( include_plugin_luminary )
 	C.LinkLibraries beehivestudio : luminary ;
 }
 
-if ( beehive_config_fixed_stamps )
+if ( $(beehive_config_fixed_stamps) = 1 )
 {
 	C.Defines * : BEEHIVE_FIXED_STAMP_MODE ;
 }
 
-if ( beehive_config_lean_ui )
+if ( $(beehive_config_lean_ui) = 1 )
 {
 	C.Defines * : BEEHIVE_LEAN_UI ;
 }

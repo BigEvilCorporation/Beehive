@@ -22,10 +22,8 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 	m_cellSizeTexSpaceSq = 1.0f;
 
 	//Load shaders
-	m_vertexShaders[eShaderFlatColour] = resourceManager.GetResource<ion::render::Shader>("flatcoloured_v");
-	m_pixelShaders[eShaderFlatColour] = resourceManager.GetResource<ion::render::Shader>("flatcoloured_p");
-	m_vertexShaders[eShaderFlatTextured] = resourceManager.GetResource<ion::render::Shader>("flattextured_v");
-	m_pixelShaders[eShaderFlatTextured] = resourceManager.GetResource<ion::render::Shader>("flattextured_p");
+	m_shaders[eShaderFlatColour] = resourceManager.GetResource<ion::render::Shader>("flatcoloured");
+	m_shaders[eShaderFlatTextured] = resourceManager.GetResource<ion::render::Shader>("flattextured");
 
 	while (resourceManager.GetNumResourcesWaiting() > 0)
 	{
@@ -46,43 +44,50 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 
 	//Setup flat material
 	m_materials[eMaterialFlatColour]->SetDiffuseColour(ion::Colour(0.0f, 0.0f, 0.0f));
-	m_materials[eMaterialFlatColour]->SetVertexShader(m_vertexShaders[eShaderFlatColour].Get());
-	m_materials[eMaterialFlatColour]->SetPixelShader(m_pixelShaders[eShaderFlatColour].Get());
+#if defined ION_RENDERER_SHADER
+	m_materials[eMaterialFlatColour]->SetShader(m_shaders[eShaderFlatColour].Get());
+#endif
 
 	//Setup textured tileset material
 	m_materials[eMaterialTileset]->AddDiffuseMap(m_textures[eTextureTileset]);
 	m_materials[eMaterialTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialTileset]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
-	m_materials[eMaterialTileset]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+#if defined ION_RENDERER_SHADER
+	m_materials[eMaterialTileset]->SetShader(m_shaders[eShaderFlatTextured].Get());
+#endif
 
 	//Setup textured collision types material
 	m_materials[eMaterialCollisionTypes]->AddDiffuseMap(m_textures[eTextureCollisionTypes]);
 	m_materials[eMaterialCollisionTypes]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialCollisionTypes]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
-	m_materials[eMaterialCollisionTypes]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+#if defined ION_RENDERER_SHADER
+	m_materials[eMaterialCollisionTypes]->SetShader(m_shaders[eShaderFlatTextured].Get());
+#endif
 
 	//Setup textured terrain tileset materials
 	m_materials[eMaterialTerrainTilesetHeight]->AddDiffuseMap(m_textures[eTextureTerrainTilesetHeight]);
 	m_materials[eMaterialTerrainTilesetHeight]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialTerrainTilesetHeight]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
-	m_materials[eMaterialTerrainTilesetHeight]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+#if defined ION_RENDERER_SHADER
+	m_materials[eMaterialTerrainTilesetHeight]->SetShader(m_shaders[eShaderFlatTextured].Get());
+#endif
 
 	m_materials[eMaterialTerrainTilesetWidth]->AddDiffuseMap(m_textures[eTextureTerrainTilesetWidth]);
 	m_materials[eMaterialTerrainTilesetWidth]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialTerrainTilesetWidth]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
-	m_materials[eMaterialTerrainTilesetWidth]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+#if defined ION_RENDERER_SHADER
+	m_materials[eMaterialTerrainTilesetWidth]->SetShader(m_shaders[eShaderFlatTextured].Get());
+#endif
 
 	//Setup textured spriteSheet material
 	m_materials[eMaterialSpriteSheet]->AddDiffuseMap(m_textures[eTextureSpriteSheetPreview]);
 	m_materials[eMaterialSpriteSheet]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialSpriteSheet]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
-	m_materials[eMaterialSpriteSheet]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+#if defined ION_RENDERER_SHADER
+	m_materials[eMaterialSpriteSheet]->SetShader(m_shaders[eShaderFlatTextured].Get());
+#endif
 
 	//Setup textured reference material
 	m_materials[eMaterialReferenceImage]->AddDiffuseMap(m_textures[eTextureReferenceImage]);
 	m_materials[eMaterialReferenceImage]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-	m_materials[eMaterialReferenceImage]->SetVertexShader(m_vertexShaders[eShaderFlatTextured].Get());
-	m_materials[eMaterialReferenceImage]->SetPixelShader(m_pixelShaders[eShaderFlatTextured].Get());
+#if defined ION_RENDERER_SHADER
+	m_materials[eMaterialReferenceImage]->SetShader(m_shaders[eShaderFlatTextured].Get());
+#endif
 
 	//Set colours
 	m_colours[eColourHighlight] = ion::Colour(0.1f, 0.2f, 0.5f, 0.4f);
@@ -126,8 +131,7 @@ RenderResources::~RenderResources()
 
 	for(int i = 0; i < eShaderMax; i++)
 	{
-		m_vertexShaders[i].Clear();
-		m_pixelShaders[i].Clear();
+		m_shaders[i].Clear();
 	}
 }
 
@@ -792,7 +796,7 @@ RenderResources::SpriteSheetRenderResources::SpriteSheetRenderResources()
 	m_primitive = NULL;
 }
 
-void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader, Project* project)
+void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& spriteSheet, ion::render::Shader* shader, Project* project)
 {
 	const int tileWidth = project->GetPlatformConfig().tileWidth;
 	const int tileHeight = project->GetPlatformConfig().tileHeight;
@@ -891,8 +895,9 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 		renderFrame.material = new ion::render::Material();
 		renderFrame.material->AddDiffuseMap(renderFrame.texture);
 		renderFrame.material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
-		renderFrame.material->SetVertexShader(vertexShader);
-		renderFrame.material->SetPixelShader(pixelshader);
+#if defined ION_RENDERER_SHADER
+		renderFrame.material->SetShader(shader);
+#endif
 
 		//Insert frame
 		m_frames.push_back(renderFrame);
@@ -937,7 +942,7 @@ void RenderResources::CreateSpriteSheetResources(SpriteSheetId spriteSheetId, co
 {
 	m_spriteSheetRenderResources.erase(spriteSheetId);
 	std::pair<std::map<SpriteSheetId, SpriteSheetRenderResources>::iterator, bool> it = m_spriteSheetRenderResources.insert(std::make_pair(spriteSheetId, SpriteSheetRenderResources()));
-	it.first->second.Load(spriteSheet, m_pixelShaders[eShaderFlatTextured].Get(), m_vertexShaders[eShaderFlatTextured].Get(), &m_project);
+	it.first->second.Load(spriteSheet, m_shaders[eShaderFlatTextured].Get(), &m_project);
 }
 
 void RenderResources::DeleteSpriteSheetRenderResources(SpriteSheetId spriteSheetId)

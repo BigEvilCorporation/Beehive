@@ -114,8 +114,7 @@ public:
 
 	//Get resources
 	ion::render::Material* GetMaterial(MaterialType type) { return m_materials[type]; }
-	ion::render::Shader* GetVertexShader(ShaderType type) { return m_vertexShaders[type].Get(); }
-	ion::render::Shader* GetPixelhader(ShaderType type) { return m_pixelShaders[type].Get(); }
+	ion::render::Shader* GetShader(ShaderType type) { return m_shaders[type].Get(); }
 	ion::render::Primitive* GetPrimitive(PrimitiveType type) const { return m_primitives[type]; }
 	const ion::Colour& GetColour(ColourType type) const { return m_colours[type]; }
 
@@ -133,7 +132,7 @@ public:
 		SpriteSheetRenderResources();
 		~SpriteSheetRenderResources();
 
-		void Load(const SpriteSheet& spriteSheet, ion::render::Shader* pixelshader, ion::render::Shader* vertexShader, Project* project);
+		void Load(const SpriteSheet& spriteSheet, ion::render::Shader* shader, Project* project);
 
 		struct Frame
 		{
@@ -171,8 +170,7 @@ private:
 	Project& m_project;
 
 	//Resources
-	ion::io::ResourceHandle<ion::render::Shader> m_vertexShaders[eShaderMax];
-	ion::io::ResourceHandle<ion::render::Shader> m_pixelShaders[eShaderMax];
+	ion::io::ResourceHandle<ion::render::Shader> m_shaders[eShaderMax];
 	ion::render::Texture* m_textures[eTextureMax];
 	ion::render::Material* m_materials[eMaterialMax];
 	ion::render::Primitive* m_primitives[ePrimitiveMax];
