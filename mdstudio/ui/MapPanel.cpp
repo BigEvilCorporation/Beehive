@@ -487,13 +487,20 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						int stampX = x % stamp->GetWidth();
 						int stampY = y % stamp->GetHeight();
 						TileId tileId = stamp->GetTile(stampX, stampY);
+
+#if BEEHIVE_FIXED_STAMP_MODE
 						TerrainTileId terrainTileId = stamp->GetTerrainTile(stampX, stampY);
+						u16 collisionFlags = stamp->GetCollisionTileFlags(x, y);
+#else
+						TerrainTileId terrainTileId = m_project.GetEditingCollisionMap().GetTerrainTile(x, y);
+						u16 collisionFlags = m_project.GetEditingCollisionMap().GetCollisionTileFlags(x, y);
+#endif
 
 						std::stringstream tipStr;
 						tipStr << "Cursor: 0x" << SSTREAM_HEX4(x) << ", 0x" << SSTREAM_HEX4(y) << " (" << x << ", " << y << ")" << std::endl;
 						tipStr << "Stamp: 0x" << SSTREAM_HEX4(stampId) << " (" << stampId << ")" << std::endl;
 						tipStr << "Tile: 0x" << SSTREAM_HEX4(tileId) << " (" << tileId << ")" << std::endl;
-						tipStr << "Terrain: 0x" << SSTREAM_HEX4(terrainTileId) << " (" << terrainTileId << ")" << std::endl;
+						tipStr << "Terrain: 0x" << SSTREAM_HEX4(terrainTileId) << " (" << terrainTileId << ")" << " collisionFlags: 0x" << SSTREAM_HEX2(collisionFlags) /*<< " terrainFlags: 0x" << SSTREAM_HEX2(terrainFlags)*/ << std::endl;
 						tipStr << "Stamp pos: 0x" << SSTREAM_HEX4(stampPos.x) << ", 0x" << SSTREAM_HEX4(stampPos.y) << " (" << stampPos.x << ", " << stampPos.y << ")" << std::endl;
 						tipStr << "Size: " << stamp->GetWidth() << ", " << stamp->GetHeight() << std::endl;
 						tipStr << "Addr: 0x" << SSTREAM_HEX8(stampId * tileWidth * tileHeight * 4) << std::endl;
@@ -2370,7 +2377,11 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				int spriteFrame = 0;
 				ion::Vector3 animPosOffset;
 
-				if (const Actor* spriteActor = m_project.GetActor(gameObject.GetSpriteActorId()))
+				const Actor* spriteActor = m_project.GetActor(gameObject.GetSpriteActorId());
+				if(!spriteActor)
+					spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId());
+
+				if (spriteActor)
 				{
 					spriteSheet = spriteActor->GetSpriteSheet(gameObject.GetSpriteSheetId());
 					spriteSheetId = gameObject.GetSpriteSheetId();
