@@ -55,6 +55,8 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 	std::string projectDir = m_dirPickerProject->GetPath().c_str().AsChar();
 	m_project.m_settings.sceneExportDir = m_dirPickerScene->GetPath().c_str().AsChar();
 	m_project.m_settings.spritesExportDir = m_dirPickerSprites->GetPath().c_str().AsChar();
+	m_project.m_settings.spriteAnimsExportDir = m_dirPickerSpriteAnims->GetPath().c_str().AsChar();
+	m_project.m_settings.spritePalettesExportDir = m_dirPickerSpritePalettes->GetPath().c_str().AsChar();
 	std::string gameObjectsFile = m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 	std::string spritesFile = m_filePickerSpritesProj->GetPath().c_str().AsChar();
 	std::string referenceFile = m_filePickerReference->GetPath().c_str().AsChar();

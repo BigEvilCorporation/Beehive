@@ -23,7 +23,7 @@ GameObjectParamsPanel::GameObjectParamsPanel(MainWindow& mainWindow, Project& pr
 	m_currentVariable = NULL;
 	PopulateVarsList();
 
-#if BEEHIVE_PLUGIN_LUMINARY
+#if defined BEEHIVE_PLUGIN_LUMINARY
 	// TODO: Remove from UI, uses game object type layout now
 	m_toolAddVariable->Enable(false);
 	m_toolRemoveVariable->Enable(false);
@@ -78,7 +78,7 @@ void GameObjectParamsPanel::OnSelectVariable(wxListEvent& event)
 {
 	if(m_gameObject)
 	{
-#if BEEHIVE_PLUGIN_LUMINARY
+#if defined BEEHIVE_PLUGIN_LUMINARY
 		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
 		{
 			m_currentVariable = gameObjectType->GetVariable(event.GetIndex());
@@ -259,7 +259,7 @@ void GameObjectParamsPanel::PopulateVarsList()
 
 	if(m_gameObject)
 	{
-#if BEEHIVE_PLUGIN_LUMINARY
+#if defined BEEHIVE_PLUGIN_LUMINARY
 		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
 		{
 			//Populate var names and layout from game object type, but take values from game object

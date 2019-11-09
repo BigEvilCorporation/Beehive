@@ -490,7 +490,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 
 #if BEEHIVE_FIXED_STAMP_MODE
 						TerrainTileId terrainTileId = stamp->GetTerrainTile(stampX, stampY);
-						u16 collisionFlags = stamp->GetCollisionTileFlags(x, y);
+						u16 collisionFlags = stamp->GetCollisionTileFlags(stampX, stampY);
 #else
 						TerrainTileId terrainTileId = m_project.GetEditingCollisionMap().GetTerrainTile(x, y);
 						u16 collisionFlags = m_project.GetEditingCollisionMap().GetCollisionTileFlags(x, y);

@@ -1817,6 +1817,26 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
 
+	m_staticText511111 = new wxStaticText( this, wxID_ANY, wxT("Sprite anim export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText511111->Wrap( -1 );
+	fgSizer40->Add( m_staticText511111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerSpriteAnims = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerSpriteAnims, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText5111111 = new wxStaticText( this, wxID_ANY, wxT("Sprite palette export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5111111->Wrap( -1 );
+	fgSizer40->Add( m_staticText5111111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerSpritePalettes = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerSpritePalettes, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
 	m_staticText51 = new wxStaticText( this, wxID_ANY, wxT("Sprites definition file:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText51->Wrap( -1 );
 	fgSizer40->Add( m_staticText51, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );

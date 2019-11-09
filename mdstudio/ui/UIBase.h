@@ -713,6 +713,8 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxButton* m_btnParseProject;
 		wxStaticText* m_staticText5111;
 		wxStaticText* m_staticText51111;
+		wxStaticText* m_staticText511111;
+		wxStaticText* m_staticText5111111;
 		wxStaticText* m_staticText51;
 		wxStaticText* m_staticText53;
 		wxStaticText* m_staticText531;
@@ -733,11 +735,13 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxDirPickerCtrl* m_dirPickerProject;
 		wxDirPickerCtrl* m_dirPickerScene;
 		wxDirPickerCtrl* m_dirPickerSprites;
+		wxDirPickerCtrl* m_dirPickerSpriteAnims;
+		wxDirPickerCtrl* m_dirPickerSpritePalettes;
 		wxFilePickerCtrl* m_filePickerSpritesProj;
 		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
 		wxFilePickerCtrl* m_filePickerReference;
 
-		ProjectSettingsDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,373 ), long style = wxCAPTION|wxRESIZE_BORDER );
+		ProjectSettingsDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,463 ), long style = wxCAPTION|wxRESIZE_BORDER );
 		~ProjectSettingsDialogBase();
 
 };

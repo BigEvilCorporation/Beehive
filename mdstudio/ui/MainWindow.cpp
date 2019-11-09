@@ -1329,6 +1329,13 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		std::vector<std::pair<std::string,std::string>> includeFilenames;
 
+		//Export sprite data
+		// TODO: All-in-one sprites export dir + include file
+		// TODO: Luminary (binary) data formats
+		m_project->ExportSpriteSheets(m_project->m_settings.spritesExportDir, Project::ExportFormat::BinaryCompressed);
+		m_project->ExportSpriteAnims(m_project->m_settings.spriteAnimsExportDir, Project::ExportFormat::BinaryCompressed);
+		m_project->ExportSpritePalettes(m_project->m_settings.spritePalettesExportDir);
+
 		//Export luminary palettes
 		int numPalettes = 0;
 		std::string palettesLabel = std::string("palettes_") + m_project->GetName();
@@ -1621,7 +1628,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		//Generate uber include file
 		if (includeFilenames.size() > 0)
 		{
-			m_project->WriteIncludeFile(m_project->m_settings.projectExportDir, m_project->m_settings.sceneExportDir, "INCLUDE.ASM", includeFilenames);
+			m_project->WriteIncludeFile(m_project->m_settings.projectExportDir, m_project->m_settings.sceneExportDir, "INCLUDE.ASM", includeFilenames, true);
 		}
 
 		SetStatusText("Export complete");
