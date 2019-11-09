@@ -31,6 +31,9 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	m_textProjectName->SetValue(m_project.GetName());
 	m_dirPickerProject->SetPath(m_project.m_settings.projectExportDir);
 	m_dirPickerScene->SetPath(m_project.m_settings.sceneExportDir);
+	m_dirPickerSprites->SetPath(m_project.m_settings.spritesExportDir);
+	m_dirPickerSpriteAnims->SetPath(m_project.m_settings.spriteAnimsExportDir);
+	m_dirPickerSpritePalettes->SetPath(m_project.m_settings.spritePalettesExportDir);
 	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.gameObjectsExternalFile);
 	m_filePickerSpritesProj->SetPath(m_project.m_settings.spriteActorsExternalFile);
 	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
