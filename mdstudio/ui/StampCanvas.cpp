@@ -186,18 +186,15 @@ void StampCanvas::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 			{
 				if (const TerrainTile* tile = m_project->GetTerrainTileset().GetTerrainTile(hoverTileId))
 				{
-					float radians = tile->GetNormal().Angle(ion::Vector2(0.0f, 1.0f));
-					float degrees = 360.0f - ion::maths::Fmod(ion::maths::RadiansToDegrees(radians) + 360.0f, 360.0f);
-					if (degrees >= 360.0f)
-						degrees -= 360.0f;
-
-					u8 hexAngle = (u8)ion::maths::Floor((360.0f - degrees) * (256.0f / 360.0f));
+					float radians = tile->GetAngleRadians();
+					float degrees = tile->GetAngleDegrees();
+					u8 angleByte = tile->GetAngleByte();
 					int quadrant = ion::maths::Round(degrees / 90.0f) % 4;
 
 					std::stringstream tipStr;
 					tipStr << "Cursor: 0x" << SSTREAM_HEX2(x) << ", 0x" << SSTREAM_HEX2(y) << " (" << x << ", " << y << ")" << std::endl;
 					tipStr << "Tile: 0x" << SSTREAM_HEX4(hoverTileId) << " (" << hoverTileId << ")" << std::endl;
-					tipStr << "Angle: " << radians << " (deg: " << degrees << ", hex: 0x" << SSTREAM_HEX2(hexAngle) << ", quadrant: " << quadrant << ")" << std::endl;
+					tipStr << "Angle: " << radians << " (deg: " << degrees << ", hex: 0x" << SSTREAM_HEX2(angleByte) << ", quadrant: " << quadrant << ")" << std::endl;
 					tipStr << "Normal: " << tile->GetNormal().x << ", " << tile->GetNormal().y << std::endl;
 					tipStr << "Addr: 0x" << SSTREAM_HEX8(hoverTileId * tileWidth) << std::endl;
 					tipStr << "Data:" << std::endl;
