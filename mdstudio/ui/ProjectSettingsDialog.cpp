@@ -147,15 +147,26 @@ void ProjectSettingsDialog::ScanProject(const std::string directory)
 				GameObjectTypeId gameObjectTypeId = m_project.AddGameObjectType();
 				gameObjectType = m_project.GetGameObjectType(gameObjectTypeId);
 				gameObjectType->SetName(entities[i].name);
+				gameObjectType->SetStatic(entities[i].isStatic);
 			}
 
 			//Add all variables from entity and all components,
-			//but keep the original values(if they exist) and keep the order
-			int numVariables = entities[i].spawnData.params.size();
-
-			for (int j = 0; j < entities[i].components.size(); j++)
+			//but keep the original values (if they exist) and keep the order
+			int numVariables = 0;
+			
+			if (entities[i].isStatic)
 			{
-				numVariables += entities[i].components[j].spawnData.params.size();
+				//Static entities have no components
+				numVariables = entities[i].params.size();
+			}
+			else
+			{
+				numVariables = entities[i].spawnData.params.size();
+
+				for (int j = 0; j < entities[i].components.size(); j++)
+				{
+					numVariables += entities[i].components[j].spawnData.params.size();
+				}
 			}
 
 			std::vector<GameObjectVariable> variables;
@@ -164,30 +175,64 @@ void ProjectSettingsDialog::ScanProject(const std::string directory)
 			int variableIdx = 0;
 
 			//Add entity variables
-			for (int j = 0; j < entities[i].spawnData.params.size(); j++, variableIdx++)
+			if (entities[i].isStatic)
 			{
-				if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].spawnData.params[j].name))
+				//Static entity is just data
+				for (int j = 0; j < entities[i].params.size(); j++, variableIdx++)
 				{
-					variables[variableIdx] = *variable;
-				}
-				else
-				{
-					variables[variableIdx].m_name = entities[i].spawnData.params[j].name;
-				}
+					if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].params[j].name))
+					{
+						variables[variableIdx] = *variable;
+					}
+					else
+					{
+						variables[variableIdx].m_name = entities[i].params[j].name;
+					}
 
-				variables[variableIdx].m_tags = entities[i].spawnData.params[j].tags;
+					variables[variableIdx].m_tags = entities[i].params[j].tags;
 
-				switch (entities[i].spawnData.params[j].size)
+					switch (entities[i].params[j].size)
+					{
+					case luminary::ParamSize::Byte:
+						variables[variableIdx].m_size = eSizeByte;
+						break;
+					case luminary::ParamSize::Word:
+						variables[variableIdx].m_size = eSizeWord;
+						break;
+					case luminary::ParamSize::Long:
+						variables[variableIdx].m_size = eSizeLong;
+						break;
+					}
+				}
+			}
+			else
+			{
+				//Dynamic entity has separate spawn data structure
+				for (int j = 0; j < entities[i].spawnData.params.size(); j++, variableIdx++)
 				{
-				case luminary::ParamSize::Byte:
-					variables[variableIdx].m_size = eSizeByte;
-					break;
-				case luminary::ParamSize::Word:
-					variables[variableIdx].m_size = eSizeWord;
-					break;
-				case luminary::ParamSize::Long:
-					variables[variableIdx].m_size = eSizeLong;
-					break;
+					if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].spawnData.params[j].name))
+					{
+						variables[variableIdx] = *variable;
+					}
+					else
+					{
+						variables[variableIdx].m_name = entities[i].spawnData.params[j].name;
+					}
+
+					variables[variableIdx].m_tags = entities[i].spawnData.params[j].tags;
+
+					switch (entities[i].spawnData.params[j].size)
+					{
+					case luminary::ParamSize::Byte:
+						variables[variableIdx].m_size = eSizeByte;
+						break;
+					case luminary::ParamSize::Word:
+						variables[variableIdx].m_size = eSizeWord;
+						break;
+					case luminary::ParamSize::Long:
+						variables[variableIdx].m_size = eSizeLong;
+						break;
+					}
 				}
 			}
 

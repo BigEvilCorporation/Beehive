@@ -1316,6 +1316,159 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 	}
 }
 
+#if defined BEEHIVE_PLUGIN_LUMINARY
+void ExportEntity(const Project& project, const GameObjectType& gameObjectType, const GameObject& gameObject, luminary::Entity& entity)
+{
+	//Type name
+	entity.name = gameObjectType.GetName();
+
+	//Entity name
+	if (gameObject.GetName().size() > 0)
+		entity.spawnData.name = gameObject.GetName();
+	else
+		entity.spawnData.name = std::string("ent") + std::to_string(gameObject.GetId());
+
+	//Spawn position
+	entity.spawnData.positionX = gameObject.GetPosition().x + GameObject::spriteSheetBorderX;
+	entity.spawnData.positionY = gameObject.GetPosition().y + GameObject::spriteSheetBorderY;
+	entity.spawnData.width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType.GetDimensions().x;
+	entity.spawnData.height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType.GetDimensions().y;
+
+	//Sprite
+	std::string spriteActorName = "";
+	std::string spriteSheetName = "";
+	std::string spriteAnimName = "";
+	int spriteSizeTiles = 0;
+	u8 spriteLayout = 0;
+
+	if (const Actor* actor = project.GetActor(gameObject.GetSpriteActorId()))
+	{
+		spriteActorName = actor->GetName();
+
+		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(gameObject.GetSpriteSheetId()))
+		{
+			spriteSheetName = spriteSheet->GetName();
+			spriteSizeTiles = spriteSheet->GetWidthTiles() * spriteSheet->GetHeightTiles();
+			spriteLayout = (u8)luminary::SpriteExporter::GetSpriteLayout(spriteSheet->GetWidthTiles(), spriteSheet->GetHeightTiles());
+
+			if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(gameObject.GetSpriteAnim()))
+			{
+				spriteAnimName = spriteAnim->GetName();
+			}
+		}
+	}
+
+	//Create entity and component spawn params
+	int paramIdx = 0;
+	int componentIdx = -1;
+
+	const std::vector<GameObjectVariable>& variables = gameObjectType.GetVariables();
+
+	for (int j = 0; j < variables.size(); j++, paramIdx++)
+	{
+		const GameObjectVariable& variable = variables[j];
+		luminary::Param* param = nullptr;
+
+		if (variable.m_componentIdx == -1)
+		{
+			//Entity param
+			entity.spawnData.params.resize(paramIdx + 1);
+			param = &entity.spawnData.params[paramIdx];
+		}
+		else
+		{
+			//Component param
+			if (componentIdx != variable.m_componentIdx)
+			{
+				componentIdx = variable.m_componentIdx;
+				entity.components.resize(componentIdx + 1);
+				entity.components[componentIdx].name = variable.m_componentName;
+				paramIdx = 0;
+			}
+
+			entity.components[componentIdx].spawnData.params.resize(paramIdx + 1);
+			param = &entity.components[componentIdx].spawnData.params[paramIdx];
+		}
+
+		param->name = variable.m_name;
+		param->value = "0x0";
+
+		//Search for supported tags
+		if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionX)))
+		{
+			param->value = std::to_string(gameObject.GetPosition().x + GameObject::spriteSheetBorderX);
+		}
+		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionY)))
+		{
+			param->value = std::to_string(gameObject.GetPosition().y + GameObject::spriteSheetBorderY);
+		}
+		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet)))
+		{
+			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+			{
+				std::stringstream stream;
+				stream << "actor_" << spriteActorName << "_spritesheet_" << spriteSheetName;
+				param->value = stream.str();
+			}
+		}
+		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileData)))
+		{
+			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+			{
+				std::stringstream stream;
+				stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0";
+				param->value = stream.str();
+			}
+		}
+		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileCount)))
+		{
+			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+			{
+				std::stringstream stream;
+				stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0_size_t";
+				param->value = stream.str();
+			}
+		}
+		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteLayout)))
+		{
+			param->value = std::to_string(spriteLayout);
+		}
+		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteAnimation)))
+		{
+			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0 && spriteAnimName.size() > 0)
+			{
+				std::stringstream stream;
+				stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_anim_" << spriteAnimName;
+				param->value = stream.str();
+			}
+		}
+		else
+		{
+			param->value = variable.m_value;
+
+			//If game object has overridden the variable, take that value instead
+			if (const GameObjectVariable* overriddenVar = gameObject.FindVariable(variable.m_name))
+			{
+				param->value = overriddenVar->m_value;
+			}
+		}
+
+		switch (variable.m_size)
+		{
+		case eSizeByte:
+			param->size = luminary::ParamSize::Byte;
+			break;
+		case eSizeWord:
+			param->size = luminary::ParamSize::Word;
+			break;
+		case eSizeLong:
+			param->size = luminary::ParamSize::Long;
+			break;
+		}
+	}
+}
+#endif
+
 void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 {
 	if(m_project.get())
@@ -1440,159 +1593,24 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
 				if (gameObjectType)
 				{
-					sceneData.entities.resize(sceneData.entities.size() + it->second.size());
-					const std::vector<GameObjectVariable>& variables = gameObjectType->GetVariables();
-
-					for (int i = 0; i < it->second.size(); i++, entityIdx++)
+					if (gameObjectType->IsStaticType())
 					{
-						const GameObject& gameObject = it->second[i].m_gameObject;
-
-						luminary::Entity& entity = sceneData.entities[entityIdx];
-
-						//Type name
-						entity.name = gameObjectType->GetName();
-
-						//Entity name
-						if (gameObject.GetName().size() > 0)
-							entity.spawnData.name = gameObject.GetName();
-						else
-							entity.spawnData.name = std::string("ent") + std::to_string(gameObject.GetId());
-
-						//Spawn position
-						entity.spawnData.positionX = gameObject.GetPosition().x + GameObject::spriteSheetBorderX;
-						entity.spawnData.positionY = gameObject.GetPosition().y + GameObject::spriteSheetBorderY;
-						entity.spawnData.width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType->GetDimensions().x;
-						entity.spawnData.height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
-
-						//Sprite
-						std::string spriteActorName = "";
-						std::string spriteSheetName = "";
-						std::string spriteAnimName = "";
-						int spriteSizeTiles = 0;
-						u8 spriteLayout = 0;
-
-						if (const Actor* actor = m_project->GetActor(gameObject.GetSpriteActorId()))
+						for (int i = 0; i < it->second.size(); i++, entityIdx++)
 						{
-							spriteActorName = actor->GetName();
-
-							if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(gameObject.GetSpriteSheetId()))
-							{
-								spriteSheetName = spriteSheet->GetName();
-								spriteSizeTiles = spriteSheet->GetWidthTiles() * spriteSheet->GetHeightTiles();
-								spriteLayout = (u8)luminary::SpriteExporter::GetSpriteLayout(spriteSheet->GetWidthTiles(), spriteSheet->GetHeightTiles());
-
-								if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(gameObject.GetSpriteAnim()))
-								{
-									spriteAnimName = spriteAnim->GetName();
-								}
-							}
+							const GameObject& gameObject = it->second[i].m_gameObject;
+							sceneData.staticEntities.push_back(luminary::Entity());
+							luminary::Entity& entity = sceneData.staticEntities.back();
+							ExportEntity(*m_project, *gameObjectType, gameObject, entity);
 						}
-
-						//Create entity and component spawn params
-						int paramIdx = 0;
-						int componentIdx = -1;
-
-						for (int j = 0; j < variables.size(); j++, paramIdx++)
+					}
+					else
+					{
+						for (int i = 0; i < it->second.size(); i++, entityIdx++)
 						{
-							const GameObjectVariable& variable = variables[j];
-							luminary::Param* param = nullptr;
-
-							if (variable.m_componentIdx == -1)
-							{
-								//Entity param
-								entity.spawnData.params.resize(paramIdx + 1);
-								param = &entity.spawnData.params[paramIdx];
-							}
-							else
-							{
-								//Component param
-								if (componentIdx != variable.m_componentIdx)
-								{
-									componentIdx = variable.m_componentIdx;
-									entity.components.resize(componentIdx + 1);
-									entity.components[componentIdx].name = variable.m_componentName;
-									paramIdx = 0;
-								}
-
-								entity.components[componentIdx].spawnData.params.resize(paramIdx + 1);
-								param = &entity.components[componentIdx].spawnData.params[paramIdx];
-							}
-
-							param->name = variable.m_name;
-							param->value = "0x0";
-
-							//Search for supported tags
-							if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionX)))
-							{
-								param->value = std::to_string(gameObject.GetPosition().x + GameObject::spriteSheetBorderX);
-							}
-							else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionY)))
-							{
-								param->value = std::to_string(gameObject.GetPosition().y + GameObject::spriteSheetBorderY);
-							}
-							else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet)))
-							{
-								if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
-								{
-									std::stringstream stream;
-									stream << "actor_" << spriteActorName << "_spritesheet_" << spriteSheetName;
-									param->value = stream.str();
-								}
-							}
-							else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileData)))
-							{
-								if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
-								{
-									std::stringstream stream;
-									stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0";
-									param->value = stream.str();
-								}
-							}
-							else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileCount)))
-							{
-								if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
-								{
-									std::stringstream stream;
-									stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0_size_t";
-									param->value = stream.str();
-								}
-							}
-							else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteLayout)))
-							{
-								param->value = std::to_string(spriteLayout);
-							}
-							else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteAnimation)))
-							{
-								if (spriteActorName.size() > 0 && spriteSheetName.size() > 0 && spriteAnimName.size() > 0)
-								{
-									std::stringstream stream;
-									stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_anim_" << spriteAnimName;
-									param->value = stream.str();
-								}
-							}
-							else
-							{
-								param->value = variable.m_value;
-
-								//If game object has overridden the variable, take that value instead
-								if (const GameObjectVariable* overriddenVar = gameObject.FindVariable(variable.m_name))
-								{
-									param->value = overriddenVar->m_value;
-								}
-							}
-
-							switch (variable.m_size)
-							{
-							case eSizeByte:
-								param->size = luminary::ParamSize::Byte;
-								break;
-							case eSizeWord:
-								param->size = luminary::ParamSize::Word;
-								break;
-							case eSizeLong:
-								param->size = luminary::ParamSize::Long;
-								break;
-							}
+							const GameObject& gameObject = it->second[i].m_gameObject;
+							sceneData.dynamicEntities.push_back(luminary::Entity());
+							luminary::Entity& entity = sceneData.dynamicEntities.back();
+							ExportEntity(*m_project, *gameObjectType, gameObject, entity);
 						}
 					}
 				}
