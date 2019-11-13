@@ -37,6 +37,16 @@ public:
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
 private:
+	static const int s_maxTerrainLayers = 2;
+
+	enum ContextMenuItems
+	{
+		eContextMenuSetTerrainFlagSpecial,
+		eContextMenuSetTerrainFlagWater,
+		eContextMenuSetTerrainLayerFirst,
+		eContextMenuSetTerrainLayerLast = eContextMenuSetTerrainLayerFirst + s_maxTerrainLayers,
+	};
+
 	//Mouse click or changed tile callback
 	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y);
 
@@ -45,6 +55,9 @@ private:
 
 	//To end/cancel current tool
 	virtual void OnKeyboard(wxKeyEvent& event);
+
+	//On right-click menu click
+	void OnContextMenuClick(wxCommandEvent& event);
 
 	//Rendering
 	void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);

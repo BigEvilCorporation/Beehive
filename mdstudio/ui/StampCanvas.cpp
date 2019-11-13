@@ -495,7 +495,7 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 					else
 					{
 						highlightedBezier = smallestBezier;
-						highlightedBezierIdx = highlightedBezierIdx;
+						highlightedBezierIdx = smallestBezierIndex;
 					}
 				}
 
@@ -507,9 +507,35 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 					Refresh();
 				}
 
+				if ((buttonBits & eMouseRight) && (m_currentTool == eToolSelectTerrainBezier) && m_highlightedBezier)
+				{
+					//Right-click menu
+					wxMenu contextMenu;
+
+					for (int i = 0; i < s_maxTerrainLayers; i++)
+					{
+						std::string label = "Terrain layer " + std::to_string(i);
+						wxMenuItem* item = contextMenu.Append(eContextMenuSetTerrainLayerFirst + i, wxString(label.c_str()));
+						item->SetCheckable(true);
+						item->Check(m_stamp->GetTerrainBezierLayer(m_highlightedBezierIdx) == i);
+					}
+
+					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampCanvas::OnContextMenuClick, NULL, this);
+					PopupMenu(&contextMenu);
+				}
+
 				break;
 			}
 		}
+	}
+}
+
+void StampCanvas::OnContextMenuClick(wxCommandEvent& event)
+{
+	if (event.GetId() >= eContextMenuSetTerrainLayerFirst && event.GetId() < eContextMenuSetTerrainLayerLast)
+	{
+		int layer = (event.GetId() - eContextMenuSetTerrainLayerFirst);
+		m_stamp->SetTerrainBezierLayer(m_highlightedBezierIdx, layer);
 	}
 }
 

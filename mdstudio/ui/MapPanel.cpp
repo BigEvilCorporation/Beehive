@@ -492,8 +492,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						TerrainTileId terrainTileId = stamp->GetTerrainTile(stampX, stampY);
 						u16 collisionFlags = stamp->GetCollisionTileFlags(stampX, stampY);
 #else
-						TerrainTileId terrainTileId = m_project.GetEditingCollisionMap().GetTerrainTile(x, y);
-						u16 collisionFlags = m_project.GetEditingCollisionMap().GetCollisionTileFlags(x, y);
+						TerrainTileId terrainTileId = inMapRange ? m_project.GetEditingCollisionMap().GetTerrainTile(x, y) : InvalidTerrainTileId;
+						u16 collisionFlags = inMapRange ? m_project.GetEditingCollisionMap().GetCollisionTileFlags(x, y) : 0;
 #endif
 
 						std::stringstream tipStr;
