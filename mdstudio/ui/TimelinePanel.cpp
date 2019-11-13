@@ -877,7 +877,7 @@ void TimelinePanel::OnToolStepLeft(wxCommandEvent& event)
 {
 	if (m_animation)
 	{
-		m_animation->SetFrame(ion::maths::Clamp(ion::maths::Floor(m_animation->GetFrame() - 1), 0, m_animation->GetLength()));
+		m_animation->SetFrame(ion::maths::Clamp(ion::maths::Floor(m_animation->GetFrame() - 1), 0.0f, m_animation->GetLength()));
 	}
 
 	SetSliderFrame(m_animation->GetFrame());
@@ -898,7 +898,7 @@ void TimelinePanel::OnToolStepRight(wxCommandEvent& event)
 {
 	if (m_animation)
 	{
-		m_animation->SetFrame(ion::maths::Clamp(ion::maths::Floor(m_animation->GetFrame() + 1), 0, m_animation->GetLength()));
+		m_animation->SetFrame(ion::maths::Clamp(ion::maths::Floor(m_animation->GetFrame() + 1), 0.0f, m_animation->GetLength()));
 	}
 
 	SetSliderFrame(m_animation->GetFrame());
