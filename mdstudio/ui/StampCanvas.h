@@ -68,7 +68,7 @@ private:
 	//Canvas drawing
 	void PaintTerrainBeziers(const Stamp& stamp);
 	void PaintCollisionStamp(const Stamp& stamp);
-	void PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y);
+	void PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u16 collisionFlags);
 
 	//Rendering primitives
 	ion::render::Chessboard* m_terrainCanvasPrimitive;

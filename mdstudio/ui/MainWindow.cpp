@@ -149,8 +149,6 @@ void MainWindow::OnPostInit()
 	m_ribbonBar->Realise();
 	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_GRID_SNAP);
 	m_ribbonBar->Realise();
-	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_SHOW_COLLISION);
-	m_ribbonBar->Realise();
 #endif
 
 #if BEEHIVE_LEAN_UI
@@ -1017,9 +1015,6 @@ void MainWindow::RefreshAll()
 {
 	if(!IsRefreshLocked())
 	{
-		m_auiManager.Update();
-		Refresh();
-
 		if(m_project.get())
 		{
 			m_project->InvalidateMap(true);
@@ -1031,6 +1026,9 @@ void MainWindow::RefreshAll()
 		}
 
 		RedrawAll();
+
+		m_auiManager.Update();
+		Refresh();
 
 		if(m_project.get())
 		{

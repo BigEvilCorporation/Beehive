@@ -73,14 +73,23 @@ protected:
 	//Create canvas
 	void CreateCanvas(int width, int height);
 
+	//Create collision canvas
+	void CreateCollisionCanvas(int width, int height);
+
 	//Create grid
 	void CreateGrid(int width, int height, int cellsX, int cellsY);
 
 	//Paint single tile to canvas
 	void PaintTile(TileId tileId, int x, int y, u32 flipFlags);
 
+	//Paint collision tile to canvas
+	void PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u16 collisionFlags);
+
 	//Paint stamp to canvas
 	void PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags);
+
+	//Paint stamp collision to canvas
+	void PaintStampCollision(const Stamp& stamp, int x, int y, u32 flipFlags);
 
 	//Fill selection with single tile
 	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
@@ -127,6 +136,8 @@ protected:
 
 	//Rendering primitives
 	ion::render::Chessboard* m_canvasPrimitive;
+	ion::render::Chessboard* m_terrainCanvasPrimitive;
+	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Grid* m_gridPrimitive;
 
 	//Canvas size (tiles)

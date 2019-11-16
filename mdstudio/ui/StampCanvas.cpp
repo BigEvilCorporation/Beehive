@@ -256,7 +256,7 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 						m_stamp->SetCollisionTileFlags(tileX, tileY, collisionTileFlags);
 
 						//Paint to canvas
-						PaintCollisionTile(m_stamp->GetTerrainTile(tileX, tileY), collisionTileFlags, tileX, y_inv);
+						PaintCollisionTile(m_stamp->GetTerrainTile(tileX, tileY), tileX, y_inv, collisionTileFlags);
 						Refresh();
 					}
 					else if (buttonBits & eMouseRight)
@@ -266,7 +266,7 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 						m_stamp->SetCollisionTileFlags(tileX, tileY, collisionTileFlags);
 
 						//Paint to canvas
-						PaintCollisionTile(m_stamp->GetTerrainTile(tileX, tileY), collisionTileFlags, tileX, y_inv);
+						PaintCollisionTile(m_stamp->GetTerrainTile(tileX, tileY), tileX, y_inv, collisionTileFlags);
 						Refresh();
 					}
 				}
@@ -774,12 +774,12 @@ void StampCanvas::PaintCollisionStamp(const Stamp& stamp)
 			int yInv = height - 1 - y;
 
 			//Paint tile
-			PaintCollisionTile(terrainTileId, collisionFlags, x, yInv);
+			PaintCollisionTile(terrainTileId, x, yInv, collisionFlags);
 		}
 	}
 }
 
-void StampCanvas::PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y)
+void StampCanvas::PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u16 collisionFlags)
 {
 	//Set texture coords for terrain cell
 	ion::render::TexCoord coords[4];

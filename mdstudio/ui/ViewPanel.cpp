@@ -13,6 +13,8 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Rend
 
 	m_mainWindow = mainWindow;
 	m_canvasPrimitive = NULL;
+	m_terrainCanvasPrimitive = NULL;
+	m_collisionCanvasPrimitive = NULL;
 	m_gridPrimitive = NULL;
 	m_cameraZoom = 1.0f;
 	m_cameraPanSpeed = 1.0f;
@@ -136,6 +138,22 @@ void ViewPanel::CreateCanvas(int width, int height)
 	m_canvasSize.y = height;
 }
 
+void ViewPanel::CreateCollisionCanvas(int width, int height)
+{
+	//Create rendering primitives
+	if (m_terrainCanvasPrimitive)
+		delete m_terrainCanvasPrimitive;
+
+	if (m_collisionCanvasPrimitive)
+		delete m_collisionCanvasPrimitive;
+
+	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+}
+
 void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 {
 	if(m_gridPrimitive)
@@ -147,8 +165,6 @@ void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), cellsX, cellsY);
 }
 
-#pragma optimize("",off)
-
 void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 {
 	//Set texture coords for cell
@@ -157,7 +173,17 @@ void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 	m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
 }
 
-#pragma optimize("",on)
+void ViewPanel::PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u16 collisionFlags)
+{
+	//Set texture coords for terrain cell
+	ion::render::TexCoord coords[4];
+	m_renderResources.GetTerrainTileTexCoords(terrainTileId, coords);
+	m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+
+	//Set texture coords for collision cell
+	m_renderResources.GetCollisionTypeTexCoords(collisionFlags, coords);
+	m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+}
 
 void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 {
@@ -183,6 +209,35 @@ void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)
 			{
 				//Paint on canvas
 				PaintTile(tileId, canvasX, y_inv, tileFlags);
+			}
+		}
+	}
+}
+
+void ViewPanel::PaintStampCollision(const Stamp& stamp, int x, int y, u32 flipFlags)
+{
+	int width = stamp.GetWidth();
+	int height = stamp.GetHeight();
+
+	for (int stampX = 0; stampX < width; stampX++)
+	{
+		for (int stampY = 0; stampY < height; stampY++)
+		{
+			int sourceX = (flipFlags & Map::eFlipX) ? (width - 1 - stampX) : stampX;
+			int sourceY = (flipFlags & Map::eFlipY) ? (height - 1 - stampY) : stampY;
+
+			TerrainTileId tileId = stamp.GetTerrainTile(sourceX, sourceY);
+			u16 tileFlags = stamp.GetCollisionTileFlags(sourceX, sourceY);
+			tileFlags ^= flipFlags;
+			int canvasX = stampX + x;
+			int canvasY = stampY + y;
+			int y_inv = m_canvasSize.y - 1 - canvasY;
+
+			//Can place stamps outside canvas boundaries, only draw tiles that are inside
+			if (canvasX >= 0 && canvasX < m_canvasSize.x && y_inv >= 0 && y_inv < m_canvasSize.y)
+			{
+				//Paint on canvas
+				PaintCollisionTile(tileId, canvasX, y_inv, tileFlags);
 			}
 		}
 	}

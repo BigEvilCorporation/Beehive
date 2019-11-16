@@ -71,9 +71,6 @@ private:
 		eCursor_MAX
 	};
 
-	//Create collision canvas
-	void CreateCollisionCanvas(int width, int height);
-
 	//Rendering
 	void RenderPaintPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
 	void RenderStampPreview(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z);
@@ -94,10 +91,7 @@ private:
 	void PaintMap(const Map& map);
 
 	//Paint whole collision map to canvas
-	void PaintCollisionMap(const CollisionMap& map);
-
-	//Paint collision tile to canvas
-	void PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y);
+	void PaintCollisionMap(const Map& map, const CollisionMap& collisionMap);
 
 	//Paint terrain beziers
 	void PaintTerrainBeziers(Project& project);
@@ -115,8 +109,6 @@ private:
 	void OnContextMenuClick(wxCommandEvent& event);
 
 	//Rendering primitives
-	ion::render::Chessboard* m_terrainCanvasPrimitive;
-	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Chessboard* m_stampPreviewPrimitive;
 	std::vector<ion::render::Primitive*> m_primitiveBeziers;
 	ion::render::Primitive* m_primitiveBezierPoints;

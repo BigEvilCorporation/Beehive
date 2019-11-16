@@ -26,8 +26,6 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	m_currentTool = eToolSelectTiles;
 	m_cursorOrigin = eCursorTopLeft;
 	m_tempStamp = NULL;
-	m_terrainCanvasPrimitive = NULL;
-	m_collisionCanvasPrimitive = NULL;
 	m_stampPreviewPrimitive = NULL;
 	m_primitiveBezierPoints = NULL;
 	m_primitiveBezierHandles = NULL;
@@ -57,11 +55,14 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	//Create grid
 	CreateGrid(mapWidth, mapHeight, mapWidth / project.GetGridSize(), mapHeight / project.GetGridSize());
 
-	//Redraw map
-	PaintMap(project.GetEditingMap());
+	if (!mainWindow->IsRefreshLocked())
+	{
+		//Redraw map
+		PaintMap(project.GetEditingMap());
 
-	//Redraw collision map
-	PaintCollisionMap(project.GetEditingCollisionMap());
+		//Redraw collision map
+		PaintCollisionMap(project.GetEditingMap(), project.GetEditingCollisionMap());
+	}
 }
 
 MapPanel::~MapPanel()
@@ -321,7 +322,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					collisionMap.SetTerrainTile(x, y, tileId);
 
 					//Paint to canvas
-					PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(x, y), x, y_inv);
+					PaintCollisionTile(tileId, x, y_inv, collisionMap.GetCollisionTileFlags(x, y));
 				}
 			}
 
@@ -343,7 +344,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
 
 					//Paint to canvas
-					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), x, y_inv, collisionTileFlags);
 				}
 				else if(buttonBits & eMouseRight)
 				{
@@ -355,7 +356,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
 
 					//Paint to canvas
-					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), x, y_inv, collisionTileFlags);
 				}
 			}
 
@@ -377,7 +378,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
 
 					//Paint to canvas
-					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), x, y_inv, collisionTileFlags);
 				}
 				else if(buttonBits & eMouseRight)
 				{
@@ -389,7 +390,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					collisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
 
 					//Paint to canvas
-					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), collisionTileFlags, x, y_inv);
+					PaintCollisionTile(collisionMap.GetTerrainTile(x, y), x, y_inv, collisionTileFlags);
 				}
 			}
 
@@ -1395,7 +1396,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						collisionMap.SetTerrainTile(tileX, tileY, tileId);
 
 						//Paint to canvas
-						PaintCollisionTile(tileId, collisionMap.GetCollisionTileFlags(tileX, tileY), tileX, y_inv);
+						PaintCollisionTile(tileId, tileX, y_inv, collisionMap.GetCollisionTileFlags(tileX, tileY));
 
 						//Invalidate terrain tileset
 						m_project.InvalidateTerrainTiles(true);
@@ -1756,7 +1757,7 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		if(m_project.TerrainTilesAreInvalidated())
 		{
 			//Redraw collision map
-			PaintCollisionMap(m_project.GetEditingCollisionMap());
+			PaintCollisionMap(m_project.GetEditingMap(), m_project.GetEditingCollisionMap());
 		}
 
 		//If terrain beziers invalidated
@@ -1773,22 +1774,6 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 		ViewPanel::Refresh(eraseBackground, rect);
 	}
-}
-
-void MapPanel::CreateCollisionCanvas(int width, int height)
-{
-	//Create rendering primitives
-	if(m_terrainCanvasPrimitive)
-		delete m_terrainCanvasPrimitive;
-
-	if(m_collisionCanvasPrimitive)
-		delete m_collisionCanvasPrimitive;
-
-	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-
-	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
-	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
 }
 
 void MapPanel::SetTool(ToolType tool)
@@ -2904,7 +2889,7 @@ void MapPanel::PaintMap(const Map& map)
 	}
 }
 
-void MapPanel::PaintCollisionMap(const CollisionMap& map)
+void MapPanel::PaintCollisionMap(const Map& map, const CollisionMap& collisionMap)
 {
 	int mapWidth = map.GetWidth();
 	int mapHeight = map.GetHeight();
@@ -2915,28 +2900,25 @@ void MapPanel::PaintCollisionMap(const CollisionMap& map)
 		for(int x = 0; x < mapWidth; x++)
 		{
 			//Get terrain tile and collision flags
-			TerrainTileId terrainTileId = map.GetTerrainTile(x, y);
-			u16 collisionFlags = map.GetCollisionTileFlags(x, y);
+			TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
+			u16 collisionFlags = collisionMap.GetCollisionTileFlags(x, y);
 
 			//Invert Y for OpenGL
 			int yInv = mapHeight - 1 - y;
 
 			//Paint tile
-			PaintCollisionTile(terrainTileId, collisionFlags, x, yInv);
+			PaintCollisionTile(terrainTileId, x, yInv, collisionFlags);
 		}
 	}
-}
 
-void MapPanel::PaintCollisionTile(TerrainTileId terrainTileId, u16 collisionFlags, int x, int y)
-{
-	//Set texture coords for terrain cell
-	ion::render::TexCoord coords[4];
-	m_renderResources.GetTerrainTileTexCoords(terrainTileId, coords);
-	m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
-
-	//Set texture coords for collision cell
-	m_renderResources.GetCollisionTypeTexCoords(collisionFlags, coords);
-	m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+	//Paint all stamps
+	for (TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
+	{
+		if (Stamp* stamp = m_project.GetStamp(it->m_id))
+		{
+			PaintStampCollision(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
+		}
+	}
 }
 
 void MapPanel::PaintTerrainBeziers(Project& project)
