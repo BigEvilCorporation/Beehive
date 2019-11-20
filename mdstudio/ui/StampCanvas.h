@@ -43,6 +43,7 @@ private:
 	{
 		eContextMenuSetTerrainFlagSpecial,
 		eContextMenuSetTerrainFlagWater,
+		eContextMenuSetTerrainGenerateWidthData,
 		eContextMenuSetTerrainLayerFirst,
 		eContextMenuSetTerrainLayerLast = eContextMenuSetTerrainLayerFirst + s_maxTerrainLayers,
 	};

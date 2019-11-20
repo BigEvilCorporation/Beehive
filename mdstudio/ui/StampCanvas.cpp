@@ -520,6 +520,10 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 						item->Check(m_stamp->GetTerrainBezierLayer(m_highlightedBezierIdx) == i);
 					}
 
+					wxMenuItem* item = contextMenu.Append(eContextMenuSetTerrainGenerateWidthData, "Generate width data");
+					item->SetCheckable(true);
+					item->Check(m_stamp->GetTerrainBezierGenerateWidth(m_highlightedBezierIdx));
+
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&StampCanvas::OnContextMenuClick, NULL, this);
 					PopupMenu(&contextMenu);
 				}
@@ -536,6 +540,10 @@ void StampCanvas::OnContextMenuClick(wxCommandEvent& event)
 	{
 		int layer = (event.GetId() - eContextMenuSetTerrainLayerFirst);
 		m_stamp->SetTerrainBezierLayer(m_highlightedBezierIdx, layer);
+	}
+	else if (event.GetId() == eContextMenuSetTerrainGenerateWidthData)
+	{
+		m_stamp->SetTerrainBezierGenerateWidth(m_highlightedBezierIdx, event.IsChecked());
 	}
 }
 
