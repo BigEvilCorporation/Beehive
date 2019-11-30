@@ -565,12 +565,18 @@ void StampCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 	}
 
 	//Render collision
-	RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
-	z += zOffset;
+	if (m_project->GetShowCollision())
+	{
+		RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
+	}
 
 	//Render terrain
-	RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
-	z += zOffset;
+	if (m_project->GetShowCollision())
+	{
+		RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
+	}
 
 	//Render beziers
 	RenderCollisionBeziers(renderer, cameraInverseMtx, projectionMtx, z);
