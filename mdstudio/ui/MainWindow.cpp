@@ -1332,29 +1332,8 @@ void ExportEntity(const Project& project, const GameObjectType& gameObjectType, 
 	entity.spawnData.width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType.GetDimensions().x;
 	entity.spawnData.height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType.GetDimensions().y;
 
-	//Sprite
-	std::string spriteActorName = "";
-	std::string spriteSheetName = "";
-	std::string spriteAnimName = "";
-	int spriteSizeTiles = 0;
-	u8 spriteLayout = 0;
-
-	if (const Actor* actor = project.GetActor(gameObject.GetSpriteActorId()))
-	{
-		spriteActorName = actor->GetName();
-
-		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(gameObject.GetSpriteSheetId()))
-		{
-			spriteSheetName = spriteSheet->GetName();
-			spriteSizeTiles = spriteSheet->GetWidthTiles() * spriteSheet->GetHeightTiles();
-			spriteLayout = (u8)luminary::SpriteExporter::GetSpriteLayout(spriteSheet->GetWidthTiles(), spriteSheet->GetHeightTiles());
-
-			if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(gameObject.GetSpriteAnim()))
-			{
-				spriteAnimName = spriteAnim->GetName();
-			}
-		}
-	}
+	//Sprite actor
+	const Actor* actor = project.GetActor(gameObject.GetSpriteActorId());
 
 	//Create entity and component spawn params
 	int paramIdx = 0;
@@ -1364,10 +1343,17 @@ void ExportEntity(const Project& project, const GameObjectType& gameObjectType, 
 
 	for (int j = 0; j < variables.size(); j++, paramIdx++)
 	{
-		const GameObjectVariable& variable = variables[j];
+		//Find overridden variable on game object
+		const GameObjectVariable* variable = gameObject.FindVariable(variables[j].m_name, variables[j].m_componentIdx);
+		if (!variable)
+		{
+			//Use variable from game object type
+			variable = &variables[j];
+		}
+
 		luminary::Param* param = nullptr;
 
-		if (variable.m_componentIdx == -1)
+		if (variable->m_componentIdx == -1)
 		{
 			//Entity param
 			entity.spawnData.params.resize(paramIdx + 1);
@@ -1376,11 +1362,11 @@ void ExportEntity(const Project& project, const GameObjectType& gameObjectType, 
 		else
 		{
 			//Component param
-			if (componentIdx != variable.m_componentIdx)
+			if (componentIdx != variable->m_componentIdx)
 			{
-				componentIdx = variable.m_componentIdx;
+				componentIdx = variable->m_componentIdx;
 				entity.components.resize(componentIdx + 1);
-				entity.components[componentIdx].name = variable.m_componentName;
+				entity.components[componentIdx].name = variable->m_componentName;
 				paramIdx = 0;
 			}
 
@@ -1388,70 +1374,83 @@ void ExportEntity(const Project& project, const GameObjectType& gameObjectType, 
 			param = &entity.components[componentIdx].spawnData.params[paramIdx];
 		}
 
-		param->name = variable.m_name;
+		param->name = variable->m_name;
 		param->value = "0x0";
 
 		//Search for supported tags
-		if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionX)))
+		if (variable->HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionX)))
 		{
 			param->value = std::to_string(gameObject.GetPosition().x + GameObject::spriteSheetBorderX);
 		}
-		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionY)))
+		else if (variable->HasTag(luminary::tags::GetTagName(luminary::tags::TagType::PositionY)))
 		{
 			param->value = std::to_string(gameObject.GetPosition().y + GameObject::spriteSheetBorderY);
 		}
-		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet)))
+		else if (variable->HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet)))
 		{
-			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+			if (actor)
 			{
-				std::stringstream stream;
-				stream << "actor_" << spriteActorName << "_spritesheet_" << spriteSheetName;
-				param->value = stream.str();
+				//Sprite sheet from variable
+				const SpriteSheet* spriteSheet = actor->GetSpriteSheet(actor->FindSpriteSheetId(variable->m_value));
+
+				//Sprite sheet from game object
+				if (!spriteSheet)
+					spriteSheet = actor->GetSpriteSheet(gameObject.GetSpriteSheetId());
+
+				//Sprite sheet from game object type
+				if (!spriteSheet)
+					spriteSheet = actor->GetSpriteSheet(gameObjectType.GetSpriteSheetId());
+				
+				if (spriteSheet)
+				{
+					std::stringstream stream;
+					stream << "actor_" << actor->GetName() << "_spritesheet_" << spriteSheet->GetName();
+					param->value = stream.str();
+				}
 			}
 		}
-		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileData)))
+		else if (variable->HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteAnimation)))
 		{
-			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
+			if (actor)
 			{
-				std::stringstream stream;
-				stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0";
-				param->value = stream.str();
-			}
-		}
-		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteTileCount)))
-		{
-			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0)
-			{
-				std::stringstream stream;
-				stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_frame_0_size_t";
-				param->value = stream.str();
-			}
-		}
-		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteLayout)))
-		{
-			param->value = std::to_string(spriteLayout);
-		}
-		else if (variable.HasTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteAnimation)))
-		{
-			if (spriteActorName.size() > 0 && spriteSheetName.size() > 0 && spriteAnimName.size() > 0)
-			{
-				std::stringstream stream;
-				stream << "actor_" << spriteActorName << "_sheet_" << spriteSheetName << "_anim_" << spriteAnimName;
-				param->value = stream.str();
+				//Find sprite sheet first
+				SpriteSheetId spriteSheetId = InvalidSpriteSheetId;
+				const GameObjectVariable* spriteSheetVar = gameObject.FindVariableByTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet), variable->m_componentIdx);
+
+				if (!spriteSheetVar)
+				{
+					spriteSheetVar = gameObjectType.FindVariableByTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet), variable->m_componentIdx);
+				}
+
+				if (spriteSheetVar)
+				{
+					spriteSheetId = actor->FindSpriteSheetId(spriteSheetVar->m_value);
+				}
+
+				if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(spriteSheetId))
+				{
+					if (const SpriteAnimation* spriteAnim = spriteSheet->FindAnimation(variable->m_value))
+					{
+						std::stringstream stream;
+						stream << "actor_" << actor->GetName() << "_sheet_" << spriteSheet->GetName() << "_anim_" << spriteAnim->GetName();
+
+						param->value = stream.str();
+					}
+				}
 			}
 		}
 		else
 		{
-			param->value = variable.m_value;
+			param->value = variable->m_value;
 
 			//If game object has overridden the variable, take that value instead
-			if (const GameObjectVariable* overriddenVar = gameObject.FindVariable(variable.m_name))
+			if (const GameObjectVariable* overriddenVar = gameObject.FindVariable(variable->m_name))
 			{
 				param->value = overriddenVar->m_value;
 			}
 		}
 
-		switch (variable.m_size)
+		switch (variable->m_size)
 		{
 		case eSizeByte:
 			param->size = luminary::ParamSize::Byte;
@@ -1481,7 +1480,6 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		std::vector<std::pair<std::string,std::string>> includeFilenames;
 
 		//Export sprite data
-		// TODO: All-in-one sprites export dir + include file
 		// TODO: Luminary (binary) data formats
 		m_project->ExportSpriteSheets(m_project->m_settings.spritesExportDir, Project::ExportFormat::BinaryCompressed);
 		m_project->ExportSpriteAnims(m_project->m_settings.spriteAnimsExportDir, Project::ExportFormat::BinaryCompressed);

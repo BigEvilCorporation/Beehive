@@ -29,6 +29,10 @@ GameObjectParamsPanel::GameObjectParamsPanel(MainWindow& mainWindow, Project& pr
 	m_toolRemoveVariable->Enable(false);
 	m_textVariableName->Enable(false);
 	m_choiceSize->Enable(false);
+
+	//One sprite sheet+anim per ECSprite component
+	m_choiceSpriteSheet->Enable(false);
+	m_choiceSpriteAnim->Enable(false);
 #endif
 }
 
@@ -46,10 +50,17 @@ void GameObjectParamsPanel::SetGameObject(GameObject* gameObject)
 
 	if(gameObject)
 	{
-		m_textObjectName->SetValue(m_gameObject->GetName());
+		m_textObjectName->ChangeValue(m_gameObject->GetName());
 	}
 
-	PopulateSpriteActorList();
+	PopulateSpriteActorList(*m_choiceSpriteActor);
+
+#if !defined BEEHIVE_PLUGIN_LUMINARY
+	//One sprite sheet+anim per ECSprite component
+	PopulateSpriteSheetList(*m_choiceSpriteSheet);
+	PopulateSpriteAnimList(*m_choiceSpriteAnim, m_gameObject->GetSpriteSheetId());
+#endif
+
 	PopulateVarsList();
 }
 
@@ -81,7 +92,16 @@ void GameObjectParamsPanel::OnSelectVariable(wxListEvent& event)
 #if defined BEEHIVE_PLUGIN_LUMINARY
 		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
 		{
-			m_currentVariable = gameObjectType->GetVariable(event.GetIndex());
+			if (const GameObjectVariable* variable = gameObjectType->GetVariable(event.GetIndex()))
+			{
+				//Find overridden variable
+				m_currentVariable = m_gameObject->FindVariable(variable->m_name, variable->m_componentIdx);
+				if (!m_currentVariable)
+				{
+					//No overridden variable, show archetype's value
+					m_currentVariable = variable;
+				}
+			}
 		}
 #else
 		m_currentVariable = m_gameObject->GetVariable(event.GetIndex());
@@ -100,52 +120,125 @@ void GameObjectParamsPanel::OnButtonApplyObjectName(wxCommandEvent& event)
 	}
 }
 
-void GameObjectParamsPanel::OnBtnApplyVariableChanges(wxCommandEvent& event)
+void GameObjectParamsPanel::OnEnterTextVariable(wxCommandEvent& event)
 {
-	if(m_gameObject)
-	{
-		if(m_currentVariable)
-		{
-			if (m_textValue->GetValue() != s_defaultVarName)
-			{
-				//Find or add overridden var on game object
-				GameObjectVariable* variable = m_gameObject->FindVariable(m_textVariableName->GetValue().c_str().AsChar());
-				if (!variable)
-				{
-					variable = &m_gameObject->AddVariable();
-					variable->m_name = m_textVariableName->GetValue().c_str().AsChar();
-				}
-
-				variable->m_value = m_textValue->GetValue().c_str().AsChar();
-
 #if !BEEHIVE_PLUGIN_LUMINARY
-				switch (m_choiceSize->GetSelection())
+	if (m_gameObject && m_currentVariable)
+	{
+		if (m_textValue->GetValue() != s_defaultVarName)
+		{
+			//Find or add overridden var on game object
+			GameObjectVariable* variable = m_gameObject->FindVariable(m_currentVariable->m_name, m_currentVariable->m_componentIdx);
+			if (!variable)
+			{
+				if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
 				{
-				case 0:
-					variable->m_size = eSizeByte;
-					break;
-				case 1:
-					variable->m_size = eSizeWord;
-					break;
-				case 2:
-					variable->m_size = eSizeLong;
-					break;
-				default:
-					ion::debug::Error("GameObjectParamsPanel::OnVariableSizeChanged() - Bad size");
+					if (const GameObjectVariable* original = gameObjectType->FindVariable(m_currentVariable->m_name, m_currentVariable->m_componentIdx))
+					{
+						variable = &m_gameObject->AddVariable();
+						*variable = *original;
+					}
 				}
-#endif
 			}
+
+			variable->m_value = m_textValue->GetValue().c_str().AsChar();
+		}
+	}
+#endif
+}
+
+void GameObjectParamsPanel::OnVariableSizeChanged(wxCommandEvent& event)
+{
+#if !BEEHIVE_PLUGIN_LUMINARY
+	if (m_gameObject && m_currentVariable)
+	{
+		//Find or add overridden var on game object
+		GameObjectVariable* variable = m_gameObject->FindVariable(m_textVariableName->GetValue().c_str().AsChar());
+		if (!variable)
+		{
+			variable = &m_gameObject->AddVariable();
+			variable->m_name = m_textVariableName->GetValue().c_str().AsChar();
 		}
 
-		PopulateVarsList();
-		m_mainWindow.RedrawPanel(MainWindow::ePanelGameObjectParams);
+		switch (m_choiceSize->GetSelection())
+		{
+		case 0:
+			variable->m_size = eSizeByte;
+			break;
+		case 1:
+			variable->m_size = eSizeWord;
+			break;
+		case 2:
+			variable->m_size = eSizeLong;
+			break;
+		default:
+			ion::debug::Error("GameObjectParamsPanel::OnVariableSizeChanged() - Bad size");
+		}
+	}
+#endif
+}
+
+void GameObjectParamsPanel::OnEnterTextValue(wxCommandEvent& event)
+{
+	if (m_gameObject && m_currentVariable)
+	{
+		if (m_textValue->GetValue() != s_defaultVarName)
+		{
+			//Find or add overridden var on game object
+			GameObjectVariable* variable = m_gameObject->FindVariable(m_currentVariable->m_name, m_currentVariable->m_componentIdx);
+			if (!variable)
+			{
+				if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
+				{
+					if (const GameObjectVariable* original = gameObjectType->FindVariable(m_currentVariable->m_name, m_currentVariable->m_componentIdx))
+					{
+						variable = &m_gameObject->AddVariable();
+						*variable = *original;
+					}
+				}
+			}
+
+			variable->m_value = m_textValue->GetValue().c_str().AsChar();
+			PopulateVarsList();
+		}
+	}
+}
+
+void GameObjectParamsPanel::OnSelectValue(wxCommandEvent& event)
+{
+	if (m_gameObject && m_currentVariable)
+	{
+		if (m_textValue->GetValue() != s_defaultVarName)
+		{
+			//Find or add overridden var on game object
+			GameObjectVariable* variable = m_gameObject->FindVariable(m_currentVariable->m_name, m_currentVariable->m_componentIdx);
+			if (!variable)
+			{
+				if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
+				{
+					if (const GameObjectVariable* original = gameObjectType->FindVariable(m_currentVariable->m_name, m_currentVariable->m_componentIdx))
+					{
+						variable = &m_gameObject->AddVariable();
+						*variable = *original;
+					}
+				}
+			}
+
+			variable->m_value = m_choiceValue->GetStringSelection().c_str().AsChar();
+			PopulateVarsList();
+		}
 	}
 }
 
 void GameObjectParamsPanel::OnSelectSpriteActor(wxCommandEvent& event)
 {
 	m_gameObject->SetSpriteActorId(m_project.FindActorId(m_choiceSpriteActor->GetStringSelection().c_str().AsChar()));
-	PopulateSpriteSheetList();
+
+#if !defined BEEHIVE_PLUGIN_LUMINARY
+	//One sprite sheet+anim per ECSprite component
+	PopulateSpriteSheetList(*m_choiceSpriteSheet);
+	PopulateSpriteAnimList(*m_choiceSpriteAnim, m_gameObject->GetSpriteSheetId());
+#endif
 }
 
 void GameObjectParamsPanel::OnSelectSpriteSheet(wxCommandEvent& event)
@@ -153,7 +246,7 @@ void GameObjectParamsPanel::OnSelectSpriteSheet(wxCommandEvent& event)
 	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
 	{
 		m_gameObject->SetSpriteSheetId(actor->FindSpriteSheetId(m_choiceSpriteSheet->GetStringSelection().c_str().AsChar()));
-		PopulateSpriteAnimList();
+		PopulateSpriteAnimList(*m_choiceSpriteAnim, m_gameObject->GetSpriteSheetId());
 	}
 }
 
@@ -168,66 +261,58 @@ void GameObjectParamsPanel::OnSelectSpriteAnim(wxCommandEvent& event)
 	}
 }
 
-void GameObjectParamsPanel::PopulateSpriteActorList()
+void GameObjectParamsPanel::PopulateSpriteActorList(wxChoice& list)
 {
-	m_choiceSpriteActor->Clear();
-	m_choiceSpriteSheet->Clear();
-	m_choiceSpriteAnim->Clear();
-	m_choiceSpriteActor->SetSelection(-1);
-	m_choiceSpriteSheet->SetSelection(-1);
-	m_choiceSpriteAnim->SetSelection(-1);
+	list.Clear();
+	list.SetSelection(-1);
 
 	for (TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
 	{
-		m_choiceSpriteActor->AppendString(it->second.GetName());
+		list.AppendString(it->second.GetName());
 	}
 
 	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
 	{
-		m_choiceSpriteActor->SetStringSelection(actor->GetName());
-		PopulateSpriteSheetList();
+		list.SetStringSelection(actor->GetName());
 	}
 }
 
-void GameObjectParamsPanel::PopulateSpriteSheetList()
+void GameObjectParamsPanel::PopulateSpriteSheetList(wxChoice& list)
 {
-	m_choiceSpriteSheet->Clear();
-	m_choiceSpriteAnim->Clear();
-	m_choiceSpriteSheet->SetSelection(-1);
-	m_choiceSpriteAnim->SetSelection(-1);
+	list.Clear();
+	list.SetSelection(-1);
 
 	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
 	{
 		for (TSpriteSheetMap::const_iterator it = actor->SpriteSheetsBegin(), end = actor->SpriteSheetsEnd(); it != end; ++it)
 		{
-			m_choiceSpriteSheet->AppendString(it->second.GetName());
+			list.AppendString(it->second.GetName());
 		}
 
 		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(m_gameObject->GetSpriteSheetId()))
 		{
-			m_choiceSpriteSheet->SetStringSelection(spriteSheet->GetName());
-			PopulateSpriteAnimList();
+			list.SetStringSelection(spriteSheet->GetName());
 		}
 	}
 }
 
-void GameObjectParamsPanel::PopulateSpriteAnimList()
+void GameObjectParamsPanel::PopulateSpriteAnimList(wxChoice& list, SpriteSheetId spriteSheetId)
 {
-	m_choiceSpriteAnim->Clear();
-	m_choiceSpriteAnim->SetSelection(-1);
+	list.Clear();
+	list.SetSelection(-1);
 
 	if (const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId()))
 	{
-		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(m_gameObject->GetSpriteSheetId()))
+		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(spriteSheetId))
 		{
 			for (TSpriteAnimMap::const_iterator it = spriteSheet->AnimationsBegin(), end = spriteSheet->AnimationsEnd(); it != end; ++it)
 			{
-				m_choiceSpriteAnim->AppendString(it->second.GetName());
+				list.AppendString(it->second.GetName());
 			}
 
 			if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(m_gameObject->GetSpriteAnim()))
 			{
-				m_choiceSpriteAnim->SetStringSelection(spriteAnim->GetName());
+				list.SetStringSelection(spriteAnim->GetName());
 			}
 		}
 	}
@@ -292,8 +377,9 @@ void GameObjectParamsPanel::PopulateVarsList()
 
 				m_listVariables->SetItem(i,(int)Columns::Name, wxString(variables[i].m_name));
 				m_listVariables->SetItem(i, (int)Columns::Size, wxString(sizeText));
+				m_listVariables->SetItemData(i, variables[i].m_componentIdx);
 
-				if (const GameObjectVariable* overriddenVar = m_gameObject->FindVariable(variables[i].m_name))
+				if (const GameObjectVariable* overriddenVar = m_gameObject->FindVariable(variables[i].m_name, variables[i].m_componentIdx))
 				{
 					m_listVariables->SetItem(i, (int)Columns::Value, wxString(overriddenVar->m_value));
 				}
@@ -318,8 +404,49 @@ void GameObjectParamsPanel::PopulateVarsFields(const GameObjectVariable* variabl
 {
 	if(variable)
 	{
-		m_textVariableName->SetValue(variable->m_name);
-		m_textValue->SetValue(variable->m_value);
+		m_textVariableName->ChangeValue(variable->m_name);
+
+#if defined BEEHIVE_PLUGIN_LUMINARY
+		if (variable->HasTag("SPRITE_SHEET"))
+		{
+			m_choiceValue->Enable(true);
+			m_textValue->Enable(false);
+			PopulateSpriteSheetList(*m_choiceValue);
+			m_choiceValue->SetStringSelection(variable->m_value);
+		}
+		else if (variable->HasTag("SPRITE_ANIM"))
+		{
+			m_choiceValue->Enable(true);
+			m_textValue->Enable(false);
+
+			//Find sprite sheet in this component first
+			const Actor* actor = m_project.GetActor(m_gameObject->GetSpriteActorId());
+			SpriteSheetId spriteSheetId = InvalidSpriteSheetId;
+			const GameObjectVariable* spriteSheetVar = m_gameObject->FindVariableByTag("SPRITE_SHEET", variable->m_componentIdx);
+
+			if (!spriteSheetVar)
+			{
+				if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
+				{
+					spriteSheetVar = gameObjectType->FindVariableByTag("SPRITE_SHEET", variable->m_componentIdx);
+				}
+			}
+
+			if (spriteSheetVar && actor)
+			{
+				spriteSheetId = actor->FindSpriteSheetId(spriteSheetVar->m_value);
+			}
+
+			PopulateSpriteAnimList(*m_choiceValue, spriteSheetId);
+			m_choiceValue->SetStringSelection(variable->m_value);
+		}
+		else
+#endif
+		{
+			m_choiceValue->Enable(false);
+			m_textValue->Enable(true);
+			m_textValue->ChangeValue(variable->m_value);
+		}
 
 		int choice = 0;
 
@@ -340,12 +467,15 @@ void GameObjectParamsPanel::PopulateVarsFields(const GameObjectVariable* variabl
 
 		//Vars with tags can't be edited, they're auto-populated by exporter
 		m_textValue->Enable(variable->m_tags.size() == 0);
-		m_btnApplyVarParams->Enable(variable->m_tags.size() == 0);
+
+#if defined BEEHIVE_PLUGIN_LUMINARY
+		m_textVariableName->Enable(false);
+#endif
 	}
 	else
 	{
-		m_textVariableName->SetValue("");
-		m_textValue->SetValue("");
+		m_textVariableName->ChangeValue("");
+		m_textValue->ChangeValue("");
 		m_choiceSize->SetSelection(0);
 	}
 }

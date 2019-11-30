@@ -28,10 +28,13 @@ public:
 	virtual void OnToolVariableRemove(wxCommandEvent& event);
 	virtual void OnSelectVariable(wxListEvent& event);
 	virtual void OnButtonApplyObjectName(wxCommandEvent& event);
-	virtual void OnBtnApplyVariableChanges(wxCommandEvent& event);
 	virtual void OnSelectSpriteActor(wxCommandEvent& event);
 	virtual void OnSelectSpriteSheet(wxCommandEvent& event);
 	virtual void OnSelectSpriteAnim(wxCommandEvent& event);
+	virtual void OnEnterTextVariable(wxCommandEvent& event);
+	virtual void OnVariableSizeChanged(wxCommandEvent& event);
+	virtual void OnEnterTextValue(wxCommandEvent& event);
+	virtual void OnSelectValue(wxCommandEvent& event);
 	
 	void SetGameObject(GameObject* gameObject);
 
@@ -44,9 +47,9 @@ private:
 		Tags
 	};
 
-	void PopulateSpriteActorList();
-	void PopulateSpriteSheetList();
-	void PopulateSpriteAnimList();
+	void PopulateSpriteActorList(wxChoice& list);
+	void PopulateSpriteSheetList(wxChoice& list);
+	void PopulateSpriteAnimList(wxChoice& list, SpriteSheetId spriteSheetId);
 	void PopulateVarsList();
 	void PopulateVarsFields(const GameObjectVariable* variable);
 

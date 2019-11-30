@@ -1024,7 +1024,8 @@ class GameObjParamsPanelBase : public wxPanel
 		wxChoice* m_choiceSize;
 		wxStaticText* m_staticText8;
 		wxTextCtrl* m_textValue;
-		wxButton* m_btnApplyVarParams;
+		wxStaticText* m_staticText81;
+		wxChoice* m_choiceValue;
 
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
@@ -1034,8 +1035,10 @@ class GameObjParamsPanelBase : public wxPanel
 		virtual void OnSelectSpriteSheet( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectVariable( wxListEvent& event ) { event.Skip(); }
+		virtual void OnEnterTextVariable( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnVariableSizeChanged( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnApplyVariableChanges( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnEnterTextValue( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectValue( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
