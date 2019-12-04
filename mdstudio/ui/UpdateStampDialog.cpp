@@ -15,6 +15,7 @@
 DialogUpdateStamp::DialogUpdateStamp(wxWindow* parent, Stamp& stamp, Project& project, ion::render::Renderer& renderer, wxGLContext& glContext, RenderResources& renderResources)
 	: DialogUpdateStampBase(parent)
 	, m_stampOld(stamp)
+	, m_stampNew(stamp)
 	, m_project(project)
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)

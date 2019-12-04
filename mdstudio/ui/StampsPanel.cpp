@@ -228,14 +228,14 @@ void StampsPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 
 	if(buttonBits & eMouseRight)
 	{
-		if(m_hoverStamp != InvalidStampId)
+		//if(m_hoverStamp != InvalidStampId)
 		{
 			//Right-click menu
 			wxMenu contextMenu;
 
 			contextMenu.Append(eMenuRenameStamp, wxString("Rename stamp"));
-#if !BEEHIVE_LEAN_UI
 			contextMenu.Append(eMenuUpdateStamp, wxString("Update stamp"));
+#if !BEEHIVE_LEAN_UI
 			contextMenu.Append(eMenuUpdatePalette, wxString("Update palette"));
 			contextMenu.Append(eMenuSubstituteStamp, wxString("Substitute stamp"));
 #endif
@@ -272,7 +272,6 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
-#if !BEEHIVE_LEAN_UI
 	else if(event.GetId() == eMenuUpdateStamp)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
@@ -285,6 +284,7 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
+#if !BEEHIVE_LEAN_UI
 	else if(event.GetId() == eMenuUpdatePalette)
 	{
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);

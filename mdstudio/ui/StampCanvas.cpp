@@ -549,38 +549,41 @@ void StampCanvas::OnContextMenuClick(wxCommandEvent& event)
 
 void StampCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
-	//Render tile frame
-	RenderTileFrame(renderer, cameraInverseMtx, projectionMtx, z);
-	z += zOffset;
-
-	//Render preview
-	RenderPreview(renderer, cameraInverseMtx, projectionMtx, z);
-	z += zOffset;
-
-	//Render grid
-	if (m_project->GetShowGrid())
+	if (m_stamp)
 	{
-		RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
+		//Render tile frame
+		RenderTileFrame(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
+
+		//Render preview
+		RenderPreview(renderer, cameraInverseMtx, projectionMtx, z);
+		z += zOffset;
+
+		//Render grid
+		if (m_project->GetShowGrid())
+		{
+			RenderGrid(renderer, cameraInverseMtx, projectionMtx, z);
+			z += zOffset;
+		}
+
+		//Render collision
+		if (m_project->GetShowCollision())
+		{
+			RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+			z += zOffset;
+		}
+
+		//Render terrain
+		if (m_project->GetShowCollision())
+		{
+			RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
+			z += zOffset;
+		}
+
+		//Render beziers
+		RenderCollisionBeziers(renderer, cameraInverseMtx, projectionMtx, z);
 		z += zOffset;
 	}
-
-	//Render collision
-	if (m_project->GetShowCollision())
-	{
-		RenderCollisionCanvas(renderer, cameraInverseMtx, projectionMtx, z);
-		z += zOffset;
-	}
-
-	//Render terrain
-	if (m_project->GetShowCollision())
-	{
-		RenderTerrainCanvas(renderer, cameraInverseMtx, projectionMtx, z);
-		z += zOffset;
-	}
-
-	//Render beziers
-	RenderCollisionBeziers(renderer, cameraInverseMtx, projectionMtx, z);
-	z += zOffset;
 }
 
 void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -724,50 +727,56 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 
 void StampCanvas::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	//No depth test (stops grid cells Z fighting)
-	renderer.SetDepthTest(ion::render::Renderer::eAlways);
-
-	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
-
-	//Draw terrain heightmaps
+	if (m_terrainCanvasPrimitive)
 	{
-		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
-		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
-		renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
-		material->Unbind();
+		//No depth test (stops grid cells Z fighting)
+		renderer.SetDepthTest(ion::render::Renderer::eAlways);
+
+		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+
+		//Draw terrain heightmaps
+		{
+			ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
+			material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+			material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+			renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
+			material->Unbind();
+		}
+
+		//Draw terrain widthmaps
+		{
+			ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetWidth);
+			material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+			material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+			renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
+			material->Unbind();
+		}
+
+		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+
+		renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 	}
-
-	//Draw terrain widthmaps
-	{
-		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetWidth);
-		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
-		renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
-		material->Unbind();
-	}
-
-	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
-
-	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
 void StampCanvas::RenderCollisionCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
-	//No depth test (stops grid cells Z fighting)
-	renderer.SetDepthTest(ion::render::Renderer::eAlways);
+	if (m_collisionCanvasPrimitive)
+	{
+		//No depth test (stops grid cells Z fighting)
+		renderer.SetDepthTest(ion::render::Renderer::eAlways);
 
-	ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialCollisionTypes);
+		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialCollisionTypes);
 
-	//Draw map
-	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
-	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
-	renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
-	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+		//Draw map
+		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
+		material->Unbind();
+		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
 
-	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+		renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+	}
 }
 
 void StampCanvas::PaintCollisionStamp(const Stamp& stamp)

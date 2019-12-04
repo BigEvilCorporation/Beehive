@@ -43,6 +43,7 @@ private:
 	{
 		eMenuRenameStamp,
 		eMenuDeleteStamp,
+		eMenuUpdateStamp,
 		eMenuEditCollision,
 
 #if !BEEHIVE_FIXED_STAMP_MODE
@@ -51,7 +52,6 @@ private:
 #endif
 
 #if !BEEHIVE_LEAN_UI
-		eMenuUpdateStamp,
 		eMenuUpdatePalette,
 		eMenuSubstituteStamp,
 		eMenuSortTilesSequentially,
