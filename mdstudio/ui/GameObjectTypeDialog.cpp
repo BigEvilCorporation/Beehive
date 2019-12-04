@@ -183,7 +183,16 @@ void GameObjectTypeDialog::OnBtnApplyObjChanges(wxCommandEvent& event)
 			int index = m_choiceSpriteActor->GetSelection();
 			if(index >= 0)
 			{
-				gameObjType->SetSpriteActorId(m_actorCache[index]);
+				if (const Actor* actor = m_project.GetActor(m_actorCache[index]))
+				{
+					gameObjType->SetSpriteActorId(m_actorCache[index]);
+
+					if (const SpriteSheet* spriteSheet = actor->FindSpriteSheet(m_choiceSpriteSheet->GetStringSelection().c_str().AsChar()))
+					{
+						gameObjType->SetSpriteSheetId(actor->FindSpriteSheetId(m_choiceSpriteSheet->GetStringSelection().c_str().AsChar()));
+						gameObjType->SetSpriteAnim(spriteSheet->FindAnimationId(m_choiceSpriteAnim->GetStringSelection().c_str().AsChar()));
+					}
+				}
 			}
 		}
 
@@ -250,6 +259,107 @@ void GameObjectTypeDialog::OnBtnExport(wxCommandEvent& event)
 	}
 }
 
+void GameObjectTypeDialog::OnSelectSpriteActor(wxCommandEvent& event)
+{
+	if (const GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	{
+		PopulateSpriteSheets(*gameObjType);
+	}
+}
+
+void GameObjectTypeDialog::OnSelectSpriteSheet(wxCommandEvent& event)
+{
+	if (const GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
+	{
+		PopulateSpriteAnims(*gameObjType);
+	}
+}
+
+void GameObjectTypeDialog::OnSelectSpriteAnim(wxCommandEvent& event)
+{
+	
+}
+
+void GameObjectTypeDialog::PopulateSpriteActors(const GameObjectType& gameObjType)
+{
+	m_choiceSpriteActor->Clear();
+	m_actorCache.clear();
+
+	int selectedSpriteIdx = -1;
+
+	for (TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
+	{
+		if (it->first == gameObjType.GetSpriteActorId())
+		{
+			selectedSpriteIdx = m_actorCache.size();
+		}
+
+		//Store by index
+		m_actorCache.push_back(it->first);
+
+		//Add to list
+		m_choiceSpriteActor->AppendString(it->second.GetName());
+	}
+
+	if (selectedSpriteIdx != -1)
+	{
+		m_choiceSpriteActor->SetSelection(selectedSpriteIdx);
+	}
+
+	PopulateSpriteSheets(gameObjType);
+}
+
+void GameObjectTypeDialog::PopulateSpriteSheets(const GameObjectType& gameObjType)
+{
+	m_choiceSpriteSheet->Clear();
+	m_choiceSpriteSheet->SetSelection(-1);
+
+	int actorIdx = m_choiceSpriteActor->GetSelection();
+	if (actorIdx >= 0)
+	{
+		if (const Actor* actor = m_project.GetActor(m_actorCache[actorIdx]))
+		{
+			for (TSpriteSheetMap::const_iterator it = actor->SpriteSheetsBegin(), end = actor->SpriteSheetsEnd(); it != end; ++it)
+			{
+				m_choiceSpriteSheet->AppendString(it->second.GetName());
+			}
+
+			if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(gameObjType.GetSpriteSheetId()))
+			{
+				m_choiceSpriteSheet->SetStringSelection(spriteSheet->GetName());
+			}
+		}
+	}
+
+	PopulateSpriteAnims(gameObjType);
+}
+
+void GameObjectTypeDialog::PopulateSpriteAnims(const GameObjectType& gameObjType)
+{
+	m_choiceSpriteAnim->Clear();
+	m_choiceSpriteAnim->SetSelection(-1);
+
+	int actorIdx = m_choiceSpriteActor->GetSelection();
+	if (actorIdx >= 0)
+	{
+		if (const Actor* actor = m_project.GetActor(m_actorCache[actorIdx]))
+		{
+			if (const SpriteSheet* spriteSheet = actor->FindSpriteSheet(m_choiceSpriteSheet->GetStringSelection().c_str().AsChar()))
+			{
+				for (TSpriteAnimMap::const_iterator it = spriteSheet->AnimationsBegin(), end = spriteSheet->AnimationsEnd(); it != end; ++it)
+				{
+					m_choiceSpriteAnim->AppendString(it->second.GetName());
+				}
+
+				if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(gameObjType.GetSpriteAnim()))
+				{
+					m_choiceSpriteAnim->SetStringSelection(spriteAnim->GetName());
+				}
+			}
+		}
+	}
+}
+
 void GameObjectTypeDialog::PopulateTypeList()
 {
 	m_listGameObjTypes->Clear();
@@ -290,29 +400,7 @@ void GameObjectTypeDialog::PopulateTypeFields(GameObjectType* gameObjType)
 		m_spinWidth->SetValue(gameObjType->GetDimensions().x);
 		m_spinHeight->SetValue(gameObjType->GetDimensions().y);
 
-		m_choiceSpriteActor->Clear();
-		m_actorCache.clear();
-
-		int selectedSpriteIdx = -1;
-
-		for(TActorMap::const_iterator it = m_project.ActorsBegin(), end = m_project.ActorsEnd(); it != end; ++it)
-		{
-			if(it->first == gameObjType->GetSpriteActorId())
-			{
-				selectedSpriteIdx = m_actorCache.size();
-			}
-
-			//Store by index
-			m_actorCache.push_back(it->first);
-
-			//Add to list
-			m_choiceSpriteActor->AppendString(it->second.GetName());
-		}
-
-		if(selectedSpriteIdx != -1)
-		{
-			m_choiceSpriteActor->SetSelection(selectedSpriteIdx);
-		}
+		PopulateSpriteActors(*gameObjType);
 	}
 	else
 	{

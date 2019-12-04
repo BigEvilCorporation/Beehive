@@ -1315,6 +1315,62 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 }
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
+
+const SpriteSheet* FindSpriteSheet(const Actor& actor, const GameObjectType& gameObjectType, const GameObject& gameObject, const GameObjectVariable& variable)
+{
+	//Sprite sheet from variable
+	const SpriteSheet* spriteSheet = actor.GetSpriteSheet(actor.FindSpriteSheetId(variable.m_value));
+
+	//Sprite sheet from game object
+	if (!spriteSheet)
+		spriteSheet = actor.GetSpriteSheet(gameObject.GetSpriteSheetId());
+
+	//Sprite sheet from game object type
+	if (!spriteSheet)
+		spriteSheet = actor.GetSpriteSheet(gameObjectType.GetSpriteSheetId());
+
+	return spriteSheet;
+}
+
+const SpriteAnimation* FindSpriteAnim(const Actor& actor, const GameObjectType& gameObjectType, const GameObject& gameObject, const GameObjectVariable& variable)
+{
+	const SpriteSheet* spriteSheet = nullptr;
+	const SpriteAnimation* spriteAnim = nullptr;
+
+	//Sprite sheet from variable
+	const GameObjectVariable* spriteSheetVar = gameObject.FindVariableByTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet), variable.m_componentIdx);
+
+	if (!spriteSheetVar)
+		spriteSheetVar = gameObjectType.FindVariableByTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet), variable.m_componentIdx);
+	
+	if (spriteSheetVar)
+		spriteSheet = FindSpriteSheet(actor, gameObjectType, gameObject, *spriteSheetVar);
+
+	//Sprite sheet from game object
+	if (!spriteSheet)
+		spriteSheet = actor.GetSpriteSheet(gameObject.GetSpriteSheetId());
+
+	//Sprite sheet from game object type
+	if (!spriteSheet)
+		spriteSheet = actor.GetSpriteSheet(gameObjectType.GetSpriteSheetId());
+
+	if (spriteSheet)
+	{
+		//Sprite anim from variable
+		spriteAnim = spriteSheet->FindAnimation(variable.m_value);
+
+		//Sprite anim from game object
+		if (!spriteAnim)
+			spriteAnim = spriteSheet->GetAnimation(gameObject.GetSpriteAnim());
+
+		//Sprite anim from game object type
+		if (!spriteAnim)
+			spriteAnim = spriteSheet->GetAnimation(gameObjectType.GetSpriteAnim());
+	}
+
+	return spriteAnim;
+}
+
 void ExportEntity(const Project& project, const GameObjectType& gameObjectType, const GameObject& gameObject, luminary::Entity& entity)
 {
 	//Type name
@@ -1332,8 +1388,12 @@ void ExportEntity(const Project& project, const GameObjectType& gameObjectType, 
 	entity.spawnData.width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType.GetDimensions().x;
 	entity.spawnData.height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType.GetDimensions().y;
 
-	//Sprite actor
+	//Sprite actor from game object
 	const Actor* actor = project.GetActor(gameObject.GetSpriteActorId());
+
+	//Sprite actor from game object type
+	if(!actor)
+		actor = project.GetActor(gameObjectType.GetSpriteActorId());
 
 	//Create entity and component spawn params
 	int paramIdx = 0;
@@ -1390,18 +1450,7 @@ void ExportEntity(const Project& project, const GameObjectType& gameObjectType, 
 		{
 			if (actor)
 			{
-				//Sprite sheet from variable
-				const SpriteSheet* spriteSheet = actor->GetSpriteSheet(actor->FindSpriteSheetId(variable->m_value));
-
-				//Sprite sheet from game object
-				if (!spriteSheet)
-					spriteSheet = actor->GetSpriteSheet(gameObject.GetSpriteSheetId());
-
-				//Sprite sheet from game object type
-				if (!spriteSheet)
-					spriteSheet = actor->GetSpriteSheet(gameObjectType.GetSpriteSheetId());
-				
-				if (spriteSheet)
+				if (const SpriteSheet* spriteSheet = FindSpriteSheet(*actor, gameObjectType, gameObject, *variable))
 				{
 					std::stringstream stream;
 					stream << "actor_" << actor->GetName() << "_spritesheet_" << spriteSheet->GetName();
@@ -1413,23 +1462,9 @@ void ExportEntity(const Project& project, const GameObjectType& gameObjectType, 
 		{
 			if (actor)
 			{
-				//Find sprite sheet first
-				SpriteSheetId spriteSheetId = InvalidSpriteSheetId;
-				const GameObjectVariable* spriteSheetVar = gameObject.FindVariableByTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet), variable->m_componentIdx);
-
-				if (!spriteSheetVar)
+				if (const SpriteSheet* spriteSheet = FindSpriteSheet(*actor, gameObjectType, gameObject, *variable))
 				{
-					spriteSheetVar = gameObjectType.FindVariableByTag(luminary::tags::GetTagName(luminary::tags::TagType::SpriteSheet), variable->m_componentIdx);
-				}
-
-				if (spriteSheetVar)
-				{
-					spriteSheetId = actor->FindSpriteSheetId(spriteSheetVar->m_value);
-				}
-
-				if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(spriteSheetId))
-				{
-					if (const SpriteAnimation* spriteAnim = spriteSheet->FindAnimation(variable->m_value))
+					if (const SpriteAnimation* spriteAnim = FindSpriteAnim(*actor, gameObjectType, gameObject, *variable))
 					{
 						std::stringstream stream;
 						stream << "actor_" << actor->GetName() << "_sheet_" << spriteSheet->GetName() << "_anim_" << spriteAnim->GetName();
@@ -1575,67 +1610,86 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			}
 		}
 
+		//Find background map
+		MapId backgroundMapId = InvalidMapId;
+
+		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end && backgroundMapId == InvalidMapId; ++it)
+		{
+			if (it->second.IsBackgroundMap())
+			{
+				backgroundMapId = it->first;
+			}
+		}
+
 		//Export Luminary scenes
 		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
 		{
-			const Map& map = m_project->GetMap(it->first);
-			const TGameObjectPosMap& gameObjMap = map.GetGameObjects();
-			int entityIdx = 0;
-
-			luminary::SceneExporter::SceneData sceneData;
-
-			for (TGameObjectPosMap::const_iterator it = gameObjMap.begin(), end = gameObjMap.end(); it != end; ++it)
+			//Ignore background map
+			if (it->first != backgroundMapId)
 			{
-				const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
-				if (gameObjectType)
+				const Map& mapFg = m_project->GetMap(it->first);
+				const Map* mapBg = (backgroundMapId == InvalidMapId) ? nullptr : &m_project->GetMap(backgroundMapId);
+				const TGameObjectPosMap& gameObjMap = mapFg.GetGameObjects();
+				int entityIdx = 0;
+
+				luminary::SceneExporter::SceneData sceneData;
+
+				for (TGameObjectPosMap::const_iterator it = gameObjMap.begin(), end = gameObjMap.end(); it != end; ++it)
 				{
-					if (gameObjectType->IsStaticType())
+					const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
+					if (gameObjectType)
 					{
-						for (int i = 0; i < it->second.size(); i++, entityIdx++)
+						if (gameObjectType->IsStaticType())
 						{
-							const GameObject& gameObject = it->second[i].m_gameObject;
-							sceneData.staticEntities.push_back(luminary::Entity());
-							luminary::Entity& entity = sceneData.staticEntities.back();
-							ExportEntity(*m_project, *gameObjectType, gameObject, entity);
+							for (int i = 0; i < it->second.size(); i++, entityIdx++)
+							{
+								const GameObject& gameObject = it->second[i].m_gameObject;
+								sceneData.staticEntities.push_back(luminary::Entity());
+								luminary::Entity& entity = sceneData.staticEntities.back();
+								ExportEntity(*m_project, *gameObjectType, gameObject, entity);
+							}
 						}
-					}
-					else
-					{
-						for (int i = 0; i < it->second.size(); i++, entityIdx++)
+						else
 						{
-							const GameObject& gameObject = it->second[i].m_gameObject;
-							sceneData.dynamicEntities.push_back(luminary::Entity());
-							luminary::Entity& entity = sceneData.dynamicEntities.back();
-							ExportEntity(*m_project, *gameObjectType, gameObject, entity);
+							for (int i = 0; i < it->second.size(); i++, entityIdx++)
+							{
+								const GameObject& gameObject = it->second[i].m_gameObject;
+								sceneData.dynamicEntities.push_back(luminary::Entity());
+								luminary::Entity& entity = sceneData.dynamicEntities.back();
+								ExportEntity(*m_project, *gameObjectType, gameObject, entity);
+							}
 						}
 					}
 				}
-			}
 
-			sceneData.palettesLabel = palettesLabel;
-			sceneData.numPalettes = numPalettes;
+				sceneData.palettesLabel = palettesLabel;
+				sceneData.numPalettes = numPalettes;
 
-			sceneData.mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
-			sceneData.stampsetLabel = stampsetLabel;
-			sceneData.tilesetLabel = tilesetLabel;
-			sceneData.collisionMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + map.GetName();
-			sceneData.collisionStampsetLabel = terrainStampsetLabel;
-			sceneData.collisionTilesetLabel = terrainTilesetLabel;
+				sceneData.mapFgLabel = std::string("map_") + m_project->GetName() + "_" + mapFg.GetName();
+				sceneData.mapBgLabel = mapBg ? (std::string("map_") + m_project->GetName() + "_" + mapBg->GetName()) : "0x0";
+				sceneData.stampsetLabel = stampsetLabel;
+				sceneData.tilesetLabel = tilesetLabel;
+				sceneData.collisionMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + mapFg.GetName();
+				sceneData.collisionStampsetLabel = terrainStampsetLabel;
+				sceneData.collisionTilesetLabel = terrainTilesetLabel;
 
-			sceneData.numTiles = m_project->GetTileset().GetCount();
-			sceneData.numStamps = m_project->GetStampCount();
-			sceneData.mapWidthStamps = map.GetWidth() / m_project->GetPlatformConfig().stampWidth;
-			sceneData.mapHeightStamps = map.GetHeight() / m_project->GetPlatformConfig().stampHeight;
-			sceneData.numCollisionTiles = m_project->GetTerrainTileset().GetCount();
-			sceneData.numCollisionStamps = terrainExporter.GetNumUniqueTerrainStamps();
-			sceneData.collisionMapWidthStamps = map.GetWidth() / m_project->GetPlatformConfig().stampWidth;
-			sceneData.collisionMapHeightStamps = map.GetHeight() / m_project->GetPlatformConfig().stampHeight;
+				sceneData.numTiles = m_project->GetTileset().GetCount();
+				sceneData.numStamps = m_project->GetStampCount();
+				sceneData.mapFgWidthStamps = mapFg.GetWidth() / m_project->GetPlatformConfig().stampWidth;
+				sceneData.mapFgHeightStamps = mapFg.GetHeight() / m_project->GetPlatformConfig().stampHeight;
+				sceneData.mapBgWidthStamps =  mapBg ? (mapBg->GetWidth() / m_project->GetPlatformConfig().stampWidth) : 0;
+				sceneData.mapBgHeightStamps = mapBg ? (mapBg->GetHeight() / m_project->GetPlatformConfig().stampHeight) : 0;
+				sceneData.numCollisionTiles = m_project->GetTerrainTileset().GetCount();
+				sceneData.numCollisionStamps = terrainExporter.GetNumUniqueTerrainStamps();
+				sceneData.collisionMapWidthStamps = mapFg.GetWidth() / m_project->GetPlatformConfig().stampWidth;
+				sceneData.collisionMapHeightStamps = mapFg.GetHeight() / m_project->GetPlatformConfig().stampHeight;
 
-			std::string sceneName = m_project->GetName() + "_" + map.GetName();
-			std::string sceneFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(map.GetName()) + ".ASM";
-			if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
-			{
-				includeFilenames.push_back(std::make_pair(std::string("scene_") + sceneName, sceneFilename));
+				std::string sceneName = m_project->GetName() + "_" + mapFg.GetName();
+				std::string sceneFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + ".ASM";
+				if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
+				{
+					includeFilenames.push_back(std::make_pair(std::string("scene_") + sceneName, sceneFilename));
+				}
 			}
 		}
 
@@ -2287,6 +2341,11 @@ void MainWindow::OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event )
 	ShowToolboxTiles();
 	ShowToolboxCollision();
 #endif
+}
+
+void MainWindow::OnBtnToolsMapList(wxRibbonButtonBarEvent& event)
+{
+	ShowPanelMapList();
 }
 
 void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )

@@ -25,13 +25,23 @@ public:
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 	virtual void OnMapSelected(wxListEvent& event);
+	virtual void OnMapRightClick(wxListEvent& event);
 	virtual void OnToolAddMap(wxCommandEvent& event);
 	virtual void OnToolRemoveMap(wxCommandEvent& event);
 	virtual void OnToolImportMap(wxCommandEvent& event);
 	virtual void OnToolRenameMap(wxCommandEvent& event);
 
+protected:
+	enum ContextMenu
+	{
+		BackgroundMap
+	};
+
+	void OnContextMenuClick(wxCommandEvent& event);
+
 private:
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	std::vector<MapId> m_mapIds;
+	MapId m_rightClickMap;
 };

@@ -40,12 +40,18 @@ protected:
 	virtual void OnBtnApplyVarChanges(wxCommandEvent& event);
 	virtual void OnBtnImport(wxCommandEvent& event);
 	virtual void OnBtnExport(wxCommandEvent& event);
+	virtual void OnSelectSpriteActor(wxCommandEvent& event);
+	virtual void OnSelectSpriteSheet(wxCommandEvent& event);
+	virtual void OnSelectSpriteAnim(wxCommandEvent& event);
 
 private:
 	void PopulateTypeList();
 	void PopulateTypeFields(GameObjectType* gameObjType);
 	void PopulateVarsList(GameObjectType* gameObjType);
 	void PopulateVarsFields(GameObjectVariable* variable);
+	void PopulateSpriteActors(const GameObjectType& gameObjType);
+	void PopulateSpriteSheets(const GameObjectType& gameObjType);
+	void PopulateSpriteAnims(const GameObjectType& gameObjType);
 
 	MainWindow& m_mainWindow;
 	Project& m_project;

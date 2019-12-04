@@ -67,9 +67,49 @@ void MapListPanel::OnMapSelected(wxListEvent& event)
 	}
 }
 
+void MapListPanel::OnMapRightClick(wxListEvent& event)
+{
+	m_rightClickMap = m_mapIds[event.GetIndex()];
+
+	const Map& map = m_project.GetMap(m_rightClickMap);
+
+	//Right-click menu
+	wxMenu contextMenu;
+
+	wxMenuItem* item = contextMenu.Append(ContextMenu::BackgroundMap, "Background Map");
+	item->SetCheckable(true);
+	item->Check(map.IsBackgroundMap());
+
+	contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapListPanel::OnContextMenuClick, NULL, this);
+	PopupMenu(&contextMenu);
+}
+
+void MapListPanel::OnContextMenuClick(wxCommandEvent& event)
+{
+	if (event.GetId() == ContextMenu::BackgroundMap)
+	{
+		if (event.IsChecked())
+		{
+			//There can only be one background map, clear the rest
+			for (TMapMap::iterator it = m_project.MapsBegin(), end = m_project.MapsEnd(); it != end; ++it)
+			{
+				it->second.SetBackgroundMap(false);
+			}
+		}
+
+		Map& map = m_project.GetMap(m_rightClickMap);
+		map.SetBackgroundMap(event.IsChecked());
+	}
+}
+
 void MapListPanel::OnToolAddMap(wxCommandEvent& event)
 {
 	DialogNewMap dialog(m_mainWindow);
+
+#if BEEHIVE_FIXED_STAMP_MODE
+	dialog.m_spinCtrlWidth->SetValue(8);
+	dialog.m_spinCtrlHeight->SetValue(4);
+#endif
 
 	if(dialog.ShowModal() == wxID_OK)
 	{
@@ -78,8 +118,16 @@ void MapListPanel::OnToolAddMap(wxCommandEvent& event)
 		Map& newMap = m_project.GetMap(newMapId);
 		CollisionMap& newCollisionMap = m_project.GetCollisionMap(collisionMapId);
 		newMap.SetName(dialog.m_textMapName->GetValue().GetData().AsChar());
+
+#if BEEHIVE_FIXED_STAMP_MODE
+		const PlatformConfig& config = m_project.GetPlatformConfig();
+		newMap.Resize(dialog.m_spinCtrlWidth->GetValue() * config.stampWidth, dialog.m_spinCtrlHeight->GetValue() * config.stampHeight, false, false);
+		newCollisionMap.Resize(dialog.m_spinCtrlWidth->GetValue() * config.stampWidth, dialog.m_spinCtrlHeight->GetValue() * config.stampHeight, false, false);
+#else
 		newMap.Resize(dialog.m_spinCtrlWidth->GetValue(), dialog.m_spinCtrlHeight->GetValue(), false, false);
 		newCollisionMap.Resize(dialog.m_spinCtrlWidth->GetValue(), dialog.m_spinCtrlHeight->GetValue(), false, false);
+#endif
+
 		m_project.SetEditingMap(newMapId);
 		m_project.SetEditingCollisionMap(newMapId);
 
