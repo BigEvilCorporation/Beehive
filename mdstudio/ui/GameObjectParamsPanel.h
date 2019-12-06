@@ -27,6 +27,8 @@ public:
 	virtual void OnToolVariableAdd(wxCommandEvent& event);
 	virtual void OnToolVariableRemove(wxCommandEvent& event);
 	virtual void OnSelectVariable(wxListEvent& event);
+	virtual void OnSelectArchetype(wxCommandEvent& event);
+	virtual void OnButtonNewArchetype(wxCommandEvent& event);
 	virtual void OnButtonApplyObjectName(wxCommandEvent& event);
 	virtual void OnSelectSpriteActor(wxCommandEvent& event);
 	virtual void OnSelectSpriteSheet(wxCommandEvent& event);
@@ -47,9 +49,11 @@ private:
 		Tags
 	};
 
+	void PopulateArchetypeList(wxChoice& list, GameObjectTypeId gameObjectTypeId);
 	void PopulateSpriteActorList(wxChoice& list);
 	void PopulateSpriteSheetList(wxChoice& list);
 	void PopulateSpriteAnimList(wxChoice& list, SpriteSheetId spriteSheetId);
+	void PopulateGameObjectTypeList(wxChoice& list);
 	void PopulateVarsList();
 	void PopulateVarsFields(const GameObjectVariable* variable);
 

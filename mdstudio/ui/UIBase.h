@@ -714,6 +714,7 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxTextCtrl* m_textProjectName;
 		wxStaticText* m_staticText511;
 		wxButton* m_btnParseProject;
+		wxStaticText* m_staticText51112;
 		wxStaticText* m_staticText5111;
 		wxStaticText* m_staticText51111;
 		wxStaticText* m_staticText511111;
@@ -736,6 +737,7 @@ class ProjectSettingsDialogBase : public wxDialog
 
 	public:
 		wxDirPickerCtrl* m_dirPickerProject;
+		wxDirPickerCtrl* m_dirPickerEntities;
 		wxDirPickerCtrl* m_dirPickerScene;
 		wxDirPickerCtrl* m_dirPickerSprites;
 		wxDirPickerCtrl* m_dirPickerSpriteAnims;
@@ -744,7 +746,7 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
 		wxFilePickerCtrl* m_filePickerReference;
 
-		ProjectSettingsDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,463 ), long style = wxCAPTION|wxRESIZE_BORDER );
+		ProjectSettingsDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,501 ), long style = wxCAPTION|wxRESIZE_BORDER );
 		~ProjectSettingsDialogBase();
 
 };
@@ -1022,6 +1024,9 @@ class GameObjParamsPanelBase : public wxPanel
 		wxTextCtrl* m_textObjectName;
 		wxButton* m_btnApplyObjectName;
 		wxStaticText* m_staticText63;
+		wxChoice* m_choiceArchetypes;
+		wxButton* m_btnNewArchetype;
+		wxStaticText* m_staticText631;
 		wxChoice* m_choiceSpriteActor;
 		wxStaticText* m_staticText641;
 		wxChoice* m_choiceSpriteSheet;
@@ -1041,6 +1046,8 @@ class GameObjParamsPanelBase : public wxPanel
 		virtual void OnToolVariableAdd( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToolVariableRemove( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButtonApplyObjectName( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelectArchetype( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButtonNewArchetype( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteActor( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteSheet( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSelectSpriteAnim( wxCommandEvent& event ) { event.Skip(); }

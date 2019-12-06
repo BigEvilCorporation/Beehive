@@ -1802,6 +1802,16 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 	m_btnParseProject = new wxButton( this, wxID_ANY, wxT("Scan Project"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer40->Add( m_btnParseProject, 0, wxALL, 5 );
 
+	m_staticText51112 = new wxStaticText( this, wxID_ANY, wxT("Entity data export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText51112->Wrap( -1 );
+	fgSizer40->Add( m_staticText51112, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerEntities = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerEntities, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
 	m_staticText5111 = new wxStaticText( this, wxID_ANY, wxT("Scene data export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText5111->Wrap( -1 );
 	fgSizer40->Add( m_staticText5111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
@@ -2947,11 +2957,23 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	fgSizer30->Add( m_textObjectName, 0, wxALL|wxEXPAND, 5 );
 
 	m_btnApplyObjectName = new wxButton( this, wxID_ANY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer30->Add( m_btnApplyObjectName, 0, wxALL, 5 );
+	fgSizer30->Add( m_btnApplyObjectName, 0, wxALL|wxEXPAND, 5 );
 
-	m_staticText63 = new wxStaticText( this, wxID_ANY, wxT("Sprite Actor:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText63 = new wxStaticText( this, wxID_ANY, wxT("Archetype:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText63->Wrap( -1 );
 	fgSizer30->Add( m_staticText63, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	wxArrayString m_choiceArchetypesChoices;
+	m_choiceArchetypes = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceArchetypesChoices, 0 );
+	m_choiceArchetypes->SetSelection( 0 );
+	fgSizer30->Add( m_choiceArchetypes, 0, wxALL|wxEXPAND, 5 );
+
+	m_btnNewArchetype = new wxButton( this, wxID_ANY, wxT("New Archetype..."), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer30->Add( m_btnNewArchetype, 0, wxALL, 5 );
+
+	m_staticText631 = new wxStaticText( this, wxID_ANY, wxT("Sprite Actor:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText631->Wrap( -1 );
+	fgSizer30->Add( m_staticText631, 0, wxALL, 5 );
 
 	wxArrayString m_choiceSpriteActorChoices;
 	m_choiceSpriteActor = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceSpriteActorChoices, 0 );
@@ -3055,6 +3077,8 @@ GameObjParamsPanelBase::GameObjParamsPanelBase( wxWindow* parent, wxWindowID id,
 	this->Connect( m_toolAddVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableAdd ) );
 	this->Connect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableRemove ) );
 	m_btnApplyObjectName->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonApplyObjectName ), NULL, this );
+	m_choiceArchetypes->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectArchetype ), NULL, this );
+	m_btnNewArchetype->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonNewArchetype ), NULL, this );
 	m_choiceSpriteActor->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteActor ), NULL, this );
 	m_choiceSpriteSheet->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteSheet ), NULL, this );
 	m_choiceSpriteAnim->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteAnim ), NULL, this );
@@ -3071,6 +3095,8 @@ GameObjParamsPanelBase::~GameObjParamsPanelBase()
 	this->Disconnect( m_toolAddVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableAdd ) );
 	this->Disconnect( m_toolRemoveVariable->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnToolVariableRemove ) );
 	m_btnApplyObjectName->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonApplyObjectName ), NULL, this );
+	m_choiceArchetypes->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectArchetype ), NULL, this );
+	m_btnNewArchetype->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GameObjParamsPanelBase::OnButtonNewArchetype ), NULL, this );
 	m_choiceSpriteActor->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteActor ), NULL, this );
 	m_choiceSpriteSheet->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteSheet ), NULL, this );
 	m_choiceSpriteAnim->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GameObjParamsPanelBase::OnSelectSpriteAnim ), NULL, this );

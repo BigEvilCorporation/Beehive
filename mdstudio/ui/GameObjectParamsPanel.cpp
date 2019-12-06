@@ -51,17 +51,17 @@ void GameObjectParamsPanel::SetGameObject(GameObject* gameObject)
 	if(gameObject)
 	{
 		m_textObjectName->ChangeValue(m_gameObject->GetName());
-	}
-
-	PopulateSpriteActorList(*m_choiceSpriteActor);
+		PopulateSpriteActorList(*m_choiceSpriteActor);
+		PopulateArchetypeList(*m_choiceArchetypes, gameObject->GetTypeId());
 
 #if !defined BEEHIVE_PLUGIN_LUMINARY
-	//One sprite sheet+anim per ECSprite component
-	PopulateSpriteSheetList(*m_choiceSpriteSheet);
-	PopulateSpriteAnimList(*m_choiceSpriteAnim, m_gameObject->GetSpriteSheetId());
+		//One sprite sheet+anim per ECSprite component
+		PopulateSpriteSheetList(*m_choiceSpriteSheet);
+		PopulateSpriteAnimList(*m_choiceSpriteAnim, m_gameObject->GetSpriteSheetId());
 #endif
 
-	PopulateVarsList();
+		PopulateVarsList();
+	}
 }
 
 void GameObjectParamsPanel::OnToolVariableAdd(wxCommandEvent& event)
@@ -117,6 +117,24 @@ void GameObjectParamsPanel::OnButtonApplyObjectName(wxCommandEvent& event)
 	{
 		m_gameObject->SetName(m_textObjectName->GetValue().c_str().AsChar());
 		m_mainWindow.RefreshAnimActors();
+	}
+}
+
+void GameObjectParamsPanel::OnButtonNewArchetype(wxCommandEvent& event)
+{
+	if (m_gameObject)
+	{
+		if (GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
+		{
+			GameObjectArchetypeId archetypeId = gameObjectType->CreateArchetypeFromState(*m_gameObject);
+
+			PopulateArchetypeList(*m_choiceArchetypes, m_gameObject->GetTypeId());
+
+			if (const GameObjectArchetype* archetype = gameObjectType->GetArchetype(archetypeId))
+			{
+				m_choiceArchetypes->SetStringSelection(archetype->name);
+			}
+		}
 	}
 }
 
@@ -204,6 +222,20 @@ void GameObjectParamsPanel::OnEnterTextValue(wxCommandEvent& event)
 	}
 }
 
+void GameObjectParamsPanel::OnSelectArchetype(wxCommandEvent& event)
+{
+	if (m_gameObject)
+	{
+		if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(m_gameObject->GetTypeId()))
+		{
+			if (const GameObjectArchetype* archetype = gameObjectType->GetArchetype(m_choiceArchetypes->GetStringSelection().c_str().AsChar()))
+			{
+				m_gameObject->ApplyArchetype(*archetype);
+			}
+		}
+	}
+}
+
 void GameObjectParamsPanel::OnSelectValue(wxCommandEvent& event)
 {
 	if (m_gameObject && m_currentVariable)
@@ -257,6 +289,20 @@ void GameObjectParamsPanel::OnSelectSpriteAnim(wxCommandEvent& event)
 		if (const SpriteSheet* spriteSheet = actor->GetSpriteSheet(m_gameObject->GetSpriteSheetId()))
 		{
 			m_gameObject->SetSpriteAnim(spriteSheet->FindAnimationId(m_choiceSpriteAnim->GetStringSelection().c_str().AsChar()));
+		}
+	}
+}
+
+void GameObjectParamsPanel::PopulateArchetypeList(wxChoice& list, GameObjectTypeId gameObjectTypeId)
+{
+	list.Clear();
+	list.SetSelection(-1);
+
+	if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
+	{
+		for (TGameObjectArchetypeMap::const_iterator it = gameObjectType->GetArchetypes().begin(), end = gameObjectType->GetArchetypes().end(); it != end; ++it)
+		{
+			list.AppendString(it->second.name);
 		}
 	}
 }
@@ -315,6 +361,17 @@ void GameObjectParamsPanel::PopulateSpriteAnimList(wxChoice& list, SpriteSheetId
 				list.SetStringSelection(spriteAnim->GetName());
 			}
 		}
+	}
+}
+
+void GameObjectParamsPanel::PopulateGameObjectTypeList(wxChoice& list)
+{
+	list.Clear();
+	list.SetSelection(-1);
+
+	for (TGameObjectTypeMap::const_iterator it = m_project.GetGameObjectTypes().begin(), end = m_project.GetGameObjectTypes().end(); it != end; ++it)
+	{
+		list.AppendString(it->second.GetName());
 	}
 }
 
@@ -438,6 +495,34 @@ void GameObjectParamsPanel::PopulateVarsFields(const GameObjectVariable* variabl
 			}
 
 			PopulateSpriteAnimList(*m_choiceValue, spriteSheetId);
+			m_choiceValue->SetStringSelection(variable->m_value);
+		}
+		else if (variable->HasTag("ENTITY_DESC"))
+		{
+			m_choiceValue->Enable(true);
+			m_textValue->Enable(false);
+
+			PopulateGameObjectTypeList(*m_choiceValue);
+			m_choiceValue->SetStringSelection(variable->m_value);
+		}
+		else if (variable->HasTag("ENTITY_ARCHETYPE"))
+		{
+			m_choiceValue->Enable(true);
+			m_textValue->Enable(false);
+
+			//Find entity type in this component first
+			GameObjectTypeId gameObjTypeId = InvalidGameObjectTypeId;
+
+			const GameObjectVariable* gameObjTypeVar = m_gameObject->FindVariableByTag("ENTITY_DESC", variable->m_componentIdx);
+			if (gameObjTypeVar)
+			{
+				if (const GameObjectType* gameObjType = m_project.FindGameObjectType(gameObjTypeVar->m_value))
+				{
+					gameObjTypeId = gameObjType->GetId();
+				}
+			}
+
+			PopulateArchetypeList(*m_choiceValue, gameObjTypeId);
 			m_choiceValue->SetStringSelection(variable->m_value);
 		}
 		else

@@ -30,6 +30,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 {
 	m_textProjectName->SetValue(m_project.GetName());
 	m_dirPickerProject->SetPath(m_project.m_settings.projectExportDir);
+	m_dirPickerEntities->SetPath(m_project.m_settings.entitiesExportDir);
 	m_dirPickerScene->SetPath(m_project.m_settings.sceneExportDir);
 	m_dirPickerSprites->SetPath(m_project.m_settings.spritesExportDir);
 	m_dirPickerSpriteAnims->SetPath(m_project.m_settings.spriteAnimsExportDir);
@@ -56,6 +57,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 {
 	m_project.SetName(m_textProjectName->GetValue().c_str().AsChar());
 	std::string projectDir = m_dirPickerProject->GetPath().c_str().AsChar();
+	m_project.m_settings.entitiesExportDir = m_dirPickerEntities->GetPath().c_str().AsChar();
 	m_project.m_settings.sceneExportDir = m_dirPickerScene->GetPath().c_str().AsChar();
 	m_project.m_settings.spritesExportDir = m_dirPickerSprites->GetPath().c_str().AsChar();
 	m_project.m_settings.spriteAnimsExportDir = m_dirPickerSpriteAnims->GetPath().c_str().AsChar();
