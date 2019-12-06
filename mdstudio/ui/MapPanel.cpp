@@ -2362,15 +2362,27 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				int spriteFrame = 0;
 				ion::Vector3 animPosOffset;
 
+				//Find sprite actor from game object
 				const Actor* spriteActor = m_project.GetActor(gameObject.GetSpriteActorId());
+
+				//Find sprite actor from game object type
 				if(!spriteActor)
 					spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId());
 
 				if (spriteActor)
 				{
-					spriteSheet = spriteActor->GetSpriteSheet(gameObject.GetSpriteSheetId());
+					//Find sprite sheet from game object
 					spriteSheetId = gameObject.GetSpriteSheetId();
+					spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
 
+					//Find sprite sheet from game object type
+					if (!spriteSheet)
+					{
+						spriteSheetId = gameObjectType->GetSpriteSheetId();
+						spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+					}
+
+					//Default to first sprite sheet
 					if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
 					{
 						spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
