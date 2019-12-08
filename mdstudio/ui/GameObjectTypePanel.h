@@ -25,9 +25,14 @@ public:
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 	virtual void OnGameObjectTypeSelected(wxCommandEvent& event);
+	virtual void OnArchetypeSelected(wxCommandEvent& event);
 
 private:
+	void PopulateGameObjects();
+	void PopulateArchetypes(GameObjectTypeId gameObjectTypeId);
+
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	std::vector<GameObjectTypeId> m_gameObjectTypeMap;
+	std::vector<GameObjectArchetypeId> m_archetypeMap;
 };

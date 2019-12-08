@@ -179,6 +179,7 @@ private:
 
 	//Current preview gameobj
 	GameObjectTypeId m_previewGameObjectType;
+	GameObjectArchetypeId m_previewGameObjectArchetype;
 	ion::Vector2i m_previewGameObjectPos;
 	bool m_moveGameObjByPixel;
 

@@ -1557,12 +1557,24 @@ GameObjTypesPanelBase::GameObjTypesPanelBase( wxWindow* parent, wxWindowID id, c
 	wxFlexGridSizer* fgSizer13;
 	fgSizer13 = new wxFlexGridSizer( 0, 2, 0, 0 );
 	fgSizer13->AddGrowableCol( 0 );
-	fgSizer13->AddGrowableRow( 0 );
+	fgSizer13->AddGrowableCol( 1 );
+	fgSizer13->AddGrowableRow( 1 );
 	fgSizer13->SetFlexibleDirection( wxBOTH );
 	fgSizer13->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
+	m_staticText77 = new wxStaticText( this, wxID_ANY, wxT("Game Objects:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText77->Wrap( -1 );
+	fgSizer13->Add( m_staticText77, 0, wxALL, 5 );
+
+	m_staticText78 = new wxStaticText( this, wxID_ANY, wxT("Archetypes:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText78->Wrap( -1 );
+	fgSizer13->Add( m_staticText78, 0, wxALL, 5 );
+
 	m_listGameObjTypes = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
 	fgSizer13->Add( m_listGameObjTypes, 0, wxALL|wxEXPAND, 5 );
+
+	m_listGameObjArchetypes = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	fgSizer13->Add( m_listGameObjArchetypes, 0, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( fgSizer13 );
@@ -1570,12 +1582,14 @@ GameObjTypesPanelBase::GameObjTypesPanelBase( wxWindow* parent, wxWindowID id, c
 
 	// Connect Events
 	m_listGameObjTypes->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypesPanelBase::OnGameObjectTypeSelected ), NULL, this );
+	m_listGameObjArchetypes->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypesPanelBase::OnArchetypeSelected ), NULL, this );
 }
 
 GameObjTypesPanelBase::~GameObjTypesPanelBase()
 {
 	// Disconnect Events
 	m_listGameObjTypes->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypesPanelBase::OnGameObjectTypeSelected ), NULL, this );
+	m_listGameObjArchetypes->Disconnect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( GameObjTypesPanelBase::OnArchetypeSelected ), NULL, this );
 
 }
 

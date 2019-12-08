@@ -845,6 +845,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 		case eToolPlaceGameObject:
 		{
 			m_previewGameObjectType = m_project.GetPaintGameObjectType();
+			m_previewGameObjectArchetype = m_project.GetPaintGameObjectArchetype();
 			m_previewGameObjectPos.x = x;
 			m_previewGameObjectPos.y = y;
 
@@ -853,7 +854,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
 				if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
 				{
-					m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType);
+					m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType, m_previewGameObjectArchetype);
 					m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
 					Refresh();
 				}
@@ -869,6 +870,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				if (GameObjectType* gameObjectType = m_project.GetGameObjectType(original->GetTypeId()))
 				{
 					m_previewGameObjectType = original->GetTypeId();
+					m_previewGameObjectArchetype = InvalidGameObjectArchetypeId;
 					m_previewGameObjectPos.x = x;
 					m_previewGameObjectPos.y = y;
 
@@ -920,7 +922,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						int boxWidth = ion::maths::Abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1;
 						int boxHeight = ion::maths::Abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1;
 
-						m_project.GetEditingMap().PlaceGameObject(boxX, boxY, boxWidth, boxHeight, *gameObjectType);
+						m_project.GetEditingMap().PlaceGameObject(boxX, boxY, boxWidth, boxHeight, *gameObjectType, m_project.GetPaintGameObjectArchetype());
 						Refresh();
 					}
 				}
@@ -2530,13 +2532,27 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 		material->Unbind();
 
-		SpriteSheetId spriteSheetId = gameObjectType->GetPreviewSpriteSheetId();
+		SpriteSheetId spriteSheetId = InvalidSpriteSheetId;
 
-		if (const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
+		//Find sprite sheet from archetype
+		if (const GameObjectArchetype* archetype = gameObjectType->GetArchetype(m_previewGameObjectArchetype))
 		{
-			if (!spriteActor->GetSpriteSheet(spriteSheetId) && spriteActor->GetSpriteSheetCount() > 0)
+			spriteSheetId = archetype->spriteSheetId;
+		}
+		
+		//Find sprite sheet from game object type
+		if (spriteSheetId == InvalidSpriteSheetId)
+			spriteSheetId = gameObjectType->GetPreviewSpriteSheetId();
+
+		//Default to first sprite sheet in actor
+		if (spriteSheetId == InvalidSpriteSheetId)
+		{
+			if (const Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
 			{
-				spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
+				if (!spriteActor->GetSpriteSheet(spriteSheetId) && spriteActor->GetSpriteSheetCount() > 0)
+				{
+					spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
+				}
 			}
 		}
 

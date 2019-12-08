@@ -634,10 +634,14 @@ class GameObjTypesPanelBase : public wxPanel
 	private:
 
 	protected:
+		wxStaticText* m_staticText77;
+		wxStaticText* m_staticText78;
 		wxListBox* m_listGameObjTypes;
+		wxListBox* m_listGameObjArchetypes;
 
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnGameObjectTypeSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnArchetypeSelected( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:

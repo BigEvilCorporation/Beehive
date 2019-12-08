@@ -291,7 +291,7 @@ void MapListPanel::OnToolImportMap(wxCommandEvent& event)
 					{
 						if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(it->first))
 						{
-							newMap.PlaceGameObject(it->second[i].m_gameObject.GetPosition().x, it->second[i].m_gameObject.GetPosition().y, it->second[i].m_gameObject, *gameObjectType);
+							newMap.PlaceGameObject(it->second[i].m_gameObject.GetPosition().x, it->second[i].m_gameObject.GetPosition().y, it->second[i].m_gameObject, *gameObjectType, InvalidGameObjectArchetypeId);
 						}
 						else
 						{
