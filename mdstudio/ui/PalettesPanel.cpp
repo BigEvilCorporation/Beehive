@@ -26,6 +26,8 @@ PalettesPanel::PalettesPanel(MainWindow* mainWindow, Project& project, wxWindow 
 
 	m_dragPalette = -1;
 	m_dragColour = -1;
+	m_mergePalette = -1;
+	m_mergeColour = -1;
 
 	Bind(wxEVT_LEFT_DOWN,		&PalettesPanel::OnMouse, this, GetId());
 	Bind(wxEVT_LEFT_UP,			&PalettesPanel::OnMouse, this, GetId());
@@ -71,7 +73,7 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 			//End drag/drop
 
 			//TODO: Fix for non-active palette
-			if(m_dragPalette != paletteId && m_dragColour != colourId)
+			if(m_dragPalette == paletteId && m_dragColour != colourId)
 			{
 				if(Palette* palette = m_project.GetPalette(paletteId))
 				{
@@ -84,7 +86,7 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 						palette->SetColour(m_dragColour, newColour);
 
 						//Swap colours in all tiles
-						m_project.SwapPaletteEntries(m_dragColour, colourId);
+						m_project.SwapPaletteEntries(paletteId, m_dragColour, colourId);
 
 						//Refresh all
 						m_mainWindow->RefreshAll();
@@ -94,6 +96,51 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 
 			m_dragPalette = -1;
 			m_dragColour = -1;
+		}
+
+		if (event.LeftUp() && (m_mergePalette != -1))
+		{
+			//End merge
+
+			if (m_mergePalette == paletteId && m_mergeColour != colourId)
+			{
+				if (Palette* palette = m_project.GetPalette(paletteId))
+				{
+					if (palette->IsColourUsed(m_mergeColour) && palette->IsColourUsed(colourId))
+					{
+						//Set original index to new index in all tiles
+						m_project.MergePaletteEntries(paletteId, m_mergeColour, colourId);
+
+						//Shuffle all colours down
+						int lastEntry = m_mergeColour;
+						for (int i = m_mergeColour; i < Palette::coloursPerPalette-1; i++)
+						{
+							if (palette->GetUsedColourMask() & (1 << i + 1))
+							{
+								//Swap colours in palette
+								Colour right = palette->GetColour(i + 1);
+								Colour left = palette->GetColour(i);
+								palette->SetColour(i, right);
+								palette->SetColour(i + 1, left);
+
+								//Swap colours in all tiles
+								m_project.SwapPaletteEntries(paletteId, i, i + 1);
+
+								lastEntry = i+1;
+							}
+						}
+
+						//Invalidate last entry
+						palette->InvalidateColour(lastEntry);
+
+						//Refresh all
+						m_mainWindow->RefreshAll();
+					}
+				}
+			}
+
+			m_mergePalette = -1;
+			m_mergeColour = -1;
 		}
 
 		if(event.RightUp())
@@ -127,6 +174,7 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 			slotMenu.Append(eMenuImportDiff, wxString("Import diff..."));
 			saveMenu->AppendSeparator();
 			slotMenu.Append(eMenuSetAsBg, wxString("Set as Background/Transparency Colour"));
+			slotMenu.Append(eMenuMerge, wxString("Merge with..."));
 				
 			slotMenu.SetClientData((void*)paletteId);
 			slotMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PalettesPanel::OnSlotsMenuClick, NULL, this);
@@ -181,192 +229,230 @@ void PalettesPanel::OnMouse(wxMouseEvent& event)
 void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 {
 	int menuItemId = event.GetId();
-	int slotId = menuItemId & 0xFF;
 	int numSlots = m_project.GetNumPaletteSlots();
 	PaletteId paletteId = (PaletteId)event.GetClientData();
 
-	if(menuItemId & eMenuNew)
+	switch (menuItemId)
 	{
-		//Backup palette to new slot
-		Palette* palette = m_project.GetPalette(paletteId);
-		m_project.AddPaletteSlot(*palette);
-	}
-	else if(menuItemId & eMenuSave)
-	{
-		//Backup palette to existing slot
-		Palette* palette = m_project.GetPalette(paletteId);
-		Palette* slot = m_project.GetPaletteSlot(slotId);
-		*slot = *palette;
-	}
-	else if(menuItemId & eMenuLoad)
-	{
-		//Set active palette slot
-		m_project.SetActivePaletteSlot(paletteId, slotId);
-
-		//Refresh tiles, stamps and map panels
-		m_mainWindow->RefreshAll();
-	}
-	else if(menuItemId & eMenuImport)
-	{
-		wxFileDialog dialogue(this, _("Open BEE Palettes file"), "", "", "BEE_Palette files (*.bee_palette)|*.bee_palette", wxFD_OPEN);
-		if(dialogue.ShowModal() == wxID_OK)
+		case eMenuNew:
 		{
-			std::string filename = dialogue.GetPath().c_str().AsChar();
-			m_project.ImportPaletteSlots(filename);
+			//Backup palette to new slot
+			Palette* palette = m_project.GetPalette(paletteId);
+			m_project.AddPaletteSlot(*palette);
+
+			break;
+		}
+
+		case eMenuSave:
+		{
+			//Backup palette to existing slot
+			int slotId = menuItemId & 0xFF;
+			Palette* palette = m_project.GetPalette(paletteId);
+			Palette* slot = m_project.GetPaletteSlot(slotId);
+			*slot = *palette;
+
+			break;
+		}
+
+		case eMenuLoad:
+		{
+			//Set active palette slot
+			int slotId = menuItemId & 0xFF;
+			m_project.SetActivePaletteSlot(paletteId, slotId);
+
+			//Refresh tiles, stamps and map panels
 			m_mainWindow->RefreshAll();
+
+			break;
 		}
-	}
-	else if(menuItemId & eMenuExport)
-	{
-		wxFileDialog dialogue(this, _("Save BEE Palettes file"), "", "", "BEE_Palette files (*.bee_palette)|*.bee_palette", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		if(dialogue.ShowModal() == wxID_OK)
+
+		case eMenuImport:
 		{
-			std::string filename = dialogue.GetPath().c_str().AsChar();
-			m_project.ExportPaletteSlots(filename, Project::ExportFormat::Beehive);
-		}
-	}
-	else if(menuItemId & eMenuExportBMP)
-	{
-		wxFileDialog dialogue(this, _("Save BMP swatch"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		if(dialogue.ShowModal() == wxID_OK)
-		{
-			std::string filename = dialogue.GetPath().c_str().AsChar();
-			
-			if(Palette* palette = m_project.GetPalette(m_selectedPaletteId))
+			wxFileDialog dialogue(this, _("Open BEE Palettes file"), "", "", "BEE_Palette files (*.bee_palette)|*.bee_palette", wxFD_OPEN);
+			if (dialogue.ShowModal() == wxID_OK)
 			{
-				BMPReader writer;
+				std::string filename = dialogue.GetPath().c_str().AsChar();
+				m_project.ImportPaletteSlots(filename);
+				m_mainWindow->RefreshAll();
+			}
 
-				static const int colourWidth = 8;
-				static const int colourHeight = 8;
+			break;
+		}
 
-				writer.SetDimensions(colourWidth * Palette::coloursPerPalette, colourHeight);
+		case eMenuExport:
+		{
+			wxFileDialog dialogue(this, _("Save BEE Palettes file"), "", "", "BEE_Palette files (*.bee_palette)|*.bee_palette", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			if (dialogue.ShowModal() == wxID_OK)
+			{
+				std::string filename = dialogue.GetPath().c_str().AsChar();
+				m_project.ExportPaletteSlots(filename, Project::ExportFormat::Beehive);
+			}
 
-				for(int i = 0; i < Palette::coloursPerPalette; i++)
+			break;
+		}
+
+		case eMenuExportBMP:
+		{
+			wxFileDialog dialogue(this, _("Save BMP swatch"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			if (dialogue.ShowModal() == wxID_OK)
+			{
+				std::string filename = dialogue.GetPath().c_str().AsChar();
+
+				if (Palette* palette = m_project.GetPalette(m_selectedPaletteId))
 				{
-					//Write colour
-					Colour paletteColour = palette->IsColourUsed(i) ? palette->GetColour(i) : Colour(255, 255, 255);
-					BMPReader::Colour bmpColour(paletteColour.GetRed(), paletteColour.GetGreen(), paletteColour.GetBlue());
-					writer.SetPaletteEntry(i, bmpColour);
+					BMPReader writer;
 
-					//Write index to a swatch square
-					for(int x = (i * colourWidth); x < ((i + 1) * colourWidth); x++)
+					static const int colourWidth = 8;
+					static const int colourHeight = 8;
+
+					writer.SetDimensions(colourWidth * Palette::coloursPerPalette, colourHeight);
+
+					for (int i = 0; i < Palette::coloursPerPalette; i++)
 					{
-						for(int y = 0; y < colourHeight; y++)
+						//Write colour
+						Colour paletteColour = palette->IsColourUsed(i) ? palette->GetColour(i) : Colour(255, 255, 255);
+						BMPReader::Colour bmpColour(paletteColour.GetRed(), paletteColour.GetGreen(), paletteColour.GetBlue());
+						writer.SetPaletteEntry(i, bmpColour);
+
+						//Write index to a swatch square
+						for (int x = (i * colourWidth); x < ((i + 1) * colourWidth); x++)
 						{
-							writer.SetColourIndex(x, y, i);
+							for (int y = 0; y < colourHeight; y++)
+							{
+								writer.SetColourIndex(x, y, i);
+							}
 						}
 					}
-				}
 
-				if(!writer.Write(filename))
-				{
-					ion::debug::Popup("Error exporting palette", "Error");
-				}
-			}
-		}
-	}
-	else if(menuItemId & eMenuImportDiff)
-	{
-		wxFileDialog referenceDialogue(this, _("Open reference palette BMP"), "", "", "BMP files (*.BMP)|*.bmp", wxFD_OPEN);
-		wxFileDialog newDialogue(this, _("Open new palette BMP"), "", "", "BMP files (*.BMP)|*.bmp", wxFD_OPEN);
-		bool success = false;
-
-		if(referenceDialogue.ShowModal() == wxID_OK)
-		{
-			if(newDialogue.ShowModal() == wxID_OK)
-			{
-				std::string referenceFilename = referenceDialogue.GetPath().c_str().AsChar();
-				std::string newFilename = newDialogue.GetPath().c_str().AsChar();
-
-				BMPReader referenceReader;
-				BMPReader newReader;
-
-				if(referenceReader.Read(referenceFilename))
-				{
-					if(newReader.Read(newFilename))
+					if (!writer.Write(filename))
 					{
-						if(referenceReader.GetPaletteSize() != newReader.GetPaletteSize())
-						{
-							ion::debug::Popup("Reference palette colour count differs from new palette", "Error");
-							return;
-						}
-
-						Palette* currentPalette = m_project.GetPalette(m_selectedPaletteId);
-						Palette newPalette;
-						
-						//Create remap from current palette to reference palette
-						for(int i = 0; i < referenceReader.GetPaletteSize(); i++)
-						{
-							if(!currentPalette->IsColourUsed(i))
-							{
-								ion::debug::Popup("Reference palette colour count differs from current palette", "Error");
-								return;
-							}
-
-							BMPReader::Colour referenceColourBMP = referenceReader.GetPaletteEntry(i);
-							Colour referenceColour(referenceColourBMP.r, referenceColourBMP.g, referenceColourBMP.b);
-
-							int remapIndex = 0;
-							if(!currentPalette->GetNearestColourIdx(referenceColour, Palette::eExact, remapIndex))
-							{
-								ion::debug::Popup("Reference palette cannot be mapped to current palette", "Error");
-								return;
-							}
-
-							BMPReader::Colour newColourBMP = referenceReader.GetPaletteEntry(i);
-							Colour newColour(newColourBMP.r, newColourBMP.g, newColourBMP.b);
-
-							newPalette.SetColour(remapIndex, newColour);
-						}
-
-						//Set as new palette
-						*currentPalette = newPalette;
-
-						//Refresh all
-						m_mainWindow->RefreshAll();
-
-						success = true;
+						ion::debug::Popup("Error exporting palette", "Error");
 					}
 				}
 			}
+
+			break;
 		}
 
-		if(!success)
+		case eMenuImportDiff:
 		{
-			ion::debug::Popup("Error loading reference palettes", "Error");
-		}
-	}
-	else if(menuItemId & eMenuSetAsBg)
-	{
-		//Swap colours in active palette
-		if(Palette* palette = m_project.GetPalette(m_selectedPaletteId))
-		{
-			Colour originalColour = palette->GetColour(0);
-			Colour newColour = palette->GetColour(m_seletedColourId);
-			palette->SetColour(m_seletedColourId, originalColour);
-			palette->SetColour(0, newColour);
-		}
+			wxFileDialog referenceDialogue(this, _("Open reference palette BMP"), "", "", "BMP files (*.BMP)|*.bmp", wxFD_OPEN);
+			wxFileDialog newDialogue(this, _("Open new palette BMP"), "", "", "BMP files (*.BMP)|*.bmp", wxFD_OPEN);
+			bool success = false;
 
-		//Swap colours in all palette slots
-		for(int i = 0; i < m_project.GetNumPaletteSlots(); i++)
-		{
-			if(Palette* palette = m_project.GetPaletteSlot(i))
+			if (referenceDialogue.ShowModal() == wxID_OK)
 			{
-				if(palette->IsColourUsed(0) && palette->IsColourUsed(m_seletedColourId))
+				if (newDialogue.ShowModal() == wxID_OK)
 				{
-					Colour originalColour = palette->GetColour(0);
-					Colour newColour = palette->GetColour(m_seletedColourId);
-					palette->SetColour(m_seletedColourId, originalColour);
-					palette->SetColour(0, newColour);
+					std::string referenceFilename = referenceDialogue.GetPath().c_str().AsChar();
+					std::string newFilename = newDialogue.GetPath().c_str().AsChar();
+
+					BMPReader referenceReader;
+					BMPReader newReader;
+
+					if (referenceReader.Read(referenceFilename))
+					{
+						if (newReader.Read(newFilename))
+						{
+							if (referenceReader.GetPaletteSize() != newReader.GetPaletteSize())
+							{
+								ion::debug::Popup("Reference palette colour count differs from new palette", "Error");
+								return;
+							}
+
+							Palette* currentPalette = m_project.GetPalette(m_selectedPaletteId);
+							Palette newPalette;
+
+							//Create remap from current palette to reference palette
+							for (int i = 0; i < referenceReader.GetPaletteSize(); i++)
+							{
+								if (!currentPalette->IsColourUsed(i))
+								{
+									ion::debug::Popup("Reference palette colour count differs from current palette", "Error");
+									return;
+								}
+
+								BMPReader::Colour referenceColourBMP = referenceReader.GetPaletteEntry(i);
+								Colour referenceColour(referenceColourBMP.r, referenceColourBMP.g, referenceColourBMP.b);
+
+								int remapIndex = 0;
+								if (!currentPalette->GetNearestColourIdx(referenceColour, Palette::eExact, remapIndex))
+								{
+									ion::debug::Popup("Reference palette cannot be mapped to current palette", "Error");
+									return;
+								}
+
+								BMPReader::Colour newColourBMP = referenceReader.GetPaletteEntry(i);
+								Colour newColour(newColourBMP.r, newColourBMP.g, newColourBMP.b);
+
+								newPalette.SetColour(remapIndex, newColour);
+							}
+
+							//Set as new palette
+							*currentPalette = newPalette;
+
+							//Refresh all
+							m_mainWindow->RefreshAll();
+
+							success = true;
+						}
+					}
 				}
 			}
+
+			if (!success)
+			{
+				ion::debug::Popup("Error loading reference palettes", "Error");
+			}
+
+			break;
 		}
 
-		//Swap colours in all tiles
-		m_project.SetBackgroundColour(m_seletedColourId);
+		case eMenuSetAsBg:
+		{
+			//Swap colours in active palette
+			if (Palette* palette = m_project.GetPalette(m_selectedPaletteId))
+			{
+				Colour originalColour = palette->GetColour(0);
+				Colour newColour = palette->GetColour(m_seletedColourId);
+				palette->SetColour(m_seletedColourId, originalColour);
+				palette->SetColour(0, newColour);
+			}
 
-		//Refresh all
-		m_mainWindow->RefreshAll();
+			//Swap colours in all palette slots
+			for (int i = 0; i < m_project.GetNumPaletteSlots(); i++)
+			{
+				if (Palette* palette = m_project.GetPaletteSlot(i))
+				{
+					if (palette->IsColourUsed(0) && palette->IsColourUsed(m_seletedColourId))
+					{
+						Colour originalColour = palette->GetColour(0);
+						Colour newColour = palette->GetColour(m_seletedColourId);
+						palette->SetColour(m_seletedColourId, originalColour);
+						palette->SetColour(0, newColour);
+					}
+				}
+			}
+
+			//Swap colours in all tiles
+			m_project.SetBackgroundColour(m_selectedPaletteId, m_seletedColourId);
+
+			//Refresh all
+			m_mainWindow->RefreshAll();
+
+			break;
+		}
+
+		case eMenuMerge:
+		{
+			//Begin palette merge
+			m_mergePalette = m_selectedPaletteId;
+			m_mergeColour = m_seletedColourId;
+			break;
+		}
+
+		default:
+			break;
 	}
 }
 

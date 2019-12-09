@@ -44,14 +44,15 @@ public:
 private:
 	enum MenuItems
 	{
-		eMenuSave =		(1 << 0) << 8,
-		eMenuLoad =		(1 << 1) << 8,
-		eMenuNew =		(1 << 2) << 8,
-		eMenuImport =	(1 << 3) << 8,
-		eMenuExport =	(1 << 4) << 8,
-		eMenuExportBMP =(1 << 5) << 8,
-		eMenuImportDiff = (1 << 6) << 8,
-		eMenuSetAsBg =	(1 << 7) << 8,
+		eMenuSave,
+		eMenuLoad,
+		eMenuNew,
+		eMenuImport,
+		eMenuExport,
+		eMenuExportBMP,
+		eMenuImportDiff,
+		eMenuSetAsBg,
+		eMenuMerge,
 	};
 
 	Project& m_project;
@@ -63,4 +64,7 @@ private:
 
 	s32 m_dragPalette;
 	s32 m_dragColour;
+
+	u32 m_mergePalette;
+	u32 m_mergeColour;
 };
