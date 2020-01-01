@@ -143,7 +143,7 @@ void GameObjectParamsPanel::OnEnterTextVariable(wxCommandEvent& event)
 #if !BEEHIVE_PLUGIN_LUMINARY
 	if (m_gameObject && m_currentVariable)
 	{
-		if (m_textValue->GetValue() != s_defaultVarName)
+		if (m_currentVariable->m_name != s_defaultVarName)
 		{
 			//Find or add overridden var on game object
 			GameObjectVariable* variable = m_gameObject->FindVariable(m_currentVariable->m_name, m_currentVariable->m_componentIdx);
@@ -159,7 +159,8 @@ void GameObjectParamsPanel::OnEnterTextVariable(wxCommandEvent& event)
 				}
 			}
 
-			variable->m_value = m_textValue->GetValue().c_str().AsChar();
+			variable->m_name = m_textVariableName->GetValue().c_str().AsChar();
+			PopulateVarsList();
 		}
 	}
 #endif

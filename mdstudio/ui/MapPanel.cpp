@@ -1944,7 +1944,7 @@ void MapPanel::SetTool(ToolType tool)
 					{
 						if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjects[i]->m_gameObject.GetTypeId()))
 						{
-							newMap.PlaceGameObject(gameObjects[i]->m_gameObject.GetPosition().x - (left * tileWidth), gameObjects[i]->m_gameObject.GetPosition().y - (top * tileHeight), gameObjects[i]->m_gameObject, *gameObjectType);
+							newMap.PlaceGameObject(gameObjects[i]->m_gameObject.GetPosition().x - (left * tileWidth), gameObjects[i]->m_gameObject.GetPosition().y - (top * tileHeight), gameObjects[i]->m_gameObject, *gameObjectType, InvalidGameObjectArchetypeId);
 						}
 					}
 
@@ -2939,6 +2939,7 @@ void MapPanel::PaintCollisionMap(const Map& map, const CollisionMap& collisionMa
 		}
 	}
 
+#if BEEHIVE_FIXED_STAMP_MODE
 	//Paint all stamps
 	for (TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
 	{
@@ -2947,6 +2948,7 @@ void MapPanel::PaintCollisionMap(const Map& map, const CollisionMap& collisionMa
 			PaintStampCollision(*stamp, it->m_position.x, it->m_position.y, it->m_flags);
 		}
 	}
+#endif
 }
 
 void MapPanel::PaintTerrainBeziers(Project& project)
