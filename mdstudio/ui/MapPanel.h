@@ -29,8 +29,14 @@ public:
 	virtual void OnKeyboard(wxKeyEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
+	//Camera control
+	void CameraCentreOnObject(const GameObject& gameObject);
+
 	//Set current tool
 	void SetTool(ToolType tool);
+
+	//Set selection
+	void SelectGameObject(GameObjectId gameObjectId);
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
@@ -107,6 +113,9 @@ private:
 
 	//On right-click menu click
 	void OnContextMenuClick(wxCommandEvent& event);
+
+	//Set gizmo pos
+	void CentreGizmoOnObject(const GameObject& gameObject);
 
 	//Rendering primitives
 	ion::render::Chessboard* m_stampPreviewPrimitive;

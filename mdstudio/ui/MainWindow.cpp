@@ -181,6 +181,12 @@ void MainWindow::SetProject(Project* project)
 	if(project != m_project.get())
 	{
 		//Changed project, close all panels
+		if (m_sceneExplorerPanel)
+		{
+			m_auiManager.DetachPane(m_sceneExplorerPanel);
+			delete m_sceneExplorerPanel;
+		}
+
 		if(m_tilesPanel)
 		{
 			m_auiManager.DetachPane(m_tilesPanel);
@@ -310,6 +316,7 @@ void MainWindow::SetProject(Project* project)
 #endif
 
 			//Open left panels
+			ShowPanelSceneExplorer();
 			ShowToolboxStamps();
 			ShowToolboxObjects();
 
@@ -399,6 +406,35 @@ void MainWindow::RestoreWindowLayout()
 wxString MainWindow::GetWindowLayoutConfig() const
 {
 	return wxStandardPaths::Get().GetUserConfigDir() + "/BigEvilCorporation/Beehive/layout.cfg";
+}
+
+void MainWindow::ShowPanelSceneExplorer()
+{
+	if (m_project.get())
+	{
+		if (m_sceneExplorerPanel)
+		{
+			m_auiManager.GetPane("Scene Explorer").Show();
+		}
+		else
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Scene Explorer");
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(200));
+			paneInfo.Left();
+			paneInfo.Row(0);
+			paneInfo.Caption("Scene Explorer");
+			paneInfo.CaptionVisible(true);
+
+			m_sceneExplorerPanel = new SceneExplorerPanel(this, *m_project, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_sceneExplorerPanel, paneInfo);
+			paneInfo.Show();
+		}
+
+		m_auiManager.Update();
+	}
 }
 
 void MainWindow::ShowPanelPalettes()
@@ -620,7 +656,7 @@ void MainWindow::ShowToolboxTiles()
 		paneInfo.DockFixed(false);
 		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
 		paneInfo.Left();
-		paneInfo.Row(0);
+		paneInfo.Row(1);
 		paneInfo.Caption("Tile Tools");
 		paneInfo.CaptionVisible(true);
 
@@ -683,7 +719,7 @@ void MainWindow::ShowToolboxCollision()
 		paneInfo.DockFixed(false);
 		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_X(20));
 		paneInfo.Left();
-		paneInfo.Row(1);
+		paneInfo.Row(2);
 		paneInfo.Caption("Collision Tools");
 		paneInfo.CaptionVisible(true);
 
@@ -725,7 +761,7 @@ void MainWindow::ShowToolboxStamps()
 		paneInfo.DockFixed(false);
 		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
 		paneInfo.Left();
-		paneInfo.Row(0);
+		paneInfo.Row(1);
 		paneInfo.Caption("Stamp Tools");
 		paneInfo.CaptionVisible(true);
 
@@ -775,9 +811,9 @@ void MainWindow::ShowToolboxObjects()
 		paneInfo.CaptionVisible(true);
 
 #if BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode, fewer toolboxes
-		paneInfo.Row(0);
-#else
 		paneInfo.Row(1);
+#else
+		paneInfo.Row(2);
 #endif
 
 		m_toolboxPanelGameObjs = new MapToolboxGameObjs(m_dockArea, NewControlId());
@@ -957,6 +993,11 @@ void MainWindow::ShowPanelTimeline()
 	}
 }
 
+MapPanel* MainWindow::GetMapPanel()
+{
+	return m_mapPanel;
+}
+
 void MainWindow::SetMapTool(ToolType tool)
 {
 	if(m_mapPanel)
@@ -1071,6 +1112,9 @@ void MainWindow::RedrawAll()
 	RefreshTerrainTileset();
 	RefreshSpriteSheets();
 	SetPanelCaptions();
+
+	if (m_sceneExplorerPanel)
+		m_sceneExplorerPanel->Refresh();
 
 	if(m_palettesPanel)
 		m_palettesPanel->Refresh();
@@ -1209,6 +1253,10 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelGameObjectTypes:
 		if(m_gameObjectTypePanel)
 			m_gameObjectTypePanel->Refresh();
+	case ePanelSceneExplorer:
+		if (m_sceneExplorerPanel)
+			m_sceneExplorerPanel->Refresh();
+		break;
 	}
 }
 

@@ -51,6 +51,7 @@ class SpriteCanvas;
 #include <wx/grid.h>
 #include <wx/slider.h>
 #include <wx/statline.h>
+#include <wx/treectrl.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -1214,6 +1215,36 @@ class ExportDialogMapTab : public wxPanel
 
 		ExportDialogMapTab( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~ExportDialogMapTab();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SceneExplorerPanelBase
+///////////////////////////////////////////////////////////////////////////////
+class SceneExplorerPanelBase : public wxPanel
+{
+	private:
+
+	protected:
+		wxToolBar* m_toolBar1;
+		wxToolBarToolBase* m_toolAddObj;
+		wxToolBarToolBase* m_toolRemoveObj;
+		wxTreeCtrl* m_tree;
+
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnToolAddMap( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnToolRemoveMap( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnItemDragged( wxTreeEvent& event ) { event.Skip(); }
+		virtual void OnItemRenamed( wxTreeEvent& event ) { event.Skip(); }
+		virtual void OnItemActivated( wxTreeEvent& event ) { event.Skip(); }
+		virtual void OnItemContextMenu( wxTreeEvent& event ) { event.Skip(); }
+		virtual void OnItemSelected( wxTreeEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		SceneExplorerPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 169,613 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		~SceneExplorerPanelBase();
 
 };
 

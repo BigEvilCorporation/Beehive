@@ -23,6 +23,7 @@
 #include "RenderResources.h"
 #include "Tool.h"
 
+#include "SceneExplorerPanel.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "StampsPanel.h"
@@ -54,13 +55,15 @@ public:
 		ePanelTerrainTiles,
 		ePanelTerrainTileEditor,
 		ePanelGameObjectTypes,
-		ePanelGameObjectParams
+		ePanelGameObjectParams,
+		ePanelSceneExplorer
 	};
 
 	MainWindow();
 	virtual ~MainWindow();
 
 	//Open panels
+	void ShowPanelSceneExplorer();
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
@@ -79,6 +82,9 @@ public:
 	void ShowToolboxCollision();
 	void ShowToolboxStamps();
 	void ShowToolboxObjects();
+
+	//Get panels
+	MapPanel* GetMapPanel();
 
 	//Set current map editing tool
 	void SetMapTool(ToolType tool);
@@ -182,6 +188,7 @@ private:
 	wxWeakRef<MapToolboxStamps> m_toolboxPanelStamps;
 	wxWeakRef<MapToolboxTerrain> m_toolboxPanelTerrain;
 	wxWeakRef<MapToolboxGameObjs> m_toolboxPanelGameObjs;
+	wxWeakRef<SceneExplorerPanel> m_sceneExplorerPanel;
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<MapListPanel> m_mapListPanel;

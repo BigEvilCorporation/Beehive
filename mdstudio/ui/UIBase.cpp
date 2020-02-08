@@ -3511,3 +3511,57 @@ ExportDialogMapTab::ExportDialogMapTab( wxWindow* parent, wxWindowID id, const w
 ExportDialogMapTab::~ExportDialogMapTab()
 {
 }
+
+SceneExplorerPanelBase::SceneExplorerPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+{
+	wxBoxSizer* bSizer69;
+	bSizer69 = new wxBoxSizer( wxVERTICAL );
+
+	m_toolBar1 = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL );
+	m_toolAddObj = m_toolBar1->AddTool( wxID_ANY, wxT("Add Variable"), wxBitmap( add_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	m_toolRemoveObj = m_toolBar1->AddTool( wxID_ANY, wxT("Remove Variable"), wxBitmap( remove_16_16_xpm ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	m_toolBar1->Realize();
+
+	bSizer69->Add( m_toolBar1, 0, wxEXPAND, 5 );
+
+	wxFlexGridSizer* fgSizer62;
+	fgSizer62 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer62->AddGrowableCol( 0 );
+	fgSizer62->AddGrowableRow( 0 );
+	fgSizer62->SetFlexibleDirection( wxBOTH );
+	fgSizer62->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_tree = new wxTreeCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_EDIT_LABELS|wxTR_HIDE_ROOT );
+	fgSizer62->Add( m_tree, 0, wxALL|wxEXPAND, 5 );
+
+
+	bSizer69->Add( fgSizer62, 1, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer69 );
+	this->Layout();
+
+	// Connect Events
+	this->Connect( m_toolAddObj->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( SceneExplorerPanelBase::OnToolAddMap ) );
+	this->Connect( m_toolRemoveObj->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( SceneExplorerPanelBase::OnToolRemoveMap ) );
+	m_tree->Connect( wxEVT_COMMAND_TREE_END_DRAG, wxTreeEventHandler( SceneExplorerPanelBase::OnItemDragged ), NULL, this );
+	m_tree->Connect( wxEVT_COMMAND_TREE_END_LABEL_EDIT, wxTreeEventHandler( SceneExplorerPanelBase::OnItemRenamed ), NULL, this );
+	m_tree->Connect( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler( SceneExplorerPanelBase::OnItemActivated ), NULL, this );
+	m_tree->Connect( wxEVT_COMMAND_TREE_ITEM_MENU, wxTreeEventHandler( SceneExplorerPanelBase::OnItemContextMenu ), NULL, this );
+	m_tree->Connect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( SceneExplorerPanelBase::OnItemSelected ), NULL, this );
+}
+
+SceneExplorerPanelBase::~SceneExplorerPanelBase()
+{
+	// Disconnect Events
+	this->Disconnect( m_toolAddObj->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( SceneExplorerPanelBase::OnToolAddMap ) );
+	this->Disconnect( m_toolRemoveObj->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( SceneExplorerPanelBase::OnToolRemoveMap ) );
+	m_tree->Disconnect( wxEVT_COMMAND_TREE_END_DRAG, wxTreeEventHandler( SceneExplorerPanelBase::OnItemDragged ), NULL, this );
+	m_tree->Disconnect( wxEVT_COMMAND_TREE_END_LABEL_EDIT, wxTreeEventHandler( SceneExplorerPanelBase::OnItemRenamed ), NULL, this );
+	m_tree->Disconnect( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler( SceneExplorerPanelBase::OnItemActivated ), NULL, this );
+	m_tree->Disconnect( wxEVT_COMMAND_TREE_ITEM_MENU, wxTreeEventHandler( SceneExplorerPanelBase::OnItemContextMenu ), NULL, this );
+	m_tree->Disconnect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( SceneExplorerPanelBase::OnItemSelected ), NULL, this );
+
+}

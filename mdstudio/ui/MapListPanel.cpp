@@ -61,6 +61,7 @@ void MapListPanel::OnMapSelected(wxListEvent& event)
 		m_project.InvalidateMap(true);
 		m_project.InvalidateCamera(true);
 		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
 		m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
 		m_project.InvalidateMap(false);
 		m_project.InvalidateCamera(false);

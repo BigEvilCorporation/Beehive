@@ -1594,6 +1594,9 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 				if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
 				{
+					//Update gizmo pos
+					CentreGizmoOnObject(*gameObject);
+
 					if(buttonBits & eMouseLeft)
 					{
 						const int tileWidth = m_project.GetPlatformConfig().tileWidth;
@@ -1610,12 +1613,6 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 							Refresh();
 						}
 					}
-
-					GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId());
-
-					//Update gizmo pos
-					ion::Vector2i centre = gameObject->GetPosition() + (gameObjectType->GetDimensions() / 2);
-					m_gizmo.SetPosition(ion::Vector2i(centre.x, mapSizePx.y - centre.y));
 				}
 			}
 			else
@@ -1775,6 +1772,41 @@ void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		}
 
 		ViewPanel::Refresh(eraseBackground, rect);
+	}
+}
+
+void MapPanel::CameraCentreOnObject(const GameObject& gameObject)
+{
+	ion::Vector2 centre(gameObject.GetPosition().x + gameObject.GetDimensions().x / 2.0f, gameObject.GetPosition().y + gameObject.GetDimensions().y / 2.0f);
+
+	const Map& map = m_project.GetEditingMap();
+	const float mapWidth = map.GetWidth();
+	const float mapHeight = map.GetHeight();
+	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
+	const float tileHeight = m_project.GetPlatformConfig().tileHeight;
+	const float mapWidthPixels = mapWidth * tileWidth;
+	const float mapHeightPixels = mapHeight * tileHeight;
+
+	//Reset zoom to identity
+	float zoom = m_cameraZoom;
+	SetCameraZoom(1.0f);
+
+	//Centre camera
+	ion::Vector3 cameraPos(-(m_panelSize.x / 2.0f) - (mapWidthPixels / 2.0f) + centre.x, -(m_panelSize.y / 2.0f) - (mapHeightPixels / 2.0f) + (mapHeightPixels - centre.y), 0.0f);
+	m_camera.SetPosition(cameraPos);
+
+	//Re-apply zoom
+	SetCameraZoom(zoom);
+}
+
+void MapPanel::SelectGameObject(GameObjectId gameObjectId)
+{
+	m_selectedGameObject = gameObjectId;
+
+	if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
+	{
+		m_mainWindow->SetSelectedGameObject(gameObject);
+		m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
 	}
 }
 
@@ -2088,19 +2120,27 @@ void MapPanel::SetTool(ToolType tool)
 			if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
 			{
 				m_gizmo.SetEnabled(true);
-				m_gizmo.SetPosition(gameObject->GetPosition());
+				CentreGizmoOnObject(*gameObject);
 			}
 		}
 
-		if (tool == eToolDuplicateGameObject && previousTool == eToolSelectGameObject)
-		{
-			//Don't reset tool data if about to duplicate
-			break;
-		}
+		break;
 	}
 
 	default:
 		ResetToolData();
+	}
+}
+
+void MapPanel::CentreGizmoOnObject(const GameObject& gameObject)
+{
+	if (GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject.GetTypeId()))
+	{
+		ion::Vector2i centre = gameObject.GetPosition() + (gameObjectType->GetDimensions() / 2);
+		ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
+		ion::Vector2i position(centre.x, mapSizePx.y - centre.y);
+
+		m_gizmo.SetPosition(position);
 	}
 }
 
