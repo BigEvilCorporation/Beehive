@@ -52,6 +52,8 @@ class SpriteCanvas;
 #include <wx/slider.h>
 #include <wx/statline.h>
 #include <wx/treectrl.h>
+#include <wx/propgrid/propgrid.h>
+#include <wx/propgrid/advprops.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -1240,6 +1242,27 @@ class SceneExplorerPanelBase : public wxPanel
 
 		SceneExplorerPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 169,613 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 		~SceneExplorerPanelBase();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class PropertyPanelBase
+///////////////////////////////////////////////////////////////////////////////
+class PropertyPanelBase : public wxPanel
+{
+	private:
+
+	protected:
+		wxPropertyGrid* m_propertyGrid;
+
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnPropertyChanged( wxPropertyGridEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		PropertyPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 356,614 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		~PropertyPanelBase();
 
 };
 

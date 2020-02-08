@@ -3552,3 +3552,30 @@ SceneExplorerPanelBase::~SceneExplorerPanelBase()
 	m_tree->Disconnect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( SceneExplorerPanelBase::OnItemSelected ), NULL, this );
 
 }
+
+PropertyPanelBase::PropertyPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+{
+	wxFlexGridSizer* fgSizer63;
+	fgSizer63 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer63->AddGrowableCol( 0 );
+	fgSizer63->AddGrowableRow( 0 );
+	fgSizer63->SetFlexibleDirection( wxBOTH );
+	fgSizer63->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_propertyGrid = new wxPropertyGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
+	fgSizer63->Add( m_propertyGrid, 0, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( fgSizer63 );
+	this->Layout();
+
+	// Connect Events
+	m_propertyGrid->Connect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( PropertyPanelBase::OnPropertyChanged ), NULL, this );
+}
+
+PropertyPanelBase::~PropertyPanelBase()
+{
+	// Disconnect Events
+	m_propertyGrid->Disconnect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( PropertyPanelBase::OnPropertyChanged ), NULL, this );
+
+}

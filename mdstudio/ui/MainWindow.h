@@ -24,6 +24,7 @@
 #include "Tool.h"
 
 #include "SceneExplorerPanel.h"
+#include "PropertyPanel.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "StampsPanel.h"
@@ -56,7 +57,8 @@ public:
 		ePanelTerrainTileEditor,
 		ePanelGameObjectTypes,
 		ePanelGameObjectParams,
-		ePanelSceneExplorer
+		ePanelSceneExplorer,
+		ePanelProperties
 	};
 
 	MainWindow();
@@ -64,6 +66,7 @@ public:
 
 	//Open panels
 	void ShowPanelSceneExplorer();
+	void ShowPanelProperties();
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
@@ -189,6 +192,7 @@ private:
 	wxWeakRef<MapToolboxTerrain> m_toolboxPanelTerrain;
 	wxWeakRef<MapToolboxGameObjs> m_toolboxPanelGameObjs;
 	wxWeakRef<SceneExplorerPanel> m_sceneExplorerPanel;
+	wxWeakRef<PropertyPanel> m_propertyPanel;
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<MapListPanel> m_mapListPanel;

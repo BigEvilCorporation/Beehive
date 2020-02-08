@@ -187,6 +187,12 @@ void MainWindow::SetProject(Project* project)
 			delete m_sceneExplorerPanel;
 		}
 
+		if (m_propertyPanel)
+		{
+			m_auiManager.DetachPane(m_propertyPanel);
+			delete m_propertyPanel;
+		}
+
 		if(m_tilesPanel)
 		{
 			m_auiManager.DetachPane(m_tilesPanel);
@@ -317,6 +323,7 @@ void MainWindow::SetProject(Project* project)
 
 			//Open left panels
 			ShowPanelSceneExplorer();
+			ShowPanelProperties();
 			ShowToolboxStamps();
 			ShowToolboxObjects();
 
@@ -430,6 +437,35 @@ void MainWindow::ShowPanelSceneExplorer()
 
 			m_sceneExplorerPanel = new SceneExplorerPanel(this, *m_project, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_sceneExplorerPanel, paneInfo);
+			paneInfo.Show();
+		}
+
+		m_auiManager.Update();
+	}
+}
+
+void MainWindow::ShowPanelProperties()
+{
+	if (m_project.get())
+	{
+		if (m_propertyPanel)
+		{
+			m_auiManager.GetPane("Properties").Show();
+		}
+		else
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Properties");
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(200));
+			paneInfo.Right();
+			paneInfo.Row(0);
+			paneInfo.Caption("Properties");
+			paneInfo.CaptionVisible(true);
+
+			m_propertyPanel = new PropertyPanel(this, *m_project, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_propertyPanel, paneInfo);
 			paneInfo.Show();
 		}
 
@@ -1012,6 +1048,11 @@ void MainWindow::SetSelectedGameObject(GameObject* gameObject)
 	{
 		m_gameObjectParamsPanel->SetGameObject(gameObject);
 	}
+
+	if (m_propertyPanel)
+	{
+		m_propertyPanel->SetGameObject(gameObject->GetId());
+	}
 }
 
 AnimationId MainWindow::GetSelectedAnimation()
@@ -1256,6 +1297,10 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelSceneExplorer:
 		if (m_sceneExplorerPanel)
 			m_sceneExplorerPanel->Refresh();
+		break;
+	case ePanelProperties:
+		if (m_propertyPanel)
+			m_propertyPanel->Refresh();
 		break;
 	}
 }

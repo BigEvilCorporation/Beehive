@@ -75,9 +75,13 @@ void SceneExplorerPanel::OnItemSelected(wxTreeEvent& event)
 	{
 		if (MapPanel* mapPanel = m_mainWindow->GetMapPanel())
 		{
-			mapPanel->SelectGameObject(it->second);
-			mapPanel->SetTool(eToolMoveGameObject);
-			m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
+			if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(it->second))
+			{
+				m_mainWindow->SetSelectedGameObject(gameObject);
+				mapPanel->SelectGameObject(it->second);
+				mapPanel->SetTool(eToolMoveGameObject);
+				m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
+			}
 		}
 	}
 }
