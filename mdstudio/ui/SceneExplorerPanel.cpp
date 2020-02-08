@@ -131,6 +131,8 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 		m_objectTypeListSorted.push_back(std::make_pair(objectType.first, objectType.second.GetName()));
 	}
 
+	std::sort(m_objectTypeListSorted.begin(), m_objectTypeListSorted.end(), [](const std::pair<GameObjectTypeId, std::string>& lhs, const std::pair<GameObjectTypeId, std::string>& rhs) { return lhs.second < rhs.second; });
+
 	for(int i = 0; i < m_objectTypeListSorted.size(); i++)
 	{
 		addMenu->Append(ContextMenu::TypeListFirst + i, m_objectTypeListSorted[i].second);
