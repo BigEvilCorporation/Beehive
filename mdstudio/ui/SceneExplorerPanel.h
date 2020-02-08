@@ -48,10 +48,21 @@ protected:
 	void OnContextMenuClick(wxCommandEvent& event);
 
 private:
+	struct ArchetypeEntry
+	{
+		GameObjectTypeId typeId;
+		GameObjectArchetypeId archetypeId;
+		std::string typeName;
+		std::string archetypeName;
+	};
+
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	std::map<wxTreeItemId, GameObjectId> m_objectMap;
 	std::vector<std::pair<GameObjectTypeId, std::string>> m_objectTypeListSorted;
+	std::vector<ArchetypeEntry> m_archetypeListSorted;
 	wxTreeItemId m_contextItem;
-	wxMenuItem* m_addObjectMenu;
+
+	int m_firstObjectId;
+	int m_firstArchetypeId;
 };

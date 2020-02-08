@@ -126,23 +126,46 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 	m_contextItem = event.GetItem();
 
 	wxMenu contextMenu;
-	wxMenu* addMenu = new wxMenu();
+	wxMenu* objMenu = new wxMenu();
+	wxMenu* archetypeMenu = new wxMenu();
 
 	m_objectTypeListSorted.clear();
+	m_archetypeListSorted.clear();
 
 	for (auto objectType : m_project.GetGameObjectTypes())
 	{
 		m_objectTypeListSorted.push_back(std::make_pair(objectType.first, objectType.second.GetName()));
+
+		for (auto archetype : objectType.second.GetArchetypes())
+		{
+			ArchetypeEntry archetypeEntry;
+			archetypeEntry.archetypeId = archetype.first;
+			archetypeEntry.archetypeName = archetype.second.name;
+			archetypeEntry.typeId = objectType.first;
+			archetypeEntry.typeName = objectType.second.GetName();
+
+			m_archetypeListSorted.push_back(archetypeEntry);
+		}
 	}
 
+	m_firstObjectId = ContextMenu::TypeListFirst;
+	m_firstArchetypeId = ContextMenu::TypeListFirst + m_objectTypeListSorted.size();
+
 	std::sort(m_objectTypeListSorted.begin(), m_objectTypeListSorted.end(), [](const std::pair<GameObjectTypeId, std::string>& lhs, const std::pair<GameObjectTypeId, std::string>& rhs) { return lhs.second < rhs.second; });
+	std::sort(m_archetypeListSorted.begin(), m_archetypeListSorted.end(), [](const ArchetypeEntry& lhs, const ArchetypeEntry& rhs) { return lhs.typeName < rhs.typeName; });
 
 	for(int i = 0; i < m_objectTypeListSorted.size(); i++)
 	{
-		addMenu->Append(ContextMenu::TypeListFirst + i, m_objectTypeListSorted[i].second);
+		objMenu->Append(m_firstObjectId + i, m_objectTypeListSorted[i].second);
 	}
 
-	m_addObjectMenu = contextMenu.AppendSubMenu(addMenu, "Add Object");
+	for (int i = 0; i < m_archetypeListSorted.size(); i++)
+	{
+		archetypeMenu->Append(m_firstArchetypeId + i, m_archetypeListSorted[i].typeName + " : " + m_archetypeListSorted[i].archetypeName);
+	}
+
+	contextMenu.AppendSubMenu(objMenu, "Add New Object");
+	contextMenu.AppendSubMenu(archetypeMenu, "Add Object from Archetype");
 	contextMenu.Append(ContextMenu::Rename, "Rename Object");
 
 	contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&SceneExplorerPanel::OnContextMenuClick, NULL, this);
@@ -151,9 +174,23 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 
 void SceneExplorerPanel::OnContextMenuClick(wxCommandEvent& event)
 {
-	if (event.GetId() >= ContextMenu::TypeListFirst)
+	if (event.GetId() >= ContextMenu::TypeListFirst + m_objectTypeListSorted.size())
 	{
-		GameObjectId objectTypeId = m_objectTypeListSorted[event.GetId() - ContextMenu::TypeListFirst].first;
+		ArchetypeEntry archetypeEntry = m_archetypeListSorted[event.GetId() - m_firstArchetypeId];
+
+		if (const GameObjectType* objectType = m_project.GetGameObjectType(archetypeEntry.typeId))
+		{
+			if (MapPanel* mapPanel = m_mainWindow->GetMapPanel())
+			{
+				//Start placement
+				m_project.SetPaintGameObjectType(archetypeEntry.typeId, archetypeEntry.archetypeId);
+				mapPanel->SetTool(eToolPlaceGameObject);
+			}
+		}
+	}
+	else if (event.GetId() >= ContextMenu::TypeListFirst)
+	{
+		GameObjectId objectTypeId = m_objectTypeListSorted[event.GetId() - m_firstObjectId].first;
 
 		if (const GameObjectType* objectType = m_project.GetGameObjectType(objectTypeId))
 		{
