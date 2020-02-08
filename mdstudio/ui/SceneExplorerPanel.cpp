@@ -34,7 +34,7 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 		const Map& editingMap = m_project.GetEditingMap();
 
-		wxTreeItemId rootId = m_tree->AddRoot("Root");
+		wxTreeItemId rootId = m_tree->AddRoot(editingMap.GetName());
 
 		int labelIdx = 1;
 
@@ -53,18 +53,8 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 				}
 			}
 		}
-	}
-}
 
-void SceneExplorerPanel::OnContextMenuClick(wxCommandEvent& event)
-{
-	if (event.GetId() == ContextMenu::Add)
-	{
-
-	}
-	else if (event.GetId() == ContextMenu::Rename)
-	{
-
+		m_tree->Expand(rootId);
 	}
 }
 
@@ -129,11 +119,48 @@ void SceneExplorerPanel::OnItemRenamed(wxTreeEvent& event)
 void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 {
 	//Right-click menu
-	wxMenu contextMenu;
+	m_contextItem = event.GetItem();
 
-	contextMenu.Append(ContextMenu::Add, "Add Object");
+	wxMenu contextMenu;
+	wxMenu* addMenu = new wxMenu();
+
+	m_objectTypeListSorted.clear();
+
+	for (auto objectType : m_project.GetGameObjectTypes())
+	{
+		m_objectTypeListSorted.push_back(std::make_pair(objectType.first, objectType.second.GetName()));
+	}
+
+	for(int i = 0; i < m_objectTypeListSorted.size(); i++)
+	{
+		addMenu->Append(ContextMenu::TypeListFirst + i, m_objectTypeListSorted[i].second);
+	}
+
+	m_addObjectMenu = contextMenu.AppendSubMenu(addMenu, "Add Object");
 	contextMenu.Append(ContextMenu::Rename, "Rename Object");
 
 	contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&SceneExplorerPanel::OnContextMenuClick, NULL, this);
 	PopupMenu(&contextMenu);
+}
+
+void SceneExplorerPanel::OnContextMenuClick(wxCommandEvent& event)
+{
+	if (event.GetId() >= ContextMenu::TypeListFirst)
+	{
+		GameObjectId objectTypeId = m_objectTypeListSorted[event.GetId() - ContextMenu::TypeListFirst].first;
+
+		if (const GameObjectType* objectType = m_project.GetGameObjectType(objectTypeId))
+		{
+			if (MapPanel* mapPanel = m_mainWindow->GetMapPanel())
+			{
+				//Start placement
+				m_project.SetPaintGameObjectType(objectTypeId);
+				mapPanel->SetTool(eToolPlaceGameObject);
+			}
+		}
+	}
+	else if (event.GetId() == ContextMenu::Rename)
+	{
+		m_tree->EditLabel(m_contextItem);
+	}
 }

@@ -1799,6 +1799,24 @@ void MapPanel::CameraCentreOnObject(const GameObject& gameObject)
 	SetCameraZoom(zoom);
 }
 
+ion::Vector2 MapPanel::GetCameraPos() const
+{
+	float prevZoom = m_cameraZoom;
+
+	//Reset camera zoom
+	ion::render::Camera camera = m_camera;
+	camera.SetZoom(ion::Vector3(1.0f, 1.0f, 1.0f));
+
+	//Compensate camera pos
+	ion::Vector2 originalViewportSize((float)m_panelSize.x / prevZoom, (float)m_panelSize.y / prevZoom);
+	ion::Vector2 newViewportSize((float)m_panelSize.x, (float)m_panelSize.y);
+	ion::Vector3 cameraPos = camera.GetPosition();
+	cameraPos.x -= (newViewportSize.x - originalViewportSize.x) / 2.0f;
+	cameraPos.y -= (newViewportSize.y - originalViewportSize.y) / 2.0f;
+	
+	return ion::Vector2(cameraPos.x, cameraPos.y);
+}
+
 void MapPanel::SelectGameObject(GameObjectId gameObjectId)
 {
 	m_selectedGameObject = gameObjectId;

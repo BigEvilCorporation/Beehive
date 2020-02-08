@@ -15,6 +15,7 @@
 #include <ion/beehive/Map.h>
 
 #include <map>
+#include <vector>
 
 #include "UIBase.h"
 
@@ -39,7 +40,9 @@ protected:
 	enum ContextMenu
 	{
 		Add,
-		Rename
+		Rename,
+
+		TypeListFirst
 	};
 
 	void OnContextMenuClick(wxCommandEvent& event);
@@ -48,4 +51,7 @@ private:
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	std::map<wxTreeItemId, GameObjectId> m_objectMap;
+	std::vector<std::pair<GameObjectTypeId, std::string>> m_objectTypeListSorted;
+	wxTreeItemId m_contextItem;
+	wxMenuItem* m_addObjectMenu;
 };

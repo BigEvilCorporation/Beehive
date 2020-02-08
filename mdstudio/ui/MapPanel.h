@@ -31,6 +31,7 @@ public:
 
 	//Camera control
 	void CameraCentreOnObject(const GameObject& gameObject);
+	ion::Vector2 GetCameraPos() const;
 
 	//Set current tool
 	void SetTool(ToolType tool);

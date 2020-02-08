@@ -1226,14 +1226,9 @@ class SceneExplorerPanelBase : public wxPanel
 	private:
 
 	protected:
-		wxToolBar* m_toolBar1;
-		wxToolBarToolBase* m_toolAddObj;
-		wxToolBarToolBase* m_toolRemoveObj;
 		wxTreeCtrl* m_tree;
 
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnToolAddMap( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnToolRemoveMap( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnItemDragged( wxTreeEvent& event ) { event.Skip(); }
 		virtual void OnItemRenamed( wxTreeEvent& event ) { event.Skip(); }
 		virtual void OnItemActivated( wxTreeEvent& event ) { event.Skip(); }
