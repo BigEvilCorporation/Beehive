@@ -43,6 +43,7 @@
 #include <luminary/MapExporter.h>
 #include <luminary/PaletteExporter.h>
 #include <luminary/TerrainExporter.h>
+#include <luminary/ScriptCompiler.h>
 #endif
 
 wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
@@ -1535,6 +1536,59 @@ void ExportArchetype(const Project& project, const GameObjectArchetype& srcArche
 	}
 }
 
+void ConvertScriptEntity(const GameObjectType& gameObjectType, luminary::Entity& entity)
+{
+	entity.name = gameObjectType.GetName();
+
+	const std::vector<GameObjectVariable>& variables = gameObjectType.GetScriptVariables();
+
+	int paramIdx = 0;
+	int componentIdx = -1;
+
+	for (int j = 0; j < variables.size(); j++, paramIdx++)
+	{
+		const GameObjectVariable& variable = variables[j];
+		luminary::Param* param = nullptr;
+
+		if (variable.m_componentIdx == -1)
+		{
+			//Entity param
+			entity.params.resize(paramIdx + 1);
+			param = &entity.params[paramIdx];
+		}
+		else
+		{
+			//Component param
+			if (componentIdx != variable.m_componentIdx)
+			{
+				componentIdx = variable.m_componentIdx;
+				entity.components.resize(componentIdx + 1);
+				entity.components[componentIdx].name = variable.m_componentName;
+				paramIdx = 0;
+			}
+
+			entity.components[componentIdx].params.resize(paramIdx + 1);
+			param = &entity.components[componentIdx].params[paramIdx];
+		}
+
+		param->name = variable.m_name;
+		param->value = "0x0";
+
+		switch (variable.m_size)
+		{
+		case eSizeByte:
+			param->size = luminary::ParamSize::Byte;
+			break;
+		case eSizeWord:
+			param->size = luminary::ParamSize::Word;
+			break;
+		case eSizeLong:
+			param->size = luminary::ParamSize::Long;
+			break;
+		}
+	}
+}
+
 void ExportEntity(const Project& project, const GameObjectType& gameObjectType, const GameObject& gameObject, luminary::Entity& entity)
 {
 	//Type name
@@ -1614,8 +1668,21 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		luminary::MapExporter mapExporter;
 		luminary::PaletteExporter paletteExporter;
 		luminary::TerrainExporter terrainExporter;
+		luminary::ScriptTranspiler scriptTranspiler;
 
 		std::vector<std::pair<std::string,std::string>> includeFilenames;
+
+		//Generate script headers
+		std::string scriptsDir = m_project->m_settings.scriptsExportDir;
+
+		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
+		{
+			luminary::Entity entity;
+			ConvertScriptEntity(typeIt->second, entity);
+			scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+		}
+
+		//Compile scripts
 
 		//Export entity archetypes
 		std::vector<luminary::Archetype> archetypes;
