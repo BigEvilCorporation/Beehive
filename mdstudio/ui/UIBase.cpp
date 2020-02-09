@@ -3571,11 +3571,13 @@ PropertyPanelBase::PropertyPanelBase( wxWindow* parent, wxWindowID id, const wxP
 
 	// Connect Events
 	m_propertyGrid->Connect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( PropertyPanelBase::OnPropertyChanged ), NULL, this );
+	m_propertyGrid->Connect( wxEVT_RIGHT_UP, wxMouseEventHandler( PropertyPanelBase::OnRightClick ), NULL, this );
 }
 
 PropertyPanelBase::~PropertyPanelBase()
 {
 	// Disconnect Events
 	m_propertyGrid->Disconnect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( PropertyPanelBase::OnPropertyChanged ), NULL, this );
+	m_propertyGrid->Disconnect( wxEVT_RIGHT_UP, wxMouseEventHandler( PropertyPanelBase::OnRightClick ), NULL, this );
 
 }

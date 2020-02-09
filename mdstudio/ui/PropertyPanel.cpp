@@ -17,6 +17,15 @@
 #include <wx/msgdlg.h>
 #include <wx/textdlg.h>
 
+#include <ion/io/File.h>
+#include <ion/io/FileDevice.h>
+
+#if defined BEEHIVE_PLUGIN_LUMINARY
+#include <luminary/Types.h>
+#include <luminary/ScriptCompiler.h>
+#include <luminary/BeehiveToLuminary.h>
+#endif
+
 static const std::string s_defaultVarName = "[ DEFAULT_VALUE ]";
 
 PropertyPanel::PropertyPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
@@ -25,6 +34,7 @@ PropertyPanel::PropertyPanel(MainWindow* mainWindow, Project& project, wxWindow 
 	, m_mainWindow(mainWindow)
 {
 	m_gameObjectId = InvalidGameObjectId;
+	m_contextProperty = nullptr;
 }
 
 void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -55,6 +65,8 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 						if (selection >= 0 && selection < list->size())
 							choiceProp->SetChoiceSelection(selection);
+
+						choiceProp->SetAttribute("isScript", false);
 
 						m_propertyGrid->Append(choiceProp);
 
@@ -152,6 +164,103 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 				Refresh();
 			}
 		}
+	}
+}
+
+void PropertyPanel::OnRightClick(wxMouseEvent& event)
+{
+	m_contextProperty = m_propertyGrid->GetItemAtY(event.GetPosition().y);
+
+	if (m_contextProperty)
+	{
+		if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId))
+		{
+			wxMenu contextMenu;
+
+			wxMenuItem* defaultItem = contextMenu.Append(ContextMenu::Default, "Revert to Default");
+			defaultItem->Enable(gameObject->GetOriginalArchetype() != InvalidGameObjectArchetypeId);
+
+			wxMenuItem* editScriptItem = contextMenu.Append(ContextMenu::EditScript, "Edit Script");
+			editScriptItem->Enable(m_contextProperty->GetAttribute("isScript") && !m_project.m_settings.scriptsExportDir.empty());
+
+			wxMenuItem* compileScriptItem = contextMenu.Append(ContextMenu::CompileScript, "Compile Script");
+			compileScriptItem->Enable(m_contextProperty->GetAttribute("isScript") && !m_project.m_settings.scriptsExportDir.empty());
+
+			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PropertyPanel::OnContextMenuClick, NULL, this);
+			PopupMenu(&contextMenu);
+		}
+	}
+}
+
+void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
+{
+	if (m_contextProperty)
+	{
+		if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId))
+		{
+			if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+			{
+				std::string variableName = m_contextProperty->GetAttribute("variableName").GetString();
+				int componentIdx = m_contextProperty->GetAttribute("componentIdx").GetInteger();
+
+				//Find or add overridden var on game object
+				GameObjectVariable* variable = gameObject->FindVariable(variableName, componentIdx);
+				if (!variable)
+				{
+					if (const GameObjectVariable* original = gameObjectType->FindVariable(variableName, componentIdx))
+					{
+						variable = &gameObject->AddVariable();
+						*variable = *original;
+					}
+				}
+
+				if (variable)
+				{
+					switch (event.GetId())
+					{
+						case ContextMenu::Default:
+						{
+							break;
+						}
+
+						case ContextMenu::EditScript:
+						{
+	#if defined BEEHIVE_PLUGIN_LUMINARY
+							std::string scriptsDir = m_project.m_settings.scriptsExportDir;
+							std::string scriptFilename = gameObjectType->GetName() + ".cpp";
+							std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
+
+							luminary::ScriptTranspiler scriptTranspiler;
+							luminary::Entity entity;
+							luminary::beehive::ConvertScriptEntity(*gameObjectType, entity);
+							scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+
+							if (ion::io::FileDevice* device = ion::io::FileDevice::GetDefault())
+							{
+								if (!device->GetFileExists(scriptFullPath))
+								{
+									scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsDir);
+									variable->m_value = scriptFilename;
+									Refresh();
+								}
+							}
+
+							std::string shellCmd = "rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + scriptFullPath + "\"";
+							wxExecute(shellCmd);
+	#endif
+							break;
+						}
+
+						case ContextMenu::CompileScript:
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		m_contextProperty = nullptr;
 	}
 }
 
@@ -256,6 +365,8 @@ void PropertyPanel::AddProperty(const GameObject& gameObject, const GameObjectVa
 		property->SetAttribute("variableName", variable.m_name);
 		property->SetAttribute("componentIdx", componentIdx);
 		property->SetAttribute("variableSize", variable.m_size);
+		property->SetAttribute("variable", wxVariant((void*)&variable));
+		property->SetAttribute("isScript", variable.HasTag("SCRIPT_DATA"));
 		m_propertyGrid->Append(property);
 	}
 }

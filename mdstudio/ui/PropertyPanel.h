@@ -28,12 +28,22 @@ public:
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 	virtual void OnPropertyChanged(wxPropertyGridEvent& event);
+	virtual void OnRightClick(wxMouseEvent& event);
 
 	void SetGameObject(GameObjectId gameObjectId);
 
 protected:
 
 private:
+	enum ContextMenu
+	{
+		Default,
+		EditScript,
+		CompileScript
+	};
+
+	void OnContextMenuClick(wxCommandEvent& event);
+
 	void AddProperty(const GameObject& gameObject, const GameObjectVariable& variable, int componentIdx, bool enabled = true);
 	int PopulateSpriteActorList(wxArrayString& list, const std::string& selectedValue);
 	int PopulateSpriteSheetList(wxArrayString& list, const Actor& actor, const std::string& selectedValue);
@@ -42,4 +52,6 @@ private:
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	GameObjectId m_gameObjectId;
+
+	wxPGProperty* m_contextProperty;
 };

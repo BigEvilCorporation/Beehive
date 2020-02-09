@@ -1257,6 +1257,7 @@ class PropertyPanelBase : public wxPanel
 
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnPropertyChanged( wxPropertyGridEvent& event ) { event.Skip(); }
+		virtual void OnRightClick( wxMouseEvent& event ) { event.Skip(); }
 
 
 	public:
