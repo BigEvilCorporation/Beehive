@@ -25,6 +25,7 @@
 
 #include "SceneExplorerPanel.h"
 #include "PropertyPanel.h"
+#include "ScriptCompilePanel.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "StampsPanel.h"
@@ -58,7 +59,8 @@ public:
 		ePanelGameObjectTypes,
 		ePanelGameObjectParams,
 		ePanelSceneExplorer,
-		ePanelProperties
+		ePanelProperties,
+		ePanelScriptCompile
 	};
 
 	MainWindow();
@@ -67,6 +69,7 @@ public:
 	//Open panels
 	void ShowPanelSceneExplorer();
 	void ShowPanelProperties();
+	void ShowPanelScriptCompile();
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
@@ -88,6 +91,7 @@ public:
 
 	//Get panels
 	MapPanel* GetMapPanel();
+	ScriptCompilePanel* GetScriptCompilePanel();
 
 	//Set current map editing tool
 	void SetMapTool(ToolType tool);
@@ -193,6 +197,7 @@ private:
 	wxWeakRef<MapToolboxGameObjs> m_toolboxPanelGameObjs;
 	wxWeakRef<SceneExplorerPanel> m_sceneExplorerPanel;
 	wxWeakRef<PropertyPanel> m_propertyPanel;
+	wxWeakRef<ScriptCompilePanel> m_scriptCompilePanel;
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<MapListPanel> m_mapListPanel;

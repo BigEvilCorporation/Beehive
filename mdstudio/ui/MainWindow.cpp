@@ -474,6 +474,33 @@ void MainWindow::ShowPanelProperties()
 	}
 }
 
+void MainWindow::ShowPanelScriptCompile()
+{
+	if (m_project.get())
+	{
+		if (m_scriptCompilePanel)
+		{
+			m_auiManager.GetPane("Script Compiler").Show();
+		}
+		else
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Script Compiler");
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(PANEL_SIZE_X(200), PANEL_SIZE_Y(100));
+			paneInfo.Caption("Script Compiler");
+			paneInfo.CaptionVisible(true);
+
+			m_scriptCompilePanel = new ScriptCompilePanel(this, *m_project, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_scriptCompilePanel, paneInfo);
+			paneInfo.Show();
+		}
+
+		m_auiManager.Update();
+	}
+}
+
 void MainWindow::ShowPanelPalettes()
 {
 	if(m_project.get())
@@ -1033,6 +1060,11 @@ void MainWindow::ShowPanelTimeline()
 MapPanel* MainWindow::GetMapPanel()
 {
 	return m_mapPanel;
+}
+
+ScriptCompilePanel* MainWindow::GetScriptCompilePanel()
+{
+	return m_scriptCompilePanel;
 }
 
 void MainWindow::SetMapTool(ToolType tool)

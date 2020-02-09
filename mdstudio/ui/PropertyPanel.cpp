@@ -226,6 +226,7 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 						case ContextMenu::EditScript:
 						{
 	#if defined BEEHIVE_PLUGIN_LUMINARY
+							//TODO: Do this in Beehive-side script compiler
 							std::string scriptsDir = m_project.m_settings.scriptsExportDir;
 							std::string scriptFilename = gameObjectType->GetName() + ".cpp";
 							std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
@@ -253,6 +254,16 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 
 						case ContextMenu::CompileScript:
 						{
+							//TODO: Do this in Beehive-side script compiler
+							m_mainWindow->ShowPanelScriptCompile();
+							if (ScriptCompilePanel* panel = m_mainWindow->GetScriptCompilePanel())
+							{
+								std::string scriptsDir = m_project.m_settings.scriptsExportDir;
+								std::string scriptFilename = gameObjectType->GetName() + ".cpp";
+								std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
+								panel->BeginCompile(scriptFullPath);
+							}
+
 							break;
 						}
 					}

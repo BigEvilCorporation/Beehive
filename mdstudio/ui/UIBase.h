@@ -1267,3 +1267,20 @@ class PropertyPanelBase : public wxPanel
 
 };
 
+///////////////////////////////////////////////////////////////////////////////
+/// Class ScriptCompilePanelBase
+///////////////////////////////////////////////////////////////////////////////
+class ScriptCompilePanelBase : public wxPanel
+{
+	private:
+
+	protected:
+		wxTextCtrl* m_textOutput;
+
+	public:
+
+		ScriptCompilePanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		~ScriptCompilePanelBase();
+
+};
+

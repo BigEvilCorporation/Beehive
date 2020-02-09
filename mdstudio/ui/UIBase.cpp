@@ -3581,3 +3581,24 @@ PropertyPanelBase::~PropertyPanelBase()
 	m_propertyGrid->Disconnect( wxEVT_RIGHT_UP, wxMouseEventHandler( PropertyPanelBase::OnRightClick ), NULL, this );
 
 }
+
+ScriptCompilePanelBase::ScriptCompilePanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+{
+	wxFlexGridSizer* fgSizer63;
+	fgSizer63 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer63->AddGrowableCol( 0 );
+	fgSizer63->AddGrowableRow( 0 );
+	fgSizer63->SetFlexibleDirection( wxBOTH );
+	fgSizer63->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_textOutput = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	fgSizer63->Add( m_textOutput, 0, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( fgSizer63 );
+	this->Layout();
+}
+
+ScriptCompilePanelBase::~ScriptCompilePanelBase()
+{
+}
