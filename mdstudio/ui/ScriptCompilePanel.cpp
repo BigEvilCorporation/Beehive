@@ -18,6 +18,8 @@
 #include <wx/textdlg.h>
 #include <wx/txtstrm.h>
 
+#include <ion/core/thread/Sleep.h>
+
 const std::string g_compilerDir = "compiler\\m68k-elf\\bin";
 const std::string g_includeDir = "scripts\\common";
 
@@ -26,12 +28,15 @@ ScriptCompilePanel::ScriptCompilePanel(MainWindow* mainWindow, Project& project,
 	, m_project(project)
 	, m_mainWindow(mainWindow)
 {
-
+	m_state = State::Idle;
 }
 
-void ScriptCompilePanel::BeginCompile(const std::string& filename)
+bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished)
 {
+	m_state = State::Compiling;
+
 	m_textOutput->Clear();
+	m_onFinished = onFinished;
 	m_compileRunner = new ScriptCompilerRunner(*this);
 	m_compileRunner->Redirect();
 
@@ -41,18 +46,158 @@ void ScriptCompilePanel::BeginCompile(const std::string& filename)
 	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner) < 0)
 	{
 		m_textOutput->AppendText("Error starting script compiler");
+		return false;
 	}
 #endif
+
+	return true;
 }
 
-void ScriptCompilePanel::BeginObjCopy(const std::string& filename)
+bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
 {
+	m_textOutput->Clear();
+	m_symbolOutput.clear();
+	m_onFinished = nullptr;
+	m_compileRunner = new ScriptCompilerRunner(*this);
+	m_compileRunner->Redirect();
 
+#if defined BEEHIVE_PLUGIN_LUMINARY
+	m_currentFilename = filename;
+
+	m_state = State::Compiling;
+	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, g_compilerDir, g_includeDir);
+	if (wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner) < 0)
+	{
+		m_textOutput->AppendText("Error starting script compiler");
+		return false;
+	}
+
+	CollectOutput();
+
+	m_state = State::Copying;
+	std::string objcopyCmd = m_scriptCompiler.GenerateObjCopyCommand(filename, g_compilerDir);
+	if (wxExecute(objcopyCmd, wxEXEC_SYNC, m_compileRunner) < 0)
+	{
+		m_textOutput->AppendText("Error starting objcopy");
+		return false;
+	}
+
+	CollectOutput();
+
+	m_state = State::ReadingSymbols;
+	std::string symbolsCmd = m_scriptCompiler.GenerateSymbolReadCommand(filename, g_compilerDir);
+	if (wxExecute(symbolsCmd, wxEXEC_SYNC, m_compileRunner) < 0)
+	{
+		m_textOutput->AppendText("Error starting symbol reader");
+		return false;
+	}
+
+	CollectOutput();
+	m_state = State::Idle;
+#endif
+
+	return true;
+}
+
+bool ScriptCompilePanel::BeginObjCopy(const std::string& filename)
+{
+	m_state = State::Copying;
+
+	m_compileRunner = new ScriptCompilerRunner(*this);
+	m_compileRunner->Redirect();
+
+#if defined BEEHIVE_PLUGIN_LUMINARY
+	m_currentFilename = filename;
+	std::string commandLine = m_scriptCompiler.GenerateObjCopyCommand(filename, g_compilerDir);
+	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner) < 0)
+	{
+		m_textOutput->AppendText("Error starting objcopy");
+		return false;
+	}
+#endif
+
+	return true;
+}
+
+bool ScriptCompilePanel::BeginSymbolRead(const std::string& filename)
+{
+	m_state = State::ReadingSymbols;
+	m_symbolOutput.clear();
+
+	m_compileRunner = new ScriptCompilerRunner(*this);
+	m_compileRunner->Redirect();
+
+#if defined BEEHIVE_PLUGIN_LUMINARY
+	m_currentFilename = filename;
+	std::string commandLine = m_scriptCompiler.GenerateSymbolReadCommand(filename, g_compilerDir);
+	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner) < 0)
+	{
+		m_textOutput->AppendText("Error starting symbol reader");
+		return false;
+	}
+#endif
+
+	return true;
+}
+
+void ScriptCompilePanel::CollectOutput()
+{
+	if (m_compileRunner->IsInputAvailable())
+	{
+		wxTextInputStream stream(*m_compileRunner->GetInputStream());
+		while (m_compileRunner->GetInputStream()->IsOk() && !m_compileRunner->GetInputStream()->Eof())
+		{
+			AppendText(stream.ReadLine() + "\n");
+		}
+	}
+	else if (m_compileRunner->IsErrorAvailable())
+	{
+		wxTextInputStream stream(*m_compileRunner->GetErrorStream());
+		while (m_compileRunner->GetErrorStream()->IsOk() && !m_compileRunner->GetErrorStream()->Eof())
+		{
+			AppendText(stream.ReadLine() + "\n");
+		}
+	}
 }
 
 void ScriptCompilePanel::AppendText(const wxString& text)
 {
 	m_textOutput->AppendText(text);
+
+	if (m_state == State::ReadingSymbols)
+	{
+		m_symbolOutput.push_back(text.c_str().AsChar());
+	}
+}
+
+void ScriptCompilePanel::OnProcessFinished(int pid, int status)
+{
+	if (m_state == State::Compiling)
+	{
+		AppendText("Script compiler with process ID " + std::to_string(pid) + " exited with status " + std::to_string(status) + "\n");
+		if (!BeginObjCopy(m_currentFilename))
+		{
+			m_state = State::Idle;
+		}
+	}
+	else if(m_state == State::Copying)
+	{
+		AppendText("Object copier with process ID " + std::to_string(pid) + " exited with status " + std::to_string(status) + "\n");
+		if(!BeginSymbolRead(m_currentFilename))
+		{
+			m_state = State::Idle;
+		}
+	}
+	else if (m_state == State::ReadingSymbols)
+	{
+		AppendText("Symbol reader with process ID " + std::to_string(pid) + " exited with status " + std::to_string(status) + "\n");
+		m_state = State::Idle;
+
+		if (m_onFinished)
+		{
+			m_onFinished(m_symbolOutput);
+		}
+	}
 }
 
 void ScriptCompilerRunner::OnTerminate(int pid, int status)
@@ -74,5 +219,5 @@ void ScriptCompilerRunner::OnTerminate(int pid, int status)
 		}
 	}
 	
-	m_panel.AppendText("Script compiler with process ID " + std::to_string(pid) + " exited with status " + std::to_string(status));
+	m_panel.OnProcessFinished(pid, status);
 }

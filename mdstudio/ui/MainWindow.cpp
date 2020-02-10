@@ -17,6 +17,7 @@
 #include <wx/aui/framemanager.h>
 #include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
+#include <wx/progdlg.h>
 
 #include <string>
 
@@ -30,7 +31,8 @@
 #include "TilesPanel.h"
 #include "MapPanel.h"
 
-#include "maths\Maths.h"
+#include <ion/core/utils/STL.h>
+#include <ion/maths/Maths.h>
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 #include <luminary/Types.h>
@@ -1454,20 +1456,104 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		luminary::PaletteExporter paletteExporter;
 		luminary::TerrainExporter terrainExporter;
 		luminary::ScriptTranspiler scriptTranspiler;
+		luminary::ScriptCompiler scriptCompiler;
 
 		std::vector<std::pair<std::string,std::string>> includeFilenames;
 
-		//Generate script headers
+		//Generate script headers and compile
+		wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
 		std::string scriptsDir = m_project->m_settings.scriptsExportDir;
+		std::vector<std::pair<std::string, std::string>> scriptIncludes;
 
 		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
 		{
-			luminary::Entity entity;
-			luminary::beehive::ConvertScriptEntity(typeIt->second, entity);
-			scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+			//luminary::Entity entity;
+			//luminary::beehive::ConvertScriptEntity(typeIt->second, entity);
+			//scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
 		}
 
-		//Compile scripts
+		//Compile scripts and collect script function addresses
+		std::vector<const GameObjectType*> objTypesWithScripts;
+		std::map<std::string, std::vector<luminary::ScriptAddress>> scriptFuncAddresses;
+
+		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
+		{
+			//Check if entity has a script
+			bool hasScript = false;
+			for (auto variable : typeIt->second.GetVariables())
+			{
+				if (variable.HasTag("SCRIPT_DATA"))
+				{
+					objTypesWithScripts.push_back(&typeIt->second);
+					break;
+				}
+			}
+		}
+
+		for(int i = 0; i < objTypesWithScripts.size(); i++)
+		{
+			const GameObjectType* gameObjType = objTypesWithScripts[i];
+
+			if (scriptProgress.Update((100 / objTypesWithScripts.size()) * i))
+			{
+				//Do all script compiling via UI panel
+				ShowPanelScriptCompile();
+				if (ScriptCompilePanel* panel = GetScriptCompilePanel())
+				{
+					//Generate header file
+					luminary::Entity entity;
+					luminary::beehive::ConvertScriptEntity(*gameObjType, entity);
+					scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+
+					//Compile script
+					std::string scriptFilename = gameObjType->GetName() + ".cpp";
+					std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
+					panel->CompileBlocking(scriptFullPath);
+
+					//Check output was written
+					std::string scriptDataFilename = gameObjType->GetName() + ".bin";
+					std::string scriptDataFullPath = scriptsDir + "\\" + scriptDataFilename;
+
+					if (ion::io::FileDevice::GetDefault()->GetFileExists(scriptDataFullPath))
+					{
+						//Add binary to include files
+						std::string scriptLabel = std::string("scriptdata_") + gameObjType->GetName();
+						std::string scriptFilename = m_project->m_settings.scriptsExportDir + "\\" + gameObjType->GetName() + ".bin";
+						scriptIncludes.push_back(std::make_pair(scriptLabel, scriptFilename));
+
+						//Find all script function addresses
+						for (auto variable : gameObjType->GetVariables())
+						{
+							std::string routineName;
+
+							if (variable.FindTagValue("SCRIPTFUNC", routineName))
+							{
+								int address = scriptCompiler.FindFunctionOffset(panel->GetSymbolOutput(), gameObjType->GetName(), routineName);
+								if (address >= 0)
+								{
+									luminary::ScriptAddress addr;
+									addr.routineName = routineName;
+									addr.routineAddress = address;
+									scriptFuncAddresses[gameObjType->GetName()].push_back(addr);
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				//Cancelled
+				return;
+			}
+		}
+
+		scriptProgress.Update(100);
+
+		if (scriptIncludes.size() > 0)
+		{
+			m_project->WriteIncludeFile(m_project->m_settings.projectExportDir, m_project->m_settings.scriptsExportDir, "SCRIPTS.ASM", scriptIncludes, true);
+		}
 
 		//Export entity archetypes
 		std::vector<luminary::Archetype> archetypes;
@@ -1477,7 +1563,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			for (TGameObjectArchetypeMap::const_iterator archIt = typeIt->second.GetArchetypes().begin(), archEnd = typeIt->second.GetArchetypes().end(); archIt != archEnd; ++archIt)
 			{
 				luminary::Archetype archetype;
-				luminary::beehive::ExportArchetype(*m_project, archIt->second, archetype);
+				luminary::beehive::ExportArchetype(*m_project, archIt->second, scriptFuncAddresses, archetype);
 				archetypes.push_back(archetype);
 			}
 		}
@@ -1617,7 +1703,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								const GameObject& gameObject = it->second[i].m_gameObject;
 								sceneData.staticEntities.push_back(luminary::Entity());
 								luminary::Entity& entity = sceneData.staticEntities.back();
-								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, entity);
+								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptFuncAddresses, entity);
 							}
 						}
 						else
@@ -1627,7 +1713,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								const GameObject& gameObject = it->second[i].m_gameObject;
 								sceneData.dynamicEntities.push_back(luminary::Entity());
 								luminary::Entity& entity = sceneData.dynamicEntities.back();
-								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, entity);
+								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptFuncAddresses, entity);
 							}
 						}
 					}

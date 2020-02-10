@@ -261,7 +261,7 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 								std::string scriptsDir = m_project.m_settings.scriptsExportDir;
 								std::string scriptFilename = gameObjectType->GetName() + ".cpp";
 								std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
-								panel->BeginCompile(scriptFullPath);
+								panel->BeginCompileAsync(scriptFullPath, nullptr);
 							}
 
 							break;
