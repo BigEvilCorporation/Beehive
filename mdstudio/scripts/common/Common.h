@@ -14,3 +14,8 @@ struct Entity : BlockHeader
 	unsigned short extentsX;
 	unsigned short extentsY;
 };
+
+struct ComponentBase : BlockHeader
+{
+	unsigned short ownerEntity;
+};
