@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<Toolchain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ToolchainName>Motorola 68000</ToolchainName>
+  <ToolchainType>Embedded</ToolchainType>
+  <PathDetectionKeyStrip>0</PathDetectionKeyStrip>
+  <GNUTargetID>m68k-elf</GNUTargetID>
+  <ToolchainID>com.visualgdb.m68k-elf</ToolchainID>
+  <BinaryDirectory>bin</BinaryDirectory>
+  <Prefix>m68k-elf-</Prefix>
+  <Make>make.exe</Make>
+  <BSPIndexUrlFormat>http://visualgdb.com/hwsupport/BSP/?autofetch=1&amp;target=m68k-elf&amp;filter={0}</BSPIndexUrlFormat>
+  <IsCygwinBased>false</IsCygwinBased>
+  <GCCVersion>4.8.0</GCCVersion>
+  <GDBVersion>7.5.1</GDBVersion>
+</Toolchain>

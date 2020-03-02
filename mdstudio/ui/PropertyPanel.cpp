@@ -231,11 +231,13 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 							std::string scriptFilename = gameObjectType->GetName() + ".cpp";
 							std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
 
+							//Generate header
 							luminary::ScriptTranspiler scriptTranspiler;
 							luminary::Entity entity;
 							luminary::beehive::ConvertScriptEntity(*gameObjectType, entity);
 							scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
 
+							//Generate boilerplate
 							if (ion::io::FileDevice* device = ion::io::FileDevice::GetDefault())
 							{
 								if (!device->GetFileExists(scriptFullPath))
@@ -246,6 +248,7 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 								}
 							}
 
+							//Open in default shell program
 							std::string shellCmd = "rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + scriptFullPath + "\"";
 							wxExecute(shellCmd);
 	#endif
@@ -261,6 +264,25 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 								std::string scriptsDir = m_project.m_settings.scriptsExportDir;
 								std::string scriptFilename = gameObjectType->GetName() + ".cpp";
 								std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
+
+								//Generate header
+								luminary::ScriptTranspiler scriptTranspiler;
+								luminary::Entity entity;
+								luminary::beehive::ConvertScriptEntity(*gameObjectType, entity);
+								scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+
+								//Generate boilerplate
+								if (ion::io::FileDevice* device = ion::io::FileDevice::GetDefault())
+								{
+									if (!device->GetFileExists(scriptFullPath))
+									{
+										scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsDir);
+										variable->m_value = scriptFilename;
+										Refresh();
+									}
+								}
+
+								//Compile
 								panel->BeginCompileAsync(scriptFullPath, nullptr);
 							}
 
