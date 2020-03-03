@@ -28,7 +28,7 @@ ApplySLZSDK beehivestudio ;
 
 if ( shader in $(ion_renderer_opts) )
 {
-	ApplyIonShaders $(TARGET) ;
+	ApplyIonShaders beehivestudio ;
 }
 
 local BEEHIVE_STUDIO_SRC = 
