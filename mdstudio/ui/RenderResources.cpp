@@ -798,111 +798,116 @@ RenderResources::SpriteSheetRenderResources::SpriteSheetRenderResources()
 
 void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& spriteSheet, ion::render::Shader* shader, Project* project)
 {
-	const int tileWidth = project->GetPlatformConfig().tileWidth;
-	const int tileHeight = project->GetPlatformConfig().tileHeight;
-
-	m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)spriteSheet.GetWidthTiles() * (tileWidth / 2.0f), (float)spriteSheet.GetHeightTiles() * (tileHeight / 2.0f)), spriteSheet.GetWidthTiles(), spriteSheet.GetHeightTiles(), true);
-
-	u32 widthTiles = spriteSheet.GetWidthTiles();
-	u32 heightTiles = spriteSheet.GetHeightTiles();
-	u32 textureWidth = widthTiles * tileWidth;
-	u32 textureHeight = heightTiles * tileHeight;
-	u32 bytesPerPixel = 4;
-	u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
-
-	const Palette& palette = spriteSheet.GetPalette();
-
-	for(int i = 0; i < spriteSheet.GetNumFrames(); i++)
+	if (spriteSheet.GetNumFrames() > 0)
 	{
-		//Get spriteSheet frame
-		const SpriteSheetFrame& spriteSheetFrame = spriteSheet.GetFrame(i);
+		const int tileWidth = project->GetPlatformConfig().tileWidth;
+		const int tileHeight = project->GetPlatformConfig().tileHeight;
 
-		//Create new render frame
-		Frame renderFrame;
+		m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)spriteSheet.GetWidthTiles() * (tileWidth / 2.0f), (float)spriteSheet.GetHeightTiles() * (tileHeight / 2.0f)), spriteSheet.GetWidthTiles(), spriteSheet.GetHeightTiles(), true);
 
-		//Create tileset texture for frame
-		renderFrame.texture = ion::render::Texture::Create();
+		u32 widthTiles = spriteSheet.GetWidthTiles();
+		u32 heightTiles = spriteSheet.GetHeightTiles();
+		u32 textureWidth = widthTiles * tileWidth;
+		u32 textureHeight = heightTiles * tileHeight;
+		u32 bytesPerPixel = 4;
+		u32 textureSize = textureWidth * textureHeight * bytesPerPixel;
 
-		u8* data = new u8[textureSize];
-		ion::memory::MemSet(data, 0, textureSize);
+		const Palette& palette = spriteSheet.GetPalette();
 
-		for(int tileX = 0; tileX < spriteSheet.GetWidthTiles(); tileX++)
+		for (int i = 0; i < spriteSheet.GetNumFrames(); i++)
 		{
-			for(int tileY = 0; tileY < spriteSheet.GetHeightTiles(); tileY++)
+			//Get spriteSheet frame
+			const SpriteSheetFrame& spriteSheetFrame = spriteSheet.GetFrame(i);
+
+			//Create new render frame
+			Frame renderFrame;
+
+			//Create tileset texture for frame
+			renderFrame.texture = ion::render::Texture::Create();
+
+			u8* data = new u8[textureSize];
+			ion::memory::MemSet(data, 0, textureSize);
+
+			for (int tileX = 0; tileX < spriteSheet.GetWidthTiles(); tileX++)
 			{
-				//Genesis spriteSheet order = column major
-				const Tile& tile = spriteSheetFrame[(tileX * heightTiles) + tileY];
-
-				//Invert Y for OpenGL
-				int tileY_inv = spriteSheet.GetHeightTiles() - 1 - tileY;
-
-				//Paint tile to texture
-				for(int pixelY = 0; pixelY < tileHeight; pixelY++)
+				for (int tileY = 0; tileY < spriteSheet.GetHeightTiles(); tileY++)
 				{
-					for(int pixelX = 0; pixelX < tileWidth; pixelX++)
+					//Genesis spriteSheet order = column major
+					const Tile& tile = spriteSheetFrame[(tileX * heightTiles) + tileY];
+
+					//Invert Y for OpenGL
+					int tileY_inv = spriteSheet.GetHeightTiles() - 1 - tileY;
+
+					//Paint tile to texture
+					for (int pixelY = 0; pixelY < tileHeight; pixelY++)
 					{
-						//Invert Y for OpenGL
-						int pixelY_OGL = tileHeight - 1 - pixelY;
+						for (int pixelX = 0; pixelX < tileWidth; pixelX++)
+						{
+							//Invert Y for OpenGL
+							int pixelY_OGL = tileHeight - 1 - pixelY;
 
-						u8 colourIdx = tile.GetPixelColour(pixelX, pixelY_OGL);
+							u8 colourIdx = tile.GetPixelColour(pixelX, pixelY_OGL);
 
-						const Colour& colour = palette.GetColour(colourIdx);
+							const Colour& colour = palette.GetColour(colourIdx);
 
-						int destPixelX = (tileX * tileWidth) + pixelX;
-						int destPixelY = (tileY_inv * tileHeight) + pixelY;
-						u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
-						u32 dataOffset = pixelIdx * bytesPerPixel;
-						ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
-						data[dataOffset] = colour.GetRed();
-						data[dataOffset + 1] = colour.GetGreen();
-						data[dataOffset + 2] = colour.GetBlue();
-						data[dataOffset + 3] = colourIdx > 0 ? 255 : 0;
+							int destPixelX = (tileX * tileWidth) + pixelX;
+							int destPixelY = (tileY_inv * tileHeight) + pixelY;
+							u32 pixelIdx = (destPixelY * textureWidth) + destPixelX;
+							u32 dataOffset = pixelIdx * bytesPerPixel;
+							ion::debug::Assert(dataOffset + 2 < textureSize, "eOut of bounds");
+							data[dataOffset] = colour.GetRed();
+							data[dataOffset + 1] = colour.GetGreen();
+							data[dataOffset + 2] = colour.GetBlue();
+							data[dataOffset + 3] = colourIdx > 0 ? 255 : 0;
+						}
 					}
+
+					//Set UV coords on primitive
+					ion::render::TexCoord coords[4];
+					ion::Vector2 textureBottomLeft((1.0f / (float)widthTiles) * tileX, (1.0f / (float)heightTiles) * tileY);
+
+					float top = textureBottomLeft.y + (1.0f / (float)heightTiles);
+					float left = textureBottomLeft.x;
+					float bottom = textureBottomLeft.y;
+					float right = textureBottomLeft.x + (1.0f / (float)widthTiles);
+
+					//Top left
+					coords[0].x = left;
+					coords[0].y = top;
+					//Bottom left
+					coords[1].x = left;
+					coords[1].y = bottom;
+					//Bottom right
+					coords[2].x = right;
+					coords[2].y = bottom;
+					//Top right
+					coords[3].x = right;
+					coords[3].y = top;
+
+					m_primitive->SetTexCoords((tileY * widthTiles) + tileX, coords);
 				}
-
-				//Set UV coords on primitive
-				ion::render::TexCoord coords[4];
-				ion::Vector2 textureBottomLeft((1.0f / (float)widthTiles) * tileX, (1.0f / (float)heightTiles) * tileY);
-
-				float top = textureBottomLeft.y + (1.0f / (float)heightTiles);
-				float left = textureBottomLeft.x;
-				float bottom = textureBottomLeft.y;
-				float right = textureBottomLeft.x + (1.0f / (float)widthTiles);
-
-				//Top left
-				coords[0].x = left;
-				coords[0].y = top;
-				//Bottom left
-				coords[1].x = left;
-				coords[1].y = bottom;
-				//Bottom right
-				coords[2].x = right;
-				coords[2].y = bottom;
-				//Top right
-				coords[3].x = right;
-				coords[3].y = top;
-
-				m_primitive->SetTexCoords((tileY * widthTiles) + tileX, coords);
 			}
-		}
 
-		renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
-		renderFrame.texture->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
-		renderFrame.texture->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
-		renderFrame.texture->SetWrapping(ion::render::Texture::Wrapping::Clamp);
+			m_primitive->GetVertexBuffer().CommitBuffer();
 
-		//Create material
-		renderFrame.material = new ion::render::Material();
-		renderFrame.material->AddDiffuseMap(renderFrame.texture);
-		renderFrame.material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+			renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+			renderFrame.texture->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
+			renderFrame.texture->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
+			renderFrame.texture->SetWrapping(ion::render::Texture::Wrapping::Clamp);
+
+			//Create material
+			renderFrame.material = new ion::render::Material();
+			renderFrame.material->AddDiffuseMap(renderFrame.texture);
+			renderFrame.material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
-		renderFrame.material->SetShader(shader);
+			renderFrame.material->SetShader(shader);
 #endif
 
-		//Insert frame
-		m_frames.push_back(renderFrame);
+			//Insert frame
+			m_frames.push_back(renderFrame);
 
-		delete data;
+			delete data;
+		}
 	}
 }
 

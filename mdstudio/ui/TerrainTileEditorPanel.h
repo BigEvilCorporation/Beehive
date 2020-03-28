@@ -49,4 +49,6 @@ private:
 	//Rendering primitives
 	ion::render::Quad* m_tilePrimitive;
 	ion::render::Quad* m_collisionPrimitive;
+
+	bool m_primitiveDirty;
 };

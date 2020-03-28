@@ -21,6 +21,9 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Rend
 	m_prevMouseBits = 0;
 	m_enableZoom = true;
 	m_enablePan = true;
+	m_canvasPrimitiveDirty = true;
+	m_terrainCanvasDirty = false;
+	m_collisionCanvasDirty = false;
 
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 
@@ -121,6 +124,24 @@ void ViewPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	if(!m_mainWindow->IsRefreshLocked())
 	{
 		wxGLCanvas::Refresh(eraseBackground, rect);
+
+		if (m_canvasPrimitive && m_canvasPrimitiveDirty)
+		{
+			m_canvasPrimitive->GetVertexBuffer().CommitBuffer();
+			m_canvasPrimitiveDirty = false;
+		}
+
+		if (m_terrainCanvasPrimitive && m_terrainCanvasDirty)
+		{
+			m_terrainCanvasPrimitive->GetVertexBuffer().CommitBuffer();
+			m_terrainCanvasDirty = false;
+		}
+
+		if (m_collisionCanvasPrimitive && m_collisionCanvasDirty)
+		{
+			m_collisionCanvasPrimitive->GetVertexBuffer().CommitBuffer();
+			m_collisionCanvasDirty = false;
+		}
 	}
 }
 
@@ -136,6 +157,7 @@ void ViewPanel::CreateCanvas(int width, int height)
 	m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
 	m_canvasSize.x = width;
 	m_canvasSize.y = height;
+	m_canvasPrimitiveDirty = true;
 }
 
 void ViewPanel::CreateCollisionCanvas(int width, int height)
@@ -152,6 +174,9 @@ void ViewPanel::CreateCollisionCanvas(int width, int height)
 
 	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
 	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+
+	m_terrainCanvasDirty = true;
+	m_collisionCanvasDirty = true;
 }
 
 void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
@@ -171,6 +196,7 @@ void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
 	ion::render::TexCoord coords[4];
 	m_renderResources.GetTileTexCoords(tileId, coords, flipFlags);
 	m_canvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+	m_canvasPrimitiveDirty = true;
 }
 
 void ViewPanel::PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u16 collisionFlags)
@@ -179,10 +205,12 @@ void ViewPanel::PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u1
 	ion::render::TexCoord coords[4];
 	m_renderResources.GetTerrainTileTexCoords(terrainTileId, coords);
 	m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+	m_terrainCanvasDirty = true;
 
 	//Set texture coords for collision cell
 	m_renderResources.GetCollisionTypeTexCoords(collisionFlags, coords);
 	m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+	m_collisionCanvasDirty = true;
 }
 
 void ViewPanel::PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags)

@@ -127,11 +127,12 @@ void TileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(!m_mainWindow->IsRefreshLocked())
 	{
-		ViewPanel::Refresh(eraseBackground, rect);
-
 		ion::render::TexCoord texCoords[4];
 		m_renderResources.GetTileTexCoords(m_project.GetPaintTile(), texCoords, 0);
 		m_tilePrimitive->SetTexCoords(texCoords);
+		m_tilePrimitive->GetVertexBuffer().CommitBuffer();
+
+		ViewPanel::Refresh(eraseBackground, rect);
 	}
 }
 

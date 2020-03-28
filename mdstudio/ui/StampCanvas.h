@@ -79,6 +79,9 @@ private:
 	ion::render::Primitive* m_primitiveBezierHandles;
 	ion::render::Primitive* m_primitiveBezierNormals;
 
+	bool m_terrainPrimitiveDirty;
+	bool m_collisionPrimitiveDirty;
+
 	//Beziers
 	enum eBezierModifyHandle
 	{

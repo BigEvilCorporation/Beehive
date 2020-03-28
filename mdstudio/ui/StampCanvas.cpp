@@ -27,6 +27,8 @@ StampCanvas::StampCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 	m_currentBezierControlIdx = -1;
 	m_currentTool = eToolNone;
 	m_stamp = NULL;
+	m_terrainPrimitiveDirty = true;
+	m_collisionPrimitiveDirty = true;
 }
 
 StampCanvas::~StampCanvas()
@@ -64,6 +66,18 @@ void StampCanvas::Refresh(bool eraseBackground, const wxRect *rect)
 		{
 			PaintTerrainBeziers(*m_stamp);
 		}
+	}
+
+	if (m_terrainCanvasPrimitive && m_terrainPrimitiveDirty)
+	{
+		m_terrainCanvasPrimitive->GetVertexBuffer().CommitBuffer();
+		m_terrainPrimitiveDirty = false;
+	}
+
+	if (m_collisionCanvasPrimitive && m_collisionPrimitiveDirty)
+	{
+		m_collisionCanvasPrimitive->GetVertexBuffer().CommitBuffer();
+		m_collisionPrimitiveDirty = false;
 	}
 
 	SpriteCanvas::Refresh(eraseBackground, rect);
@@ -106,6 +120,8 @@ void StampCanvas::SetStamp(Stamp& stamp, const ion::Vector2i& offset)
 			m_tileFramePrimitive->SetTexCoords((y_inv * width) + x, coords);
 		}
 	}
+
+	m_tileFramePrimitive->GetVertexBuffer().CommitBuffer();
 
 	m_stamp = &stamp;
 
@@ -808,10 +824,12 @@ void StampCanvas::PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, 
 	ion::render::TexCoord coords[4];
 	m_renderResources->GetTerrainTileTexCoords(terrainTileId, coords);
 	m_terrainCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+	m_terrainPrimitiveDirty = true;
 
 	//Set texture coords for collision cell
 	m_renderResources->GetCollisionTypeTexCoords(collisionFlags, coords);
 	m_collisionCanvasPrimitive->SetTexCoords((y * m_canvasSize.x) + x, coords);
+	m_collisionPrimitiveDirty = true;
 }
 
 void StampCanvas::PaintTerrainBeziers(const Stamp& stamp)

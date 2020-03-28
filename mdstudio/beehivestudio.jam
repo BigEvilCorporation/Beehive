@@ -13,7 +13,7 @@ beehive_config_lean_ui = 0 ;
 
 ion_renderer_api ?= opengl ;
 ion_renderer_opts ?= shader ;
-ion_renderer_shader_language ?= cggl ;
+ion_renderer_shader_language ?= glsl ;
 
 ApplyIonDefines beehivestudio ;
 ApplyIonIncludes beehivestudio ;

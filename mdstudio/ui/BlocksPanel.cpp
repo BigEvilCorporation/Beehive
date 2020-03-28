@@ -12,8 +12,6 @@
 #include "BlocksPanel.h"
 #include "MainWindow.h"
 
-#pragma optimize("",off)
-
 BlocksPanel::BlocksPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 {
@@ -272,6 +270,8 @@ void BlocksPanel::PaintBlocks()
 				}
 			}
 		}
+
+		m_canvasPrimitive->GetVertexBuffer().CommitBuffer();
 	}
 }
 
@@ -320,5 +320,3 @@ void BlocksPanel::ResetZoomPan()
 	m_camera.SetZoom(ion::Vector3(m_cameraZoom, m_cameraZoom, 1.0f));
 	m_camera.SetPosition(cameraPos);
 }
-
-#pragma optimize("",on)

@@ -140,6 +140,10 @@ protected:
 	ion::render::Chessboard* m_collisionCanvasPrimitive;
 	ion::render::Grid* m_gridPrimitive;
 
+	bool m_canvasPrimitiveDirty;
+	bool m_terrainCanvasDirty;
+	bool m_collisionCanvasDirty;
+
 	//Canvas size (tiles)
 	ion::Vector2i m_canvasSize;
 

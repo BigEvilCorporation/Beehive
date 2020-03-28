@@ -3069,4 +3069,6 @@ void MapPanel::CreateStampPreview(Stamp* stamp)
 			m_stampPreviewPrimitive->SetTexCoords((y_inv * width) + x, coords);
 		}
 	}
+
+	m_stampPreviewPrimitive->GetVertexBuffer().CommitBuffer();
 }

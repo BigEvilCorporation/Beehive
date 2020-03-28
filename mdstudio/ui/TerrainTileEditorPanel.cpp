@@ -30,6 +30,7 @@ TerrainTileEditorPanel::TerrainTileEditorPanel(MainWindow* mainWindow, Project& 
 	//Create rendering primitives
 	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
 	m_collisionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
+	m_primitiveDirty = true;
 
 	//Create 8x8 grid
 	CreateGrid(tileWidth, tileHeight, tileWidth, tileHeight);
@@ -125,13 +126,20 @@ void TerrainTileEditorPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(!m_mainWindow->IsRefreshLocked())
 	{
-		ViewPanel::Refresh(eraseBackground, rect);
-
 		//Redraw tile and collision
 		PaintTile();
 
 		//Redraw collision tile
 		PaintCollision();
+
+		if (m_primitiveDirty)
+		{
+			m_tilePrimitive->GetVertexBuffer().CommitBuffer();
+			m_collisionPrimitive->GetVertexBuffer().CommitBuffer();
+			m_primitiveDirty = false;
+		}
+
+		ViewPanel::Refresh(eraseBackground, rect);
 	}
 }
 
@@ -162,6 +170,7 @@ void TerrainTileEditorPanel::PaintTile()
 	ion::render::TexCoord texCoords[4];
 	m_renderResources.GetTileTexCoords(m_project.GetPaintTile(), texCoords, 0);
 	m_tilePrimitive->SetTexCoords(texCoords);
+	m_primitiveDirty = true;
 }
 
 void TerrainTileEditorPanel::PaintCollision()
@@ -173,4 +182,5 @@ void TerrainTileEditorPanel::PaintCollision()
 	ion::render::TexCoord texCoords[4];
 	m_renderResources.GetTerrainTileTexCoords(m_project.GetPaintTerrainTile(), texCoords);
 	m_collisionPrimitive->SetTexCoords(texCoords);
+	m_primitiveDirty = true;
 }
