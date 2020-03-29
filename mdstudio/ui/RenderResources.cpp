@@ -15,7 +15,8 @@
 #include <ion/core/thread/Sleep.h>
 
 RenderResources::RenderResources(Project& project, ion::io::ResourceManager& resourceManager)
- : m_project(project)
+	: m_project(project)
+	, m_resourceManager(resourceManager)
 {
 	m_tilesetSizeSq = 1;
 	m_terrainTilesetSizeSq = 1;
@@ -132,6 +133,11 @@ RenderResources::~RenderResources()
 	for(int i = 0; i < eShaderMax; i++)
 	{
 		m_shaders[i].Clear();
+	}
+
+	while (m_resourceManager.GetNumResourcesWaiting() > 0)
+	{
+		ion::thread::Sleep(5);
 	}
 }
 

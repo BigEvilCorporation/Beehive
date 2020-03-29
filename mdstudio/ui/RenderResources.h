@@ -169,6 +169,9 @@ private:
 	//Current project
 	Project& m_project;
 
+	//Resource manager
+	ion::io::ResourceManager& m_resourceManager;
+
 	//Resources
 	ion::io::ResourceHandle<ion::render::Shader> m_shaders[eShaderMax];
 	ion::render::Texture* m_textures[eTextureMax];

@@ -495,20 +495,24 @@ void ViewPanel::OnResize(wxSizeEvent& event)
 	if(!m_mainWindow->IsRefreshLocked())
 	{
 		wxSize clientSize = event.GetSize();
-		m_panelSize.x = clientSize.x;
-		m_panelSize.y = clientSize.y;
 
-		if(m_panelSize.x > 1 && m_panelSize.y > 1)
+		if (clientSize.x != m_panelSize.x || clientSize.y != m_panelSize.y)
 		{
-			//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
-			if(m_prevPanelSize.x != m_panelSize.x || m_prevPanelSize.y != m_panelSize.y)
-			{
-				m_prevPanelSize = m_panelSize;
-				m_viewport.Resize(m_panelSize.x, m_panelSize.y);
-			}
-		}
+			m_panelSize.x = clientSize.x;
+			m_panelSize.y = clientSize.y;
 
-		Refresh();
+			if (m_panelSize.x > 1 && m_panelSize.y > 1)
+			{
+				//Filter out superflous resize events (wx sends them if UI thread doesn't respond during saving/loading)
+				if (m_prevPanelSize.x != m_panelSize.x || m_prevPanelSize.y != m_panelSize.y)
+				{
+					m_prevPanelSize = m_panelSize;
+					m_viewport.Resize(m_panelSize.x, m_panelSize.y);
+				}
+			}
+
+			Refresh();
+		}
 	}
 }
 

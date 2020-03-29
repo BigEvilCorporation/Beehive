@@ -99,13 +99,13 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 {
 	if(!m_mainWindow->IsRefreshLocked())
 	{
-		ViewPanel::OnResize(event);
-
-		const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-		const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-
-		if(m_panelSize.x > tileWidth && m_panelSize.y > tileHeight)
+		if (event.GetSize().x != m_panelSize.x && event.GetSize().y != m_panelSize.y)
 		{
+			const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+
+			ViewPanel::OnResize(event);
+
 			//Rearrange stamps (calculates canvas size)
 			ArrangeStamps(ion::Vector2(m_panelSize.x, m_panelSize.y));
 
@@ -123,6 +123,8 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 
 			//Reset zoom/pan
 			ResetZoomPan();
+
+			Refresh();
 		}
 	}
 }
