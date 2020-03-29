@@ -20,7 +20,8 @@
 
 #include <ion/core/thread/Sleep.h>
 
-const std::string g_compilerDir = "compiler\\m68k-elf\\bin";
+const std::string g_compilerDir = "compiler\\m68k-elf";
+const std::string g_compilerVer = "4.8.0";
 const std::string g_includeDir = "scripts\\common";
 
 ScriptCompilePanel::ScriptCompilePanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
@@ -43,7 +44,10 @@ bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, std::fun
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	m_currentFilename = filename;
 	std::string commandLine = m_scriptCompiler.GenerateCompileCommand(filename, g_compilerDir, g_includeDir);
-	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner) < 0)
+	wxExecuteEnv env;
+	env.cwd = ion::io::FileDevice::GetDefault()->GetMountPoint() + "\\" + ion::io::FileDevice::GetDefault()->GetDirectory();
+	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) + ";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
+	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner, &env) < 0)
 	{
 		m_textOutput->AppendText("Error starting script compiler");
 		return false;
@@ -66,7 +70,9 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
 
 	m_state = State::Compiling;
 	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, g_compilerDir, g_includeDir);
-	if (wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner) < 0)
+	wxExecuteEnv env;
+	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) +";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
+	if (wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner, &env) < 0)
 	{
 		m_textOutput->AppendText("Error starting script compiler");
 		return false;
