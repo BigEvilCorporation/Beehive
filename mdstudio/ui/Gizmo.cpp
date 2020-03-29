@@ -63,6 +63,9 @@ Gizmo::Gizmo(RenderResources& renderResources)
 	{
 		m_unitTriangleY->GetVertexBuffer().AddVertex(triY[i], ion::Vector3(), ion::Colour(1.0f, 1.0f, 1.0f, 1.0f), ion::render::TexCoord());
 	}
+
+	m_unitTriangleX->GetVertexBuffer().CompileBuffer();
+	m_unitTriangleY->GetVertexBuffer().CompileBuffer();
 }
 
 Gizmo::~Gizmo()
