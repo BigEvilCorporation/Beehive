@@ -1474,7 +1474,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		//Compile scripts and collect script function addresses
 		std::vector<const GameObjectType*> objTypesWithScripts;
-		std::map<std::string, std::vector<luminary::ScriptAddress>> scriptFuncAddresses;
+		std::map<std::string, std::vector<luminary::ScriptAddress>> scriptAddresses;
 
 		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
 		{
@@ -1521,20 +1521,31 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 						std::string scriptFilename = m_project->m_settings.scriptsExportDir + "\\" + gameObjType->GetName() + ".bin";
 						scriptIncludes.push_back(std::make_pair(scriptLabel, scriptFilename));
 
-						//Find all script function addresses
+						//Find all script function and variable addresses
 						for (auto variable : gameObjType->GetVariables())
 						{
-							std::string routineName;
+							std::string name;
 
-							if (variable.FindTagValue("SCRIPTFUNC", routineName))
+							if (variable.FindTagValue("SCRIPTFUNC", name))
 							{
-								int address = scriptCompiler.FindFunctionOffset(panel->GetSymbolOutput(), gameObjType->GetName(), routineName);
+								int address = scriptCompiler.FindFunctionOffset(panel->GetSymbolOutput(), gameObjType->GetName(), name);
 								if (address >= 0)
 								{
 									luminary::ScriptAddress addr;
-									addr.routineName = routineName;
-									addr.routineAddress = address;
-									scriptFuncAddresses[gameObjType->GetName()].push_back(addr);
+									addr.name = name;
+									addr.address = address;
+									scriptAddresses[gameObjType->GetName()].push_back(addr);
+								}
+							}
+							else if(variable.FindTagValue("SCRIPTGLOBAL", name))
+							{
+								int address = scriptCompiler.FindGlobalVarOffset(panel->GetSymbolOutput(), name);
+								if (address >= 0)
+								{
+									luminary::ScriptAddress addr;
+									addr.name = name;
+									addr.address = address;
+									scriptAddresses[gameObjType->GetName()].push_back(addr);
 								}
 							}
 						}
@@ -1563,7 +1574,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			for (TGameObjectArchetypeMap::const_iterator archIt = typeIt->second.GetArchetypes().begin(), archEnd = typeIt->second.GetArchetypes().end(); archIt != archEnd; ++archIt)
 			{
 				luminary::Archetype archetype;
-				luminary::beehive::ExportArchetype(*m_project, archIt->second, scriptFuncAddresses, archetype);
+				luminary::beehive::ExportArchetype(*m_project, archIt->second, scriptAddresses, archetype);
 				archetypes.push_back(archetype);
 			}
 		}
@@ -1703,7 +1714,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								const GameObject& gameObject = it->second[i].m_gameObject;
 								sceneData.staticEntities.push_back(luminary::Entity());
 								luminary::Entity& entity = sceneData.staticEntities.back();
-								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptFuncAddresses, entity);
+								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
 							}
 						}
 						else
@@ -1713,7 +1724,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								const GameObject& gameObject = it->second[i].m_gameObject;
 								sceneData.dynamicEntities.push_back(luminary::Entity());
 								luminary::Entity& entity = sceneData.dynamicEntities.back();
-								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptFuncAddresses, entity);
+								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
 							}
 						}
 					}

@@ -71,7 +71,7 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
 	m_state = State::Compiling;
 	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, g_compilerDir, g_includeDir);
 	wxExecuteEnv env;
-	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) +";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
+	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) + ";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
 	if (wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner, &env) < 0)
 	{
 		m_textOutput->AppendText("Error starting script compiler");
