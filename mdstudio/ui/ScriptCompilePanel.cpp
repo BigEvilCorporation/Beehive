@@ -32,7 +32,7 @@ ScriptCompilePanel::ScriptCompilePanel(MainWindow* mainWindow, Project& project,
 	m_state = State::Idle;
 }
 
-bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished)
+bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished)
 {
 	m_state = State::Compiling;
 
@@ -43,7 +43,8 @@ bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, std::fun
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	m_currentFilename = filename;
-	std::string commandLine = m_scriptCompiler.GenerateCompileCommand(filename, g_compilerDir, g_includeDir);
+	m_currentOutname = outname;
+	std::string commandLine = m_scriptCompiler.GenerateCompileCommand(filename, outname, g_compilerDir, g_includeDir, defines);
 	wxExecuteEnv env;
 	env.cwd = ion::io::FileDevice::GetDefault()->GetMountPoint() + "\\" + ion::io::FileDevice::GetDefault()->GetDirectory();
 	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) + ";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
@@ -57,7 +58,7 @@ bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, std::fun
 	return true;
 }
 
-bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
+bool ScriptCompilePanel::CompileBlocking(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines)
 {
 	m_textOutput->Clear();
 	m_symbolOutput.clear();
@@ -69,7 +70,7 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
 	m_currentFilename = filename;
 
 	m_state = State::Compiling;
-	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, g_compilerDir, g_includeDir);
+	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, outname, g_compilerDir, g_includeDir, defines);
 	wxExecuteEnv env;
 	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) + ";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
 	if (wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner, &env) < 0)
@@ -81,7 +82,7 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
 	CollectOutput();
 
 	m_state = State::Copying;
-	std::string objcopyCmd = m_scriptCompiler.GenerateObjCopyCommand(filename, g_compilerDir);
+	std::string objcopyCmd = m_scriptCompiler.GenerateObjCopyCommand(filename, outname, g_compilerDir);
 	if (wxExecute(objcopyCmd, wxEXEC_SYNC, m_compileRunner) < 0)
 	{
 		m_textOutput->AppendText("Error starting objcopy");
@@ -91,7 +92,7 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
 	CollectOutput();
 
 	m_state = State::ReadingSymbols;
-	std::string symbolsCmd = m_scriptCompiler.GenerateSymbolReadCommand(filename, g_compilerDir);
+	std::string symbolsCmd = m_scriptCompiler.GenerateSymbolReadCommand(filename, outname, g_compilerDir);
 	if (wxExecute(symbolsCmd, wxEXEC_SYNC, m_compileRunner) < 0)
 	{
 		m_textOutput->AppendText("Error starting symbol reader");
@@ -105,7 +106,7 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename)
 	return true;
 }
 
-bool ScriptCompilePanel::BeginObjCopy(const std::string& filename)
+bool ScriptCompilePanel::BeginObjCopy(const std::string& filename, const std::string& outname)
 {
 	m_state = State::Copying;
 
@@ -114,7 +115,7 @@ bool ScriptCompilePanel::BeginObjCopy(const std::string& filename)
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	m_currentFilename = filename;
-	std::string commandLine = m_scriptCompiler.GenerateObjCopyCommand(filename, g_compilerDir);
+	std::string commandLine = m_scriptCompiler.GenerateObjCopyCommand(filename, outname, g_compilerDir);
 	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner) < 0)
 	{
 		m_textOutput->AppendText("Error starting objcopy");
@@ -125,7 +126,7 @@ bool ScriptCompilePanel::BeginObjCopy(const std::string& filename)
 	return true;
 }
 
-bool ScriptCompilePanel::BeginSymbolRead(const std::string& filename)
+bool ScriptCompilePanel::BeginSymbolRead(const std::string& filename, const std::string& outname)
 {
 	m_state = State::ReadingSymbols;
 	m_symbolOutput.clear();
@@ -135,7 +136,7 @@ bool ScriptCompilePanel::BeginSymbolRead(const std::string& filename)
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	m_currentFilename = filename;
-	std::string commandLine = m_scriptCompiler.GenerateSymbolReadCommand(filename, g_compilerDir);
+	std::string commandLine = m_scriptCompiler.GenerateSymbolReadCommand(filename, outname, g_compilerDir);
 	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner) < 0)
 	{
 		m_textOutput->AppendText("Error starting symbol reader");
@@ -181,7 +182,7 @@ void ScriptCompilePanel::OnProcessFinished(int pid, int status)
 	if (m_state == State::Compiling)
 	{
 		AppendText("Script compiler with process ID " + std::to_string(pid) + " exited with status " + std::to_string(status) + "\n");
-		if (!BeginObjCopy(m_currentFilename))
+		if (!BeginObjCopy(m_currentFilename, m_currentOutname))
 		{
 			m_state = State::Idle;
 		}
@@ -189,7 +190,7 @@ void ScriptCompilePanel::OnProcessFinished(int pid, int status)
 	else if(m_state == State::Copying)
 	{
 		AppendText("Object copier with process ID " + std::to_string(pid) + " exited with status " + std::to_string(status) + "\n");
-		if(!BeginSymbolRead(m_currentFilename))
+		if(!BeginSymbolRead(m_currentFilename, m_currentOutname))
 		{
 			m_state = State::Idle;
 		}

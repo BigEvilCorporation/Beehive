@@ -1458,12 +1458,12 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		luminary::ScriptTranspiler scriptTranspiler;
 		luminary::ScriptCompiler scriptCompiler;
 
-		std::vector<std::pair<std::string,std::string>> includeFilenames;
+		std::vector<Project::IncludeFile> includeFilenames;
 
 		//Generate script headers and compile
 		wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
 		std::string scriptsDir = m_project->m_settings.scriptsExportDir;
-		std::vector<std::pair<std::string, std::string>> scriptIncludes;
+		std::vector<Project::IncludeFile> scriptIncludes;
 
 		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
 		{
@@ -1508,7 +1508,20 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 					//Compile script
 					std::string scriptFilename = gameObjType->GetName() + ".cpp";
 					std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
-					panel->CompileBlocking(scriptFullPath);
+
+					//Release
+					std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptFilename, ".cpp");
+					std::string scriptOutFullPathRelease = scriptsDir + "\\" + scriptOutNameRelease;
+					std::vector<std::string> definesRelease;
+					definesRelease.push_back("_RELEASE");
+					panel->CompileBlocking(scriptFullPath, scriptOutFullPathRelease, definesRelease);
+
+					//Debug
+					std::string scriptOutNameDebug = ion::string::RemoveSubstring(scriptFilename, ".cpp") + "_dbg";
+					std::string scriptOutFullPathDebug = scriptsDir + "\\" + scriptOutNameDebug;
+					std::vector<std::string> definesDebug;
+					definesDebug.push_back("_DEBUG");
+					panel->CompileBlocking(scriptFullPath, scriptOutFullPathDebug, definesDebug);
 
 					//Check output was written
 					std::string scriptDataFilename = gameObjType->GetName() + ".bin";
@@ -1516,10 +1529,13 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 					if (ion::io::FileDevice::GetDefault()->GetFileExists(scriptDataFullPath))
 					{
-						//Add binary to include files
+						//Add binaries to include files
 						std::string scriptLabel = std::string("scriptdata_") + gameObjType->GetName();
-						std::string scriptFilename = m_project->m_settings.scriptsExportDir + "\\" + gameObjType->GetName() + ".bin";
-						scriptIncludes.push_back(std::make_pair(scriptLabel, scriptFilename));
+						std::string scriptFilenameRelease = scriptOutFullPathRelease + ".bin";
+						scriptIncludes.push_back(Project::IncludeFile { scriptLabel, scriptFilenameRelease, Project::IncludeExportFlags::ReleaseOnly });
+
+						std::string scriptFilenameDebug = scriptOutFullPathDebug + ".bin";
+						scriptIncludes.push_back(Project::IncludeFile{ scriptLabel, scriptFilenameDebug, Project::IncludeExportFlags::DebugOnly });
 
 						//Find all script function and variable addresses
 						for (auto variable : gameObjType->GetVariables())
@@ -1606,7 +1622,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 			if (paletteExporter.ExportPalettes(palettesFilename, palettes))
 			{
-				includeFilenames.push_back(std::make_pair(palettesLabel, palettesFilename));
+				includeFilenames.push_back(Project::IncludeFile { palettesLabel, palettesFilename, Project::IncludeExportFlags::None });
 			}
 
 			numPalettes = palettes.size();
@@ -1617,7 +1633,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		std::string tilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "GTILES.BIN";
 		if (tilesetExporter.ExportTileset(tilesetFilename, m_project->GetTileset()))
 		{
-			includeFilenames.push_back(std::make_pair(tilesetLabel, tilesetFilename));
+			includeFilenames.push_back(Project::IncludeFile { tilesetLabel, tilesetFilename, Project::IncludeExportFlags::None });
 		}
 
 		//Export Luminary stamp set
@@ -1635,7 +1651,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		std::string stampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "GSTAMPS.BIN";
 		if (tilesetExporter.ExportStamps(stampsetFilename, stamps, m_project->GetTileset(), m_project->GetBackgroundTile()))
 		{
-			includeFilenames.push_back(std::make_pair(stampsetLabel, stampsetFilename));
+			includeFilenames.push_back(Project::IncludeFile { stampsetLabel, stampsetFilename, Project::IncludeExportFlags::None });
 		}
 
 		//Export Luminary maps
@@ -1646,7 +1662,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			std::string mapFilename = m_project->m_settings.sceneExportDir + "\\G" + ion::string::ToUpper(map.GetName()) + ".BIN";
 			if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
 			{
-				includeFilenames.push_back(std::make_pair(mapLabel, mapFilename));
+				includeFilenames.push_back(Project::IncludeFile { mapLabel, mapFilename, Project::IncludeExportFlags::None });
 			}
 		}
 
@@ -1655,7 +1671,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		std::string terrainTilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "CTILES.BIN";
 		if (terrainExporter.ExportTerrainTileset(terrainTilesetFilename, m_project->GetTerrainTileset(), m_project->GetPlatformConfig().tileWidth))
 		{
-			includeFilenames.push_back(std::make_pair(terrainTilesetLabel, terrainTilesetFilename));
+			includeFilenames.push_back(Project::IncludeFile{  terrainTilesetLabel, terrainTilesetFilename, Project::IncludeExportFlags::None });
 		}
 
 		//Export Luminary terrain stamps
@@ -1663,7 +1679,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		std::string terrainStampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "CSTAMPS.BIN";
 		if (terrainExporter.ExportTerrainStamps(terrainStampsetFilename, stamps, m_project->GetTerrainTileset(), m_project->GetDefaultTerrainTile()))
 		{
-			includeFilenames.push_back(std::make_pair(terrainStampsetLabel, terrainStampsetFilename));
+			includeFilenames.push_back(Project::IncludeFile { terrainStampsetLabel, terrainStampsetFilename, Project::IncludeExportFlags::None });
 		}
 
 		//Export Luminary terrain maps
@@ -1674,7 +1690,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			std::string terrainMapFilename = m_project->m_settings.sceneExportDir + "\\C" + ion::string::ToUpper(map.GetName()) + ".BIN";
 			if (terrainExporter.ExportTerrainMap(terrainMapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
 			{
-				includeFilenames.push_back(std::make_pair(terrainMapLabel, terrainMapFilename));
+				includeFilenames.push_back(Project::IncludeFile { terrainMapLabel, terrainMapFilename, Project::IncludeExportFlags::None });
 			}
 		}
 
@@ -1756,7 +1772,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				std::string sceneFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + ".ASM";
 				if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
 				{
-					includeFilenames.push_back(std::make_pair(std::string("scene_") + sceneName, sceneFilename));
+					includeFilenames.push_back(Project::IncludeFile { std::string("scene_") + sceneName, sceneFilename, Project::IncludeExportFlags::None });
 				}
 			}
 		}

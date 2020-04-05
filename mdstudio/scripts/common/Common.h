@@ -6,8 +6,8 @@ struct Fixed16
 	{
 		struct
 		{
-			unsigned short integer;
 			unsigned short fraction;
+			unsigned short integer;
 		};
 
 		unsigned int value;
@@ -18,6 +18,11 @@ struct Fixed16
 
 struct BlockHeader
 {
+#if defined _DEBUG
+	static const int ENTITY_DEBUG_NAME_LEN = 16;
+	char debugName[ENTITY_DEBUG_NAME_LEN];
+#endif
+
 	unsigned short flags;
 	unsigned short nextBlock;
 };
@@ -81,7 +86,16 @@ struct Scene
 	unsigned short dynamicEntityCount;
 };
 
+enum TerrainFlags
+{
+	COLLISION_FLAG_BIT_TERRAIN_B	= 3,
+	COLLISION_FLAG_BIT_TERRAIN_W	= COLLISION_FLAG_BIT_TERRAIN_B + 8,
+	COLLISION_FLAG_BIT_SOLID_B		= 5,
+	COLLISION_FLAG_BIT_SOLID_W		= COLLISION_FLAG_BIT_SOLID_B + 8,
+};
+
 struct Engine
 {
-	short (*FindFloor)(const Entity& entity, const Scene& scene);
+	//Find floor under an entity, returns floor Y position relative to entity centre
+	short (*FindFloor)(const Entity& entity, const Scene& scene, short& terrainFlags);
 };

@@ -34,8 +34,8 @@ class ScriptCompilePanel : public ScriptCompilePanelBase
 public:
 	ScriptCompilePanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 
-	bool BeginCompileAsync(const std::string& filename, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished);
-	bool CompileBlocking(const std::string& filename);
+	bool BeginCompileAsync(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished);
+	bool CompileBlocking(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines);
 
 	void AppendText(const wxString& text);
 
@@ -52,8 +52,8 @@ private:
 		ReadingSymbols
 	};
 
-	bool BeginObjCopy(const std::string& filename);
-	bool BeginSymbolRead(const std::string& filename);
+	bool BeginObjCopy(const std::string& filename, const std::string& outname);
+	bool BeginSymbolRead(const std::string& filename, const std::string& outname);
 
 	void CollectOutput();
 
@@ -65,6 +65,7 @@ private:
 #endif
 
 	std::string m_currentFilename;
+	std::string m_currentOutname;
 	std::vector<std::string> m_symbolOutput;
 	std::function<void(const std::vector<std::string>& symbolOutput)> m_onFinished;
 	wxWeakRef<ScriptCompilerRunner> m_compileRunner;

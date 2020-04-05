@@ -283,7 +283,10 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 								}
 
 								//Compile
-								panel->BeginCompileAsync(scriptFullPath, nullptr);
+								std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptFilename, ".cpp");
+								std::vector<std::string> definesRelease;
+								definesRelease.push_back("_RELEASE");
+								panel->BeginCompileAsync(scriptFullPath, scriptOutNameRelease, definesRelease, nullptr);
 							}
 
 							break;
