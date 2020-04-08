@@ -22,7 +22,6 @@
 
 const std::string g_compilerDir = "compiler\\m68k-elf";
 const std::string g_compilerVer = "4.8.0";
-const std::string g_includeDir = "scripts\\common";
 
 ScriptCompilePanel::ScriptCompilePanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ScriptCompilePanelBase(parent, id, pos, size, style)
@@ -32,7 +31,7 @@ ScriptCompilePanel::ScriptCompilePanel(MainWindow* mainWindow, Project& project,
 	m_state = State::Idle;
 }
 
-bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished)
+bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished)
 {
 	m_state = State::Compiling;
 
@@ -44,7 +43,7 @@ bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, const st
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	m_currentFilename = filename;
 	m_currentOutname = outname;
-	std::string commandLine = m_scriptCompiler.GenerateCompileCommand(filename, outname, g_compilerDir, g_includeDir, defines);
+	std::string commandLine = m_scriptCompiler.GenerateCompileCommand(filename, outname, g_compilerDir, includes, defines);
 	wxExecuteEnv env;
 	env.cwd = ion::io::FileDevice::GetDefault()->GetMountPoint() + "\\" + ion::io::FileDevice::GetDefault()->GetDirectory();
 	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) + ";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
@@ -58,7 +57,7 @@ bool ScriptCompilePanel::BeginCompileAsync(const std::string& filename, const st
 	return true;
 }
 
-bool ScriptCompilePanel::CompileBlocking(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines)
+bool ScriptCompilePanel::CompileBlocking(const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines)
 {
 	m_textOutput->Clear();
 	m_symbolOutput.clear();
@@ -70,7 +69,7 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename, const std:
 	m_currentFilename = filename;
 
 	m_state = State::Compiling;
-	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, outname, g_compilerDir, g_includeDir, defines);
+	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, outname, g_compilerDir, includes, defines);
 	wxExecuteEnv env;
 	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) + ";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
 	if (wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner, &env) < 0)

@@ -34,8 +34,8 @@ class ScriptCompilePanel : public ScriptCompilePanelBase
 public:
 	ScriptCompilePanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 
-	bool BeginCompileAsync(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished);
-	bool CompileBlocking(const std::string& filename, const std::string& outname, const std::vector<std::string>& defines);
+	bool BeginCompileAsync(const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines, std::function<void(const std::vector<std::string>& symbolOutput)> const& onFinished);
+	bool CompileBlocking(const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines);
 
 	void AppendText(const wxString& text);
 

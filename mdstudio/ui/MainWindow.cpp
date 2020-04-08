@@ -1509,19 +1509,22 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 					std::string scriptFilename = gameObjType->GetName() + ".cpp";
 					std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
 
+					std::vector<std::string> includes;
+					includes.push_back(m_project->m_settings.scriptsIncludeDir);
+
 					//Release
 					std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptFilename, ".cpp");
 					std::string scriptOutFullPathRelease = scriptsDir + "\\" + scriptOutNameRelease;
 					std::vector<std::string> definesRelease;
 					definesRelease.push_back("_RELEASE");
-					panel->CompileBlocking(scriptFullPath, scriptOutFullPathRelease, definesRelease);
+					panel->CompileBlocking(scriptFullPath, scriptOutFullPathRelease, includes, definesRelease);
 
 					//Debug
 					std::string scriptOutNameDebug = ion::string::RemoveSubstring(scriptFilename, ".cpp") + "_dbg";
 					std::string scriptOutFullPathDebug = scriptsDir + "\\" + scriptOutNameDebug;
 					std::vector<std::string> definesDebug;
 					definesDebug.push_back("_DEBUG");
-					panel->CompileBlocking(scriptFullPath, scriptOutFullPathDebug, definesDebug);
+					panel->CompileBlocking(scriptFullPath, scriptOutFullPathDebug, includes, definesDebug);
 
 					//Check output was written
 					std::string scriptDataFilename = gameObjType->GetName() + ".bin";

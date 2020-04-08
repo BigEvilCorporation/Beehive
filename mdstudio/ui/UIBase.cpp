@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Sep  5 2018)
+// C++ code generated with wxFormBuilder (version Oct 26 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -1872,6 +1872,16 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	m_dirPickerScripts = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer40->Add( m_dirPickerScripts, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText511111111 = new wxStaticText( this, wxID_ANY, wxT("Scripts include dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText511111111->Wrap( -1 );
+	fgSizer40->Add( m_staticText511111111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerScriptsInclude = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerScriptsInclude, 0, wxALL|wxEXPAND, 5 );
 
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );

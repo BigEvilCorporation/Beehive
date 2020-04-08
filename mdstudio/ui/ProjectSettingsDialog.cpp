@@ -36,6 +36,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	m_dirPickerSpriteAnims->SetPath(m_project.m_settings.spriteAnimsExportDir);
 	m_dirPickerSpritePalettes->SetPath(m_project.m_settings.spritePalettesExportDir);
 	m_dirPickerScripts->SetPath(m_project.m_settings.scriptsExportDir);
+	m_dirPickerScriptsInclude->SetPath(m_project.m_settings.scriptsIncludeDir);
 	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.gameObjectsExternalFile);
 	m_filePickerSpritesProj->SetPath(m_project.m_settings.spriteActorsExternalFile);
 	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
@@ -64,6 +65,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 	m_project.m_settings.spriteAnimsExportDir = m_dirPickerSpriteAnims->GetPath().c_str().AsChar();
 	m_project.m_settings.spritePalettesExportDir = m_dirPickerSpritePalettes->GetPath().c_str().AsChar();
 	m_project.m_settings.scriptsExportDir = m_dirPickerScripts->GetPath().c_str().AsChar();
+	m_project.m_settings.scriptsIncludeDir = m_dirPickerScriptsInclude->GetPath().c_str().AsChar();
 	std::string gameObjectsFile = m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 	std::string spritesFile = m_filePickerSpritesProj->GetPath().c_str().AsChar();
 	std::string referenceFile = m_filePickerReference->GetPath().c_str().AsChar();
