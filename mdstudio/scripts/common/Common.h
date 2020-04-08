@@ -6,8 +6,9 @@ struct Fixed16
 	{
 		struct
 		{
-			unsigned short fraction;
+			//Big endian order
 			unsigned short integer;
+			unsigned short fraction;
 		};
 
 		unsigned int value;
