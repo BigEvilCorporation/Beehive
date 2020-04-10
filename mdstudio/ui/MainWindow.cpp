@@ -1471,6 +1471,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
 		const std::string spritesExportDir = projectRootDir + "\\DATA\\SPRITES\\";
 
+		const std::string scriptsOffsetsTableFilename = scriptsExportDir + "OFFSETS.ASM";
+
 		if (ion::io::FileDevice* fileDevice = ion::io::FileDevice::GetDefault())
 		{
 			fileDevice->CreateDirectory(animsExportDir);
@@ -1482,12 +1484,13 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		}
 
 		std::vector<Project::IncludeFile> includeFilenames;
+		std::vector<Project::IncludeFile> scriptIncludes;
 
 		//Find all game object types with scripts, convert to Luminary entities and components
 		std::vector<const GameObjectType*> objTypesWithScripts;
 		std::vector<luminary::Entity> entitiesWithScripts;
 		std::vector<luminary::Component> components;
-		std::map<std::string, std::vector<luminary::ScriptAddress>> scriptAddresses;
+		luminary::ScriptAddressMap scriptAddresses;
 
 		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
 		{
@@ -1518,16 +1521,20 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		}
 
 		//Generate script boilerplate
-		//scriptTranspiler.GenerateComponentCppHeader(components, scriptsSourceDir);
+		scriptTranspiler.GenerateComponentCppHeader(components, scriptsSourceDir);
 
 		for (auto entity : entitiesWithScripts)
 		{
 			scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
 		}
 
+		//Generate global function call table
+		std::vector<luminary::ScriptFunc> globalOffsetsTable;
+		scriptTranspiler.GenerateGlobalOffsetTable(entitiesWithScripts, components, globalOffsetsTable, scriptsOffsetsTableFilename);
+		scriptIncludes.push_back(Project::IncludeFile{ "script_global_offsets_table", scriptsOffsetsTableFilename });
+
 		//Compile scripts and collect script function addresses
 		wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
-		std::vector<Project::IncludeFile> scriptIncludes;
 
 		for(int i = 0; i < objTypesWithScripts.size(); i++)
 		{

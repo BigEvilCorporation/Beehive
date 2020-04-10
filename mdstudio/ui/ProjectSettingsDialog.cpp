@@ -151,6 +151,9 @@ void ProjectSettingsDialog::ScanProject(const std::string& engineDir, const std:
 				gameObjectType->SetStatic(entities[i].isStatic);
 			}
 
+			//Clear script funcs
+			gameObjectType->ClearScriptFunctions();
+
 			//Add all variables as script variables, keep structures intact
 			int numScriptVariables = 0;
 
@@ -202,6 +205,19 @@ void ProjectSettingsDialog::ScanProject(const std::string& engineDir, const std:
 					scriptVariables[scriptVarIdx].m_size = eSizeLong;
 					break;
 				}
+			}
+
+			//Add entity script functions
+			for (int j = 0; j < entities[i].scriptFuncs.size(); j++)
+			{
+				GameObjectScriptFunc scriptFunc;
+				scriptFunc.componentIdx = -1;
+				scriptFunc.name = entities[i].scriptFuncs[j].name;
+				scriptFunc.params = entities[i].scriptFuncs[j].params;
+				scriptFunc.returnType = entities[i].scriptFuncs[j].returnType;
+				scriptFunc.routine = entities[i].scriptFuncs[j].routine;
+
+				gameObjectType->AddScriptFunction(scriptFunc);
 			}
 
 			//Add entity spawn data variables
@@ -266,9 +282,9 @@ void ProjectSettingsDialog::ScanProject(const std::string& engineDir, const std:
 				}
 			}
 
-			//Add component script variables
 			for (int j = 0; j < entities[i].components.size(); j++)
 			{
+				//Add component script variables
 				for (int k = 0; k < entities[i].components[j].params.size(); k++, scriptVarIdx++)
 				{
 					scriptVariables[scriptVarIdx].m_name = entities[i].components[j].params[k].name;
@@ -287,6 +303,23 @@ void ProjectSettingsDialog::ScanProject(const std::string& engineDir, const std:
 					case luminary::ParamSize::Long:
 						scriptVariables[scriptVarIdx].m_size = eSizeLong;
 						break;
+					}
+				}
+
+				//Add component script functions
+				for (int k = 0; k < entities[i].components[j].scriptFuncs.size(); k++)
+				{
+					GameObjectScriptFunc scriptFunc;
+					scriptFunc.componentIdx = j;
+					scriptFunc.name = entities[i].components[j].scriptFuncs[k].name;
+					scriptFunc.params = entities[i].components[j].scriptFuncs[k].params;
+					scriptFunc.returnType = entities[i].components[j].scriptFuncs[k].returnType;
+					scriptFunc.routine = entities[i].components[j].scriptFuncs[k].routine;
+
+					if (std::find_if(gameObjectType->GetScriptFunctions().begin(), gameObjectType->GetScriptFunctions().end(),
+						[&](const GameObjectScriptFunc& lhs) { return lhs == scriptFunc; }) == gameObjectType->GetScriptFunctions().end())
+					{
+						gameObjectType->AddScriptFunction(scriptFunc);
 					}
 				}
 			}
