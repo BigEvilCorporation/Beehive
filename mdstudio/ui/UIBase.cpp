@@ -1806,82 +1806,22 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_staticText511 = new wxStaticText( this, wxID_ANY, wxT("Project dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText51112 = new wxStaticText( this, wxID_ANY, wxT("Engine root dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText51112->Wrap( -1 );
+	fgSizer40->Add( m_staticText51112, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerEngine = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerEngine, 0, wxALL|wxEXPAND, 5 );
+
+	m_btnParseProject = new wxButton( this, wxID_ANY, wxT("Scan Project"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer40->Add( m_btnParseProject, 0, wxALL, 5 );
+
+	m_staticText511 = new wxStaticText( this, wxID_ANY, wxT("Project root dir:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText511->Wrap( -1 );
 	fgSizer40->Add( m_staticText511, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 
 	m_dirPickerProject = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer40->Add( m_dirPickerProject, 0, wxALL|wxEXPAND, 5 );
-
-	m_btnParseProject = new wxButton( this, wxID_ANY, wxT("Scan Project"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer40->Add( m_btnParseProject, 0, wxALL, 5 );
-
-	m_staticText51112 = new wxStaticText( this, wxID_ANY, wxT("Entity data export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText51112->Wrap( -1 );
-	fgSizer40->Add( m_staticText51112, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
-
-	m_dirPickerEntities = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer40->Add( m_dirPickerEntities, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText5111 = new wxStaticText( this, wxID_ANY, wxT("Scene data export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText5111->Wrap( -1 );
-	fgSizer40->Add( m_staticText5111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
-
-	m_dirPickerScene = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer40->Add( m_dirPickerScene, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText51111 = new wxStaticText( this, wxID_ANY, wxT("Sprite data export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText51111->Wrap( -1 );
-	fgSizer40->Add( m_staticText51111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
-
-	m_dirPickerSprites = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer40->Add( m_dirPickerSprites, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText511111 = new wxStaticText( this, wxID_ANY, wxT("Sprite anim export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText511111->Wrap( -1 );
-	fgSizer40->Add( m_staticText511111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
-
-	m_dirPickerSpriteAnims = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer40->Add( m_dirPickerSpriteAnims, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText5111111 = new wxStaticText( this, wxID_ANY, wxT("Sprite palette export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText5111111->Wrap( -1 );
-	fgSizer40->Add( m_staticText5111111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
-
-	m_dirPickerSpritePalettes = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer40->Add( m_dirPickerSpritePalettes, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText51111111 = new wxStaticText( this, wxID_ANY, wxT("Scripts export dir:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText51111111->Wrap( -1 );
-	fgSizer40->Add( m_staticText51111111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
-
-	m_dirPickerScripts = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer40->Add( m_dirPickerScripts, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText511111111 = new wxStaticText( this, wxID_ANY, wxT("Scripts include dir:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText511111111->Wrap( -1 );
-	fgSizer40->Add( m_staticText511111111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
-
-	m_dirPickerScriptsInclude = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	fgSizer40->Add( m_dirPickerScriptsInclude, 0, wxALL|wxEXPAND, 5 );
 
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );

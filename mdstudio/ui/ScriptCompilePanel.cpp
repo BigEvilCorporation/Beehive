@@ -72,9 +72,16 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename, const std:
 	std::string compileCmd = m_scriptCompiler.GenerateCompileCommand(filename, outname, g_compilerDir, includes, defines);
 	wxExecuteEnv env;
 	env.env["PATH"] = m_scriptCompiler.GetBinPath(g_compilerDir) + ";" + m_scriptCompiler.GetLibExecPath(g_compilerDir, g_compilerVer);
-	if (wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner, &env) < 0)
+	long compileResult = wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner, &env);
+	if (compileResult < 0)
 	{
 		m_textOutput->AppendText("Error starting script compiler");
+		return false;
+	}
+	else if (compileResult > 0)
+	{
+		CollectOutput();
+		m_textOutput->AppendText("Script compile error");
 		return false;
 	}
 
@@ -82,9 +89,16 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename, const std:
 
 	m_state = State::Copying;
 	std::string objcopyCmd = m_scriptCompiler.GenerateObjCopyCommand(filename, outname, g_compilerDir);
-	if (wxExecute(objcopyCmd, wxEXEC_SYNC, m_compileRunner) < 0)
+	long objCopyResult = wxExecute(objcopyCmd, wxEXEC_SYNC, m_compileRunner);
+	if (objCopyResult < 0)
 	{
 		m_textOutput->AppendText("Error starting objcopy");
+		return false;
+	}
+	else if (objCopyResult > 0)
+	{
+		CollectOutput();
+		m_textOutput->AppendText("Objcopy failed");
 		return false;
 	}
 
@@ -92,9 +106,16 @@ bool ScriptCompilePanel::CompileBlocking(const std::string& filename, const std:
 
 	m_state = State::ReadingSymbols;
 	std::string symbolsCmd = m_scriptCompiler.GenerateSymbolReadCommand(filename, outname, g_compilerDir);
-	if (wxExecute(symbolsCmd, wxEXEC_SYNC, m_compileRunner) < 0)
+	long symbolParseResult = wxExecute(symbolsCmd, wxEXEC_SYNC, m_compileRunner);
+	if (symbolParseResult < 0)
 	{
 		m_textOutput->AppendText("Error starting symbol reader");
+		return false;
+	}
+	else if (symbolParseResult > 0)
+	{
+		CollectOutput();
+		m_textOutput->AppendText("Parsing symbols failed");
 		return false;
 	}
 

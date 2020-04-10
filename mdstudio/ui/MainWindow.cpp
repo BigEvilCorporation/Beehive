@@ -432,7 +432,7 @@ void MainWindow::ShowPanelSceneExplorer()
 			paneInfo.Name("Scene Explorer");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(200));
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(150));
 			paneInfo.Left();
 			paneInfo.Row(0);
 			paneInfo.Caption("Scene Explorer");
@@ -461,7 +461,7 @@ void MainWindow::ShowPanelProperties()
 			paneInfo.Name("Properties");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(200));
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(150));
 			paneInfo.Right();
 			paneInfo.Row(0);
 			paneInfo.Caption("Properties");
@@ -1458,37 +1458,76 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		luminary::ScriptTranspiler scriptTranspiler;
 		luminary::ScriptCompiler scriptCompiler;
 
-		std::vector<Project::IncludeFile> includeFilenames;
+		const std::string engineRootDir = m_project->m_settings.engineRootDir;
+		const std::string projectRootDir = m_project->m_settings.projectRootDir;
 
-		//Generate script headers and compile
-		wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
-		std::string scriptsDir = m_project->m_settings.scriptsExportDir;
-		std::vector<Project::IncludeFile> scriptIncludes;
+		const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
+		const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
 
-		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
+		const std::string animsExportDir = projectRootDir + "\\DATA\\ANIMS\\";
+		const std::string entitiesExportDir = projectRootDir + "\\DATA\\ENTITIES\\";
+		const std::string palettesExportDir = projectRootDir + "\\DATA\\PALETTES\\";
+		const std::string scenesExportDir = projectRootDir + "\\DATA\\SCENES\\" + m_project->GetName();
+		const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
+		const std::string spritesExportDir = projectRootDir + "\\DATA\\SPRITES\\";
+
+		if (ion::io::FileDevice* fileDevice = ion::io::FileDevice::GetDefault())
 		{
-			//luminary::Entity entity;
-			//luminary::beehive::ConvertScriptEntity(typeIt->second, entity);
-			//scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+			fileDevice->CreateDirectory(animsExportDir);
+			fileDevice->CreateDirectory(entitiesExportDir);
+			fileDevice->CreateDirectory(palettesExportDir);
+			fileDevice->CreateDirectory(scenesExportDir);
+			fileDevice->CreateDirectory(scriptsExportDir);
+			fileDevice->CreateDirectory(spritesExportDir);
 		}
 
-		//Compile scripts and collect script function addresses
+		std::vector<Project::IncludeFile> includeFilenames;
+
+		//Find all game object types with scripts, convert to Luminary entities and components
 		std::vector<const GameObjectType*> objTypesWithScripts;
+		std::vector<luminary::Entity> entitiesWithScripts;
+		std::vector<luminary::Component> components;
 		std::map<std::string, std::vector<luminary::ScriptAddress>> scriptAddresses;
 
 		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
 		{
+			//Convert to luminary entity
+			luminary::Entity entity;
+			luminary::beehive::ConvertScriptEntity(typeIt->second, entity);
+
+			//Add all components
+			for (auto component : entity.components)
+			{
+				if (std::find_if(components.begin(), components.end(), [&](const luminary::Component& lhs) { return lhs.name == component.name; }) == components.end())
+				{
+					components.push_back(component);
+				}
+			}
+
 			//Check if entity has a script
 			bool hasScript = false;
 			for (auto variable : typeIt->second.GetVariables())
 			{
 				if (variable.HasTag("SCRIPT_DATA"))
 				{
+					entitiesWithScripts.push_back(entity);
 					objTypesWithScripts.push_back(&typeIt->second);
 					break;
 				}
 			}
 		}
+
+		//Generate script boilerplate
+		//scriptTranspiler.GenerateComponentCppHeader(components, scriptsSourceDir);
+
+		for (auto entity : entitiesWithScripts)
+		{
+			scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
+		}
+
+		//Compile scripts and collect script function addresses
+		wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
+		std::vector<Project::IncludeFile> scriptIncludes;
 
 		for(int i = 0; i < objTypesWithScripts.size(); i++)
 		{
@@ -1500,35 +1539,41 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				ShowPanelScriptCompile();
 				if (ScriptCompilePanel* panel = GetScriptCompilePanel())
 				{
-					//Generate header file
-					luminary::Entity entity;
-					luminary::beehive::ConvertScriptEntity(*gameObjType, entity);
-					scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
-
 					//Compile script
-					std::string scriptFilename = gameObjType->GetName() + ".cpp";
-					std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
+					std::string scriptSourceFilename = gameObjType->GetName() + ".cpp";
+					std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
 
 					std::vector<std::string> includes;
-					includes.push_back(m_project->m_settings.scriptsIncludeDir);
+					includes.push_back(scriptsEngineIncludes);
+					includes.push_back(scriptsSourceDir);
 
 					//Release
-					std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptFilename, ".cpp");
-					std::string scriptOutFullPathRelease = scriptsDir + "\\" + scriptOutNameRelease;
+					std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp");
+					std::string scriptOutFullPathRelease = scriptsExportDir + scriptOutNameRelease;
 					std::vector<std::string> definesRelease;
 					definesRelease.push_back("_RELEASE");
-					panel->CompileBlocking(scriptFullPath, scriptOutFullPathRelease, includes, definesRelease);
+					if (!panel->CompileBlocking(scriptSourceFullPath, scriptOutFullPathRelease, includes, definesRelease))
+					{
+						SetStatusText("Script compile error");
+						wxMessageBox("Error compiling scripts, see script log", "Error", wxOK | wxICON_INFORMATION);
+						return;
+					}
 
 					//Debug
-					std::string scriptOutNameDebug = ion::string::RemoveSubstring(scriptFilename, ".cpp") + "_dbg";
-					std::string scriptOutFullPathDebug = scriptsDir + "\\" + scriptOutNameDebug;
+					std::string scriptOutNameDebug = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp") + "_dbg";
+					std::string scriptOutFullPathDebug = scriptsExportDir + scriptOutNameDebug;
 					std::vector<std::string> definesDebug;
 					definesDebug.push_back("_DEBUG");
-					panel->CompileBlocking(scriptFullPath, scriptOutFullPathDebug, includes, definesDebug);
+					if (!panel->CompileBlocking(scriptSourceFullPath, scriptOutFullPathDebug, includes, definesDebug))
+					{
+						SetStatusText("Script compile error");
+						wxMessageBox("Error compiling scripts, see script log", "Error", wxOK | wxICON_INFORMATION);
+						return;
+					}
 
 					//Check output was written
 					std::string scriptDataFilename = gameObjType->GetName() + ".bin";
-					std::string scriptDataFullPath = scriptsDir + "\\" + scriptDataFilename;
+					std::string scriptDataFullPath = scriptsExportDir + scriptDataFilename;
 
 					if (ion::io::FileDevice::GetDefault()->GetFileExists(scriptDataFullPath))
 					{
@@ -1582,7 +1627,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		if (scriptIncludes.size() > 0)
 		{
-			m_project->WriteIncludeFile(m_project->m_settings.projectExportDir, m_project->m_settings.scriptsExportDir, "SCRIPTS.ASM", scriptIncludes, true);
+			m_project->WriteIncludeFile(projectRootDir, scriptsExportDir, "SCRIPTS.ASM", scriptIncludes, true);
 		}
 
 		//Export entity archetypes
@@ -1598,19 +1643,19 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			}
 		}
 
-		std::string archetypesFilename = m_project->m_settings.entitiesExportDir + "\\" + "ARCHTYPS.ASM";
+		std::string archetypesFilename = entitiesExportDir + "ARCHTYPS.ASM";
 		entityExporter.ExportArchetypes(archetypesFilename, archetypes);
 
 		//Export sprite data
 		// TODO: Luminary (binary) data formats
-		m_project->ExportSpriteSheets(m_project->m_settings.spritesExportDir, Project::ExportFormat::BinaryCompressed);
-		m_project->ExportSpriteAnims(m_project->m_settings.spriteAnimsExportDir, Project::ExportFormat::BinaryCompressed);
-		m_project->ExportSpritePalettes(m_project->m_settings.spritePalettesExportDir);
+		m_project->ExportSpriteSheets(spritesExportDir, Project::ExportFormat::BinaryCompressed);
+		m_project->ExportSpriteAnims(animsExportDir, Project::ExportFormat::BinaryCompressed);
+		m_project->ExportSpritePalettes(palettesExportDir);
 
 		//Export luminary palettes
 		int numPalettes = 0;
 		std::string palettesLabel = std::string("palettes_") + m_project->GetName();
-		std::string palettesFilename = m_project->m_settings.sceneExportDir + "\\" + "PALETTES.ASM";
+		std::string palettesFilename = scenesExportDir + "\\" + "PALETTES.ASM";
 		if (m_project->GetNumPalettes() > 0)
 		{
 			std::vector<Palette> palettes;
@@ -1633,7 +1678,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		//Export Luminary tileset
 		std::string tilesetLabel = std::string("tileset_") + m_project->GetName();
-		std::string tilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "GTILES.BIN";
+		std::string tilesetFilename = scenesExportDir + "\\" + "GTILES.BIN";
 		if (tilesetExporter.ExportTileset(tilesetFilename, m_project->GetTileset()))
 		{
 			includeFilenames.push_back(Project::IncludeFile { tilesetLabel, tilesetFilename, Project::IncludeExportFlags::None });
@@ -1651,7 +1696,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		}
 
 		std::string stampsetLabel = std::string("stampset_") + m_project->GetName();
-		std::string stampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "GSTAMPS.BIN";
+		std::string stampsetFilename = scenesExportDir + "\\" + "GSTAMPS.BIN";
 		if (tilesetExporter.ExportStamps(stampsetFilename, stamps, m_project->GetTileset(), m_project->GetBackgroundTile()))
 		{
 			includeFilenames.push_back(Project::IncludeFile { stampsetLabel, stampsetFilename, Project::IncludeExportFlags::None });
@@ -1662,7 +1707,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		{
 			const Map& map = m_project->GetMap(it->first);
 			std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
-			std::string mapFilename = m_project->m_settings.sceneExportDir + "\\G" + ion::string::ToUpper(map.GetName()) + ".BIN";
+			std::string mapFilename = scenesExportDir + "\\G" + ion::string::ToUpper(map.GetName()) + ".BIN";
 			if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
 			{
 				includeFilenames.push_back(Project::IncludeFile { mapLabel, mapFilename, Project::IncludeExportFlags::None });
@@ -1671,7 +1716,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		//Export Luminary terrain tileset
 		std::string terrainTilesetLabel = std::string("collision_tileset_") + m_project->GetName();
-		std::string terrainTilesetFilename = m_project->m_settings.sceneExportDir + "\\" + "CTILES.BIN";
+		std::string terrainTilesetFilename = scenesExportDir + "\\" + "CTILES.BIN";
 		if (terrainExporter.ExportTerrainTileset(terrainTilesetFilename, m_project->GetTerrainTileset(), m_project->GetPlatformConfig().tileWidth))
 		{
 			includeFilenames.push_back(Project::IncludeFile{  terrainTilesetLabel, terrainTilesetFilename, Project::IncludeExportFlags::None });
@@ -1679,7 +1724,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		//Export Luminary terrain stamps
 		std::string terrainStampsetLabel = std::string("collision_stampset_") + m_project->GetName();
-		std::string terrainStampsetFilename = m_project->m_settings.sceneExportDir + "\\" + "CSTAMPS.BIN";
+		std::string terrainStampsetFilename = scenesExportDir + "\\" + "CSTAMPS.BIN";
 		if (terrainExporter.ExportTerrainStamps(terrainStampsetFilename, stamps, m_project->GetTerrainTileset(), m_project->GetDefaultTerrainTile()))
 		{
 			includeFilenames.push_back(Project::IncludeFile { terrainStampsetLabel, terrainStampsetFilename, Project::IncludeExportFlags::None });
@@ -1690,7 +1735,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		{
 			const Map& map = m_project->GetMap(it->first);
 			std::string terrainMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + map.GetName();
-			std::string terrainMapFilename = m_project->m_settings.sceneExportDir + "\\C" + ion::string::ToUpper(map.GetName()) + ".BIN";
+			std::string terrainMapFilename = scenesExportDir + "\\C" + ion::string::ToUpper(map.GetName()) + ".BIN";
 			if (terrainExporter.ExportTerrainMap(terrainMapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
 			{
 				includeFilenames.push_back(Project::IncludeFile { terrainMapLabel, terrainMapFilename, Project::IncludeExportFlags::None });
@@ -1772,7 +1817,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				sceneData.collisionMapHeightStamps = mapFg.GetHeight() / m_project->GetPlatformConfig().stampHeight;
 
 				std::string sceneName = m_project->GetName() + "_" + mapFg.GetName();
-				std::string sceneFilename = m_project->m_settings.sceneExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + ".ASM";
+				std::string sceneFilename = scenesExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + ".ASM";
 				if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
 				{
 					includeFilenames.push_back(Project::IncludeFile { std::string("scene_") + sceneName, sceneFilename, Project::IncludeExportFlags::None });
@@ -1783,7 +1828,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		//Generate uber include file
 		if (includeFilenames.size() > 0)
 		{
-			m_project->WriteIncludeFile(m_project->m_settings.projectExportDir, m_project->m_settings.sceneExportDir, "INCLUDE.ASM", includeFilenames, true);
+			m_project->WriteIncludeFile(projectRootDir, scenesExportDir, "INCLUDE.ASM", includeFilenames, true);
 		}
 
 		SetStatusText("Export complete");

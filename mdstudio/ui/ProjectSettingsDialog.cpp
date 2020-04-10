@@ -29,14 +29,8 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	, m_renderResources(renderResources)
 {
 	m_textProjectName->SetValue(m_project.GetName());
-	m_dirPickerProject->SetPath(m_project.m_settings.projectExportDir);
-	m_dirPickerEntities->SetPath(m_project.m_settings.entitiesExportDir);
-	m_dirPickerScene->SetPath(m_project.m_settings.sceneExportDir);
-	m_dirPickerSprites->SetPath(m_project.m_settings.spritesExportDir);
-	m_dirPickerSpriteAnims->SetPath(m_project.m_settings.spriteAnimsExportDir);
-	m_dirPickerSpritePalettes->SetPath(m_project.m_settings.spritePalettesExportDir);
-	m_dirPickerScripts->SetPath(m_project.m_settings.scriptsExportDir);
-	m_dirPickerScriptsInclude->SetPath(m_project.m_settings.scriptsIncludeDir);
+	m_dirPickerProject->SetPath(m_project.m_settings.projectRootDir);
+	m_dirPickerEngine->SetPath(m_project.m_settings.engineRootDir);
 	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.gameObjectsExternalFile);
 	m_filePickerSpritesProj->SetPath(m_project.m_settings.spriteActorsExternalFile);
 	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
@@ -49,9 +43,10 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 void ProjectSettingsDialog::OnBtnScanProject(wxCommandEvent& event)
 {
 	std::string projectDir = m_dirPickerProject->GetPath().c_str().AsChar();
-	if (projectDir.size() > 0)
+	std::string engineDir = m_dirPickerEngine->GetPath().c_str().AsChar();
+	if (projectDir.size() > 0 && engineDir.size())
 	{
-		ScanProject(projectDir);
+		ScanProject(projectDir, engineDir);
 	}
 }
 
@@ -59,13 +54,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 {
 	m_project.SetName(m_textProjectName->GetValue().c_str().AsChar());
 	std::string projectDir = m_dirPickerProject->GetPath().c_str().AsChar();
-	m_project.m_settings.entitiesExportDir = m_dirPickerEntities->GetPath().c_str().AsChar();
-	m_project.m_settings.sceneExportDir = m_dirPickerScene->GetPath().c_str().AsChar();
-	m_project.m_settings.spritesExportDir = m_dirPickerSprites->GetPath().c_str().AsChar();
-	m_project.m_settings.spriteAnimsExportDir = m_dirPickerSpriteAnims->GetPath().c_str().AsChar();
-	m_project.m_settings.spritePalettesExportDir = m_dirPickerSpritePalettes->GetPath().c_str().AsChar();
-	m_project.m_settings.scriptsExportDir = m_dirPickerScripts->GetPath().c_str().AsChar();
-	m_project.m_settings.scriptsIncludeDir = m_dirPickerScriptsInclude->GetPath().c_str().AsChar();
+	std::string engineDir = m_dirPickerEngine->GetPath().c_str().AsChar();
 	std::string gameObjectsFile = m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 	std::string spritesFile = m_filePickerSpritesProj->GetPath().c_str().AsChar();
 	std::string referenceFile = m_filePickerReference->GetPath().c_str().AsChar();
@@ -116,14 +105,15 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 		m_renderResources.CreateSpriteSheetResources(m_project);
 	}
 
-	if (projectDir != m_project.m_settings.projectExportDir)
+	if (projectDir != m_project.m_settings.projectRootDir || engineDir != m_project.m_settings.engineRootDir)
 	{
-		if (wxMessageBox("Project directory has changed, would you like to re-scan for entity types?", "Scan for entities", wxOK | wxCANCEL) == wxOK)
+		if (wxMessageBox("Engine or project directory has changed, would you like to re-scan for entity types?", "Scan for entities", wxOK | wxCANCEL) == wxOK)
 		{
-			ScanProject(projectDir);
+			ScanProject(engineDir, projectDir);
 		}
 
-		m_project.m_settings.projectExportDir = projectDir;
+		m_project.m_settings.projectRootDir = projectDir;
+		m_project.m_settings.engineRootDir = engineDir;
 	}
 
 	m_project.GetPlatformConfig().stampWidth = m_spinStampWidth->GetValue();
@@ -137,12 +127,17 @@ void ProjectSettingsDialog::OnBtnCancel(wxCommandEvent& event)
 	EndModal(wxID_CANCEL);
 }
 
-void ProjectSettingsDialog::ScanProject(const std::string directory)
+void ProjectSettingsDialog::ScanProject(const std::string& engineDir, const std::string& projectDir)
 {
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	luminary::EntityParser entityParser;
 	std::vector<luminary::Entity> entities;
-	if (entityParser.ParseDirectory(directory, entities))
+	std::vector<std::string> directories;
+
+	directories.push_back(engineDir);
+	directories.push_back(projectDir);
+
+	if (entityParser.ParseDirectories(directories, entities))
 	{
 		for (int i = 0; i < entities.size(); i++)
 		{

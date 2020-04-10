@@ -181,10 +181,10 @@ void PropertyPanel::OnRightClick(wxMouseEvent& event)
 			defaultItem->Enable(gameObject->GetOriginalArchetype() != InvalidGameObjectArchetypeId);
 
 			wxMenuItem* editScriptItem = contextMenu.Append(ContextMenu::EditScript, "Edit Script");
-			editScriptItem->Enable(m_contextProperty->GetAttribute("isScript") && !m_project.m_settings.scriptsExportDir.empty());
+			editScriptItem->Enable(m_contextProperty->GetAttribute("isScript"));
 
 			wxMenuItem* compileScriptItem = contextMenu.Append(ContextMenu::CompileScript, "Compile Script");
-			compileScriptItem->Enable(m_contextProperty->GetAttribute("isScript") && !m_project.m_settings.scriptsExportDir.empty());
+			compileScriptItem->Enable(m_contextProperty->GetAttribute("isScript"));
 
 			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&PropertyPanel::OnContextMenuClick, NULL, this);
 			PopupMenu(&contextMenu);
@@ -227,29 +227,34 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 						{
 	#if defined BEEHIVE_PLUGIN_LUMINARY
 							//TODO: Do this in Beehive-side script compiler
-							std::string scriptsDir = m_project.m_settings.scriptsExportDir;
-							std::string scriptFilename = gameObjectType->GetName() + ".cpp";
-							std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
+							const std::string engineRootDir = m_project.m_settings.engineRootDir;
+							const std::string projectRootDir = m_project.m_settings.projectRootDir;
+
+							const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
+							const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
+
+							const std::string scriptSourceFilename = gameObjectType->GetName() + ".cpp";
+							const std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
 
 							//Generate header
 							luminary::ScriptTranspiler scriptTranspiler;
 							luminary::Entity entity;
 							luminary::beehive::ConvertScriptEntity(*gameObjectType, entity);
-							scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+							scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
 
 							//Generate boilerplate
 							if (ion::io::FileDevice* device = ion::io::FileDevice::GetDefault())
 							{
-								if (!device->GetFileExists(scriptFullPath))
+								if (!device->GetFileExists(scriptSourceFullPath))
 								{
-									scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsDir);
-									variable->m_value = scriptFilename;
+									scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsSourceDir);
+									variable->m_value = scriptSourceFilename;
 									Refresh();
 								}
 							}
 
 							//Open in default shell program
-							std::string shellCmd = "rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + scriptFullPath + "\"";
+							std::string shellCmd = "rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + scriptSourceFullPath + "\"";
 							wxExecute(shellCmd);
 	#endif
 							break;
@@ -261,34 +266,42 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 							m_mainWindow->ShowPanelScriptCompile();
 							if (ScriptCompilePanel* panel = m_mainWindow->GetScriptCompilePanel())
 							{
-								std::string scriptsDir = m_project.m_settings.scriptsExportDir;
-								std::string scriptFilename = gameObjectType->GetName() + ".cpp";
-								std::string scriptFullPath = scriptsDir + "\\" + scriptFilename;
+								const std::string engineRootDir = m_project.m_settings.engineRootDir;
+								const std::string projectRootDir = m_project.m_settings.projectRootDir;
+
+								const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
+								const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
+								const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
+
+								const std::string scriptSourceFilename = gameObjectType->GetName() + ".cpp";
+								const std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
 
 								//Generate header
 								luminary::ScriptTranspiler scriptTranspiler;
 								luminary::Entity entity;
 								luminary::beehive::ConvertScriptEntity(*gameObjectType, entity);
-								scriptTranspiler.GenerateEntityCppHeader(entity, scriptsDir);
+								scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
 
 								//Generate boilerplate
 								if (ion::io::FileDevice* device = ion::io::FileDevice::GetDefault())
 								{
-									if (!device->GetFileExists(scriptFullPath))
+									if (!device->GetFileExists(scriptSourceFullPath))
 									{
-										scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsDir);
-										variable->m_value = scriptFilename;
+										scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsSourceDir);
+										variable->m_value = scriptSourceFilename;
 										Refresh();
 									}
 								}
 
 								//Compile
-								std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptFilename, ".cpp");
+								const std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp");
+								const std::string scriptOutFullPathRelease = scriptsExportDir + scriptOutNameRelease;
 								std::vector<std::string> includes;
 								std::vector<std::string> defines;
-								includes.push_back(m_project.m_settings.scriptsIncludeDir);
+								includes.push_back(scriptsEngineIncludes);
+								includes.push_back(scriptsSourceDir);
 								defines.push_back("_RELEASE");
-								panel->BeginCompileAsync(scriptFullPath, scriptOutNameRelease, includes, defines, nullptr);
+								panel->BeginCompileAsync(scriptSourceFullPath, scriptOutFullPathRelease, includes, defines, nullptr);
 							}
 
 							break;

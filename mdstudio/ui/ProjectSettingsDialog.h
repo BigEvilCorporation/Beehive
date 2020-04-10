@@ -28,7 +28,7 @@ protected:
 	virtual void OnBtnCancel(wxCommandEvent& event);
 
 private:
-	void ScanProject(const std::string directory);
+	void ScanProject(const std::string& engineDir, const std::string& projectDir);
 	Project& m_project;
 	RenderResources& m_renderResources;
 };
