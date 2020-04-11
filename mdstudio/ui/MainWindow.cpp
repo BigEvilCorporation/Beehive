@@ -1533,8 +1533,15 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		scriptTranspiler.GenerateGlobalOffsetTable(entitiesWithScripts, components, globalOffsetsTable, scriptsOffsetsTableFilename);
 		scriptIncludes.push_back(Project::IncludeFile{ "script_global_offsets_table", scriptsOffsetsTableFilename });
 
+		//Global offset table size as binary (longword per entry)
+		u16 globalOffsetTableSize = globalOffsetsTable.size() * sizeof(u32);
+
 		//Compile scripts and collect script function addresses
 		wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
+
+		//Relative offset from end of global offset table to current script
+		u16 scriptOffsetRelease = 0;
+		u16 scriptOffsetDebug = 0;
 
 		for(int i = 0; i < objTypesWithScripts.size(); i++)
 		{
@@ -1554,7 +1561,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 					includes.push_back(scriptsEngineIncludes);
 					includes.push_back(scriptsSourceDir);
 
-					//Release
+					//Compile release
 					std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp");
 					std::string scriptOutFullPathRelease = scriptsExportDir + scriptOutNameRelease;
 					std::vector<std::string> definesRelease;
@@ -1566,7 +1573,12 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 						return;
 					}
 
-					//Debug
+					//Link release
+					std::vector<luminary::ScriptRelocation> relocationTableRelease;
+					scriptCompiler.ReadRelocationTable(panel->GetSymbolOutput(), globalOffsetsTable, relocationTableRelease);
+					scriptOffsetRelease += scriptCompiler.LinkProgram(scriptOutFullPathRelease + ".bin", relocationTableRelease, globalOffsetTableSize, scriptOffsetRelease);
+
+					//Compile debug
 					std::string scriptOutNameDebug = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp") + "_dbg";
 					std::string scriptOutFullPathDebug = scriptsExportDir + scriptOutNameDebug;
 					std::vector<std::string> definesDebug;
@@ -1577,6 +1589,11 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 						wxMessageBox("Error compiling scripts, see script log", "Error", wxOK | wxICON_INFORMATION);
 						return;
 					}
+
+					//Link debug
+					std::vector<luminary::ScriptRelocation> relocationTableDebug;
+					scriptCompiler.ReadRelocationTable(panel->GetSymbolOutput(), globalOffsetsTable, relocationTableDebug);
+					scriptOffsetDebug += scriptCompiler.LinkProgram(scriptOutFullPathDebug + ".bin", relocationTableDebug, globalOffsetTableSize, scriptOffsetDebug);
 
 					//Check output was written
 					std::string scriptDataFilename = gameObjType->GetName() + ".bin";
