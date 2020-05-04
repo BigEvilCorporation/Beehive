@@ -43,8 +43,10 @@ private:
 		CompileScript
 	};
 
-	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, Actor*& actor, std::vector<GameObjectVariable>*& variables);
+	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables);
+	GameObjectVariable* FindVariable(std::vector<GameObjectVariable>& variables, const std::string& name, int componentIdx);
 	GameObjectVariable* FindVariableByTag(std::vector<GameObjectVariable>& variables, const std::string& tag, int componentIdx);
+	GameObjectVariable& AddVariable(std::vector<GameObjectVariable>& variables);
 
 	void OnContextMenuClick(wxCommandEvent& event);
 

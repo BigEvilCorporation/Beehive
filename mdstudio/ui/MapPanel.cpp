@@ -856,6 +856,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				{
 					m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType, m_previewGameObjectArchetype);
 					m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
+					m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
 					Refresh();
 				}
 			}
@@ -884,6 +885,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 
 						m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType, *original, name);
 						m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
+						m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
 						Refresh();
 					}
 				}
@@ -923,6 +925,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						int boxHeight = ion::maths::Abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1;
 
 						m_project.GetEditingMap().PlaceGameObject(boxX, boxY, boxWidth, boxHeight, *gameObjectType, m_project.GetPaintGameObjectArchetype());
+						m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
 						Refresh();
 					}
 				}
@@ -942,6 +945,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
 			{
 				m_project.GetEditingMap().RemoveGameObject(x, y);
+				m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
+				m_mainWindow->RefreshPanel(MainWindow::ePanelProperties);
 				Refresh();
 			}
 

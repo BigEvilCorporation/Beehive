@@ -39,18 +39,23 @@ PropertyPanel::PropertyPanel(MainWindow* mainWindow, Project& project, wxWindow 
 	m_contextProperty = nullptr;
 }
 
-void PropertyPanel::GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, Actor*& actor, std::vector<GameObjectVariable>*& variables)
+void PropertyPanel::GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables)
 {
 	gameObjectType = nullptr;
 	actor = nullptr;
-	variables = nullptr;
+	typeVariables = nullptr;
+	instanceVariables = nullptr;
 
 	gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId);
 	if (gameObject)
 	{
 		gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId());
+		typeVariables = &gameObjectType->GetVariables();
+		instanceVariables = &gameObject->GetVariables();
+
 		actor = m_project.GetActor(gameObject->GetSpriteActorId());
-		variables = &gameObject->GetVariables();
+		if (!actor)
+			actor = m_project.GetActor(gameObjectType->GetSpriteActorId());
 	}
 	else
 	{
@@ -59,11 +64,28 @@ void PropertyPanel::GetEditingVariables(GameObjectType*& gameObjectType, GameObj
 		{
 			if (GameObjectArchetype* archetype = gameObjectType->GetArchetype(m_archetypeId))
 			{
+				typeVariables = &gameObjectType->GetVariables();
+				instanceVariables = &archetype->variables;
+
 				actor = m_project.GetActor(archetype->spriteActorId);
-				variables = &archetype->variables;
+				if (!actor)
+					actor = m_project.GetActor(gameObjectType->GetSpriteActorId());
 			}
 		}
 	}
+}
+
+GameObjectVariable* PropertyPanel::FindVariable(std::vector<GameObjectVariable>& variables, const std::string& name, int componentIdx)
+{
+	for (int i = 0; i < variables.size(); i++)
+	{
+		if (((componentIdx == -1) || (componentIdx == variables[i].m_componentIdx)) && ion::string::CompareNoCase(variables[i].m_name, name))
+		{
+			return &variables[i];
+		}
+	}
+
+	return nullptr;
 }
 
 GameObjectVariable* PropertyPanel::FindVariableByTag(std::vector<GameObjectVariable>& variables, const std::string& tag, int componentIdx)
@@ -79,6 +101,12 @@ GameObjectVariable* PropertyPanel::FindVariableByTag(std::vector<GameObjectVaria
 	return nullptr;
 }
 
+GameObjectVariable& PropertyPanel::AddVariable(std::vector<GameObjectVariable>& variables)
+{
+	variables.push_back(GameObjectVariable());
+	return variables[variables.size() - 1];
+}
+
 void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(!m_mainWindow->IsRefreshLocked())
@@ -88,14 +116,15 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 		GameObjectType* gameObjectType = nullptr;
 		GameObject* gameObject = nullptr;
 		Actor* actor = nullptr;
-		std::vector<GameObjectVariable>* variables = nullptr;
+		std::vector<GameObjectVariable>* typeVariables = nullptr;
+		std::vector<GameObjectVariable>* instanceVariables = nullptr;
 
-		GetEditingVariables(gameObjectType, gameObject, actor, variables);
+		GetEditingVariables(gameObjectType, gameObject, actor, typeVariables, instanceVariables);
 
-		if (variables)
+		if (typeVariables)
 		{
 			//If entity has a sprite actor, find it and add property
-			for (auto variable : *variables)
+			for (auto variable : *typeVariables)
 			{
 				if (variable.HasTag("SPRITE_SHEET"))
 				{
@@ -158,7 +187,7 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			else
 #endif
 			{
-				for (auto variable : *variables)
+				for (auto variable : *typeVariables)
 				{
 					if (componentIdx != variable.m_componentIdx)
 					{
@@ -167,9 +196,12 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 					}
 
 					//Some properties need the actor and sprite sheet associated with this component, if it has one
-					const GameObjectVariable* spriteSheetVar = FindVariableByTag(*variables, "SPRITE_SHEET", variable.m_componentIdx);
+					const GameObjectVariable* spriteSheetVar = FindVariableByTag(*instanceVariables, "SPRITE_SHEET", variable.m_componentIdx);
 
-					const GameObjectVariable* overriddenVar = gameObject ? gameObject->FindVariable(variable.m_name, variable.m_componentIdx) : nullptr;
+					if(!spriteSheetVar)
+						spriteSheetVar = FindVariableByTag(*typeVariables, "SPRITE_SHEET", variable.m_componentIdx);
+
+					const GameObjectVariable* overriddenVar = FindVariable(*instanceVariables, variable.m_name, variable.m_componentIdx);
 					if (overriddenVar)
 					{
 						AddProperty(*gameObjectType, *overriddenVar, variable.m_componentIdx, actor, spriteSheetVar);
@@ -191,11 +223,12 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 		GameObjectType* gameObjectType = nullptr;
 		GameObject* gameObject = nullptr;
 		Actor* actor = nullptr;
-		std::vector<GameObjectVariable>* variables = nullptr;
+		std::vector<GameObjectVariable>* typeVariables = nullptr;
+		std::vector<GameObjectVariable>* instanceVariables = nullptr;
 
-		GetEditingVariables(gameObjectType, gameObject, actor, variables);
+		GetEditingVariables(gameObjectType, gameObject, actor, typeVariables, instanceVariables);
 
-		if (variables)
+		if (typeVariables)
 		{
 			wxString variableName = property->GetAttribute("variableName", "");
 			wxVariant componentIdx = property->GetAttribute("componentIdx");
@@ -204,16 +237,13 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 			if (value != s_defaultVarName)
 			{
 				//Find or add overridden var on game object
-				GameObjectVariable* variable = gameObject ? gameObject->FindVariable(variableName.c_str().AsChar(), componentIdx.GetInteger()) : nullptr;
+				GameObjectVariable* variable = FindVariable(*instanceVariables, variableName.c_str().AsChar(), componentIdx.GetInteger());
 				if (!variable)
 				{
-					if (gameObjectType)
+					if (const GameObjectVariable* original = FindVariable(*typeVariables, variableName.c_str().AsChar(), componentIdx.GetInteger()))
 					{
-						if (const GameObjectVariable* original = gameObjectType->FindVariable(variableName.c_str().AsChar(), componentIdx.GetInteger()))
-						{
-							variable = &gameObject->AddVariable();
-							*variable = *original;
-						}
+						variable = &AddVariable(*instanceVariables);
+						*variable = *original;
 					}
 				}
 
@@ -260,20 +290,21 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 		GameObjectType* gameObjectType = nullptr;
 		GameObject* gameObject = nullptr;
 		Actor* actor = nullptr;
-		std::vector<GameObjectVariable>* variables = nullptr;
+		std::vector<GameObjectVariable>* typeVariables = nullptr;
+		std::vector<GameObjectVariable>* instanceVariables = nullptr;
 
-		GetEditingVariables(gameObjectType, gameObject, actor, variables);
+		GetEditingVariables(gameObjectType, gameObject, actor, typeVariables, instanceVariables);
 
-		if(variables)
+		if(typeVariables)
 		{
 			std::string variableName = m_contextProperty->GetAttribute("variableName").GetString();
 			int componentIdx = m_contextProperty->GetAttribute("componentIdx").GetInteger();
 
 			//Find or add overridden var on game object
-			GameObjectVariable* variable = gameObject ? gameObject->FindVariable(variableName, componentIdx) : nullptr;
+			GameObjectVariable* variable = FindVariable(*instanceVariables, variableName, componentIdx);
 			if (!variable)
 			{
-				if (const GameObjectVariable* original = gameObjectType->FindVariable(variableName, componentIdx))
+				if (const GameObjectVariable* original = FindVariable(*typeVariables, variableName, componentIdx))
 				{
 					variable = &gameObject->AddVariable();
 					*variable = *original;
