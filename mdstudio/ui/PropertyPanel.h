@@ -31,6 +31,7 @@ public:
 	virtual void OnRightClick(wxMouseEvent& event);
 
 	void SetGameObject(GameObjectId gameObjectId);
+	void SetArchetype(GameObjectTypeId gameObjectTypeId, GameObjectArchetypeId archetypeId);
 
 protected:
 
@@ -42,9 +43,12 @@ private:
 		CompileScript
 	};
 
+	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, Actor*& actor, std::vector<GameObjectVariable>*& variables);
+	GameObjectVariable* FindVariableByTag(std::vector<GameObjectVariable>& variables, const std::string& tag, int componentIdx);
+
 	void OnContextMenuClick(wxCommandEvent& event);
 
-	void AddProperty(const GameObject& gameObject, const GameObjectVariable& variable, int componentIdx, bool enabled = true);
+	void AddProperty(const GameObjectType& gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled = true);
 	int PopulateSpriteActorList(wxArrayString& list, const std::string& selectedValue);
 	int PopulateSpriteSheetList(wxArrayString& list, const Actor& actor, const std::string& selectedValue);
 	int PopulateSpriteAnimList(wxArrayString& list, const Actor& actor, SpriteSheetId spriteSheetId, const std::string& selectedValue);
@@ -52,6 +56,8 @@ private:
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	GameObjectId m_gameObjectId;
+	GameObjectTypeId m_gameObjectTypeId;
+	GameObjectArchetypeId m_archetypeId;
 
 	wxPGProperty* m_contextProperty;
 };

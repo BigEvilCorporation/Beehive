@@ -1059,6 +1059,11 @@ void MainWindow::ShowPanelTimeline()
 	}
 }
 
+PropertyPanel* MainWindow::GetPropertiesPanel()
+{
+	return m_propertyPanel;
+}
+
 MapPanel* MainWindow::GetMapPanel()
 {
 	return m_mapPanel;

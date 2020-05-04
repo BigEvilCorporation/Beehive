@@ -90,6 +90,7 @@ public:
 	void ShowToolboxObjects();
 
 	//Get panels
+	PropertyPanel* GetPropertiesPanel();
 	MapPanel* GetMapPanel();
 	ScriptCompilePanel* GetScriptCompilePanel();
 

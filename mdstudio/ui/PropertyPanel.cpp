@@ -34,7 +34,49 @@ PropertyPanel::PropertyPanel(MainWindow* mainWindow, Project& project, wxWindow 
 	, m_mainWindow(mainWindow)
 {
 	m_gameObjectId = InvalidGameObjectId;
+	m_gameObjectTypeId = InvalidGameObjectTypeId;
+	m_archetypeId = InvalidGameObjectArchetypeId;
 	m_contextProperty = nullptr;
+}
+
+void PropertyPanel::GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, Actor*& actor, std::vector<GameObjectVariable>*& variables)
+{
+	gameObjectType = nullptr;
+	actor = nullptr;
+	variables = nullptr;
+
+	gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId);
+	if (gameObject)
+	{
+		gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId());
+		actor = m_project.GetActor(gameObject->GetSpriteActorId());
+		variables = &gameObject->GetVariables();
+	}
+	else
+	{
+		gameObjectType = m_project.GetGameObjectType(m_gameObjectTypeId);
+		if (gameObjectType)
+		{
+			if (GameObjectArchetype* archetype = gameObjectType->GetArchetype(m_archetypeId))
+			{
+				actor = m_project.GetActor(archetype->spriteActorId);
+				variables = &archetype->variables;
+			}
+		}
+	}
+}
+
+GameObjectVariable* PropertyPanel::FindVariableByTag(std::vector<GameObjectVariable>& variables, const std::string& tag, int componentIdx)
+{
+	for (int i = 0; i < variables.size(); i++)
+	{
+		if (((componentIdx == -1) || (componentIdx == variables[i].m_componentIdx)) && variables[i].HasTag(tag))
+		{
+			return &variables[i];
+		}
+	}
+
+	return nullptr;
 }
 
 void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -43,82 +85,60 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	{
 		m_propertyGrid->Clear();
 
-		if (const GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId))
+		GameObjectType* gameObjectType = nullptr;
+		GameObject* gameObject = nullptr;
+		Actor* actor = nullptr;
+		std::vector<GameObjectVariable>* variables = nullptr;
+
+		GetEditingVariables(gameObjectType, gameObject, actor, variables);
+
+		if (variables)
 		{
-			if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+			//If entity has a sprite actor, find it and add property
+			for (auto variable : *variables)
 			{
-				//If entity has a sprite actor, find it and add property
-				for (auto variable : gameObjectType->GetVariables())
+				if (variable.HasTag("SPRITE_SHEET"))
 				{
-					if (variable.HasTag("SPRITE_SHEET"))
+					std::string currentActor;
+
+					if (actor)
 					{
-						std::string currentActor;
-
-						if (const Actor* actor = m_project.GetActor(gameObject->GetSpriteActorId()))
-						{
-							currentActor = actor->GetName();
-						}
-
-						wxArrayString* list = new wxArrayString();
-						int selection = PopulateSpriteActorList(*list, currentActor);
-						wxEnumProperty* choiceProp = new wxEnumProperty("Sprite Actor", "Sprite Actor", *list);
-
-						if (selection >= 0 && selection < list->size())
-							choiceProp->SetChoiceSelection(selection);
-
-						choiceProp->SetAttribute("isScript", false);
-
-						m_propertyGrid->Append(choiceProp);
-
-						break;
+						currentActor = actor->GetName();
 					}
-				}
 
-				//Add all properties from all components
-				int componentIdx = -1;
+					wxArrayString* list = new wxArrayString();
+					int selection = PopulateSpriteActorList(*list, currentActor);
+					wxEnumProperty* choiceProp = new wxEnumProperty("Sprite Actor", "Sprite Actor", *list);
+
+					if (selection >= 0 && selection < list->size())
+						choiceProp->SetChoiceSelection(selection);
+
+					choiceProp->SetAttribute("isScript", false);
+
+					m_propertyGrid->Append(choiceProp);
+
+					break;
+				}
+			}
+
+			//Add all properties from all components
+			int componentIdx = -1;
 
 #if 0
-				if (gameObjectType->GetScriptVariables().size() > 0)
+			if (gameObjectType->GetScriptVariables().size() > 0)
+			{
+				//Populate all variables, mark unmodifiable ones as read only
+				for (auto variable : gameObjectType->GetScriptVariables())
 				{
-					//Populate all variables, mark unmodifiable ones as read only
-					for (auto variable : gameObjectType->GetScriptVariables())
+					if (componentIdx != variable.m_componentIdx)
 					{
-						if (componentIdx != variable.m_componentIdx)
-						{
-							m_propertyGrid->Append(new wxPropertyCategory(variable.m_componentName));
-							componentIdx = variable.m_componentIdx;
-						}
-
-						if (gameObjectType->FindVariable(variable.m_name, variable.m_componentIdx))
-						{
-							//Variable is modifiable
-							if (const GameObjectVariable* overriddenVar = gameObject->FindVariable(variable.m_name, variable.m_componentIdx))
-							{
-								AddProperty(*gameObject, *overriddenVar, variable.m_componentIdx);
-							}
-							else
-							{
-								AddProperty(*gameObject, variable, variable.m_componentIdx);
-							}
-						}
-						else
-						{
-							//Script variable only, show but mark read only
-							AddProperty(*gameObject, variable, variable.m_componentIdx, false);
-						}
+						m_propertyGrid->Append(new wxPropertyCategory(variable.m_componentName));
+						componentIdx = variable.m_componentIdx;
 					}
-				}
-				else
-#endif
-				{
-					for (auto variable : gameObjectType->GetVariables())
-					{
-						if (componentIdx != variable.m_componentIdx)
-						{
-							m_propertyGrid->Append(new wxPropertyCategory(variable.m_componentName));
-							componentIdx = variable.m_componentIdx;
-						}
 
+					if (gameObjectType->FindVariable(variable.m_name, variable.m_componentIdx))
+					{
+						//Variable is modifiable
 						if (const GameObjectVariable* overriddenVar = gameObject->FindVariable(variable.m_name, variable.m_componentIdx))
 						{
 							AddProperty(*gameObject, *overriddenVar, variable.m_componentIdx);
@@ -127,6 +147,36 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 						{
 							AddProperty(*gameObject, variable, variable.m_componentIdx);
 						}
+					}
+					else
+					{
+						//Script variable only, show but mark read only
+						AddProperty(*gameObject, variable, variable.m_componentIdx, false);
+					}
+				}
+			}
+			else
+#endif
+			{
+				for (auto variable : *variables)
+				{
+					if (componentIdx != variable.m_componentIdx)
+					{
+						m_propertyGrid->Append(new wxPropertyCategory(variable.m_componentName));
+						componentIdx = variable.m_componentIdx;
+					}
+
+					//Some properties need the actor and sprite sheet associated with this component, if it has one
+					const GameObjectVariable* spriteSheetVar = FindVariableByTag(*variables, "SPRITE_SHEET", variable.m_componentIdx);
+
+					const GameObjectVariable* overriddenVar = gameObject ? gameObject->FindVariable(variable.m_name, variable.m_componentIdx) : nullptr;
+					if (overriddenVar)
+					{
+						AddProperty(*gameObjectType, *overriddenVar, variable.m_componentIdx, actor, spriteSheetVar);
+					}
+					else
+					{
+						AddProperty(*gameObjectType, variable, variable.m_componentIdx, actor, spriteSheetVar);
 					}
 				}
 			}
@@ -138,7 +188,14 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 {
 	if (wxPGProperty* property = event.GetProperty())
 	{
-		if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId))
+		GameObjectType* gameObjectType = nullptr;
+		GameObject* gameObject = nullptr;
+		Actor* actor = nullptr;
+		std::vector<GameObjectVariable>* variables = nullptr;
+
+		GetEditingVariables(gameObjectType, gameObject, actor, variables);
+
+		if (variables)
 		{
 			wxString variableName = property->GetAttribute("variableName", "");
 			wxVariant componentIdx = property->GetAttribute("componentIdx");
@@ -147,10 +204,10 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 			if (value != s_defaultVarName)
 			{
 				//Find or add overridden var on game object
-				GameObjectVariable* variable = gameObject->FindVariable(variableName.c_str().AsChar(), componentIdx.GetInteger());
+				GameObjectVariable* variable = gameObject ? gameObject->FindVariable(variableName.c_str().AsChar(), componentIdx.GetInteger()) : nullptr;
 				if (!variable)
 				{
-					if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+					if (gameObjectType)
 					{
 						if (const GameObjectVariable* original = gameObjectType->FindVariable(variableName.c_str().AsChar(), componentIdx.GetInteger()))
 						{
@@ -160,7 +217,11 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 					}
 				}
 
-				variable->m_value = value.c_str().AsChar();
+				if (variable)
+				{
+					variable->m_value = value.c_str().AsChar();
+				}
+
 				Refresh();
 			}
 		}
@@ -196,42 +257,87 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 {
 	if (m_contextProperty)
 	{
-		if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId))
+		GameObjectType* gameObjectType = nullptr;
+		GameObject* gameObject = nullptr;
+		Actor* actor = nullptr;
+		std::vector<GameObjectVariable>* variables = nullptr;
+
+		GetEditingVariables(gameObjectType, gameObject, actor, variables);
+
+		if(variables)
 		{
-			if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+			std::string variableName = m_contextProperty->GetAttribute("variableName").GetString();
+			int componentIdx = m_contextProperty->GetAttribute("componentIdx").GetInteger();
+
+			//Find or add overridden var on game object
+			GameObjectVariable* variable = gameObject ? gameObject->FindVariable(variableName, componentIdx) : nullptr;
+			if (!variable)
 			{
-				std::string variableName = m_contextProperty->GetAttribute("variableName").GetString();
-				int componentIdx = m_contextProperty->GetAttribute("componentIdx").GetInteger();
-
-				//Find or add overridden var on game object
-				GameObjectVariable* variable = gameObject->FindVariable(variableName, componentIdx);
-				if (!variable)
+				if (const GameObjectVariable* original = gameObjectType->FindVariable(variableName, componentIdx))
 				{
-					if (const GameObjectVariable* original = gameObjectType->FindVariable(variableName, componentIdx))
-					{
-						variable = &gameObject->AddVariable();
-						*variable = *original;
-					}
+					variable = &gameObject->AddVariable();
+					*variable = *original;
 				}
+			}
 
-				if (variable)
+			if (variable)
+			{
+				switch (event.GetId())
 				{
-					switch (event.GetId())
+					case ContextMenu::Default:
 					{
-						case ContextMenu::Default:
+						break;
+					}
+
+					case ContextMenu::EditScript:
+					{
+#if defined BEEHIVE_PLUGIN_LUMINARY
+						//TODO: Do this in Beehive-side script compiler
+						const std::string engineRootDir = m_project.m_settings.engineRootDir;
+						const std::string projectRootDir = m_project.m_settings.projectRootDir;
+
+						const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
+						const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
+
+						const std::string scriptSourceFilename = gameObjectType->GetName() + ".cpp";
+						const std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
+
+						//Generate header
+						luminary::ScriptTranspiler scriptTranspiler;
+						luminary::Entity entity;
+						luminary::beehive::ConvertScriptEntity(*gameObjectType, entity);
+						scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
+
+						//Generate boilerplate
+						if (ion::io::FileDevice* device = ion::io::FileDevice::GetDefault())
 						{
-							break;
+							if (!device->GetFileExists(scriptSourceFullPath))
+							{
+								scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsSourceDir);
+								variable->m_value = scriptSourceFilename;
+								Refresh();
+							}
 						}
 
-						case ContextMenu::EditScript:
+						//Open in default shell program
+						std::string shellCmd = "rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + scriptSourceFullPath + "\"";
+						wxExecute(shellCmd);
+#endif
+						break;
+					}
+
+					case ContextMenu::CompileScript:
+					{
+						//TODO: Do this in Beehive-side script compiler
+						m_mainWindow->ShowPanelScriptCompile();
+						if (ScriptCompilePanel* panel = m_mainWindow->GetScriptCompilePanel())
 						{
-	#if defined BEEHIVE_PLUGIN_LUMINARY
-							//TODO: Do this in Beehive-side script compiler
 							const std::string engineRootDir = m_project.m_settings.engineRootDir;
 							const std::string projectRootDir = m_project.m_settings.projectRootDir;
 
 							const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
 							const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
+							const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
 
 							const std::string scriptSourceFilename = gameObjectType->GetName() + ".cpp";
 							const std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
@@ -253,59 +359,18 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 								}
 							}
 
-							//Open in default shell program
-							std::string shellCmd = "rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + scriptSourceFullPath + "\"";
-							wxExecute(shellCmd);
-	#endif
-							break;
+							//Compile
+							const std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp");
+							const std::string scriptOutFullPathRelease = scriptsExportDir + scriptOutNameRelease;
+							std::vector<std::string> includes;
+							std::vector<std::string> defines;
+							includes.push_back(scriptsEngineIncludes);
+							includes.push_back(scriptsSourceDir);
+							defines.push_back("_RELEASE");
+							panel->BeginCompileAsync(scriptSourceFullPath, scriptOutFullPathRelease, includes, defines, nullptr);
 						}
 
-						case ContextMenu::CompileScript:
-						{
-							//TODO: Do this in Beehive-side script compiler
-							m_mainWindow->ShowPanelScriptCompile();
-							if (ScriptCompilePanel* panel = m_mainWindow->GetScriptCompilePanel())
-							{
-								const std::string engineRootDir = m_project.m_settings.engineRootDir;
-								const std::string projectRootDir = m_project.m_settings.projectRootDir;
-
-								const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
-								const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
-								const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
-
-								const std::string scriptSourceFilename = gameObjectType->GetName() + ".cpp";
-								const std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
-
-								//Generate header
-								luminary::ScriptTranspiler scriptTranspiler;
-								luminary::Entity entity;
-								luminary::beehive::ConvertScriptEntity(*gameObjectType, entity);
-								scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
-
-								//Generate boilerplate
-								if (ion::io::FileDevice* device = ion::io::FileDevice::GetDefault())
-								{
-									if (!device->GetFileExists(scriptSourceFullPath))
-									{
-										scriptTranspiler.GenerateEntityCppBoilerplate(entity, scriptsSourceDir);
-										variable->m_value = scriptSourceFilename;
-										Refresh();
-									}
-								}
-
-								//Compile
-								const std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp");
-								const std::string scriptOutFullPathRelease = scriptsExportDir + scriptOutNameRelease;
-								std::vector<std::string> includes;
-								std::vector<std::string> defines;
-								includes.push_back(scriptsEngineIncludes);
-								includes.push_back(scriptsSourceDir);
-								defines.push_back("_RELEASE");
-								panel->BeginCompileAsync(scriptSourceFullPath, scriptOutFullPathRelease, includes, defines, nullptr);
-							}
-
-							break;
-						}
+						break;
 					}
 				}
 			}
@@ -318,10 +383,20 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 void PropertyPanel::SetGameObject(GameObjectId gameObjectId)
 {
 	m_gameObjectId = gameObjectId;
+	m_gameObjectTypeId = InvalidGameObjectTypeId;
+	m_archetypeId = InvalidGameObjectArchetypeId;
 	Refresh();
 }
 
-void PropertyPanel::AddProperty(const GameObject& gameObject, const GameObjectVariable& variable, int componentIdx, bool enabled)
+void PropertyPanel::SetArchetype(GameObjectTypeId gameObjectTypeId, GameObjectArchetypeId archetypeId)
+{
+	m_gameObjectId = InvalidGameObjectId;
+	m_gameObjectTypeId = gameObjectTypeId;
+	m_archetypeId = archetypeId;
+	Refresh();
+}
+
+void PropertyPanel::AddProperty(const GameObjectType& gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled)
 {
 	wxPGProperty* property = nullptr;
 
@@ -330,7 +405,7 @@ void PropertyPanel::AddProperty(const GameObject& gameObject, const GameObjectVa
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	if (variable.HasTag("SPRITE_SHEET"))
 	{
-		if (const Actor* actor = m_project.GetActor(gameObject.GetSpriteActorId()))
+		if (actor)
 		{
 			wxArrayString* list = new wxArrayString();
 			int selection = PopulateSpriteSheetList(*list, *actor, variable.m_value);
@@ -344,17 +419,13 @@ void PropertyPanel::AddProperty(const GameObject& gameObject, const GameObjectVa
 	else if (variable.HasTag("SPRITE_ANIM"))
 	{
 		//Find sprite sheet in this component first
-		if (const Actor* actor = m_project.GetActor(gameObject.GetSpriteActorId()))
+		if (actor)
 		{
 			SpriteSheetId spriteSheetId = InvalidSpriteSheetId;
-			const GameObjectVariable* spriteSheetVar = gameObject.FindVariableByTag("SPRITE_SHEET", variable.m_componentIdx);
 
 			if (!spriteSheetVar)
 			{
-				if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject.GetTypeId()))
-				{
-					spriteSheetVar = gameObjectType->FindVariableByTag("SPRITE_SHEET", variable.m_componentIdx);
-				}
+				spriteSheetVar = gameObjectType.FindVariableByTag("SPRITE_SHEET", variable.m_componentIdx);
 			}
 
 			if (spriteSheetVar && actor)

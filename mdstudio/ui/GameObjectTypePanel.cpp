@@ -96,10 +96,20 @@ void GameObjectTypesPanel::OnGameObjectTypeSelected(wxCommandEvent& event)
 	GameObjectTypeId typeId = m_gameObjectTypeMap[event.GetSelection()];
 	PopulateArchetypes(typeId);
 	m_project.SetPaintGameObjectType(typeId, InvalidGameObjectArchetypeId);
+
+	if (PropertyPanel* propertiesPanel = m_mainWindow->GetPropertiesPanel())
+	{
+		propertiesPanel->SetArchetype(InvalidGameObjectTypeId, InvalidGameObjectArchetypeId);
+	}
 }
 
 void GameObjectTypesPanel::OnArchetypeSelected(wxCommandEvent& event)
 {
 	GameObjectArchetypeId archetypeId = m_archetypeMap[event.GetSelection()];
 	m_project.SetPaintGameObjectType(m_project.GetPaintGameObjectType(), archetypeId);
+
+	if (PropertyPanel* propertiesPanel = m_mainWindow->GetPropertiesPanel())
+	{
+		propertiesPanel->SetArchetype(m_project.GetPaintGameObjectType(), archetypeId);
+	}
 }
