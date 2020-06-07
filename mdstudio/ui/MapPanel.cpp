@@ -1040,6 +1040,73 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		m_project.InvalidateMap(false);
 	}
 #endif
+	else if (event.GetId() == eContextMenuGameObjCreatePrefab)
+	{
+		if (m_selectedGameObjects.size() > 0)
+		{
+			//Create new game object
+			GameObjectTypeId prefabId = m_project.AddGameObjectType();
+
+			if (GameObjectType* prefab = m_project.GetGameObjectType(prefabId))
+			{
+				//Ask name
+				wxTextEntryDialog dialog(m_mainWindow, "Prefab Name");
+				if (dialog.ShowModal() == wxID_OK)
+				{
+					//Determine bounds
+					ion::maths::Bounds2i bounds;
+
+					for (auto gameObjId : m_selectedGameObjects)
+					{
+						if (const GameObject* gameObj = m_project.GetEditingMap().GetGameObject(gameObjId))
+						{
+							if (const GameObjectType* gameObjType = m_project.GetGameObjectType(gameObj->GetTypeId()))
+							{
+								ion::Vector2i position = gameObj->GetPosition();
+								bounds.AddPoint(position);
+								bounds.AddPoint(position + gameObjType->GetDimensions());
+							}
+						}
+					}
+
+					//Add all object types to prefab, remove original objects from scene
+					for (auto gameObjId : m_selectedGameObjects)
+					{
+						if (const GameObject* gameObj = m_project.GetEditingMap().GetGameObject(gameObjId))
+						{
+							//Add at relative position
+							ion::Vector2i position = gameObj->GetPosition();
+							prefab->AddChild(gameObj->GetTypeId(), position - bounds.GetMin());
+
+							//Remove original
+							m_project.GetEditingMap().RemoveGameObject(gameObj->GetId());
+						}
+					}
+
+					//Configure prefab
+					prefab->SetPrefab(true);
+					prefab->SetName(dialog.GetValue().c_str().AsChar());
+					prefab->SetDimensions(bounds.GetSize());
+
+					//Place prefab in scene
+					GameObjectId instanceId = m_project.GetEditingMap().PlaceGameObject(0, 0, prefabId, InvalidGameObjectArchetypeId);
+
+					//PlaceGameObject() takes tile coords, need to set world pos manually
+					m_project.GetEditingMap().MoveGameObject(instanceId, bounds.GetMin().x, bounds.GetMin().y);
+
+					//Set as new selection, update gizmo
+					m_selectedGameObjects.clear();
+					m_selectedGameObjects.push_back(instanceId);
+					SetGizmoCentre(bounds.GetCentre());
+
+					//Refresh relevant panels
+					m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
+					m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
+					Refresh();
+				}
+			}
+		}
+	}
 	else if(event.GetId() == eContextMenuGameObjAddToAnim)
 	{
 		if(m_hoverGameObject != InvalidGameObjectId)
@@ -1640,6 +1707,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					//Right-click menu
 					wxMenu contextMenu;
 
+					contextMenu.Append(eContextMenuGameObjCreatePrefab, wxString("Create Prefab"));
 					contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
 					PopupMenu(&contextMenu);
@@ -1688,10 +1756,13 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 				for (auto gameObjectId : m_selectedGameObjects)
 				{
-					if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(gameObjectId))
+					if (const GameObject* gameObject = m_project.GetEditingMap().GetGameObject(gameObjectId))
 					{
-						bounds.AddPoint(gameObject->GetPosition());
-						bounds.AddPoint(gameObject->GetPosition() + (gameObject->GetDimensions() / 2));
+						if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+						{
+							bounds.AddPoint(gameObject->GetPosition());
+							bounds.AddPoint(gameObject->GetPosition() + (gameObject->GetDimensions().x == 0 ? gameObjectType->GetDimensions() : gameObject->GetDimensions()));
+						}
 					}
 				}
 
@@ -2451,6 +2522,140 @@ void MapPanel::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::M
 	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
 }
 
+void RenderGameObject(
+	Project& project,
+	ion::render::Renderer& renderer,
+	RenderResources& renderResources,
+	const ion::Matrix4& cameraInverseMtx,
+	const ion::Matrix4& projectionMtx,
+	float z,
+	int mapWidth,
+	int mapHeight,
+	int tileWidth,
+	int tileHeight,
+	ion::render::Primitive* primitive,
+	ion::render::Material* material,
+	const GameObjectType& gameObjectType,
+	const GameObject* gameObject,
+	const ion::Vector2i& position,
+	bool selected,
+	bool hovering)
+{
+	const float x = position.x;
+	const float y_inv = (mapHeight * tileHeight) - 1 - position.y;
+	const float width = (gameObject && gameObject->GetDimensions().x > 0) ? gameObject->GetDimensions().x : gameObjectType.GetDimensions().x;
+	const float height = (gameObject && gameObject->GetDimensions().y > 0) ? gameObject->GetDimensions().y : gameObjectType.GetDimensions().y;
+	const float height_inv = -height;
+	const bool customSize = gameObject && gameObject->GetDimensions().x > 0;
+
+	//Use sprite sheet animation if available, else use default preview image
+	SpriteSheetId spriteSheetId = gameObjectType.GetPreviewSpriteSheetId();
+	SpriteAnimId spriteAnimId = gameObject ? gameObject->GetSpriteAnim() : InvalidSpriteAnimId;
+	const SpriteSheet* spriteSheet = nullptr;
+	int spriteFrame = 0;
+	ion::Vector3 animPosOffset;
+
+	//Find sprite actor from game object
+	const Actor* spriteActor = gameObject ? project.GetActor(gameObject->GetSpriteActorId()) : nullptr;
+
+	//Find sprite actor from game object type
+	if (!spriteActor)
+		spriteActor = project.GetActor(gameObjectType.GetSpriteActorId());
+
+	if (spriteActor)
+	{
+		//Find sprite sheet from game object
+		spriteSheetId = gameObject ? gameObject->GetSpriteSheetId() : InvalidSpriteSheetId;
+		spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+
+		//Find sprite sheet from game object type
+		if (!spriteSheet)
+		{
+			spriteSheetId = gameObjectType.GetSpriteSheetId();
+			spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+		}
+
+		//Default to first sprite sheet
+		if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
+		{
+			spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
+			spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
+		}
+	}
+
+	if (spriteSheet)
+	{
+		if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
+		{
+			ion::Vector2i position = spriteAnim->m_trackPosition.GetValue(spriteAnim->GetFrame());
+			spriteFrame = spriteAnim->m_trackSpriteFrame.GetValue(spriteAnim->GetFrame());
+
+			animPosOffset.x = (float)position.x;
+			animPosOffset.y = (float)position.y;
+		}
+	}
+
+	//Render outline
+	if (project.GetShowStampOutlines())
+	{
+		ion::Colour colour(1.0f, 1.0f, 1.0f, 0.0f);
+
+		if (selected)
+			colour = renderResources.GetColour(RenderResources::eColourSelected);
+		else if (hovering)
+			colour = renderResources.GetColour(RenderResources::eColourOutline);
+		else
+			colour = renderResources.GetColour(RenderResources::eColourUnselected);
+
+		material->SetDiffuseColour(colour);
+
+		ion::Vector3 scale(width / tileWidth, height / tileHeight, 1.0f);
+		ion::Matrix4 mtx;
+		ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
+			floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
+
+		mtx.SetTranslation(pos + animPosOffset);
+		mtx.SetScale(scale);
+
+		material->Bind(mtx, cameraInverseMtx, projectionMtx);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+		material->Unbind();
+	}
+
+	if (spriteSheetId != InvalidSpriteSheetId)
+	{
+		//Render spriteSheet
+		if (RenderResources::SpriteSheetRenderResources* spriteSheetResources = renderResources.GetSpriteSheetResources(spriteSheetId))
+		{
+			ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
+			ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
+
+			ion::render::Primitive* spriteSheetPrimitive = spriteSheetResources->m_primitive;
+			ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[spriteFrame].material;
+			spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
+
+			ion::Matrix4 spriteSheetMtx;
+
+			ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
+				floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
+
+			spriteSheetMtx.SetTranslation(pos + animPosOffset);
+
+			if (customSize)
+			{
+				spriteSheetPrimitive = renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
+				spriteSheetMtx.SetScale(ion::Vector3(width, height_inv, 1.0f));
+			}
+
+			spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
+			renderer.SetFaceCulling(ion::render::Renderer::eNoCull);
+			renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
+			renderer.SetFaceCulling(ion::render::Renderer::eCounterClockwise);
+			spriteSheetMaterial->Unbind();
+		}
+	}
+}
+
 void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	const TGameObjectPosMap& gameObjects = m_project.GetEditingMap().GetGameObjects();
@@ -2474,117 +2679,57 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 
 			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject.GetTypeId()))
 			{
-				const float x = gameObject.GetPosition().x;
-				const float y_inv = (mapHeight * tileHeight) - 1 - gameObject.GetPosition().y;
-				const float width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType->GetDimensions().x;
-				const float height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
-				const float height_inv = -height;
-				const bool customSize = (gameObject.GetDimensions().x > 0);
+				bool selected = ion::utils::stl::Find(m_selectedGameObjects, gameObject.GetId());
+				bool hovering = gameObject.GetId() == m_hoverGameObject;
 
-				//Use sprite sheet animation if available, else use default preview image
-				SpriteSheetId spriteSheetId = gameObjectType->GetPreviewSpriteSheetId();
-				SpriteAnimId spriteAnimId = gameObject.GetSpriteAnim();
-				const SpriteSheet* spriteSheet = nullptr;
-				int spriteFrame = 0;
-				ion::Vector3 animPosOffset;
+				//Draw single game object
+				ion::Vector2i position = gameObject.GetPosition();
 
-				//Find sprite actor from game object
-				const Actor* spriteActor = m_project.GetActor(gameObject.GetSpriteActorId());
+				RenderGameObject(
+					m_project,
+					renderer,
+					m_renderResources,
+					cameraInverseMtx,
+					projectionMtx,
+					z,
+					mapWidth,
+					mapHeight,
+					tileWidth,
+					tileHeight,
+					primitive,
+					material,
+					*gameObjectType,
+					&gameObject,
+					position,
+					selected,
+					hovering);
 
-				//Find sprite actor from game object type
-				if(!spriteActor)
-					spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId());
-
-				if (spriteActor)
+				if (gameObjectType->IsPrefabType())
 				{
-					//Find sprite sheet from game object
-					spriteSheetId = gameObject.GetSpriteSheetId();
-					spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
-
-					//Find sprite sheet from game object type
-					if (!spriteSheet)
+					//Draw all prefab children
+					for (auto prefabChild : gameObjectType->GetChildren())
 					{
-						spriteSheetId = gameObjectType->GetSpriteSheetId();
-						spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
-					}
-
-					//Default to first sprite sheet
-					if (!spriteSheet && spriteActor->GetSpriteSheetCount() > 0)
-					{
-						spriteSheet = &spriteActor->GetSpriteSheets().begin()->second;
-						spriteSheetId = spriteActor->GetSpriteSheets().begin()->first;
-					}
-				}
-
-				if (spriteSheet)
-				{
-					if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
-					{
-						ion::Vector2i position = spriteAnim->m_trackPosition.GetValue(spriteAnim->GetFrame());
-						spriteFrame = spriteAnim->m_trackSpriteFrame.GetValue(spriteAnim->GetFrame());
-
-						animPosOffset.x = (float)position.x;
-						animPosOffset.y = (float)position.y;
-					}
-				}
-
-				//Render outline
-				if(m_project.GetShowStampOutlines())
-				{
-					ion::Colour colour(1.0f, 1.0f, 1.0f, 0.0f);
-
-					if (ion::utils::stl::Find(m_selectedGameObjects, gameObject.GetId()))
-						colour = m_renderResources.GetColour(RenderResources::eColourSelected);
-					else if (gameObject.GetId() == m_hoverGameObject)
-						colour = m_renderResources.GetColour(RenderResources::eColourOutline);
-					else
-						colour = m_renderResources.GetColour(RenderResources::eColourUnselected);
-
-					material->SetDiffuseColour(colour);
-
-					ion::Vector3 scale(width / tileWidth, height / tileHeight, 1.0f);
-					ion::Matrix4 mtx;
-					ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
-						floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
-
-					mtx.SetTranslation(pos + animPosOffset);
-					mtx.SetScale(scale);
-
-					material->Bind(mtx, cameraInverseMtx, projectionMtx);
-					renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-					material->Unbind();
-				}
-
-				if(spriteSheetId != InvalidSpriteSheetId)
-				{
-					//Render spriteSheet
-					if(RenderResources::SpriteSheetRenderResources* spriteSheetResources = m_renderResources.GetSpriteSheetResources(spriteSheetId))
-					{
-						ion::debug::Assert(spriteSheetResources, "MapPanel::RenderGameObjects() - Missing spriteSheet render resources");
-						ion::debug::Assert(spriteSheetResources->m_frames.size() > 0, "MapPanel::RenderGameObjects() - SpriteSheet contains no frames");
-
-						ion::render::Primitive* spriteSheetPrimitive = spriteSheetResources->m_primitive;
-						ion::render::Material* spriteSheetMaterial = spriteSheetResources->m_frames[spriteFrame].material;
-						spriteSheetMaterial->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-
-						ion::Matrix4 spriteSheetMtx;
-
-						ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
-							floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
-
-						spriteSheetMtx.SetTranslation(pos + animPosOffset);
-
-						if(customSize)
+						if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.first))
 						{
-							spriteSheetPrimitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
-							spriteSheetMtx.SetScale(ion::Vector3(width, height_inv, 1.0f));
+							RenderGameObject(
+								m_project,
+								renderer,
+								m_renderResources,
+								cameraInverseMtx,
+								projectionMtx,
+								z,
+								mapWidth,
+								mapHeight,
+								tileWidth,
+								tileHeight,
+								primitive,
+								material,
+								*prefabChildType,
+								nullptr,
+								position + prefabChild.second,
+								selected,
+								hovering);
 						}
-
-						spriteSheetMaterial->Bind(spriteSheetMtx, cameraInverseMtx, projectionMtx);
-						renderer.SetFaceCulling(ion::render::Renderer::eNoCull);
-						renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
-						renderer.SetFaceCulling(ion::render::Renderer::eCounterClockwise);
-						spriteSheetMaterial->Unbind();
 					}
 				}
 			}

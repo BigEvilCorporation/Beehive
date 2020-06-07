@@ -49,7 +49,21 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 						name = "[" + objectType->GetName() + "_id" + std::to_string(labelIdx++) + "]";
 
 					wxTreeItemId itemId = m_tree->AppendItem(rootId, name);
+					m_tree->SetItemBold(itemId, objectType->IsPrefabType());
 					m_objectMap.insert(std::make_pair(itemId, object.m_gameObject.GetId()));
+
+					if (objectType->IsPrefabType())
+					{
+						for (auto prefabChild : objectType->GetChildren())
+						{
+							if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.first))
+							{
+								std::string childName = "[" + prefabChildType->GetName() + "_id" + std::to_string(labelIdx++) + "]";
+								wxTreeItemId childId = m_tree->AppendItem(itemId, childName);
+							}
+						}
+						
+					}
 				}
 			}
 		}

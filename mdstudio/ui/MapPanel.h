@@ -64,6 +64,7 @@ private:
 		eContextMenuStampSendToBack,
 #endif
 		eContextMenuGameObjAddToAnim,
+		eContextMenuGameObjCreatePrefab,
 		eContextMenuSetTerrainFlagSpecial,
 		eContextMenuSetTerrainFlagWater,
 	};
