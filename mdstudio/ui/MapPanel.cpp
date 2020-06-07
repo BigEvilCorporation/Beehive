@@ -17,6 +17,7 @@
 #include <wx/Menu.h>
 #include <wx/msgdlg.h>
 
+#include <ion/maths/Bounds.h>
 #include <ion/core/utils/STL.h>
 
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
@@ -36,6 +37,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	m_stampPastePos.y = -1;
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 	m_moveGameObjByPixel = false;
+	m_boxSelection = false;
 
 	m_cursorHorizontal = new wxCursor(wxCURSOR_SIZEWE);
 	m_cursorVertical = new wxCursor(wxCURSOR_SIZENS);
@@ -87,7 +89,6 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		Refresh();
 	}
 
-#if !BEEHIVE_FIXED_STAMP_MODE //Fixed grid placement only in fixed mode
 	if (m_currentTool == eToolPaintStamp)
 	{
 		if(m_previewTileFlipX != event.ShiftDown())
@@ -105,7 +106,8 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		}
 	}
 
-	if(m_currentTool == eToolMoveGameObject
+#if !BEEHIVE_FIXED_STAMP_MODE //Fixed grid placement only in fixed mode
+	if(m_currentTool == eToolSelectGameObject
 		|| m_currentTool == eToolPlaceGameObject
 		|| m_currentTool == eToolDrawGameObject
 		|| m_currentTool == eToolDuplicateGameObject)
@@ -424,8 +426,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 							m_selectedTiles.clear();
 
 							//eStart box selection, in case next event is dragging
-							m_boxSelectStart.x = x;
-							m_boxSelectStart.y = y;
+							m_boxSelectStart.x = x * tileWidth;
+							m_boxSelectStart.y = y * tileHeight;
 						}
 
 						//Single click - add tile at cursor to selection
@@ -434,17 +436,17 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					else if(!m_multipleSelection)
 					{
 						//Dragging, set box end
-						m_boxSelectEnd.x = x;
-						m_boxSelectEnd.y = y;
+						m_boxSelectEnd.x = x * tileWidth;
+						m_boxSelectEnd.y = y * tileHeight;
 
 						//Clear current selection
 						m_selectedTiles.clear();
 
 						//Sanitise loop order
-						int top = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
-						int left = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
-						int bottom = ion::maths::Max(m_boxSelectStart.y, m_boxSelectEnd.y);
-						int right = ion::maths::Max(m_boxSelectStart.x, m_boxSelectEnd.x);
+						int top = ion::maths::Min(m_boxSelectStart.y * tileHeight, m_boxSelectEnd.y * tileHeight);
+						int left = ion::maths::Min(m_boxSelectStart.x * tileWidth, m_boxSelectEnd.x * tileWidth);
+						int bottom = ion::maths::Max(m_boxSelectStart.y * tileHeight, m_boxSelectEnd.y * tileHeight);
+						int right = ion::maths::Max(m_boxSelectStart.x * tileWidth, m_boxSelectEnd.x * tileWidth);
 
 						//Add all tiles in box
 						for(int tileX = left; tileX <= right; tileX++)
@@ -485,27 +487,38 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				{
 					if (const Stamp* stamp = m_project.GetStamp(stampId))
 					{
-						int stampX = x % stamp->GetWidth();
-						int stampY = y % stamp->GetHeight();
-						TileId tileId = stamp->GetTile(stampX, stampY);
+						if (x >= 0 && y >= 0)
+						{
+							int stampX = x % stamp->GetWidth();
+							int stampY = y % stamp->GetHeight();
+							TileId tileId = stamp->GetTile(stampX, stampY);
 
 #if BEEHIVE_FIXED_STAMP_MODE
-						TerrainTileId terrainTileId = stamp->GetTerrainTile(stampX, stampY);
-						u16 collisionFlags = stamp->GetCollisionTileFlags(stampX, stampY);
+							TerrainTileId terrainTileId = stamp->GetTerrainTile(stampX, stampY);
+							u16 collisionFlags = stamp->GetCollisionTileFlags(stampX, stampY);
 #else
-						TerrainTileId terrainTileId = inMapRange ? m_project.GetEditingCollisionMap().GetTerrainTile(x, y) : InvalidTerrainTileId;
-						u16 collisionFlags = inMapRange ? m_project.GetEditingCollisionMap().GetCollisionTileFlags(x, y) : 0;
+							TerrainTileId terrainTileId = inMapRange ? m_project.GetEditingCollisionMap().GetTerrainTile(x, y) : InvalidTerrainTileId;
+							u16 collisionFlags = inMapRange ? m_project.GetEditingCollisionMap().GetCollisionTileFlags(x, y) : 0;
 #endif
 
-						std::stringstream tipStr;
-						tipStr << "Cursor: 0x" << SSTREAM_HEX4(x) << ", 0x" << SSTREAM_HEX4(y) << " (" << x << ", " << y << ")" << std::endl;
-						tipStr << "Stamp: 0x" << SSTREAM_HEX4(stampId) << " (" << stampId << ")" << std::endl;
-						tipStr << "Tile: 0x" << SSTREAM_HEX4(tileId) << " (" << tileId << ")" << std::endl;
-						tipStr << "Terrain: 0x" << SSTREAM_HEX4(terrainTileId) << " (" << terrainTileId << ")" << " collisionFlags: 0x" << SSTREAM_HEX2(collisionFlags) /*<< " terrainFlags: 0x" << SSTREAM_HEX2(terrainFlags)*/ << std::endl;
-						tipStr << "Stamp pos: 0x" << SSTREAM_HEX4(stampPos.x) << ", 0x" << SSTREAM_HEX4(stampPos.y) << " (" << stampPos.x << ", " << stampPos.y << ")" << std::endl;
-						tipStr << "Size: " << stamp->GetWidth() << ", " << stamp->GetHeight() << std::endl;
-						tipStr << "Addr: 0x" << SSTREAM_HEX8(stampId * tileWidth * tileHeight * 4) << std::endl;
-						SetToolTip(tipStr.str().c_str());
+							u8 terrainAngleByte = 0;
+							ion::Vector2 terrainNormal;
+							if (const TerrainTile* terrainTile = m_project.GetTerrainTileset().GetTerrainTile(terrainTileId))
+							{
+								terrainAngleByte = terrainTile->GetAngleByte();
+								terrainNormal = terrainTile->GetNormal();
+							}
+
+							std::stringstream tipStr;
+							tipStr << "Cursor: 0x" << SSTREAM_HEX4(x) << ", 0x" << SSTREAM_HEX4(y) << " (" << x << ", " << y << ")" << std::endl;
+							tipStr << "Stamp: 0x" << SSTREAM_HEX4(stampId) << " (" << stampId << ")" << std::endl;
+							tipStr << "Tile: 0x" << SSTREAM_HEX4(tileId) << " (" << tileId << ")" << std::endl;
+							tipStr << "Terrain: 0x" << SSTREAM_HEX4(terrainTileId) << " (" << terrainTileId << ")" << " collisionFlags: 0x" << SSTREAM_HEX2(collisionFlags) << " angleByte: 0x" << SSTREAM_HEX2(terrainAngleByte) << " normal: " << terrainNormal.x << "," << terrainNormal.y << std::endl;
+							tipStr << "Stamp pos: 0x" << SSTREAM_HEX4(stampPos.x) << ", 0x" << SSTREAM_HEX4(stampPos.y) << " (" << stampPos.x << ", " << stampPos.y << ")" << std::endl;
+							tipStr << "Size: " << stamp->GetWidth() << ", " << stamp->GetHeight() << std::endl;
+							tipStr << "Addr: 0x" << SSTREAM_HEX8(stampId * tileWidth * tileHeight * 4) << std::endl;
+							SetToolTip(tipStr.str().c_str());
+						}
 					}
 					else
 					{
@@ -528,10 +541,10 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						if (Stamp* stamp = m_project.GetStamp(stampId))
 						{
 							//Set box selection
-							m_boxSelectStart.x = stampPos.x;
-							m_boxSelectStart.y = stampPos.y;
-							m_boxSelectEnd.x = stampPos.x + stamp->GetWidth() - 1;
-							m_boxSelectEnd.y = stampPos.y + stamp->GetHeight() - 1;
+							m_boxSelectStart.x = stampPos.x * tileWidth;
+							m_boxSelectStart.y = stampPos.y * tileHeight;
+							m_boxSelectEnd.x = stampPos.x + ((stamp->GetWidth() - 1) * tileWidth);
+							m_boxSelectEnd.y = stampPos.y + ((stamp->GetHeight() - 1) * tileHeight);
 						}
 					}
 
@@ -809,39 +822,6 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 			}
 		}
 
-		case eToolSelectGameObject:
-		case eToolAnimateGameObject:
-		{
-			ion::Vector2i topLeft;
-			m_hoverGameObject = m_project.GetEditingMap().FindGameObject(x, y, topLeft);
-
-			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
-			{
-				m_selectedGameObject = m_hoverGameObject;
-
-				if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
-				{
-					m_mainWindow->SetSelectedGameObject(gameObject);
-					m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
-				}
-			}
-
-			if(buttonBits & eMouseRight)
-			{
-				if(m_hoverGameObject != InvalidGameObjectId)
-				{
-					//Right-click menu
-					wxMenu contextMenu;
-
-					contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
-					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
-					PopupMenu(&contextMenu);
-				}
-			}
-
-			break;
-		}
-
 		case eToolPlaceGameObject:
 		{
 			m_previewGameObjectType = m_project.GetPaintGameObjectType();
@@ -866,30 +846,39 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 
 		case eToolDuplicateGameObject:
 		{
-			if (const GameObject* original = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
+			std::vector<GameObjectId> newObjects;
+
+			for (auto gameObjId : m_selectedGameObjects)
 			{
-				if (GameObjectType* gameObjectType = m_project.GetGameObjectType(original->GetTypeId()))
+				if (const GameObject* original = m_project.GetEditingMap().GetGameObject(gameObjId))
 				{
-					m_previewGameObjectType = original->GetTypeId();
-					m_previewGameObjectArchetype = InvalidGameObjectArchetypeId;
-					m_previewGameObjectPos.x = x;
-					m_previewGameObjectPos.y = y;
-
-					if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+					if (GameObjectType* gameObjectType = m_project.GetGameObjectType(original->GetTypeId()))
 					{
-						std::string name = ion::string::AddNumericPostfix(original->GetName(), 1);
-						while (m_project.GetEditingMap().FindGameObject(name))
-						{
-							name = ion::string::AddNumericPostfix(name, 1);
-						}
+						m_previewGameObjectType = original->GetTypeId();
+						m_previewGameObjectArchetype = InvalidGameObjectArchetypeId;
+						m_previewGameObjectPos.x = original->GetPosition().x;
+						m_previewGameObjectPos.y = original->GetPosition().y;
 
-						m_project.GetEditingMap().PlaceGameObject(x, y, *gameObjectType, *original, name);
-						m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
-						m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
-						Refresh();
+						if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+						{
+							std::string name = ion::string::AddNumericPostfix(original->GetName(), 1);
+							while (m_project.GetEditingMap().FindGameObject(name))
+							{
+								name = ion::string::AddNumericPostfix(name, 1);
+							}
+
+							GameObjectId newObject = m_project.GetEditingMap().PlaceGameObject(original->GetPosition().x, original->GetPosition().y, *gameObjectType, *original, name);
+							m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
+							m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
+							Refresh();
+
+							newObjects.push_back(newObject);
+						}
 					}
 				}
 			}
+
+			m_selectedGameObjects = newObjects;
 
 			break;
 		}
@@ -901,13 +890,13 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				if(m_boxSelectStart.x == -1)
 				{
 					//Mouse first down, take start pos
-					m_boxSelectStart.x = x;
-					m_boxSelectStart.y = y;
+					m_boxSelectStart.x = x * tileWidth;
+					m_boxSelectStart.y = y * tileHeight;
 				}
 				else
 				{
 					//Start pos already taken, take end pos
-					m_boxSelectEnd.x = x;
+					m_boxSelectEnd.x = x * tileWidth;
 					m_boxSelectEnd.y = y;
 				}
 			}
@@ -919,8 +908,8 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
 					if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
 					{
-						int boxX = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
-						int boxY = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int boxX = ion::maths::Min(m_boxSelectStart.x * tileWidth, m_boxSelectEnd.x * tileWidth);
+						int boxY = ion::maths::Min(m_boxSelectStart.y * tileHeight, m_boxSelectEnd.y * tileHeight);
 						int boxWidth = ion::maths::Abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1;
 						int boxHeight = ion::maths::Abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1;
 
@@ -1573,56 +1562,145 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			break;
 		}
 
-		case eToolMoveGameObject:
+		case eToolSelectGameObject:
+		case eToolAnimateGameObject:
 		{
+			ion::Vector2i topLeft;
+			m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+
 			ion::Vector2i moveDelta = m_gizmo.IsEnabled() ? gizmoDelta : mouseDelta;
 			bool mouseOverGizmo = m_gizmo.IsEnabled() && (m_gizmo.GetCurrentConstraint() != Gizmo::Constraint::None);
 
-			if (!mouseOverGizmo)
+			if (!mouseOverGizmo || m_boxSelection)
 			{
-				if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+				//Mouse selection
+				if (buttonBits & eMouseLeft)
 				{
-					ion::Vector2i topLeft;
-					m_selectedGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+					if (!(m_prevMouseBits & eMouseLeft))
+					{
+						//First click
+						m_boxSelectStart.x = -1;
+						m_boxSelectStart.y = -1;
+						m_boxSelectEnd.x = -1;
+						m_boxSelectEnd.y = -1;
+
+						m_selectedGameObjects.clear();
+						m_selectedGameObjects.push_back(m_hoverGameObject);
+
+						if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
+						{
+							m_mainWindow->SetSelectedGameObject(gameObject);
+							m_mainWindow->SetSelectedAnimObject(m_hoverGameObject);
+						}
+					}
+					else
+					{
+						//Dragging
+						if (m_boxSelectStart.x == -1)
+						{
+							m_boxSelectStart = mousePos;
+							m_boxSelection = true;
+						}
+
+						m_boxSelectEnd = mousePos;
+
+						//Sanitise box size
+						int top = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int left = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
+						int bottom = ion::maths::Max(m_boxSelectStart.y, m_boxSelectEnd.y);
+						int right = ion::maths::Max(m_boxSelectStart.x, m_boxSelectEnd.x);
+
+						std::vector<const GameObjectMapEntry*> gameObjects;
+						m_project.GetEditingMap().FindGameObjects(left / tileWidth, top / tileHeight, (right - left) / tileWidth, (bottom - top) / tileHeight, gameObjects);
+
+						m_selectedGameObjects.clear();
+
+						for (auto gameObj : gameObjects)
+						{
+							m_selectedGameObjects.push_back(gameObj->m_gameObject.GetId());
+						}
+					}
+
+					Refresh();
 				}
 				else
 				{
-					ion::Vector2i topLeft;
-					m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+					m_boxSelectStart.x = -1;
+					m_boxSelectStart.y = -1;
+					m_boxSelectEnd.x = -1;
+					m_boxSelectEnd.y = -1;
+					m_boxSelection = false;
+				}
+			}
+			
+			if (buttonBits & eMouseRight)
+			{
+				if (m_hoverGameObject != InvalidGameObjectId)
+				{
+					//Right-click menu
+					wxMenu contextMenu;
+
+					contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
+					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
+					PopupMenu(&contextMenu);
 				}
 			}
 
-			if (m_selectedGameObject != InvalidGameObjectId)
+			//Transform using gizmo
+			if (!m_boxSelection && m_selectedGameObjects.size() > 0)
 			{
-				//Object selected
+				//Objects selected
 				m_gizmo.SetEnabled(true);
 
-				if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
+				if(buttonBits & eMouseLeft)
 				{
-					//Update gizmo pos
-					CentreGizmoOnObject(*gameObject);
+					const int tileWidth = m_project.GetPlatformConfig().tileWidth;
+					const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-					if(buttonBits & eMouseLeft)
+					if(m_moveGameObjByPixel || m_gizmo.IsEnabled())
 					{
-						const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-						const int tileHeight = m_project.GetPlatformConfig().tileHeight;
+						for (auto gameObjectId : m_selectedGameObjects)
+						{
+							if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(gameObjectId))
+							{
+								m_project.GetEditingMap().MoveGameObject(gameObjectId, gameObject->GetPosition().x + moveDelta.x, gameObject->GetPosition().y + moveDelta.y);
+							}
+						}
 
-						if(m_moveGameObjByPixel || m_gizmo.IsEnabled())
+						Refresh();
+					}
+					else if(!m_gizmo.IsEnabled())
+					{
+						for (auto gameObjectId : m_selectedGameObjects)
 						{
-							m_project.GetEditingMap().MoveGameObject(m_selectedGameObject, gameObject->GetPosition().x + moveDelta.x, gameObject->GetPosition().y + moveDelta.y);
-							Refresh();
+							if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(gameObjectId))
+							{
+								m_project.GetEditingMap().MoveGameObject(gameObjectId, gameObject->GetPosition().x + (tileDelta.x * tileWidth), gameObject->GetPosition().y + (tileDelta.y * tileHeight));
+							}
 						}
-						else if(!m_gizmo.IsEnabled())
-						{
-							m_project.GetEditingMap().MoveGameObject(m_selectedGameObject, gameObject->GetPosition().x + (tileDelta.x * tileWidth), gameObject->GetPosition().y + (tileDelta.y * tileHeight));
-							Refresh();
-						}
+
+						Refresh();
 					}
 				}
+
+				//Determine gizmo centre
+				ion::maths::Bounds2i bounds;
+
+				for (auto gameObjectId : m_selectedGameObjects)
+				{
+					if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(gameObjectId))
+					{
+						bounds.AddPoint(gameObject->GetPosition());
+						bounds.AddPoint(gameObject->GetPosition() + (gameObject->GetDimensions() / 2));
+					}
+				}
+
+				//Update gizmo pos
+				SetGizmoCentre(bounds.GetCentre());
 			}
 			else
 			{
-				//No object selected
+				//No objects selected
 				m_gizmo.SetEnabled(false);
 			}
 
@@ -1666,8 +1744,8 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	z += zOffset;
 
-	//Render selected tiles
-	RenderTileSelection(renderer, cameraInverseMtx, projectionMtx, z);
+	//Render selection box
+	RenderBoxSelection(renderer, cameraInverseMtx, projectionMtx, z);
 
 	z += zOffset;
 
@@ -1824,12 +1902,13 @@ ion::Vector2 MapPanel::GetCameraPos() const
 
 void MapPanel::SelectGameObject(GameObjectId gameObjectId)
 {
-	m_selectedGameObject = gameObjectId;
+	m_selectedGameObjects.clear();
+	m_selectedGameObjects.push_back(gameObjectId);
 
-	if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
+	if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(gameObjectId))
 	{
 		m_mainWindow->SetSelectedGameObject(gameObject);
-		m_mainWindow->SetSelectedAnimObject(m_selectedGameObject);
+		m_mainWindow->SetSelectedAnimObject(gameObjectId);
 	}
 }
 
@@ -2134,37 +2213,18 @@ void MapPanel::SetTool(ToolType tool)
 	}
 #endif
 
-	case eToolSelectGameObject:
-	case eToolMoveGameObject:
-	case eToolDuplicateGameObject:
-	{
-		if (m_selectedGameObject != InvalidGameObjectId)
-		{
-			if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_selectedGameObject))
-			{
-				m_gizmo.SetEnabled(true);
-				CentreGizmoOnObject(*gameObject);
-			}
-		}
-
-		break;
-	}
-
 	default:
 		ResetToolData();
 	}
+
+	Refresh();
 }
 
-void MapPanel::CentreGizmoOnObject(const GameObject& gameObject)
+void MapPanel::SetGizmoCentre(const ion::Vector2i& centre)
 {
-	if (GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject.GetTypeId()))
-	{
-		ion::Vector2i centre = gameObject.GetPosition() + (gameObjectType->GetDimensions() / 2);
-		ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
-		ion::Vector2i position(centre.x, mapSizePx.y - centre.y);
-
-		m_gizmo.SetPosition(position);
-	}
+	ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
+	ion::Vector2i position(centre.x, mapSizePx.y - centre.y);
+	m_gizmo.SetPosition(position);
 }
 
 void MapPanel::ResetToolData()
@@ -2180,6 +2240,7 @@ void MapPanel::ResetToolData()
 	//Invalidate box/multiple selection
 	m_selectedTiles.clear();
 	m_multipleSelection = false;
+	m_boxSelection = false;
 	m_boxSelectStart.x = -1;
 	m_boxSelectStart.y = -1;
 	m_boxSelectEnd.x = -1;
@@ -2191,7 +2252,7 @@ void MapPanel::ResetToolData()
 
 	//Invalidate game object preview
 	m_hoverGameObject = InvalidGameObjectId;
-	m_selectedGameObject = InvalidGameObjectId;
+	m_selectedGameObjects.clear();
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 
 	//Invalidate bezier
@@ -2472,7 +2533,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				{
 					ion::Colour colour(1.0f, 1.0f, 1.0f, 0.0f);
 
-					if (gameObject.GetId() == m_selectedGameObject)
+					if (ion::utils::stl::Find(m_selectedGameObjects, gameObject.GetId()))
 						colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 					else if (gameObject.GetId() == m_hoverGameObject)
 						colour = m_renderResources.GetColour(RenderResources::eColourOutline);
@@ -2674,7 +2735,7 @@ void MapPanel::RenderPaintPreview(ion::render::Renderer& renderer, const ion::Ma
 	}
 }
 
-void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
+void MapPanel::RenderBoxSelection(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	const Map& map = m_project.GetEditingMap();
 	const float mapWidth = map.GetWidth();
@@ -2682,19 +2743,24 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourSelected);
 
 	if(m_boxSelectStart.x >= 0 && m_boxSelectEnd.x >= 0)
 	{
 		//Draw overlay over box selection
-		const float bottom = ion::maths::Min(mapHeight - 1 - m_boxSelectStart.y, mapHeight - 1 - m_boxSelectEnd.y);
-		const float left = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 
-		ion::Vector3 boxScale((float)abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1.0f, (float)abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1.0f, 0.0f);
-		ion::Vector3 boxPos(floor((left - (mapWidth / 2.0f) + (boxScale.x / 2.0f)) * tileWidth),
-			floor((bottom - (mapHeight / 2.0f) + (boxScale.y / 2.0f)) * tileHeight), z);
+		const float x = ion::maths::Min(m_boxSelectStart.x, m_boxSelectEnd.x);
+		const float y = ion::maths::Min(m_boxSelectStart.y, m_boxSelectEnd.y);
+		const float y_inv = (mapHeight * tileHeight) - 1 - y;
+		const float width = (float)abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1.0f;
+		const float height = (float)abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1.0f;
+		const ion::Vector2 mapCentre((mapWidth * tileWidth) / 2.0f, (mapHeight * tileHeight) / 2.0f);
+		const ion::Vector2 boxCentre(width / 2.0f, height / 2.0f);
+
+		ion::Vector3 boxScale(width, height, 0.0f);
+		ion::Vector3 boxPos(floor((x - mapCentre.x + boxCentre.x)), floor((y_inv - mapCentre.y - boxCentre.y)), z);
 
 		ion::Matrix4 boxMtx;
 		boxMtx.SetTranslation(boxPos);
@@ -2710,6 +2776,8 @@ void MapPanel::RenderTileSelection(ion::render::Renderer& renderer, const ion::M
 	else if(m_selectedTiles.size() > 0)
 	{
 		//Draw overlay over selected tiles
+		ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
+
 		ion::Matrix4 selectionMtx;
 		ion::Matrix4 worldViewProjMtx;
 		ion::render::Shader* shader = m_renderResources.GetShader(RenderResources::eShaderFlatColour);

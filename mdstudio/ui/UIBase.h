@@ -124,11 +124,10 @@ class SpriteCanvas;
 #define wxID_TOOL_COPY_TO_NEW_MAP 1064
 #define wxID_TOOL_SELECTGAMEOBJ 1065
 #define wxID_TOOL_PLACEGAMEOBJ 1066
-#define wxID_TOOL_MOVEGAMEOBJ 1067
-#define wxID_TOOL_ANIMATEGAMEOBJ 1068
-#define wxID_TOOL_REMOVEGAMEOBJ 1069
-#define wxID_TOOL_DRAWGAMEOBJ 1070
-#define wxID_TOOL_DUPLICATEGAMEOBJ 1071
+#define wxID_TOOL_ANIMATEGAMEOBJ 1067
+#define wxID_TOOL_REMOVEGAMEOBJ 1068
+#define wxID_TOOL_DRAWGAMEOBJ 1069
+#define wxID_TOOL_DUPLICATEGAMEOBJ 1070
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -489,7 +488,6 @@ class MapToolbox : public wxPanel
 		wxStaticText* m_staticText14;
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
-		wxBitmapButton* m_toolMoveGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
 
 	public:
@@ -516,7 +514,6 @@ class MapToolboxGameObjs : public wxPanel
 		wxBitmapButton* m_toolSelectGameObject;
 		wxBitmapButton* m_toolPlaceGameObject;
 		wxBitmapButton* m_toolDrawGameObject;
-		wxBitmapButton* m_toolMoveGameObject;
 		wxBitmapButton* m_toolRemoveGameObject;
 		wxBitmapButton* m_toolDuplicateGameObject;
 

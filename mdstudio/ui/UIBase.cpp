@@ -61,7 +61,6 @@
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
 #include "../FormBuilderProj/tool_genterrain_beziers.xpm"
-#include "../FormBuilderProj/tool_movegameobj.xpm"
 #include "../FormBuilderProj/tool_movestamp.xpm"
 #include "../FormBuilderProj/tool_paintcolhole.xpm"
 #include "../FormBuilderProj/tool_paintcolpixel.xpm"
@@ -1145,13 +1144,6 @@ MapToolbox::MapToolbox( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 
 	fgSizer9->Add( m_toolPlaceGameObject, 0, wxALL, 5 );
 
-	m_toolMoveGameObject = new wxBitmapButton( this, wxID_TOOL_MOVEGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
-
-	m_toolMoveGameObject->SetBitmap( wxBitmap( tool_selectgameobj_xpm ) );
-	m_toolMoveGameObject->SetToolTip( wxT("Move Game Object") );
-
-	fgSizer9->Add( m_toolMoveGameObject, 0, wxALL, 5 );
-
 	m_toolAnimateGameObject = new wxBitmapButton( this, wxID_TOOL_ANIMATEGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
 	m_toolAnimateGameObject->SetBitmap( wxBitmap( tool_selectgameobj_xpm ) );
@@ -1214,13 +1206,6 @@ MapToolboxGameObjs::MapToolboxGameObjs( wxWindow* parent, wxWindowID id, const w
 	m_toolDrawGameObject->SetToolTip( wxT("Draw Game Object") );
 
 	fgSizer9->Add( m_toolDrawGameObject, 0, wxALL, 5 );
-
-	m_toolMoveGameObject = new wxBitmapButton( this, wxID_TOOL_MOVEGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
-
-	m_toolMoveGameObject->SetBitmap( wxBitmap( tool_movegameobj_xpm ) );
-	m_toolMoveGameObject->SetToolTip( wxT("Move Game Object") );
-
-	fgSizer9->Add( m_toolMoveGameObject, 0, wxALL, 5 );
 
 	m_toolAnimateGameObject = new wxBitmapButton( this, wxID_TOOL_ANIMATEGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
