@@ -194,8 +194,9 @@ void SpriteAnimEditorDialog::OnBtnImport(wxCommandEvent& event)
 	wxFileDialog dialogue(this, _("Open Beehive GameObj file"), "", "", "Bee_Sprite files (*.bee_sprites)|*.bee_sprites", wxFD_OPEN);
 	if(dialogue.ShowModal() == wxID_OK)
 	{
+		bool clearExisting = wxMessageBox("Clear existing actors/sprites?", "Import Actors/Sprites", wxYES | wxNO | wxICON_WARNING) == wxYES;
 		std::string filename = dialogue.GetPath().c_str().AsChar();
-		m_project.ImportActors(filename);
+		m_project.ImportActors(filename, clearExisting);
 		PopulateActorList();
 		m_renderResources.CreateSpriteSheetResources(m_project);
 	}

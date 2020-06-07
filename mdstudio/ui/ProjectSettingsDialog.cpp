@@ -66,7 +66,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 		if (!gameObjectsFile.empty())
 		{
 			//Re-import game objects file
-			if (!m_project.ImportGameObjectTypes(gameObjectsFile))
+			if (!m_project.ImportGameObjectTypes(gameObjectsFile, true))
 			{
 				wxMessageBox("Could not import external game object types, check settings.\nData may be lost if project is saved.", "Error", wxOK | wxICON_ERROR);
 			}
@@ -81,7 +81,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 		if (!spritesFile.empty())
 		{
 			//Re-import sprites file
-			if (!m_project.ImportActors(spritesFile))
+			if (!m_project.ImportActors(spritesFile, true))
 			{
 				wxMessageBox("Could not import external sprite actors, check settings.\nData may be lost if project is saved.", "Error", wxOK | wxICON_ERROR);
 			}

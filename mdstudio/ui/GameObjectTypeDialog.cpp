@@ -237,8 +237,9 @@ void GameObjectTypeDialog::OnBtnImport(wxCommandEvent& event)
 	wxFileDialog dialogue(this, _("Open BEE GameObj file"), "", "", "BEE_GameObj files (*.bee_gameobj)|*.bee_gameobj", wxFD_OPEN);
 	if(dialogue.ShowModal() == wxID_OK)
 	{
+		bool clearExisting = wxMessageBox("Clear existing object types?", "Import Game Object Types", wxYES | wxNO | wxICON_WARNING) == wxYES;
 		std::string filename = dialogue.GetPath().c_str().AsChar();
-		m_project.ImportGameObjectTypes(filename);
+		m_project.ImportGameObjectTypes(filename, clearExisting);
 		PopulateTypeList();
 		PopulateVarsList(NULL);
 

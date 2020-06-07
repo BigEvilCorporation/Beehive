@@ -79,7 +79,7 @@ void SceneExplorerPanel::OnItemSelected(wxTreeEvent& event)
 			{
 				m_mainWindow->SetSelectedGameObject(gameObject);
 				mapPanel->SelectGameObject(it->second);
-				mapPanel->SetTool(eToolMoveGameObject);
+				mapPanel->SetTool(eToolSelectGameObject);
 				m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
 			}
 		}
