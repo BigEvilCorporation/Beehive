@@ -56,7 +56,7 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 					{
 						for (auto prefabChild : objectType->GetChildren())
 						{
-							if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.first))
+							if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.typeId))
 							{
 								std::string childName = "[" + prefabChildType->GetName() + "_id" + std::to_string(labelIdx++) + "]";
 								wxTreeItemId childId = m_tree->AppendItem(itemId, childName);

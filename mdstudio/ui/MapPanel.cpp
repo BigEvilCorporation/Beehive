@@ -1075,8 +1075,11 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 						if (const GameObject* gameObj = m_project.GetEditingMap().GetGameObject(gameObjId))
 						{
 							//Add at relative position
-							ion::Vector2i position = gameObj->GetPosition();
-							prefab->AddChild(gameObj->GetTypeId(), position - bounds.GetMin());
+							GameObjectType::Child child;
+							child.relativePos = gameObj->GetPosition() - bounds.GetMin();
+							child.typeId = gameObj->GetTypeId();
+							child.instanceId = gameObj->GetId();
+							prefab->AddChild(child);
 
 							//Remove original
 							m_project.GetEditingMap().RemoveGameObject(gameObj->GetId());
@@ -2709,7 +2712,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 					//Draw all prefab children
 					for (auto prefabChild : gameObjectType->GetChildren())
 					{
-						if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.first))
+						if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.typeId))
 						{
 							RenderGameObject(
 								m_project,
@@ -2726,7 +2729,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 								material,
 								*prefabChildType,
 								nullptr,
-								position + prefabChild.second,
+								position + prefabChild.relativePos,
 								selected,
 								hovering);
 						}
