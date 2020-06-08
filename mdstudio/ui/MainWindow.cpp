@@ -1493,7 +1493,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		std::vector<Project::IncludeFile> includeFilenames;
 		std::vector<Project::IncludeFile> scriptIncludes;
 
-		//Find all game object types with scripts, convert to Luminary entities and components
+		//Convert script entities
 		std::vector<const GameObjectType*> objTypesWithScripts;
 		std::vector<luminary::Entity> entitiesWithScripts;
 		std::vector<luminary::Component> components;
@@ -1503,7 +1503,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		{
 			//Convert to luminary entity
 			luminary::Entity entity;
-			luminary::beehive::ConvertScriptEntity(typeIt->second, entity);
+			luminary::beehive::ConvertEntityType(typeIt->second, entity);
 
 			//Add all components
 			for (auto component : entity.components)
@@ -1514,7 +1514,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 				}
 			}
 
-			//Check if entity has a script
+			//If entity has a script, mark for script compile
 			bool hasScript = false;
 			for (auto variable : typeIt->second.GetVariables())
 			{
@@ -1676,6 +1676,29 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 
 		std::string archetypesFilename = entitiesExportDir + "ARCHTYPS.ASM";
 		entityExporter.ExportArchetypes(archetypesFilename, archetypes);
+
+		//Export entity prefabs
+		std::vector<luminary::Prefab> prefabs;
+
+		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
+		{
+			//If entity is prefab, mark for export
+			if (typeIt->second.IsPrefabType())
+			{
+				std::vector<const GameObjectType*> children;
+				for (auto child : typeIt->second.GetChildren())
+				{
+					children.push_back(m_project->GetGameObjectType(child.typeId));
+				}
+
+				luminary::Prefab prefab;
+				luminary::beehive::ConvertPrefabType(typeIt->second, children, prefab);
+				prefabs.push_back(prefab);
+			}
+		}
+
+		std::string prefabsFilename = entitiesExportDir + "PREFABS.ASM";
+		entityExporter.ExportPrefabs(prefabsFilename, prefabs);
 
 		//Export sprite data
 		// TODO: Luminary (binary) data formats

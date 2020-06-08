@@ -20,6 +20,9 @@
 #include <ion/maths/Bounds.h>
 #include <ion/core/utils/STL.h>
 
+//TODO_LUMINARY - needs define
+#include <luminary/BeehiveToLuminary.h>
+
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, renderResources, parent, winid, pos, size, style, name)
 	, m_gizmo(renderResources)
@@ -1088,19 +1091,29 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 
 					//Configure prefab
 					prefab->SetPrefab(true);
-					prefab->SetName(dialog.GetValue().c_str().AsChar());
 					prefab->SetDimensions(bounds.GetSize());
+					prefab->SetPrefabName(dialog.GetValue().c_str().AsChar());
+
+					//TODO_LUMINARY - needs define
+					//Configure variables needed for Luminary type
+					luminary::beehive::CreatePrefabType(*prefab);
 
 					//Place prefab in scene
 					GameObjectId instanceId = m_project.GetEditingMap().PlaceGameObject(0, 0, prefabId, InvalidGameObjectArchetypeId);
 
-					//PlaceGameObject() takes tile coords, need to set world pos manually
-					m_project.GetEditingMap().MoveGameObject(instanceId, bounds.GetMin().x, bounds.GetMin().y);
+					if (GameObject* prefabInstance = m_project.GetEditingMap().GetGameObject(instanceId))
+					{
+						//PlaceGameObject() takes tile coords, need to set world pos manually
+						m_project.GetEditingMap().MoveGameObject(instanceId, bounds.GetMin().x, bounds.GetMin().y);
 
-					//Set as new selection, update gizmo
-					m_selectedGameObjects.clear();
-					m_selectedGameObjects.push_back(instanceId);
-					SetGizmoCentre(bounds.GetCentre());
+						//Set instance name
+						prefabInstance->SetName(prefab->GetPrefabName());
+
+						//Set as new selection, update gizmo
+						m_selectedGameObjects.clear();
+						m_selectedGameObjects.push_back(instanceId);
+						SetGizmoCentre(bounds.GetCentre());
+					}
 
 					//Refresh relevant panels
 					m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
