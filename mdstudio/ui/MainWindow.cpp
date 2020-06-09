@@ -1503,7 +1503,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 		{
 			//Convert to luminary entity
 			luminary::Entity entity;
-			luminary::beehive::ConvertEntityType(typeIt->second, entity);
+			luminary::beehive::ConvertEntityType(*m_project, typeIt->second, entity);
 
 			//Add all components
 			for (auto component : entity.components)
@@ -1669,7 +1669,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			for (TGameObjectArchetypeMap::const_iterator archIt = typeIt->second.GetArchetypes().begin(), archEnd = typeIt->second.GetArchetypes().end(); archIt != archEnd; ++archIt)
 			{
 				luminary::Archetype archetype;
-				luminary::beehive::ExportArchetype(*m_project, archIt->second, scriptAddresses, archetype);
+				luminary::beehive::ConvertArchetype(*m_project, archIt->second, scriptAddresses, archetype);
 				archetypes.push_back(archetype);
 			}
 		}
@@ -1685,14 +1685,8 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 			//If entity is prefab, mark for export
 			if (typeIt->second.IsPrefabType())
 			{
-				std::vector<const GameObjectType*> children;
-				for (auto child : typeIt->second.GetChildren())
-				{
-					children.push_back(m_project->GetGameObjectType(child.typeId));
-				}
-
 				luminary::Prefab prefab;
-				luminary::beehive::ConvertPrefabType(typeIt->second, children, prefab);
+				luminary::beehive::ConvertPrefabType(*m_project, typeIt->second, prefab);
 				prefabs.push_back(prefab);
 			}
 		}
@@ -1832,7 +1826,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								const GameObject& gameObject = it->second[i].m_gameObject;
 								sceneData.staticEntities.push_back(luminary::Entity());
 								luminary::Entity& entity = sceneData.staticEntities.back();
-								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
+								luminary::beehive::ConvertEntityInstance(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
 							}
 						}
 						else
@@ -1842,7 +1836,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 								const GameObject& gameObject = it->second[i].m_gameObject;
 								sceneData.dynamicEntities.push_back(luminary::Entity());
 								luminary::Entity& entity = sceneData.dynamicEntities.back();
-								luminary::beehive::ExportEntity(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
+								luminary::beehive::ConvertEntityInstance(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
 							}
 						}
 					}

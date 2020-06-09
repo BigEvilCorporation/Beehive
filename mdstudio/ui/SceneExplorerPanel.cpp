@@ -38,15 +38,15 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 		int labelIdx = 1;
 
-		for(auto objectType : editingMap.GetGameObjects())
+		for(auto objectTypeList : editingMap.GetGameObjects())
 		{
-			for (auto object : objectType.second)
+			for (auto object : objectTypeList.second)
 			{
 				if (const GameObjectType* objectType = m_project.GetGameObjectType(object.m_gameObject.GetTypeId()))
 				{
 					std::string name = object.m_gameObject.GetName();
 					if (name.empty())
-						name = "[" + objectType->GetName() + "_id" + std::to_string(labelIdx++) + "]";
+						name = "[" + objectType->GetName() + "_id" + std::to_string(object.m_gameObject.GetId()) + "]";
 
 					wxTreeItemId itemId = m_tree->AppendItem(rootId, name);
 					m_tree->SetItemBold(itemId, objectType->IsPrefabType());
@@ -139,16 +139,22 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 	//Right-click menu
 	m_contextItem = event.GetItem();
 
+	//Set current as selected
+	m_tree->SelectItem(m_contextItem);
+
 	wxMenu contextMenu;
 	wxMenu* objMenu = new wxMenu();
+	wxMenu* convertMenu = new wxMenu();
 	wxMenu* archetypeMenu = new wxMenu();
 
 	m_objectTypeListSorted.clear();
 	m_archetypeListSorted.clear();
+	m_convertTypeListSorted.clear();
 
 	for (auto objectType : m_project.GetGameObjectTypes())
 	{
 		m_objectTypeListSorted.push_back(std::make_pair(objectType.first, objectType.second.GetName()));
+		m_convertTypeListSorted.push_back(std::make_pair(objectType.first, objectType.second.GetName()));
 
 		for (auto archetype : objectType.second.GetArchetypes())
 		{
@@ -163,10 +169,12 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 	}
 
 	m_firstObjectId = ContextMenu::TypeListFirst;
-	m_firstArchetypeId = ContextMenu::TypeListFirst + m_objectTypeListSorted.size();
+	m_firstArchetypeId = m_firstObjectId + m_objectTypeListSorted.size();
+	m_firstConvertId = m_firstArchetypeId + m_archetypeListSorted.size();
 
 	std::sort(m_objectTypeListSorted.begin(), m_objectTypeListSorted.end(), [](const std::pair<GameObjectTypeId, std::string>& lhs, const std::pair<GameObjectTypeId, std::string>& rhs) { return lhs.second < rhs.second; });
 	std::sort(m_archetypeListSorted.begin(), m_archetypeListSorted.end(), [](const ArchetypeEntry& lhs, const ArchetypeEntry& rhs) { return lhs.typeName < rhs.typeName; });
+	std::sort(m_convertTypeListSorted.begin(), m_convertTypeListSorted.end(), [](const std::pair<GameObjectTypeId, std::string>& lhs, const std::pair<GameObjectTypeId, std::string>& rhs) { return lhs.second < rhs.second; });
 
 	for(int i = 0; i < m_objectTypeListSorted.size(); i++)
 	{
@@ -178,8 +186,14 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 		archetypeMenu->Append(m_firstArchetypeId + i, m_archetypeListSorted[i].typeName + " : " + m_archetypeListSorted[i].archetypeName);
 	}
 
+	for (int i = 0; i < m_convertTypeListSorted.size(); i++)
+	{
+		convertMenu->Append(m_firstConvertId + i, m_convertTypeListSorted[i].second);
+	}
+
 	contextMenu.AppendSubMenu(objMenu, "Add New Object");
 	contextMenu.AppendSubMenu(archetypeMenu, "Add Object from Archetype");
+	contextMenu.AppendSubMenu(convertMenu, "Convert Object");
 	contextMenu.Append(ContextMenu::Rename, "Rename Object");
 
 	contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&SceneExplorerPanel::OnContextMenuClick, NULL, this);
@@ -188,7 +202,49 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 
 void SceneExplorerPanel::OnContextMenuClick(wxCommandEvent& event)
 {
-	if (event.GetId() >= ContextMenu::TypeListFirst + m_objectTypeListSorted.size())
+	if (event.GetId() >= m_firstConvertId)
+	{
+		std::map<wxTreeItemId, GameObjectId>::const_iterator it = m_objectMap.find(m_tree->GetSelection());
+		if (it != m_objectMap.end())
+		{
+			GameObjectId objectTypeId = m_convertTypeListSorted[event.GetId() - m_firstConvertId].first;
+
+			if (const GameObjectType* objectType = m_project.GetGameObjectType(objectTypeId))
+			{
+				if (const GameObject* originalObj = m_project.GetEditingMap().GetGameObject(it->second))
+				{
+					if (const GameObjectType* originalType = m_project.GetGameObjectType(originalObj->GetTypeId()))
+					{
+						//Copy obj
+						GameObject newObj(originalObj->GetId(), objectTypeId, *originalObj);
+
+						//Generate name
+						std::string name = newObj.GetName();
+						if (name.size() == 0)
+						{
+							std::vector<char> stripChars = { '[', ']' };
+							name = ion::string::Strip(m_tree->GetItemText(m_tree->GetSelection()).c_str().AsChar(), stripChars);
+						}
+
+						newObj.SetName(name);
+
+						//Copy size and sprite params to instance, new type might not support default types
+						newObj.SetDimensions(originalObj->GetDimensions().x == 0 ? originalType->GetDimensions() : originalObj->GetDimensions());
+						newObj.SetSpriteActorId(m_project.GetActor(originalObj->GetSpriteActorId()) ? originalObj->GetSpriteActorId() : originalType->GetSpriteActorId());
+						newObj.SetSpriteSheetId(originalObj->GetSpriteSheetId() == InvalidSpriteSheetId ? originalType->GetSpriteSheetId() : originalObj->GetSpriteSheetId());
+						newObj.SetSpriteAnim(originalObj->GetSpriteAnim() == InvalidSpriteAnimId ? originalType->GetSpriteAnim() : originalObj->GetSpriteAnim());
+
+						//Remove original and place new
+						m_project.GetEditingMap().RemoveGameObject(it->second);
+						m_project.GetEditingMap().PlaceGameObject(newObj);
+
+						Refresh();
+					}
+				}
+			}
+		}
+	}
+	else if (event.GetId() >= m_firstArchetypeId)
 	{
 		ArchetypeEntry archetypeEntry = m_archetypeListSorted[event.GetId() - m_firstArchetypeId];
 
@@ -202,7 +258,7 @@ void SceneExplorerPanel::OnContextMenuClick(wxCommandEvent& event)
 			}
 		}
 	}
-	else if (event.GetId() >= ContextMenu::TypeListFirst)
+	else if (event.GetId() >= m_firstObjectId)
 	{
 		GameObjectId objectTypeId = m_objectTypeListSorted[event.GetId() - m_firstObjectId].first;
 

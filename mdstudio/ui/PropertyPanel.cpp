@@ -336,7 +336,7 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 						//Generate header
 						luminary::ScriptTranspiler scriptTranspiler;
 						luminary::Entity entity;
-						luminary::beehive::ConvertEntityType(*gameObjectType, entity);
+						luminary::beehive::ConvertEntityType(m_project, *gameObjectType, entity);
 						scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
 
 						//Generate boilerplate
@@ -376,7 +376,7 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 							//Generate header
 							luminary::ScriptTranspiler scriptTranspiler;
 							luminary::Entity entity;
-							luminary::beehive::ConvertEntityType(*gameObjectType, entity);
+							luminary::beehive::ConvertEntityType(m_project, *gameObjectType, entity);
 							scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
 
 							//Generate boilerplate

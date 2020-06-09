@@ -41,7 +41,7 @@ protected:
 	{
 		Add,
 		Rename,
-
+		Convert,
 		TypeListFirst
 	};
 
@@ -60,9 +60,11 @@ private:
 	MainWindow* m_mainWindow;
 	std::map<wxTreeItemId, GameObjectId> m_objectMap;
 	std::vector<std::pair<GameObjectTypeId, std::string>> m_objectTypeListSorted;
+	std::vector<std::pair<GameObjectTypeId, std::string>> m_convertTypeListSorted;
 	std::vector<ArchetypeEntry> m_archetypeListSorted;
 	wxTreeItemId m_contextItem;
 
 	int m_firstObjectId;
 	int m_firstArchetypeId;
+	int m_firstConvertId;
 };
