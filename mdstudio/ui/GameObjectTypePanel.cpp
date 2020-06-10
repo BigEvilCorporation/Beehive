@@ -42,7 +42,12 @@ void GameObjectTypesPanel::PopulateGameObjects()
 		}
 
 		std::stringstream nameCount;
-		nameCount << it->second.GetName() << " (" << count << ")";
+
+		if(it->second.IsPrefabType())
+			nameCount << "[" << it->second.GetPrefabName() << "] (" << count << ")";
+		else
+			nameCount << it->second.GetName() << " (" << count << ")";
+
 		m_listGameObjTypes->Insert(wxString(nameCount.str()), index);
 
 		if (it->first == m_project.GetPaintGameObjectType())

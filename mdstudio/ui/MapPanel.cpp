@@ -1077,15 +1077,26 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 					{
 						if (const GameObject* gameObj = m_project.GetEditingMap().GetGameObject(gameObjId))
 						{
-							//Add at relative position
-							GameObjectType::Child child;
-							child.relativePos = gameObj->GetPosition() - bounds.GetMin();
-							child.typeId = gameObj->GetTypeId();
-							child.instanceId = gameObj->GetId();
-							prefab->AddChild(child);
+							if (const GameObjectType* gameObjType = m_project.GetGameObjectType(gameObj->GetTypeId()))
+							{
+								//Add at relative position
+								GameObjectType::PrefabChild child;
 
-							//Remove original
-							m_project.GetEditingMap().RemoveGameObject(gameObj->GetId());
+								child.name = gameObj->GetName();
+								child.typeId = gameObj->GetTypeId();
+								child.instanceId = gameObj->GetId();
+								child.relativePos = gameObj->GetPosition() - bounds.GetMin();
+								child.dimensions = gameObj->GetDimensions();
+								child.spriteActorId = gameObj->GetSpriteActorId() == InvalidActorId ? gameObjType->GetSpriteActorId() : gameObj->GetSpriteActorId();
+								child.spriteSheetId = gameObj->GetSpriteSheetId() == InvalidSpriteSheetId ? gameObjType->GetSpriteSheetId() : gameObj->GetSpriteSheetId();
+								child.spriteAnimId = gameObj->GetSpriteAnim() == InvalidSpriteAnimId ? gameObjType->GetSpriteAnim() : gameObj->GetSpriteAnim();
+								child.variables = gameObj->GetVariables();
+
+								prefab->AddPrefabChild(child);
+
+								//Remove original
+								m_project.GetEditingMap().RemoveGameObject(gameObj->GetId());
+							}
 						}
 					}
 
@@ -2554,35 +2565,60 @@ void RenderGameObject(
 	const GameObjectType& gameObjectType,
 	const GameObject* gameObject,
 	const ion::Vector2i& position,
+	const ion::Vector2i& dimensions,
+	ActorId spriteActorId,
+	SpriteSheetId spriteSheetId,
+	SpriteAnimId spriteAnimId,
 	bool selected,
 	bool hovering)
 {
 	const float x = position.x;
 	const float y_inv = (mapHeight * tileHeight) - 1 - position.y;
-	const float width = (gameObject && gameObject->GetDimensions().x > 0) ? gameObject->GetDimensions().x : gameObjectType.GetDimensions().x;
-	const float height = (gameObject && gameObject->GetDimensions().y > 0) ? gameObject->GetDimensions().y : gameObjectType.GetDimensions().y;
+	const float width = (dimensions.x > 0) ? dimensions.x : (gameObject && gameObject->GetDimensions().x > 0) ? gameObject->GetDimensions().x : gameObjectType.GetDimensions().x;
+	const float height = (dimensions.y > 0) ? dimensions.y : (gameObject && gameObject->GetDimensions().y > 0) ? gameObject->GetDimensions().y : gameObjectType.GetDimensions().y;
 	const float height_inv = -height;
 	const bool customSize = gameObject && gameObject->GetDimensions().x > 0;
 
-	//Use sprite sheet animation if available, else use default preview image
-	SpriteSheetId spriteSheetId = gameObjectType.GetPreviewSpriteSheetId();
-	SpriteAnimId spriteAnimId = gameObject ? gameObject->GetSpriteAnim() : InvalidSpriteAnimId;
+	//Find a usable sprite actor, sheet, anim from editor preview, object, or type
 	const SpriteSheet* spriteSheet = nullptr;
 	int spriteFrame = 0;
 	ion::Vector3 animPosOffset;
 
-	//Find sprite actor from game object
-	const Actor* spriteActor = gameObject ? project.GetActor(gameObject->GetSpriteActorId()) : nullptr;
+	//Get sprite actor
+	const Actor* spriteActor = project.GetActor(spriteActorId);
 
-	//Find sprite actor from game object type
 	if (!spriteActor)
-		spriteActor = project.GetActor(gameObjectType.GetSpriteActorId());
+	{
+		//Find sprite actor from game object
+		spriteActorId = gameObject ? gameObject->GetSpriteActorId() : InvalidActorId;
+		spriteActor = project.GetActor(spriteActorId);
+	}
+
+	if (!spriteActor)
+	{
+		//Find sprite actor from game object type
+		spriteActorId = gameObjectType.GetSpriteActorId();
+		spriteActor = project.GetActor(spriteActorId);
+	}
 
 	if (spriteActor)
 	{
-		//Find sprite sheet from game object
-		spriteSheetId = gameObject ? gameObject->GetSpriteSheetId() : InvalidSpriteSheetId;
+		//Get sprite sheet
 		spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+
+		if (!spriteSheet)
+		{
+			//Find sprite sheet from editor preview
+			spriteSheetId = gameObjectType.GetPreviewSpriteSheetId();
+			spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+		}
+
+		if (!spriteSheet)
+		{
+			//Find sprite sheet from game object
+			spriteSheetId = gameObject ? gameObject->GetSpriteSheetId() : InvalidSpriteSheetId;
+			spriteSheet = spriteActor->GetSpriteSheet(spriteSheetId);
+		}
 
 		//Find sprite sheet from game object type
 		if (!spriteSheet)
@@ -2601,7 +2637,24 @@ void RenderGameObject(
 
 	if (spriteSheet)
 	{
-		if (const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId))
+		//Get sprite anim
+		const SpriteAnimation* spriteAnim = spriteSheet->GetAnimation(spriteAnimId);
+
+		if (!spriteAnim)
+		{
+			//Find sprite anim from game object
+			spriteAnimId = gameObject ? gameObject->GetSpriteAnim() : InvalidSpriteAnimId;
+			spriteAnim = spriteSheet->GetAnimation(spriteAnimId);
+		}
+
+		if (!spriteAnim)
+		{
+			//Find sprite anim from game object type
+			spriteAnimId = gameObjectType.GetSpriteAnim();
+			spriteAnim = spriteSheet->GetAnimation(spriteAnimId);
+		}
+
+		if (spriteAnim)
 		{
 			ion::Vector2i position = spriteAnim->m_trackPosition.GetValue(spriteAnim->GetFrame());
 			spriteFrame = spriteAnim->m_trackSpriteFrame.GetValue(spriteAnim->GetFrame());
@@ -2698,7 +2751,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 				bool selected = ion::utils::stl::Find(m_selectedGameObjects, gameObject.GetId());
 				bool hovering = gameObject.GetId() == m_hoverGameObject;
 
-				//Draw single game object
+				//Draw root game object
 				ion::Vector2i position = gameObject.GetPosition();
 
 				RenderGameObject(
@@ -2717,13 +2770,17 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 					*gameObjectType,
 					&gameObject,
 					position,
+					ion::Vector2i(),
+					InvalidActorId,
+					InvalidSpriteSheetId,
+					InvalidSpriteAnimId,
 					selected,
 					hovering);
 
 				if (gameObjectType->IsPrefabType())
 				{
 					//Draw all prefab children
-					for (auto prefabChild : gameObjectType->GetChildren())
+					for (auto prefabChild : gameObjectType->GetPrefabChildren())
 					{
 						if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.typeId))
 						{
@@ -2743,6 +2800,10 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 								*prefabChildType,
 								nullptr,
 								position + prefabChild.relativePos,
+								prefabChild.dimensions,
+								prefabChild.spriteActorId,
+								prefabChild.spriteSheetId,
+								prefabChild.spriteAnimId,
 								selected,
 								hovering);
 						}

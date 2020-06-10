@@ -142,12 +142,12 @@ void ProjectSettingsDialog::ScanProject(const std::string& engineDir, const std:
 		for (int i = 0; i < entities.size(); i++)
 		{
 			//Find or add game object type
-			GameObjectType* gameObjectType = m_project.FindGameObjectType(entities[i].name);
+			GameObjectType* gameObjectType = m_project.FindGameObjectType(entities[i].typeName);
 			if (!gameObjectType)
 			{
 				GameObjectTypeId gameObjectTypeId = m_project.AddGameObjectType();
 				gameObjectType = m_project.GetGameObjectType(gameObjectTypeId);
-				gameObjectType->SetName(entities[i].name);
+				gameObjectType->SetName(entities[i].typeName);
 				gameObjectType->SetStatic(entities[i].isStatic);
 			}
 
