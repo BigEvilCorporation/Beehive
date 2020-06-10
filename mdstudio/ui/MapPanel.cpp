@@ -1085,7 +1085,11 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 								child.name = gameObj->GetName();
 								child.typeId = gameObj->GetTypeId();
 								child.instanceId = gameObj->GetId();
+#if BEEHIVE_GAMEOBJ_ORIGIN_CENTRE
+								child.relativePos = gameObj->GetPosition() - bounds.GetCentre();
+#else
 								child.relativePos = gameObj->GetPosition() - bounds.GetMin();
+#endif
 								child.dimensions = gameObj->GetDimensions();
 								child.spriteActorId = gameObj->GetSpriteActorId() == InvalidActorId ? gameObjType->GetSpriteActorId() : gameObj->GetSpriteActorId();
 								child.spriteSheetId = gameObj->GetSpriteSheetId() == InvalidSpriteSheetId ? gameObjType->GetSpriteSheetId() : gameObj->GetSpriteSheetId();
@@ -2680,8 +2684,14 @@ void RenderGameObject(
 
 		ion::Vector3 scale(width / tileWidth, height / tileHeight, 1.0f);
 		ion::Matrix4 mtx;
+
+#if BEEHIVE_GAMEOBJ_ORIGIN_CENTRE
+		ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f))),
+			floor((y_inv - ((mapHeight * tileHeight) / 2.0f))), z);
+#else
 		ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
 			floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
+#endif
 
 		mtx.SetTranslation(pos + animPosOffset);
 		mtx.SetScale(scale);
@@ -2705,8 +2715,13 @@ void RenderGameObject(
 
 			ion::Matrix4 spriteSheetMtx;
 
+#if BEEHIVE_GAMEOBJ_ORIGIN_CENTRE
+			ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f))),
+				floor((y_inv - ((mapHeight * tileHeight) / 2.0f))), z);
+#else
 			ion::Vector3 pos(floor((x - ((mapWidth * tileWidth) / 2.0f) + (width / 2.0f))),
 				floor((y_inv - ((mapHeight * tileHeight) / 2.0f) + ((height_inv / 2.0f) + 1.0f))), z);
+#endif
 
 			spriteSheetMtx.SetTranslation(pos + animPosOffset);
 
@@ -2869,8 +2884,15 @@ void MapPanel::RenderGameObjectPreview(ion::render::Renderer& renderer, const io
 
 		ion::Vector3 previewScale(gameObjectType->GetDimensions().x / tileWidth, gameObjectType->GetDimensions().y / tileHeight, 1.0f);
 		ion::Matrix4 previewMtx;
+
+#if BEEHIVE_GAMEOBJ_ORIGIN_CENTRE
+		ion::Vector3 previewPos(floor((x - (mapWidth / 2.0f)) * tileWidth),
+			floor((y_inv - (mapHeight / 2.0f)) * tileHeight), z);
+#else
 		ion::Vector3 previewPos(floor((x - (mapWidth / 2.0f) + (width / 2.0f)) * tileWidth),
 								floor((y_inv - (mapHeight / 2.0f) + ((height_inv / 2.0f) + 1.0f)) * tileHeight), z);
+#endif
+
 		previewMtx.SetTranslation(previewPos);
 		previewMtx.SetScale(previewScale);
 

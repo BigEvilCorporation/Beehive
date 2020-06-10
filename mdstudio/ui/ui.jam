@@ -80,6 +80,8 @@ local BEEHIVE_STUDIO_UI_SRC =
 	UIBase.h
 	UpdateStampDialog.cpp
 	UpdateStampDialog.h
+	Utils.cpp
+	Utils.h
 	WxApp.cpp
 	WxApp.h
 	;

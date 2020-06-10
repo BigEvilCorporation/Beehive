@@ -1344,6 +1344,46 @@ void MainWindow::RedrawPanel(Panel panel)
 	}
 }
 
+void MainWindow::OnMenuToolsTweaksGameObjCentreOrigin(wxCommandEvent& event)
+{
+	for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
+	{
+		Map& map = m_project->GetMap(it->first);
+
+		for (TGameObjectPosMap::iterator it = map.GetGameObjects().begin(), end = map.GetGameObjects().end(); it != end; ++it)
+		{
+			GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
+			if (gameObjectType)
+			{
+				for (int i = 0; i < it->second.size(); i++)
+				{
+					const GameObject& gameObject = it->second[i].m_gameObject;
+
+					const float width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType->GetDimensions().x;
+					const float height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
+
+					map.MoveGameObject(gameObject.GetId(), gameObject.GetPosition().x + (width / 2), gameObject.GetPosition().y + (height / 2));
+
+					if (gameObjectType->IsPrefabType())
+					{
+						std::vector<GameObjectType::PrefabChild>& prefabChildren = gameObjectType->GetPrefabChildren();
+						for (int j = 0; j < prefabChildren.size(); j++)
+						{
+							GameObjectType::PrefabChild& child = prefabChildren[j];
+							const float childWidth = (child.dimensions.x > 0) ? child.dimensions.x : (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType->GetDimensions().x;
+							const float childHeight = (child.dimensions.y > 0) ? child.dimensions.y : (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
+							child.relativePos.x = -(width / 2) + child.relativePos.x + (childWidth / 2);
+							child.relativePos.y = -(height / 2) + child.relativePos.y + (childHeight / 2);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	RefreshPanel(ePanelMap);
+}
+
 void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
 {
 	if(wxMessageBox("Unsaved changes will be lost, are you sure?", "New Project", wxOK | wxCANCEL) == wxOK)

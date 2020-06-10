@@ -135,6 +135,8 @@ public:
 	void OnPostInit();
 
 protected:
+	virtual void OnMenuToolsTweaksGameObjCentreOrigin(wxCommandEvent& event);
+
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjSave(wxRibbonButtonBarEvent& event);

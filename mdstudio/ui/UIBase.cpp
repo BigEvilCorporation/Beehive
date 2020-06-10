@@ -82,6 +82,20 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
+	m_menubar1 = new wxMenuBar( 0 );
+	m_menuTools = new wxMenu();
+	m_menu1 = new wxMenu();
+	wxMenuItem* m_menu1Item = new wxMenuItem( m_menuTools, wxID_ANY, wxT("Tweaks"), wxEmptyString, wxITEM_NORMAL, m_menu1 );
+	wxMenuItem* m_menuItem3;
+	m_menuItem3 = new wxMenuItem( m_menu1, wxID_MENU_TOOLS_TWEAKS_GAMEOBJ_CENTRE_ORIGIN, wxString( wxT("Game Object Centre Origins") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem3 );
+
+	m_menuTools->Append( m_menu1Item );
+
+	m_menubar1->Append( m_menuTools, wxT("&Tools") );
+
+	this->SetMenuBar( m_menubar1 );
+
 	wxBoxSizer* bSizer1;
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
 
@@ -164,6 +178,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuToolsTweaksGameObjCentreOrigin ), this, m_menuItem3->GetId());
 	this->Connect( wxID_BTN_PROJ_NEW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjNew ) );
 	this->Connect( wxID_BTN_PROJ_OPEN, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjOpen ) );
 	this->Connect( wxID_BTN_PROJ_SAVE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSave ) );

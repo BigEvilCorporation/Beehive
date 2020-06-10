@@ -1,15 +1,19 @@
 SubDir bigevilcorp mdstudio ;
 
-include_plugin_luminary = 0 ;
+# Include Luminary engine features and exporters
+include_plugin_luminary = 1 ;
 
 # Fixed stamps mode:
 # - no individual tile editing
 # - collision editing per-stamp only
 # - removes legacy UI
-beehive_config_fixed_stamps = 0 ;
+beehive_config_fixed_stamps = 1 ;
 
 # Lean mode - hides advanced features
-beehive_config_lean_ui = 0 ;
+beehive_config_lean_ui = 1 ;
+
+# Game object coords originate from centre
+beehive_config_gameobj_origin_centre = 1 ;
 
 ion_renderer_api ?= opengl ;
 ion_renderer_opts ?= shader ;
@@ -54,6 +58,11 @@ if ( $(beehive_config_fixed_stamps) = 1 )
 if ( $(beehive_config_lean_ui) = 1 )
 {
 	C.Defines * : BEEHIVE_LEAN_UI ;
+}
+
+if ( $(beehive_config_gameobj_origin_centre) = 1 )
+{
+	C.Defines * : BEEHIVE_GAMEOBJ_ORIGIN_CENTRE ;
 }
 
 SubInclude bigevilcorp mdstudio ui : ui ;
