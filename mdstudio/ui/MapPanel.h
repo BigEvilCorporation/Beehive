@@ -39,6 +39,9 @@ public:
 	//Set selection
 	void SelectGameObject(GameObjectId gameObjectId);
 
+	GameObjectId FindGameObject(int x, int y, ion::Vector2i& topLeft) const;
+	int FindGameObjects(int x, int y, int width, int height, std::vector<const GameObjectMapEntry*>& gameObjects) const;
+
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
 protected:

@@ -1664,7 +1664,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 		case eToolAnimateGameObject:
 		{
 			ion::Vector2i topLeft;
-			m_hoverGameObject = m_project.GetEditingMap().FindGameObject(tileX, tileY, topLeft);
+			m_hoverGameObject = FindGameObject(mousePos.x, mousePos.y, topLeft);
 
 			ion::Vector2i moveDelta = m_gizmo.IsEnabled() ? gizmoDelta : mouseDelta;
 			bool mouseOverGizmo = m_gizmo.IsEnabled() && (m_gizmo.GetCurrentConstraint() != Gizmo::Constraint::None);
@@ -1709,7 +1709,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						int right = ion::maths::Max(m_boxSelectStart.x, m_boxSelectEnd.x);
 
 						std::vector<const GameObjectMapEntry*> gameObjects;
-						m_project.GetEditingMap().FindGameObjects(left / tileWidth, top / tileHeight, (right - left) / tileWidth, (bottom - top) / tileHeight, gameObjects);
+						FindGameObjects(left, top, (right - left), (bottom - top), gameObjects);
 
 						m_selectedGameObjects.clear();
 
@@ -2012,6 +2012,96 @@ void MapPanel::SelectGameObject(GameObjectId gameObjectId)
 		m_mainWindow->SetSelectedGameObject(gameObject);
 		m_mainWindow->SetSelectedAnimObject(gameObjectId);
 	}
+}
+
+GameObjectId MapPanel::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
+{
+	GameObjectId gameObjectId = InvalidGameObjectId;
+	ion::Vector2i size;
+	ion::Vector2i bottomRight;
+
+	const int x_px = x;
+	const int y_px = y;
+
+	std::vector<const GameObjectMapEntry*> foundObjects;
+
+	//Find all game objects at position
+	const TGameObjectPosMap& gameObjs = m_project.GetEditingMap().GetGameObjects();
+	for (TGameObjectPosMap::const_iterator itMap = gameObjs.begin(), endMap = gameObjs.end(); itMap != endMap && !gameObjectId; ++itMap)
+	{
+		for (std::vector<GameObjectMapEntry>::const_reverse_iterator itVec = itMap->second.rbegin(), endVec = itMap->second.rend(); itVec != endVec && !gameObjectId; ++itVec)
+		{
+			const int objWidth = (itVec->m_gameObject.GetDimensions().x > 0) ? itVec->m_gameObject.GetDimensions().x : itVec->m_size.x;
+			const int objHeight = (itVec->m_gameObject.GetDimensions().y > 0) ? itVec->m_gameObject.GetDimensions().y : itVec->m_size.y;
+
+			ion::Vector2i size(objWidth, objHeight);
+
+#if BEEHIVE_GAMEOBJ_ORIGIN_CENTRE
+			topLeft.x = itVec->m_gameObject.GetPosition().x - (size.x / 2);
+			topLeft.y = itVec->m_gameObject.GetPosition().y - (size.y / 2);
+#else
+			topLeft.x = itVec->m_gameObject.GetPosition().x;
+			topLeft.y = itVec->m_gameObject.GetPosition().y;
+#endif
+
+			ion::Vector2i bottomRight = topLeft + size;
+
+			if (x_px >= topLeft.x && y_px >= topLeft.y
+				&& x_px < bottomRight.x && y_px < bottomRight.y)
+			{
+				foundObjects.push_back(&(*itVec));
+			}
+		}
+	}
+
+	//Pick the smallest
+	int smallestSize = ion::maths::S32_MAX;
+	for (int i = 0; i < foundObjects.size(); i++)
+	{
+		const int objWidth = (foundObjects[i]->m_gameObject.GetDimensions().x > 0) ? foundObjects[i]->m_gameObject.GetDimensions().x : foundObjects[i]->m_size.x;
+		const int objHeight = (foundObjects[i]->m_gameObject.GetDimensions().y > 0) ? foundObjects[i]->m_gameObject.GetDimensions().y : foundObjects[i]->m_size.y;
+
+		int size = objWidth * objHeight;
+		if (size < smallestSize)
+		{
+			smallestSize = size;
+			gameObjectId = foundObjects[i]->m_gameObject.GetId();
+		}
+	}
+
+	return gameObjectId;
+}
+
+int MapPanel::FindGameObjects(int x, int y, int width, int height, std::vector<const GameObjectMapEntry*>& gameObjects) const
+{
+	ion::Vector2i boundsMin(x, y);
+	ion::Vector2i boundsMax(x + width, y + height);
+
+	const TGameObjectPosMap& gameObjs = m_project.GetEditingMap().GetGameObjects();
+	for (TGameObjectPosMap::const_iterator it = gameObjs.begin(), end = gameObjs.end(); it != end; ++it)
+	{
+		const std::vector<GameObjectMapEntry>& gameObjectsOfType = it->second;
+
+		for (int i = 0; i < gameObjectsOfType.size(); i++)
+		{
+			const GameObjectMapEntry& gameObject = gameObjectsOfType[i];
+
+			const int objWidth = (gameObject.m_gameObject.GetDimensions().x > 0) ? gameObject.m_gameObject.GetDimensions().x : gameObject.m_size.x;
+			const int objHeight = (gameObject.m_gameObject.GetDimensions().y > 0) ? gameObject.m_gameObject.GetDimensions().y : gameObject.m_size.y;
+
+#if BEEHIVE_GAMEOBJ_ORIGIN_CENTRE
+			ion::Vector2i position = gameObject.m_gameObject.GetPosition() - (ion::Vector2i(objWidth, objHeight) / 2);
+			if (ion::maths::BoxIntersectsBox(boundsMin, boundsMax, position, position + ion::Vector2i(objWidth, objHeight)))
+#else
+			if (ion::maths::BoxIntersectsBox(boundsMin, boundsMax, gameObject.m_gameObject.GetPosition(), gameObject.m_gameObject.GetPosition() + ion::Vector2i(objWidth, objHeight)))
+#endif
+			{
+				gameObjects.push_back(&gameObject);
+			}
+		}
+	}
+
+	return gameObjects.size();
 }
 
 void MapPanel::SetTool(ToolType tool)

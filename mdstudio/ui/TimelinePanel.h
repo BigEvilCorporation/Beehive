@@ -77,6 +77,7 @@ private:
 	void PopulateTimeline(Animation& animation);
 
 	void SyncActor(AnimationActor& actor);
+	template <typename T> void SyncSpriteObj(AnimationActor& animActor, const GameObjectType& gameObjType, T& spriteObj, ion::Vector2i positionOffset);
 	void SyncAllActors();
 
 	void RecalculateLenth(Animation& animation);
@@ -129,9 +130,58 @@ private:
 	GameObjectId m_selectedActorId;
 	AnimationActor* m_selectedActor;
 
+	GameObjectId m_selectedPrefabInstance;
+
 	//Timer
 	u64 m_prevClock;
 	wxTimer m_timer;
 
 	int m_contextMenuColIdx;
 };
+
+template <typename T> void TimelinePanel::SyncSpriteObj(AnimationActor& animActor, const GameObjectType& gameObjType, T& spriteObj, ion::Vector2i positionOffset)
+{
+	float frame = m_animation->GetFrame();
+	SpriteAnimId originalSpriteAnim = spriteObj.GetSpriteAnim();
+
+	//Apply all track values to object
+	if (animActor.m_trackPosition.GetNumKeyframes() > 0)
+	{
+		ion::Vector2i position = positionOffset + animActor.m_trackPosition.GetValue(frame);
+		m_project.GetEditingMap().MoveGameObject(animActor.GetGameObjectId(), position.x, position.y);
+		spriteObj.SetPosition(position);
+	}
+
+	if (animActor.m_trackSpriteAnim.GetNumKeyframes() > 0)
+	{
+		std::pair<SpriteSheetId, SpriteAnimId> spriteAnim = animActor.m_trackSpriteAnim.GetValue(frame);
+		spriteObj.SetSpriteSheetId(spriteAnim.first);
+		spriteObj.SetSpriteAnim(spriteAnim.second);
+
+		//Advance current sprite anim
+		if (Actor* spriteActor = m_project.GetActor(gameObjType.GetSpriteActorId()))
+		{
+			if (SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteAnim.first))
+			{
+				if (SpriteAnimation* spriteAnimation = spriteSheet->GetAnimation(spriteAnim.second))
+				{
+					float spriteAnimStartTime = animActor.m_trackSpriteAnim.GetPrevKeyframe(frame)->GetTime();
+					float spriteAnimFrame = (frame - spriteAnimStartTime) * spriteAnimation->GetPlaybackSpeed();
+					float spriteAnimLength = spriteAnimation->GetLength();
+
+					if (spriteAnimation->GetPlaybackBehaviour() == ion::render::Animation::eLoop)
+					{
+						spriteAnimation->SetFrame(ion::maths::Fmod(spriteAnimFrame, spriteAnimLength));
+					}
+					else
+					{
+						spriteAnimation->SetFrame(ion::maths::Clamp(spriteAnimFrame, 0.0f, spriteAnimLength));
+					}
+				}
+			}
+		}
+	}
+
+	//Refresh map panel
+	m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
+}

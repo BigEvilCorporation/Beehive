@@ -421,61 +421,77 @@ void TimelinePanel::SetCurrentActor(GameObjectId actorId)
 
 		if(const GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actorId))
 		{
-			m_selectedActorId = actorId;
-
-			if(m_animation)
+			if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
 			{
-				m_selectedActor = m_animation->GetActor(actorId);
+				m_selectedActorId = actorId;
 
-				if(m_selectedActor)
+				if (m_animation)
 				{
-					//Populate timeline
-					PopulateTimeline(*m_animation);
-
-					//Set actor in list
-					std::vector<AnimationActor*>::iterator actorIt = std::find(m_actorCache.begin(), m_actorCache.end(), m_selectedActor);
-					int actorIdx = std::distance(m_actorCache.begin(), actorIt);
-					if (actorIdx >= 0)
+					if (gameObjectType->IsPrefabType())
 					{
-						m_choiceActor->SetSelection(actorIdx);
+						//Only allow playback for prefabs, no editing yet
+						m_selectedActor = nullptr;
+						m_selectedPrefabInstance = gameObject->GetId();
+						m_textCurrentActor->SetLabel("[prefab instance]");
+						m_choiceSpriteAnim->Clear();
+						m_spriteSheetCache.clear();
 					}
-
-					//Set section on timeline
-					std::map<KeyframePanel::SectionId, AnimationActor*>::iterator it = std::find_if(m_sectionCache.begin(), m_sectionCache.end(), [&](const std::pair<KeyframePanel::SectionId, AnimationActor*>& rhs) { return rhs.second == m_selectedActor; });
-					if (it != m_sectionCache.end())
+					else
 					{
-						m_timeline->SetSelectedSection(it->first);
-					}
+						m_selectedActor = m_animation->GetActor(actorId);
+						m_selectedPrefabInstance = InvalidGameObjectId;
 
-					//Set game object label
-					std::stringstream label;
-
-					std::string objName = gameObject->GetName();
-					if(objName.empty())
-					{
-						objName = "<No Name>";
-					}
-
-					label << objName << " (object " << gameObject->GetId() << ")";
-					m_textCurrentActor->SetLabel(label.str());
-
-					//Populate sprite actor choices
-					m_choiceSpriteAnim->Clear();
-					m_spriteSheetCache.clear();
-
-					if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
-					{
-						ActorId spriteActorId = gameObjectType->GetSpriteActorId();
-						if(Actor* spriteActor = m_project.GetActor(spriteActorId))
+						if (m_selectedActor)
 						{
-							for(TSpriteSheetMap::iterator spriteSheetIt = spriteActor->SpriteSheetsBegin(), spriteSheetEnd = spriteActor->SpriteSheetsEnd(); spriteSheetIt != spriteSheetEnd; ++spriteSheetIt)
+							//Populate timeline
+							PopulateTimeline(*m_animation);
+
+							//Set actor in list
+							std::vector<AnimationActor*>::iterator actorIt = std::find(m_actorCache.begin(), m_actorCache.end(), m_selectedActor);
+							int actorIdx = std::distance(m_actorCache.begin(), actorIt);
+							if (actorIdx >= 0)
 							{
-								for(TSpriteAnimMap::iterator animIt = spriteSheetIt->second.AnimationsBegin(), animEnd = spriteSheetIt->second.AnimationsEnd(); animIt != animEnd; ++animIt)
+								m_choiceActor->SetSelection(actorIdx);
+							}
+
+							//Set section on timeline
+							std::map<KeyframePanel::SectionId, AnimationActor*>::iterator it = std::find_if(m_sectionCache.begin(), m_sectionCache.end(), [&](const std::pair<KeyframePanel::SectionId, AnimationActor*>& rhs) { return rhs.second == m_selectedActor; });
+							if (it != m_sectionCache.end())
+							{
+								m_timeline->SetSelectedSection(it->first);
+							}
+
+							//Set game object label
+							std::stringstream label;
+
+							std::string objName = gameObject->GetName();
+							if (objName.empty())
+							{
+								objName = "<No Name>";
+							}
+
+							label << objName << " (object " << gameObject->GetId() << ")";
+							m_textCurrentActor->SetLabel(label.str());
+
+							//Populate sprite actor choices
+							m_choiceSpriteAnim->Clear();
+							m_spriteSheetCache.clear();
+
+							if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+							{
+								ActorId spriteActorId = gameObjectType->GetSpriteActorId();
+								if (Actor* spriteActor = m_project.GetActor(spriteActorId))
 								{
-									std::stringstream label;
-									label << spriteSheetIt->second.GetName() << ":" << animIt->second.GetName();
-									m_choiceSpriteAnim->AppendString(label.str());
-									m_spriteSheetCache.push_back(std::make_pair(spriteSheetIt->first, animIt->first));
+									for (TSpriteSheetMap::iterator spriteSheetIt = spriteActor->SpriteSheetsBegin(), spriteSheetEnd = spriteActor->SpriteSheetsEnd(); spriteSheetIt != spriteSheetEnd; ++spriteSheetIt)
+									{
+										for (TSpriteAnimMap::iterator animIt = spriteSheetIt->second.AnimationsBegin(), animEnd = spriteSheetIt->second.AnimationsEnd(); animIt != animEnd; ++animIt)
+										{
+											std::stringstream label;
+											label << spriteSheetIt->second.GetName() << ":" << animIt->second.GetName();
+											m_choiceSpriteAnim->AppendString(label.str());
+											m_spriteSheetCache.push_back(std::make_pair(spriteSheetIt->first, animIt->first));
+										}
+									}
 								}
 							}
 						}
@@ -495,54 +511,27 @@ void TimelinePanel::SyncActor(AnimationActor& actor)
 {
 	if(m_animation)
 	{
-		if(GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor.GetGameObjectId()))
+		//If selected obj is a prefab, apply to its children
+		const GameObject* selectedObj = m_project.GetEditingMap().GetGameObject(m_selectedPrefabInstance);
+		GameObjectType* selectedType = selectedObj ? m_project.GetGameObjectType(selectedObj->GetTypeId()) : nullptr;
+
+		if (selectedType && selectedType->IsPrefabType())
 		{
-			float frame = m_animation->GetFrame();
-			SpriteAnimId originalSpriteAnim = gameObject->GetSpriteAnim();
-
-			//Apply all track values to object
-			if(actor.m_trackPosition.GetNumKeyframes() > 0)
+			if (GameObjectType::PrefabChild* prefabChild = selectedType->FindPrefabChild(actor.GetGameObjectId()))
 			{
-				ion::Vector2i position = actor.m_trackPosition.GetValue(frame);
-				m_project.GetEditingMap().MoveGameObject(actor.GetGameObjectId(), position.x, position.y);
-				gameObject->SetPosition(position);
+				SyncSpriteObj(actor, *selectedType, *prefabChild, -selectedObj->GetPosition());
 			}
-
-			if(actor.m_trackSpriteAnim.GetNumKeyframes() > 0)
+		}
+		else
+		{
+			//else apply to scene object
+			if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(actor.GetGameObjectId()))
 			{
-				std::pair<SpriteSheetId, SpriteAnimId> spriteAnim = actor.m_trackSpriteAnim.GetValue(frame);
-				gameObject->SetSpriteSheetId(spriteAnim.first);
-				gameObject->SetSpriteAnim(spriteAnim.second);
-
-				//Advance current sprite anim
-				if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject->GetTypeId()))
+				if (const GameObjectType* gameObjType = m_project.GetGameObjectType(gameObject->GetTypeId()))
 				{
-					if(Actor* spriteActor = m_project.GetActor(gameObjectType->GetSpriteActorId()))
-					{
-						if(SpriteSheet* spriteSheet = spriteActor->GetSpriteSheet(spriteAnim.first))
-						{
-							if(SpriteAnimation* spriteAnimation = spriteSheet->GetAnimation(spriteAnim.second))
-							{
-								float spriteAnimStartTime = actor.m_trackSpriteAnim.GetPrevKeyframe(frame)->GetTime();
-								float spriteAnimFrame = (frame - spriteAnimStartTime) * spriteAnimation->GetPlaybackSpeed();
-								float spriteAnimLength = spriteAnimation->GetLength();
-
-								if(spriteAnimation->GetPlaybackBehaviour() == ion::render::Animation::eLoop)
-								{
-									spriteAnimation->SetFrame(ion::maths::Fmod(spriteAnimFrame, spriteAnimLength));
-								}
-								else
-								{
-									spriteAnimation->SetFrame(ion::maths::Clamp(spriteAnimFrame, 0.0f, spriteAnimLength));
-								}
-							}
-						}
-					}
+					SyncSpriteObj(actor , *gameObjType , *gameObject, ion::Vector2i());
 				}
 			}
-
-			//Refresh map panel
-			m_mainWindow.RedrawPanel(MainWindow::ePanelMap);
 		}
 	}
 }

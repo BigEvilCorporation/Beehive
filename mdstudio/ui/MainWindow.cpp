@@ -1346,18 +1346,18 @@ void MainWindow::RedrawPanel(Panel panel)
 
 void MainWindow::OnMenuToolsTweaksGameObjCentreOrigin(wxCommandEvent& event)
 {
-	for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
+	for (TMapMap::iterator mapIt = m_project->MapsBegin(), mapEnd = m_project->MapsEnd(); mapIt != mapEnd; ++mapIt)
 	{
-		Map& map = m_project->GetMap(it->first);
+		Map& map = m_project->GetMap(mapIt->first);
 
-		for (TGameObjectPosMap::iterator it = map.GetGameObjects().begin(), end = map.GetGameObjects().end(); it != end; ++it)
+		for (TGameObjectPosMap::iterator objTypeIt = map.GetGameObjects().begin(), objTypeEnd = map.GetGameObjects().end(); objTypeIt != objTypeEnd; ++objTypeIt)
 		{
-			GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
+			GameObjectType* gameObjectType = m_project->GetGameObjectType(objTypeIt->first);
 			if (gameObjectType)
 			{
-				for (int i = 0; i < it->second.size(); i++)
+				for (int i = 0; i < objTypeIt->second.size(); i++)
 				{
-					const GameObject& gameObject = it->second[i].m_gameObject;
+					const GameObject& gameObject = objTypeIt->second[i].m_gameObject;
 
 					const float width = (gameObject.GetDimensions().x > 0) ? gameObject.GetDimensions().x : gameObjectType->GetDimensions().x;
 					const float height = (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
@@ -1374,6 +1374,30 @@ void MainWindow::OnMenuToolsTweaksGameObjCentreOrigin(wxCommandEvent& event)
 							const float childHeight = (child.dimensions.y > 0) ? child.dimensions.y : (gameObject.GetDimensions().y > 0) ? gameObject.GetDimensions().y : gameObjectType->GetDimensions().y;
 							child.relativePos.x = -(width / 2) + child.relativePos.x + (childWidth / 2);
 							child.relativePos.y = -(height / 2) + child.relativePos.y + (childHeight / 2);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (TAnimationMap::const_iterator animIt = m_project->AnimationsBegin(), animEnd = m_project->AnimationsEnd(); animIt != animEnd; ++animIt)
+	{
+		if (Animation* anim = m_project->GetAnimation(animIt->first))
+		{
+			for (TAnimActorMap::iterator actorIt = anim->ActorsBegin(), actorEnd = anim->ActorsEnd(); actorIt != actorEnd; ++actorIt)
+			{
+				if (const GameObject* gameObj = m_project->GetEditingMap().GetGameObject(actorIt->second.GetGameObjectId()))
+				{
+					if (const GameObjectType* gameObjType = m_project->GetGameObjectType(gameObj->GetTypeId()))
+					{
+						ion::Vector2i offset((gameObj->GetDimensions().x > 0) ? gameObj->GetDimensions().x : gameObjType->GetDimensions().x,
+											(gameObj->GetDimensions().y > 0) ? gameObj->GetDimensions().y : gameObjType->GetDimensions().y);
+
+						for (int i = 0; i < actorIt->second.m_trackPosition.GetNumKeyframes(); i++)
+						{
+							AnimKeyframePosition& keyframe = actorIt->second.m_trackPosition.GetKeyframe(i);
+							keyframe.SetValue(keyframe.GetValue() + (offset / 2));
 						}
 					}
 				}

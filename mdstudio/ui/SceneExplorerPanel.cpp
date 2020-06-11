@@ -64,12 +64,12 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 								wxTreeItemId childId = m_tree->AppendItem(itemId, childName);
 							}
 						}
-						
 					}
 				}
 			}
 		}
 
+		m_tree->SortChildren(rootId);
 		m_tree->Expand(rootId);
 	}
 }
