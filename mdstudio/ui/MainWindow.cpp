@@ -890,10 +890,8 @@ void MainWindow::ShowToolboxObjects()
 		//Subscribe to toolbox buttons
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_SELECTGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_PLACEGAMEOBJ);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_DUPLICATEGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_DRAWGAMEOBJ);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_ANIMATEGAMEOBJ);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVEGAMEOBJ);
 
 		//Hide unused
 #if !INCLUDE_UI_TOOLBOX_GAMEOBJ_ANIMATE
@@ -2965,17 +2963,11 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 		case wxID_TOOL_PLACEGAMEOBJ:
 			m_mapPanel->SetTool(eToolPlaceGameObject);
 			break;
-		case wxID_TOOL_DUPLICATEGAMEOBJ:
-			m_mapPanel->SetTool(eToolDuplicateGameObject);
-			break;
 		case wxID_TOOL_DRAWGAMEOBJ:
 			m_mapPanel->SetTool(eToolDrawGameObject);
 			break;
 		case wxID_TOOL_ANIMATEGAMEOBJ:
 			m_mapPanel->SetTool(eToolAnimateGameObject);
-			break;
-		case wxID_TOOL_REMOVEGAMEOBJ:
-			m_mapPanel->SetTool(eToolRemoveGameObject);
 			break;
 		}
 	}

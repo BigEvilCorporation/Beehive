@@ -53,9 +53,7 @@ enum ToolType
 	eToolSelectGameObject,
 	eToolPlaceGameObject,
 	eToolDrawGameObject,
-	eToolDuplicateGameObject,
 	eToolAnimateGameObject,
-	eToolRemoveGameObject,
 
 	//Collision
 	eToolDrawTerrainBezier,

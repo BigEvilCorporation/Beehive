@@ -847,45 +847,6 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 			break;
 		}
 
-		case eToolDuplicateGameObject:
-		{
-			std::vector<GameObjectId> newObjects;
-
-			for (auto gameObjId : m_selectedGameObjects)
-			{
-				if (const GameObject* original = m_project.GetEditingMap().GetGameObject(gameObjId))
-				{
-					if (GameObjectType* gameObjectType = m_project.GetGameObjectType(original->GetTypeId()))
-					{
-						m_previewGameObjectType = original->GetTypeId();
-						m_previewGameObjectArchetype = InvalidGameObjectArchetypeId;
-						m_previewGameObjectPos.x = original->GetPosition().x;
-						m_previewGameObjectPos.y = original->GetPosition().y;
-
-						if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
-						{
-							std::string name = ion::string::AddNumericPostfix(original->GetName(), 1);
-							while (m_project.GetEditingMap().FindGameObject(name))
-							{
-								name = ion::string::AddNumericPostfix(name, 1);
-							}
-
-							GameObjectId newObject = m_project.GetEditingMap().PlaceGameObject(original->GetPosition().x, original->GetPosition().y, *gameObjectType, *original, name);
-							m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
-							m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
-							Refresh();
-
-							newObjects.push_back(newObject);
-						}
-					}
-				}
-			}
-
-			m_selectedGameObjects = newObjects;
-
-			break;
-		}
-
 		case eToolDrawGameObject:
 		{
 			if(buttonBits & eMouseLeft)
@@ -927,19 +888,6 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				m_boxSelectStart.y = -1;
 				m_boxSelectEnd.x = -1;
 				m_boxSelectEnd.y = -1;
-			}
-
-			break;
-		}
-
-		case eToolRemoveGameObject:
-		{
-			if((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
-			{
-				m_project.GetEditingMap().RemoveGameObject(x, y);
-				m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
-				m_mainWindow->RefreshPanel(MainWindow::ePanelProperties);
-				Refresh();
 			}
 
 			break;

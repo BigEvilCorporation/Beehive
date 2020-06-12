@@ -196,7 +196,9 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 	contextMenu.AppendSubMenu(objMenu, "Add New Object");
 	contextMenu.AppendSubMenu(archetypeMenu, "Add Object from Archetype");
 	contextMenu.AppendSubMenu(convertMenu, "Convert Object");
+	contextMenu.Append(ContextMenu::Delete, "Delete Object");
 	contextMenu.Append(ContextMenu::Rename, "Rename Object");
+	contextMenu.Append(ContextMenu::Duplicate, "Duplicate Object");
 
 	contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&SceneExplorerPanel::OnContextMenuClick, NULL, this);
 	PopupMenu(&contextMenu);
@@ -271,6 +273,42 @@ void SceneExplorerPanel::OnContextMenuClick(wxCommandEvent& event)
 				//Start placement
 				m_project.SetPaintGameObjectType(objectTypeId);
 				mapPanel->SetTool(eToolPlaceGameObject);
+			}
+		}
+	}
+	else if (event.GetId() == ContextMenu::Delete)
+	{
+		std::map<wxTreeItemId, GameObjectId>::const_iterator it = m_objectMap.find(m_tree->GetSelection());
+		if (it != m_objectMap.end())
+		{
+			m_project.GetEditingMap().RemoveGameObject(it->second);
+			m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+			m_mainWindow->RefreshPanel(MainWindow::ePanelProperties);
+			Refresh();
+		}
+	}
+	else if (event.GetId() == ContextMenu::Duplicate)
+	{
+		//TODO: multiple selection
+		//for (auto gameObjId : m_selectedGameObjects)
+		std::map<wxTreeItemId, GameObjectId>::const_iterator it = m_objectMap.find(m_tree->GetSelection());
+		if (it != m_objectMap.end())
+		{
+			if (const GameObject* original = m_project.GetEditingMap().GetGameObject(it->second))
+			{
+				if (GameObjectType* gameObjectType = m_project.GetGameObjectType(original->GetTypeId()))
+				{
+					std::string name = ion::string::AddNumericPostfix(original->GetName(), 1);
+					while (m_project.GetEditingMap().FindGameObject(name))
+					{
+						name = ion::string::AddNumericPostfix(name, 1);
+					}
+
+					GameObjectId newObject = m_project.GetEditingMap().PlaceGameObject(original->GetPosition().x, original->GetPosition().y, *gameObjectType, *original, name);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
+					m_mainWindow->RedrawPanel(MainWindow::ePanelGameObjectTypes);
+					Refresh();
+				}
 			}
 		}
 	}

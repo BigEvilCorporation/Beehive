@@ -41,6 +41,8 @@ protected:
 	{
 		Add,
 		Rename,
+		Delete,
+		Duplicate,
 		Convert,
 		TypeListFirst
 	};
