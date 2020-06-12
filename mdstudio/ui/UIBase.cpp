@@ -94,6 +94,25 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 
 	m_menubar1->Append( m_menuTools, wxT("&Tools") );
 
+	m_menuAnimations = new wxMenu();
+	wxMenuItem* m_menuItem2;
+	m_menuItem2 = new wxMenuItem( m_menuAnimations, wxID_MENU_ANIMATION_IMPORT, wxString( wxT("Import") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuAnimations->Append( m_menuItem2 );
+
+	wxMenuItem* m_menuItem31;
+	m_menuItem31 = new wxMenuItem( m_menuAnimations, wxID_MENU_ANIMATION_EXPORT, wxString( wxT("Export") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuAnimations->Append( m_menuItem31 );
+
+	wxMenuItem* m_menuItem4;
+	m_menuItem4 = new wxMenuItem( m_menuAnimations, wxID_MENU_ANIMATION_CONVERT_RELATIVE, wxString( wxT("Convert to relative coords") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuAnimations->Append( m_menuItem4 );
+
+	wxMenuItem* m_menuItem5;
+	m_menuItem5 = new wxMenuItem( m_menuAnimations, wxID_ANY, wxString( wxT("Bind Animations to Prefabs") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuAnimations->Append( m_menuItem5 );
+
+	m_menubar1->Append( m_menuAnimations, wxT("Animation") );
+
 	this->SetMenuBar( m_menubar1 );
 
 	wxBoxSizer* bSizer1;
@@ -179,6 +198,10 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 
 	// Connect Events
 	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuToolsTweaksGameObjCentreOrigin ), this, m_menuItem3->GetId());
+	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationImport ), this, m_menuItem2->GetId());
+	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationExport ), this, m_menuItem31->GetId());
+	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationConvertToRelativeCoords ), this, m_menuItem4->GetId());
+	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationBindPrefabs ), this, m_menuItem5->GetId());
 	this->Connect( wxID_BTN_PROJ_NEW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjNew ) );
 	this->Connect( wxID_BTN_PROJ_OPEN, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjOpen ) );
 	this->Connect( wxID_BTN_PROJ_SAVE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSave ) );
@@ -3092,6 +3115,10 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	fgSizer24->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	m_toolBarAnimation = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL );
+	wxArrayString m_choicePrefabsChoices;
+	m_choicePrefabs = new wxChoice( m_toolBarAnimation, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choicePrefabsChoices, 0 );
+	m_choicePrefabs->SetSelection( 0 );
+	m_toolBarAnimation->AddControl( m_choicePrefabs );
 	wxArrayString m_choiceAnimsChoices;
 	m_choiceAnims = new wxChoice( m_toolBarAnimation, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceAnimsChoices, 0 );
 	m_choiceAnims->SetSelection( 0 );
@@ -3135,10 +3162,6 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	m_toolBarAnimation->AddControl( m_staticText34 );
 	m_spinSpeed = new wxSpinCtrl( m_toolBarAnimation, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1000, 0 );
 	m_toolBarAnimation->AddControl( m_spinSpeed );
-	m_toolBarAnimation->AddSeparator();
-
-	m_chkExportLocalSpace = new wxCheckBox( m_toolBarAnimation, wxID_ANY, wxT("Export Local Space"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toolBarAnimation->AddControl( m_chkExportLocalSpace );
 	m_toolBarAnimation->Realize();
 
 	fgSizer24->Add( m_toolBarAnimation, 0, wxEXPAND, 5 );
@@ -3189,6 +3212,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	this->Layout();
 
 	// Connect Events
+	m_choicePrefabs->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectPrefab ), NULL, this );
 	m_choiceAnims->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectAnimation ), NULL, this );
 	this->Connect( m_toolAddAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolAddAnim ) );
 	this->Connect( m_toolDeleteAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolDeleteAnim ) );
@@ -3205,7 +3229,6 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 	this->Connect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Connect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
-	m_chkExportLocalSpace->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnChkExportLocalSpace ), NULL, this );
 	m_choiceActor->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectActor ), NULL, this );
 	m_choiceSpriteAnim->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
 }
@@ -3213,6 +3236,7 @@ TimelinePanelBase::TimelinePanelBase( wxWindow* parent, wxWindowID id, const wxP
 TimelinePanelBase::~TimelinePanelBase()
 {
 	// Disconnect Events
+	m_choicePrefabs->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectPrefab ), NULL, this );
 	m_choiceAnims->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectAnimation ), NULL, this );
 	this->Disconnect( m_toolAddAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolAddAnim ) );
 	this->Disconnect( m_toolDeleteAnim->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolDeleteAnim ) );
@@ -3229,7 +3253,6 @@ TimelinePanelBase::~TimelinePanelBase()
 	this->Disconnect( m_toolFastForward->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolFastForward ) );
 	this->Disconnect( m_toolIsolateObject->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnToolIsolateObject ) );
 	m_spinSpeed->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( TimelinePanelBase::OnSpinSpeed ), NULL, this );
-	m_chkExportLocalSpace->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( TimelinePanelBase::OnChkExportLocalSpace ), NULL, this );
 	m_choiceActor->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectActor ), NULL, this );
 	m_choiceSpriteAnim->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( TimelinePanelBase::OnSelectSpriteAnim ), NULL, this );
 

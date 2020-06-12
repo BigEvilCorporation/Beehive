@@ -41,6 +41,7 @@ public:
 protected:
 
 	virtual void OnSpinSpeed(wxSpinEvent& event);
+	virtual void OnSelectPrefab(wxCommandEvent& event);
 	virtual void OnSelectAnimation(wxCommandEvent& event);
 	virtual void OnSelectActor(wxCommandEvent& event);
 	virtual void OnSelectSpriteAnim(wxCommandEvent& event);
@@ -58,7 +59,6 @@ protected:
 	virtual void OnToolRewind(wxCommandEvent& event);
 	virtual void OnToolFastForward(wxCommandEvent& event);
 	virtual void OnToolIsolateObject(wxCommandEvent& event);
-	virtual void OnChkExportLocalSpace(wxCommandEvent& event);
 	virtual void OnResize(wxSizeEvent& event);
 
 	//Right-click menu callback
@@ -73,7 +73,8 @@ private:
 		eMenuSetSpriteAnimLength
 	};
 
-	void PopulateAnimations();
+	void PopulatePrefabs();
+	void PopulateAnimations(GameObjectTypeId prefabId);
 	void PopulateTimeline(Animation& animation);
 
 	void SyncActor(AnimationActor& actor);
@@ -96,6 +97,7 @@ private:
 	MainWindow& m_mainWindow;
 	Project& m_project;
 
+	std::vector<GameObjectTypeId> m_prefabTypeCache;
 	std::vector<AnimationId> m_animCache;
 	std::vector<AnimationActor*> m_actorCache;
 	std::vector<std::pair<SpriteSheetId, SpriteAnimId>> m_spriteSheetCache;
@@ -130,6 +132,7 @@ private:
 	GameObjectId m_selectedActorId;
 	AnimationActor* m_selectedActor;
 
+	GameObjectTypeId m_selectedPrefabType;
 	GameObjectId m_selectedPrefabInstance;
 
 	//Timer
@@ -147,9 +150,10 @@ template <typename T> void TimelinePanel::SyncSpriteObj(AnimationActor& animActo
 	//Apply all track values to object
 	if (animActor.m_trackPosition.GetNumKeyframes() > 0)
 	{
-		ion::Vector2i position = positionOffset + animActor.m_trackPosition.GetValue(frame);
-		m_project.GetEditingMap().MoveGameObject(animActor.GetGameObjectId(), position.x, position.y);
-		spriteObj.SetPosition(position);
+		ion::Vector2i localPos = animActor.m_trackPosition.GetValue(frame);
+		ion::Vector2i worldPos = localPos + positionOffset;
+		m_project.GetEditingMap().MoveGameObject(animActor.GetGameObjectId(), worldPos.x, worldPos.y);
+		spriteObj.SetPosition(localPos);
 	}
 
 	if (animActor.m_trackSpriteAnim.GetNumKeyframes() > 0)

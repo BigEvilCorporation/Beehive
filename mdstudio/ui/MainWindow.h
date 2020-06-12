@@ -60,7 +60,8 @@ public:
 		ePanelGameObjectParams,
 		ePanelSceneExplorer,
 		ePanelProperties,
-		ePanelScriptCompile
+		ePanelScriptCompile,
+		ePanelAnimation
 	};
 
 	MainWindow();
@@ -136,6 +137,10 @@ public:
 
 protected:
 	virtual void OnMenuToolsTweaksGameObjCentreOrigin(wxCommandEvent& event);
+	virtual void OnMenuAnimationImport(wxCommandEvent& event);
+	virtual void OnMenuAnimationExport(wxCommandEvent& event);
+	virtual void OnMenuAnimationConvertToRelativeCoords(wxCommandEvent& event);
+	virtual void OnMenuAnimationBindPrefabs(wxCommandEvent& event);
 
 	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
 	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);

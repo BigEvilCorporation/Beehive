@@ -33,6 +33,7 @@
 
 #include <ion/core/utils/STL.h>
 #include <ion/maths/Maths.h>
+#include <ion/maths/Bounds.h>
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 #include <luminary/Types.h>
@@ -1340,6 +1341,9 @@ void MainWindow::RedrawPanel(Panel panel)
 	case ePanelProperties:
 		if (m_propertyPanel)
 			m_propertyPanel->Refresh();
+	case ePanelAnimation:
+		if (m_timelinePanel)
+			m_timelinePanel->Refresh();
 		break;
 	}
 }
@@ -1406,6 +1410,106 @@ void MainWindow::OnMenuToolsTweaksGameObjCentreOrigin(wxCommandEvent& event)
 	}
 
 	RefreshPanel(ePanelMap);
+}
+
+void MainWindow::OnMenuAnimationImport(wxCommandEvent& event)
+{
+	wxFileDialog dialogue(this, _("Open .bee_anim file"), "", "", "bee_anim files (*.bee_anim)|*.bee_anim", wxFD_OPEN);
+	if (dialogue.ShowModal() == wxID_OK)
+	{
+		bool clearExisting = wxMessageBox("Clear existing animations?", "Import Animations", wxYES | wxNO | wxICON_WARNING) == wxYES;
+		std::string filename = dialogue.GetPath().c_str().AsChar();
+		m_project->ImportAnimations(filename, clearExisting);
+		RedrawPanel(ePanelAnimation);
+	}
+}
+
+void MainWindow::OnMenuAnimationExport(wxCommandEvent& event)
+{
+	wxFileDialog dialogue(this, _("Save .bee_anim file"), "", "", "bee_anim files (*.bee_anim)|*.bee_anim", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	if (dialogue.ShowModal() == wxID_OK)
+	{
+		std::string filename = dialogue.GetPath().c_str().AsChar();
+		m_project->ExportAnimations(filename);
+	}
+}
+
+void MainWindow::OnMenuAnimationConvertToRelativeCoords(wxCommandEvent& event)
+{
+	for (TAnimationMap::const_iterator animIt = m_project->AnimationsBegin(), animEnd = m_project->AnimationsEnd(); animIt != animEnd; ++animIt)
+	{
+		if (Animation* anim = m_project->GetAnimation(animIt->first))
+		{
+			ion::maths::Bounds2i bounds;
+
+			//Calculate centre of all objs
+			for (TAnimActorMap::iterator actorIt = anim->ActorsBegin(), actorEnd = anim->ActorsEnd(); actorIt != actorEnd; ++actorIt)
+			{
+				if (const GameObject* gameObj = m_project->GetEditingMap().GetGameObject(actorIt->second.GetGameObjectId()))
+				{
+					if (const GameObjectType* gameObjType = m_project->GetGameObjectType(gameObj->GetTypeId()))
+					{
+						ion::Vector2i size((gameObj->GetDimensions().x > 0) ? gameObj->GetDimensions().x : gameObjType->GetDimensions().x,
+							(gameObj->GetDimensions().y > 0) ? gameObj->GetDimensions().y : gameObjType->GetDimensions().y);
+
+						bounds.AddPoint(gameObj->GetPosition() - (size / 2));
+						bounds.AddPoint(gameObj->GetPosition() + (size / 2));
+					}
+				}
+			}
+
+			//Offset all position keyframes
+			for (TAnimActorMap::iterator actorIt = anim->ActorsBegin(), actorEnd = anim->ActorsEnd(); actorIt != actorEnd; ++actorIt)
+			{
+				for (int i = 0; i < actorIt->second.m_trackPosition.GetNumKeyframes(); i++)
+				{
+					AnimKeyframePosition& keyframe = actorIt->second.m_trackPosition.GetKeyframe(i);
+					keyframe.SetValue(-bounds.GetCentre() + keyframe.GetValue());
+				}
+			}
+
+			//Set anchor position
+			anim->SetAnchor(bounds.GetCentre());
+		}
+	}
+
+	RefreshPanel(ePanelAnimation);
+}
+
+void MainWindow::OnMenuAnimationBindPrefabs(wxCommandEvent& event)
+{
+	std::vector<const GameObjectType*> prefabs;
+
+	for (TGameObjectTypeMap::const_iterator it = m_project->GetGameObjectTypes().begin(), end = m_project->GetGameObjectTypes().end(); it != end; ++it)
+	{
+		if (it->second.IsPrefabType())
+		{
+			prefabs.push_back(&it->second);
+		}
+	}
+
+	for (TAnimationMap::const_iterator animIt = m_project->AnimationsBegin(), animEnd = m_project->AnimationsEnd(); animIt != animEnd; ++animIt)
+	{
+		if (Animation* anim = m_project->GetAnimation(animIt->first))
+		{
+			for (auto prefab : prefabs)
+			{
+				bool match = true;
+
+				for (TAnimActorMap::iterator actorIt = anim->ActorsBegin(), actorEnd = anim->ActorsEnd(); actorIt != actorEnd && match; ++actorIt)
+				{
+					match = std::find_if(prefab->GetPrefabChildren().begin(), prefab->GetPrefabChildren().end(), [&](const GameObjectType::PrefabChild& rhs) { return actorIt->first == rhs.instanceId; }) != prefab->GetPrefabChildren().end();
+				}
+
+				if (match)
+				{
+					anim->SetPrefabId(prefab->GetId());
+				}
+			}
+		}
+	}
+
+	RefreshPanel(ePanelAnimation);
 }
 
 void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)

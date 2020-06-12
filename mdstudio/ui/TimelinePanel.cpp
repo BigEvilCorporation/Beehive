@@ -79,9 +79,12 @@ TimelinePanel::TimelinePanel(MainWindow& mainWindow, Project& project, ion::rend
 	m_selectedActorId = InvalidActorId;
 	m_selectedActor = NULL;
 	m_selectedTrackId = eTrackPosition;
+	m_selectedPrefabType = InvalidGameObjectTypeId;
+	m_selectedPrefabInstance = InvalidGameObjectId;
 	m_prevClock = 0;
 
-	PopulateAnimations();
+	PopulatePrefabs();
+	PopulateAnimations(m_selectedPrefabType);
 
 	Bind(wxEVT_TIMER, &TimelinePanel::EventHandlerTimer, this, m_timer.GetId());
 	Bind(wxEVT_SIZE, &TimelinePanel::OnResize, this, GetId());
@@ -268,7 +271,36 @@ void TimelinePanel::SetSliderFrame(float frame)
 	m_timeline->SetTime(frame);
 }
 
-void TimelinePanel::PopulateAnimations()
+void TimelinePanel::PopulatePrefabs()
+{
+	m_choicePrefabs->Clear();
+	m_prefabTypeCache.clear();
+
+	typedef std::pair<std::string, GameObjectTypeId> TNameIDPair;
+	typedef std::vector<TNameIDPair> TNameList;
+	TNameList nameList;
+	
+	for (auto gameObjType : m_project.GetGameObjectTypes())
+	{
+		if (gameObjType.second.IsPrefabType())
+		{
+			nameList.push_back(std::make_pair(gameObjType.second.GetPrefabName(), gameObjType.first));
+		}
+	}
+
+	std::sort(nameList.begin(), nameList.end(), [](TNameIDPair& a, TNameIDPair& b) { return a.first < b.first; });
+
+	for (int i = 0; i < nameList.size(); i++)
+	{
+		//Store by index
+		m_prefabTypeCache.push_back(nameList[i].second);
+
+		//Add to list
+		m_choicePrefabs->AppendString(nameList[i].first);
+	}
+}
+
+void TimelinePanel::PopulateAnimations(GameObjectTypeId prefabId)
 {
 	m_choiceAnims->Clear();
 	m_animCache.clear();
@@ -279,7 +311,10 @@ void TimelinePanel::PopulateAnimations()
 
 	for(TAnimationMap::const_iterator it = m_project.AnimationsBegin(), end = m_project.AnimationsEnd(); it != end; ++it)
 	{
-		nameList.push_back(std::make_pair(it->second.GetName(), it->first));
+		if (prefabId == InvalidGameObjectTypeId || it->second.GetPrefabId() == prefabId)
+		{
+			nameList.push_back(std::make_pair(it->second.GetName(), it->first));
+		}
 	}
 
 	std::sort(nameList.begin(), nameList.end(), [](TNameIDPair& a, TNameIDPair& b) { return a.first < b.first; });
@@ -519,7 +554,7 @@ void TimelinePanel::SyncActor(AnimationActor& actor)
 		{
 			if (GameObjectType::PrefabChild* prefabChild = selectedType->FindPrefabChild(actor.GetGameObjectId()))
 			{
-				SyncSpriteObj(actor, *selectedType, *prefabChild, -selectedObj->GetPosition());
+				SyncSpriteObj(actor, *selectedType, *prefabChild, selectedObj->GetPosition());
 			}
 		}
 		else
@@ -529,7 +564,7 @@ void TimelinePanel::SyncActor(AnimationActor& actor)
 			{
 				if (const GameObjectType* gameObjType = m_project.GetGameObjectType(gameObject->GetTypeId()))
 				{
-					SyncSpriteObj(actor , *gameObjType , *gameObject, ion::Vector2i());
+					SyncSpriteObj(actor , *gameObjType , *gameObject, m_animation->GetAnchor());
 				}
 			}
 		}
@@ -591,6 +626,8 @@ void TimelinePanel::Refresh(bool eraseBackground, const wxRect *rect)
 {
 	if(!m_mainWindow.IsRefreshLocked())
 	{
+		PopulatePrefabs();
+
 		if (m_timeline)
 		{
 			m_timeline->Refresh();
@@ -604,6 +641,21 @@ void TimelinePanel::OnSpinSpeed(wxSpinEvent& event)
 	{
 		m_animation->SetPlaybackSpeed((float)m_spinSpeed->GetValue());
 	}
+}
+
+void TimelinePanel::OnSelectPrefab(wxCommandEvent& event)
+{
+	int index = event.GetSelection();
+	if (index < m_prefabTypeCache.size())
+	{
+		m_selectedPrefabType = m_prefabTypeCache[index];
+	}
+	else
+	{
+		m_selectedPrefabType = InvalidGameObjectTypeId;
+	}
+
+	PopulateAnimations(m_selectedPrefabType);
 }
 
 void TimelinePanel::OnSelectAnimation(wxCommandEvent& event)
@@ -651,7 +703,7 @@ void TimelinePanel::OnToolAddAnim(wxCommandEvent& event)
 		m_animationId = m_project.CreateAnimation();
 		m_animation = m_project.GetAnimation(m_animationId);
 		m_animation->SetName(dialog.m_textName->GetValue().GetData().AsChar());
-		PopulateAnimations();
+		PopulateAnimations(m_selectedPrefabType);
 		PopulateTimeline(*m_animation);
 		PopulateActors();
 	}
@@ -666,7 +718,7 @@ void TimelinePanel::OnToolDeleteAnim(wxCommandEvent& event)
 		m_animation = NULL;
 		m_selectedActorId = InvalidActorId;
 
-		PopulateAnimations();
+		PopulateAnimations(m_selectedPrefabType);
 		PopulateActors();
 	}
 }
@@ -951,16 +1003,6 @@ void TimelinePanel::OnToolIsolateObject(wxCommandEvent& event)
 	if(event.IsChecked() && !m_selectedActor)
 	{
 		m_toolIsolateObject->Toggle(false);
-	}
-
-	event.Skip();
-}
-
-void TimelinePanel::OnChkExportLocalSpace(wxCommandEvent& event)
-{
-	if (m_animation)
-	{
-		m_animation->SetExportLocalSpace(event.IsChecked());
 	}
 
 	event.Skip();
