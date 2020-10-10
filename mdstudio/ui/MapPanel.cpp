@@ -41,6 +41,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 	m_moveGameObjByPixel = false;
 	m_boxSelection = false;
+	m_editingPrefabInstanceId = InvalidGameObjectId;
 
 	m_cursorHorizontal = new wxCursor(wxCURSOR_SIZEWE);
 	m_cursorVertical = new wxCursor(wxCURSOR_SIZENS);
@@ -1960,6 +1961,12 @@ void MapPanel::SelectGameObject(GameObjectId gameObjectId)
 		m_mainWindow->SetSelectedGameObject(gameObject);
 		m_mainWindow->SetSelectedAnimObject(gameObjectId);
 	}
+}
+
+void MapPanel::SetEditingPrefab(GameObjectId instanceId)
+{
+
+	m_editingPrefabInstanceId = instanceId;
 }
 
 GameObjectId MapPanel::FindGameObject(int x, int y, ion::Vector2i& topLeft) const

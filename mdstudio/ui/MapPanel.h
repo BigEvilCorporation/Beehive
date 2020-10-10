@@ -39,6 +39,9 @@ public:
 	//Set selection
 	void SelectGameObject(GameObjectId gameObjectId);
 
+	//Set editing prefab
+	void SetEditingPrefab(GameObjectId instanceId);
+
 	GameObjectId FindGameObject(int x, int y, ion::Vector2i& topLeft) const;
 	int FindGameObjects(int x, int y, int width, int height, std::vector<const GameObjectMapEntry*>& gameObjects) const;
 
@@ -130,6 +133,9 @@ private:
 
 	//Current tool
 	ToolType m_currentTool;
+
+	//Current prefab
+	GameObjectId m_editingPrefabInstanceId;
 
 	//Current cursor origin mode
 	CursorOrigin m_cursorOrigin;

@@ -178,7 +178,7 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 	std::sort(m_archetypeListSorted.begin(), m_archetypeListSorted.end(), [](const ArchetypeEntry& lhs, const ArchetypeEntry& rhs) { return lhs.typeName < rhs.typeName; });
 	std::sort(m_convertTypeListSorted.begin(), m_convertTypeListSorted.end(), [](const std::pair<GameObjectTypeId, std::string>& lhs, const std::pair<GameObjectTypeId, std::string>& rhs) { return lhs.second < rhs.second; });
 
-	for(int i = 0; i < m_objectTypeListSorted.size(); i++)
+	for (int i = 0; i < m_objectTypeListSorted.size(); i++)
 	{
 		objMenu->Append(m_firstObjectId + i, m_objectTypeListSorted[i].second);
 	}
@@ -199,6 +199,20 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 	contextMenu.Append(ContextMenu::Delete, "Delete Object");
 	contextMenu.Append(ContextMenu::Rename, "Rename Object");
 	contextMenu.Append(ContextMenu::Duplicate, "Duplicate Object");
+
+	std::map<wxTreeItemId, GameObjectId>::const_iterator it = m_objectMap.find(m_contextItem);
+	if (it != m_objectMap.end())
+	{
+		GameObjectId objectTypeId = m_convertTypeListSorted[event.GetId() - m_firstConvertId].first;
+
+		if (const GameObjectType* objectType = m_project.GetGameObjectType(objectTypeId))
+		{
+			if (objectType->IsPrefabType())
+			{
+				contextMenu.Append(ContextMenu::EditPrefab, "Edit Prefab");
+			}
+		}
+	}
 
 	contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&SceneExplorerPanel::OnContextMenuClick, NULL, this);
 	PopupMenu(&contextMenu);
@@ -315,5 +329,8 @@ void SceneExplorerPanel::OnContextMenuClick(wxCommandEvent& event)
 	else if (event.GetId() == ContextMenu::Rename)
 	{
 		m_tree->EditLabel(m_contextItem);
+	}
+	else if (event.GetId() == ContextMenu::EditPrefab)
+	{
 	}
 }

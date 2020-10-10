@@ -44,6 +44,7 @@ protected:
 		Delete,
 		Duplicate,
 		Convert,
+		EditPrefab,
 		TypeListFirst
 	};
 
