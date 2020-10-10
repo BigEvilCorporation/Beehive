@@ -13,29 +13,34 @@
 #include "BeehiveStudio.h"
 #include "core/time/Time.h"
 
-int main(char** args, int numargs)
+namespace ion
 {
-	SetDllDirectoryA("bin");
-
-	Beehive app;
-	
-	if(app.Initialise())
+	int EntryPoint(int numargs, char** args)
 	{
-		float deltaTime = 0.0f;
-		bool run = true;
-		while(run)
-		{
-			u64 startTicks = ion::time::GetSystemTicks();
+		SetDllDirectoryA("bin");
 
-			if(run = app.Update(deltaTime))
+		Beehive app;
+
+		if (app.Initialise())
+		{
+			float deltaTime = 0.0f;
+			bool run = true;
+			while (run)
 			{
-				app.Render();
+				u64 startTicks = ion::time::GetSystemTicks();
+
+				if (run = app.Update(deltaTime))
+				{
+					app.Render();
+				}
+
+				u64 endTicks = ion::time::GetSystemTicks();
+				deltaTime = (float)ion::time::TicksToSeconds(endTicks - startTicks);
 			}
 
-			u64 endTicks = ion::time::GetSystemTicks();
-			deltaTime = (float)ion::time::TicksToSeconds(endTicks - startTicks);
+			app.Shutdown();
 		}
 
-		app.Shutdown();
+		return 0;
 	}
 }
