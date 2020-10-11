@@ -10,13 +10,14 @@
 ///////////////////////////////////////////////////////
 
 #include "SpriteCanvas.h"
+#include "MainWindow.h"
 #include "Mouse.h"
 
 #include <wx/dc.h>
 #include <wx/dcclient.h>
 
 SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: wxGLCanvas(parent, id, NULL, pos, size, style, name)
+	: wxGLCanvas(parent, MainWindow::GetGLAttributes(), id, pos, size, style, name)
 	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
 {
 	m_gridPrimitive = NULL;

@@ -11,43 +11,21 @@
 #include "UIBase.h"
 
 #include "../FormBuilderProj/add_16_16.xpm"
-#include "../FormBuilderProj/clearmap.xpm"
-#include "../FormBuilderProj/config.xpm"
-#include "../FormBuilderProj/deletestamp.xpm"
-#include "../FormBuilderProj/deletetile.xpm"
-#include "../FormBuilderProj/deleteunusedtiles.xpm"
 #include "../FormBuilderProj/down_16_16.xpm"
 #include "../FormBuilderProj/fastforward_16_16.xpm"
-#include "../FormBuilderProj/gameobj.xpm"
-#include "../FormBuilderProj/gameobjpanel.xpm"
-#include "../FormBuilderProj/genterrain_beziers.xpm"
-#include "../FormBuilderProj/grid.xpm"
-#include "../FormBuilderProj/gridsnap.xpm"
-#include "../FormBuilderProj/importtiles.xpm"
 #include "../FormBuilderProj/key_delete_16_16.xpm"
 #include "../FormBuilderProj/key_end_16_16.xpm"
 #include "../FormBuilderProj/key_insert_16_16.xpm"
 #include "../FormBuilderProj/keyall_16_16.xpm"
 #include "../FormBuilderProj/loop_16_16.xpm"
-#include "../FormBuilderProj/megadrive2.xpm"
-#include "../FormBuilderProj/newproj.xpm"
-#include "../FormBuilderProj/newstamp.xpm"
-#include "../FormBuilderProj/newtile.xpm"
 #include "../FormBuilderProj/obj_16_16.xpm"
-#include "../FormBuilderProj/open.xpm"
-#include "../FormBuilderProj/palettespanel.xpm"
 #include "../FormBuilderProj/play_16_16.xpm"
 #include "../FormBuilderProj/qmark_16_16.xpm"
 #include "../FormBuilderProj/remove_16_16.xpm"
-#include "../FormBuilderProj/resizemap.xpm"
 #include "../FormBuilderProj/rewind_16_16.xpm"
-#include "../FormBuilderProj/save.xpm"
-#include "../FormBuilderProj/showoutlines.xpm"
-#include "../FormBuilderProj/stampspanel.xpm"
 #include "../FormBuilderProj/stepleft_16_16.xpm"
 #include "../FormBuilderProj/stepright_16_16.xpm"
 #include "../FormBuilderProj/stop_16_16.xpm"
-#include "../FormBuilderProj/tilespanel.xpm"
 #include "../FormBuilderProj/tool_addterrainbezier.xpm"
 #include "../FormBuilderProj/tool_clone.xpm"
 #include "../FormBuilderProj/tool_createstamp.xpm"
@@ -72,7 +50,6 @@
 #include "../FormBuilderProj/tool_selectgameobj.xpm"
 #include "../FormBuilderProj/tool_selectstamp.xpm"
 #include "../FormBuilderProj/tool_stamppicker.xpm"
-#include "../FormBuilderProj/toolspanel.xpm"
 #include "../FormBuilderProj/up_16_16.xpm"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -82,6 +59,104 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
 	m_menubar1 = new wxMenuBar( 0 );
+	m_menuProject = new wxMenu();
+	wxMenuItem* m_menuItemProjNew;
+	m_menuItemProjNew = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_NEW, wxString( wxT("New") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuProject->Append( m_menuItemProjNew );
+
+	wxMenuItem* m_menuItemProjOpen;
+	m_menuItemProjOpen = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_OPEN, wxString( wxT("Open") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuProject->Append( m_menuItemProjOpen );
+
+	wxMenuItem* m_menuItemProjSave;
+	m_menuItemProjSave = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_SAVE, wxString( wxT("Save") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuProject->Append( m_menuItemProjSave );
+
+	wxMenuItem* m_menuItemProjSettings;
+	m_menuItemProjSettings = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_SETTINGS, wxString( wxT("Settings") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuProject->Append( m_menuItemProjSettings );
+
+	wxMenuItem* m_menuItemProjExport;
+	m_menuItemProjExport = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_EXPORT, wxString( wxT("Export") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuProject->Append( m_menuItemProjExport );
+
+	m_menubar1->Append( m_menuProject, wxT("Project") );
+
+	m_menuView = new wxMenu();
+	m_menuViewPanels = new wxMenu();
+	wxMenuItem* m_menuViewPanelsItem = new wxMenuItem( m_menuView, wxID_ANY, wxT("Panels"), wxEmptyString, wxITEM_NORMAL, m_menuViewPanels );
+	wxMenuItem* m_menuItemPanelMapEditor;
+	m_menuItemPanelMapEditor = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_MAPEDIT, wxString( wxT("Map Editor") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelMapEditor );
+
+	wxMenuItem* m_menuItemPanelMaps;
+	m_menuItemPanelMaps = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_MAP_LIST, wxString( wxT("Maps") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelMaps );
+
+	wxMenuItem* m_menuItemPanelTiles;
+	m_menuItemPanelTiles = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_TILES, wxString( wxT("Tiles") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelTiles );
+
+	wxMenuItem* m_menuItemPanelCollisionTiles;
+	m_menuItemPanelCollisionTiles = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_COLLISION_TILES, wxString( wxT("Collision Tiles") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelCollisionTiles );
+
+	wxMenuItem* m_menuItemPanelStamps;
+	m_menuItemPanelStamps = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_STAMPS, wxString( wxT("Stamps") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelStamps );
+
+	wxMenuItem* m_menuItemPanelPalettes;
+	m_menuItemPanelPalettes = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_PALETTES, wxString( wxT("Palettes") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelPalettes );
+
+	wxMenuItem* m_menuItemPanelEntities;
+	m_menuItemPanelEntities = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_GAMEOBJS, wxString( wxT("Entities") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelEntities );
+
+	wxMenuItem* m_menuItemPanelProperties;
+	m_menuItemPanelProperties = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_GAMEOBJPARAMS, wxString( wxT("Properties") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelProperties );
+
+	wxMenuItem* m_menuItemPanelAnimTimeline;
+	m_menuItemPanelAnimTimeline = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_TIMELINE, wxString( wxT("Animation Timeline") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelAnimTimeline );
+
+	wxMenuItem* m_menuItemPanelSpriteAnim;
+	m_menuItemPanelSpriteAnim = new wxMenuItem( m_menuViewPanels, wxID_BTN_TOOLS_SPRITEANIM, wxString( wxT("Sprite Animation") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuViewPanels->Append( m_menuItemPanelSpriteAnim );
+
+	m_menuView->Append( m_menuViewPanelsItem );
+
+	wxMenuItem* m_menuItemViewSaveLayout;
+	m_menuItemViewSaveLayout = new wxMenuItem( m_menuView, wxID_BTN_SAVE_LAYOUT, wxString( wxT("Save Layout") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuView->Append( m_menuItemViewSaveLayout );
+
+	wxMenuItem* m_menuItemViewResetLayout;
+	m_menuItemViewResetLayout = new wxMenuItem( m_menuView, wxID_BTN_RESET_LAYOUT, wxString( wxT("Reset Layout") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuView->Append( m_menuItemViewResetLayout );
+
+	wxMenuItem* m_menuItemViewShowGrid;
+	m_menuItemViewShowGrid = new wxMenuItem( m_menuView, wxID_BTN_GRID_SHOW, wxString( wxT("Show Grid") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_menuItemViewShowGrid );
+
+	wxMenuItem* m_menuItemViewSnapToGrid;
+	m_menuItemViewSnapToGrid = new wxMenuItem( m_menuView, wxID_BTN_GRID_SNAP, wxString( wxT("Snap to Grid") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_menuItemViewSnapToGrid );
+
+	wxMenuItem* m_menuItemViewShowOutlines;
+	m_menuItemViewShowOutlines = new wxMenuItem( m_menuView, wxID_BTN_SHOW_OUTLINES, wxString( wxT("Show Outlines") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_menuItemViewShowOutlines );
+
+	wxMenuItem* m_menuItemViewShowCollision;
+	m_menuItemViewShowCollision = new wxMenuItem( m_menuView, wxID_BTN_SHOW_COLLISION, wxString( wxT("Show Collision") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_menuItemViewShowCollision );
+
+	wxMenuItem* m_menuItemViewShowDisplayFrame;
+	m_menuItemViewShowDisplayFrame = new wxMenuItem( m_menuView, wxID_BTN_SHOW_DISPLAYFRAME, wxString( wxT("Show Display Frame") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_menuItemViewShowDisplayFrame );
+
+	m_menubar1->Append( m_menuView, wxT("View") );
+
 	m_menuTools = new wxMenu();
 	m_menu1 = new wxMenu();
 	wxMenuItem* m_menu1Item = new wxMenuItem( m_menuTools, wxID_ANY, wxT("Tweaks"), wxEmptyString, wxITEM_NORMAL, m_menu1 );
@@ -92,6 +167,88 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menuTools->Append( m_menu1Item );
 
 	m_menubar1->Append( m_menuTools, wxT("&Tools") );
+
+	m_menuMap = new wxMenu();
+	wxMenuItem* m_menuItemMapNew;
+	m_menuItemMapNew = new wxMenuItem( m_menuMap, wxID_BTN_MAP_NEW, wxString( wxT("New") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemMapNew );
+
+	wxMenuItem* m_menuItemMapDelete;
+	m_menuItemMapDelete = new wxMenuItem( m_menuMap, wxID_BTN_MAP_DELETE, wxString( wxT("Delete") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemMapDelete );
+
+	wxMenuItem* m_menuItemMapRename;
+	m_menuItemMapRename = new wxMenuItem( m_menuMap, wxID_BTN_MAP_RENAME, wxString( wxT("Rename") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemMapRename );
+
+	wxMenuItem* m_menuItemMapClear;
+	m_menuItemMapClear = new wxMenuItem( m_menuMap, wxID_BTN_MAP_CLEAR, wxString( wxT("Clear") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemMapClear );
+
+	wxMenuItem* m_menuItemMapResize;
+	m_menuItemMapResize = new wxMenuItem( m_menuMap, wxID_BTN_MAP_RESIZE, wxString( wxT("Resize") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemMapResize );
+
+	wxMenuItem* m_menuItemExportBitmap;
+	m_menuItemExportBitmap = new wxMenuItem( m_menuMap, wxID_BTN_MAP_EXPORT_BMP, wxString( wxT("Export (.BMP)") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemExportBitmap );
+
+	m_menubar1->Append( m_menuMap, wxT("Map") );
+
+	m_menuTiles = new wxMenu();
+	wxMenuItem* m_menuItemTilesImport;
+	m_menuItemTilesImport = new wxMenuItem( m_menuTiles, wxID_BTN_TILES_IMPORT, wxString( wxT("Import") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuTiles->Append( m_menuItemTilesImport );
+
+	wxMenuItem* m_menuItemTilesCleanup;
+	m_menuItemTilesCleanup = new wxMenuItem( m_menuTiles, wxID_BTN_TILES_CLEANUP, wxString( wxT("Cleanup") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuTiles->Append( m_menuItemTilesCleanup );
+
+	m_menubar1->Append( m_menuTiles, wxT("Tiles") );
+
+	m_menuSprites = new wxMenu();
+	wxMenuItem* m_menuItemSpritesEditor;
+	m_menuItemSpritesEditor = new wxMenuItem( m_menuSprites, wxID_BTN_SPRITE_EDITOR, wxString( wxT("Sprite Editor") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuSprites->Append( m_menuItemSpritesEditor );
+
+	m_menubar1->Append( m_menuSprites, wxT("Sprites") );
+
+	m_menuStamps = new wxMenu();
+	wxMenuItem* m_menuItemStampsImport;
+	m_menuItemStampsImport = new wxMenuItem( m_menuStamps, wxID_BTN_STAMPS_IMPORT, wxString( wxT("Import") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuStamps->Append( m_menuItemStampsImport );
+
+	wxMenuItem* m_menuItemStampsExport;
+	m_menuItemStampsExport = new wxMenuItem( m_menuStamps, wxID_BTN_STAMPS_EXPORT_BMP, wxString( wxT("Export (.BMP)") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuStamps->Append( m_menuItemStampsExport );
+
+	wxMenuItem* m_menuItemStampsCleanup;
+	m_menuItemStampsCleanup = new wxMenuItem( m_menuStamps, wxID_BTN_STAMPS_CLEANUP, wxString( wxT("Cleanup") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuStamps->Append( m_menuItemStampsCleanup );
+
+	m_menubar1->Append( m_menuStamps, wxT("Stamps") );
+
+	m_menuCollision = new wxMenu();
+	wxMenuItem* m_menuItemCollisionGenerate;
+	m_menuItemCollisionGenerate = new wxMenuItem( m_menuCollision, wxID_BTN_COL_GEN_BEZIER, wxString( wxT("Generate from Beziers") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuCollision->Append( m_menuItemCollisionGenerate );
+
+	wxMenuItem* m_menuItemCollisionCleanup;
+	m_menuItemCollisionCleanup = new wxMenuItem( m_menuCollision, wxID_BTN_COL_TILES_CLEANUP, wxString( wxT("Cleanup") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuCollision->Append( m_menuItemCollisionCleanup );
+
+	wxMenuItem* m_menuItemCollisionClearMap;
+	m_menuItemCollisionClearMap = new wxMenuItem( m_menuCollision, wxID_BTN_COL_MAP_CLEAR, wxString( wxT("Clear Collision Map") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuCollision->Append( m_menuItemCollisionClearMap );
+
+	m_menubar1->Append( m_menuCollision, wxT("Collision") );
+
+	m_menuEntities = new wxMenu();
+	wxMenuItem* m_menuItemEntitiesTypes;
+	m_menuItemEntitiesTypes = new wxMenuItem( m_menuEntities, wxID_BTN_GAME_OBJ_TYPES, wxString( wxT("Entity Types") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuEntities->Append( m_menuItemEntitiesTypes );
+
+	m_menubar1->Append( m_menuEntities, wxT("Entities") );
 
 	m_menuAnimations = new wxMenu();
 	wxMenuItem* m_menuItem2;
@@ -117,74 +274,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	wxBoxSizer* bSizer1;
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
 
-	m_ribbonBar = new wxRibbonBar( this, wxID_ANY, wxDefaultPosition, wxSize( -1,-1 ), wxRIBBON_BAR_DEFAULT_STYLE|wxRIBBON_BAR_FLOW_HORIZONTAL|wxRIBBON_BAR_SHOW_PAGE_ICONS|wxRIBBON_BAR_SHOW_PAGE_LABELS|wxRIBBON_BAR_SHOW_PANEL_MINIMISE_BUTTONS|wxBORDER_NONE );
-	m_ribbonBar->SetArtProvider(new wxRibbonDefaultArtProvider);
-	m_ribbonPageProject = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Project") , wxNullBitmap , 0 );
-	m_ribbonBar->SetActivePage( m_ribbonPageProject );
-	m_ribbonPanelProject = new wxRibbonPanel( m_ribbonPageProject, wxID_ANY, wxT("Project") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarProject = new wxRibbonButtonBar( m_ribbonPanelProject, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_NEW, wxT("New"), wxBitmap( newproj_xpm ), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_OPEN, wxT("Open"), wxBitmap( open_xpm ), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_SAVE, wxT("Save"), wxBitmap( save_xpm ), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_SETTINGS, wxT("Settings"), wxBitmap( config_xpm ), wxEmptyString);
-	m_ribbonButtonBarProject->AddButton( wxID_BTN_PROJ_EXPORT, wxT("Export"), wxBitmap( megadrive2_xpm ), wxEmptyString);
-	m_ribbonPageView = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("View") , wxNullBitmap , 0 );
-	m_ribbonPanelView = new wxRibbonPanel( m_ribbonPageView, wxID_ANY, wxT("Grid") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarGrid = new wxRibbonButtonBar( m_ribbonPanelView, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarGrid->AddButton( wxID_BTN_SAVE_LAYOUT, wxT("Save Layout"), wxBitmap( save_xpm ), wxEmptyString);
-	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SHOW, wxT("Show Grid"), wxBitmap( grid_xpm ), wxEmptyString);
-	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_GRID_SNAP, wxT("Snap to Grid"), wxBitmap( gridsnap_xpm ), wxEmptyString);
-	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_SHOW_OUTLINES, wxT("Show Outlines"), wxBitmap( showoutlines_xpm ), wxEmptyString);
-	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_SHOW_COLLISION, wxT("Show Collision"), wxBitmap( showoutlines_xpm ), wxEmptyString);
-	m_ribbonButtonBarGrid->AddToggleButton( wxID_BTN_SHOW_DISPLAYFRAME, wxT("Show Display Frame"), wxBitmap( showoutlines_xpm ), wxEmptyString);
-	m_ribbonPageTools = new wxRibbonPage( m_ribbonBar, wxID_ANY, wxT("Tools") , wxNullBitmap , 0 );
-	m_ribbonPanelTools = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tool Panels") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarTools = new wxRibbonButtonBar( m_ribbonPanelTools, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAPEDIT, wxT("Toolbox"), wxBitmap( toolspanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_MAP_LIST, wxT("Maps"), wxBitmap( toolspanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_TILES, wxT("Tiles"), wxBitmap( tilespanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_COLLISION_TILES, wxT("Terrain Tiles"), wxBitmap( tilespanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_STAMPS, wxT("Stamps"), wxBitmap( stampspanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_PALETTES, wxT("Palettes"), wxBitmap( palettespanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_GAMEOBJS, wxT("Objects"), wxBitmap( gameobjpanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_GAMEOBJPARAMS, wxT("Object Params"), wxBitmap( gameobjpanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_TIMELINE, wxT("Animation Timeline"), wxBitmap( gameobjpanel_xpm ), wxEmptyString);
-	m_ribbonButtonBarTools->AddButton( wxID_BTN_TOOLS_SPRITEANIM, wxT("Sprite Animation"), wxBitmap( gameobjpanel_xpm ), wxEmptyString);
-	m_ribbonPanelMap = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Map") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarMap = new wxRibbonButtonBar( m_ribbonPanelMap, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_CLEAR, wxT("Clear Map"), wxBitmap( clearmap_xpm ), wxEmptyString);
-	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_RESIZE, wxT("Resize Map"), wxBitmap( resizemap_xpm ), wxEmptyString);
-	m_ribbonButtonBarMap->AddButton( wxID_BTN_MAP_EXPORT_BMP, wxT("Export BMP"), wxBitmap( save_xpm ), wxEmptyString);
-	m_ribbonPanelTiles = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Tiles") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarTiles = new wxRibbonButtonBar( m_ribbonPanelTiles, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_IMPORT, wxT("Import"), wxBitmap( importtiles_xpm ), wxEmptyString);
-	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_CREATE, wxT("New"), wxBitmap( newtile_xpm ), wxEmptyString);
-	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_DELETE, wxT("Delete"), wxBitmap( deletetile_xpm ), wxEmptyString);
-	m_ribbonButtonBarTiles->AddButton( wxID_BTN_TILES_CLEANUP, wxT("Cleanup"), wxBitmap( deleteunusedtiles_xpm ), wxEmptyString);
-	m_ribbonPanelSprites = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Sprites") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarSprites = new wxRibbonButtonBar( m_ribbonPanelSprites, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarSprites->AddButton( wxID_BTN_SPRITE_EDITOR, wxT("Sprite Editor"), wxBitmap( importtiles_xpm ), wxEmptyString);
-	m_ribbonPanelStamps = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Stamps") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarStamps = new wxRibbonButtonBar( m_ribbonPanelStamps, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_IMPORT, wxT("Import"), wxBitmap( importtiles_xpm ), wxEmptyString);
-	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_CREATE, wxT("Create"), wxBitmap( newstamp_xpm ), wxEmptyString);
-	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_DELETE, wxT("Delete"), wxBitmap( deletestamp_xpm ), wxEmptyString);
-	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_EXPORT_BMP, wxT("Export As BMPs"), wxBitmap( save_xpm ), wxEmptyString);
-	m_ribbonButtonBarStamps->AddButton( wxID_BTN_STAMPS_CLEANUP, wxT("Cleanup"), wxBitmap( deleteunusedtiles_xpm ), wxEmptyString);
-	m_ribbonPanelCollision = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Collision") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarCollision = new wxRibbonButtonBar( m_ribbonPanelCollision, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_CREATE, wxT("New"), wxBitmap( newtile_xpm ), wxEmptyString);
-	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_DELETE, wxT("Delete"), wxBitmap( deletetile_xpm ), wxEmptyString);
-	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_TILES_CLEANUP, wxT("Cleanup"), wxBitmap( deleteunusedtiles_xpm ), wxEmptyString);
-	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_MAP_CLEAR, wxT("Clear Collision Map"), wxBitmap( clearmap_xpm ), wxEmptyString);
-	m_ribbonButtonBarCollision->AddButton( wxID_BTN_COL_GEN_BEZIER, wxT("Generate from Beziers"), wxBitmap( genterrain_beziers_xpm ), wxEmptyString);
-	m_ribbonPanelGameObj = new wxRibbonPanel( m_ribbonPageTools, wxID_ANY, wxT("Objects") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonButtonBarGameObj = new wxRibbonButtonBar( m_ribbonPanelGameObj, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBarGameObj->AddButton( wxID_BTN_GAME_OBJ_TYPES, wxT("Types"), wxBitmap( gameobj_xpm ), wxEmptyString);
-	m_ribbonBar->Realize();
-
-	bSizer1->Add( m_ribbonBar, 0, wxALL|wxEXPAND, 0 );
-
 	m_dockArea = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	bSizer1->Add( m_dockArea, 1, wxEXPAND | wxALL, 5 );
 
@@ -196,92 +285,54 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjNew ), this, m_menuItemProjNew->GetId());
+	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjOpen ), this, m_menuItemProjOpen->GetId());
+	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjSave ), this, m_menuItemProjSave->GetId());
+	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjSettings ), this, m_menuItemProjSettings->GetId());
+	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjExport ), this, m_menuItemProjExport->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsMapEdit ), this, m_menuItemPanelMapEditor->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsMapList ), this, m_menuItemPanelMaps->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsTiles ), this, m_menuItemPanelTiles->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsCollisionTiles ), this, m_menuItemPanelCollisionTiles->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsStamps ), this, m_menuItemPanelStamps->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsPalettes ), this, m_menuItemPanelPalettes->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsGameObjs ), this, m_menuItemPanelEntities->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsGameObjParams ), this, m_menuItemPanelProperties->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsTimeline ), this, m_menuItemPanelAnimTimeline->GetId());
+	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsSpriteAnim ), this, m_menuItemPanelSpriteAnim->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnSaveLayout ), this, m_menuItemViewSaveLayout->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnResetLayout ), this, m_menuItemViewResetLayout->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnGridShow ), this, m_menuItemViewShowGrid->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnGridSnap ), this, m_menuItemViewSnapToGrid->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnShowOutlines ), this, m_menuItemViewShowOutlines->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnShowCollision ), this, m_menuItemViewShowCollision->GetId());
+	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnShowDisplayFrame ), this, m_menuItemViewShowDisplayFrame->GetId());
 	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuToolsTweaksGameObjCentreOrigin ), this, m_menuItem3->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapNew ), this, m_menuItemMapNew->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapDelete ), this, m_menuItemMapDelete->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapRename ), this, m_menuItemMapRename->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapClear ), this, m_menuItemMapClear->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapResize ), this, m_menuItemMapResize->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapExportBMP ), this, m_menuItemExportBitmap->GetId());
+	m_menuTiles->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnTilesImport ), this, m_menuItemTilesImport->GetId());
+	m_menuTiles->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnTilesCleanup ), this, m_menuItemTilesCleanup->GetId());
+	m_menuSprites->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnSpriteEditor ), this, m_menuItemSpritesEditor->GetId());
+	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsImport ), this, m_menuItemStampsImport->GetId());
+	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsExportBMPs ), this, m_menuItemStampsExport->GetId());
+	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsCleanup ), this, m_menuItemStampsCleanup->GetId());
+	m_menuCollision->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnColGenTerrainBezier ), this, m_menuItemCollisionGenerate->GetId());
+	m_menuCollision->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnColTilesCleanup ), this, m_menuItemCollisionCleanup->GetId());
+	m_menuCollision->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnColMapClear ), this, m_menuItemCollisionClearMap->GetId());
+	m_menuEntities->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnGameObjTypes ), this, m_menuItemEntitiesTypes->GetId());
 	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationImport ), this, m_menuItem2->GetId());
 	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationExport ), this, m_menuItem31->GetId());
 	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationConvertToRelativeCoords ), this, m_menuItem4->GetId());
 	m_menuAnimations->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuAnimationBindPrefabs ), this, m_menuItem5->GetId());
-	this->Connect( wxID_BTN_PROJ_NEW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjNew ) );
-	this->Connect( wxID_BTN_PROJ_OPEN, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjOpen ) );
-	this->Connect( wxID_BTN_PROJ_SAVE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSave ) );
-	this->Connect( wxID_BTN_PROJ_SETTINGS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSettings ) );
-	this->Connect( wxID_BTN_PROJ_EXPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjExport ) );
-	this->Connect( wxID_BTN_SAVE_LAYOUT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSaveLayout ) );
-	this->Connect( wxID_BTN_GRID_SHOW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnGridShow ) );
-	this->Connect( wxID_BTN_GRID_SNAP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnGridSnap ) );
-	this->Connect( wxID_BTN_SHOW_OUTLINES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnShowOutlines ) );
-	this->Connect( wxID_BTN_SHOW_COLLISION, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnShowCollision ) );
-	this->Connect( wxID_BTN_SHOW_DISPLAYFRAME, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnShowDisplayFrame ) );
-	this->Connect( wxID_BTN_TOOLS_MAPEDIT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsMapEdit ) );
-	this->Connect( wxID_BTN_TOOLS_MAP_LIST, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsMapList ) );
-	this->Connect( wxID_BTN_TOOLS_TILES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsTiles ) );
-	this->Connect( wxID_BTN_TOOLS_COLLISION_TILES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsCollisionTiles ) );
-	this->Connect( wxID_BTN_TOOLS_STAMPS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsStamps ) );
-	this->Connect( wxID_BTN_TOOLS_PALETTES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsPalettes ) );
-	this->Connect( wxID_BTN_TOOLS_GAMEOBJS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjs ) );
-	this->Connect( wxID_BTN_TOOLS_GAMEOBJPARAMS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjParams ) );
-	this->Connect( wxID_BTN_TOOLS_TIMELINE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsTimeline ) );
-	this->Connect( wxID_BTN_TOOLS_SPRITEANIM, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsSpriteAnim ) );
-	this->Connect( wxID_BTN_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapClear ) );
-	this->Connect( wxID_BTN_MAP_RESIZE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapResize ) );
-	this->Connect( wxID_BTN_MAP_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapExportBMP ) );
-	this->Connect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
-	this->Connect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
-	this->Connect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
-	this->Connect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
-	this->Connect( wxID_BTN_SPRITE_EDITOR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpriteEditor ) );
-	this->Connect( wxID_BTN_STAMPS_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsImport ) );
-	this->Connect( wxID_BTN_STAMPS_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsExportBMPs ) );
-	this->Connect( wxID_BTN_STAMPS_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsCleanup ) );
-	this->Connect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
-	this->Connect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
-	this->Connect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );
-	this->Connect( wxID_BTN_COL_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColMapClear ) );
-	this->Connect( wxID_BTN_COL_GEN_BEZIER, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColGenTerrainBezier ) );
-	this->Connect( wxID_BTN_GAME_OBJ_TYPES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
 }
 
 MainWindowBase::~MainWindowBase()
 {
 	// Disconnect Events
-	this->Disconnect( wxID_BTN_PROJ_NEW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjNew ) );
-	this->Disconnect( wxID_BTN_PROJ_OPEN, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjOpen ) );
-	this->Disconnect( wxID_BTN_PROJ_SAVE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSave ) );
-	this->Disconnect( wxID_BTN_PROJ_SETTINGS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjSettings ) );
-	this->Disconnect( wxID_BTN_PROJ_EXPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnProjExport ) );
-	this->Disconnect( wxID_BTN_SAVE_LAYOUT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSaveLayout ) );
-	this->Disconnect( wxID_BTN_GRID_SHOW, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnGridShow ) );
-	this->Disconnect( wxID_BTN_GRID_SNAP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnGridSnap ) );
-	this->Disconnect( wxID_BTN_SHOW_OUTLINES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnShowOutlines ) );
-	this->Disconnect( wxID_BTN_SHOW_COLLISION, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnShowCollision ) );
-	this->Disconnect( wxID_BTN_SHOW_DISPLAYFRAME, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxCommandEventHandler( MainWindowBase::OnBtnShowDisplayFrame ) );
-	this->Disconnect( wxID_BTN_TOOLS_MAPEDIT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsMapEdit ) );
-	this->Disconnect( wxID_BTN_TOOLS_MAP_LIST, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsMapList ) );
-	this->Disconnect( wxID_BTN_TOOLS_TILES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsTiles ) );
-	this->Disconnect( wxID_BTN_TOOLS_COLLISION_TILES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsCollisionTiles ) );
-	this->Disconnect( wxID_BTN_TOOLS_STAMPS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsStamps ) );
-	this->Disconnect( wxID_BTN_TOOLS_PALETTES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsPalettes ) );
-	this->Disconnect( wxID_BTN_TOOLS_GAMEOBJS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjs ) );
-	this->Disconnect( wxID_BTN_TOOLS_GAMEOBJPARAMS, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsGameObjParams ) );
-	this->Disconnect( wxID_BTN_TOOLS_TIMELINE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsTimeline ) );
-	this->Disconnect( wxID_BTN_TOOLS_SPRITEANIM, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnToolsSpriteAnim ) );
-	this->Disconnect( wxID_BTN_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapClear ) );
-	this->Disconnect( wxID_BTN_MAP_RESIZE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapResize ) );
-	this->Disconnect( wxID_BTN_MAP_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnMapExportBMP ) );
-	this->Disconnect( wxID_BTN_TILES_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesImport ) );
-	this->Disconnect( wxID_BTN_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCreate ) );
-	this->Disconnect( wxID_BTN_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesDelete ) );
-	this->Disconnect( wxID_BTN_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnTilesCleanup ) );
-	this->Disconnect( wxID_BTN_SPRITE_EDITOR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnSpriteEditor ) );
-	this->Disconnect( wxID_BTN_STAMPS_IMPORT, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsImport ) );
-	this->Disconnect( wxID_BTN_STAMPS_EXPORT_BMP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsExportBMPs ) );
-	this->Disconnect( wxID_BTN_STAMPS_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnStampsCleanup ) );
-	this->Disconnect( wxID_BTN_COL_TILES_CREATE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCreate ) );
-	this->Disconnect( wxID_BTN_COL_TILES_DELETE, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesDelete ) );
-	this->Disconnect( wxID_BTN_COL_TILES_CLEANUP, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColTilesCleanup ) );
-	this->Disconnect( wxID_BTN_COL_MAP_CLEAR, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColMapClear ) );
-	this->Disconnect( wxID_BTN_COL_GEN_BEZIER, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnColGenTerrainBezier ) );
-	this->Disconnect( wxID_BTN_GAME_OBJ_TYPES, wxEVT_COMMAND_RIBBONBUTTON_CLICKED, wxRibbonButtonBarEventHandler( MainWindowBase::OnBtnGameObjTypes ) );
 
 }
 

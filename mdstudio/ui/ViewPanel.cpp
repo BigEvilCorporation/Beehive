@@ -1,8 +1,8 @@
 #include "ViewPanel.h"
 #include "MainWindow.h"
 
-ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-	: wxGLCanvas(parent, winid, NULL, pos, size, style, name, wxNullPalette)
+ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, wxGLAttributes& glAttributes, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+	: wxGLCanvas(parent, glAttributes, winid, pos, size, style, name, wxNullPalette)
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)
 	, m_glContext(glContext)

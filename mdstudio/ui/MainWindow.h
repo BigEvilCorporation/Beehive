@@ -64,6 +64,9 @@ public:
 		ePanelAnimation
 	};
 
+	//OpenGL setup
+	static wxGLAttributes GetGLAttributes();
+
 	MainWindow();
 	virtual ~MainWindow();
 
@@ -142,44 +145,44 @@ protected:
 	virtual void OnMenuAnimationConvertToRelativeCoords(wxCommandEvent& event);
 	virtual void OnMenuAnimationBindPrefabs(wxCommandEvent& event);
 
-	virtual void OnBtnProjNew(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnProjOpen(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnProjSave(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnProjSettings(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnProjExport(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnTilesImport(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnTilesCreate(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnTilesDelete(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnTilesCleanup(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnSpriteEditor(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnStampsImport(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnStampsExportBMPs(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnStampsCleanup(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnColMapClear(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnColTilesCreate(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnColTilesDelete(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsMapEdit(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsMapList(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsTiles(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsCollisionTiles(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsStamps(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsPalettes(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsGameObjParams(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnToolsTimeline(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnMapClear(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnMapResize(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnMapExportBMP(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnSaveLayout(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnProjNew(wxCommandEvent& event);
+	virtual void OnBtnProjOpen(wxCommandEvent& event);
+	virtual void OnBtnProjSave(wxCommandEvent& event);
+	virtual void OnBtnProjSettings(wxCommandEvent& event);
+	virtual void OnBtnProjExport(wxCommandEvent& event);
+	virtual void OnBtnTilesImport(wxCommandEvent& event);
+	virtual void OnBtnTilesCreate(wxCommandEvent& event);
+	virtual void OnBtnTilesDelete(wxCommandEvent& event);
+	virtual void OnBtnTilesCleanup(wxCommandEvent& event);
+	virtual void OnBtnSpriteEditor(wxCommandEvent& event);
+	virtual void OnBtnStampsImport(wxCommandEvent& event);
+	virtual void OnBtnStampsExportBMPs(wxCommandEvent& event);
+	virtual void OnBtnStampsCleanup(wxCommandEvent& event);
+	virtual void OnBtnColMapClear(wxCommandEvent& event);
+	virtual void OnBtnColGenTerrainBezier(wxCommandEvent& event);
+	virtual void OnBtnColTilesCreate(wxCommandEvent& event);
+	virtual void OnBtnColTilesDelete(wxCommandEvent& event);
+	virtual void OnBtnColTilesCleanup(wxCommandEvent& event);
+	virtual void OnBtnToolsMapEdit(wxCommandEvent& event);
+	virtual void OnBtnToolsMapList(wxCommandEvent& event);
+	virtual void OnBtnToolsTiles(wxCommandEvent& event);
+	virtual void OnBtnToolsCollisionTiles(wxCommandEvent& event);
+	virtual void OnBtnToolsStamps(wxCommandEvent& event);
+	virtual void OnBtnToolsPalettes(wxCommandEvent& event);
+	virtual void OnBtnToolsGameObjs(wxCommandEvent& event);
+	virtual void OnBtnToolsGameObjParams(wxCommandEvent& event);
+	virtual void OnBtnToolsTimeline(wxCommandEvent& event);
+	virtual void OnBtnMapClear(wxCommandEvent& event);
+	virtual void OnBtnMapResize(wxCommandEvent& event);
+	virtual void OnBtnMapExportBMP(wxCommandEvent& event);
+	virtual void OnBtnSaveLayout(wxCommandEvent& event);
 	virtual void OnBtnGridShow(wxCommandEvent& event);
 	virtual void OnBtnGridSnap(wxCommandEvent& event);
 	virtual void OnBtnShowOutlines(wxCommandEvent& event);
 	virtual void OnBtnShowCollision(wxCommandEvent& event);
 	virtual void OnBtnShowDisplayFrame(wxCommandEvent& event);
-	virtual void OnBtnTerrainTileEdit(wxRibbonButtonBarEvent& event);
-	virtual void OnBtnGameObjTypes(wxRibbonButtonBarEvent& event);
+	virtual void OnBtnTerrainTileEdit(wxCommandEvent& event);
+	virtual void OnBtnGameObjTypes(wxCommandEvent& event);
 
 	void OnBtnTool(wxCommandEvent& event);
 
@@ -196,6 +199,9 @@ private:
 	void SaveWindowLayout();
 	void RestoreWindowLayout();
 	wxString GetWindowLayoutConfig() const;
+
+	//OpenGL attributes for GL canvasses
+	static wxGLAttributes s_glAttributes;
 
 	wxAuiManager m_auiManager;
 

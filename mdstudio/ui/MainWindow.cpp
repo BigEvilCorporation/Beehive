@@ -55,6 +55,8 @@ wxDEFINE_SCOPED_PTR(Project, ProjectPtr)
 #define PANEL_SIZE_X(x) (m_width / 100) * x
 #define PANEL_SIZE_Y(y) (m_height / 100) * y
 
+wxGLAttributes MainWindow::s_glAttributes;
+
 MainWindow::MainWindow()
 	: MainWindowBase(NULL)
 {
@@ -81,10 +83,11 @@ MainWindow::MainWindow()
 	Bind(wxEVT_KEY_DOWN, &MainWindow::EventHandlerKeyboard, this, GetId());
 	Bind(wxEVT_KEY_UP, &MainWindow::EventHandlerKeyboard, this, GetId());
 
+	//Configure GL attributes for glCanvas
+	s_glAttributes.PlatformDefaults().Defaults().RGBA().MinRGBA(8, 8, 8, 8).Depth(24).Stencil(8).DoubleBuffer().EndList();
+
 	//Create blank OpenGL panel to create global DC
-	wxGLAttributes dispAttrs;
-	dispAttrs.PlatformDefaults().Defaults().EndList();
-	m_blankCanvas = new wxGLCanvas(this, dispAttrs, wxID_ANY);
+	m_blankCanvas = new wxGLCanvas(this, s_glAttributes, wxID_ANY);
 
 	//Create GL context
 	m_context = new wxGLContext(m_blankCanvas);
@@ -147,22 +150,7 @@ MainWindow::~MainWindow()
 void MainWindow::OnPostInit()
 {
 #if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
-	delete m_ribbonPanelTiles;
-	m_ribbonBar->Realise();
-	delete m_ribbonPanelCollision;
-	m_ribbonBar->Realise();
-	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_CREATE);
-	m_ribbonBar->Realise();
-	m_ribbonButtonBarGrid->DeleteButton(wxID_BTN_GRID_SNAP);
-	m_ribbonBar->Realise();
-#endif
 
-#if BEEHIVE_LEAN_UI
-	m_ribbonButtonBarStamps->DeleteButton(wxID_BTN_STAMPS_DELETE);
-#endif
-
-#if BEEHIVE_FIXED_STAMP_MODE || BEEHIVE_LEAN_UI
-	m_ribbonBar->Realise();
 #endif
 }
 
@@ -433,7 +421,7 @@ void MainWindow::ShowPanelSceneExplorer()
 			paneInfo.Name("Scene Explorer");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(150));
+			paneInfo.BestSize(PANEL_SIZE_X(10), PANEL_SIZE_Y(80));
 			paneInfo.Left();
 			paneInfo.Row(0);
 			paneInfo.Caption("Scene Explorer");
@@ -462,7 +450,7 @@ void MainWindow::ShowPanelProperties()
 			paneInfo.Name("Properties");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(150));
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(40));
 			paneInfo.Right();
 			paneInfo.Row(0);
 			paneInfo.Caption("Properties");
@@ -551,7 +539,7 @@ void MainWindow::ShowPanelTiles()
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 			
-			m_tilesPanel = new TilesPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_tilesPanel = new TilesPanel(this, *m_project, *m_renderer, m_context, s_glAttributes, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tilesPanel, paneInfo);
 			paneInfo.Show();
 		}
@@ -581,7 +569,7 @@ void MainWindow::ShowPanelTerrainTiles()
 			paneInfo.Caption("Tileset");
 			paneInfo.CaptionVisible(true);
 
-			m_terrainTilesPanel = new TerrainTilesPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_terrainTilesPanel = new TerrainTilesPanel(this, *m_project, *m_renderer, m_context, s_glAttributes, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_terrainTilesPanel, paneInfo);
 			paneInfo.Show();
 		}
@@ -606,13 +594,13 @@ void MainWindow::ShowPanelStamps()
 			paneInfo.Name("Stamps");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(70));
+			paneInfo.BestSize(PANEL_SIZE_X(20), PANEL_SIZE_Y(60));
 			paneInfo.Right();
-			paneInfo.Row(1);
+			paneInfo.Row(0);
 			paneInfo.Caption("Stamps");
 			paneInfo.CaptionVisible(true);
 
-			m_stampsPanel = new StampsPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_stampsPanel = new StampsPanel(this, *m_project, *m_renderer, m_context, s_glAttributes, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_stampsPanel, paneInfo);
 			paneInfo.Show();
 		}
@@ -641,7 +629,7 @@ void MainWindow::ShowPanelBlocks()
 			paneInfo.Caption("Blocks");
 			paneInfo.CaptionVisible(true);
 
-			m_blocksPanel = new BlocksPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_blocksPanel = new BlocksPanel(this, *m_project, *m_renderer, m_context, s_glAttributes, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_blocksPanel, paneInfo);
 			paneInfo.Show();
 		}
@@ -664,12 +652,12 @@ void MainWindow::ShowPanelMap()
 			paneInfo.Name("Map");
 			paneInfo.Dockable(true);
 			paneInfo.DockFixed(false);
-			paneInfo.BestSize(PANEL_SIZE_X(60), PANEL_SIZE_Y(40));
+			paneInfo.BestSize(PANEL_SIZE_X(80), PANEL_SIZE_Y(100));
 			paneInfo.Centre();
 			paneInfo.Caption("Map");
 			paneInfo.CaptionVisible(true);
 
-			m_mapPanel = new MapPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_mapPanel = new MapPanel(this, *m_project, *m_renderer, m_context, s_glAttributes, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_mapPanel, paneInfo);
 			paneInfo.Show();
 		}
@@ -721,7 +709,7 @@ void MainWindow::ShowToolboxTiles()
 		paneInfo.Name("ToolboxTiles");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
+		paneInfo.BestSize(PANEL_SIZE_X(10), PANEL_SIZE_Y(10));
 		paneInfo.Left();
 		paneInfo.Row(1);
 		paneInfo.Caption("Tile Tools");
@@ -784,7 +772,7 @@ void MainWindow::ShowToolboxCollision()
 		paneInfo.Name("ToolboxTerrain");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_X(20));
+		paneInfo.BestSize(PANEL_SIZE_X(10), PANEL_SIZE_X(10));
 		paneInfo.Left();
 		paneInfo.Row(2);
 		paneInfo.Caption("Collision Tools");
@@ -826,9 +814,9 @@ void MainWindow::ShowToolboxStamps()
 		paneInfo.Name("ToolboxStamps");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
+		paneInfo.BestSize(PANEL_SIZE_X(10), PANEL_SIZE_Y(10));
 		paneInfo.Left();
-		paneInfo.Row(1);
+		paneInfo.Row(0);
 		paneInfo.Caption("Stamp Tools");
 		paneInfo.CaptionVisible(true);
 
@@ -872,13 +860,13 @@ void MainWindow::ShowToolboxObjects()
 		paneInfo.Name("ToolboxObjects");
 		paneInfo.Dockable(true);
 		paneInfo.DockFixed(false);
-		paneInfo.BestSize(PANEL_SIZE_X(7), PANEL_SIZE_Y(20));
+		paneInfo.BestSize(PANEL_SIZE_X(10), PANEL_SIZE_Y(10));
 		paneInfo.Left();
-		paneInfo.Caption("Object Tools");
+		paneInfo.Caption("Entity Tools");
 		paneInfo.CaptionVisible(true);
 
 #if BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode, fewer toolboxes
-		paneInfo.Row(1);
+		paneInfo.Row(0);
 #else
 		paneInfo.Row(2);
 #endif
@@ -923,7 +911,7 @@ void MainWindow::ShowPanelTileEditor()
 			paneInfo.Caption("Tile");
 			paneInfo.CaptionVisible(true);
 
-			m_tileEditorPanel = new TileEditorPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_tileEditorPanel = new TileEditorPanel(this, *m_project, *m_renderer, m_context, s_glAttributes, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_tileEditorPanel, paneInfo);
 			paneInfo.Show();
 		}
@@ -953,7 +941,7 @@ void MainWindow::ShowPanelTerrainEditor()
 			paneInfo.Caption("Terrain Tile");
 			paneInfo.CaptionVisible(true);
 
-			m_TerrainTileEditorPanel = new TerrainTileEditorPanel(this, *m_project, *m_renderer, m_context, *m_renderResources, m_dockArea, NewControlId());
+			m_TerrainTileEditorPanel = new TerrainTileEditorPanel(this, *m_project, *m_renderer, m_context, s_glAttributes, *m_renderResources, m_dockArea, NewControlId());
 			m_auiManager.AddPane(m_TerrainTileEditorPanel, paneInfo);
 			paneInfo.Show();
 			
@@ -1072,6 +1060,11 @@ ScriptCompilePanel* MainWindow::GetScriptCompilePanel()
 	return m_scriptCompilePanel;
 }
 
+wxGLAttributes MainWindow::GetGLAttributes()
+{
+	return s_glAttributes;
+}
+
 void MainWindow::SetMapTool(ToolType tool)
 {
 	if(m_mapPanel)
@@ -1125,11 +1118,11 @@ void MainWindow::SyncSettingsWidgets()
 {
 	if(m_project.get())
 	{
-		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SHOW, m_project->GetShowGrid());
-		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_GRID_SNAP, m_project->GetGridSnap());
-		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_SHOW_OUTLINES, m_project->GetShowStampOutlines());
-		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_SHOW_COLLISION, m_project->GetShowCollision());
-		m_ribbonButtonBarGrid->ToggleButton(wxID_BTN_SHOW_DISPLAYFRAME, m_project->GetShowDisplayFrame());
+		m_menuView->Check(wxID_BTN_GRID_SHOW, m_project->GetShowGrid());
+		m_menuView->Check(wxID_BTN_GRID_SNAP, m_project->GetGridSnap());
+		m_menuView->Check(wxID_BTN_SHOW_OUTLINES, m_project->GetShowStampOutlines());
+		m_menuView->Check(wxID_BTN_SHOW_COLLISION, m_project->GetShowCollision());
+		m_menuView->Check(wxID_BTN_SHOW_DISPLAYFRAME, m_project->GetShowDisplayFrame());
 	}
 }
 
@@ -1510,7 +1503,7 @@ void MainWindow::OnMenuAnimationBindPrefabs(wxCommandEvent& event)
 	RefreshPanel(ePanelAnimation);
 }
 
-void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnProjNew(wxCommandEvent& event)
 {
 	if(wxMessageBox("Unsaved changes will be lost, are you sure?", "New Project", wxOK | wxCANCEL) == wxOK)
 	{
@@ -1546,7 +1539,7 @@ void MainWindow::OnBtnProjNew(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnProjOpen(wxCommandEvent& event)
 {
 	wxFileDialog dialog(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if(dialog.ShowModal() == wxID_OK)
@@ -1571,7 +1564,7 @@ void MainWindow::OnBtnProjOpen(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnProjSave(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -1605,7 +1598,7 @@ void MainWindow::OnBtnProjSave(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnProjSettings(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -1617,7 +1610,7 @@ void MainWindow::OnBtnProjSettings(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -2223,7 +2216,7 @@ void MainWindow::OnBtnProjExport(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnTilesImport(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2360,7 +2353,7 @@ void MainWindow::OnBtnTilesImport(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnStampsImport(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 {
 	if (m_project.get())
 	{
@@ -2477,7 +2470,7 @@ void MainWindow::OnBtnStampsImport(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnSpriteEditor(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -2486,7 +2479,7 @@ void MainWindow::OnBtnSpriteEditor(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnStampsExportBMPs(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnStampsExportBMPs(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -2498,7 +2491,7 @@ void MainWindow::OnBtnStampsExportBMPs(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnStampsCleanup(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnStampsCleanup(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -2509,7 +2502,7 @@ void MainWindow::OnBtnStampsCleanup(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnTilesCreate(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2533,7 +2526,7 @@ void MainWindow::OnBtnTilesCreate(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnTilesDelete(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2557,7 +2550,7 @@ void MainWindow::OnBtnTilesDelete(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnTilesCleanup(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnTilesCleanup(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2570,7 +2563,7 @@ void MainWindow::OnBtnTilesCleanup(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnColMapClear(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnColMapClear(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2581,7 +2574,7 @@ void MainWindow::OnBtnColMapClear(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnColGenTerrainBezier(wxCommandEvent& event)
 {
 #if !BEEHIVE_PLUGIN_LUMINARY
 	if(m_project.get())
@@ -2607,7 +2600,7 @@ void MainWindow::OnBtnColGenTerrainBezier(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnColTilesCleanup(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2620,7 +2613,7 @@ void MainWindow::OnBtnColTilesCleanup(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnColTilesCreate(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2651,7 +2644,7 @@ void MainWindow::OnBtnColTilesCreate(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnColTilesDelete(wxCommandEvent& event)
 {
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 	if(m_project.get())
@@ -2678,7 +2671,7 @@ void MainWindow::OnBtnColTilesDelete(wxRibbonButtonBarEvent& event)
 #endif
 }
 
-void MainWindow::OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event )
+void MainWindow::OnBtnToolsMapEdit( wxCommandEvent& event )
 {
 	ShowToolboxStamps();
 	ShowToolboxObjects();
@@ -2689,47 +2682,47 @@ void MainWindow::OnBtnToolsMapEdit( wxRibbonButtonBarEvent& event )
 #endif
 }
 
-void MainWindow::OnBtnToolsMapList(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnToolsMapList(wxCommandEvent& event)
 {
 	ShowPanelMapList();
 }
 
-void MainWindow::OnBtnToolsTiles( wxRibbonButtonBarEvent& event )
+void MainWindow::OnBtnToolsTiles( wxCommandEvent& event )
 {
 	ShowPanelTiles();
 }
 
-void MainWindow::OnBtnToolsCollisionTiles(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnToolsCollisionTiles(wxCommandEvent& event)
 {
 	ShowPanelTerrainTiles();
 }
 
-void MainWindow::OnBtnToolsStamps(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnToolsStamps(wxCommandEvent& event)
 {
 	ShowPanelStamps();
 }
 
-void MainWindow::OnBtnToolsPalettes( wxRibbonButtonBarEvent& event )
+void MainWindow::OnBtnToolsPalettes( wxCommandEvent& event )
 {
 	ShowPanelPalettes();
 }
 
-void MainWindow::OnBtnToolsGameObjs(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnToolsGameObjs(wxCommandEvent& event)
 {
 	ShowPanelGameObjectTypes();
 }
 
-void MainWindow::OnBtnToolsGameObjParams(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnToolsGameObjParams(wxCommandEvent& event)
 {
 	ShowPanelGameObjectParams();
 }
 
-void MainWindow::OnBtnToolsTimeline(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnToolsTimeline(wxCommandEvent& event)
 {
 	ShowPanelTimeline();
 }
 
-void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnMapClear(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -2739,7 +2732,7 @@ void MainWindow::OnBtnMapClear(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnMapResize(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -2805,7 +2798,7 @@ void MainWindow::OnBtnMapResize(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnMapExportBMP(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnMapExportBMP(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
@@ -2817,7 +2810,7 @@ void MainWindow::OnBtnMapExportBMP(wxRibbonButtonBarEvent& event)
 	}
 }
 
-void MainWindow::OnBtnSaveLayout(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnSaveLayout(wxCommandEvent& event)
 {
 	SaveWindowLayout();
 }
@@ -2869,12 +2862,12 @@ void MainWindow::OnBtnShowDisplayFrame(wxCommandEvent& event)
 	}
 }
 
-void MainWindow::OnBtnTerrainTileEdit(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnTerrainTileEdit(wxCommandEvent& event)
 {
 	ShowPanelTerrainEditor();
 }
 
-void MainWindow::OnBtnGameObjTypes(wxRibbonButtonBarEvent& event)
+void MainWindow::OnBtnGameObjTypes(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
