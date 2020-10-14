@@ -20,8 +20,9 @@
 #include <ion/maths/Bounds.h>
 #include <ion/core/utils/STL.h>
 
-//TODO_LUMINARY - needs define
+#if defined BEEHIVE_PLUGIN_LUMINARY
 #include <luminary/BeehiveToLuminary.h>
+#endif
 
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, wxGLAttributes& glAttributes, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, glAttributes, renderResources, parent, winid, pos, size, style, name)
@@ -110,15 +111,14 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		}
 	}
 
-#if !BEEHIVE_FIXED_STAMP_MODE //Fixed grid placement only in fixed mode
 	if(m_currentTool == eToolSelectGameObject
 		|| m_currentTool == eToolPlaceGameObject
-		|| m_currentTool == eToolDrawGameObject
-		|| m_currentTool == eToolDuplicateGameObject)
+		|| m_currentTool == eToolDrawGameObject)
 	{
 		m_moveGameObjByPixel = event.ShiftDown();
 	}
 
+#if !BEEHIVE_FIXED_STAMP_MODE //Fixed grid placement only in fixed mode
 	if(m_currentTool == eToolSelectTiles)
 	{
 		//Store CTRL held state for multiple selection
@@ -1058,9 +1058,10 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 					prefab->SetDimensions(bounds.GetSize());
 					prefab->SetPrefabName(dialog.GetValue().c_str().AsChar());
 
-					//TODO_LUMINARY - needs define
+#if defined BEEHIVE_PLUGIN_LUMINARY
 					//Configure variables needed for Luminary type
 					luminary::beehive::CreatePrefabType(*prefab);
+#endif
 
 					//Place prefab in scene
 					GameObjectId instanceId = m_project.GetEditingMap().PlaceGameObject(0, 0, prefabId, InvalidGameObjectArchetypeId);
@@ -2220,7 +2221,7 @@ void MapPanel::SetTool(ToolType tool)
 
 					//Populate game objects
 					std::vector<const GameObjectMapEntry*> gameObjects;
-					map.FindGameObjects(left, top, width, height, gameObjects);
+					FindGameObjects(left, top, width, height, gameObjects);
 					for(int i = 0; i < gameObjects.size(); i++)
 					{
 						if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjects[i]->m_gameObject.GetTypeId()))
@@ -2618,6 +2619,7 @@ void RenderGameObject(
 	ActorId spriteActorId,
 	SpriteSheetId spriteSheetId,
 	SpriteAnimId spriteAnimId,
+	ActorId previewSpriteActorId,
 	bool selected,
 	bool hovering)
 {
@@ -2647,6 +2649,13 @@ void RenderGameObject(
 	{
 		//Find sprite actor from game object type
 		spriteActorId = gameObjectType.GetSpriteActorId();
+		spriteActor = project.GetActor(spriteActorId);
+	}
+
+	if (!spriteActor)
+	{
+		//Find sprite actor from editor preview
+		spriteActorId = previewSpriteActorId;
 		spriteActor = project.GetActor(spriteActorId);
 	}
 
@@ -2834,6 +2843,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 					InvalidActorId,
 					InvalidSpriteSheetId,
 					InvalidSpriteAnimId,
+					gameObjectType->GetPreviewSpriteSheetId(),
 					selected,
 					hovering);
 
@@ -2864,6 +2874,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 								prefabChild.spriteActorId,
 								prefabChild.spriteSheetId,
 								prefabChild.spriteAnimId,
+								InvalidSpriteSheetId,
 								selected,
 								hovering);
 						}

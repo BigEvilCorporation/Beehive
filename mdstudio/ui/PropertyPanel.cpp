@@ -359,6 +359,7 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 
 					case ContextMenu::CompileScript:
 					{
+#if defined BEEHIVE_PLUGIN_LUMINARY
 						//TODO: Do this in Beehive-side script compiler
 						m_mainWindow->ShowPanelScriptCompile();
 						if (ScriptCompilePanel* panel = m_mainWindow->GetScriptCompilePanel())
@@ -400,7 +401,7 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 							defines.push_back("_RELEASE");
 							panel->BeginCompileAsync(scriptSourceFullPath, scriptOutFullPathRelease, includes, defines, nullptr);
 						}
-
+#endif
 						break;
 					}
 				}
@@ -506,9 +507,8 @@ void PropertyPanel::AddProperty(const GameObjectType& gameObjectType, const Game
 		*/
 	}
 	else
-	{
 #endif
-
+	{
 		property = new wxStringProperty(variable.m_name, propName, variable.m_value);
 	}
 
