@@ -2693,6 +2693,13 @@ void RenderGameObject(
 		}
 	}
 
+	//Use editor preview sprite sheet if available
+	if (!spriteSheet && gameObjectType.GetPreviewSpriteSheetId() != InvalidSpriteSheetId)
+	{
+		spriteSheetId = gameObjectType.GetPreviewSpriteSheetId();
+		spriteSheet = &gameObjectType.GetPreviewSpriteSheet();
+	}
+
 	if (spriteSheet)
 	{
 		//Get sprite anim
