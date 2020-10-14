@@ -924,7 +924,7 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 
 void SpriteAnimEditorDialog::EventHandlerTimer(wxTimerEvent& event)
 {
-	if(m_selectedAnim)
+	if(m_selectedSpriteSheet && m_selectedAnim)
 	{
 		//Get accurate delta
 		u64 clock = ion::time::GetSystemTicks();
