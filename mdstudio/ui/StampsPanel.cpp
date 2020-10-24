@@ -243,6 +243,7 @@ void StampsPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 #endif
 			contextMenu.Append(eMenuDeleteStamp, wxString("Delete stamp"));
 			contextMenu.Append(eMenuEditCollision, wxString("Edit collision"));
+			contextMenu.Append(eMenuSetBackground, wxString("Set as background stamp"));
 #if !BEEHIVE_LEAN_UI
 			contextMenu.Append(eMenuSortTilesSequentially, wxString("Sort tiles sequentially"));
 			contextMenu.Append(eMenuOpenInAnimEditor, wxString("Open in animation editor"));
@@ -382,6 +383,10 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			DialogEditStampCollision dialog(*m_mainWindow, *stamp, m_project, m_renderer, *m_glContext, m_renderResources);
 			dialog.ShowModal();
 		}
+	}
+	else if (event.GetId() == eMenuSetBackground)
+	{
+		m_project.SetBackgroundStamp(m_hoverStamp);
 	}
 #if !BEEHIVE_FIXED_STAMP_MODE
 	else if(event.GetId() == eMenuSetStampLowDrawPrio)

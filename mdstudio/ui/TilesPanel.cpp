@@ -146,7 +146,6 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDel
 		m_mainWindow->RefreshPanel(MainWindow::ePanelTerrainTileEditor);
 	}
 
-#if !BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode
 	if(buttonBits & eMouseRight)
 	{
 		if(m_hoverTile != InvalidTileId)
@@ -154,13 +153,14 @@ void TilesPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDel
 			//Right-click menu
 			wxMenu contextMenu;
 
+#if !BEEHIVE_FIXED_STAMP_MODE //No tile editing in fixed mode
 			contextMenu.Append(eMenuDeleteTile, wxString("Delete tile"));
+#endif
 			contextMenu.Append(eMenuUseAsBgTile, wxString("Use as background tile"));
 			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&TilesPanel::OnContextMenuClick, NULL, this);
 			PopupMenu(&contextMenu);
 		}
 	}
-#endif
 
 	//Redraw
 	Refresh();

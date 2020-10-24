@@ -45,6 +45,7 @@ private:
 		eMenuDeleteStamp,
 		eMenuUpdateStamp,
 		eMenuEditCollision,
+		eMenuSetBackground,
 
 #if !BEEHIVE_FIXED_STAMP_MODE
 		eMenuSetStampLowDrawPrio,

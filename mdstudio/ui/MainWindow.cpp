@@ -1915,7 +1915,8 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 			const Map& map = m_project->GetMap(it->first);
 			std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
 			std::string mapFilename = scenesExportDir + "\\G" + ion::string::ToUpper(map.GetName()) + ".BIN";
-			if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
+			StampId backgroundStamp = m_project->GetBackgroundStamp() == InvalidStampId ? 0 : m_project->GetBackgroundStamp();
+			if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight, backgroundStamp))
 			{
 				includeFilenames.push_back(Project::IncludeFile { mapLabel, mapFilename, Project::IncludeExportFlags::None });
 			}
