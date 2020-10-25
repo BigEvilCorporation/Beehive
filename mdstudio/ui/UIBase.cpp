@@ -173,6 +173,14 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menuItemMapNew = new wxMenuItem( m_menuMap, wxID_BTN_MAP_NEW, wxString( wxT("New") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuMap->Append( m_menuItemMapNew );
 
+	wxMenuItem* m_menuItemMapImport;
+	m_menuItemMapImport = new wxMenuItem( m_menuMap, wxID_BTN_MAP_IMPORT, wxString( wxT("Import") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemMapImport );
+
+	wxMenuItem* m_menuItemMapCopy;
+	m_menuItemMapCopy = new wxMenuItem( m_menuMap, wxID_ANYwxID_BTN_MAP_COPY, wxString( wxT("Copy") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMap->Append( m_menuItemMapCopy );
+
 	wxMenuItem* m_menuItemMapDelete;
 	m_menuItemMapDelete = new wxMenuItem( m_menuMap, wxID_BTN_MAP_DELETE, wxString( wxT("Delete") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuMap->Append( m_menuItemMapDelete );
@@ -309,6 +317,8 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnShowDisplayFrame ), this, m_menuItemViewShowDisplayFrame->GetId());
 	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnMenuToolsTweaksGameObjCentreOrigin ), this, m_menuItem3->GetId());
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapNew ), this, m_menuItemMapNew->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapImport ), this, m_menuItemMapImport->GetId());
+	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapCopy ), this, m_menuItemMapCopy->GetId());
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapDelete ), this, m_menuItemMapDelete->GetId());
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapRename ), this, m_menuItemMapRename->GetId());
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapClear ), this, m_menuItemMapClear->GetId());
@@ -1841,6 +1851,9 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
+	wxBoxSizer* bSizer69;
+	bSizer69 = new wxBoxSizer( wxVERTICAL );
+
 	wxFlexGridSizer* fgSizer40;
 	fgSizer40 = new wxFlexGridSizer( 0, 3, 0, 0 );
 	fgSizer40->AddGrowableCol( 1 );
@@ -1933,10 +1946,53 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 	fgSizer40->Add( m_spinStampHeight, 0, wxALL, 5 );
 
 
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+	bSizer69->Add( fgSizer40, 1, wxEXPAND, 5 );
+
+	m_advancedPane = new wxCollapsiblePane( this, wxID_ANY, wxT("Advanced Settings"), wxDefaultPosition, wxDefaultSize, wxCP_DEFAULT_STYLE );
+	m_advancedPane->Collapse( true );
+
+	wxFlexGridSizer* fgSizer64;
+	fgSizer64 = new wxFlexGridSizer( 0, 3, 0, 0 );
+	fgSizer64->AddGrowableCol( 1 );
+	fgSizer64->AddGrowableRow( 0 );
+	fgSizer64->SetFlexibleDirection( wxBOTH );
+	fgSizer64->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
+	m_staticText75 = new wxStaticText( m_advancedPane->GetPane(), wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText75->Wrap( -1 );
+	fgSizer64->Add( m_staticText75, 0, wxALIGN_RIGHT|wxALL, 5 );
+
+	m_textCtrl18 = new wxTextCtrl( m_advancedPane->GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer64->Add( m_textCtrl18, 0, wxALL|wxEXPAND, 5 );
 
 
-	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+	fgSizer64->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText76 = new wxStaticText( m_advancedPane->GetPane(), wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText76->Wrap( -1 );
+	fgSizer64->Add( m_staticText76, 0, wxALIGN_RIGHT|wxALL, 5 );
+
+	m_textCtrl19 = new wxTextCtrl( m_advancedPane->GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer64->Add( m_textCtrl19, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer64->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText77 = new wxStaticText( m_advancedPane->GetPane(), wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText77->Wrap( -1 );
+	fgSizer64->Add( m_staticText77, 0, wxALIGN_RIGHT|wxALL, 5 );
+
+	m_textCtrl20 = new wxTextCtrl( m_advancedPane->GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer64->Add( m_textCtrl20, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer64->Add( 0, 0, 1, wxEXPAND, 5 );
+
+
+	m_advancedPane->GetPane()->SetSizer( fgSizer64 );
+	m_advancedPane->GetPane()->Layout();
+	fgSizer64->Fit( m_advancedPane->GetPane() );
+	bSizer69->Add( m_advancedPane, 1, wxEXPAND | wxALL, 5 );
 
 	m_sdbSizer7 = new wxStdDialogButtonSizer();
 	m_sdbSizer7OK = new wxButton( this, wxID_OK );
@@ -1945,10 +2001,10 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 	m_sdbSizer7->AddButton( m_sdbSizer7Cancel );
 	m_sdbSizer7->Realize();
 
-	fgSizer40->Add( m_sdbSizer7, 1, wxEXPAND, 5 );
+	bSizer69->Add( m_sdbSizer7, 1, wxEXPAND, 5 );
 
 
-	this->SetSizer( fgSizer40 );
+	this->SetSizer( bSizer69 );
 	this->Layout();
 
 	this->Centre( wxBOTH );

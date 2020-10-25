@@ -172,6 +172,11 @@ protected:
 	virtual void OnBtnToolsGameObjs(wxCommandEvent& event);
 	virtual void OnBtnToolsGameObjParams(wxCommandEvent& event);
 	virtual void OnBtnToolsTimeline(wxCommandEvent& event);
+	virtual void OnBtnMapNew(wxCommandEvent& event);
+	virtual void OnBtnMapImport(wxCommandEvent& event);
+	virtual void OnBtnMapCopy(wxCommandEvent& event);
+	virtual void OnBtnMapDelete(wxCommandEvent& event);
+	virtual void OnBtnMapRename(wxCommandEvent& event);
 	virtual void OnBtnMapClear(wxCommandEvent& event);
 	virtual void OnBtnMapResize(wxCommandEvent& event);
 	virtual void OnBtnMapExportBMP(wxCommandEvent& event);

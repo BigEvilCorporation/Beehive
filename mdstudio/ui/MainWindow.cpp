@@ -2723,13 +2723,258 @@ void MainWindow::OnBtnToolsTimeline(wxCommandEvent& event)
 	ShowPanelTimeline();
 }
 
+void MainWindow::OnBtnMapNew(wxCommandEvent& event)
+{
+	DialogNewMap dialog(this);
+
+#if BEEHIVE_FIXED_STAMP_MODE
+	dialog.m_spinCtrlWidth->SetValue(8);
+	dialog.m_spinCtrlHeight->SetValue(4);
+#endif
+
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		MapId newMapId = m_project->CreateMap();
+		CollisionMapId collisionMapId = m_project->CreateCollisionMap(newMapId);
+		Map& newMap = m_project->GetMap(newMapId);
+		CollisionMap& newCollisionMap = m_project->GetCollisionMap(collisionMapId);
+		newMap.SetName(dialog.m_textMapName->GetValue().GetData().AsChar());
+
+#if BEEHIVE_FIXED_STAMP_MODE
+		const PlatformConfig& config = m_project->GetPlatformConfig();
+		newMap.Resize(dialog.m_spinCtrlWidth->GetValue() * config.stampWidth, dialog.m_spinCtrlHeight->GetValue() * config.stampHeight, false, false);
+		newCollisionMap.Resize(dialog.m_spinCtrlWidth->GetValue() * config.stampWidth, dialog.m_spinCtrlHeight->GetValue() * config.stampHeight, false, false);
+#else
+		newMap.Resize(dialog.m_spinCtrlWidth->GetValue(), dialog.m_spinCtrlHeight->GetValue(), false, false);
+		newCollisionMap.Resize(dialog.m_spinCtrlWidth->GetValue(), dialog.m_spinCtrlHeight->GetValue(), false, false);
+#endif
+
+		m_project->SetEditingMap(newMapId);
+		m_project->SetEditingCollisionMap(newMapId);
+
+		m_project->InvalidateMap(true);
+		RefreshPanel(ePanelMap);
+		RefreshPanel(ePanelMapList);
+		m_project->InvalidateMap(false);
+	}
+}
+
+void MainWindow::OnBtnMapImport(wxCommandEvent& event)
+{
+	wxFileDialog dialog(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		Project project(PlatformPresets::s_configs[ePlatformMegaDrive]);
+
+		const Tileset& tileset = project.GetTileset();
+
+		if (project.Load(dialog.GetPath().c_str().AsChar()))
+		{
+			//Recalculate all hashes
+			m_project->GetTileset().RebuildHashMap();
+			project.GetTileset().RebuildHashMap();
+
+			//Import all maps
+			for (TMapMap::const_iterator it = project.MapsBegin(), end = project.MapsEnd(); it != end; ++it)
+			{
+				MapId mapId = it->first;
+				const Map& map = it->second;
+
+				MapId newMapId = m_project->CreateMap();
+				Map& newMap = m_project->GetMap(newMapId);
+				newMap.SetName(map.GetName());
+				newMap.Resize(map.GetWidth(), map.GetHeight(), false, false);
+
+				//Import collision map
+				const CollisionMap& collisionMap = project.GetCollisionMap(mapId);
+				CollisionMapId newCollisionMapId = m_project->CreateCollisionMap(newMapId);
+				CollisionMap& newCollisionMap = m_project->GetCollisionMap(newCollisionMapId);
+				newCollisionMap.Resize(collisionMap.GetWidth(), collisionMap.GetHeight(), false, false);
+
+				//Import all terrain tiles
+				for (int x = 0; x < collisionMap.GetWidth(); x++)
+				{
+					for (int y = 0; y < collisionMap.GetHeight(); y++)
+					{
+						TerrainTileId terrainTileId = collisionMap.GetTerrainTile(x, y);
+						if (TerrainTile* terrainTile = project.GetTerrainTileset().GetTerrainTile(terrainTileId))
+						{
+							TerrainTileId existingTileId = m_project->GetTerrainTileset().FindDuplicate(*terrainTile);
+							if (existingTileId != InvalidTileId)
+							{
+								newCollisionMap.SetTerrainTile(x, y, existingTileId);
+							}
+						}
+
+						u32 collisionTileFlags = collisionMap.GetCollisionTileFlags(x, y);
+						newCollisionMap.SetCollisionTileFlags(x, y, collisionTileFlags);
+					}
+				}
+
+				//Import all terrain bezier paths
+				for (int i = 0; i < collisionMap.GetNumTerrainBeziers(); i++)
+				{
+					newCollisionMap.AddTerrainBezier(*collisionMap.GetTerrainBezier(i));
+				}
+
+				//Import all map tiles
+				for (int x = 0; x < map.GetWidth(); x++)
+				{
+					for (int y = 0; y < map.GetHeight(); y++)
+					{
+						TileId tileId = map.GetTile(x, y);
+						u32 tileFlags = map.GetTileFlags(x, y);
+						if (const Tile* tile = tileset.GetTile(tileId))
+						{
+							TileId existingTileId = m_project->GetTileset().FindDuplicate(*tile, tileFlags);
+							if (existingTileId == InvalidTileId)
+							{
+								//Import new tile
+								existingTileId = m_project->GetTileset().AddTile();
+								Tile* newTile = m_project->GetTileset().GetTile(existingTileId);
+								*newTile = *tile;
+							}
+
+							newMap.SetTile(x, y, existingTileId);
+							newMap.SetTileFlags(x, y, tileFlags);
+						}
+					}
+				}
+
+				//Import all stamps
+				for (TStampPosMap::const_iterator it = map.StampsBegin(), end = map.StampsEnd(); it != end; ++it)
+				{
+					if (const Stamp* stamp = project.GetStamp(it->m_id))
+					{
+						Stamp tempStamp(InvalidStampId, stamp->GetWidth(), stamp->GetHeight());
+
+						for (int x = 0; x < stamp->GetWidth(); x++)
+						{
+							for (int y = 0; y < stamp->GetHeight(); y++)
+							{
+								TileId tileId = stamp->GetTile(x, y);
+								u32 tileFlags = stamp->GetTileFlags(x, y);
+								if (const Tile* tile = tileset.GetTile(tileId))
+								{
+									u32 existingFlags = 0;
+									TileId existingTileId = m_project->GetTileset().FindDuplicate(*tile, existingFlags);
+									if (existingTileId == InvalidTileId)
+									{
+										//Import new tile
+										existingTileId = m_project->GetTileset().AddTile();
+										Tile* newTile = m_project->GetTileset().GetTile(existingTileId);
+										*newTile = *tile;
+									}
+
+									tempStamp.SetTile(x, y, existingTileId);
+									tempStamp.SetTileFlags(x, y, tileFlags ^ existingFlags);
+								}
+							}
+						}
+
+						StampId existingStampId = m_project->FindDuplicateStamp(&tempStamp);
+
+						if (existingStampId == InvalidStampId)
+						{
+							//Duplicate temp stamp
+							StampId newStampId = m_project->AddStamp(&tempStamp);
+							Stamp* newStamp = m_project->GetStamp(newStampId);
+							newMap.SetStamp(it->m_position.x, it->m_position.y, *newStamp, it->m_flags);
+						}
+						else
+						{
+							//Set existing
+							newMap.SetStamp(it->m_position.x, it->m_position.y, *m_project->GetStamp(existingStampId), it->m_flags);
+						}
+					}
+				}
+
+				//Import all game objects
+				for (TGameObjectPosMap::const_iterator it = map.GetGameObjects().begin(), end = map.GetGameObjects().end(); it != end; ++it)
+				{
+					for (int i = 0; i < it->second.size(); i++)
+					{
+						if (const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first))
+						{
+							newMap.PlaceGameObject(it->second[i].m_gameObject.GetPosition().x, it->second[i].m_gameObject.GetPosition().y, it->second[i].m_gameObject, *gameObjectType, InvalidGameObjectArchetypeId);
+						}
+						else
+						{
+							wxMessageBox("Game object type ID mismatch, game objects will be missing", "Error", wxOK);
+						}
+					}
+				}
+			}
+
+			m_project->InvalidateTiles(true);
+			m_project->InvalidateMap(true);
+			m_project->InvalidateTerrainTiles(true);
+			RefreshPanel(ePanelMap);
+			RefreshPanel(ePanelMapList);
+			m_project->InvalidateTiles(false);
+			m_project->InvalidateTerrainTiles(false);
+			m_project->InvalidateMap(false);
+		}
+		else
+		{
+			wxMessageBox("Error importing map", "Error", wxOK | wxICON_ERROR);
+		}
+	}
+}
+
+void MainWindow::OnBtnMapCopy(wxCommandEvent& event)
+{
+	Map& originalMap = m_project->GetEditingMap();
+	CollisionMap& originalCollisionMap = m_project->GetEditingCollisionMap();
+
+	MapId newMapId = m_project->CreateMap(originalMap);
+	CollisionMapId newCollisionMapId = m_project->CreateCollisionMap(newMapId, originalCollisionMap);
+
+	m_project->SetEditingMap(newMapId);
+	m_project->SetEditingCollisionMap(newCollisionMapId);
+
+	m_project->InvalidateMap(true);
+	RefreshPanel(ePanelMap);
+	RefreshPanel(ePanelMapList);
+	m_project->InvalidateMap(false);
+}
+
+void MainWindow::OnBtnMapDelete(wxCommandEvent& event)
+{
+	if (m_project->GetMapCount() > 1)
+	{
+		m_project->DeleteMap(m_project->GetEditingMapId());
+		m_project->SetEditingMap(m_project->MapsBegin()->first);
+		m_project->SetEditingCollisionMap(m_project->MapsBegin()->first);
+
+		m_project->InvalidateMap(true);
+		RefreshPanel(ePanelMap);
+		RefreshPanel(ePanelMapList);
+		m_project->InvalidateMap(false);
+	}
+}
+
+void MainWindow::OnBtnMapRename(wxCommandEvent& event)
+{
+	wxTextEntryDialog dialog(this, "Rename Map");
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		m_project->GetEditingMap().SetName(dialog.GetValue().c_str().AsChar());
+		RefreshPanel(ePanelMapList);
+	}
+}
+
 void MainWindow::OnBtnMapClear(wxCommandEvent& event)
 {
 	if(m_project.get())
 	{
 		m_project->GetEditingMap().Clear();
 		m_project->GetEditingCollisionMap().Clear();
+		
+		m_project->InvalidateMap(true);
 		RefreshPanel(ePanelMap);
+		RefreshPanel(ePanelMapList);
+		m_project->InvalidateMap(false);
 	}
 }
 
