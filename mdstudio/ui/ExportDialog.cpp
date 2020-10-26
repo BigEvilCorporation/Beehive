@@ -10,6 +10,7 @@
 ///////////////////////////////////////////////////////
 
 #include "ExportDialog.h"
+#include <ion/io/FileDevice.h>
 
 ExportDialog::ExportDialog(wxWindow* parent, Project& project)
 	: ExportDialogBase(parent)
@@ -32,15 +33,17 @@ void ExportDialog::OnBtnExportAll(wxCommandEvent& event)
 	EndModal(wxID_OK);
 }
 
-void ExportDialog::SetMapFormValues(int mapIndex, const Map::ExportFilenames& values)
+void ExportDialog::SetMapFormValues(const std::string& projectRootDir, int mapIndex, const Map::ExportFilenames& values)
 {
-	m_mapTabs[mapIndex]->m_filePickerMap->SetPath(values.map);
-	m_mapTabs[mapIndex]->m_filePickerStampMap->SetPath(values.stampMap);
-	m_mapTabs[mapIndex]->m_filePickerCollisionMap->SetPath(values.collisionMap);
-	m_mapTabs[mapIndex]->m_filePickerGameObj->SetPath(values.gameObjects);
-	m_mapTabs[mapIndex]->m_filePickerBlockMap->SetPath(values.blockMap);
-	m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->SetPath(values.terrainBlockMap);
-	m_mapTabs[mapIndex]->m_filePickerSceneAnimations->SetPath(values.sceneAnims);
+	ion::io::FileDevice* fileDevice = ion::io::FileDevice::GetDefault();
+
+	m_mapTabs[mapIndex]->m_filePickerMap->SetPath(fileDevice->CombinePath(projectRootDir, values.map));
+	m_mapTabs[mapIndex]->m_filePickerStampMap->SetPath(fileDevice->CombinePath(projectRootDir, values.stampMap));
+	m_mapTabs[mapIndex]->m_filePickerCollisionMap->SetPath(fileDevice->CombinePath(projectRootDir, values.collisionMap));
+	m_mapTabs[mapIndex]->m_filePickerGameObj->SetPath(fileDevice->CombinePath(projectRootDir, values.gameObjects));
+	m_mapTabs[mapIndex]->m_filePickerBlockMap->SetPath(fileDevice->CombinePath(projectRootDir, values.blockMap));
+	m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->SetPath(fileDevice->CombinePath(projectRootDir, values.terrainBlockMap));
+	m_mapTabs[mapIndex]->m_filePickerSceneAnimations->SetPath(fileDevice->CombinePath(projectRootDir, values.sceneAnims));
 
 	m_mapTabs[mapIndex]->m_chkMap->SetValue(values.mapExportEnabled);
 	m_mapTabs[mapIndex]->m_chkStampMap->SetValue(values.stampMapExportEnabled);
@@ -51,15 +54,15 @@ void ExportDialog::SetMapFormValues(int mapIndex, const Map::ExportFilenames& va
 	m_mapTabs[mapIndex]->m_chkSceneAnims->SetValue(values.sceneAnimExportEnabled);
 }
 
-void ExportDialog::GetMapFormValues(int mapIndex, Map::ExportFilenames& values) const
+void ExportDialog::GetMapFormValues(const std::string& projectRootDir, int mapIndex, Map::ExportFilenames& values) const
 {
-	values.map = m_mapTabs[mapIndex]->m_filePickerMap->GetPath();
-	values.stampMap = m_mapTabs[mapIndex]->m_filePickerStampMap->GetPath();
-	values.collisionMap = m_mapTabs[mapIndex]->m_filePickerCollisionMap->GetPath();
-	values.gameObjects = m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath();
-	values.blockMap = m_mapTabs[mapIndex]->m_filePickerBlockMap->GetPath();
-	values.terrainBlockMap = m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->GetPath();
-	values.sceneAnims = m_mapTabs[mapIndex]->m_filePickerSceneAnimations->GetPath();
+	values.map = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerMap->GetPath().c_str().AsChar(), projectRootDir);
+	values.stampMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerStampMap->GetPath().c_str().AsChar(), projectRootDir);
+	values.collisionMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerCollisionMap->GetPath().c_str().AsChar(), projectRootDir);
+	values.gameObjects = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath().c_str().AsChar(), projectRootDir);
+	values.blockMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerBlockMap->GetPath().c_str().AsChar(), projectRootDir);
+	values.terrainBlockMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->GetPath().c_str().AsChar(), projectRootDir);
+	values.sceneAnims = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerSceneAnimations->GetPath().c_str().AsChar(), projectRootDir);
 
 	values.mapExportEnabled = m_mapTabs[mapIndex]->m_chkMap->GetValue();
 	values.stampMapExportEnabled = m_mapTabs[mapIndex]->m_chkStampMap->GetValue();

@@ -25,8 +25,8 @@ public:
 	virtual void OnBtnCancel(wxCommandEvent& event);
 	virtual void OnBtnExportAll(wxCommandEvent& event);
 
-	void SetMapFormValues(int mapIndex, const Map::ExportFilenames& values);
-	void GetMapFormValues(int mapIndex, Map::ExportFilenames& values) const;
+	void SetMapFormValues(const std::string& projectRoot, int mapIndex, const Map::ExportFilenames& values);
+	void GetMapFormValues(const std::string& projectRoot, int mapIndex, Map::ExportFilenames& values) const;
 
 private:
 	std::vector<ExportDialogMapTab*> m_mapTabs;
