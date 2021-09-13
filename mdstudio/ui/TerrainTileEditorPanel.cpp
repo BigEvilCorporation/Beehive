@@ -28,8 +28,8 @@ TerrainTileEditorPanel::TerrainTileEditorPanel(MainWindow* mainWindow, Project& 
 	m_canvasSize.y = tileHeight;
 
 	//Create rendering primitives
-	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
-	m_collisionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
+	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::Axis::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
+	m_collisionPrimitive = new ion::render::Quad(ion::render::Quad::Axis::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
 	m_primitiveDirty = true;
 
 	//Create 8x8 grid
@@ -148,21 +148,21 @@ void TerrainTileEditorPanel::RenderTile(ion::render::Renderer& renderer, const i
 	//Draw tile
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_tilePrimitive->GetVertexBuffer(), m_tilePrimitive->GetIndexBuffer());
-	material->Unbind();
+	renderer.UnbindMaterial(*material);
 }
 
 void TerrainTileEditorPanel::RenderCollision(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//Draw collision tile
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
-	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_collisionPrimitive->GetVertexBuffer(), m_collisionPrimitive->GetIndexBuffer());
-	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+	renderer.UnbindMaterial(*material);
+	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::None);
 }
 
 void TerrainTileEditorPanel::PaintTile()

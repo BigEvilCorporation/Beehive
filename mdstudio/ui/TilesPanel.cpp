@@ -29,7 +29,7 @@ TilesPanel::TilesPanel(MainWindow* mainWindow, Project& project, ion::render::Re
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	//Create selection quad
-	m_selectionPrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
+	m_selectionPrimitive = new ion::render::Quad(ion::render::Quad::Axis::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
 }
 
 TilesPanel::~TilesPanel()
@@ -317,12 +317,12 @@ void TilesPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, c
 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
-	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 	material->SetDiffuseColour(colour);
-	material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+	renderer.BindMaterial(*material, boxMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_selectionPrimitive->GetVertexBuffer(), m_selectionPrimitive->GetIndexBuffer());
-	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+	renderer.UnbindMaterial(*material);
+	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::None);
 }
 
 void TilesPanel::ResetZoomPan()

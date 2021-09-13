@@ -6,7 +6,7 @@ ViewPanel::ViewPanel(MainWindow* mainWindow, Project& project, ion::render::Rend
 	, m_renderer(renderer)
 	, m_renderResources(renderResources)
 	, m_glContext(glContext)
-	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
+	, m_viewport(128, 128, ion::render::Viewport::PerspectiveMode::Ortho2DAbsolute)
 	, m_project(project)
 {
 	SetCurrent(*glContext);
@@ -154,7 +154,7 @@ void ViewPanel::CreateCanvas(int width, int height)
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
+	m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
 	m_canvasSize.x = width;
 	m_canvasSize.y = height;
 	m_canvasPrimitiveDirty = true;
@@ -172,8 +172,8 @@ void ViewPanel::CreateCollisionCanvas(int width, int height)
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
-	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
 
 	m_terrainCanvasDirty = true;
 	m_collisionCanvasDirty = true;
@@ -187,7 +187,7 @@ void ViewPanel::CreateGrid(int width, int height, int cellsX, int cellsY)
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), cellsX, cellsY);
+	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::Axis::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), cellsX, cellsY);
 }
 
 void ViewPanel::PaintTile(TileId tileId, int x, int y, u32 flipFlags)
@@ -461,17 +461,17 @@ void ViewPanel::RenderCanvas(ion::render::Renderer& renderer, const ion::Matrix4
 	if(m_canvasPrimitive)
 	{
 		//No depth test (stops grid cells Z fighting)
-		renderer.SetDepthTest(ion::render::Renderer::eAlways);
+		renderer.SetDepthTest(ion::render::Renderer::DepthTest::Always);
 
 		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
 
 		//Draw map
 		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_canvasPrimitive->GetVertexBuffer(), m_canvasPrimitive->GetIndexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 
-		renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+		renderer.SetDepthTest(ion::render::Renderer::DepthTest::LessOrEqual);
 	}
 }
 
@@ -485,9 +485,9 @@ void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& 
 	gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
 	gridMtx.SetScale(ion::Vector3((float)m_project.GetGridSize(), (float)m_project.GetGridSize(), 1.0f));
 	material->SetDiffuseColour(colour);
-	material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
+	renderer.BindMaterial(*material, gridMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
-	material->Unbind();
+	renderer.UnbindMaterial(*material);
 }
 
 void ViewPanel::OnResize(wxSizeEvent& event)

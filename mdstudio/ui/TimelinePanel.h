@@ -173,7 +173,7 @@ template <typename T> void TimelinePanel::SyncSpriteObj(AnimationActor& animActo
 					float spriteAnimFrame = (frame - spriteAnimStartTime) * spriteAnimation->GetPlaybackSpeed();
 					float spriteAnimLength = spriteAnimation->GetLength();
 
-					if (spriteAnimation->GetPlaybackBehaviour() == ion::render::Animation::eLoop)
+					if (spriteAnimation->GetPlaybackBehaviour() == ion::render::Animation::PlaybackBehaviour::Loop)
 					{
 						spriteAnimation->SetFrame(ion::maths::Fmod(spriteAnimFrame, spriteAnimLength));
 					}

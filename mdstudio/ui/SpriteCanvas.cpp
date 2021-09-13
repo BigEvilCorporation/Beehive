@@ -18,7 +18,7 @@
 
 SpriteCanvas::SpriteCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: wxGLCanvas(parent, MainWindow::GetGLAttributes(), id, pos, size, style, name)
-	, m_viewport(128, 128, ion::render::Viewport::eOrtho2DAbsolute)
+	, m_viewport(128, 128, ion::render::Viewport::PerspectiveMode::Ortho2DAbsolute)
 {
 	m_gridPrimitive = NULL;
 	m_boundsPrimitive = NULL;
@@ -115,7 +115,7 @@ void SpriteCanvas::SetDrawSpriteSheet(SpriteSheetId spriteSheet, u32 frame, cons
 
 	ion::Vector2 boundsHalfExtents((float)(bottomRight.x - topLeft.x) / 2.0f, (float)(bottomRight.y - topLeft.y) / 2.0f);
 	ion::Vector2 boundsOffset((float)((-size.x / 2.0f) + boundsHalfExtents.x + topLeft.x), (float)((size.y / 2.0f) - boundsHalfExtents.y - topLeft.y));
-	m_boundsPrimitive = new ion::render::LineQuad(ion::render::LineQuad::xy, boundsHalfExtents, boundsOffset);
+	m_boundsPrimitive = new ion::render::LineQuad(ion::render::LineQuad::Axis::xy, boundsHalfExtents, boundsOffset);
 
 	Refresh();
 }
@@ -130,7 +130,7 @@ void SpriteCanvas::CreateGrid(int width, int height, int cellsX, int cellsY)
 	if(m_gridPrimitive)
 		delete m_gridPrimitive;
 
-	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)width / 2, (float)height / 2), cellsX, cellsY);
+	m_gridPrimitive = new ion::render::Grid(ion::render::Grid::Axis::xy, ion::Vector2((float)width / 2, (float)height / 2), cellsX, cellsY);
 }
 
 void SpriteCanvas::OnResize(wxSizeEvent& event)
@@ -283,9 +283,9 @@ void SpriteCanvas::RenderSpriteSheet(ion::render::Renderer& renderer, const ion:
 
 		boxMtx.SetTranslation(boxPos);
 
-		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, boxMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 }
 
@@ -306,9 +306,9 @@ void SpriteCanvas::RenderTileFrame(ion::render::Renderer& renderer, const ion::M
 
 		boxMtx.SetTranslation(boxPos);
 
-		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, boxMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 }
 
@@ -326,9 +326,9 @@ void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Mat
 		boxMtx.SetTranslation(boxPos);
 		boxMtx.SetScale(boxScale);
 
-		material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, boxMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 
 		if(m_drawPreviewMaxFrames > 0)
 		{
@@ -355,9 +355,9 @@ void SpriteCanvas::RenderPreview(ion::render::Renderer& renderer, const ion::Mat
 				boxMtx.SetTranslation(boxPos);
 				boxMtx.SetScale(boxScale);
 
-				material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+				renderer.BindMaterial(*material, boxMtx, cameraInverseMtx, projectionMtx);
 				renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-				material->Unbind();
+				renderer.UnbindMaterial(*material);
 			}
 		}
 	}
@@ -373,9 +373,9 @@ void SpriteCanvas::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix
 		ion::Matrix4 gridMtx;
 		gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));
 		material->SetDiffuseColour(m_gridColour);
-		material->Bind(gridMtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, gridMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_gridPrimitive->GetVertexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 }
 
@@ -391,9 +391,9 @@ void SpriteCanvas::RenderBounds(ion::render::Renderer& renderer, const ion::Matr
 		outlineMtx.SetTranslation(ion::Vector3(m_drawOffset.x, m_drawOffset.y, z));
 
 		material->SetDiffuseColour(colour);
-		material->Bind(outlineMtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, outlineMtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_boundsPrimitive->GetVertexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 }
 

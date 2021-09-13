@@ -440,7 +440,7 @@ void SpriteAnimEditorDialog::OnTimelineCellChange(wxGridEvent& event)
 
 void SpriteAnimEditorDialog::OnSliderMove(wxScrollEvent& event)
 {
-	if(m_selectedAnim && m_selectedAnim->GetState() == ion::render::Animation::eStopped)
+	if(m_selectedAnim && m_selectedAnim->GetState() == ion::render::Animation::State::Stopped)
 	{
 		float time = ion::maths::Lerp(0.0f, m_selectedAnim->GetLength(), (float)m_sliderTimeline->GetValue() / 100.0f);
 		int frame = m_selectedAnim->m_trackSpriteFrame.GetValue(time);
@@ -458,7 +458,7 @@ void SpriteAnimEditorDialog::OnBtnPlay(wxCommandEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::ePlaying);
+		m_selectedAnim->SetState(ion::render::Animation::State::Playing);
 		m_timer.Start(1);
 		m_prevClock = ion::time::GetSystemTicks();
 	}
@@ -470,7 +470,7 @@ void SpriteAnimEditorDialog::OnBtnStop(wxCommandEvent& event)
 
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::eStopped);
+		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
 	}
 }
 
@@ -486,7 +486,7 @@ void SpriteAnimEditorDialog::OnRadioBlendLerp(wxCommandEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->m_trackPosition.SetBlendMode(AnimTrackSpritePosition::eLinear);
+		m_selectedAnim->m_trackPosition.SetBlendMode(AnimTrackSpritePosition::BlendMode::Linear);
 	}
 }
 
@@ -494,7 +494,7 @@ void SpriteAnimEditorDialog::OnRadioBlendSnap(wxCommandEvent& event)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->m_trackPosition.SetBlendMode(AnimTrackSpritePosition::eSnap);
+		m_selectedAnim->m_trackPosition.SetBlendMode(AnimTrackSpritePosition::BlendMode::Snap);
 	}
 }
 
@@ -806,15 +806,15 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 	}
 
 	//Set blend mode radio buttons
-	m_radioBlendLerp->SetValue(anim.m_trackPosition.GetBlendMode() == AnimTrackSpritePosition::eLinear);
-	m_radioBlendLerp->SetValue(anim.m_trackPosition.GetBlendMode() == AnimTrackSpritePosition::eSnap);
+	m_radioBlendLerp->SetValue(anim.m_trackPosition.GetBlendMode() == AnimTrackSpritePosition::BlendMode::Linear);
+	m_radioBlendLerp->SetValue(anim.m_trackPosition.GetBlendMode() == AnimTrackSpritePosition::BlendMode::Snap);
 }
 
 void SpriteAnimEditorDialog::SelectActor(int index)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::eStopped);
+		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
 	}
 
 	m_selectedActorId = InvalidActorId;
@@ -839,7 +839,7 @@ void SpriteAnimEditorDialog::SelectStamp(int index)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::eStopped);
+		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
 	}
 
 	m_selectedStampId = InvalidStampId;
@@ -864,7 +864,7 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::eStopped);
+		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
 	}
 
 	m_selectedSpriteSheetId = InvalidSpriteSheetId;
@@ -898,7 +898,7 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 {
 	if(m_selectedAnim)
 	{
-		m_selectedAnim->SetState(ion::render::Animation::eStopped);
+		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
 	}
 
 	m_selectedAnimId = InvalidSpriteAnimId;

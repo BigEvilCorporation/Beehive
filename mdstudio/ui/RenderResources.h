@@ -20,8 +20,8 @@
 #include <ion/renderer/imageformats/BMPReader.h>
 #include <ion/beehive/Project.h>
 #include <ion/beehive/SpriteSheet.h>
-#include <ion/io/ResourceManager.h>
-#include <ion/io/ResourceHandle.h>
+#include <ion/resource/ResourceManager.h>
+#include <ion/resource/ResourceHandle.h>
 
 class RenderResources
 {
@@ -136,7 +136,7 @@ public:
 
 		struct Frame
 		{
-			ion::render::Texture* texture;
+			ion::io::ResourceHandle<ion::render::Texture> texture;
 			ion::render::Material* material;
 		};
 
@@ -174,7 +174,7 @@ private:
 
 	//Resources
 	ion::io::ResourceHandle<ion::render::Shader> m_shaders[eShaderMax];
-	ion::render::Texture* m_textures[eTextureMax];
+	ion::io::ResourceHandle<ion::render::Texture> m_textures[eTextureMax];
 	ion::render::Material* m_materials[eMaterialMax];
 	ion::render::Primitive* m_primitives[ePrimitiveMax];
 	ion::Colour m_colours[eColourMax];

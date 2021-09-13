@@ -102,9 +102,9 @@ void StampCanvas::SetStamp(Stamp& stamp, const ion::Vector2i& offset)
 	m_canvasSize.x = width;
 	m_canvasSize.y = height;
 
-	m_tileFramePrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
-	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
-	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+	m_tileFramePrimitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)width * (tileWidth / 2.0f), (float)height * (tileHeight / 2.0f)), width, height, true);
+	m_terrainCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
+	m_collisionCanvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)(width * tileWidth) / 2.0f, (float)(height * tileHeight) / 2.0f), width, height, true);
 
 	for (int x = 0; x < width; x++)
 	{
@@ -605,7 +605,7 @@ void StampCanvas::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& 
 void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
 {
 	//No depth test
-	renderer.SetDepthTest(ion::render::Renderer::eAlways);
+	renderer.SetDepthTest(ion::render::Renderer::DepthTest::Always);
 
 	ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialFlatColour);
 
@@ -621,7 +621,7 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 	if (m_primitiveBeziers.size() > 0)
 	{
 		material->SetDiffuseColour(ion::Colour(1.0f, 0.4f, 0.4f, 1.0f));
-		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(3.0f);
 
 		for (int i = 0; i < m_primitiveBeziers.size(); i++)
@@ -630,40 +630,40 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 		}
 
 		renderer.SetLineWidth(1.0f);
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 
 	//Draw curve points
 	if (m_primitiveBezierPoints)
 	{
 		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(2.0f);
 		renderer.DrawVertexBuffer(m_primitiveBezierPoints->GetVertexBuffer());
 		renderer.SetLineWidth(1.0f);
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 
 	//Draw curve control handles
 	if (m_primitiveBezierHandles)
 	{
 		material->SetDiffuseColour(ion::Colour(1.0f, 0.6f, 0.6f, 1.0f));
-		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(2.0f);
 		renderer.DrawVertexBuffer(m_primitiveBezierHandles->GetVertexBuffer());
 		renderer.SetLineWidth(1.0f);
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 
 	//Draw normals
 	if (m_primitiveBezierNormals)
 	{
 		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 0.0f, 1.0f));
-		material->Bind(bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(2.0f);
 		renderer.DrawVertexBuffer(m_primitiveBezierNormals->GetVertexBuffer());
 		renderer.SetLineWidth(1.0f);
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 
 	//Draw selected handle
@@ -672,7 +672,7 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 		ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		const ion::Colour& colour = m_renderResources->GetColour(RenderResources::eColourSelected);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 		material->SetDiffuseColour(colour);
 
 		const float x = m_currentBezierControlPos.x;
@@ -686,11 +686,11 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 		previewMtx.SetTranslation(previewPos);
 		previewMtx.SetScale(previewScale);
 
-		material->Bind(previewMtx * bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, previewMtx * bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::None);
 	}
 
 	//Draw selected bezier
@@ -699,7 +699,7 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 		ion::render::Primitive* primitive = m_renderResources->GetPrimitive(RenderResources::ePrimitiveTileQuad);
 		const ion::Colour& colour = m_renderResources->GetColour(RenderResources::eColourSelected);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 		material->SetDiffuseColour(colour);
 
 		ion::Vector2 boundsMin;
@@ -731,14 +731,14 @@ void StampCanvas::RenderCollisionBeziers(ion::render::Renderer& renderer, const 
 		previewMtx.SetTranslation(previewPos);
 		previewMtx.SetScale(previewScale);
 
-		material->Bind(previewMtx * bezierMatrix, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, previewMtx * bezierMatrix, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::None);
 	}
 
-	renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+	renderer.SetDepthTest(ion::render::Renderer::DepthTest::LessOrEqual);
 }
 
 void StampCanvas::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float z)
@@ -746,31 +746,31 @@ void StampCanvas::RenderTerrainCanvas(ion::render::Renderer& renderer, const ion
 	if (m_terrainCanvasPrimitive)
 	{
 		//No depth test (stops grid cells Z fighting)
-		renderer.SetDepthTest(ion::render::Renderer::eAlways);
+		renderer.SetDepthTest(ion::render::Renderer::DepthTest::Always);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 
 		//Draw terrain heightmaps
 		{
 			ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetHeight);
 			material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-			material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+			renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 			renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
-			material->Unbind();
+			renderer.UnbindMaterial(*material);
 		}
 
 		//Draw terrain widthmaps
 		{
 			ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialTerrainTilesetWidth);
 			material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-			material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+			renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 			renderer.DrawVertexBuffer(m_terrainCanvasPrimitive->GetVertexBuffer(), m_terrainCanvasPrimitive->GetIndexBuffer());
-			material->Unbind();
+			renderer.UnbindMaterial(*material);
 		}
 
-		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::None);
 
-		renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+		renderer.SetDepthTest(ion::render::Renderer::DepthTest::LessOrEqual);
 	}
 }
 
@@ -779,19 +779,19 @@ void StampCanvas::RenderCollisionCanvas(ion::render::Renderer& renderer, const i
 	if (m_collisionCanvasPrimitive)
 	{
 		//No depth test (stops grid cells Z fighting)
-		renderer.SetDepthTest(ion::render::Renderer::eAlways);
+		renderer.SetDepthTest(ion::render::Renderer::DepthTest::Always);
 
 		ion::render::Material* material = m_renderResources->GetMaterial(RenderResources::eMaterialCollisionTypes);
 
 		//Draw map
-		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 		material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-		material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_collisionCanvasPrimitive->GetVertexBuffer(), m_collisionCanvasPrimitive->GetIndexBuffer());
-		material->Unbind();
-		renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+		renderer.UnbindMaterial(*material);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::None);
 
-		renderer.SetDepthTest(ion::render::Renderer::eLessEqual);
+		renderer.SetDepthTest(ion::render::Renderer::DepthTest::LessOrEqual);
 	}
 }
 

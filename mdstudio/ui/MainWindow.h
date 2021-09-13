@@ -15,8 +15,8 @@
 
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Texture.h>
-#include <ion/io/Filesystem.h>
-#include <ion/io/ResourceManager.h>
+#include <ion/core/io/Filesystem.h>
+#include <ion/resource/ResourceManager.h>
 #include <ion/beehive/Project.h>
 
 #include "UIBase.h"

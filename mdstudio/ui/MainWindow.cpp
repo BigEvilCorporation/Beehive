@@ -378,7 +378,7 @@ void MainWindow::SaveWindowLayout()
 	filename.Mkdir(511, wxPATH_MKDIR_FULL);
 	
 	ion::io::File file;
-	if(file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::eOpenWrite))
+	if(file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::OpenMode::Write))
 	{
 		wxString data = m_auiManager.SavePerspective();
 		file.Write(data.c_str().AsChar(), data.size());
@@ -391,7 +391,7 @@ void MainWindow::RestoreWindowLayout()
 	wxFileName filename(GetWindowLayoutConfig());
 
 	ion::io::File file;
-	if(file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::eOpenRead))
+	if(file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::OpenMode::Read))
 	{
 		char* data = new char[file.GetSize() + 1];
 		file.Read(data, file.GetSize());

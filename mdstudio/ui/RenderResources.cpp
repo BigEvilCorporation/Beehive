@@ -106,11 +106,11 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 	const int screenWidth = project.GetPlatformConfig().screenWidth;
 	const int screenHeight = project.GetPlatformConfig().screenHeight;
 
-	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(0.5f, 0.5f));
-	m_primitives[ePrimitiveTileQuad] = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
-	m_primitives[ePrimitiveTileLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
-	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(0.5f, 0.5f));
-	m_primitives[ePrimitiveScreenLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::xy, ion::Vector2(screenWidth / 2.0f, screenHeight / 2.0f));
+	m_primitives[ePrimitiveUnitQuad] = new ion::render::Quad(ion::render::Quad::Axis::xy, ion::Vector2(0.5f, 0.5f));
+	m_primitives[ePrimitiveTileQuad] = new ion::render::Quad(ion::render::Quad::Axis::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
+	m_primitives[ePrimitiveTileLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::Axis::xy, ion::Vector2(tileWidth / 2.0f, tileHeight / 2.0f));
+	m_primitives[ePrimitiveUnitLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::Axis::xy, ion::Vector2(0.5f, 0.5f));
+	m_primitives[ePrimitiveScreenLineQuad] = new ion::render::LineQuad(ion::render::LineQuad::Axis::xy, ion::Vector2(screenWidth / 2.0f, screenHeight / 2.0f));
 }
 
 RenderResources::~RenderResources()
@@ -122,7 +122,7 @@ RenderResources::~RenderResources()
 
 	for(int i = 0; i < eTextureMax; i++)
 	{
-		delete m_textures[i];
+		m_textures[i].Clear();
 	}
 
 	for(int i = 0; i < eMaterialMax; i++)
@@ -809,7 +809,7 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 		const int tileWidth = project->GetPlatformConfig().tileWidth;
 		const int tileHeight = project->GetPlatformConfig().tileHeight;
 
-		m_primitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)spriteSheet.GetWidthTiles() * (tileWidth / 2.0f), (float)spriteSheet.GetHeightTiles() * (tileHeight / 2.0f)), spriteSheet.GetWidthTiles(), spriteSheet.GetHeightTiles(), true);
+		m_primitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)spriteSheet.GetWidthTiles() * (tileWidth / 2.0f), (float)spriteSheet.GetHeightTiles() * (tileHeight / 2.0f)), spriteSheet.GetWidthTiles(), spriteSheet.GetHeightTiles(), true);
 
 		u32 widthTiles = spriteSheet.GetWidthTiles();
 		u32 heightTiles = spriteSheet.GetHeightTiles();
@@ -922,7 +922,7 @@ RenderResources::SpriteSheetRenderResources::~SpriteSheetRenderResources()
 	for(int i = 0; i < m_frames.size(); i++)
 	{
 		delete m_frames[i].material;
-		delete m_frames[i].texture;
+		m_frames[i].texture.Clear();
 	}
 
 	if(m_primitive)

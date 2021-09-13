@@ -14,8 +14,8 @@
 #include <ion/core/debug/Debug.h>
 #include <ion/core/thread/Thread.h>
 #include <ion/core/time/Time.h>
-#include <ion/io/Resource.h>
-#include <ion/io/ResourceManager.h>
+#include <ion/resource/Resource.h>
+#include <ion/resource/ResourceManager.h>
 #include <ion/renderer/Material.h>
 #include <ion/beehive/Project.h>
 

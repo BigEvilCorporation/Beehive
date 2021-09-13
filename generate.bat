@@ -1,0 +1,1 @@
+buildtools\sharpmake\Sharpmake.Application.exe /verbose /sources("beehivestudio.make.cs")

@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////
 
 #include "ExportDialog.h"
-#include <ion/io/FileDevice.h>
+#include <ion/core/io/FileDevice.h>
 
 ExportDialog::ExportDialog(wxWindow* parent, Project& project)
 	: ExportDialogBase(parent)

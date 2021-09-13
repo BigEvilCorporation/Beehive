@@ -109,7 +109,7 @@ TimelinePanel::~TimelinePanel()
 
 void TimelinePanel::EventHandlerTimer(wxTimerEvent& event)
 {
-	if(m_animation && m_animation->GetState() == ion::render::Animation::ePlaying)
+	if(m_animation && m_animation->GetState() == ion::render::Animation::State::Playing)
 	{
 		//Get accurate delta
 		u64 clock = ion::time::GetSystemTicks();
@@ -665,8 +665,8 @@ void TimelinePanel::OnSelectAnimation(wxCommandEvent& event)
 	m_animation = m_project.GetAnimation(m_animationId);
 	if(m_animation)
 	{
-		m_animation->SetState(ion::render::Animation::eStopped);
-		m_toolToggleLoop->Toggle(m_animation->GetPlaybackBehaviour() == ion::render::Animation::eLoop);
+		m_animation->SetState(ion::render::Animation::State::Stopped);
+		m_toolToggleLoop->Toggle(m_animation->GetPlaybackBehaviour() == ion::render::Animation::PlaybackBehaviour::Loop);
 		PopulateTimeline(*m_animation);
 		PopulateActors();
 	}
@@ -879,7 +879,7 @@ void TimelinePanel::OnToolLoopToggle(wxCommandEvent& event)
 {
 	if (m_animation)
 	{
-		m_animation->SetPlaybackBehaviour(event.IsChecked() ? ion::render::Animation::eLoop : ion::render::Animation::ePlayOnce);
+		m_animation->SetPlaybackBehaviour(event.IsChecked() ? ion::render::Animation::PlaybackBehaviour::Loop : ion::render::Animation::PlaybackBehaviour::PlayOnce);
 	}
 }
 
@@ -887,7 +887,7 @@ void TimelinePanel::OnToolPlay(wxCommandEvent& event)
 {
 	if(m_animation)
 	{
-		m_animation->SetState(ion::render::Animation::ePlaying);
+		m_animation->SetState(ion::render::Animation::State::Playing);
 		m_prevClock = ion::time::GetSystemTicks();
 	}
 }
@@ -896,7 +896,7 @@ void TimelinePanel::OnToolStop(wxCommandEvent& event)
 {
 	if(m_animation)
 	{
-		m_animation->SetState(ion::render::Animation::eStopped);
+		m_animation->SetState(ion::render::Animation::State::Stopped);
 		m_animation->SetFrame(ion::maths::Floor(m_animation->GetFrame()));
 
 		SetSliderFrame(m_animation->GetFrame());

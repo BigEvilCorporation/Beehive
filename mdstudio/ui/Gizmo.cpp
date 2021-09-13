@@ -50,9 +50,9 @@ Gizmo::Gizmo(RenderResources& renderResources)
 
 	m_unitLineX = new ion::render::LineSegments(lineX);
 	m_unitLineY = new ion::render::LineSegments(lineY);
-	m_unitTriangleX = new ion::render::Primitive(ion::render::VertexBuffer::eTriangles);
-	m_unitTriangleY = new ion::render::Primitive(ion::render::VertexBuffer::eTriangles);
-	m_unitBox = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(s_drawBoxSize / 2.0f, s_drawBoxSize / 2.0f), ion::Vector3(s_drawBoxSize / 2.0f, s_drawBoxSize / 2.0f, 0.0f));
+	m_unitTriangleX = new ion::render::Primitive(ion::render::VertexBuffer::Pattern::Triangles);
+	m_unitTriangleY = new ion::render::Primitive(ion::render::VertexBuffer::Pattern::Triangles);
+	m_unitBox = new ion::render::Quad(ion::render::Quad::Axis::xy, ion::Vector2(s_drawBoxSize / 2.0f, s_drawBoxSize / 2.0f), ion::Vector3(s_drawBoxSize / 2.0f, s_drawBoxSize / 2.0f, 0.0f));
 
 	for (int i = 0; i < triX.size(); i++)
 	{
@@ -197,25 +197,25 @@ void Gizmo::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& camera
 		mtx.SetTranslation(ion::Vector3(m_position.x + coordSysCorrection.x, m_position.y + coordSysCorrection.y, z));
 
 		material->SetDiffuseColour(s_drawColourAxisX);
-		material->Bind(mtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, mtx, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(s_drawLineWidth);
 		renderer.DrawVertexBuffer(m_unitLineX->GetVertexBuffer());
 		renderer.DrawVertexBuffer(m_unitTriangleX->GetVertexBuffer());
 		renderer.SetLineWidth(1.0f);
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 
 		material->SetDiffuseColour(s_drawColourAxisY);
-		material->Bind(mtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, mtx, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(s_drawLineWidth);
 		renderer.DrawVertexBuffer(m_unitLineY->GetVertexBuffer());
 		renderer.DrawVertexBuffer(m_unitTriangleY->GetVertexBuffer());
 		renderer.SetLineWidth(1.0f);
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 
-		renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 		material->SetDiffuseColour(s_drawColourBox);
-		material->Bind(mtx, cameraInverseMtx, projectionMtx);
+		renderer.BindMaterial(*material, mtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_unitBox->GetVertexBuffer(), m_unitBox->GetIndexBuffer());
-		material->Unbind();
+		renderer.UnbindMaterial(*material);
 	}
 }

@@ -98,7 +98,7 @@ void BlocksPanel::OnResize(wxSizeEvent& event)
 			if(m_gridPrimitive)
 				delete m_gridPrimitive;
 
-			m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)m_panelSize.x / 2.0f, (float)m_panelSize.y / 2.0f), m_canvasSize.x /*/ blockWidth*/, m_canvasSize.y /*/ blockHeight*/);
+			m_gridPrimitive = new ion::render::Grid(ion::render::Grid::Axis::xy, ion::Vector2((float)m_panelSize.x / 2.0f, (float)m_panelSize.y / 2.0f), m_canvasSize.x /*/ blockWidth*/, m_canvasSize.y /*/ blockHeight*/);
 
 			//Reset zoom/pan
 			ResetZoomPan();
@@ -172,12 +172,12 @@ void BlocksPanel::RenderBox(const ion::Vector2i& pos, const ion::Vector2& size, 
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
 
-	renderer.SetAlphaBlending(ion::render::Renderer::eTranslucent);
+	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 	material->SetDiffuseColour(colour);
-	material->Bind(boxMtx, cameraInverseMtx, projectionMtx);
+	renderer.BindMaterial(*material, boxMtx, cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
-	material->Unbind();
-	renderer.SetAlphaBlending(ion::render::Renderer::eNoBlend);
+	renderer.UnbindMaterial(*material);
+	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::None);
 }
 
 void BlocksPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -202,7 +202,7 @@ void BlocksPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			if(m_gridPrimitive)
 				delete m_gridPrimitive;
 
-			m_gridPrimitive = new ion::render::Grid(ion::render::Grid::xy, ion::Vector2((float)m_panelSize.x / 2.0f, (float)m_panelSize.y / 2.0f), m_canvasSize.x /*/ blockWidth*/, m_canvasSize.y /*/ blockHeight*/);
+			m_gridPrimitive = new ion::render::Grid(ion::render::Grid::Axis::xy, ion::Vector2((float)m_panelSize.x / 2.0f, (float)m_panelSize.y / 2.0f), m_canvasSize.x /*/ blockWidth*/, m_canvasSize.y /*/ blockHeight*/);
 
 			//Redraw blocks to canvas
 			PaintBlocks();
@@ -248,7 +248,7 @@ void BlocksPanel::PaintBlocks()
 
 	if(blockCount)
 	{
-		m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::xy, ion::Vector2((float)canvasSizePixelsX / 2.0f, (float)canvasSizePixelsY / 2.0f), canvasSizeTilesX, canvasSizeTilesY, true);
+		m_canvasPrimitive = new ion::render::Chessboard(ion::render::Chessboard::Axis::xy, ion::Vector2((float)canvasSizePixelsX / 2.0f, (float)canvasSizePixelsY / 2.0f), canvasSizeTilesX, canvasSizeTilesY, true);
 
 		//Fill with invalid tile
 		//FillTiles(InvalidTileId, ion::Vector2i(0, 0), ion::Vector2i(canvasSizeTilesX - 1, canvasSizeTilesY - 1));

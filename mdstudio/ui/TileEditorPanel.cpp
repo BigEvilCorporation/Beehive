@@ -30,7 +30,7 @@ TileEditorPanel::TileEditorPanel(MainWindow* mainWindow, Project& project, ion::
 	m_canvasSize.y = tileHeight;
 
 	//Create rendering primitive
-	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
+	m_tilePrimitive = new ion::render::Quad(ion::render::Quad::Axis::xy, ion::Vector2(tileWidth * 4.0f, tileHeight * 4.0f));
 
 	//Create 8x8 grid
 	CreateGrid(tileWidth, tileHeight, tileWidth, tileHeight);
@@ -141,7 +141,7 @@ void TileEditorPanel::RenderTile(ion::render::Renderer& renderer, const ion::Mat
 	//Draw tile
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialTileset);
 	material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
-	material->Bind(ion::Matrix4(), cameraInverseMtx, projectionMtx);
+	renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 	renderer.DrawVertexBuffer(m_tilePrimitive->GetVertexBuffer(), m_tilePrimitive->GetIndexBuffer());
-	material->Unbind();
+	renderer.UnbindMaterial(*material);
 }

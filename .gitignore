@@ -1,7 +1,5 @@
-out/*.o
+.build
 ion
 buildtools
-bigevilcorp.jamrules
-mdstudio/_build
 mdstudio/Installer/Installer
 !*.dll

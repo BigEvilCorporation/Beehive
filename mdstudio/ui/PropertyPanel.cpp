@@ -17,8 +17,8 @@
 #include <wx/msgdlg.h>
 #include <wx/textdlg.h>
 
-#include <ion/io/File.h>
-#include <ion/io/FileDevice.h>
+#include <ion/core/io/File.h>
+#include <ion/core/io/FileDevice.h>
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 #include <luminary/Types.h>
