@@ -28,6 +28,7 @@ class BeehiveStudio : IonExe
 
         // ion::engine
         conf.AddPublicDependency<IonCore>(target);
+        conf.AddPublicDependency<IonMaths>(target);
         conf.AddPublicDependency<IonRenderer>(target);
         conf.AddPublicDependency<IonShaders>(target, DependencySetting.DefaultWithoutLinking);
         conf.AddPublicDependency<IonGameKit>(target);
