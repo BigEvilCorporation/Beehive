@@ -19,6 +19,13 @@ class BeehiveStudio : IonExe
     public BeehiveStudio() : base("BeehiveStudio", "MDStudio")
     {
         AddTargets(Globals.IonTargetsDefault);
+        SourceFilesExtensions.Add(".glsl");
+    }
+
+    protected override void ExcludeOutputFiles()
+    {
+        base.ExcludeOutputFiles();
+        BuildShader.ConfigureShaders(this);
     }
 
     [Configure]
@@ -36,7 +43,8 @@ class BeehiveStudio : IonExe
         conf.AddPublicDependency<IonResource>(target);
 
         // Dependencies
-        conf.AddPublicDependency<Dependencies.WxWidgets>(target);
+        conf.AddPublicDependency<Dependencies.LibWxWidgets>(target);
+        conf.AddPublicDependency<Dependencies.LibSLZ>(target);
 
         conf.IncludePaths.Add(@"[project.SharpmakeCsPath]/mdstudio/ui");
         conf.IncludePaths.Add(@"[project.SharpmakeCsPath]/ion/renderer/imageformats");
@@ -58,6 +66,9 @@ class BeehiveStudio : IonExe
                 break;
             }
         }
+
+        // Assets
+        conf.TargetCopyFilesToSubDirectory.Add(new KeyValuePair<string, string>(@"[project.SharpmakeCsPath]/.build/projects/shaders/", @"[project.SharpmakeCsPath]/MDStudio/shaders"));
     }
 }
 
