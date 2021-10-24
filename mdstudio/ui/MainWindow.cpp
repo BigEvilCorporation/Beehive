@@ -2234,32 +2234,32 @@ void MainWindow::OnBtnTilesImport(wxCommandEvent& event)
 			u32 flags = 0;
 
 			if(dialog.m_chkImportToStamp->GetValue())
-				flags |= Project::eBMPImportToStamp;
+				flags |= Project::eTileImportToStamp;
 			if(dialog.m_chkReplaceStamps->GetValue())
-				flags |= Project::eBMPImportReplaceStamp;
+				flags |= Project::eTileImportReplaceStamp;
 			if(dialog.m_chkInsertBGTile->GetValue())
-				flags |= Project::eBMPImportInsertBGTile;
+				flags |= Project::eTileImportInsertBGTile;
 			if(dialog.m_chkOnlyExisting->GetValue())
-				flags |= Project::eBMPImportOnlyExistingStamps;
+				flags |= Project::eTileImportOnlyExistingStamps;
 			if(dialog.m_chkNoDuplicateTileCheck->GetValue())
-				flags |= Project::eBMPImportNoDuplicateTileCheck;
+				flags |= Project::eTileImportNoDuplicateTileCheck;
 
 			//Unsupported flags if multiple files/stamp directory selected
 			if((dialog.m_dirStamps->GetPath().size() == 0) || (dialog.m_paths.size() > 1))
 			{
 				
 				if(dialog.m_chkImportPalette->GetValue())
-					flags |= Project::eBMPImportWholePalette;
+					flags |= Project::eTileImportWholePalette;
 				if(dialog.m_chkClearMap->GetValue())
-					flags |= Project::eBMPImportClearMap;
+					flags |= Project::eTileImportClearMap;
 				if(dialog.m_chkPaintToMap->GetValue())
-					flags |= Project::eBMPImportDrawToMap;
+					flags |= Project::eTileImportDrawToMap;
 				if(dialog.m_chkClearPalettes->GetValue())
-					flags |= Project::eBMPImportClearPalettes;
+					flags |= Project::eTileImportClearPalettes;
 				if(dialog.m_chkClearTiles->GetValue())
-					flags |= Project::eBMPImportClearTiles;
+					flags |= Project::eTileImportClearTiles;
 				if(dialog.m_chkInsertBGTile->GetValue())
-					flags |= Project::eBMPImportInsertBGTile;
+					flags |= Project::eTileImportInsertBGTile;
 			}
 
 			u32 palettes = 0;
@@ -2302,7 +2302,7 @@ void MainWindow::OnBtnTilesImport(wxCommandEvent& event)
 					}
 
 					//If only to import existing, stamp by this name must already exist
-					if(!(flags & Project::eBMPImportOnlyExistingStamps) || m_project->FindStamp(stampName))
+					if(!(flags & Project::eTileImportOnlyExistingStamps) || m_project->FindStamp(stampName))
 					{
 						filenames.Add(directoryPath + "\\" + filename);
 					}
@@ -2320,7 +2320,7 @@ void MainWindow::OnBtnTilesImport(wxCommandEvent& event)
 			{
 				Stamp* stampToReplace = NULL;
 
-				if(flags & Project::eBMPImportReplaceStamp)
+				if(flags & Project::eTileImportReplaceStamp)
 				{
 					std::string stampName = filenames[i].c_str().AsChar();
 
@@ -2368,19 +2368,19 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 			SetStatusText("Importing...");
 
 			//Importing from stamp(s)
-			u32 flags = Project::eBMPImportToStamp;
+			u32 flags = Project::eTileImportToStamp;
 
 			//Enumerate flags
 			if (dialog.m_chkReplaceStamps->GetValue())
-				flags |= Project::eBMPImportReplaceStamp;
+				flags |= Project::eTileImportReplaceStamp;
 
 			//Unsupported flags if multiple files/stamp directory selected
 			if (!dialog.m_radioStampDir->GetValue())
 			{
 				if (dialog.m_chkImportPalette->GetValue())
-					flags |= Project::eBMPImportWholePalette;
+					flags |= Project::eTileImportWholePalette;
 				if (dialog.m_chkClearPalettes->GetValue())
-					flags |= Project::eBMPImportClearPalettes;
+					flags |= Project::eTileImportClearPalettes;
 			}
 
 			u32 palettes = (1 << dialog.m_radioBoxPal->GetSelection());
@@ -2420,7 +2420,7 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 					}
 
 					//If only to import existing, stamp by this name must already exist
-					if (!(flags & Project::eBMPImportOnlyExistingStamps) || m_project->FindStamp(stampName))
+					if (!(flags & Project::eTileImportOnlyExistingStamps) || m_project->FindStamp(stampName))
 					{
 						filenames.Add(directoryPath + "\\" + filename);
 					}
@@ -2438,7 +2438,7 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 			{
 				Stamp* stampToReplace = NULL;
 
-				if (flags & Project::eBMPImportReplaceStamp)
+				if (flags & Project::eTileImportReplaceStamp)
 				{
 					std::string stampName = filenames[i].c_str().AsChar();
 

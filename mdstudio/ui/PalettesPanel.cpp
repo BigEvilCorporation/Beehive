@@ -300,7 +300,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 
 				if (Palette* palette = m_project.GetPalette(m_selectedPaletteId))
 				{
-					BMPReader writer;
+					ion::ImageFormatBMP writer;
 
 					static const int colourWidth = 8;
 					static const int colourHeight = 8;
@@ -311,7 +311,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 					{
 						//Write colour
 						Colour paletteColour = palette->IsColourUsed(i) ? palette->GetColour(i) : Colour(255, 255, 255);
-						BMPReader::Colour bmpColour(paletteColour.GetRed(), paletteColour.GetGreen(), paletteColour.GetBlue());
+						ion::ImageFormat::Colour bmpColour(paletteColour.GetRed(), paletteColour.GetGreen(), paletteColour.GetBlue());
 						writer.SetPaletteEntry(i, bmpColour);
 
 						//Write index to a swatch square
@@ -347,14 +347,14 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 					std::string referenceFilename = referenceDialogue.GetPath().c_str().AsChar();
 					std::string newFilename = newDialogue.GetPath().c_str().AsChar();
 
-					BMPReader referenceReader;
-					BMPReader newReader;
+					ion::ImageFormat* referenceReader = ion::ImageFormat::CreateReader(ion::string::GetFileExtension(referenceFilename));
+					ion::ImageFormat* newReader = ion::ImageFormat::CreateReader(ion::string::GetFileExtension(newFilename));
 
-					if (referenceReader.Read(referenceFilename))
+					if (referenceReader && referenceReader->Read(referenceFilename))
 					{
-						if (newReader.Read(newFilename))
+						if (newReader && newReader->Read(newFilename))
 						{
-							if (referenceReader.GetPaletteSize() != newReader.GetPaletteSize())
+							if (referenceReader->GetPaletteSize() != newReader->GetPaletteSize())
 							{
 								ion::debug::Popup("Reference palette colour count differs from new palette", "Error");
 								return;
@@ -364,7 +364,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 							Palette newPalette;
 
 							//Create remap from current palette to reference palette
-							for (int i = 0; i < referenceReader.GetPaletteSize(); i++)
+							for (int i = 0; i < referenceReader->GetPaletteSize(); i++)
 							{
 								if (!currentPalette->IsColourUsed(i))
 								{
@@ -372,7 +372,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 									return;
 								}
 
-								BMPReader::Colour referenceColourBMP = referenceReader.GetPaletteEntry(i);
+								ion::ImageFormat::Colour referenceColourBMP = referenceReader->GetPaletteEntry(i);
 								Colour referenceColour(referenceColourBMP.r, referenceColourBMP.g, referenceColourBMP.b);
 
 								int remapIndex = 0;
@@ -382,7 +382,7 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 									return;
 								}
 
-								BMPReader::Colour newColourBMP = referenceReader.GetPaletteEntry(i);
+								ion::ImageFormat::Colour newColourBMP = referenceReader->GetPaletteEntry(i);
 								Colour newColour(newColourBMP.r, newColourBMP.g, newColourBMP.b);
 
 								newPalette.SetColour(remapIndex, newColour);
@@ -395,7 +395,11 @@ void PalettesPanel::OnSlotsMenuClick(wxCommandEvent& event)
 							m_mainWindow->RefreshAll();
 
 							success = true;
+
+							delete newReader;
 						}
+
+						delete referenceReader;
 					}
 				}
 			}

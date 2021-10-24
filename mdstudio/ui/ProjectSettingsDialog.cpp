@@ -93,10 +93,11 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 
 	if (referenceFile.size() > 0)
 	{
-		BMPReader reader;
-		if (reader.Read(referenceFile))
+		ion::ImageFormat* reader = ion::ImageFormat::CreateReader(ion::string::GetFileExtension(referenceFile));
+		if (reader && reader->Read(referenceFile))
 		{
-			m_renderResources.CreateReferenceImageTexture(reader);
+			m_renderResources.CreateReferenceImageTexture(*reader);
+			delete reader;
 		}
 	}
 
