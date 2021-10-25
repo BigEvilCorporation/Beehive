@@ -293,7 +293,7 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
 		{
-			wxFileDialog dialog(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			wxFileDialog dialog(this, _("Open BMP file"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 			if(dialog.ShowModal() == wxID_OK)
 			{
 				std::string filename = dialog.GetPath().c_str().AsChar();

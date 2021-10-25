@@ -1624,8 +1624,8 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 		luminary::ScriptTranspiler scriptTranspiler;
 		luminary::ScriptCompiler scriptCompiler;
 
-		const std::string engineRootDir = m_project->m_settings.engineRootDir;
-		const std::string projectRootDir = m_project->m_settings.projectRootDir;
+		const std::string engineRootDir = m_project->m_settings.Get("engineRootDir");
+		const std::string projectRootDir = m_project->m_settings.Get("projectRootDir");
 
 		const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
 		const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
@@ -2358,11 +2358,33 @@ void MainWindow::OnBtnTilesImport(wxCommandEvent& event)
 #endif
 }
 
+void EnumerateDirectory(const wxString path, const wxString filespec, wxArrayString& filenames)
+{
+	wxDir dir(path);
+	wxString filename;
+	bool next = dir.GetFirst(&filename, filespec, wxDIR_FILES | wxDIR_NO_FOLLOW);
+	while (next)
+	{
+		filenames.Add(filename);
+		next = dir.GetNext(&filename);
+	}
+}
+
 void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 {
 	if (m_project.get())
 	{
 		ImportStampsDialog dialog(this);
+
+		std::string projectRoot = m_project->m_settings.Get("projectRootDir");
+		std::string stampsDir = m_project->m_settings.Get("stampsDir");
+		if (projectRoot.size() && stampsDir.size())
+		{
+			dialog.m_dirStamps->SetPath(projectRoot + "/" + stampsDir);
+			dialog.m_radioStampDir->SetValue(true);
+			dialog.m_chkReplaceStamps->SetValue(true);
+		}
+
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			SetStatusText("Importing...");
@@ -2397,11 +2419,11 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 			{
 				//Enumerate all files in directory
 				wxString directoryPath = dialog.m_dirStamps->GetDirName().GetPath();
-				wxDir dir(directoryPath);
+				wxArrayString dirList;
+				EnumerateDirectory(directoryPath, "*.bmp", dirList);
+				EnumerateDirectory(directoryPath, "*.png", dirList);
 
-				wxString filename;
-				bool next = dir.GetFirst(&filename, "*.bmp", wxDIR_FILES | wxDIR_NO_FOLLOW);
-				while (next)
+				for (auto filename : dirList)
 				{
 					//Get stamp name
 					std::string stampName = filename;
@@ -2424,8 +2446,13 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 					{
 						filenames.Add(directoryPath + "\\" + filename);
 					}
+				}
 
-					next = dir.GetNext(&filename);
+				//Save dir
+				if (projectRoot.size())
+				{
+					stampsDir = ion::string::RemoveSubstring(directoryPath.c_str().AsChar(), projectRoot);
+					m_project->m_settings.Set("stampsDir", stampsDir);
 				}
 			}
 			else if(dialog.m_radioSingleStamp->GetValue())

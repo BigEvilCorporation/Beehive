@@ -57,7 +57,7 @@ ImportDialog::ImportDialog(wxWindow* parent) : ImportDialogBase(parent)
 
 void ImportDialog::OnBtnBrowse(wxCommandEvent& event)
 {
-	wxFileDialog dialog(this, _("Open BMP files"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
+	wxFileDialog dialog(this, _("Open image files"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
 	if(dialog.ShowModal() == wxID_OK)
 	{
 		dialog.GetPaths(m_paths);
@@ -73,7 +73,7 @@ void ImportDialog::OnBtnBrowse(wxCommandEvent& event)
 		else
 		{
 			char text[128] = { 0 };
-			sprintf(text, "(%u) BMP files", m_paths.size());
+			sprintf(text, "(%u) image files", m_paths.size());
 			m_filenames->SetValue(wxString(text));
 		}
 	}
@@ -86,7 +86,7 @@ ImportStampsDialog::ImportStampsDialog(wxWindow* parent) : ImportStampsDialogBas
 
 void ImportStampsDialog::OnBtnBrowse(wxCommandEvent& event)
 {
-	wxFileDialog dialog(this, _("Open BMP files"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
+	wxFileDialog dialog(this, _("Open image files"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		dialog.GetPaths(m_paths);

@@ -324,8 +324,8 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 					{
 #if defined BEEHIVE_PLUGIN_LUMINARY
 						//TODO: Do this in Beehive-side script compiler
-						const std::string engineRootDir = m_project.m_settings.engineRootDir;
-						const std::string projectRootDir = m_project.m_settings.projectRootDir;
+						const std::string engineRootDir = m_project.m_settings.Get("engineootDir");
+						const std::string projectRootDir = m_project.m_settings.Get("projectRootDir");
 
 						const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
 						const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
@@ -364,8 +364,8 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 						m_mainWindow->ShowPanelScriptCompile();
 						if (ScriptCompilePanel* panel = m_mainWindow->GetScriptCompilePanel())
 						{
-							const std::string engineRootDir = m_project.m_settings.engineRootDir;
-							const std::string projectRootDir = m_project.m_settings.projectRootDir;
+							const std::string engineRootDir = m_project.m_settings.Get("engineRootDir");
+							const std::string projectRootDir = m_project.m_settings.Get("projectRootDir");
 
 							const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
 							const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
