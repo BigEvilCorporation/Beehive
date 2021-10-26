@@ -812,11 +812,6 @@ void SpriteAnimEditorDialog::PopulateKeyframes(const SpriteSheetId& spriteSheetI
 
 void SpriteAnimEditorDialog::SelectActor(int index)
 {
-	if(m_selectedAnim)
-	{
-		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
-	}
-
 	m_selectedActorId = InvalidActorId;
 	m_selectedActor = NULL;
 
@@ -831,17 +826,18 @@ void SpriteAnimEditorDialog::SelectActor(int index)
 			m_selectedActor = m_project.GetActor(m_selectedActorId);
 			ion::debug::Assert(m_selectedActor, "SpriteAnimEditorDialog::OnActorSelected() - Invalid actor ID");
 			PopulateSpriteSheetList(*m_selectedActor);
+
+			if (m_spriteSheetCache.size() > 0)
+			{
+				m_listSpriteSheets->SetSelection(0);
+				SelectSpriteSheet(0);
+			}
 		}
 	}
 }
 
 void SpriteAnimEditorDialog::SelectStamp(int index)
 {
-	if(m_selectedAnim)
-	{
-		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
-	}
-
 	m_selectedStampId = InvalidStampId;
 	m_selectedStamp = NULL;
 
@@ -862,11 +858,6 @@ void SpriteAnimEditorDialog::SelectStamp(int index)
 
 void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 {
-	if(m_selectedAnim)
-	{
-		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
-	}
-
 	m_selectedSpriteSheetId = InvalidSpriteSheetId;
 	m_selectedSpriteSheet = NULL;
 
@@ -890,14 +881,23 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 
 			PopulateSpriteFrames(m_selectedSpriteSheetId);
 			PopulateAnimList(*m_selectedSpriteSheet);
+
+			if (m_animCache.size() > 0)
+			{
+				m_listAnimations->SetSelection(0);
+				SelectAnimation(0);
+			}
 		}
 	}
 }
 
 void SpriteAnimEditorDialog::SelectAnimation(int index)
 {
+	bool playing = false;
+
 	if(m_selectedAnim)
 	{
+		playing = m_selectedAnim->GetState() == ion::render::Animation::State::Playing;
 		m_selectedAnim->SetState(ion::render::Animation::State::Stopped);
 	}
 
@@ -917,6 +917,10 @@ void SpriteAnimEditorDialog::SelectAnimation(int index)
 				PopulateKeyframes(m_selectedSpriteSheetId, *m_selectedAnim);
 
 				m_spinCtrlSpeed->SetValue((int)m_selectedAnim->GetPlaybackSpeed());
+
+
+				if (playing)
+					m_selectedAnim->SetState(ion::render::Animation::State::Playing);
 			}
 		}
 	}
