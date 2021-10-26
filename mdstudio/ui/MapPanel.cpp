@@ -2611,7 +2611,6 @@ void RenderGameObject(
 	int tileWidth,
 	int tileHeight,
 	ion::render::Primitive* primitive,
-	ion::render::Material* material,
 	const GameObjectType& gameObjectType,
 	const GameObject* gameObject,
 	const ion::Vector2i& position,
@@ -2741,6 +2740,7 @@ void RenderGameObject(
 		else
 			colour = renderResources.GetColour(RenderResources::eColourUnselected);
 
+		ion::render::Material* material = renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 		material->SetDiffuseColour(colour);
 
 		ion::Vector3 scale(width / tileWidth, height / tileHeight, 1.0f);
@@ -2792,11 +2792,11 @@ void RenderGameObject(
 				spriteSheetMtx.SetScale(ion::Vector3(width, height_inv, 1.0f));
 			}
 
-			renderer.BindMaterial(*material, spriteSheetMtx, cameraInverseMtx, projectionMtx);
+			renderer.BindMaterial(*spriteSheetMaterial, spriteSheetMtx, cameraInverseMtx, projectionMtx);
 			renderer.SetFaceCulling(ion::render::Renderer::CullingMode::None);
 			renderer.DrawVertexBuffer(spriteSheetPrimitive->GetVertexBuffer(), spriteSheetPrimitive->GetIndexBuffer());
 			renderer.SetFaceCulling(ion::render::Renderer::CullingMode::CounterClockwise);
-			renderer.UnbindMaterial(*material);
+			renderer.UnbindMaterial(*spriteSheetMaterial);
 		}
 	}
 }
@@ -2812,7 +2812,6 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 	const float tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveTileQuad);
-	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
 	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 
@@ -2842,7 +2841,6 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 					tileWidth,
 					tileHeight,
 					primitive,
-					material,
 					*gameObjectType,
 					&gameObject,
 					position,
@@ -2873,7 +2871,6 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 								tileWidth,
 								tileHeight,
 								primitive,
-								material,
 								*prefabChildType,
 								nullptr,
 								position + prefabChild.relativePos,
