@@ -50,10 +50,12 @@ private:
 
 	void OnContextMenuClick(wxCommandEvent& event);
 
-	void AddProperty(const GameObjectType& gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled = true);
+	void AddProperty(const GameObject& gameObject, const GameObjectType& gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled = true);
 	int PopulateSpriteActorList(wxArrayString& list, const std::string& selectedValue);
 	int PopulateSpriteSheetList(wxArrayString& list, const Actor& actor, const std::string& selectedValue);
 	int PopulateSpriteAnimList(wxArrayString& list, const Actor& actor, SpriteSheetId spriteSheetId, const std::string& selectedValue);
+	int PopulateGameObjectTypeList(wxArrayString& list, const std::string& selectedValue);
+	int PopulateArchetypeList(wxArrayString& list, GameObjectTypeId gameObjectTypeId, const std::string& selectedValue);
 
 	Project& m_project;
 	MainWindow* m_mainWindow;

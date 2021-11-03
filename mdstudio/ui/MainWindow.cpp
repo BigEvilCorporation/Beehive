@@ -2006,7 +2006,7 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 				sceneData.numPalettes = numPalettes;
 
 				sceneData.mapFgLabel = std::string("map_") + m_project->GetName() + "_" + mapFg.GetName();
-				sceneData.mapBgLabel = mapBg ? (std::string("map_") + m_project->GetName() + "_" + mapBg->GetName()) : "0x0";
+				sceneData.mapBgLabel = mapBg ? (std::string("map_") + m_project->GetName() + "_" + mapBg->GetName()) : "0";
 				sceneData.stampsetLabel = stampsetLabel;
 				sceneData.tilesetLabel = tilesetLabel;
 				sceneData.collisionMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + mapFg.GetName();

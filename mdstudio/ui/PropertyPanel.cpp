@@ -204,11 +204,11 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 					const GameObjectVariable* overriddenVar = FindVariable(*instanceVariables, variable.m_name, variable.m_componentIdx);
 					if (overriddenVar)
 					{
-						AddProperty(*gameObjectType, *overriddenVar, variable.m_componentIdx, actor, spriteSheetVar);
+						AddProperty(*gameObject , *gameObjectType, *overriddenVar, variable.m_componentIdx, actor, spriteSheetVar);
 					}
 					else
 					{
-						AddProperty(*gameObjectType, variable, variable.m_componentIdx, actor, spriteSheetVar);
+						AddProperty(*gameObject , *gameObjectType, variable, variable.m_componentIdx, actor, spriteSheetVar);
 					}
 				}
 			}
@@ -428,11 +428,12 @@ void PropertyPanel::SetArchetype(GameObjectTypeId gameObjectTypeId, GameObjectAr
 	Refresh();
 }
 
-void PropertyPanel::AddProperty(const GameObjectType& gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled)
+void PropertyPanel::AddProperty(const GameObject& gameObject, const GameObjectType& gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled)
 {
 	wxPGProperty* property = nullptr;
 
-	const std::string propName = variable.m_componentName + "_" + variable.m_name + "_" + std::to_string(componentIdx);
+	std::string propName = componentIdx == -1 ? gameObjectType.GetName() : variable.m_componentName;
+	propName += "_" + variable.m_name + "_" + std::to_string(componentIdx);
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	if (variable.HasTag("SPRITE_SHEET"))
@@ -476,24 +477,20 @@ void PropertyPanel::AddProperty(const GameObjectType& gameObjectType, const Game
 	}
 	else if (variable.HasTag("ENTITY_DESC"))
 	{
-		/*
-		m_choiceValue->Enable(true);
-		m_textValue->Enable(false);
+		wxArrayString* list = new wxArrayString();
+		int selection = PopulateGameObjectTypeList(*list, variable.m_value);
+		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
+		property = choiceProp;
 
-		PopulateGameObjectTypeList(*m_choiceValue);
-		m_choiceValue->SetStringSelection(variable->m_value);
-		*/
+		if (selection >= 0 && selection < list->size())
+			choiceProp->SetChoiceSelection(selection);
 	}
 	else if (variable.HasTag("ENTITY_ARCHETYPE"))
 	{
-		/*
-		m_choiceValue->Enable(true);
-		m_textValue->Enable(false);
-
 		//Find entity type in this component first
 		GameObjectTypeId gameObjTypeId = InvalidGameObjectTypeId;
 
-		const GameObjectVariable* gameObjTypeVar = m_gameObject->FindVariableByTag("ENTITY_DESC", variable->m_componentIdx);
+		const GameObjectVariable* gameObjTypeVar = gameObject.FindVariableByTag("ENTITY_DESC", variable.m_componentIdx);
 		if (gameObjTypeVar)
 		{
 			if (const GameObjectType* gameObjType = m_project.FindGameObjectType(gameObjTypeVar->m_value))
@@ -502,9 +499,13 @@ void PropertyPanel::AddProperty(const GameObjectType& gameObjectType, const Game
 			}
 		}
 
-		PopulateArchetypeList(*m_choiceValue, gameObjTypeId);
-		m_choiceValue->SetStringSelection(variable->m_value);
-		*/
+		wxArrayString* list = new wxArrayString();
+		int selection = PopulateArchetypeList(*list, gameObjTypeId, variable.m_value);
+		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
+		property = choiceProp;
+
+		if (selection >= 0 && selection < list->size())
+			choiceProp->SetChoiceSelection(selection);
 	}
 	else
 #endif
@@ -563,11 +564,46 @@ int PropertyPanel::PopulateSpriteAnimList(wxArrayString& list, const Actor& acto
 
 	if (const SpriteSheet* spriteSheet = actor.GetSpriteSheet(spriteSheetId))
 	{
-		for (TSpriteAnimMap::const_iterator it = spriteSheet->AnimationsBegin(), end = spriteSheet->AnimationsEnd(); it != end; ++it)
+		for (TSpriteAnimMap::const_iterator it = spriteSheet->AnimationsBegin(), end = spriteSheet->AnimationsEnd(); it != end; ++it, ++index)
 		{
 			list.Add(it->second.GetName());
 
 			if (it->second.GetName() == selectedValue)
+				selection = index;
+		}
+	}
+
+	return selection;
+}
+
+int PropertyPanel::PopulateGameObjectTypeList(wxArrayString& list, const std::string& selectedValue)
+{
+	int selection = -1;
+	int index = 0;
+
+	for (TGameObjectTypeMap::const_iterator it = m_project.GetGameObjectTypes().begin(), end = m_project.GetGameObjectTypes().end(); it != end; ++it, ++index)
+	{
+		list.Add(it->second.GetName());
+
+		if (it->second.GetName() == selectedValue)
+			selection = index;
+	}
+
+	return selection;
+}
+
+int PropertyPanel::PopulateArchetypeList(wxArrayString& list, GameObjectTypeId gameObjectTypeId, const std::string& selectedValue)
+{
+	int selection = -1;
+	int index = 0;
+
+	if (const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
+	{
+		for (TGameObjectArchetypeMap::const_iterator it = gameObjectType->GetArchetypes().begin(), end = gameObjectType->GetArchetypes().end(); it != end; ++it, ++index)
+		{
+			list.Add(it->second.name);
+
+			if (it->second.name == selectedValue)
 				selection = index;
 		}
 	}
