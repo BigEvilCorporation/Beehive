@@ -2317,6 +2317,11 @@ ImportDialogSpriteSheetBase::ImportDialogSpriteSheetBase( wxWindow* parent, wxWi
 	m_canvas = new SpriteCanvas( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	fgSizer13->Add( m_canvas, 1, wxEXPAND | wxALL, 5 );
 
+	wxFlexGridSizer* fgSizer65;
+	fgSizer65 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer65->SetFlexibleDirection( wxBOTH );
+	fgSizer65->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+
 	wxFlexGridSizer* fgSizer12;
 	fgSizer12 = new wxFlexGridSizer( 0, 2, 0, 0 );
 	fgSizer12->SetFlexibleDirection( wxBOTH );
@@ -2351,7 +2356,23 @@ ImportDialogSpriteSheetBase::ImportDialogSpriteSheetBase( wxWindow* parent, wxWi
 	fgSizer12->Add( m_spinCellCount, 0, wxALL, 5 );
 
 
-	fgSizer13->Add( fgSizer12, 1, wxEXPAND, 5 );
+	fgSizer65->Add( fgSizer12, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer70;
+	bSizer70 = new wxBoxSizer( wxVERTICAL );
+
+	m_radioSingleSheet = new wxRadioButton( this, wxID_ANY, wxT("Single sheet"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+	m_radioSingleSheet->SetValue( true );
+	bSizer70->Add( m_radioSingleSheet, 0, wxALL, 5 );
+
+	m_radioIndividualSheets = new wxRadioButton( this, wxID_ANY, wxT("Individual sheets"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer70->Add( m_radioIndividualSheets, 0, wxALL, 5 );
+
+
+	fgSizer65->Add( bSizer70, 1, wxEXPAND, 5 );
+
+
+	fgSizer13->Add( fgSizer65, 1, wxEXPAND, 5 );
 
 
 	fgSizer14->Add( fgSizer13, 1, wxEXPAND, 5 );

@@ -219,39 +219,55 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)
 		ImportDialogSpriteSheet dialog(this, m_project, m_renderer, m_glContext, m_renderResources);
 		if(dialog.ShowModal() == wxID_OK)
 		{
-			//Create new spriteSheet
-			SpriteSheetId spriteSheetId = m_selectedActor ? m_selectedActor->CreateSpriteSheet() : m_selectedStamp->CreateStampAnimSheet();
-			SpriteSheet* spriteSheet = m_selectedActor ? m_selectedActor->GetSpriteSheet(spriteSheetId) : m_selectedStamp->GetStampAnimSheet(spriteSheetId);
-
+			const int widthFrames = dialog.m_spinWidthCells->GetValue();
+			const int heightFrames = dialog.m_spinHeightCells->GetValue();
+			const int numFrames = dialog.m_radioIndividualSheets->GetValue() ? (widthFrames * heightFrames) : 1;
 			const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-
-			//Import bitmap
-			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), tileWidth, tileHeight, dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
+			
+			for(int i = 0; i < numFrames; i++)
 			{
-				//Create render resources
-				m_renderResources.CreateSpriteSheetResources(spriteSheetId, *spriteSheet);
+				//Create new spriteSheet
+				SpriteSheetId spriteSheetId = m_selectedActor ? m_selectedActor->CreateSpriteSheet() : m_selectedStamp->CreateStampAnimSheet();
+				SpriteSheet* spriteSheet = m_selectedActor ? m_selectedActor->GetSpriteSheet(spriteSheetId) : m_selectedStamp->GetStampAnimSheet(spriteSheetId);
 
-				//Populate spriteSheet list
-				if(m_selectedActor)
+				std::string name = dialog.m_textName->GetValue().GetData().AsChar();
+				int endFrame = dialog.m_spinCellCount->GetValue() - 1;
+
+				if (numFrames > 1)
 				{
-					PopulateSpriteSheetList(*m_selectedActor);
-				}
-				else if(m_selectedStamp)
-				{
-					PopulateStampAnimSheetList(*m_selectedStamp);
+					name += "_" + std::to_string(i);
+					endFrame = i;
 				}
 
-				//Select in list
-				int index = m_listSpriteSheets->FindString(spriteSheet->GetName());
-				m_listSpriteSheets->SetSelection(index);
-				SelectSpriteSheet(index);
-			}
-			else
-			{
-				//Failed, remove spriteSheet
-				wxMessageBox("Error importing spriteSheet", "Error", wxOK);
-				m_selectedActor->DeleteSpriteSheet(spriteSheetId);
+				//Import bitmap
+				if (spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), name, tileWidth, tileHeight, widthFrames, heightFrames, i, endFrame))
+				{
+					//Create render resources
+					m_renderResources.CreateSpriteSheetResources(spriteSheetId, *spriteSheet);
+
+					//Populate spriteSheet list
+					if (m_selectedActor)
+					{
+						PopulateSpriteSheetList(*m_selectedActor);
+					}
+					else if (m_selectedStamp)
+					{
+						PopulateStampAnimSheetList(*m_selectedStamp);
+					}
+
+					//Select in list
+					int index = m_listSpriteSheets->FindString(spriteSheet->GetName());
+					m_listSpriteSheets->SetSelection(index);
+					SelectSpriteSheet(index);
+				}
+				else
+				{
+					//Failed, remove spriteSheet
+					wxMessageBox("Error importing spriteSheet", "Error", wxOK);
+					m_selectedActor->DeleteSpriteSheet(spriteSheetId);
+					break;
+				}
 			}
 		}
 	}

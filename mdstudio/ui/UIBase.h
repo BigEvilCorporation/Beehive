@@ -859,6 +859,8 @@ class ImportDialogSpriteSheetBase : public wxDialog
 		wxSpinCtrl* m_spinWidthCells;
 		wxSpinCtrl* m_spinHeightCells;
 		wxSpinCtrl* m_spinCellCount;
+		wxRadioButton* m_radioSingleSheet;
+		wxRadioButton* m_radioIndividualSheets;
 
 		ImportDialogSpriteSheetBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Import Sprite/Stamp Sheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 816,656 ), long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE|wxMAXIMIZE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU );
 		~ImportDialogSpriteSheetBase();
