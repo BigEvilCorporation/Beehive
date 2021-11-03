@@ -970,7 +970,7 @@ void MainWindow::ShowPanelGameObjectTypes()
 			paneInfo.DockFixed(false);
 			paneInfo.BestSize(PANEL_SIZE_X(30), PANEL_SIZE_Y(30));
 			paneInfo.Bottom();
-			paneInfo.Caption("Game Object Types");
+			paneInfo.Caption("Entity Types");
 			paneInfo.CaptionVisible(true);
 
 			m_gameObjectTypePanel = new GameObjectTypesPanel(this, *m_project.get(), m_dockArea, NewControlId());
@@ -1082,7 +1082,7 @@ void MainWindow::SetSelectedGameObject(GameObject* gameObject)
 
 	if (m_propertyPanel)
 	{
-		m_propertyPanel->SetGameObject(gameObject->GetId());
+		m_propertyPanel->SetGameObject(gameObject->GetTypeId(), gameObject->GetId());
 	}
 }
 

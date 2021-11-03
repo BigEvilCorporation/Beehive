@@ -30,7 +30,8 @@ public:
 	virtual void OnPropertyChanged(wxPropertyGridEvent& event);
 	virtual void OnRightClick(wxMouseEvent& event);
 
-	void SetGameObject(GameObjectId gameObjectId);
+	void SetGameObject(GameObjectTypeId gameObjectTypeId, GameObjectId gameObjectId);
+	void SetGameObjectType(GameObjectTypeId gameObjectTypeId);
 	void SetArchetype(GameObjectTypeId gameObjectTypeId, GameObjectArchetypeId archetypeId);
 
 protected:
@@ -43,14 +44,19 @@ private:
 		CompileScript
 	};
 
-	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables);
+	enum class BuiltInProperties
+	{
+		Name
+	};
+
+	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, GameObjectArchetype*& archetype, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables, std::string& editingName);
 	GameObjectVariable* FindVariable(std::vector<GameObjectVariable>& variables, const std::string& name, int componentIdx);
 	GameObjectVariable* FindVariableByTag(std::vector<GameObjectVariable>& variables, const std::string& tag, int componentIdx);
 	GameObjectVariable& AddVariable(std::vector<GameObjectVariable>& variables);
 
 	void OnContextMenuClick(wxCommandEvent& event);
 
-	void AddProperty(const GameObject& gameObject, const GameObjectType& gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled = true);
+	void AddProperty(const GameObject* gameObject, const GameObjectType* gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled = true);
 	int PopulateSpriteActorList(wxArrayString& list, const std::string& selectedValue);
 	int PopulateSpriteSheetList(wxArrayString& list, const Actor& actor, const std::string& selectedValue);
 	int PopulateSpriteAnimList(wxArrayString& list, const Actor& actor, SpriteSheetId spriteSheetId, const std::string& selectedValue);

@@ -104,7 +104,7 @@ void GameObjectTypesPanel::OnGameObjectTypeSelected(wxCommandEvent& event)
 
 	if (PropertyPanel* propertiesPanel = m_mainWindow->GetPropertiesPanel())
 	{
-		propertiesPanel->SetArchetype(InvalidGameObjectTypeId, InvalidGameObjectArchetypeId);
+		propertiesPanel->SetGameObjectType(typeId);
 	}
 }
 
