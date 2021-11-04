@@ -70,6 +70,7 @@ private:
 		eContextMenuStampSendToBack,
 #endif
 		eContextMenuGameObjAddToAnim,
+		eContextMenuGameObjCreateArchetype,
 		eContextMenuGameObjCreatePrefab,
 		eContextMenuSetTerrainFlagSpecial,
 		eContextMenuSetTerrainFlagWater,

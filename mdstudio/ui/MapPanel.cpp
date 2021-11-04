@@ -992,6 +992,20 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		m_project.InvalidateMap(false);
 	}
 #endif
+	else if (event.GetId() == eContextMenuGameObjCreateArchetype)
+	{
+		if (m_hoverGameObject != InvalidGameObjectId)
+		{
+			if (const GameObject* gameObj = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
+			{
+				if (GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObj->GetTypeId()))
+				{
+					gameObjectType->CreateArchetypeFromState(*gameObj);
+					m_mainWindow->RefreshPanel(MainWindow::Panel::ePanelGameObjectTypes);
+				}
+			}
+		}
+	}
 	else if (event.GetId() == eContextMenuGameObjCreatePrefab)
 	{
 		if (m_selectedGameObjects.size() > 0)
@@ -1688,6 +1702,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					//Right-click menu
 					wxMenu contextMenu;
 
+					contextMenu.Append(eContextMenuGameObjCreateArchetype, wxString("Create Archetype"));
 					contextMenu.Append(eContextMenuGameObjCreatePrefab, wxString("Create Prefab"));
 					contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
