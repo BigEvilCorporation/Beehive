@@ -138,6 +138,7 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			//Built-in properties
 			wxStringProperty* nameProp = new wxStringProperty("Name");
+			nameProp->SetAttribute("isScript", false);
 			nameProp->SetValue(name);
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
@@ -148,34 +149,27 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			m_propertyGrid->Append(nameProp);
 
-#if 0
-			//If entity has a sprite actor, find it and add property
-			for (auto variable : *typeVariables)
+			wxArrayString* list = new wxArrayString();
+			int selection = PopulateSpriteActorList(*list, actor ? actor->GetName() : "");
+			wxEnumProperty* choiceProp = new wxEnumProperty("Sprite Actor", "Sprite Actor", *list);
+			choiceProp->SetAttribute("isScript", false);
+
+			// Can't edit instance actor, it belongs to the type only
+			if (gameObject || archetype)
+				choiceProp->Enable(false);
+
+			if (selection >= 0)
 			{
-				if (variable.HasTag("SPRITE_SHEET"))
-				{
-					std::string currentActor;
-
-					if (actor)
-					{
-						currentActor = actor->GetName();
-					}
-
-					wxArrayString* list = new wxArrayString();
-					int selection = PopulateSpriteActorList(*list, currentActor);
-					wxEnumProperty* choiceProp = new wxEnumProperty("Sprite Actor", "Sprite Actor", *list);
-
-					if (selection >= 0 && selection < list->size())
-						choiceProp->SetChoiceSelection(selection);
-
-					choiceProp->SetAttribute("isScript", false);
-
-					m_propertyGrid->Append(choiceProp);
-
-					break;
-				}
+				choiceProp->SetChoiceSelection(selection);
 			}
-#endif
+			else
+			{
+				//Add a blank entry
+				choiceProp->AddChoice("[none]");
+				choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount()-1);
+			}
+
+			m_propertyGrid->Append(choiceProp);
 
 			//Add all properties from all components
 			int componentIdx = -1;
@@ -277,6 +271,11 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 			else
 				gameObjectType->SetName(value.c_str().AsChar());
 
+			Refresh();
+		}
+		else if (property->GetIndexInParent() == (int)BuiltInProperties::Actor)
+		{
+			gameObjectType->SetSpriteActorId(m_project.FindActorId(value.c_str().AsChar()));
 			Refresh();
 		}
 		else if (typeVariables)
@@ -519,42 +518,42 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 #if defined BEEHIVE_PLUGIN_LUMINARY
 	if (variable.HasTag("SPRITE_SHEET"))
 	{
-		if (actor)
-		{
-			wxArrayString* list = new wxArrayString();
-			int selection = PopulateSpriteSheetList(*list, *actor, variable.m_value);
-			wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
-			property = choiceProp;
+		wxArrayString* list = new wxArrayString();
+		int selection = -1;
 
-			if(selection >= 0 && selection < list->size())
-				choiceProp->SetChoiceSelection(selection);
-		}
+		if (actor)
+			selection = PopulateSpriteSheetList(*list, *actor, variable.m_value);
+
+		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
+		property = choiceProp;
+
+		if(selection >= 0 && selection < list->size())
+			choiceProp->SetChoiceSelection(selection);
 	}
 	else if (variable.HasTag("SPRITE_ANIM"))
 	{
+		wxArrayString* list = new wxArrayString();
+		int selection = -1;
+
 		//Find sprite sheet in this component first
 		if (actor)
 		{
 			SpriteSheetId spriteSheetId = InvalidSpriteSheetId;
 
 			if (!spriteSheetVar)
-			{
 				spriteSheetVar = gameObjectType->FindVariableByTag("SPRITE_SHEET", variable.m_componentIdx);
-			}
 
 			if (spriteSheetVar && actor)
-			{
 				spriteSheetId = actor->FindSpriteSheetId(spriteSheetVar->m_value);
-			}
 
-			wxArrayString* list = new wxArrayString();
-			int selection = PopulateSpriteAnimList(*list, *actor, spriteSheetId, variable.m_value);
-			wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
-			property = choiceProp;
-
-			if (selection >= 0 && selection < list->size())
-				choiceProp->SetChoiceSelection(selection);
+			selection = PopulateSpriteAnimList(*list, *actor, spriteSheetId, variable.m_value);
 		}
+
+		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
+		property = choiceProp;
+
+		if (selection >= 0 && selection < list->size())
+			choiceProp->SetChoiceSelection(selection);
 	}
 	else if (variable.HasTag("ENTITY_DESC"))
 	{
