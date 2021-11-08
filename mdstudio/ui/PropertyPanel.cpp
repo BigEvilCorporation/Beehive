@@ -140,6 +140,7 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			wxStringProperty* nameProp = new wxStringProperty("Name");
 			nameProp->SetAttribute("isScript", false);
 			nameProp->SetValue(name);
+			nameProp->SetAttribute("builtInProp", (long)BuiltInProperties::Name);
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
 			// Can't edit type name, it's scanned from project source
@@ -153,6 +154,7 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 			int selection = PopulateSpriteActorList(*list, actor ? actor->GetName() : "");
 			wxEnumProperty* choiceProp = new wxEnumProperty("Sprite Actor", "Sprite Actor", *list);
 			choiceProp->SetAttribute("isScript", false);
+			choiceProp->SetAttribute("builtInProp", (long)BuiltInProperties::Actor);
 
 			// Can't edit instance actor, it belongs to the type only
 			if (gameObject || archetype)
@@ -262,7 +264,9 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 		wxVariant componentIdx = property->GetAttribute("componentIdx");
 		wxString value = property->GetValueAsString();
 
-		if (property->GetIndexInParent() == (int)BuiltInProperties::Name)
+		int builtInType = property->GetAttributeAsLong("builtInProp", -1);
+
+		if (builtInType == (int)BuiltInProperties::Name)
 		{
 			if (gameObject)
 				gameObject->SetName(value.c_str().AsChar());
@@ -273,7 +277,7 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 
 			Refresh();
 		}
-		else if (property->GetIndexInParent() == (int)BuiltInProperties::Actor)
+		else if (builtInType == (int)BuiltInProperties::Actor)
 		{
 			gameObjectType->SetSpriteActorId(m_project.FindActorId(value.c_str().AsChar()));
 			Refresh();
@@ -527,8 +531,16 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
 		property = choiceProp;
 
-		if(selection >= 0 && selection < list->size())
+		if (selection >= 0)
+		{
 			choiceProp->SetChoiceSelection(selection);
+		}
+		else
+		{
+			//Add a blank entry
+			choiceProp->AddChoice("[none]");
+			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+		}
 	}
 	else if (variable.HasTag("SPRITE_ANIM"))
 	{
@@ -552,8 +564,16 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
 		property = choiceProp;
 
-		if (selection >= 0 && selection < list->size())
+		if (selection >= 0)
+		{
 			choiceProp->SetChoiceSelection(selection);
+		}
+		else
+		{
+			//Add a blank entry
+			choiceProp->AddChoice("[none]");
+			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+		}
 	}
 	else if (variable.HasTag("ENTITY_DESC"))
 	{
@@ -562,8 +582,16 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
 		property = choiceProp;
 
-		if (selection >= 0 && selection < list->size())
+		if (selection >= 0)
+		{
 			choiceProp->SetChoiceSelection(selection);
+		}
+		else
+		{
+			//Add a blank entry
+			choiceProp->AddChoice("[none]");
+			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+		}
 	}
 	else if (variable.HasTag("ENTITY_ARCHETYPE"))
 	{
@@ -588,8 +616,16 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
 		property = choiceProp;
 
-		if (selection >= 0 && selection < list->size())
+		if (selection >= 0)
+		{
 			choiceProp->SetChoiceSelection(selection);
+		}
+		else
+		{
+			//Add a blank entry
+			choiceProp->AddChoice("[none]");
+			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+		}
 	}
 	else
 #endif
