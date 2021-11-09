@@ -203,13 +203,16 @@ void SceneExplorerPanel::OnItemContextMenu(wxTreeEvent& event)
 	std::map<wxTreeItemId, GameObjectId>::const_iterator it = m_objectMap.find(m_contextItem);
 	if (it != m_objectMap.end())
 	{
-		GameObjectId objectTypeId = m_convertTypeListSorted[event.GetId() - m_firstConvertId].first;
-
-		if (const GameObjectType* objectType = m_project.GetGameObjectType(objectTypeId))
+		const GameObject* gameObject = m_project.GetEditingMap().GetGameObject(it->second);
+		if (gameObject)
 		{
-			if (objectType->IsPrefabType())
+			GameObjectId objectTypeId = gameObject->GetTypeId();
+			if (const GameObjectType* objectType = m_project.GetGameObjectType(objectTypeId))
 			{
-				contextMenu.Append(ContextMenu::EditPrefab, "Edit Prefab");
+				if (objectType->IsPrefabType())
+				{
+					contextMenu.Append(ContextMenu::EditPrefab, "Edit Prefab");
+				}
 			}
 		}
 	}
