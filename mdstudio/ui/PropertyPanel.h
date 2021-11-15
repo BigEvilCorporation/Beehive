@@ -46,8 +46,7 @@ private:
 
 	enum class BuiltInProperties
 	{
-		Name,
-		Actor
+		Name
 	};
 
 	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, GameObjectArchetype*& archetype, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables, std::string& editingName);

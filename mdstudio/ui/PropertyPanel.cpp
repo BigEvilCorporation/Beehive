@@ -150,29 +150,6 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 			m_propertyGrid->Append(nameProp);
 
-			wxArrayString* list = new wxArrayString();
-			int selection = PopulateSpriteActorList(*list, actor ? actor->GetName() : "");
-			wxEnumProperty* choiceProp = new wxEnumProperty("Sprite Actor", "Sprite Actor", *list);
-			choiceProp->SetAttribute("isScript", false);
-			choiceProp->SetAttribute("builtInProp", (long)BuiltInProperties::Actor);
-
-			// Can't edit instance actor, it belongs to the type only
-			if (gameObject || archetype)
-				choiceProp->Enable(false);
-
-			if (selection >= 0)
-			{
-				choiceProp->SetChoiceSelection(selection);
-			}
-			else
-			{
-				//Add a blank entry
-				choiceProp->AddChoice("[none]");
-				choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount()-1);
-			}
-
-			m_propertyGrid->Append(choiceProp);
-
 			//Add all properties from all components
 			int componentIdx = -1;
 
@@ -219,18 +196,31 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 					}
 
 					//Some properties need the actor and sprite sheet associated with this component, if it has one
+					const GameObjectVariable* spriteActorVar = nullptr;
 					const GameObjectVariable* spriteSheetVar  = nullptr;
 
-					if(instanceVariables)
+					if (instanceVariables)
+					{
+						spriteActorVar = FindVariableByTag(*instanceVariables, "SPRITE_ACTOR", variable.m_componentIdx);
 						spriteSheetVar = FindVariableByTag(*instanceVariables, "SPRITE_SHEET", variable.m_componentIdx);
+					}
 
-					if(!spriteSheetVar)
+					if(!spriteActorVar)
+						spriteActorVar = FindVariableByTag(*typeVariables, "SPRITE_ACTOR", variable.m_componentIdx);
+					if (!spriteSheetVar)
 						spriteSheetVar = FindVariableByTag(*typeVariables, "SPRITE_SHEET", variable.m_componentIdx);
 
 					const GameObjectVariable* overriddenVar = nullptr;
 					
 					if(instanceVariables)
 						overriddenVar = FindVariable(*instanceVariables, variable.m_name, variable.m_componentIdx);
+
+					if (spriteActorVar)
+					{
+						Actor* varActor = m_project.FindActor(spriteActorVar->m_value);
+						if (varActor)
+							actor = varActor;
+					}
 
 					if (overriddenVar)
 					{
@@ -275,11 +265,6 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 			else
 				gameObjectType->SetName(value.c_str().AsChar());
 
-			Refresh();
-		}
-		else if (builtInType == (int)BuiltInProperties::Actor)
-		{
-			gameObjectType->SetSpriteActorId(m_project.FindActorId(value.c_str().AsChar()));
 			Refresh();
 		}
 		else if (typeVariables)
@@ -520,7 +505,27 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 	propName += "_" + variable.m_name + "_" + std::to_string(componentIdx);
 
 #if defined BEEHIVE_PLUGIN_LUMINARY
-	if (variable.HasTag("SPRITE_SHEET"))
+	if (variable.HasTag("SPRITE_ACTOR"))
+	{
+		wxArrayString* list = new wxArrayString();
+
+		int selection = PopulateSpriteActorList(*list, variable.m_value);
+
+		wxEnumProperty* choiceProp = new wxEnumProperty(variable.m_name, propName, *list);
+		property = choiceProp;
+
+		if (selection >= 0)
+		{
+			choiceProp->SetChoiceSelection(selection);
+		}
+		else
+		{
+			//Add a blank entry
+			choiceProp->AddChoice("[none]");
+			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+		}
+	}
+	else if (variable.HasTag("SPRITE_SHEET"))
 	{
 		wxArrayString* list = new wxArrayString();
 		int selection = -1;
