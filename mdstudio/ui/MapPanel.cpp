@@ -42,7 +42,6 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 	m_moveGameObjByPixel = false;
 	m_boxSelection = false;
-	m_editingPrefabInstanceId = InvalidGameObjectId;
 
 	m_cursorHorizontal = new wxCursor(wxCURSOR_SIZEWE);
 	m_cursorVertical = new wxCursor(wxCURSOR_SIZENS);
@@ -1008,6 +1007,22 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 	}
 	else if (event.GetId() == eContextMenuGameObjCreatePrefab)
 	{
+		//Nested prefabs are not supported
+		for (auto gameObjId : m_selectedGameObjects)
+		{
+			if (const GameObject* gameObj = m_project.GetEditingMap().GetGameObject(gameObjId))
+			{
+				if (const GameObjectType* gameObjType = m_project.GetGameObjectType(gameObj->GetTypeId()))
+				{
+					if (gameObjType->IsPrefabType())
+					{
+						wxMessageBox("Selection contains an existing prefab - nested prefabs are not supported", "Error", wxOK, this);
+						return;
+					}
+				}
+			}
+		}
+
 		if (m_selectedGameObjects.size() > 0)
 		{
 			//Create new game object
@@ -1090,6 +1105,7 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 
 						//Set as new selection, update gizmo
 						m_selectedGameObjects.clear();
+						m_selectedPrefabChild = InvalidGameObjectId;
 						m_selectedGameObjects.push_back(instanceId);
 						SetGizmoCentre(bounds.GetCentre());
 					}
@@ -1647,6 +1663,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						m_boxSelectEnd.y = -1;
 
 						m_selectedGameObjects.clear();
+						m_selectedPrefabChild = InvalidGameObjectId;
 						m_selectedGameObjects.push_back(m_hoverGameObject);
 
 						if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(m_hoverGameObject))
@@ -1676,6 +1693,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 						FindGameObjects(left, top, (right - left), (bottom - top), gameObjects);
 
 						m_selectedGameObjects.clear();
+						m_selectedPrefabChild = InvalidGameObjectId;
 
 						for (auto gameObj : gameObjects)
 						{
@@ -1971,6 +1989,7 @@ void MapPanel::SelectGameObject(GameObjectId gameObjectId)
 {
 	m_selectedGameObjects.clear();
 	m_selectedGameObjects.push_back(gameObjectId);
+	m_selectedPrefabChild = InvalidGameObjectId;
 
 	if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(gameObjectId))
 	{
@@ -1979,10 +1998,11 @@ void MapPanel::SelectGameObject(GameObjectId gameObjectId)
 	}
 }
 
-void MapPanel::SetEditingPrefab(GameObjectId instanceId)
+void MapPanel::SelectPrefabChild(GameObjectId rootObject, GameObjectId childObject)
 {
-
-	m_editingPrefabInstanceId = instanceId;
+	m_selectedGameObjects.clear();
+	m_selectedGameObjects.push_back(rootObject);
+	m_selectedPrefabChild = childObject;
 }
 
 GameObjectId MapPanel::FindGameObject(int x, int y, ion::Vector2i& topLeft) const
@@ -2416,6 +2436,7 @@ void MapPanel::ResetToolData()
 	//Invalidate game object preview
 	m_hoverGameObject = InvalidGameObjectId;
 	m_selectedGameObjects.clear();
+	m_selectedPrefabChild = InvalidGameObjectId;
 	m_previewGameObjectType = InvalidGameObjectTypeId;
 
 	//Invalidate bezier
@@ -2838,7 +2859,7 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 
 			if(const GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObject.GetTypeId()))
 			{
-				bool selected = ion::utils::stl::Find(m_selectedGameObjects, gameObject.GetId());
+				bool selected = (m_selectedPrefabChild == InvalidGameObjectId) && ion::utils::stl::Find(m_selectedGameObjects, gameObject.GetId());
 				bool hovering = gameObject.GetId() == m_hoverGameObject;
 
 				//Draw root game object
@@ -2872,6 +2893,8 @@ void MapPanel::RenderGameObjects(ion::render::Renderer& renderer, const ion::Mat
 					//Draw all prefab children
 					for (auto prefabChild : gameObjectType->GetPrefabChildren())
 					{
+						selected = (m_selectedPrefabChild == prefabChild.instanceId);
+
 						if (const GameObjectType* prefabChildType = m_project.GetGameObjectType(prefabChild.typeId))
 						{
 							RenderGameObject(

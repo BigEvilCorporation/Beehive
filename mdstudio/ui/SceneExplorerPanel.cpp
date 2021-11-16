@@ -96,13 +96,14 @@ void SceneExplorerPanel::OnItemSelected(wxTreeEvent& event)
 	std::map<wxTreeItemId, GameObjectId>::const_iterator it = m_objectMap.find(event.GetItem());
 	if (it != m_objectMap.end())
 	{
-		if (MapPanel* mapPanel = m_mainWindow->GetMapPanel())
+		if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(it->second))
 		{
-			if (GameObject* gameObject = m_project.GetEditingMap().GetGameObject(it->second))
+			m_mainWindow->SetSelectedGameObject(gameObject);
+
+			if (MapPanel* mapPanel = m_mainWindow->GetMapPanel())
 			{
-				m_mainWindow->SetSelectedGameObject(gameObject);
-				mapPanel->SelectGameObject(it->second);
 				mapPanel->SetTool(eToolSelectGameObject);
+				mapPanel->SelectGameObject(it->second);
 				m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
 			}
 		}
@@ -119,6 +120,13 @@ void SceneExplorerPanel::OnItemSelected(wxTreeEvent& event)
 					if (GameObjectType* childType = m_project.GetGameObjectType(prefabIt->second.childTypeId))
 					{
 						m_mainWindow->SetSelectedPrefabChild(rootType, rootObject, childType, prefabIt->second.childInstanceId);
+
+						if (MapPanel* mapPanel = m_mainWindow->GetMapPanel())
+						{
+							mapPanel->SetTool(eToolSelectGameObject);
+							mapPanel->SelectPrefabChild(rootObject->GetId(), prefabIt->second.childInstanceId);
+							m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
+						}
 					}
 				}
 			}
