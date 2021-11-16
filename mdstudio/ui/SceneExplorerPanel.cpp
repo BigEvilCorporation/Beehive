@@ -31,6 +31,7 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	{
 		m_tree->DeleteAllItems();
 		m_objectMap.clear();
+		m_prefabChildMap.clear();
 
 		const Map& editingMap = m_project.GetEditingMap();
 
@@ -62,6 +63,12 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 								if(childName.size() == 0)
 									childName = "[" + prefabChildType->GetName() + "_id" + std::to_string(labelIdx++) + "]";
 								wxTreeItemId childId = m_tree->AppendItem(itemId, childName);
+
+								PrefabChildEntry entry;
+								entry.rootObjectId = object.m_gameObject.GetId();
+								entry.childTypeId = prefabChild.typeId;
+								entry.childInstanceId = prefabChild.instanceId;
+								m_prefabChildMap.insert(std::make_pair(childId, entry));
 							}
 						}
 					}
@@ -97,6 +104,23 @@ void SceneExplorerPanel::OnItemSelected(wxTreeEvent& event)
 				mapPanel->SelectGameObject(it->second);
 				mapPanel->SetTool(eToolSelectGameObject);
 				m_mainWindow->RedrawPanel(MainWindow::ePanelMap);
+			}
+		}
+	}
+	else
+	{
+		std::map<wxTreeItemId, PrefabChildEntry>::const_iterator prefabIt = m_prefabChildMap.find(event.GetItem());
+		if (prefabIt != m_prefabChildMap.end())
+		{
+			if (GameObject* rootObject = m_project.GetEditingMap().GetGameObject(prefabIt->second.rootObjectId))
+			{
+				if (GameObjectType* rootType = m_project.GetGameObjectType(rootObject->GetTypeId()))
+				{
+					if (GameObjectType* childType = m_project.GetGameObjectType(prefabIt->second.childTypeId))
+					{
+						m_mainWindow->SetSelectedPrefabChild(rootType, rootObject, childType, prefabIt->second.childInstanceId);
+					}
+				}
 			}
 		}
 	}

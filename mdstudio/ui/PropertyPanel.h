@@ -33,6 +33,7 @@ public:
 	void SetGameObject(GameObjectTypeId gameObjectTypeId, GameObjectId gameObjectId);
 	void SetGameObjectType(GameObjectTypeId gameObjectTypeId);
 	void SetArchetype(GameObjectTypeId gameObjectTypeId, GameObjectArchetypeId archetypeId);
+	void SetPrefabChild(GameObjectTypeId rootTypeId, GameObjectId rootObjectId, GameObjectTypeId childTypeId, GameObjectId childInstanceId);
 
 protected:
 
@@ -49,7 +50,7 @@ private:
 		Name
 	};
 
-	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, GameObjectArchetype*& archetype, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables, std::string& editingName);
+	void GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, GameObjectType*& prefabChildType, GameObjectType::PrefabChild*& prefabChild, GameObjectArchetype*& archetype, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables, std::string& editingName);
 	GameObjectVariable* FindVariable(std::vector<GameObjectVariable>& variables, const std::string& name, int componentIdx);
 	GameObjectVariable* FindVariableByTag(std::vector<GameObjectVariable>& variables, const std::string& tag, int componentIdx);
 	GameObjectVariable& AddVariable(std::vector<GameObjectVariable>& variables);
@@ -66,7 +67,9 @@ private:
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	GameObjectId m_gameObjectId;
+	GameObjectId m_prefabChildId;
 	GameObjectTypeId m_gameObjectTypeId;
+	GameObjectTypeId m_prefabChildTypeId;
 	GameObjectArchetypeId m_archetypeId;
 
 	wxPGProperty* m_contextProperty;

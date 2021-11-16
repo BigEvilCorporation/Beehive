@@ -34,23 +34,37 @@ PropertyPanel::PropertyPanel(MainWindow* mainWindow, Project& project, wxWindow 
 	, m_mainWindow(mainWindow)
 {
 	m_gameObjectId = InvalidGameObjectId;
+	m_prefabChildId = InvalidGameObjectId;
 	m_gameObjectTypeId = InvalidGameObjectTypeId;
+	m_prefabChildTypeId = InvalidGameObjectTypeId;
 	m_archetypeId = InvalidGameObjectArchetypeId;
 	m_contextProperty = nullptr;
 }
 
-void PropertyPanel::GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, GameObjectArchetype*& archetype, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables, std::string& name)
+void PropertyPanel::GetEditingVariables(GameObjectType*& gameObjectType, GameObject*& gameObject, GameObjectType*& prefabChildType, GameObjectType::PrefabChild*& prefabChild, GameObjectArchetype*& archetype, Actor*& actor, std::vector<GameObjectVariable>*& typeVariables, std::vector<GameObjectVariable>*& instanceVariables, std::string& name)
 {
+	gameObject = nullptr;
+	prefabChild = nullptr;
 	gameObjectType = nullptr;
+	prefabChildType = nullptr;
 	actor = nullptr;
 	typeVariables = nullptr;
 	instanceVariables = nullptr;
 
 	gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId);
 	gameObjectType = m_project.GetGameObjectType(m_gameObjectTypeId);
-	archetype = gameObjectType ? gameObjectType->GetArchetype(m_archetypeId) : nullptr;
+	prefabChildType = m_project.GetGameObjectType(m_prefabChildTypeId);
+	prefabChild = prefabChildType ? gameObjectType->FindPrefabChild(m_prefabChildId) : nullptr;
+	archetype = gameObjectType->GetArchetype(m_archetypeId);
 
-	if (gameObject)
+	if (prefabChild)
+	{
+		typeVariables = &prefabChildType->GetVariables();
+		instanceVariables = &prefabChild->variables;
+		actor = m_project.GetActor(gameObject->GetSpriteActorId());
+		name = prefabChild->name;
+	}
+	else if (gameObject)
 	{
 		typeVariables = &gameObjectType->GetVariables();
 		instanceVariables = &gameObject->GetVariables();
@@ -116,18 +130,22 @@ void PropertyPanel::Refresh(bool eraseBackground, const wxRect *rect)
 
 		GameObjectType* gameObjectType = nullptr;
 		GameObject* gameObject = nullptr;
+		GameObjectType* prefabChildType = nullptr;
+		GameObjectType::PrefabChild* prefabChild = nullptr;
 		GameObjectArchetype* archetype = nullptr;
 		Actor* actor = nullptr;
 		std::vector<GameObjectVariable>* typeVariables = nullptr;
 		std::vector<GameObjectVariable>* instanceVariables = nullptr;
 		std::string name;
 
-		GetEditingVariables(gameObjectType, gameObject, archetype, actor, typeVariables, instanceVariables, name);
+		GetEditingVariables(gameObjectType, gameObject, prefabChildType, prefabChild, archetype, actor, typeVariables, instanceVariables, name);
 
 		if (typeVariables)
 		{
 			std::string editingName = name;
-			if (gameObject)
+			if(prefabChild)
+				editingName += " (prefab child of type " + prefabChildType->GetName() + ")";
+			else if (gameObject)
 				editingName += " (instance of " + gameObjectType->GetName() + ")";
 			else if(archetype)
 				editingName += " (archetype of " + gameObjectType->GetName() + ")";
@@ -242,13 +260,15 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 	{
 		GameObjectType* gameObjectType = nullptr;
 		GameObject* gameObject = nullptr;
+		GameObjectType* prefabChildType = nullptr;
+		GameObjectType::PrefabChild* prefabChild;
 		GameObjectArchetype* archetype = nullptr;
 		Actor* actor = nullptr;
 		std::vector<GameObjectVariable>* typeVariables = nullptr;
 		std::vector<GameObjectVariable>* instanceVariables = nullptr;
 		std::string name;
 
-		GetEditingVariables(gameObjectType, gameObject, archetype, actor, typeVariables, instanceVariables, name);
+		GetEditingVariables(gameObjectType, gameObject, prefabChildType, prefabChild, archetype, actor, typeVariables, instanceVariables, name);
 
 		wxString variableName = property->GetAttribute("variableName", "");
 		wxVariant componentIdx = property->GetAttribute("componentIdx");
@@ -258,7 +278,9 @@ void PropertyPanel::OnPropertyChanged(wxPropertyGridEvent& event)
 
 		if (builtInType == (int)BuiltInProperties::Name)
 		{
-			if (gameObject)
+			if (prefabChild)
+				prefabChild->name = value.c_str().AsChar();
+			else if (gameObject)
 				gameObject->SetName(value.c_str().AsChar());
 			else if(archetype)
 				archetype->name = value.c_str().AsChar();
@@ -336,13 +358,15 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 	{
 		GameObjectType* gameObjectType = nullptr;
 		GameObject* gameObject = nullptr;
+		GameObjectType* prefabChildType = nullptr;
+		GameObjectType::PrefabChild* prefabChild;
 		GameObjectArchetype* archetype = nullptr;
 		Actor* actor = nullptr;
 		std::vector<GameObjectVariable>* typeVariables = nullptr;
 		std::vector<GameObjectVariable>* instanceVariables = nullptr;
 		std::string name;
 
-		GetEditingVariables(gameObjectType, gameObject, archetype, actor, typeVariables, instanceVariables, name);
+		GetEditingVariables(gameObjectType, gameObject, prefabChildType, prefabChild, archetype, actor, typeVariables, instanceVariables, name);
 
 		if(typeVariables)
 		{
@@ -476,7 +500,9 @@ void PropertyPanel::OnContextMenuClick(wxCommandEvent& event)
 void PropertyPanel::SetGameObject(GameObjectTypeId gameObjectTypeId, GameObjectId gameObjectId)
 {
 	m_gameObjectId = gameObjectId;
+	m_prefabChildId = InvalidGameObjectId;
 	m_gameObjectTypeId = gameObjectTypeId;
+	m_prefabChildTypeId = InvalidGameObjectTypeId;
 	m_archetypeId = InvalidGameObjectArchetypeId;
 	Refresh();
 }
@@ -484,7 +510,9 @@ void PropertyPanel::SetGameObject(GameObjectTypeId gameObjectTypeId, GameObjectI
 void PropertyPanel::SetGameObjectType(GameObjectTypeId gameObjectTypeId)
 {
 	m_gameObjectId = InvalidGameObjectId;
+	m_prefabChildId = InvalidGameObjectId;
 	m_gameObjectTypeId = gameObjectTypeId;
+	m_prefabChildTypeId = InvalidGameObjectTypeId;
 	m_archetypeId = InvalidGameObjectArchetypeId;
 	Refresh();
 }
@@ -492,8 +520,20 @@ void PropertyPanel::SetGameObjectType(GameObjectTypeId gameObjectTypeId)
 void PropertyPanel::SetArchetype(GameObjectTypeId gameObjectTypeId, GameObjectArchetypeId archetypeId)
 {
 	m_gameObjectId = InvalidGameObjectId;
+	m_prefabChildId = InvalidGameObjectId;
 	m_gameObjectTypeId = gameObjectTypeId;
+	m_prefabChildTypeId = InvalidGameObjectTypeId;
 	m_archetypeId = archetypeId;
+	Refresh();
+}
+
+void PropertyPanel::SetPrefabChild(GameObjectTypeId rootTypeId, GameObjectId rootObjectId, GameObjectTypeId childTypeId, GameObjectId childInstanceId)
+{
+	m_gameObjectId = rootObjectId;
+	m_prefabChildId = childInstanceId;
+	m_gameObjectTypeId = rootTypeId;
+	m_prefabChildTypeId = childTypeId;
+	m_archetypeId = InvalidGameObjectArchetypeId;
 	Refresh();
 }
 

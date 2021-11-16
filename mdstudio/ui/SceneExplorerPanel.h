@@ -59,9 +59,17 @@ private:
 		std::string archetypeName;
 	};
 
+	struct PrefabChildEntry
+	{
+		GameObjectId rootObjectId;
+		GameObjectTypeId childTypeId;
+		GameObjectId childInstanceId;
+	};
+
 	Project& m_project;
 	MainWindow* m_mainWindow;
 	std::map<wxTreeItemId, GameObjectId> m_objectMap;
+	std::map<wxTreeItemId, PrefabChildEntry> m_prefabChildMap;
 	std::vector<std::pair<GameObjectTypeId, std::string>> m_objectTypeListSorted;
 	std::vector<std::pair<GameObjectTypeId, std::string>> m_convertTypeListSorted;
 	std::vector<ArchetypeEntry> m_archetypeListSorted;

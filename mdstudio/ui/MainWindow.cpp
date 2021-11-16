@@ -1086,6 +1086,22 @@ void MainWindow::SetSelectedGameObject(GameObject* gameObject)
 	}
 }
 
+void MainWindow::SetSelectedGameObjectType(GameObjectType* gameObjectType)
+{
+	if (m_propertyPanel)
+	{
+		m_propertyPanel->SetGameObjectType(gameObjectType->GetId());
+	}
+}
+
+void MainWindow::SetSelectedPrefabChild(GameObjectType* rootObjectType, GameObject* rootObject, GameObjectType* childObjectType, GameObjectId childInstanceId)
+{
+	if (m_propertyPanel)
+	{
+		m_propertyPanel->SetPrefabChild(rootObjectType->GetId(), rootObject->GetId(), childObjectType->GetId(), childInstanceId);
+	}
+}
+
 AnimationId MainWindow::GetSelectedAnimation()
 {
 	if(m_timelinePanel)

@@ -103,6 +103,8 @@ public:
 
 	//Set selected game object
 	void SetSelectedGameObject(GameObject* gameObject);
+	void SetSelectedGameObjectType(GameObjectType* gameObjectType);
+	void SetSelectedPrefabChild(GameObjectType* rootObjectType, GameObject* rootObject, GameObjectType* childObjectType, GameObjectId childInstanceId);
 
 	//Get selected animation
 	AnimationId GetSelectedAnimation();
