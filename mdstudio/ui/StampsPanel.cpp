@@ -297,6 +297,7 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 			if(dialog.ShowModal() == wxID_OK)
 			{
 				std::string filename = dialog.GetPath().c_str().AsChar();
+				std::string referenceFile = m_project.m_settings.Get("referenceFile");
 				ion::ImageFormat* reader = ion::ImageFormat::CreateReader(ion::string::GetFileExtension(referenceFile));
 				if(reader && reader->Read(filename))
 				{
@@ -322,9 +323,9 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 						//New palette
 						Palette newPalette;
 
-						for(int x = 0; x < reader.GetWidth(); x++)
+						for(int x = 0; x < reader->GetWidth(); x++)
 						{
-							for(int y = 0; y < reader.GetHeight(); y++)
+							for(int y = 0; y < reader->GetHeight(); y++)
 							{
 								//Get original tile
 								TileId tileId = stamp->GetTile(x / tileWidth, y / tileHeight);
