@@ -736,6 +736,7 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxStaticText* m_staticText531;
 		wxStaticText* m_staticText5311;
 		wxStaticText* m_staticText53111;
+		wxStaticText* m_staticText531111;
 		wxStaticText* m_staticText68;
 		wxSpinCtrl* m_spinStampWidth;
 		wxStaticText* m_staticText69;
@@ -764,6 +765,7 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxFilePickerCtrl* m_filePickerReference;
 		wxFilePickerCtrl* m_filePickerAssembler;
 		wxFilePickerCtrl* m_filePickerAssemblyFile;
+		wxFilePickerCtrl* m_filePickerEmulator;
 
 		ProjectSettingsDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Project Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 879,506 ), long style = wxCAPTION|wxRESIZE_BORDER );
 

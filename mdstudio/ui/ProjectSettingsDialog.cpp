@@ -35,6 +35,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	m_filePickerSpritesProj->SetPath(m_project.m_settings.Get("spriteActorsExternalFile"));
 	m_filePickerAssembler->SetPath(m_project.m_settings.Get("assembler"));
 	m_filePickerAssemblyFile->SetPath(m_project.m_settings.Get("assemblyFile"));
+	m_filePickerEmulator->SetPath(m_project.m_settings.Get("emulator"));
 	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
 	m_spinStampHeight->SetValue(m_project.GetPlatformConfig().stampHeight);
 
@@ -63,6 +64,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 
 	m_project.m_settings.Set("assembler", m_filePickerAssembler->GetPath().c_str().AsChar());
 	m_project.m_settings.Set("assemblyFile", m_filePickerAssemblyFile->GetPath().c_str().AsChar());
+	m_project.m_settings.Set("emulator", m_filePickerEmulator->GetPath().c_str().AsChar());
 
 	bool buildSpriteResources = false;
 

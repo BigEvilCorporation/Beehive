@@ -1948,6 +1948,16 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
 
+	m_staticText531111 = new wxStaticText( this, wxID_ANY, wxT("Emulator:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText531111->Wrap( -1 );
+	fgSizer40->Add( m_staticText531111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_filePickerEmulator = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.exe"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	fgSizer40->Add( m_filePickerEmulator, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
 	m_staticText68 = new wxStaticText( this, wxID_ANY, wxT("Stamp width (tiles):"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText68->Wrap( -1 );
 	fgSizer40->Add( m_staticText68, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );

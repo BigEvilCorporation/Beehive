@@ -2090,6 +2090,8 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 		//Assemble and run
 		const std::string assembler = m_project->m_settings.Get("assembler");
 		const std::string assemblyFile = m_project->m_settings.Get("assemblyFile");
+		const std::string emulator = m_project->m_settings.Get("emulator");
+		std::string assemblyOutput;
 
 		if (assembler.size() && assemblyFile.size())
 		{
@@ -2102,7 +2104,7 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 
 				includes.push_back(m_project->m_settings.Get("engineRootDir"));
 
-				std::string assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".asm");
+				assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".asm");
 				assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".s");
 				assemblyOutput += ".bin";
 
@@ -2116,7 +2118,22 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 		}
 
 		SetStatusText("Export complete");
-		wxMessageBox("Export complete", "Error", wxOK | wxICON_INFORMATION);
+
+		//Run!
+		if (emulator.size() && assemblyOutput.size())
+		{
+			std::string commandLine = emulator + " " + assemblyOutput;
+			if (wxExecute(commandLine, wxEXEC_ASYNC) < 0)
+			{
+				SetStatusText("Error running emulator");
+				wxMessageBox("Error running emulator", "Error", wxOK | wxICON_INFORMATION);
+				return;
+			}
+		}
+		else
+		{
+			wxMessageBox("Export complete", "Success", wxOK | wxICON_INFORMATION);
+		}
 
 		//Update counts
 		SetPanelCaptions();
