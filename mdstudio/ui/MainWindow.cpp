@@ -2065,7 +2065,7 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 
 		ion::io::FileDevice* fileDevice = ion::io::FileDevice::GetDefault();
 
-		const std::string projectRootDir = m_project->m_settings.projectRootDir + fileDevice->GetPathSeparator();
+		const std::string projectRootDir = m_project->m_settings.Get("projectRootDir");
 
 		dialog.m_txtProjectName->SetValue(m_project->GetName());
 		dialog.m_filePickerPalettes->SetPath(fileDevice->NormalisePath(projectRootDir + m_project->m_exportFilenames.palettes));
@@ -2109,18 +2109,18 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 			SetStatusText("Exporting...");
 			
 			m_project->SetName(std::string(dialog.m_txtProjectName->GetValue()));
-			m_project->m_exportFilenames.palettes = ion::string::RemoveSubstring(dialog.m_filePickerPalettes->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.tileset = ion::string::RemoveSubstring(dialog.m_filePickerTileset->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.blocks = ion::string::RemoveSubstring(dialog.m_filePickerBlocks->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.stamps = ion::string::RemoveSubstring(dialog.m_filePickerStamps->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.stampAnims = ion::string::RemoveSubstring(dialog.m_filePickerStampAnims->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.terrainTiles = ion::string::RemoveSubstring(dialog.m_filePickerTerrainTiles->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.terrainBlocks = ion::string::RemoveSubstring(dialog.m_filePickerTerrainBlocks->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.terrainAngles = ion::string::RemoveSubstring(dialog.m_filePickerTerrainAngles->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.gameObjTypes = ion::string::RemoveSubstring(dialog.m_filePickerGameObjTypes->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.spriteSheets = ion::string::RemoveSubstring(dialog.m_dirPickerSpriteSheets->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.spriteAnims = ion::string::RemoveSubstring(dialog.m_dirPickerSpriteAnims->GetPath().c_str().AsChar(), projectRootDir);
-			m_project->m_exportFilenames.spritePalettes = ion::string::RemoveSubstring(dialog.m_dirPickerSpritePalettes->GetPath().c_str().AsChar(), projectRootDir);
+			m_project->m_exportFilenames.palettes = ion::string::RemoveSubstring(dialog.m_filePickerPalettes->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.tileset = ion::string::RemoveSubstring(dialog.m_filePickerTileset->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.blocks = ion::string::RemoveSubstring(dialog.m_filePickerBlocks->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.stamps = ion::string::RemoveSubstring(dialog.m_filePickerStamps->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.stampAnims = ion::string::RemoveSubstring(dialog.m_filePickerStampAnims->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.terrainTiles = ion::string::RemoveSubstring(dialog.m_filePickerTerrainTiles->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.terrainBlocks = ion::string::RemoveSubstring(dialog.m_filePickerTerrainBlocks->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.terrainAngles = ion::string::RemoveSubstring(dialog.m_filePickerTerrainAngles->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.gameObjTypes = ion::string::RemoveSubstring(dialog.m_filePickerGameObjTypes->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.spriteSheets = ion::string::RemoveSubstring(dialog.m_dirPickerSpriteSheets->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.spriteAnims = ion::string::RemoveSubstring(dialog.m_dirPickerSpriteAnims->GetPath().c_str().AsChar(), projectRootDir, true);
+			m_project->m_exportFilenames.spritePalettes = ion::string::RemoveSubstring(dialog.m_dirPickerSpritePalettes->GetPath().c_str().AsChar(), projectRootDir, true);
 
 			m_project->m_exportFilenames.palettesExportEnabled = dialog.m_chkPalettes->GetValue();
 			m_project->m_exportFilenames.tilesetExportEnabled = dialog.m_chkTileset->GetValue();
@@ -2206,25 +2206,25 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 				dialog.GetMapFormValues(projectRootDir, mapIndex, it->second.m_exportFilenames);
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
-					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, format);
+					m_project->ExportMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.map), format);
 
 				if(it->second.m_exportFilenames.blockMapExportEnabled)
-					m_project->ExportBlockMap(it->first, it->second.m_exportFilenames.blockMap, format, blockWidth, blockHeight);
+					m_project->ExportBlockMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.blockMap), format, blockWidth, blockHeight);
 
 				if(it->second.m_exportFilenames.stampMapExportEnabled)
-					m_project->ExportStampMap(it->first, it->second.m_exportFilenames.stampMap, format);
+					m_project->ExportStampMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.stampMap), format);
 				
 				if(it->second.m_exportFilenames.collisionMapExportEnabled)
-					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, format);
+					m_project->ExportCollisionMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.collisionMap), format);
 
 				if(it->second.m_exportFilenames.terrainBlockMapExportEnabled)
-					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, format, terrainBlockWidth, terrainBlockHeight);
+					m_project->ExportTerrainBlockMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.terrainBlockMap), format, terrainBlockWidth, terrainBlockHeight);
 
 				if(it->second.m_exportFilenames.sceneAnimExportEnabled)
-					m_project->ExportSceneAnimations(it->first, it->second.m_exportFilenames.sceneAnims, format);
+					m_project->ExportSceneAnimations(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.sceneAnims), format);
 
 				if (it->second.m_exportFilenames.gameObjectsExportEnabled)
-					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects, format);
+					m_project->ExportGameObjects(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.gameObjects), format);
 			}
 
 			SetStatusText("Export complete");

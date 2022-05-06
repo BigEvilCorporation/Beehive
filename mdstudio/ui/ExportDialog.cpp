@@ -56,13 +56,13 @@ void ExportDialog::SetMapFormValues(const std::string& projectRootDir, int mapIn
 
 void ExportDialog::GetMapFormValues(const std::string& projectRootDir, int mapIndex, Map::ExportFilenames& values) const
 {
-	values.map = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerMap->GetPath().c_str().AsChar(), projectRootDir);
-	values.stampMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerStampMap->GetPath().c_str().AsChar(), projectRootDir);
-	values.collisionMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerCollisionMap->GetPath().c_str().AsChar(), projectRootDir);
-	values.gameObjects = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath().c_str().AsChar(), projectRootDir);
-	values.blockMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerBlockMap->GetPath().c_str().AsChar(), projectRootDir);
-	values.terrainBlockMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->GetPath().c_str().AsChar(), projectRootDir);
-	values.sceneAnims = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerSceneAnimations->GetPath().c_str().AsChar(), projectRootDir);
+	values.map = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerMap->GetPath().c_str().AsChar(), projectRootDir, true);
+	values.stampMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerStampMap->GetPath().c_str().AsChar(), projectRootDir, true);
+	values.collisionMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerCollisionMap->GetPath().c_str().AsChar(), projectRootDir, true);
+	values.gameObjects = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerGameObj->GetPath().c_str().AsChar(), projectRootDir, true);
+	values.blockMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerBlockMap->GetPath().c_str().AsChar(), projectRootDir, true);
+	values.terrainBlockMap = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerCollisionBlockMap->GetPath().c_str().AsChar(), projectRootDir, true);
+	values.sceneAnims = ion::string::RemoveSubstring(m_mapTabs[mapIndex]->m_filePickerSceneAnimations->GetPath().c_str().AsChar(), projectRootDir, true);
 
 	values.mapExportEnabled = m_mapTabs[mapIndex]->m_chkMap->GetValue();
 	values.stampMapExportEnabled = m_mapTabs[mapIndex]->m_chkStampMap->GetValue();
