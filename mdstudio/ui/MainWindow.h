@@ -26,6 +26,7 @@
 #include "SceneExplorerPanel.h"
 #include "PropertyPanel.h"
 #include "ScriptCompilePanel.h"
+#include "AssemblerPanel.h"
 #include "PalettesPanel.h"
 #include "TilesPanel.h"
 #include "StampsPanel.h"
@@ -74,6 +75,7 @@ public:
 	void ShowPanelSceneExplorer();
 	void ShowPanelProperties();
 	void ShowPanelScriptCompile();
+	void ShowPanelAssembler();
 	void ShowPanelPalettes();
 	void ShowPanelTiles();
 	void ShowPanelStamps();
@@ -97,6 +99,7 @@ public:
 	PropertyPanel* GetPropertiesPanel();
 	MapPanel* GetMapPanel();
 	ScriptCompilePanel* GetScriptCompilePanel();
+	AssemblerPanel* GetAssemblerPanel();
 
 	//Set current map editing tool
 	void SetMapTool(ToolType tool);
@@ -219,6 +222,7 @@ private:
 	wxWeakRef<SceneExplorerPanel> m_sceneExplorerPanel;
 	wxWeakRef<PropertyPanel> m_propertyPanel;
 	wxWeakRef<ScriptCompilePanel> m_scriptCompilePanel;
+	wxWeakRef<AssemblerPanel> m_assemblerPanel;
 	wxWeakRef<PalettesPanel> m_palettesPanel;
 	wxWeakRef<MapPanel> m_mapPanel;
 	wxWeakRef<MapListPanel> m_mapListPanel;

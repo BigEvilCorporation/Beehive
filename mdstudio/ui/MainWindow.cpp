@@ -492,6 +492,33 @@ void MainWindow::ShowPanelScriptCompile()
 	}
 }
 
+void MainWindow::ShowPanelAssembler()
+{
+	if (m_project.get())
+	{
+		if (m_assemblerPanel)
+		{
+			m_auiManager.GetPane("Assembler").Show();
+		}
+		else
+		{
+			wxAuiPaneInfo paneInfo;
+			paneInfo.Name("Assembler");
+			paneInfo.Dockable(true);
+			paneInfo.DockFixed(false);
+			paneInfo.BestSize(PANEL_SIZE_X(200), PANEL_SIZE_Y(100));
+			paneInfo.Caption("Assembler");
+			paneInfo.CaptionVisible(true);
+
+			m_assemblerPanel = new AssemblerPanel(this, *m_project, m_dockArea, NewControlId());
+			m_auiManager.AddPane(m_assemblerPanel, paneInfo);
+			paneInfo.Show();
+		}
+
+		m_auiManager.Update();
+	}
+}
+
 void MainWindow::ShowPanelPalettes()
 {
 	if(m_project.get())
@@ -1058,6 +1085,11 @@ MapPanel* MainWindow::GetMapPanel()
 ScriptCompilePanel* MainWindow::GetScriptCompilePanel()
 {
 	return m_scriptCompilePanel;
+}
+
+AssemblerPanel* MainWindow::GetAssemblerPanel()
+{
+	return m_assemblerPanel;
 }
 
 wxGLAttributes MainWindow::GetGLAttributes()
@@ -2053,6 +2085,34 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 		if (includeFilenames.size() > 0)
 		{
 			m_project->WriteIncludeFile(projectRootDir, scenesExportDir, "INCLUDE.ASM", includeFilenames, true);
+		}
+
+		//Assemble and run
+		const std::string assembler = m_project->m_settings.Get("assembler");
+		const std::string assemblyFile = m_project->m_settings.Get("assemblyFile");
+
+		if (assembler.size() && assemblyFile.size())
+		{
+			//Do assembly via UI panel
+			ShowPanelAssembler();
+			if (AssemblerPanel* panel = GetAssemblerPanel())
+			{
+				std::vector<std::string> includes;
+				std::vector<std::string> defines;
+
+				includes.push_back(m_project->m_settings.Get("engineRootDir"));
+
+				std::string assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".asm");
+				assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".s");
+				assemblyOutput += ".bin";
+
+				if (!panel->AssembleBlocking(assembler, assemblyFile, assemblyOutput, includes, defines))
+				{
+					SetStatusText("Assembly error");
+					wxMessageBox("Error assembling, see assembler log", "Error", wxOK | wxICON_INFORMATION);
+					return;
+				}
+			}
 		}
 
 		SetStatusText("Export complete");

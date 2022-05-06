@@ -33,6 +33,8 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	m_dirPickerEngine->SetPath(m_project.m_settings.Get("engineRootDir"));
 	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.Get("gameObjectsExternalFile"));
 	m_filePickerSpritesProj->SetPath(m_project.m_settings.Get("spriteActorsExternalFile"));
+	m_filePickerAssembler->SetPath(m_project.m_settings.Get("assembler"));
+	m_filePickerAssemblyFile->SetPath(m_project.m_settings.Get("assemblyFile"));
 	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
 	m_spinStampHeight->SetValue(m_project.GetPlatformConfig().stampHeight);
 
@@ -58,6 +60,9 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 	std::string gameObjectsFile = m_filePickerGameObjTypesFile->GetPath().c_str().AsChar();
 	std::string spritesFile = m_filePickerSpritesProj->GetPath().c_str().AsChar();
 	std::string referenceFile = m_filePickerReference->GetPath().c_str().AsChar();
+
+	m_project.m_settings.Set("assembler", m_filePickerAssembler->GetPath().c_str().AsChar());
+	m_project.m_settings.Set("assemblyFile", m_filePickerAssemblyFile->GetPath().c_str().AsChar());
 
 	bool buildSpriteResources = false;
 

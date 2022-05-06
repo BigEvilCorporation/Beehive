@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct 26 2018)
+// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b3)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -1924,6 +1924,26 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	m_filePickerReference = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
 	fgSizer40->Add( m_filePickerReference, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText5311 = new wxStaticText( this, wxID_ANY, wxT("Assembler:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5311->Wrap( -1 );
+	fgSizer40->Add( m_staticText5311, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_filePickerAssembler = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.exe"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	fgSizer40->Add( m_filePickerAssembler, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText53111 = new wxStaticText( this, wxID_ANY, wxT("Assembly file:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText53111->Wrap( -1 );
+	fgSizer40->Add( m_staticText53111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_filePickerAssemblyFile = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.asm;*.s"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	fgSizer40->Add( m_filePickerAssemblyFile, 0, wxALL|wxEXPAND, 5 );
 
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
