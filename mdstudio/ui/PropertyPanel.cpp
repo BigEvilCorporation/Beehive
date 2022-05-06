@@ -54,8 +54,12 @@ void PropertyPanel::GetEditingVariables(GameObjectType*& gameObjectType, GameObj
 	gameObject = m_project.GetEditingMap().GetGameObject(m_gameObjectId);
 	gameObjectType = m_project.GetGameObjectType(m_gameObjectTypeId);
 	prefabChildType = m_project.GetGameObjectType(m_prefabChildTypeId);
-	prefabChild = prefabChildType ? gameObjectType->FindPrefabChild(m_prefabChildId) : nullptr;
-	archetype = gameObjectType->GetArchetype(m_archetypeId);
+
+	if (gameObjectType)
+	{
+		prefabChild = prefabChildType ? gameObjectType->FindPrefabChild(m_prefabChildId) : nullptr;
+		archetype = gameObjectType->GetArchetype(m_archetypeId);
+	}
 
 	if (prefabChild)
 	{
