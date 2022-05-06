@@ -861,7 +861,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				{
 					//Start pos already taken, take end pos
 					m_boxSelectEnd.x = x * tileWidth;
-					m_boxSelectEnd.y = y;
+					m_boxSelectEnd.y = y * tileHeight;
 				}
 			}
 			else
@@ -872,10 +872,10 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 					GameObjectTypeId gameObjectTypeId = m_project.GetPaintGameObjectType();
 					if(GameObjectType* gameObjectType = m_project.GetGameObjectType(gameObjectTypeId))
 					{
-						int boxX = ion::maths::Min(m_boxSelectStart.x * tileWidth, m_boxSelectEnd.x * tileWidth);
-						int boxY = ion::maths::Min(m_boxSelectStart.y * tileHeight, m_boxSelectEnd.y * tileHeight);
-						int boxWidth = ion::maths::Abs(m_boxSelectEnd.x - m_boxSelectStart.x) + 1;
-						int boxHeight = ion::maths::Abs(m_boxSelectEnd.y - m_boxSelectStart.y) + 1;
+						int boxX = ion::maths::Min(m_boxSelectStart.x / tileWidth, m_boxSelectEnd.x / tileWidth);
+						int boxY = ion::maths::Min(m_boxSelectStart.y / tileHeight, m_boxSelectEnd.y / tileHeight);
+						int boxWidth = ion::maths::Abs((m_boxSelectEnd.x / tileWidth) - (m_boxSelectStart.x / tileWidth));
+						int boxHeight = ion::maths::Abs((m_boxSelectEnd.y / tileHeight) - (m_boxSelectStart.y / tileHeight));
 
 						m_project.GetEditingMap().PlaceGameObject(boxX, boxY, boxWidth, boxHeight, *gameObjectType, m_project.GetPaintGameObjectArchetype());
 						m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
