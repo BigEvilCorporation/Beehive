@@ -42,8 +42,8 @@ void DialogNewProject::PopulatePreset(int index)
 	m_spinCtrlStampHeight->SetValue(config.stampHeight);
 
 #if BEEHIVE_FIXED_STAMP_MODE
-	m_spinCtrlMapWidth->SetValue(config.scrollPlaneWidthTiles / config.stampWidth);
-	m_spinCtrlMapHeight->SetValue(config.scrollPlaneHeightTiles / config.stampHeight);
+	m_spinCtrlMapWidth->SetValue(8);
+	m_spinCtrlMapHeight->SetValue(4);
 #else
 	m_spinCtrlMapWidth->SetValue(config.scrollPlaneWidthTiles);
 	m_spinCtrlMapHeight->SetValue(config.scrollPlaneHeightTiles);
