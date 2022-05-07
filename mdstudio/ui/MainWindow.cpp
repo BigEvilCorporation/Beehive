@@ -611,7 +611,7 @@ void MainWindow::ScanStamps(const std::string& stampsDir)
 	//Only palette 0 supported for now
 	u32 palettes = 1;
 
-	std::vector<std::string> filenames;
+	std::vector<std::pair<std::string,std::string>> filenames;
 
 	//Enumerate all files in directory
 	wxString directoryPath = stampsDir;
@@ -640,7 +640,7 @@ void MainWindow::ScanStamps(const std::string& stampsDir)
 		//If only to import existing, stamp by this name must already exist
 		if (!(flags & Project::eTileImportOnlyExistingStamps) || m_project->FindStamp(stampName))
 		{
-			filenames.push_back(filename.c_str().AsChar());
+			filenames.push_back(std::make_pair(stampName, filename.c_str().AsChar()));
 		}
 	}
 
@@ -648,7 +648,7 @@ void MainWindow::ScanStamps(const std::string& stampsDir)
 	std::vector<std::string> missingFiles;
 	for (auto stamp : m_project->GetStamps())
 	{
-		if (!ion::utils::stl::Find(filenames, stamp.second.GetName()))
+		if (std::find_if(filenames.begin(), filenames.end(), [&](const std::pair<std::string, std::string>& rhs) { return rhs.first == stamp.second.GetName(); }) == filenames.end())
 		{
 			missingFiles.push_back(stamp.second.GetName());
 		}
@@ -665,7 +665,7 @@ void MainWindow::ScanStamps(const std::string& stampsDir)
 
 		message += "\nDelete missing stamps?";
 
-		if (wxMessageBox("Clear existing animations?", "Import Animations", wxYES | wxCANCEL | wxICON_WARNING) == wxCANCEL)
+		if (wxMessageBox(message, "Missing stamps", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
 		{
 			return;
 		}
@@ -681,24 +681,12 @@ void MainWindow::ScanStamps(const std::string& stampsDir)
 
 	for (int i = 0; i < filenames.size(); i++)
 	{
-		std::string stampName = filenames[i];
-
-		const size_t lastSlash = stampName.find_last_of('\\');
-		if (std::string::npos != lastSlash)
-		{
-			stampName.erase(0, lastSlash + 1);
-		}
-
-		// Remove extension if present.
-		const size_t period = stampName.rfind('.');
-		if (std::string::npos != period)
-		{
-			stampName.erase(period);
-		}
+		std::string stampName = filenames[i].first;
+		std::string stampFile = filenames[i].second;
 
 		Stamp* stampToReplace = m_project->FindStamp(stampName);
 
-		std::string filename = directoryPath + "\\" + filenames[i];
+		std::string filename = directoryPath + "\\" + stampFile;
 		m_project->ImportBitmap(filename, flags, palettes, stampToReplace);
 	}
 
@@ -2974,6 +2962,11 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 			SetStatusText("Import complete");
 		}
 	}
+}
+
+void MainWindow::OnBtnStampsUpdate(wxCommandEvent& event)
+{
+	ScanStamps(m_project->m_settings.GetAbsolutePath("stampsDir"));
 }
 
 void MainWindow::OnBtnSpriteEditor(wxCommandEvent& event)

@@ -218,6 +218,10 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menubar1->Append( m_menuSprites, wxT("Sprites") );
 
 	m_menuStamps = new wxMenu();
+	wxMenuItem* m_menuItemStampsUpdate;
+	m_menuItemStampsUpdate = new wxMenuItem( m_menuStamps, wxID_BTN_STAMPS_UPDATE, wxString( wxT("Update from Stamps Directory") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuStamps->Append( m_menuItemStampsUpdate );
+
 	wxMenuItem* m_menuItemStampsExport;
 	m_menuItemStampsExport = new wxMenuItem( m_menuStamps, wxID_BTN_STAMPS_EXPORT_BMP, wxString( wxT("Export (.BMP)") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuStamps->Append( m_menuItemStampsExport );
@@ -318,6 +322,7 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapExportBMP ), this, m_menuItemExportBitmap->GetId());
 	m_menuTiles->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnTilesCleanup ), this, m_menuItemTilesCleanup->GetId());
 	m_menuSprites->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnSpriteEditor ), this, m_menuItemSpritesEditor->GetId());
+	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsUpdate ), this, m_menuItemStampsUpdate->GetId());
 	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsExportBMPs ), this, m_menuItemStampsExport->GetId());
 	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsCleanup ), this, m_menuItemStampsCleanup->GetId());
 	m_menuCollision->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnColGenTerrainBezier ), this, m_menuItemCollisionGenerate->GetId());

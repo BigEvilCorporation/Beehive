@@ -87,44 +87,45 @@ class SpriteCanvas;
 #define wxID_BTN_MAP_EXPORT_BMP 1031
 #define wxID_BTN_TILES_CLEANUP 1032
 #define wxID_BTN_SPRITE_EDITOR 1033
-#define wxID_BTN_STAMPS_EXPORT_BMP 1034
-#define wxID_BTN_STAMPS_CLEANUP 1035
-#define wxID_BTN_COL_GEN_BEZIER 1036
-#define wxID_BTN_COL_TILES_CLEANUP 1037
-#define wxID_BTN_COL_MAP_CLEAR 1038
-#define wxID_BTN_GAME_OBJ_TYPES 1039
-#define wxID_MENU_ANIMATION_IMPORT 1040
-#define wxID_MENU_ANIMATION_EXPORT 1041
-#define wxID_MENU_ANIMATION_CONVERT_RELATIVE 1042
-#define wxID_BTN_CANCEL 1043
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1044
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1045
-#define wxID_TOOL_COL_DELETETERRAINBEZIER 1046
-#define wxID_TOOL_COL_PAINTSOLID 1047
-#define wxID_TOOL_GENERATETERRAIN 1048
-#define wxID_TOOL_SELECTSTAMP 1049
-#define wxID_TOOL_STAMP 1050
-#define wxID_TOOL_MOVESTAMP 1051
-#define wxID_TOOL_STAMPPICKER 1052
-#define wxID_TOOL_CREATESTAMP 1053
-#define wxID_TOOL_REMOVESTAMP 1054
-#define wxID_TOOL_COL_PAINTTERRAIN 1055
-#define wxID_TOOL_COL_PAINTHOLE 1056
-#define wxID_TOOL_COL_DELETETERRTILE 1057
-#define wxID_TOOL_SELECTTILE 1058
-#define wxID_TOOL_PAINT 1059
-#define wxID_TOOL_TILEPICKER 1060
-#define wxID_TOOL_FLIPX 1061
-#define wxID_TOOL_FLIPY 1062
-#define wxID_TOOL_FILL 1063
-#define wxID_TOOL_CLONE 1064
-#define wxID_TOOL_CREATE_SCENE_ANIM 1065
-#define wxID_TOOL_COPY_TO_NEW_MAP 1066
-#define wxID_TOOL_SELECTGAMEOBJ 1067
-#define wxID_TOOL_PLACEGAMEOBJ 1068
-#define wxID_TOOL_ANIMATEGAMEOBJ 1069
-#define wxID_TOOL_REMOVEGAMEOBJ 1070
-#define wxID_TOOL_DRAWGAMEOBJ 1071
+#define wxID_BTN_STAMPS_UPDATE 1034
+#define wxID_BTN_STAMPS_EXPORT_BMP 1035
+#define wxID_BTN_STAMPS_CLEANUP 1036
+#define wxID_BTN_COL_GEN_BEZIER 1037
+#define wxID_BTN_COL_TILES_CLEANUP 1038
+#define wxID_BTN_COL_MAP_CLEAR 1039
+#define wxID_BTN_GAME_OBJ_TYPES 1040
+#define wxID_MENU_ANIMATION_IMPORT 1041
+#define wxID_MENU_ANIMATION_EXPORT 1042
+#define wxID_MENU_ANIMATION_CONVERT_RELATIVE 1043
+#define wxID_BTN_CANCEL 1044
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1045
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1046
+#define wxID_TOOL_COL_DELETETERRAINBEZIER 1047
+#define wxID_TOOL_COL_PAINTSOLID 1048
+#define wxID_TOOL_GENERATETERRAIN 1049
+#define wxID_TOOL_SELECTSTAMP 1050
+#define wxID_TOOL_STAMP 1051
+#define wxID_TOOL_MOVESTAMP 1052
+#define wxID_TOOL_STAMPPICKER 1053
+#define wxID_TOOL_CREATESTAMP 1054
+#define wxID_TOOL_REMOVESTAMP 1055
+#define wxID_TOOL_COL_PAINTTERRAIN 1056
+#define wxID_TOOL_COL_PAINTHOLE 1057
+#define wxID_TOOL_COL_DELETETERRTILE 1058
+#define wxID_TOOL_SELECTTILE 1059
+#define wxID_TOOL_PAINT 1060
+#define wxID_TOOL_TILEPICKER 1061
+#define wxID_TOOL_FLIPX 1062
+#define wxID_TOOL_FLIPY 1063
+#define wxID_TOOL_FILL 1064
+#define wxID_TOOL_CLONE 1065
+#define wxID_TOOL_CREATE_SCENE_ANIM 1066
+#define wxID_TOOL_COPY_TO_NEW_MAP 1067
+#define wxID_TOOL_SELECTGAMEOBJ 1068
+#define wxID_TOOL_PLACEGAMEOBJ 1069
+#define wxID_TOOL_ANIMATEGAMEOBJ 1070
+#define wxID_TOOL_REMOVEGAMEOBJ 1071
+#define wxID_TOOL_DRAWGAMEOBJ 1072
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -184,6 +185,7 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnMapExportBMP( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesCleanup( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteEditor( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBtnStampsUpdate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnStampsExportBMPs( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnStampsCleanup( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnColGenTerrainBezier( wxCommandEvent& event ) { event.Skip(); }
