@@ -29,8 +29,8 @@ class AssemblerPanel : public ScriptCompilePanelBase
 public:
 	AssemblerPanel(MainWindow* mainWindow, Project& project, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr);
 
-	bool BeginAssembleAsync(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines, std::function<void()> const& onFinished);
-	bool AssembleBlocking(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines);
+	bool BeginAssembleAsync(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::pair<std::string, std::string>>& defines, std::function<void()> const& onFinished);
+	bool AssembleBlocking(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::pair<std::string, std::string>>& defines);
 
 	void AppendText(const wxString& text);
 
@@ -43,7 +43,7 @@ private:
 		Assembling,
 	};
 
-	std::string GenerateCommandLine(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines);
+	std::string GenerateCommandLine(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::pair<std::string, std::string>>& defines);
 	void CollectOutput();
 
 	Project& m_project;

@@ -28,7 +28,7 @@ AssemblerPanel::AssemblerPanel(MainWindow* mainWindow, Project& project, wxWindo
 	m_state = State::Idle;
 }
 
-bool AssemblerPanel::BeginAssembleAsync(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines, std::function<void()> const& onFinished)
+bool AssemblerPanel::BeginAssembleAsync(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::pair<std::string, std::string>>& defines, std::function<void()> const& onFinished)
 {
 	m_state = State::Assembling;
 
@@ -42,6 +42,9 @@ bool AssemblerPanel::BeginAssembleAsync(const std::string& assembler, const std:
 	std::string commandLine = GenerateCommandLine(assembler, filename, outname, includes, defines);
 	wxExecuteEnv env;
 	env.cwd = ion::string::GetDirectory(filename);
+
+	m_textOutput->AppendText(commandLine);
+
 	if (wxExecute(commandLine, wxEXEC_ASYNC, m_compileRunner, &env) < 0)
 	{
 		m_textOutput->AppendText("Error starting assembler");
@@ -51,7 +54,7 @@ bool AssemblerPanel::BeginAssembleAsync(const std::string& assembler, const std:
 	return true;
 }
 
-bool AssemblerPanel::AssembleBlocking(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines)
+bool AssemblerPanel::AssembleBlocking(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::pair<std::string, std::string>>& defines)
 {
 	m_textOutput->Clear();
 	m_onFinished = nullptr;
@@ -60,10 +63,13 @@ bool AssemblerPanel::AssembleBlocking(const std::string& assembler, const std::s
 	m_currentFilename = filename;
 	m_state = State::Assembling;
 
-	std::string compileCmd = GenerateCommandLine(assembler, filename, outname, includes, defines);
+	std::string commandLine = GenerateCommandLine(assembler, filename, outname, includes, defines);
 	wxExecuteEnv env;
 	env.cwd = ion::string::GetDirectory(filename);
-	long compileResult = wxExecute(compileCmd, wxEXEC_SYNC, m_compileRunner, &env);
+
+	m_textOutput->AppendText(commandLine);
+
+	long compileResult = wxExecute(commandLine, wxEXEC_SYNC, m_compileRunner, &env);
 	if (compileResult < 0)
 	{
 		m_textOutput->AppendText("Error starting assembler");
@@ -82,18 +88,39 @@ bool AssemblerPanel::AssembleBlocking(const std::string& assembler, const std::s
 	return true;
 }
 
-std::string AssemblerPanel::GenerateCommandLine(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::string>& defines)
+std::string AssemblerPanel::GenerateCommandLine(const std::string& assembler, const std::string& filename, const std::string& outname, const std::vector<std::string>& includes, const std::vector<std::pair<std::string, std::string>>& defines)
 {
 	std::string cmdline;
 	std::string assemblyArgs;
 	std::string includeArgs;
+	std::string defineArgs;
+	std::string flags = "/p /c /zd /w /k ";
 
-	for (auto include : includes)
+	if (includes.size())
 	{
-		includeArgs += "/j " + include + "\\* ";
+		for (auto include : includes)
+		{
+			includeArgs += "/j " + include + "\\* ";
+		}
+
+		includeArgs += " ";
 	}
 
-	cmdline += assembler + " /p /c /zd /w /k " + includeArgs + " " + filename + "," + outname;
+	if (defines.size())
+	{
+		defineArgs += "/e ";
+
+		for(int i = 0; i < defines.size(); i++)
+		{
+			defineArgs += defines[i].first + "=" + defines[i].second;
+			if (i < (defines.size() - 1))
+				defineArgs += ";";
+		}
+
+		defineArgs += " ";
+	}
+
+	cmdline += assembler + " " + flags + includeArgs + defineArgs + filename + "," + outname;
 
 	return cmdline;
 }

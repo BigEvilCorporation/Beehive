@@ -2099,8 +2099,17 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 			ShowPanelAssembler();
 			if (AssemblerPanel* panel = GetAssemblerPanel())
 			{
+				//Write editor file - TODO: write equ pairs for camera pos, initial game state, etc
+				std::string sceneName = "SceneData_" + m_project->GetName() + "_" + m_project->GetEditingMap().GetName();
+				std::string editorFilename = ion::string::GetDirectory(assemblyFile) + "\\BEEHIVE.ASM";
+				ion::io::File* editorFile = new ion::io::File(editorFilename, ion::io::File::OpenMode::Write);
+				std::string beehiveScene = "BEEHIVE_SCENE\tequ " + sceneName;
+				editorFile->Write(beehiveScene.data(), beehiveScene.size());
+				editorFile->Close();
+				delete editorFile;
+
 				std::vector<std::string> includes;
-				std::vector<std::string> defines;
+				std::vector<std::pair<std::string,std::string>> defines;
 
 				includes.push_back(m_project->m_settings.Get("engineRootDir"));
 
