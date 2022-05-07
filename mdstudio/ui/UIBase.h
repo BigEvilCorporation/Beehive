@@ -85,48 +85,46 @@ class SpriteCanvas;
 #define wxID_BTN_MAP_CLEAR 1029
 #define wxID_BTN_MAP_RESIZE 1030
 #define wxID_BTN_MAP_EXPORT_BMP 1031
-#define wxID_BTN_TILES_IMPORT 1032
-#define wxID_BTN_TILES_CLEANUP 1033
-#define wxID_BTN_SPRITE_EDITOR 1034
-#define wxID_BTN_STAMPS_IMPORT 1035
-#define wxID_BTN_STAMPS_EXPORT_BMP 1036
-#define wxID_BTN_STAMPS_CLEANUP 1037
-#define wxID_BTN_COL_GEN_BEZIER 1038
-#define wxID_BTN_COL_TILES_CLEANUP 1039
-#define wxID_BTN_COL_MAP_CLEAR 1040
-#define wxID_BTN_GAME_OBJ_TYPES 1041
-#define wxID_MENU_ANIMATION_IMPORT 1042
-#define wxID_MENU_ANIMATION_EXPORT 1043
-#define wxID_MENU_ANIMATION_CONVERT_RELATIVE 1044
-#define wxID_BTN_CANCEL 1045
-#define wxID_TOOL_COL_ADDTERRAINBEZIER 1046
-#define wxID_TOOL_COL_EDITTERRAINBEZIER 1047
-#define wxID_TOOL_COL_DELETETERRAINBEZIER 1048
-#define wxID_TOOL_COL_PAINTSOLID 1049
-#define wxID_TOOL_GENERATETERRAIN 1050
-#define wxID_TOOL_SELECTSTAMP 1051
-#define wxID_TOOL_STAMP 1052
-#define wxID_TOOL_MOVESTAMP 1053
-#define wxID_TOOL_STAMPPICKER 1054
-#define wxID_TOOL_CREATESTAMP 1055
-#define wxID_TOOL_REMOVESTAMP 1056
-#define wxID_TOOL_COL_PAINTTERRAIN 1057
-#define wxID_TOOL_COL_PAINTHOLE 1058
-#define wxID_TOOL_COL_DELETETERRTILE 1059
-#define wxID_TOOL_SELECTTILE 1060
-#define wxID_TOOL_PAINT 1061
-#define wxID_TOOL_TILEPICKER 1062
-#define wxID_TOOL_FLIPX 1063
-#define wxID_TOOL_FLIPY 1064
-#define wxID_TOOL_FILL 1065
-#define wxID_TOOL_CLONE 1066
-#define wxID_TOOL_CREATE_SCENE_ANIM 1067
-#define wxID_TOOL_COPY_TO_NEW_MAP 1068
-#define wxID_TOOL_SELECTGAMEOBJ 1069
-#define wxID_TOOL_PLACEGAMEOBJ 1070
-#define wxID_TOOL_ANIMATEGAMEOBJ 1071
-#define wxID_TOOL_REMOVEGAMEOBJ 1072
-#define wxID_TOOL_DRAWGAMEOBJ 1073
+#define wxID_BTN_TILES_CLEANUP 1032
+#define wxID_BTN_SPRITE_EDITOR 1033
+#define wxID_BTN_STAMPS_EXPORT_BMP 1034
+#define wxID_BTN_STAMPS_CLEANUP 1035
+#define wxID_BTN_COL_GEN_BEZIER 1036
+#define wxID_BTN_COL_TILES_CLEANUP 1037
+#define wxID_BTN_COL_MAP_CLEAR 1038
+#define wxID_BTN_GAME_OBJ_TYPES 1039
+#define wxID_MENU_ANIMATION_IMPORT 1040
+#define wxID_MENU_ANIMATION_EXPORT 1041
+#define wxID_MENU_ANIMATION_CONVERT_RELATIVE 1042
+#define wxID_BTN_CANCEL 1043
+#define wxID_TOOL_COL_ADDTERRAINBEZIER 1044
+#define wxID_TOOL_COL_EDITTERRAINBEZIER 1045
+#define wxID_TOOL_COL_DELETETERRAINBEZIER 1046
+#define wxID_TOOL_COL_PAINTSOLID 1047
+#define wxID_TOOL_GENERATETERRAIN 1048
+#define wxID_TOOL_SELECTSTAMP 1049
+#define wxID_TOOL_STAMP 1050
+#define wxID_TOOL_MOVESTAMP 1051
+#define wxID_TOOL_STAMPPICKER 1052
+#define wxID_TOOL_CREATESTAMP 1053
+#define wxID_TOOL_REMOVESTAMP 1054
+#define wxID_TOOL_COL_PAINTTERRAIN 1055
+#define wxID_TOOL_COL_PAINTHOLE 1056
+#define wxID_TOOL_COL_DELETETERRTILE 1057
+#define wxID_TOOL_SELECTTILE 1058
+#define wxID_TOOL_PAINT 1059
+#define wxID_TOOL_TILEPICKER 1060
+#define wxID_TOOL_FLIPX 1061
+#define wxID_TOOL_FLIPY 1062
+#define wxID_TOOL_FILL 1063
+#define wxID_TOOL_CLONE 1064
+#define wxID_TOOL_CREATE_SCENE_ANIM 1065
+#define wxID_TOOL_COPY_TO_NEW_MAP 1066
+#define wxID_TOOL_SELECTGAMEOBJ 1067
+#define wxID_TOOL_PLACEGAMEOBJ 1068
+#define wxID_TOOL_ANIMATEGAMEOBJ 1069
+#define wxID_TOOL_REMOVEGAMEOBJ 1070
+#define wxID_TOOL_DRAWGAMEOBJ 1071
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class MainWindowBase
@@ -184,10 +182,8 @@ class MainWindowBase : public wxFrame
 		virtual void OnBtnMapClear( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapResize( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnMapExportBMP( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnTilesImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnTilesCleanup( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnSpriteEditor( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnBtnStampsImport( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnStampsExportBMPs( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnStampsCleanup( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnBtnColGenTerrainBezier( wxCommandEvent& event ) { event.Skip(); }
@@ -731,6 +727,7 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxStaticText* m_staticText51112;
 		wxButton* m_btnParseProject;
 		wxStaticText* m_staticText511;
+		wxStaticText* m_staticText5111;
 		wxStaticText* m_staticText51;
 		wxStaticText* m_staticText53;
 		wxStaticText* m_staticText531;
@@ -760,6 +757,7 @@ class ProjectSettingsDialogBase : public wxDialog
 	public:
 		wxDirPickerCtrl* m_dirPickerEngine;
 		wxDirPickerCtrl* m_dirPickerProject;
+		wxDirPickerCtrl* m_dirPickerStamps;
 		wxFilePickerCtrl* m_filePickerSpritesProj;
 		wxFilePickerCtrl* m_filePickerGameObjTypesFile;
 		wxFilePickerCtrl* m_filePickerReference;

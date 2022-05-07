@@ -141,6 +141,10 @@ public:
 	void UnlockRefresh();
 	bool IsRefreshLocked() const;
 
+	//Scan project directories
+	void ScanProject(const std::string& engineDir, const std::string& projectDir);
+	void ScanStamps(const std::string& stampsDir);
+
 	void OnPostInit();
 
 protected:

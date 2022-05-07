@@ -204,10 +204,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menubar1->Append( m_menuMap, wxT("Map") );
 
 	m_menuTiles = new wxMenu();
-	wxMenuItem* m_menuItemTilesImport;
-	m_menuItemTilesImport = new wxMenuItem( m_menuTiles, wxID_BTN_TILES_IMPORT, wxString( wxT("Import") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuTiles->Append( m_menuItemTilesImport );
-
 	wxMenuItem* m_menuItemTilesCleanup;
 	m_menuItemTilesCleanup = new wxMenuItem( m_menuTiles, wxID_BTN_TILES_CLEANUP, wxString( wxT("Cleanup") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuTiles->Append( m_menuItemTilesCleanup );
@@ -222,10 +218,6 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menubar1->Append( m_menuSprites, wxT("Sprites") );
 
 	m_menuStamps = new wxMenu();
-	wxMenuItem* m_menuItemStampsImport;
-	m_menuItemStampsImport = new wxMenuItem( m_menuStamps, wxID_BTN_STAMPS_IMPORT, wxString( wxT("Import") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuStamps->Append( m_menuItemStampsImport );
-
 	wxMenuItem* m_menuItemStampsExport;
 	m_menuItemStampsExport = new wxMenuItem( m_menuStamps, wxID_BTN_STAMPS_EXPORT_BMP, wxString( wxT("Export (.BMP)") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuStamps->Append( m_menuItemStampsExport );
@@ -324,10 +316,8 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapClear ), this, m_menuItemMapClear->GetId());
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapResize ), this, m_menuItemMapResize->GetId());
 	m_menuMap->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnMapExportBMP ), this, m_menuItemExportBitmap->GetId());
-	m_menuTiles->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnTilesImport ), this, m_menuItemTilesImport->GetId());
 	m_menuTiles->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnTilesCleanup ), this, m_menuItemTilesCleanup->GetId());
 	m_menuSprites->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnSpriteEditor ), this, m_menuItemSpritesEditor->GetId());
-	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsImport ), this, m_menuItemStampsImport->GetId());
 	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsExportBMPs ), this, m_menuItemStampsExport->GetId());
 	m_menuStamps->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnStampsCleanup ), this, m_menuItemStampsCleanup->GetId());
 	m_menuCollision->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnColGenTerrainBezier ), this, m_menuItemCollisionGenerate->GetId());
@@ -1894,6 +1884,16 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	m_dirPickerProject = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
 	fgSizer40->Add( m_dirPickerProject, 0, wxALL|wxEXPAND, 5 );
+
+
+	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText5111 = new wxStaticText( this, wxID_ANY, wxT("Stamps dir:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5111->Wrap( -1 );
+	fgSizer40->Add( m_staticText5111, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+
+	m_dirPickerStamps = new wxDirPickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	fgSizer40->Add( m_dirPickerStamps, 0, wxALL|wxEXPAND, 5 );
 
 
 	fgSizer40->Add( 0, 0, 1, wxEXPAND, 5 );

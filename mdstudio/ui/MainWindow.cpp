@@ -342,6 +342,378 @@ void MainWindow::SetProject(Project* project)
 	UnlockRefresh();
 }
 
+void MainWindow::ScanProject(const std::string& engineDir, const std::string& projectDir)
+{
+#if defined BEEHIVE_PLUGIN_LUMINARY
+	luminary::EntityParser entityParser;
+	std::vector<luminary::Entity> entities;
+	std::vector<std::string> directories;
+
+	directories.push_back(engineDir);
+	directories.push_back(projectDir);
+
+	if (entityParser.ParseDirectories(directories, entities))
+	{
+		for (int i = 0; i < entities.size(); i++)
+		{
+			//Find or add game object type
+			GameObjectType* gameObjectType = m_project->FindGameObjectType(entities[i].typeName);
+			if (!gameObjectType)
+			{
+				GameObjectTypeId gameObjectTypeId = m_project->AddGameObjectType();
+				gameObjectType = m_project->GetGameObjectType(gameObjectTypeId);
+				gameObjectType->SetName(entities[i].typeName);
+				gameObjectType->SetStatic(entities[i].isStatic);
+			}
+
+			//Clear script funcs
+			gameObjectType->ClearScriptFunctions();
+
+			//Add all variables as script variables, keep structures intact
+			int numScriptVariables = 0;
+
+			//Add all spawn data variables from entity and all components,
+			//but keep the original values (if they exist) and keep the order
+			int numConfigurableVariables = 0;
+
+			if (entities[i].isStatic)
+			{
+				//Static entities have no components
+				numConfigurableVariables = entities[i].params.size();
+				numScriptVariables = entities[i].params.size();
+			}
+			else
+			{
+				numConfigurableVariables = entities[i].spawnData.params.size();
+				numScriptVariables = entities[i].params.size();
+
+				for (int j = 0; j < entities[i].components.size(); j++)
+				{
+					numConfigurableVariables += entities[i].components[j].spawnData.params.size();
+					numScriptVariables += entities[i].components[j].params.size();
+				}
+			}
+
+			std::vector<GameObjectVariable> configurableVariables;
+			std::vector<GameObjectVariable> scriptVariables;
+			configurableVariables.resize(numConfigurableVariables);
+			scriptVariables.resize(numScriptVariables);
+
+			int configurableVarIdx = 0;
+			int scriptVarIdx = 0;
+
+			//Add entity script variables
+			for (int j = 0; j < entities[i].params.size(); j++, scriptVarIdx++)
+			{
+				scriptVariables[scriptVarIdx].m_name = entities[i].params[j].name;
+				scriptVariables[scriptVarIdx].m_tags = entities[i].params[j].tags;
+
+				switch (entities[i].params[j].size)
+				{
+				case luminary::ParamSize::Byte:
+					scriptVariables[scriptVarIdx].m_size = eSizeByte;
+					break;
+				case luminary::ParamSize::Word:
+					scriptVariables[scriptVarIdx].m_size = eSizeWord;
+					break;
+				case luminary::ParamSize::Long:
+					scriptVariables[scriptVarIdx].m_size = eSizeLong;
+					break;
+				}
+			}
+
+			//Add entity script functions
+			for (int j = 0; j < entities[i].scriptFuncs.size(); j++)
+			{
+				GameObjectScriptFunc scriptFunc;
+				scriptFunc.componentIdx = -1;
+				scriptFunc.name = entities[i].scriptFuncs[j].name;
+				scriptFunc.params = entities[i].scriptFuncs[j].params;
+				scriptFunc.returnType = entities[i].scriptFuncs[j].returnType;
+				scriptFunc.routine = entities[i].scriptFuncs[j].routine;
+
+				gameObjectType->AddScriptFunction(scriptFunc);
+			}
+
+			//Add entity spawn data variables
+			if (entities[i].isStatic)
+			{
+				//Static entity is just data
+				for (int j = 0; j < entities[i].params.size(); j++, configurableVarIdx++)
+				{
+					if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].params[j].name))
+					{
+						configurableVariables[configurableVarIdx] = *variable;
+					}
+					else
+					{
+						configurableVariables[configurableVarIdx].m_name = entities[i].params[j].name;
+					}
+
+					configurableVariables[configurableVarIdx].m_tags = entities[i].params[j].tags;
+
+					switch (entities[i].params[j].size)
+					{
+					case luminary::ParamSize::Byte:
+						configurableVariables[configurableVarIdx].m_size = eSizeByte;
+						break;
+					case luminary::ParamSize::Word:
+						configurableVariables[configurableVarIdx].m_size = eSizeWord;
+						break;
+					case luminary::ParamSize::Long:
+						configurableVariables[configurableVarIdx].m_size = eSizeLong;
+						break;
+					}
+				}
+			}
+			else
+			{
+				//Dynamic entity has separate spawn data structure
+				for (int j = 0; j < entities[i].spawnData.params.size(); j++, configurableVarIdx++)
+				{
+					if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].spawnData.params[j].name))
+					{
+						configurableVariables[configurableVarIdx] = *variable;
+					}
+					else
+					{
+						configurableVariables[configurableVarIdx].m_name = entities[i].spawnData.params[j].name;
+					}
+
+					configurableVariables[configurableVarIdx].m_tags = entities[i].spawnData.params[j].tags;
+
+					switch (entities[i].spawnData.params[j].size)
+					{
+					case luminary::ParamSize::Byte:
+						configurableVariables[configurableVarIdx].m_size = eSizeByte;
+						break;
+					case luminary::ParamSize::Word:
+						configurableVariables[configurableVarIdx].m_size = eSizeWord;
+						break;
+					case luminary::ParamSize::Long:
+						configurableVariables[configurableVarIdx].m_size = eSizeLong;
+						break;
+					}
+				}
+			}
+
+			for (int j = 0; j < entities[i].components.size(); j++)
+			{
+				//Add component script variables
+				for (int k = 0; k < entities[i].components[j].params.size(); k++, scriptVarIdx++)
+				{
+					scriptVariables[scriptVarIdx].m_name = entities[i].components[j].params[k].name;
+					scriptVariables[scriptVarIdx].m_componentIdx = j;
+					scriptVariables[scriptVarIdx].m_componentName = entities[i].components[j].name;
+					scriptVariables[scriptVarIdx].m_tags = entities[i].components[j].params[k].tags;
+
+					switch (entities[i].components[j].params[k].size)
+					{
+					case luminary::ParamSize::Byte:
+						scriptVariables[scriptVarIdx].m_size = eSizeByte;
+						break;
+					case luminary::ParamSize::Word:
+						scriptVariables[scriptVarIdx].m_size = eSizeWord;
+						break;
+					case luminary::ParamSize::Long:
+						scriptVariables[scriptVarIdx].m_size = eSizeLong;
+						break;
+					}
+				}
+
+				//Add component script functions
+				for (int k = 0; k < entities[i].components[j].scriptFuncs.size(); k++)
+				{
+					GameObjectScriptFunc scriptFunc;
+					scriptFunc.componentIdx = j;
+					scriptFunc.name = entities[i].components[j].scriptFuncs[k].name;
+					scriptFunc.params = entities[i].components[j].scriptFuncs[k].params;
+					scriptFunc.returnType = entities[i].components[j].scriptFuncs[k].returnType;
+					scriptFunc.routine = entities[i].components[j].scriptFuncs[k].routine;
+
+					if (std::find_if(gameObjectType->GetScriptFunctions().begin(), gameObjectType->GetScriptFunctions().end(),
+						[&](const GameObjectScriptFunc& lhs) { return lhs == scriptFunc; }) == gameObjectType->GetScriptFunctions().end())
+					{
+						gameObjectType->AddScriptFunction(scriptFunc);
+					}
+				}
+			}
+
+			//Add component spawn data variables
+			for (int j = 0; j < entities[i].components.size(); j++)
+			{
+				for (int k = 0; k < entities[i].components[j].spawnData.params.size(); k++, configurableVarIdx++, scriptVarIdx++)
+				{
+					if (GameObjectVariable* variable = gameObjectType->FindVariable(entities[i].components[j].spawnData.params[k].name))
+					{
+						configurableVariables[configurableVarIdx] = *variable;
+					}
+					else
+					{
+						configurableVariables[configurableVarIdx].m_name = entities[i].components[j].spawnData.params[k].name;
+					}
+
+					configurableVariables[configurableVarIdx].m_componentIdx = j;
+					configurableVariables[configurableVarIdx].m_componentName = entities[i].components[j].name;
+					configurableVariables[configurableVarIdx].m_tags = entities[i].components[j].spawnData.params[k].tags;
+
+					switch (entities[i].components[j].spawnData.params[k].size)
+					{
+					case luminary::ParamSize::Byte:
+						configurableVariables[configurableVarIdx].m_size = eSizeByte;
+						break;
+					case luminary::ParamSize::Word:
+						configurableVariables[configurableVarIdx].m_size = eSizeWord;
+						break;
+					case luminary::ParamSize::Long:
+						configurableVariables[configurableVarIdx].m_size = eSizeLong;
+						break;
+					}
+				}
+			}
+
+			gameObjectType->ClearVariables();
+			gameObjectType->ClearScriptVariables();
+
+			for (int j = 0; j < numScriptVariables; j++)
+			{
+				gameObjectType->AddScriptVariable(scriptVariables[j]);
+			}
+
+			for (int j = 0; j < numConfigurableVariables; j++)
+			{
+				gameObjectType->AddVariable() = configurableVariables[j];
+			}
+		}
+	}
+#endif
+}
+
+void EnumerateDirectory(const wxString path, const wxString filespec, wxArrayString& filenames)
+{
+	wxDir dir(path);
+	wxString filename;
+	bool next = dir.GetFirst(&filename, filespec, wxDIR_FILES | wxDIR_NO_FOLLOW);
+	while (next)
+	{
+		filenames.Add(filename);
+		next = dir.GetNext(&filename);
+	}
+}
+
+void MainWindow::ScanStamps(const std::string& stampsDir)
+{
+	SetStatusText("Importing stamps...");
+
+	//Importing from stamp(s)
+	u32 flags = Project::eTileImportToStamp | Project::eTileImportReplaceStamp;
+
+	//Only palette 0 supported for now
+	u32 palettes = 1;
+
+	std::vector<std::string> filenames;
+
+	//Enumerate all files in directory
+	wxString directoryPath = stampsDir;
+	wxArrayString dirList;
+	EnumerateDirectory(directoryPath, "*.bmp", dirList);
+	EnumerateDirectory(directoryPath, "*.png", dirList);
+
+	for (auto filename : dirList)
+	{
+		//Get stamp name
+		std::string stampName = filename;
+
+		const size_t lastSlash = stampName.find_last_of('\\');
+		if (std::string::npos != lastSlash)
+		{
+			stampName.erase(0, lastSlash + 1);
+		}
+
+		// Remove extension if present.
+		const size_t period = stampName.rfind('.');
+		if (std::string::npos != period)
+		{
+			stampName.erase(period);
+		}
+
+		//If only to import existing, stamp by this name must already exist
+		if (!(flags & Project::eTileImportOnlyExistingStamps) || m_project->FindStamp(stampName))
+		{
+			filenames.push_back(filename.c_str().AsChar());
+		}
+	}
+
+	//Warn if any previously imported stamps are now missing
+	std::vector<std::string> missingFiles;
+	for (auto stamp : m_project->GetStamps())
+	{
+		if (!ion::utils::stl::Find(filenames, stamp.second.GetName()))
+		{
+			missingFiles.push_back(stamp.second.GetName());
+		}
+	}
+
+	if (missingFiles.size())
+	{
+		std::string message = "The following stamps are missing from " + directoryPath + ":\n";
+
+		for (auto name : missingFiles)
+		{
+			message += name + "\n";
+		}
+
+		message += "\nDelete missing stamps?";
+
+		if (wxMessageBox("Clear existing animations?", "Import Animations", wxYES | wxCANCEL | wxICON_WARNING) == wxCANCEL)
+		{
+			return;
+		}
+
+		for (auto name : missingFiles)
+		{
+			if (Stamp* stamp = m_project->FindStamp(name))
+			{
+				m_project->DeleteStamp(stamp->GetId());
+			}
+		}
+	}
+
+	for (int i = 0; i < filenames.size(); i++)
+	{
+		std::string stampName = filenames[i];
+
+		const size_t lastSlash = stampName.find_last_of('\\');
+		if (std::string::npos != lastSlash)
+		{
+			stampName.erase(0, lastSlash + 1);
+		}
+
+		// Remove extension if present.
+		const size_t period = stampName.rfind('.');
+		if (std::string::npos != period)
+		{
+			stampName.erase(period);
+		}
+
+		Stamp* stampToReplace = m_project->FindStamp(stampName);
+
+		std::string filename = directoryPath + "\\" + filenames[i];
+		m_project->ImportBitmap(filename, flags, palettes, stampToReplace);
+	}
+
+	//Refresh tileset
+	RefreshTileset();
+
+	//Refresh collison tileset
+	RefreshTerrainTileset();
+
+	//Refresh whole application
+	RefreshAll();
+
+	SetStatusText("Import complete");
+}
+
 void MainWindow::SetPanelCaptions()
 {
 	if(m_tilesPanel.get())
@@ -1687,9 +2059,12 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 		const std::string animsExportDir = projectRootDir + "\\DATA\\ANIMS\\";
 		const std::string entitiesExportDir = projectRootDir + "\\DATA\\ENTITIES\\";
 		const std::string palettesExportDir = projectRootDir + "\\DATA\\PALETTES\\";
-		const std::string scenesExportDir = projectRootDir + "\\DATA\\SCENES\\" + m_project->GetName();
+		const std::string scenesRootDir = projectRootDir + "\\DATA\\SCENES\\";
+		const std::string scenesExportDir = scenesRootDir + m_project->GetName();
 		const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
 		const std::string spritesExportDir = projectRootDir + "\\DATA\\SPRITES\\";
+
+		const std::string scenesExportDirRelative = "data/scenes/" + m_project->GetName() + "/";
 
 		const std::string scriptsOffsetsTableFilename = scriptsExportDir + "OFFSETS.ASM";
 
@@ -2093,6 +2468,9 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 			m_project->WriteIncludeFile(projectRootDir, scenesExportDir, "INCLUDE.ASM", includeFilenames, true);
 		}
 
+		//Append to master include file
+		m_project->AppendMasterIncludeFile(projectRootDir, scenesExportDirRelative, "include.asm", scenesRootDir, "INCLUDE.ASM");
+
 		//Assemble and run
 		const std::string assembler = m_project->m_settings.Get("assembler");
 		const std::string assemblyFile = m_project->m_settings.Get("assemblyFile");
@@ -2466,18 +2844,6 @@ void MainWindow::OnBtnTilesImport(wxCommandEvent& event)
 #endif
 }
 
-void EnumerateDirectory(const wxString path, const wxString filespec, wxArrayString& filenames)
-{
-	wxDir dir(path);
-	wxString filename;
-	bool next = dir.GetFirst(&filename, filespec, wxDIR_FILES | wxDIR_NO_FOLLOW);
-	while (next)
-	{
-		filenames.Add(filename);
-		next = dir.GetNext(&filename);
-	}
-}
-
 void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 {
 	if (m_project.get())
@@ -2485,10 +2851,10 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 		ImportStampsDialog dialog(this);
 
 		std::string projectRoot = m_project->m_settings.Get("projectRootDir");
-		std::string stampsDir = m_project->m_settings.Get("stampsDir");
+		std::string stampsDir = m_project->m_settings.GetAbsolutePath("stampsDir");
 		if (projectRoot.size() && stampsDir.size())
 		{
-			dialog.m_dirStamps->SetPath(projectRoot + "/" + stampsDir);
+			dialog.m_dirStamps->SetPath(stampsDir);
 			dialog.m_radioStampDir->SetValue(true);
 			dialog.m_chkReplaceStamps->SetValue(true);
 		}
@@ -2560,7 +2926,7 @@ void MainWindow::OnBtnStampsImport(wxCommandEvent& event)
 				if (projectRoot.size())
 				{
 					stampsDir = ion::string::RemoveSubstring(directoryPath.c_str().AsChar(), projectRoot);
-					m_project->m_settings.Set("stampsDir", stampsDir);
+					m_project->m_settings.SetAbsolutePath("stampsDir", stampsDir);
 				}
 			}
 			else if(dialog.m_radioSingleStamp->GetValue())

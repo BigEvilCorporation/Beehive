@@ -171,7 +171,8 @@ void StampsPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 		if (const Stamp* stamp = m_project.GetStamp(selectedStamp))
 		{
 			std::stringstream tipStr;
-			tipStr << "Stamp 0x" << SSTREAM_HEX4(selectedStamp) << " (" << selectedStamp << ")" << std::endl;
+			tipStr << "Stamp " << stamp->GetName() << std::endl;
+			tipStr << "Index 0x" << SSTREAM_HEX4(selectedStamp) << " (" << selectedStamp << ")" << std::endl;
 			tipStr << "Size: " << stamp->GetWidth() << ", " << stamp->GetHeight() << std::endl;
 			tipStr << "Addr: 0x" << SSTREAM_HEX8(selectedStamp * tileWidth * tileHeight * 2) << std::endl;
 			SetToolTip(tipStr.str().c_str());
