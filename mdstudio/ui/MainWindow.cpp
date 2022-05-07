@@ -1583,6 +1583,12 @@ void MainWindow::OnBtnProjNew(wxCommandEvent& event)
 			}
 
 			SetProject(new Project(config));
+
+			//Show settings immediately
+			ProjectSettingsDialog settingsDlg(*this, *m_project, *m_renderResources);
+			settingsDlg.ShowModal();
+			RefreshPanel(ePanelGameObjectTypes);
+			RefreshPanel(ePanelGameObjectParams);
 		}
 	}
 }
