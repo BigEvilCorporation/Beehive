@@ -544,6 +544,7 @@ void PropertyPanel::SetPrefabChild(GameObjectTypeId rootTypeId, GameObjectId roo
 void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectType* gameObjectType, const GameObjectVariable& variable, int componentIdx, const Actor* actor, const GameObjectVariable* spriteSheetVar, bool enabled)
 {
 	wxPGProperty* property = nullptr;
+	bool selectionValid = true;
 
 	std::string propName = componentIdx == -1 ? gameObjectType->GetName() : variable.m_componentName;
 	propName += "_" + variable.m_name + "_" + std::to_string(componentIdx);
@@ -567,6 +568,7 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 			//Add a blank entry
 			choiceProp->AddChoice("[none]");
 			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+			selectionValid = false;
 		}
 	}
 	else if (variable.HasTag("SPRITE_SHEET"))
@@ -589,6 +591,7 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 			//Add a blank entry
 			choiceProp->AddChoice("[none]");
 			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+			selectionValid = false;
 		}
 	}
 	else if (variable.HasTag("SPRITE_ANIM"))
@@ -622,6 +625,7 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 			//Add a blank entry
 			choiceProp->AddChoice("[none]");
 			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+			selectionValid = false;
 		}
 	}
 	else if (variable.HasTag("ENTITY_DESC"))
@@ -640,6 +644,7 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 			//Add a blank entry
 			choiceProp->AddChoice("[none]");
 			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+			selectionValid = false;
 		}
 	}
 	else if (variable.HasTag("ENTITY_ARCHETYPE"))
@@ -674,6 +679,7 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 			//Add a blank entry
 			choiceProp->AddChoice("[none]");
 			choiceProp->SetChoiceSelection(choiceProp->GetChoices().GetCount() - 1);
+			selectionValid = false;
 		}
 	}
 	else
@@ -690,7 +696,11 @@ void PropertyPanel::AddProperty(const GameObject* gameObject, const GameObjectTy
 		property->SetAttribute("variableSize", variable.m_size);
 		property->SetAttribute("variable", wxVariant((void*)&variable));
 		property->SetAttribute("isScript", variable.HasTag("SCRIPT_DATA"));
+
 		m_propertyGrid->Append(property);
+
+		if (!selectionValid)
+			property->SetBackgroundColour(*wxRED);
 	}
 }
 
