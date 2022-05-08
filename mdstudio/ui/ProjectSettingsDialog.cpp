@@ -30,14 +30,19 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	, m_mainWindow(mainWindow)
 {
 	m_textProjectName->SetValue(m_project.GetName());
+
+	//Absolute paths
 	m_dirPickerProject->SetPath(m_project.m_settings.Get("projectRootDir"));
 	m_dirPickerEngine->SetPath(m_project.m_settings.Get("engineRootDir"));
-	m_dirPickerStamps->SetPath(m_project.m_settings.Get("stampsDir"));
-	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.Get("gameObjectsExternalFile"));
-	m_filePickerSpritesProj->SetPath(m_project.m_settings.Get("spriteActorsExternalFile"));
 	m_filePickerAssembler->SetPath(m_project.m_settings.Get("assembler"));
 	m_filePickerAssemblyFile->SetPath(m_project.m_settings.Get("assemblyFile"));
 	m_filePickerEmulator->SetPath(m_project.m_settings.Get("emulator"));
+
+	//Relative paths
+	m_dirPickerStamps->SetPath(m_project.m_settings.GetAbsolutePath("stampsDir"));
+	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.GetAbsolutePath("gameObjectsExternalFile"));
+	m_filePickerSpritesProj->SetPath(m_project.m_settings.GetAbsolutePath("spriteActorsExternalFile"));
+
 	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
 	m_spinStampHeight->SetValue(m_project.GetPlatformConfig().stampHeight);
 
@@ -118,7 +123,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 		buildSpriteResources = true;
 	}
 
-	if (m_project.m_settings.Get("spriteActorsExternalFile") != spritesFile)
+	if (m_project.m_settings.GetAbsolutePath("spriteActorsExternalFile") != spritesFile)
 	{
 		if (!spritesFile.empty())
 		{
@@ -133,7 +138,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 		buildSpriteResources = true;
 	}
 
-	if (stampsDir != m_project.m_settings.Get("stampsDir"))
+	if (stampsDir != m_project.m_settings.GetAbsolutePath("stampsDir"))
 	{
 		if (wxMessageBox("Stamps directory has changed, would you like to re-scan for stamps?", "Scan for stamps", wxOK | wxCANCEL) == wxOK)
 		{
