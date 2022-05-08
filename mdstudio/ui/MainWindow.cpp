@@ -118,6 +118,9 @@ MainWindow::MainWindow()
 	//Maximize
 	Maximize();
 
+	//Recent recents
+	RestoreRecentProjects();
+
 	//Get window size
 	GetSize(&m_width, &m_height);
 
@@ -765,6 +768,43 @@ void MainWindow::RestoreWindowLayout()
 wxString MainWindow::GetWindowLayoutConfig() const
 {
 	return wxStandardPaths::Get().GetUserConfigDir() + "/BigEvilCorporation/Beehive/layout.cfg";
+}
+
+void MainWindow::AddRecentProject(const std::string& project)
+{
+	m_recentProjects.insert(m_recentProjects.begin(), project);
+	if (m_recentProjects.size() > s_maxRecentProjects)
+		m_recentProjects.pop_back();
+
+	wxFileName filename(GetRecentFilesConfig());
+
+	ion::io::File file;
+	if (file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::OpenMode::Write))
+	{
+		ion::io::Archive archive(file, ion::io::Archive::Direction::Out);
+		archive.Serialise(m_recentProjects);
+		file.Close();
+	}
+}
+
+void MainWindow::RestoreRecentProjects()
+{
+	wxFileName filename(GetRecentFilesConfig());
+
+	ion::io::File file;
+	if (file.Open(filename.GetFullPath().c_str().AsChar(), ion::io::File::OpenMode::Read))
+	{
+		ion::io::Archive archive(file, ion::io::Archive::Direction::In);
+		archive.Serialise(m_recentProjects);
+		file.Close();
+	}
+
+	//m_menuOpenRecent->Insert()
+}
+
+wxString MainWindow::GetRecentFilesConfig() const
+{
+	return wxStandardPaths::Get().GetUserConfigDir() + "/BigEvilCorporation/Beehive/recent.cfg";
 }
 
 void MainWindow::ShowPanelSceneExplorer()
@@ -2024,491 +2064,519 @@ void MainWindow::OnBtnProjSettings(wxCommandEvent& event)
 	}
 }
 
-void MainWindow::OnBtnProjExport(wxCommandEvent& event)
+void MainWindow::OnBtnBuildExport(wxCommandEvent& event)
+{
+	Build(true, false, false);
+}
+
+void MainWindow::OnBtnBuildAssemble(wxCommandEvent& event)
+{
+	Build(true, true, false);
+}
+
+void MainWindow::OnBtnBuildRun(wxCommandEvent& event)
+{
+	Build(true, true, true);
+}
+
+void MainWindow::Build(bool exportProj, bool assemble, bool run)
 {
 	if(m_project.get())
 	{
 #if defined BEEHIVE_PLUGIN_LUMINARY
-		luminary::TilesetExporter tilesetExporter;
-		luminary::EntityExporter entityExporter;
-		luminary::SceneExporter sceneExporter;
-		luminary::MapExporter mapExporter;
-		luminary::PaletteExporter paletteExporter;
-		luminary::TerrainExporter terrainExporter;
-		luminary::ScriptTranspiler scriptTranspiler;
-		luminary::ScriptCompiler scriptCompiler;
-
-		const std::string engineRootDir = m_project->m_settings.Get("engineRootDir");
-		const std::string projectRootDir = m_project->m_settings.Get("projectRootDir");
-
-		const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
-		const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
-
-		const std::string animsExportDir = projectRootDir + "\\DATA\\ANIMS\\";
-		const std::string entitiesExportDir = projectRootDir + "\\DATA\\ENTITIES\\";
-		const std::string palettesExportDir = projectRootDir + "\\DATA\\PALETTES\\";
-		const std::string scenesRootDir = projectRootDir + "\\DATA\\SCENES\\";
-		const std::string scenesExportDir = scenesRootDir + m_project->GetName();
-		const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
-		const std::string spritesExportDir = projectRootDir + "\\DATA\\SPRITES\\";
-
-		const std::string scenesExportDirRelative = "data/scenes/" + m_project->GetName() + "/";
-
-		const std::string scriptsOffsetsTableFilename = scriptsExportDir + "OFFSETS.ASM";
-
-		if (ion::io::FileDevice* fileDevice = ion::io::FileDevice::GetDefault())
+		if (exportProj)
 		{
-			fileDevice->CreateDirectory(animsExportDir);
-			fileDevice->CreateDirectory(entitiesExportDir);
-			fileDevice->CreateDirectory(palettesExportDir);
-			fileDevice->CreateDirectory(scenesExportDir);
-			fileDevice->CreateDirectory(scriptsExportDir);
-			fileDevice->CreateDirectory(spritesExportDir);
-		}
+			luminary::TilesetExporter tilesetExporter;
+			luminary::EntityExporter entityExporter;
+			luminary::SceneExporter sceneExporter;
+			luminary::MapExporter mapExporter;
+			luminary::PaletteExporter paletteExporter;
+			luminary::TerrainExporter terrainExporter;
+			luminary::ScriptTranspiler scriptTranspiler;
+			luminary::ScriptCompiler scriptCompiler;
 
-		std::vector<Project::IncludeFile> includeFilenames;
-		std::vector<Project::IncludeFile> scriptIncludes;
+			const std::string engineRootDir = m_project->m_settings.Get("engineRootDir");
+			const std::string projectRootDir = m_project->m_settings.Get("projectRootDir");
 
-		//Convert script entities
-		std::vector<const GameObjectType*> objTypesWithScripts;
-		std::vector<luminary::Entity> entitiesWithScripts;
-		std::vector<luminary::Component> components;
-		luminary::ScriptAddressMap scriptAddresses;
+			const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
+			const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
 
-		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
-		{
-			//Convert to luminary entity
-			luminary::Entity entity;
-			luminary::beehive::ConvertEntityType(*m_project, typeIt->second, entity);
+			const std::string animsExportDir = projectRootDir + "\\DATA\\ANIMS\\";
+			const std::string entitiesExportDir = projectRootDir + "\\DATA\\ENTITIES\\";
+			const std::string palettesExportDir = projectRootDir + "\\DATA\\PALETTES\\";
+			const std::string scenesRootDir = projectRootDir + "\\DATA\\SCENES\\";
+			const std::string scenesExportDir = scenesRootDir + m_project->GetName();
+			const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
+			const std::string spritesExportDir = projectRootDir + "\\DATA\\SPRITES\\";
 
-			//Add all components
-			for (auto component : entity.components)
+			const std::string scenesExportDirRelative = "data/scenes/" + m_project->GetName() + "/";
+
+			const std::string scriptsOffsetsTableFilename = scriptsExportDir + "OFFSETS.ASM";
+
+			if (ion::io::FileDevice* fileDevice = ion::io::FileDevice::GetDefault())
 			{
-				if (std::find_if(components.begin(), components.end(), [&](const luminary::Component& lhs) { return lhs.name == component.name; }) == components.end())
+				fileDevice->CreateDirectory(animsExportDir);
+				fileDevice->CreateDirectory(entitiesExportDir);
+				fileDevice->CreateDirectory(palettesExportDir);
+				fileDevice->CreateDirectory(scenesExportDir);
+				fileDevice->CreateDirectory(scriptsExportDir);
+				fileDevice->CreateDirectory(spritesExportDir);
+			}
+
+			std::vector<Project::IncludeFile> includeFilenames;
+			std::vector<Project::IncludeFile> scriptIncludes;
+
+			//Convert script entities
+			std::vector<const GameObjectType*> objTypesWithScripts;
+			std::vector<luminary::Entity> entitiesWithScripts;
+			std::vector<luminary::Component> components;
+			luminary::ScriptAddressMap scriptAddresses;
+
+			for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
+			{
+				//Convert to luminary entity
+				luminary::Entity entity;
+				luminary::beehive::ConvertEntityType(*m_project, typeIt->second, entity);
+
+				//Add all components
+				for (auto component : entity.components)
 				{
-					components.push_back(component);
+					if (std::find_if(components.begin(), components.end(), [&](const luminary::Component& lhs) { return lhs.name == component.name; }) == components.end())
+					{
+						components.push_back(component);
+					}
+				}
+
+				//If entity has a script, mark for script compile
+				bool hasScript = false;
+				for (auto variable : typeIt->second.GetVariables())
+				{
+					if (variable.HasTag("SCRIPT_DATA"))
+					{
+						entitiesWithScripts.push_back(entity);
+						objTypesWithScripts.push_back(&typeIt->second);
+						break;
+					}
 				}
 			}
 
-			//If entity has a script, mark for script compile
-			bool hasScript = false;
-			for (auto variable : typeIt->second.GetVariables())
+			//Generate script boilerplate
+			scriptTranspiler.GenerateComponentCppHeader(components, scriptsSourceDir);
+
+			for (auto entity : entitiesWithScripts)
 			{
-				if (variable.HasTag("SCRIPT_DATA"))
-				{
-					entitiesWithScripts.push_back(entity);
-					objTypesWithScripts.push_back(&typeIt->second);
-					break;
-				}
+				scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
 			}
-		}
 
-		//Generate script boilerplate
-		scriptTranspiler.GenerateComponentCppHeader(components, scriptsSourceDir);
+			//Generate global function call table
+			std::vector<luminary::ScriptFunc> globalOffsetsTable;
+			scriptTranspiler.GenerateGlobalOffsetTable(entitiesWithScripts, components, globalOffsetsTable, scriptsOffsetsTableFilename);
+			scriptIncludes.push_back(Project::IncludeFile{ "script_global_offsets_table", scriptsOffsetsTableFilename });
 
-		for (auto entity : entitiesWithScripts)
-		{
-			scriptTranspiler.GenerateEntityCppHeader(entity, scriptsSourceDir);
-		}
+			//Global offset table size as binary (longword per entry)
+			u16 globalOffsetTableSize = globalOffsetsTable.size() * sizeof(u32);
 
-		//Generate global function call table
-		std::vector<luminary::ScriptFunc> globalOffsetsTable;
-		scriptTranspiler.GenerateGlobalOffsetTable(entitiesWithScripts, components, globalOffsetsTable, scriptsOffsetsTableFilename);
-		scriptIncludes.push_back(Project::IncludeFile{ "script_global_offsets_table", scriptsOffsetsTableFilename });
+			//Compile scripts and collect script function addresses
+			wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
 
-		//Global offset table size as binary (longword per entry)
-		u16 globalOffsetTableSize = globalOffsetsTable.size() * sizeof(u32);
+			//Relative offset from end of global offset table to current script
+			u16 scriptOffsetRelease = 0;
+			u16 scriptOffsetDebug = 0;
 
-		//Compile scripts and collect script function addresses
-		wxProgressDialog scriptProgress("Compiling", "Compiling scripts...");
-
-		//Relative offset from end of global offset table to current script
-		u16 scriptOffsetRelease = 0;
-		u16 scriptOffsetDebug = 0;
-
-		for(int i = 0; i < objTypesWithScripts.size(); i++)
-		{
-			const GameObjectType* gameObjType = objTypesWithScripts[i];
-
-			if (scriptProgress.Update((100 / objTypesWithScripts.size()) * i))
+			for (int i = 0; i < objTypesWithScripts.size(); i++)
 			{
-				//Do all script compiling via UI panel
-				ShowPanelScriptCompile();
-				if (ScriptCompilePanel* panel = GetScriptCompilePanel())
+				const GameObjectType* gameObjType = objTypesWithScripts[i];
+
+				if (scriptProgress.Update((100 / objTypesWithScripts.size()) * i))
 				{
-					//Compile script
-					std::string scriptSourceFilename = gameObjType->GetName() + ".cpp";
-					std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
-
-					std::vector<std::string> includes;
-					includes.push_back(scriptsEngineIncludes);
-					includes.push_back(scriptsSourceDir);
-
-					//Compile release
-					std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp");
-					std::string scriptOutFullPathRelease = scriptsExportDir + scriptOutNameRelease;
-					std::vector<std::string> definesRelease;
-					definesRelease.push_back("_RELEASE");
-					if (!panel->CompileBlocking(scriptSourceFullPath, scriptOutFullPathRelease, includes, definesRelease))
+					//Do all script compiling via UI panel
+					ShowPanelScriptCompile();
+					if (ScriptCompilePanel* panel = GetScriptCompilePanel())
 					{
-						SetStatusText("Script compile error");
-						wxMessageBox("Error compiling scripts, see script log", "Error", wxOK | wxICON_INFORMATION);
-						return;
-					}
+						//Compile script
+						std::string scriptSourceFilename = gameObjType->GetName() + ".cpp";
+						std::string scriptSourceFullPath = scriptsSourceDir + "\\" + scriptSourceFilename;
 
-					//Link release
-					std::vector<luminary::ScriptRelocation> relocationTableRelease;
-					scriptCompiler.ReadRelocationTable(panel->GetSymbolOutput(), globalOffsetsTable, relocationTableRelease);
-					scriptOffsetRelease += scriptCompiler.LinkProgram(scriptOutFullPathRelease + ".bin", relocationTableRelease, globalOffsetTableSize, scriptOffsetRelease);
+						std::vector<std::string> includes;
+						includes.push_back(scriptsEngineIncludes);
+						includes.push_back(scriptsSourceDir);
 
-					//Compile debug
-					std::string scriptOutNameDebug = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp") + "_dbg";
-					std::string scriptOutFullPathDebug = scriptsExportDir + scriptOutNameDebug;
-					std::vector<std::string> definesDebug;
-					definesDebug.push_back("_DEBUG");
-					if (!panel->CompileBlocking(scriptSourceFullPath, scriptOutFullPathDebug, includes, definesDebug))
-					{
-						SetStatusText("Script compile error");
-						wxMessageBox("Error compiling scripts, see script log", "Error", wxOK | wxICON_INFORMATION);
-						return;
-					}
-
-					//Link debug
-					std::vector<luminary::ScriptRelocation> relocationTableDebug;
-					scriptCompiler.ReadRelocationTable(panel->GetSymbolOutput(), globalOffsetsTable, relocationTableDebug);
-					scriptOffsetDebug += scriptCompiler.LinkProgram(scriptOutFullPathDebug + ".bin", relocationTableDebug, globalOffsetTableSize, scriptOffsetDebug);
-
-					//Check output was written
-					std::string scriptDataFilename = gameObjType->GetName() + ".bin";
-					std::string scriptDataFullPath = scriptsExportDir + scriptDataFilename;
-
-					if (ion::io::FileDevice::GetDefault()->GetFileExists(scriptDataFullPath))
-					{
-						//Add binaries to include files
-						std::string scriptLabel = std::string("scriptdata_") + gameObjType->GetName();
-						std::string scriptFilenameRelease = scriptOutFullPathRelease + ".bin";
-						scriptIncludes.push_back(Project::IncludeFile { scriptLabel, scriptFilenameRelease, Project::IncludeExportFlags::ReleaseOnly });
-
-						std::string scriptFilenameDebug = scriptOutFullPathDebug + ".bin";
-						scriptIncludes.push_back(Project::IncludeFile{ scriptLabel, scriptFilenameDebug, Project::IncludeExportFlags::DebugOnly });
-
-						//Find all script function and variable addresses
-						for (auto variable : gameObjType->GetVariables())
+						//Compile release
+						std::string scriptOutNameRelease = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp");
+						std::string scriptOutFullPathRelease = scriptsExportDir + scriptOutNameRelease;
+						std::vector<std::string> definesRelease;
+						definesRelease.push_back("_RELEASE");
+						if (!panel->CompileBlocking(scriptSourceFullPath, scriptOutFullPathRelease, includes, definesRelease))
 						{
-							std::string name;
+							SetStatusText("Script compile error");
+							wxMessageBox("Error compiling scripts, see script log", "Error", wxOK | wxICON_INFORMATION);
+							return;
+						}
 
-							if (variable.FindTagValue("SCRIPTFUNC", name))
+						//Link release
+						std::vector<luminary::ScriptRelocation> relocationTableRelease;
+						scriptCompiler.ReadRelocationTable(panel->GetSymbolOutput(), globalOffsetsTable, relocationTableRelease);
+						scriptOffsetRelease += scriptCompiler.LinkProgram(scriptOutFullPathRelease + ".bin", relocationTableRelease, globalOffsetTableSize, scriptOffsetRelease);
+
+						//Compile debug
+						std::string scriptOutNameDebug = ion::string::RemoveSubstring(scriptSourceFilename, ".cpp") + "_dbg";
+						std::string scriptOutFullPathDebug = scriptsExportDir + scriptOutNameDebug;
+						std::vector<std::string> definesDebug;
+						definesDebug.push_back("_DEBUG");
+						if (!panel->CompileBlocking(scriptSourceFullPath, scriptOutFullPathDebug, includes, definesDebug))
+						{
+							SetStatusText("Script compile error");
+							wxMessageBox("Error compiling scripts, see script log", "Error", wxOK | wxICON_INFORMATION);
+							return;
+						}
+
+						//Link debug
+						std::vector<luminary::ScriptRelocation> relocationTableDebug;
+						scriptCompiler.ReadRelocationTable(panel->GetSymbolOutput(), globalOffsetsTable, relocationTableDebug);
+						scriptOffsetDebug += scriptCompiler.LinkProgram(scriptOutFullPathDebug + ".bin", relocationTableDebug, globalOffsetTableSize, scriptOffsetDebug);
+
+						//Check output was written
+						std::string scriptDataFilename = gameObjType->GetName() + ".bin";
+						std::string scriptDataFullPath = scriptsExportDir + scriptDataFilename;
+
+						if (ion::io::FileDevice::GetDefault()->GetFileExists(scriptDataFullPath))
+						{
+							//Add binaries to include files
+							std::string scriptLabel = std::string("scriptdata_") + gameObjType->GetName();
+							std::string scriptFilenameRelease = scriptOutFullPathRelease + ".bin";
+							scriptIncludes.push_back(Project::IncludeFile{ scriptLabel, scriptFilenameRelease, Project::IncludeExportFlags::ReleaseOnly });
+
+							std::string scriptFilenameDebug = scriptOutFullPathDebug + ".bin";
+							scriptIncludes.push_back(Project::IncludeFile{ scriptLabel, scriptFilenameDebug, Project::IncludeExportFlags::DebugOnly });
+
+							//Find all script function and variable addresses
+							for (auto variable : gameObjType->GetVariables())
 							{
-								int address = scriptCompiler.FindFunctionOffset(panel->GetSymbolOutput(), gameObjType->GetName(), name);
-								if (address >= 0)
+								std::string name;
+
+								if (variable.FindTagValue("SCRIPTFUNC", name))
 								{
-									luminary::ScriptAddress addr;
-									addr.name = name;
-									addr.address = address;
-									scriptAddresses[gameObjType->GetName()].push_back(addr);
+									int address = scriptCompiler.FindFunctionOffset(panel->GetSymbolOutput(), gameObjType->GetName(), name);
+									if (address >= 0)
+									{
+										luminary::ScriptAddress addr;
+										addr.name = name;
+										addr.address = address;
+										scriptAddresses[gameObjType->GetName()].push_back(addr);
+									}
+								}
+								else if (variable.FindTagValue("SCRIPTGLOBAL", name))
+								{
+									int address = scriptCompiler.FindGlobalVarOffset(panel->GetSymbolOutput(), name);
+									if (address >= 0)
+									{
+										luminary::ScriptAddress addr;
+										addr.name = name;
+										addr.address = address;
+										scriptAddresses[gameObjType->GetName()].push_back(addr);
+									}
 								}
 							}
-							else if(variable.FindTagValue("SCRIPTGLOBAL", name))
-							{
-								int address = scriptCompiler.FindGlobalVarOffset(panel->GetSymbolOutput(), name);
-								if (address >= 0)
-								{
-									luminary::ScriptAddress addr;
-									addr.name = name;
-									addr.address = address;
-									scriptAddresses[gameObjType->GetName()].push_back(addr);
-								}
-							}
 						}
 					}
 				}
-			}
-			else
-			{
-				//Cancelled
-				return;
-			}
-		}
-
-		scriptProgress.Update(100);
-
-		if (scriptIncludes.size() > 0)
-		{
-			m_project->WriteIncludeFile(projectRootDir, scriptsExportDir, "SCRIPTS.ASM", scriptIncludes, true);
-		}
-
-		//Export entity archetypes
-		std::vector<luminary::Archetype> archetypes;
-
-		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
-		{
-			for (TGameObjectArchetypeMap::const_iterator archIt = typeIt->second.GetArchetypes().begin(), archEnd = typeIt->second.GetArchetypes().end(); archIt != archEnd; ++archIt)
-			{
-				luminary::Archetype archetype;
-				luminary::beehive::ConvertArchetype(*m_project, archIt->second, scriptAddresses, archetype);
-				archetypes.push_back(archetype);
-			}
-		}
-
-		std::string archetypesFilename = entitiesExportDir + "ARCHTYPS.ASM";
-		entityExporter.ExportArchetypes(archetypesFilename, archetypes);
-
-		//Export entity prefabs
-		std::vector<luminary::Prefab> prefabs;
-
-		for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
-		{
-			//If entity is prefab, mark for export
-			if (typeIt->second.IsPrefabType())
-			{
-				luminary::Prefab prefab;
-				luminary::beehive::ConvertPrefabType(*m_project, typeIt->second, prefab);
-				prefabs.push_back(prefab);
-			}
-		}
-
-		std::string prefabsFilename = entitiesExportDir + "PREFABS.ASM";
-		entityExporter.ExportPrefabs(prefabsFilename, prefabs);
-
-		//Export sprite data
-		// TODO: Luminary (binary) data formats
-		m_project->ExportSpriteSheets(spritesExportDir, Project::ExportFormat::BinaryCompressed);
-		m_project->ExportSpriteAnims(animsExportDir, Project::ExportFormat::BinaryCompressed);
-		m_project->ExportSpritePalettes(palettesExportDir);
-
-		//Export luminary palettes
-		int numPalettes = 0;
-		std::string palettesLabel = std::string("palettes_") + m_project->GetName();
-		std::string palettesFilename = scenesExportDir + "\\" + "PALETTES.ASM";
-		if (m_project->GetNumPalettes() > 0)
-		{
-			std::vector<Palette> palettes;
-
-			for (int i = 0; i < m_project->GetNumPalettes(); i++)
-			{
-				if (m_project->GetPalette(i)->GetUsedColourMask() > 0)
+				else
 				{
-					palettes.push_back(*m_project->GetPalette(i));
-				}
-			}
-
-			if (paletteExporter.ExportPalettes(palettesFilename, palettes))
-			{
-				includeFilenames.push_back(Project::IncludeFile { palettesLabel, palettesFilename, Project::IncludeExportFlags::None });
-			}
-
-			numPalettes = palettes.size();
-		}
-
-		//Export Luminary tileset
-		std::string tilesetLabel = std::string("tileset_") + m_project->GetName();
-		std::string tilesetFilename = scenesExportDir + "\\" + "GTILES.BIN";
-		if (tilesetExporter.ExportTileset(tilesetFilename, m_project->GetTileset()))
-		{
-			includeFilenames.push_back(Project::IncludeFile { tilesetLabel, tilesetFilename, Project::IncludeExportFlags::None });
-		}
-
-		//Export Luminary stamp set
-		m_project->CompactStampIds();
-		std::vector<Stamp> stamps;
-		for (int i = 0; i < m_project->GetStampCount(); i++)
-		{
-			if (const Stamp* stamp = m_project->GetStamp(i))
-			{
-				stamps.push_back(*stamp);
-			}
-		}
-
-		std::string stampsetLabel = std::string("stampset_") + m_project->GetName();
-		std::string stampsetFilename = scenesExportDir + "\\" + "GSTAMPS.BIN";
-		if (tilesetExporter.ExportStamps(stampsetFilename, stamps, m_project->GetTileset(), m_project->GetBackgroundTile()))
-		{
-			includeFilenames.push_back(Project::IncludeFile { stampsetLabel, stampsetFilename, Project::IncludeExportFlags::None });
-		}
-
-		//Export Luminary maps
-		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
-		{
-			const Map& map = m_project->GetMap(it->first);
-			std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
-			std::string mapFilename = scenesExportDir + "\\G" + ion::string::ToUpper(map.GetName()) + ".BIN";
-			StampId backgroundStamp = m_project->GetBackgroundStamp() == InvalidStampId ? 0 : m_project->GetBackgroundStamp();
-			if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight, backgroundStamp))
-			{
-				includeFilenames.push_back(Project::IncludeFile { mapLabel, mapFilename, Project::IncludeExportFlags::None });
-			}
-		}
-
-		//Export Luminary terrain tileset
-		std::string terrainTilesetLabel = std::string("collision_tileset_") + m_project->GetName();
-		std::string terrainTilesetFilename = scenesExportDir + "\\" + "CTILES.BIN";
-		if (terrainExporter.ExportTerrainTileset(terrainTilesetFilename, m_project->GetTerrainTileset(), m_project->GetPlatformConfig().tileWidth))
-		{
-			includeFilenames.push_back(Project::IncludeFile{  terrainTilesetLabel, terrainTilesetFilename, Project::IncludeExportFlags::None });
-		}
-
-		//Export Luminary terrain stamps
-		std::string terrainStampsetLabel = std::string("collision_stampset_") + m_project->GetName();
-		std::string terrainStampsetFilename = scenesExportDir + "\\" + "CSTAMPS.BIN";
-		if (terrainExporter.ExportTerrainStamps(terrainStampsetFilename, stamps, m_project->GetTerrainTileset(), m_project->GetDefaultTerrainTile()))
-		{
-			includeFilenames.push_back(Project::IncludeFile { terrainStampsetLabel, terrainStampsetFilename, Project::IncludeExportFlags::None });
-		}
-
-		//Export Luminary terrain maps
-		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
-		{
-			const Map& map = m_project->GetMap(it->first);
-			std::string terrainMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + map.GetName();
-			std::string terrainMapFilename = scenesExportDir + "\\C" + ion::string::ToUpper(map.GetName()) + ".BIN";
-			if (terrainExporter.ExportTerrainMap(terrainMapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
-			{
-				includeFilenames.push_back(Project::IncludeFile { terrainMapLabel, terrainMapFilename, Project::IncludeExportFlags::None });
-			}
-		}
-
-		//Find background map
-		MapId backgroundMapId = InvalidMapId;
-
-		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end && backgroundMapId == InvalidMapId; ++it)
-		{
-			if (it->second.IsBackgroundMap())
-			{
-				backgroundMapId = it->first;
-			}
-		}
-
-		//Export Luminary scenes
-		for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
-		{
-			//Ignore background map
-			if (it->first != backgroundMapId)
-			{
-				const Map& mapFg = m_project->GetMap(it->first);
-				const Map* mapBg = (backgroundMapId == InvalidMapId) ? nullptr : &m_project->GetMap(backgroundMapId);
-				const TGameObjectPosMap& gameObjMap = mapFg.GetGameObjects();
-				int entityIdx = 0;
-
-				luminary::SceneExporter::SceneData sceneData;
-
-				for (TGameObjectPosMap::const_iterator it = gameObjMap.begin(), end = gameObjMap.end(); it != end; ++it)
-				{
-					const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
-					if (gameObjectType)
-					{
-						if (gameObjectType->IsStaticType())
-						{
-							for (int i = 0; i < it->second.size(); i++, entityIdx++)
-							{
-								const GameObject& gameObject = it->second[i].m_gameObject;
-								sceneData.staticEntities.push_back(luminary::Entity());
-								luminary::Entity& entity = sceneData.staticEntities.back();
-								luminary::beehive::ConvertEntityInstance(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
-							}
-						}
-						else
-						{
-							for (int i = 0; i < it->second.size(); i++, entityIdx++)
-							{
-								const GameObject& gameObject = it->second[i].m_gameObject;
-								sceneData.dynamicEntities.push_back(luminary::Entity());
-								luminary::Entity& entity = sceneData.dynamicEntities.back();
-								luminary::beehive::ConvertEntityInstance(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
-							}
-						}
-					}
-				}
-
-				sceneData.palettesLabel = palettesLabel;
-				sceneData.numPalettes = numPalettes;
-
-				sceneData.mapFgLabel = std::string("map_") + m_project->GetName() + "_" + mapFg.GetName();
-				sceneData.mapBgLabel = mapBg ? (std::string("map_") + m_project->GetName() + "_" + mapBg->GetName()) : "0";
-				sceneData.stampsetLabel = stampsetLabel;
-				sceneData.tilesetLabel = tilesetLabel;
-				sceneData.collisionMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + mapFg.GetName();
-				sceneData.collisionStampsetLabel = terrainStampsetLabel;
-				sceneData.collisionTilesetLabel = terrainTilesetLabel;
-
-				sceneData.numTiles = m_project->GetTileset().GetCount();
-				sceneData.numStamps = m_project->GetStampCount();
-				sceneData.mapFgWidthStamps = mapFg.GetWidth() / m_project->GetPlatformConfig().stampWidth;
-				sceneData.mapFgHeightStamps = mapFg.GetHeight() / m_project->GetPlatformConfig().stampHeight;
-				sceneData.mapBgWidthStamps =  mapBg ? (mapBg->GetWidth() / m_project->GetPlatformConfig().stampWidth) : 0;
-				sceneData.mapBgHeightStamps = mapBg ? (mapBg->GetHeight() / m_project->GetPlatformConfig().stampHeight) : 0;
-				sceneData.numCollisionTiles = m_project->GetTerrainTileset().GetCount();
-				sceneData.numCollisionStamps = terrainExporter.GetNumUniqueTerrainStamps();
-				sceneData.collisionMapWidthStamps = mapFg.GetWidth() / m_project->GetPlatformConfig().stampWidth;
-				sceneData.collisionMapHeightStamps = mapFg.GetHeight() / m_project->GetPlatformConfig().stampHeight;
-
-				std::string sceneName = m_project->GetName() + "_" + mapFg.GetName();
-				std::string sceneFilename = scenesExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + ".ASM";
-				if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
-				{
-					includeFilenames.push_back(Project::IncludeFile { std::string("scene_") + sceneName, sceneFilename, Project::IncludeExportFlags::None });
-				}
-			}
-		}
-
-		//Generate uber include file
-		if (includeFilenames.size() > 0)
-		{
-			m_project->WriteIncludeFile(projectRootDir, scenesExportDir, "INCLUDE.ASM", includeFilenames, true);
-		}
-
-		//Append to master include file
-		m_project->AppendMasterIncludeFile(projectRootDir, scenesExportDirRelative, "include.asm", scenesRootDir, "INCLUDE.ASM");
-
-		//Assemble and run
-		const std::string assembler = m_project->m_settings.Get("assembler");
-		const std::string assemblyFile = m_project->m_settings.Get("assemblyFile");
-		const std::string emulator = m_project->m_settings.Get("emulator");
-		std::string assemblyOutput;
-
-		if (assembler.size() && assemblyFile.size())
-		{
-			//Do assembly via UI panel
-			ShowPanelAssembler();
-			if (AssemblerPanel* panel = GetAssemblerPanel())
-			{
-				//Write editor file - TODO: write equ pairs for camera pos, initial game state, etc
-				std::string sceneName = "SceneData_" + m_project->GetName() + "_" + m_project->GetEditingMap().GetName();
-				std::string editorFilename = ion::string::GetDirectory(assemblyFile) + "\\BEEHIVE.ASM";
-				ion::io::File* editorFile = new ion::io::File(editorFilename, ion::io::File::OpenMode::Write);
-				std::string beehiveScene = "BEEHIVE_SCENE\tequ " + sceneName;
-				editorFile->Write(beehiveScene.data(), beehiveScene.size());
-				editorFile->Close();
-				delete editorFile;
-
-				std::vector<std::string> includes;
-				std::vector<std::pair<std::string,std::string>> defines;
-
-				includes.push_back(m_project->m_settings.Get("engineRootDir"));
-
-				assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".asm");
-				assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".s");
-				assemblyOutput += ".bin";
-
-				if (!panel->AssembleBlocking(assembler, assemblyFile, assemblyOutput, includes, defines))
-				{
-					SetStatusText("Assembly error");
-					wxMessageBox("Error assembling, see assembler log", "Error", wxOK | wxICON_INFORMATION);
+					//Cancelled
 					return;
 				}
 			}
+
+			scriptProgress.Update(100);
+
+			if (scriptIncludes.size() > 0)
+			{
+				m_project->WriteIncludeFile(projectRootDir, scriptsExportDir, "SCRIPTS.ASM", scriptIncludes, true);
+			}
+
+			//Export entity archetypes
+			std::vector<luminary::Archetype> archetypes;
+
+			for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
+			{
+				for (TGameObjectArchetypeMap::const_iterator archIt = typeIt->second.GetArchetypes().begin(), archEnd = typeIt->second.GetArchetypes().end(); archIt != archEnd; ++archIt)
+				{
+					luminary::Archetype archetype;
+					luminary::beehive::ConvertArchetype(*m_project, archIt->second, scriptAddresses, archetype);
+					archetypes.push_back(archetype);
+				}
+			}
+
+			std::string archetypesFilename = entitiesExportDir + "ARCHTYPS.ASM";
+			entityExporter.ExportArchetypes(archetypesFilename, archetypes);
+
+			//Export entity prefabs
+			std::vector<luminary::Prefab> prefabs;
+
+			for (TGameObjectTypeMap::const_iterator typeIt = m_project->GetGameObjectTypes().begin(), typeEnd = m_project->GetGameObjectTypes().end(); typeIt != typeEnd; ++typeIt)
+			{
+				//If entity is prefab, mark for export
+				if (typeIt->second.IsPrefabType())
+				{
+					luminary::Prefab prefab;
+					luminary::beehive::ConvertPrefabType(*m_project, typeIt->second, prefab);
+					prefabs.push_back(prefab);
+				}
+			}
+
+			std::string prefabsFilename = entitiesExportDir + "PREFABS.ASM";
+			entityExporter.ExportPrefabs(prefabsFilename, prefabs);
+
+			//Export sprite data
+			// TODO: Luminary (binary) data formats
+			m_project->ExportSpriteSheets(spritesExportDir, Project::ExportFormat::BinaryCompressed);
+			m_project->ExportSpriteAnims(animsExportDir, Project::ExportFormat::BinaryCompressed);
+			m_project->ExportSpritePalettes(palettesExportDir);
+
+			//Export luminary palettes
+			int numPalettes = 0;
+			std::string palettesLabel = std::string("palettes_") + m_project->GetName();
+			std::string palettesFilename = scenesExportDir + "\\" + "PALETTES.ASM";
+			if (m_project->GetNumPalettes() > 0)
+			{
+				std::vector<Palette> palettes;
+
+				for (int i = 0; i < m_project->GetNumPalettes(); i++)
+				{
+					if (m_project->GetPalette(i)->GetUsedColourMask() > 0)
+					{
+						palettes.push_back(*m_project->GetPalette(i));
+					}
+				}
+
+				if (paletteExporter.ExportPalettes(palettesFilename, palettes))
+				{
+					includeFilenames.push_back(Project::IncludeFile{ palettesLabel, palettesFilename, Project::IncludeExportFlags::None });
+				}
+
+				numPalettes = palettes.size();
+			}
+
+			//Export Luminary tileset
+			std::string tilesetLabel = std::string("tileset_") + m_project->GetName();
+			std::string tilesetFilename = scenesExportDir + "\\" + "GTILES.BIN";
+			if (tilesetExporter.ExportTileset(tilesetFilename, m_project->GetTileset()))
+			{
+				includeFilenames.push_back(Project::IncludeFile{ tilesetLabel, tilesetFilename, Project::IncludeExportFlags::None });
+			}
+
+			//Export Luminary stamp set
+			m_project->CompactStampIds();
+			std::vector<Stamp> stamps;
+			for (int i = 0; i < m_project->GetStampCount(); i++)
+			{
+				if (const Stamp* stamp = m_project->GetStamp(i))
+				{
+					stamps.push_back(*stamp);
+				}
+			}
+
+			std::string stampsetLabel = std::string("stampset_") + m_project->GetName();
+			std::string stampsetFilename = scenesExportDir + "\\" + "GSTAMPS.BIN";
+			if (tilesetExporter.ExportStamps(stampsetFilename, stamps, m_project->GetTileset(), m_project->GetBackgroundTile()))
+			{
+				includeFilenames.push_back(Project::IncludeFile{ stampsetLabel, stampsetFilename, Project::IncludeExportFlags::None });
+			}
+
+			//Export Luminary maps
+			for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
+			{
+				const Map& map = m_project->GetMap(it->first);
+				std::string mapLabel = std::string("map_") + m_project->GetName() + "_" + map.GetName();
+				std::string mapFilename = scenesExportDir + "\\G" + ion::string::ToUpper(map.GetName()) + ".BIN";
+				StampId backgroundStamp = m_project->GetBackgroundStamp() == InvalidStampId ? 0 : m_project->GetBackgroundStamp();
+				if (mapExporter.ExportMap(mapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight, backgroundStamp))
+				{
+					includeFilenames.push_back(Project::IncludeFile{ mapLabel, mapFilename, Project::IncludeExportFlags::None });
+				}
+			}
+
+			//Export Luminary terrain tileset
+			std::string terrainTilesetLabel = std::string("collision_tileset_") + m_project->GetName();
+			std::string terrainTilesetFilename = scenesExportDir + "\\" + "CTILES.BIN";
+			if (terrainExporter.ExportTerrainTileset(terrainTilesetFilename, m_project->GetTerrainTileset(), m_project->GetPlatformConfig().tileWidth))
+			{
+				includeFilenames.push_back(Project::IncludeFile{ terrainTilesetLabel, terrainTilesetFilename, Project::IncludeExportFlags::None });
+			}
+
+			//Export Luminary terrain stamps
+			std::string terrainStampsetLabel = std::string("collision_stampset_") + m_project->GetName();
+			std::string terrainStampsetFilename = scenesExportDir + "\\" + "CSTAMPS.BIN";
+			if (terrainExporter.ExportTerrainStamps(terrainStampsetFilename, stamps, m_project->GetTerrainTileset(), m_project->GetDefaultTerrainTile()))
+			{
+				includeFilenames.push_back(Project::IncludeFile{ terrainStampsetLabel, terrainStampsetFilename, Project::IncludeExportFlags::None });
+			}
+
+			//Export Luminary terrain maps
+			for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
+			{
+				const Map& map = m_project->GetMap(it->first);
+				std::string terrainMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + map.GetName();
+				std::string terrainMapFilename = scenesExportDir + "\\C" + ion::string::ToUpper(map.GetName()) + ".BIN";
+				if (terrainExporter.ExportTerrainMap(terrainMapFilename, map, m_project->GetPlatformConfig().stampWidth, m_project->GetPlatformConfig().stampHeight))
+				{
+					includeFilenames.push_back(Project::IncludeFile{ terrainMapLabel, terrainMapFilename, Project::IncludeExportFlags::None });
+				}
+			}
+
+			//Find background map
+			MapId backgroundMapId = InvalidMapId;
+
+			for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end && backgroundMapId == InvalidMapId; ++it)
+			{
+				if (it->second.IsBackgroundMap())
+				{
+					backgroundMapId = it->first;
+				}
+			}
+
+			//Export Luminary scenes
+			for (TMapMap::iterator it = m_project->MapsBegin(), end = m_project->MapsEnd(); it != end; ++it)
+			{
+				//Ignore background map
+				if (it->first != backgroundMapId)
+				{
+					const Map& mapFg = m_project->GetMap(it->first);
+					const Map* mapBg = (backgroundMapId == InvalidMapId) ? nullptr : &m_project->GetMap(backgroundMapId);
+					const TGameObjectPosMap& gameObjMap = mapFg.GetGameObjects();
+					int entityIdx = 0;
+
+					luminary::SceneExporter::SceneData sceneData;
+
+					for (TGameObjectPosMap::const_iterator it = gameObjMap.begin(), end = gameObjMap.end(); it != end; ++it)
+					{
+						const GameObjectType* gameObjectType = m_project->GetGameObjectType(it->first);
+						if (gameObjectType)
+						{
+							if (gameObjectType->IsStaticType())
+							{
+								for (int i = 0; i < it->second.size(); i++, entityIdx++)
+								{
+									const GameObject& gameObject = it->second[i].m_gameObject;
+									sceneData.staticEntities.push_back(luminary::Entity());
+									luminary::Entity& entity = sceneData.staticEntities.back();
+									luminary::beehive::ConvertEntityInstance(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
+								}
+							}
+							else
+							{
+								for (int i = 0; i < it->second.size(); i++, entityIdx++)
+								{
+									const GameObject& gameObject = it->second[i].m_gameObject;
+									sceneData.dynamicEntities.push_back(luminary::Entity());
+									luminary::Entity& entity = sceneData.dynamicEntities.back();
+									luminary::beehive::ConvertEntityInstance(*m_project, *gameObjectType, gameObject, scriptAddresses, entity);
+								}
+							}
+						}
+					}
+
+					sceneData.palettesLabel = palettesLabel;
+					sceneData.numPalettes = numPalettes;
+
+					sceneData.mapFgLabel = std::string("map_") + m_project->GetName() + "_" + mapFg.GetName();
+					sceneData.mapBgLabel = mapBg ? (std::string("map_") + m_project->GetName() + "_" + mapBg->GetName()) : "0";
+					sceneData.stampsetLabel = stampsetLabel;
+					sceneData.tilesetLabel = tilesetLabel;
+					sceneData.collisionMapLabel = std::string("collision_map_") + m_project->GetName() + "_" + mapFg.GetName();
+					sceneData.collisionStampsetLabel = terrainStampsetLabel;
+					sceneData.collisionTilesetLabel = terrainTilesetLabel;
+
+					sceneData.numTiles = m_project->GetTileset().GetCount();
+					sceneData.numStamps = m_project->GetStampCount();
+					sceneData.mapFgWidthStamps = mapFg.GetWidth() / m_project->GetPlatformConfig().stampWidth;
+					sceneData.mapFgHeightStamps = mapFg.GetHeight() / m_project->GetPlatformConfig().stampHeight;
+					sceneData.mapBgWidthStamps = mapBg ? (mapBg->GetWidth() / m_project->GetPlatformConfig().stampWidth) : 0;
+					sceneData.mapBgHeightStamps = mapBg ? (mapBg->GetHeight() / m_project->GetPlatformConfig().stampHeight) : 0;
+					sceneData.numCollisionTiles = m_project->GetTerrainTileset().GetCount();
+					sceneData.numCollisionStamps = terrainExporter.GetNumUniqueTerrainStamps();
+					sceneData.collisionMapWidthStamps = mapFg.GetWidth() / m_project->GetPlatformConfig().stampWidth;
+					sceneData.collisionMapHeightStamps = mapFg.GetHeight() / m_project->GetPlatformConfig().stampHeight;
+
+					std::string sceneName = m_project->GetName() + "_" + mapFg.GetName();
+					std::string sceneFilename = scenesExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + ".ASM";
+					if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
+					{
+						includeFilenames.push_back(Project::IncludeFile{ std::string("scene_") + sceneName, sceneFilename, Project::IncludeExportFlags::None });
+					}
+				}
+			}
+
+			//Generate uber include file
+			if (includeFilenames.size() > 0)
+			{
+				m_project->WriteIncludeFile(projectRootDir, scenesExportDir, "INCLUDE.ASM", includeFilenames, true);
+			}
+
+			//Append to master include file
+			m_project->AppendMasterIncludeFile(projectRootDir, scenesExportDirRelative, "include.asm", scenesRootDir, "INCLUDE.ASM");
+
+			SetStatusText("Export complete");
 		}
 
-		SetStatusText("Export complete");
+		//Assemble
+		std::string assemblyOutput;
+
+		if (assemble)
+		{
+			const std::string assembler = m_project->m_settings.Get("assembler");
+			const std::string assemblyFile = m_project->m_settings.Get("assemblyFile");
+			
+			if (assembler.size() && assemblyFile.size())
+			{
+				//Do assembly via UI panel
+				ShowPanelAssembler();
+				if (AssemblerPanel* panel = GetAssemblerPanel())
+				{
+					//Write editor file - TODO: write equ pairs for camera pos, initial game state, etc
+					std::string sceneName = "SceneData_" + m_project->GetName() + "_" + m_project->GetEditingMap().GetName();
+					std::string editorFilename = ion::string::GetDirectory(assemblyFile) + "\\BEEHIVE.ASM";
+					ion::io::File* editorFile = new ion::io::File(editorFilename, ion::io::File::OpenMode::Write);
+					std::string beehiveScene = "BEEHIVE_SCENE\tequ " + sceneName;
+					editorFile->Write(beehiveScene.data(), beehiveScene.size());
+					editorFile->Close();
+					delete editorFile;
+
+					std::vector<std::string> includes;
+					std::vector<std::pair<std::string, std::string>> defines;
+
+					includes.push_back(m_project->m_settings.Get("engineRootDir"));
+
+					assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".asm");
+					assemblyOutput = ion::string::RemoveSubstring(assemblyFile, ".s");
+					assemblyOutput += ".bin";
+
+					if (!panel->AssembleBlocking(assembler, assemblyFile, assemblyOutput, includes, defines))
+					{
+						SetStatusText("Assembly error");
+						wxMessageBox("Error assembling, see assembler log", "Error", wxOK | wxICON_INFORMATION);
+						return;
+					}
+
+					SetStatusText("Assembly complete");
+				}
+			}
+		}
 
 		//Run!
-		if (emulator.size() && assemblyOutput.size())
+		if (run)
 		{
-			std::string commandLine = emulator + " " + assemblyOutput;
-			if (wxExecute(commandLine, wxEXEC_ASYNC) < 0)
+			const std::string emulator = m_project->m_settings.Get("emulator");
+
+			if (emulator.size() && assemblyOutput.size())
 			{
-				SetStatusText("Error running emulator");
-				wxMessageBox("Error running emulator", "Error", wxOK | wxICON_INFORMATION);
-				return;
+				std::string commandLine = emulator + " " + assemblyOutput;
+				if (wxExecute(commandLine, wxEXEC_ASYNC) < 0)
+				{
+					SetStatusText("Error running emulator");
+					wxMessageBox("Error running emulator", "Error", wxOK | wxICON_INFORMATION);
+					return;
+				}
 			}
 		}
 		else

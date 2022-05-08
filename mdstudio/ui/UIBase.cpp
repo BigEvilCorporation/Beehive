@@ -60,27 +60,44 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 
 	m_menubar1 = new wxMenuBar( 0 );
 	m_menuProject = new wxMenu();
+	m_menuOpenRecent = new wxMenu();
+	wxMenuItem* m_menuOpenRecentItem = new wxMenuItem( m_menuProject, wxID_ANY, wxT("Open Recent"), wxEmptyString, wxITEM_NORMAL, m_menuOpenRecent );
+	m_menuProject->Append( m_menuOpenRecentItem );
+
+	m_menuProject->AppendSeparator();
+
 	wxMenuItem* m_menuItemProjNew;
-	m_menuItemProjNew = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_NEW, wxString( wxT("New") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItemProjNew = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_NEW, wxString( wxT("New") ) + wxT('\t') + wxT("CTRL+N"), wxEmptyString, wxITEM_NORMAL );
 	m_menuProject->Append( m_menuItemProjNew );
 
 	wxMenuItem* m_menuItemProjOpen;
-	m_menuItemProjOpen = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_OPEN, wxString( wxT("Open") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItemProjOpen = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_OPEN, wxString( wxT("Open") ) + wxT('\t') + wxT("CTRL+O"), wxEmptyString, wxITEM_NORMAL );
 	m_menuProject->Append( m_menuItemProjOpen );
 
 	wxMenuItem* m_menuItemProjSave;
-	m_menuItemProjSave = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_SAVE, wxString( wxT("Save") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItemProjSave = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_SAVE, wxString( wxT("Save") ) + wxT('\t') + wxT("CTRL+S"), wxEmptyString, wxITEM_NORMAL );
 	m_menuProject->Append( m_menuItemProjSave );
 
 	wxMenuItem* m_menuItemProjSettings;
 	m_menuItemProjSettings = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_SETTINGS, wxString( wxT("Settings") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuProject->Append( m_menuItemProjSettings );
 
-	wxMenuItem* m_menuItemProjExport;
-	m_menuItemProjExport = new wxMenuItem( m_menuProject, wxID_BTN_PROJ_EXPORT, wxString( wxT("Export") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuProject->Append( m_menuItemProjExport );
-
 	m_menubar1->Append( m_menuProject, wxT("Project") );
+
+	m_menuBuild = new wxMenu();
+	wxMenuItem* m_menuItem49;
+	m_menuItem49 = new wxMenuItem( m_menuBuild, wxID_BTN_BUILD_EXPORT, wxString( wxT("Export") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuBuild->Append( m_menuItem49 );
+
+	wxMenuItem* m_menuItem52;
+	m_menuItem52 = new wxMenuItem( m_menuBuild, wxID_BTN_BUILD_EXPORT_ASSEMBLE, wxString( wxT("Assemble") ) + wxT('\t') + wxT("F7"), wxEmptyString, wxITEM_NORMAL );
+	m_menuBuild->Append( m_menuItem52 );
+
+	wxMenuItem* m_menuItem51;
+	m_menuItem51 = new wxMenuItem( m_menuBuild, wxID_BTN_BUILD_EXPORT_ASSEMBLE_RUN, wxString( wxT("Run") ) + wxT('\t') + wxT("F5"), wxEmptyString, wxITEM_NORMAL );
+	m_menuBuild->Append( m_menuItem51 );
+
+	m_menubar1->Append( m_menuBuild, wxT("Build") );
 
 	m_menuView = new wxMenu();
 	m_menuViewPanels = new wxMenu();
@@ -293,7 +310,9 @@ MainWindowBase::MainWindowBase( wxWindow* parent, wxWindowID id, const wxString&
 	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjOpen ), this, m_menuItemProjOpen->GetId());
 	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjSave ), this, m_menuItemProjSave->GetId());
 	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjSettings ), this, m_menuItemProjSettings->GetId());
-	m_menuProject->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnProjExport ), this, m_menuItemProjExport->GetId());
+	m_menuBuild->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnBuildExport ), this, m_menuItem49->GetId());
+	m_menuBuild->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnBuildAssemble ), this, m_menuItem52->GetId());
+	m_menuBuild->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnBuildRun ), this, m_menuItem51->GetId());
 	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsMapEdit ), this, m_menuItemPanelMapEditor->GetId());
 	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsMapList ), this, m_menuItemPanelMaps->GetId());
 	m_menuViewPanels->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainWindowBase::OnBtnToolsTiles ), this, m_menuItemPanelTiles->GetId());

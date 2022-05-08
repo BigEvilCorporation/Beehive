@@ -158,7 +158,9 @@ protected:
 	virtual void OnBtnProjOpen(wxCommandEvent& event);
 	virtual void OnBtnProjSave(wxCommandEvent& event);
 	virtual void OnBtnProjSettings(wxCommandEvent& event);
-	virtual void OnBtnProjExport(wxCommandEvent& event);
+	virtual void OnBtnBuildExport(wxCommandEvent& event);
+	virtual void OnBtnBuildAssemble(wxCommandEvent& event);
+	virtual void OnBtnBuildRun(wxCommandEvent& event);
 	virtual void OnBtnTilesImport(wxCommandEvent& event);
 	virtual void OnBtnTilesCreate(wxCommandEvent& event);
 	virtual void OnBtnTilesDelete(wxCommandEvent& event);
@@ -215,6 +217,14 @@ private:
 	void RestoreWindowLayout();
 	wxString GetWindowLayoutConfig() const;
 
+	//Recent files
+	void AddRecentProject(const std::string& project);
+	void RestoreRecentProjects();
+	wxString GetRecentFilesConfig() const;
+
+	//Build project
+	void Build(bool exportProj, bool assemble, bool run);
+
 	//OpenGL attributes for GL canvasses
 	static wxGLAttributes s_glAttributes;
 
@@ -242,6 +252,10 @@ private:
 	wxWeakRef<TimelinePanel> m_timelinePanel;
 
 	ProjectPtr m_project;
+
+	//Recently opened projects
+	static const int s_maxRecentProjects = 8;
+	std::vector<std::string> m_recentProjects;
 
 	//Filesystem
 	ion::io::FileSystem m_fileSystem;

@@ -78,10 +78,20 @@
                 <property name="window_extra_style"></property>
                 <property name="window_name"></property>
                 <property name="window_style"></property>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">Project</property>
                     <property name="name">m_menuProject</property>
                     <property name="permission">protected</property>
+                    <object class="submenu" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="label">Open Recent</property>
+                        <property name="name">m_menuOpenRecent</property>
+                        <property name="permission">protected</property>
+                    </object>
+                    <object class="separator" expanded="1">
+                        <property name="name">m_separator1</property>
+                        <property name="permission">none</property>
+                    </object>
                     <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
@@ -92,7 +102,7 @@
                         <property name="label">New</property>
                         <property name="name">m_menuItemProjNew</property>
                         <property name="permission">none</property>
-                        <property name="shortcut"></property>
+                        <property name="shortcut">CTRL+N</property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnBtnProjNew</event>
                     </object>
@@ -106,7 +116,7 @@
                         <property name="label">Open</property>
                         <property name="name">m_menuItemProjOpen</property>
                         <property name="permission">none</property>
-                        <property name="shortcut"></property>
+                        <property name="shortcut">CTRL+O</property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnBtnProjOpen</event>
                     </object>
@@ -120,7 +130,7 @@
                         <property name="label">Save</property>
                         <property name="name">m_menuItemProjSave</property>
                         <property name="permission">none</property>
-                        <property name="shortcut"></property>
+                        <property name="shortcut">CTRL+S</property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnBtnProjSave</event>
                     </object>
@@ -138,19 +148,52 @@
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnBtnProjSettings</event>
                     </object>
-                    <object class="wxMenuItem" expanded="0">
+                </object>
+                <object class="wxMenu" expanded="1">
+                    <property name="label">Build</property>
+                    <property name="name">m_menuBuild</property>
+                    <property name="permission">protected</property>
+                    <object class="wxMenuItem" expanded="1">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
                         <property name="help"></property>
-                        <property name="id">wxID_BTN_PROJ_EXPORT</property>
+                        <property name="id">wxID_BTN_BUILD_EXPORT</property>
                         <property name="kind">wxITEM_NORMAL</property>
                         <property name="label">Export</property>
-                        <property name="name">m_menuItemProjExport</property>
+                        <property name="name">m_menuItem49</property>
                         <property name="permission">none</property>
                         <property name="shortcut"></property>
                         <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnBtnProjExport</event>
+                        <event name="OnMenuSelection">OnBtnBuildExport</event>
+                    </object>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
+                        <property name="help"></property>
+                        <property name="id">wxID_BTN_BUILD_EXPORT_ASSEMBLE</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">Assemble</property>
+                        <property name="name">m_menuItem52</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut">F7</property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnBtnBuildAssemble</event>
+                    </object>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
+                        <property name="help"></property>
+                        <property name="id">wxID_BTN_BUILD_EXPORT_ASSEMBLE_RUN</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">Run</property>
+                        <property name="name">m_menuItem51</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut">F5</property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnBtnBuildRun</event>
                     </object>
                 </object>
                 <object class="wxMenu" expanded="0">
@@ -582,11 +625,11 @@
                         <event name="OnMenuSelection">OnBtnSpriteEditor</event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">Stamps</property>
                     <property name="name">m_menuStamps</property>
                     <property name="permission">protected</property>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
