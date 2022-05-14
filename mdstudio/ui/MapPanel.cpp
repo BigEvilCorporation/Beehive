@@ -761,12 +761,14 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				Stamp* stamp = m_tempStamp ? m_tempStamp : m_project.GetStamp(m_project.GetPaintStamp());
 				if (stamp)
 				{
+#if !BEEHIVE_FIXED_STAMP_MODE
 					if ((buttonBits & eMouseRight) && !(m_prevMouseBits & eMouseRight))
 					{
 						//Switch cursor origin
 						int cursorOrigin = (int)m_cursorOrigin;
 						m_cursorOrigin = (CursorOrigin)(++cursorOrigin % eCursor_MAX);
 					}
+#endif
 
 					//If fixed stamp size, snap to grid
 					int fixedStampWidth = m_project.GetPlatformConfig().stampWidth;
