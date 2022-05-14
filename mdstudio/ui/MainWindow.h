@@ -206,6 +206,9 @@ protected:
 	void EventHandlerKeyboard(wxKeyEvent& event);
 
 private:
+	//Load project from file
+	bool LoadProject(const std::string& filename);
+
 	//Set current project (opens default panels)
 	void SetProject(Project* project);
 
@@ -220,7 +223,10 @@ private:
 	//Recent files
 	void AddRecentProject(const std::string& project);
 	void RestoreRecentProjects();
+	void SaveRecentProjects();
 	wxString GetRecentFilesConfig() const;
+	void CreateRecentProjectsMenu();
+	void OnMenuRecentProjects(wxCommandEvent& event);
 
 	//Build project
 	void Build(bool exportProj, bool assemble, bool run);

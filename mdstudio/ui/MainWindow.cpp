@@ -772,10 +772,20 @@ wxString MainWindow::GetWindowLayoutConfig() const
 
 void MainWindow::AddRecentProject(const std::string& project)
 {
-	m_recentProjects.insert(m_recentProjects.begin(), project);
-	if (m_recentProjects.size() > s_maxRecentProjects)
-		m_recentProjects.pop_back();
+	std::vector<std::string>::iterator it = std::find(m_recentProjects.begin(), m_recentProjects.end(), project);
+	if (it == m_recentProjects.end())
+	{
+		m_recentProjects.insert(m_recentProjects.begin(), project);
+		if (m_recentProjects.size() > s_maxRecentProjects)
+			m_recentProjects.pop_back();
 
+		SaveRecentProjects();
+		CreateRecentProjectsMenu();
+	}
+}
+
+void MainWindow::SaveRecentProjects()
+{
 	wxFileName filename(GetRecentFilesConfig());
 
 	ion::io::File file;
@@ -797,14 +807,50 @@ void MainWindow::RestoreRecentProjects()
 		ion::io::Archive archive(file, ion::io::Archive::Direction::In);
 		archive.Serialise(m_recentProjects);
 		file.Close();
-	}
 
-	//m_menuOpenRecent->Insert()
+		CreateRecentProjectsMenu();
+	}
 }
 
 wxString MainWindow::GetRecentFilesConfig() const
 {
 	return wxStandardPaths::Get().GetUserConfigDir() + "/BigEvilCorporation/Beehive/recent.cfg";
+}
+
+void MainWindow::CreateRecentProjectsMenu()
+{
+	for (int i = 0; i < m_menuOpenRecent->GetMenuItemCount(); i++)
+	{
+		m_menuOpenRecent->Destroy(i);
+	}
+
+	for (int i = 0; i < m_recentProjects.size(); i++)
+	{
+		wxMenuItem* item = m_menuOpenRecent->Append(i, wxString(m_recentProjects[i]));
+	}
+
+	m_menuOpenRecent->Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MainWindow::OnMenuRecentProjects, NULL, this);
+}
+
+void MainWindow::OnMenuRecentProjects(wxCommandEvent& event)
+{
+	int index = event.GetId();
+	if (index >= 0 && index < m_recentProjects.size())
+	{
+		if (LoadProject(m_recentProjects[index]))
+		{
+			//Move to top of list
+			std::swap(m_recentProjects[0], m_recentProjects[index]);
+		}
+		else
+		{
+			//Remove from list
+			m_recentProjects.erase(m_recentProjects.begin() + index);
+		}
+
+		SaveRecentProjects();
+		CreateRecentProjectsMenu();
+	}
 }
 
 void MainWindow::ShowPanelSceneExplorer()
@@ -1993,6 +2039,27 @@ void MainWindow::OnBtnProjNew(wxCommandEvent& event)
 	}
 }
 
+bool MainWindow::LoadProject(const std::string& filename)
+{
+	Project* project = new Project(PlatformPresets::s_configs[ePlatformMegaDrive]);
+
+	if (project->Load(filename))
+	{
+		//Set new project, deletes old
+		SetProject(project);
+
+		SetStatusText("Load complete");
+		return true;
+	}
+	else
+	{
+		delete project;
+		SetStatusText("Load error");
+		wxMessageBox("Error loading project", "Error", wxOK | wxICON_ERROR);
+		return false;
+	}
+}
+
 void MainWindow::OnBtnProjOpen(wxCommandEvent& event)
 {
 	wxFileDialog dialog(this, _("Open BEE file"), "", "", "BEE files (*.bee)|*.bee", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -2000,20 +2067,10 @@ void MainWindow::OnBtnProjOpen(wxCommandEvent& event)
 	{
 		SetStatusText("Opening...");
 
-		Project* project = new Project(PlatformPresets::s_configs[ePlatformMegaDrive]);
-
-		if(project->Load(dialog.GetPath().c_str().AsChar()))
+		if(LoadProject(dialog.GetPath().c_str().AsChar()))
 		{
-			//Set new project, deletes old
-			SetProject(project);
-			
-			SetStatusText("Load complete");
-		}
-		else
-		{
-			delete project;
-			SetStatusText("Load error");
-			wxMessageBox("Error loading project", "Error", wxOK | wxICON_ERROR);
+			//Add to recent projects list
+			AddRecentProject(dialog.GetPath().c_str().AsChar());
 		}
 	}
 }
