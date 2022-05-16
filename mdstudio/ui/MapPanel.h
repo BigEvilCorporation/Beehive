@@ -130,8 +130,15 @@ private:
 	ion::render::Primitive* m_primitiveBezierPoints;
 	ion::render::Primitive* m_primitiveBezierHandles;
 
+	//All registered tools
+	ToolFactory m_toolFactory;
+
 	//Current tool
-	ToolType m_currentTool;
+	Tool* m_currentTool;
+	ToolType m_currentToolType;
+
+	//Undo stack
+	TUndoStack m_undoStack;
 
 	//Current cursor origin mode
 	CursorOrigin m_cursorOrigin;

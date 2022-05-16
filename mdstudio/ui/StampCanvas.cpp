@@ -25,7 +25,7 @@ StampCanvas::StampCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 	m_highlightedBezier = NULL;
 	m_currentBezier = NULL;
 	m_currentBezierControlIdx = -1;
-	m_currentTool = eToolNone;
+	m_currentToolType = eToolNone;
 	m_stamp = NULL;
 	m_terrainPrimitiveDirty = true;
 	m_collisionPrimitiveDirty = true;
@@ -133,8 +133,8 @@ void StampCanvas::SetStamp(Stamp& stamp, const ion::Vector2i& offset)
 
 void StampCanvas::SetTool(ToolType tool)
 {
-	ToolType previousTool = m_currentTool;
-	m_currentTool = tool;
+	ToolType previousTool = m_currentToolType;
+	m_currentToolType = tool;
 
 	switch (previousTool)
 	{
@@ -196,7 +196,7 @@ void StampCanvas::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 
 		TerrainTileId hoverTileId = inMaprange ? m_stamp->GetTerrainTile(x, y) : InvalidTerrainTileId;
 
-		switch (m_currentTool)
+		switch (m_currentToolType)
 		{
 			case eToolNone:
 			{
@@ -258,7 +258,7 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 
 		bool inRange = ((tileX >= 0) && (tileX < stampWidth) && (tileY >= 0) && (tileY < stampHeight));
 
-		switch (m_currentTool)
+		switch (m_currentToolType)
 		{
 			case eToolPaintCollisionSolid:
 			{
@@ -490,15 +490,15 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 				{
 					if (buttonBits & eMouseLeft)
 					{
-						if (m_currentTool == eToolSelectTerrainBezier)
+						if (m_currentToolType == eToolSelectTerrainBezier)
 						{
 							//Set current bezier
 							m_currentBezier = smallestBezier;
 
 							//Set bezier draw tool
-							m_currentTool = eToolDrawTerrainBezier;
+							m_currentToolType = eToolDrawTerrainBezier;
 						}
-						else if (m_currentTool == eToolDeleteTerrainBezier)
+						else if (m_currentToolType == eToolDeleteTerrainBezier)
 						{
 							//Delete bezier
 							m_stamp->RemoveTerrainBezier(smallestBezierIndex);
@@ -523,7 +523,7 @@ void StampCanvas::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 					Refresh();
 				}
 
-				if ((buttonBits & eMouseRight) && (m_currentTool == eToolSelectTerrainBezier) && m_highlightedBezier)
+				if ((buttonBits & eMouseRight) && (m_currentToolType == eToolSelectTerrainBezier) && m_highlightedBezier)
 				{
 					//Right-click menu
 					wxMenu contextMenu;

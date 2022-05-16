@@ -24,11 +24,15 @@
 #include <luminary/BeehiveToLuminary.h>
 #endif
 
+//All tools
+#include "ToolSelectStamp.h"
+
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, wxGLAttributes& glAttributes, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, glAttributes, renderResources, parent, winid, pos, size, style, name)
 	, m_gizmo(renderResources)
 {
-	m_currentTool = eToolSelectTiles;
+	m_currentTool = nullptr;
+	m_currentToolType = eToolSelectTiles;
 	m_cursorOrigin = eCursorTopLeft;
 	m_tempStamp = NULL;
 	m_stampPreviewPrimitive = NULL;
@@ -69,6 +73,9 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 		//Redraw collision map
 		PaintCollisionMap(project.GetEditingMap(), project.GetEditingCollisionMap());
 	}
+
+	//Create all tools
+	m_toolFactory.RegisterTool<ToolSelectStamp>(project, *this, m_undoStack);
 }
 
 MapPanel::~MapPanel()
@@ -89,11 +96,20 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 	if(event.GetKeyCode() == WXK_ESCAPE)
 	{
 		ResetToolData();
-		m_currentTool = eToolSelectTiles;
+		m_currentToolType = eToolSelectTiles;
+		m_currentTool = nullptr;
 		Refresh();
 	}
 
-	if (m_currentTool == eToolPaintStamp)
+	//The new way of doing things
+	if (m_currentTool)
+	{
+		m_currentTool->OnKeyboard(event);
+		return;
+	}
+
+	//The old way...
+	if (m_currentToolType == eToolPaintStamp)
 	{
 		if(m_previewTileFlipX != event.ShiftDown())
 		{
@@ -110,15 +126,15 @@ void MapPanel::OnKeyboard(wxKeyEvent& event)
 		}
 	}
 
-	if(m_currentTool == eToolSelectGameObject
-		|| m_currentTool == eToolPlaceGameObject
-		|| m_currentTool == eToolDrawGameObject)
+	if(m_currentToolType == eToolSelectGameObject
+		|| m_currentToolType == eToolPlaceGameObject
+		|| m_currentToolType == eToolDrawGameObject)
 	{
 		m_moveGameObjByPixel = event.ShiftDown();
 	}
 
 #if !BEEHIVE_FIXED_STAMP_MODE //Fixed grid placement only in fixed mode
-	if(m_currentTool == eToolSelectTiles)
+	if(m_currentToolType == eToolSelectTiles)
 	{
 		//Store CTRL held state for multiple selection
 		m_multipleSelection = event.ControlDown();
@@ -210,6 +226,16 @@ void MapPanel::BucketFill(Map& map, ion::Vector2i position, ion::Vector2i prevPo
 
 void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
 {
+	//The new way of doing things
+	if (m_currentTool)
+	{
+		m_currentTool->OnMouseTileEvent(mousePos, mouseDelta, tileDelta, buttonBits, x, y);
+		if (m_currentTool->NeedsRedraw())
+			Refresh();
+		return;
+	}
+
+	//The old way...
 	Map& map = m_project.GetEditingMap();
 	Tileset& tileset = m_project.GetTileset();
 
@@ -235,7 +261,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 	//	UnsetToolTip();
 	//}
 
-	switch(m_currentTool)
+	switch(m_currentToolType)
 	{
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		case eToolPaintTile:
@@ -318,7 +344,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				if(buttonBits & eMouseLeft)
 				{
 					//Get tile ID to paint
-					TerrainTileId tileId = (m_currentTool == eToolPaintTerrainTile) ? m_project.GetPaintTerrainTile() : InvalidTerrainTileId;
+					TerrainTileId tileId = (m_currentToolType == eToolPaintTerrainTile) ? m_project.GetPaintTerrainTile() : InvalidTerrainTileId;
 
 					//Get collision map
 					CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
@@ -533,7 +559,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 				{
 					m_selectedStamp = m_hoverStamp;
 
-					if (m_currentTool == eToolSelectStamp)
+					if (m_currentToolType == eToolSelectStamp)
 					{
 						//Reset selection box
 						m_boxSelectStart.x = -1;
@@ -551,7 +577,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						}
 					}
 
-					if (m_currentTool == eToolStampPicker)
+					if (m_currentToolType == eToolStampPicker)
 					{
 						//Set as paint stamp
 						m_project.SetPaintStamp(stampId);
@@ -562,7 +588,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						//TODO: Update tileset panel selection + toolbox button state
 					}
 
-					if (m_currentTool == eToolRemoveStamp)
+					if (m_currentToolType == eToolRemoveStamp)
 					{
 						if (Stamp* stamp = m_project.GetStamp(stampId))
 						{
@@ -896,7 +922,7 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 		}
 	}
 
-	if(!inMapRange && m_currentTool != eToolPaintStamp)
+	if(!inMapRange && m_currentToolType != eToolPaintStamp)
 	{
 		//Mouse of of map range, invalidate preview tile
 		m_previewTile = InvalidTileId;
@@ -1162,6 +1188,16 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 
 void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
 {
+	//The new way of doing things
+	if (m_currentTool)
+	{
+		m_currentTool->OnMousePixelEvent(mousePos, mouseDelta, tileDelta, buttonBits, tileX, tileY);
+		if (m_currentTool->NeedsRedraw())
+			Refresh();
+		return;
+	}
+
+	//The old way...
 	Map& map = m_project.GetEditingMap();
 	Tileset& tileset = m_project.GetTileset();
 
@@ -1193,7 +1229,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 		break;
 	}
 
-	switch(m_currentTool)
+	switch(m_currentToolType)
 	{
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		case eToolDrawTerrainBezier:
@@ -1395,15 +1431,15 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 			{
 				if(buttonBits & eMouseLeft)
 				{
-					if(m_currentTool == eToolSelectTerrainBezier)
+					if(m_currentToolType == eToolSelectTerrainBezier)
 					{
 						//Set current bezier
 						m_currentBezier = smallestBezier;
 
 						//Set bezier draw tool
-						m_currentTool = eToolDrawTerrainBezier;
+						m_currentToolType = eToolDrawTerrainBezier;
 					}
-					else if(m_currentTool == eToolDeleteTerrainBezier)
+					else if(m_currentToolType == eToolDeleteTerrainBezier)
 					{
 						//Get collision map
 						CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
@@ -1826,6 +1862,13 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 		z += zOffset;
 	}
 
+	//Render currently active tool
+	if (m_currentTool)
+	{
+		m_currentTool->OnRender(renderer, m_renderResources, cameraInverseMtx, projectionMtx, z, zOffset);
+		z += zOffset;
+	}
+
 	//Render paint preview tile
 	RenderPaintPreview(renderer, cameraInverseMtx, projectionMtx, z);
 
@@ -2099,8 +2142,14 @@ int MapPanel::FindGameObjects(int x, int y, int width, int height, std::vector<c
 
 void MapPanel::SetTool(ToolType tool)
 {
-	ToolType previousTool = m_currentTool;
-	m_currentTool = tool;
+	//The new way of doing things
+	m_currentTool = m_toolFactory.GetTool(tool);
+	if (m_currentTool)
+		return;
+
+	//The old way...
+	ToolType previousTool = m_currentToolType;
+	m_currentToolType = tool;
 
 	Map& map = m_project.GetEditingMap();
 	CollisionMap& collisionMap = m_project.GetEditingCollisionMap();
@@ -2130,7 +2179,7 @@ void MapPanel::SetTool(ToolType tool)
 				}
 
 				//Set back to select tool, leave tool data intact
-				m_currentTool = previousTool;
+				m_currentToolType = previousTool;
 			}
 			else
 			{
@@ -2173,7 +2222,7 @@ void MapPanel::SetTool(ToolType tool)
 		else
 		{
 			//No stamp, revert to selection tool
-			m_currentTool = eToolSelectTiles;
+			m_currentToolType = eToolSelectTiles;
 		}
 
 		break;
@@ -2362,7 +2411,7 @@ void MapPanel::SetTool(ToolType tool)
 				else if(tool == eToolCreateStamp)
 				{
 					//Creating - switch back to selection mode
-					m_currentTool = eToolSelectTiles;
+					m_currentToolType = eToolSelectTiles;
 
 					//Place new stamp to map
 					ion::Vector2i stampPos = (m_boxSelectStart.x <= m_boxSelectEnd.x && m_boxSelectStart.y <= m_boxSelectEnd.y) ? m_boxSelectStart : m_boxSelectEnd;

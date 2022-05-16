@@ -101,5 +101,5 @@ private:
 	Stamp* m_stamp;
 
 	//Current tool
-	ToolType m_currentTool;
+	ToolType m_currentToolType;
 };

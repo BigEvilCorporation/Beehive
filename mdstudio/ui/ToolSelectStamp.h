@@ -12,15 +12,35 @@
 #pragma once
 
 #include "Tool.h"
+#include "ToolMapSelector.h"
 
 class ToolSelectStamp : public Tool
 {
 public:
-	ToolSelectStamp(MapPanel& mapPanel);
+	static const ToolType StaticType() { return ToolType::eToolSelectStamp; }
 
-	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y) = 0;
+	ToolSelectStamp(Project& project, MapPanel& mapPanel, TUndoStack& undoStack);
 
-	//Render callback
-	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset) = 0;
+	virtual void OnKeyboard(wxKeyEvent& event);
+	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y);
+	virtual void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
+
+protected:
+	struct Selection
+	{
+		Selection()
+			: stampId(InvalidStampId)
+			, stampFlags(0)
+			, stampMapEntry(0)
+		{ }
+
+		StampId stampId;
+		ion::Vector2i stampPos;
+		u32 stampFlags;
+		u32 stampMapEntry;
+	};
+
+	MapSelector m_mapSelector;
+	Selection m_hovered;
+	Selection m_selected;
 };

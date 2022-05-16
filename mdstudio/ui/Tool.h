@@ -15,7 +15,10 @@
 #include <ion/renderer/Renderer.h>
 #include <ion/beehive/Project.h>
 
+#include <wx/event.h>
+
 #include "Mouse.h"
+#include "RenderResources.h"
 
 class MapPanel;
 
@@ -61,24 +64,75 @@ enum ToolType
 	eToolDeleteTerrainBezier,
 	eToolPaintCollisionSolid,
 	eToolPaintCollisionHole,
+
+	eToolTypeCount
 };
+
+typedef std::vector<std::pair<ToolType, ion::io::MemoryStream*>> TUndoStack;
 
 class Tool
 {
 public:
-	Tool(ToolType type, Project& project, MapPanel& mapPanel) : m_project(project), m_mapPanel(mapPanel), m_type(type) {}
+	Tool(ToolType type, Project& project, MapPanel& mapPanel, TUndoStack& undoStack)
+		: m_project(project)
+		, m_mapPanel(mapPanel)
+		, m_type(type)
+		, m_undoStack(undoStack)
+		, m_needsRedraw(false)
+	{
+	}
 
-	//Mouse click or changed tile callback
-	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y) = 0;
+	//Input callbacks
+	virtual void OnKeyboard(wxKeyEvent& event) {}
+	virtual void OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y) {}
+	virtual void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY) {}
 
 	//Render callback
-	virtual void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset) = 0;
+	virtual void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
+
+	//Reverses an action from serialised stream
+	virtual void UndoAction(const ion::io::MemoryStream& stream) {}
+
+	//Triggers redraw
+	bool NeedsRedraw() const { return m_needsRedraw; }
 
 protected:
+	//Pushes serialised action to undo stack
+	void PushAction(ion::io::MemoryStream* stream)
+	{
+		m_undoStack.push_back(std::make_pair(m_type, stream));
+	}
 
+	bool Redraw() { m_needsRedraw = true; }
 
 private:
 	ToolType m_type;
 	Project& m_project;
 	MapPanel& m_mapPanel;
+	TUndoStack& m_undoStack;
+	bool m_needsRedraw;
+};
+
+class ToolFactory
+{
+public:
+	template <typename T> void RegisterTool(Project& project, MapPanel& mapPanel, TUndoStack& undoStack)
+	{
+		if (m_tools.size() == 0)
+			m_tools.resize(ToolType::eToolTypeCount);
+		m_tools[T::StaticType()] = new T(project, mapPanel, undoStack);
+	}
+
+	template <typename T> T* GetTool()
+	{
+		return (T*)m_tools[T::StaticType()];
+	}
+
+	Tool* GetTool(ToolType type)
+	{
+		return m_tools[type];
+	}
+
+private:
+	std::vector<Tool*> m_tools;
 };
