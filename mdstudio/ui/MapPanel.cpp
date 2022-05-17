@@ -25,7 +25,7 @@
 #endif
 
 //All tools
-#include "ToolSelectStamp.h"
+#include "MapToolStampManipulator.h"
 
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, wxGLAttributes& glAttributes, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, glAttributes, renderResources, parent, winid, pos, size, style, name)
@@ -75,7 +75,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	}
 
 	//Create all tools
-	m_toolFactory.RegisterTool<ToolSelectStamp>(project, *this, m_undoStack);
+	m_toolFactory.RegisterTool<MapToolStampManipulator>(project, *this, m_undoStack);
 }
 
 MapPanel::~MapPanel()
@@ -2140,12 +2140,21 @@ int MapPanel::FindGameObjects(int x, int y, int width, int height, std::vector<c
 	return gameObjects.size();
 }
 
+void MapPanel::EditStampCollisionDlg(Stamp& stamp)
+{
+	DialogEditStampCollision dialog(*m_mainWindow, stamp, m_project, m_renderer, *m_glContext, m_renderResources);
+	dialog.ShowModal();
+}
+
 void MapPanel::SetTool(ToolType tool)
 {
 	//The new way of doing things
 	m_currentTool = m_toolFactory.GetTool(tool);
 	if (m_currentTool)
+	{
+		m_mainWindow->SetStatusText(m_currentTool->GetStatusText());
 		return;
+	}
 
 	//The old way...
 	ToolType previousTool = m_currentToolType;

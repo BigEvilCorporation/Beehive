@@ -12,7 +12,7 @@
 #pragma once
 
 #include "SpriteCanvas.h"
-#include "Tool.h"
+#include "MapTool.h"
 
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Viewport.h>

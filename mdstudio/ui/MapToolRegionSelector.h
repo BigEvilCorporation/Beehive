@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "Tool.h"
+#include "MapTool.h"
 
-struct MapSelection
+struct MapRegion
 {
-	MapSelection() {}
-	MapSelection(ion::Vector2i _topLeft, ion::Vector2i _bottomRight)
+	MapRegion() {}
+	MapRegion(ion::Vector2i _topLeft, ion::Vector2i _bottomRight)
 		: topLeft(_topLeft)
 		, bottomRight(_bottomRight)
 	{
@@ -26,17 +26,17 @@ struct MapSelection
 	ion::Vector2i bottomRight;
 };
 
-class MapSelector
+class MapToolRegionSelector
 {
 public:
-	MapSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor);
+	MapToolRegionSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor);
 
 	void OnKeyboard(wxKeyEvent& event);
 	void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY);
 	void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
-	ion::Vector2i GetHoverPos() const;
-	const MapSelection& GetSelections() const;
+	ion::Vector2i GetCursorPos() const { return m_cursorPos; }
+	const std::vector<MapRegion>& GetSelectedRegions() const { return m_selections; }
 	bool NeedsRedraw() const { return m_needsRedraw; }
 
 private:
@@ -53,7 +53,7 @@ private:
 	ion::Vector2i m_cursorPos;
 	ion::Vector2i m_selectionStart;
 	ion::Vector2i m_selectionEnd;
-	std::vector<MapSelection> m_selections;
+	std::vector<MapRegion> m_selections;
 	int m_prevMouseBits;
 	bool m_needsRedraw;
 };

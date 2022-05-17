@@ -21,7 +21,7 @@
 
 #include "UIBase.h"
 #include "RenderResources.h"
-#include "Tool.h"
+#include "MapTool.h"
 
 #include "SceneExplorerPanel.h"
 #include "PropertyPanel.h"

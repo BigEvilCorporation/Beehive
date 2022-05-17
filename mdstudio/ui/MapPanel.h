@@ -45,6 +45,9 @@ public:
 
 	virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
+	//Dialogs
+	void EditStampCollisionDlg(Stamp& stamp);
+
 protected:
 
 	//Mouse click or changed tile callback

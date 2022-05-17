@@ -9,9 +9,9 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 ///////////////////////////////////////////////////////
 
-#include "ToolMapSelector.h"
+#include "MapToolRegionSelector.h"
 
-MapSelector::MapSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor)
+MapToolRegionSelector::MapToolRegionSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor)
 	: m_project(project)
 	, m_unitScale(unitScale)
 	, m_allowMultipleSelection(allowMultipleSelection)
@@ -21,16 +21,18 @@ MapSelector::MapSelector(Project& project, const ion::Vector2i& unitScale, bool 
 	, m_inBoxSelection(false)
 	, m_prevMouseBits(0)
 	, m_needsRedraw(0)
+	, m_selectionStart(-1, -1)
+	, m_selectionEnd(-1, -1)
 {
 
 }
 
-void MapSelector::OnKeyboard(wxKeyEvent& event)
+void MapToolRegionSelector::OnKeyboard(wxKeyEvent& event)
 {
 	m_inMultipleSelection = m_allowMultipleSelection && event.ControlDown();
 }
 
-void MapSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
+void MapToolRegionSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
 {
 	m_needsRedraw = false;
 	m_cursorPos = ion::Vector2i(-1, -1);
@@ -65,10 +67,13 @@ void MapSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 			if (m_prevMouseBits & eMouseLeft)
 			{
 				//If selection started outside map region, update selection start now
-				if(m_selectionStart.x == -1)
-					m_selectionStart = coords;
-				else
-					m_selectionEnd = coords;
+				if (m_inMultipleSelection && m_allowBoxSelection)
+				{
+					if (m_selectionStart.x == -1)
+						m_selectionStart = coords;
+					else
+						m_selectionEnd = coords;
+				}
 			}
 			else
 			{
@@ -78,17 +83,17 @@ void MapSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 			}
 			
 			//If dragged > 1 tile, start box selection
-			m_inBoxSelection = m_allowBoxSelection && (coords != m_selectionStart);
+			m_inBoxSelection = m_inMultipleSelection && m_allowBoxSelection && (coords != m_selectionStart);
 		}
 		else if(m_prevMouseBits & eMouseLeft)
 		{
 			if (m_selectionEnd.x != -1)
 			{
-				//Add tile range
+				//Add region
 				ion::Vector2i topLeft;
 				ion::Vector2i bottomRight;
 				SanitiseBoxOrder(m_selectionStart, m_selectionEnd, topLeft, bottomRight);
-				m_selections.push_back(MapSelection(topLeft, bottomRight));
+				m_selections.push_back(MapRegion(topLeft, bottomRight));
 
 				//Reset current selection
 				m_selectionStart = ion::Vector2i(-1, -1);
@@ -102,7 +107,7 @@ void MapSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseD
 	}
 }
 
-void MapSelector::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
+void MapToolRegionSelector::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
 	const Map& map = m_project.GetEditingMap();
 	const ion::Vector2i tileSizePx(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
@@ -157,7 +162,7 @@ void MapSelector::OnRender(ion::render::Renderer& renderer, RenderResources& ren
 	m_needsRedraw = false;
 }
 
-void MapSelector::SanitiseBoxOrder(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, ion::Vector2i& topLeft, ion::Vector2i& bottomRight)
+void MapToolRegionSelector::SanitiseBoxOrder(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, ion::Vector2i& topLeft, ion::Vector2i& bottomRight)
 {
 	topLeft.x = ion::maths::Min(boxStart.x, boxEnd.x);
 	topLeft.y = ion::maths::Min(boxStart.y, boxEnd.y);
@@ -165,7 +170,7 @@ void MapSelector::SanitiseBoxOrder(const ion::Vector2i& boxStart, const ion::Vec
 	bottomRight.y = ion::maths::Max(boxStart.y, boxEnd.y);
 }
 
-ion::Matrix4 MapSelector::CalcBoxDrawMatrix(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, const ion::Vector2i& mapSizePx, float z)
+ion::Matrix4 MapToolRegionSelector::CalcBoxDrawMatrix(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, const ion::Vector2i& mapSizePx, float z)
 {
 	const float x = ion::maths::Min(boxStart.x, boxEnd.x);
 	const float y = ion::maths::Min(boxStart.y, boxEnd.y);

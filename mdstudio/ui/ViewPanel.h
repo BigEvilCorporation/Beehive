@@ -31,7 +31,7 @@
 
 #include "UIBase.h"
 #include "Mouse.h"
-#include "Tool.h"
+#include "MapTool.h"
 #include "RenderResources.h"
 
 class MainWindow;
@@ -54,6 +54,22 @@ public:
 
 	//Centre camera on canvas
 	void CentreCamera();
+
+	//Paint single tile to canvas
+	void PaintTile(TileId tileId, int x, int y, u32 flipFlags);
+
+	//Paint collision tile to canvas
+	void PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u16 collisionFlags);
+
+	//Paint stamp to canvas
+	void PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags);
+
+	//Paint stamp collision to canvas
+	void PaintStampCollision(const Stamp& stamp, int x, int y, u32 flipFlags);
+
+	//Fill selection with single tile
+	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
+	void FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection);
 
 protected:
 	//Event callbacks
@@ -78,22 +94,6 @@ protected:
 
 	//Create grid
 	void CreateGrid(int width, int height, int cellsX, int cellsY);
-
-	//Paint single tile to canvas
-	void PaintTile(TileId tileId, int x, int y, u32 flipFlags);
-
-	//Paint collision tile to canvas
-	void PaintCollisionTile(TerrainTileId terrainTileId, int x, int y, u16 collisionFlags);
-
-	//Paint stamp to canvas
-	void PaintStamp(const Stamp& stamp, int x, int y, u32 flipFlags);
-
-	//Paint stamp collision to canvas
-	void PaintStampCollision(const Stamp& stamp, int x, int y, u32 flipFlags);
-
-	//Fill selection with single tile
-	void FillTiles(TileId tileId, const ion::Vector2i& boxCorner1, const ion::Vector2i& boxCorner2);
-	void FillTiles(TileId tileId, const std::vector<ion::Vector2i>& selection);
 
 	//Find bounds from selected tile coords
 	void FindBounds(const std::vector<ion::Vector2i>& tiles, int& left, int& top, int& right, int& bottom) const;
