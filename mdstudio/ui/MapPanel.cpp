@@ -29,7 +29,6 @@
 
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, wxGLAttributes& glAttributes, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, glAttributes, renderResources, parent, winid, pos, size, style, name)
-	, m_gizmo(renderResources)
 {
 	m_currentTool = nullptr;
 	m_currentToolType = eToolSelectTiles;
@@ -1938,7 +1937,7 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	//Render gizmo
 	ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
-	m_gizmo.OnRender(renderer, cameraInverseMtx, projectionMtx, z, mapSizePx);
+	m_gizmo.OnRender(renderer, m_renderResources, cameraInverseMtx, projectionMtx, z, mapSizePx);
 }
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)

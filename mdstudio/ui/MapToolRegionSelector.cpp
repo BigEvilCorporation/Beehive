@@ -27,13 +27,15 @@ MapToolRegionSelector::MapToolRegionSelector(Project& project, const ion::Vector
 
 }
 
-void MapToolRegionSelector::OnKeyboard(wxKeyEvent& event)
+bool MapToolRegionSelector::OnKeyboard(wxKeyEvent& event)
 {
 	m_inMultipleSelection = m_allowMultipleSelection && event.ControlDown();
+	return false;
 }
 
-void MapToolRegionSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
+bool MapToolRegionSelector::OnMouse(ion::Vector2i mousePos, int buttonBits)
 {
+	bool selectionChanged = false;
 	m_needsRedraw = false;
 	m_cursorPos = ion::Vector2i(-1, -1);
 
@@ -46,6 +48,7 @@ void MapToolRegionSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vecto
 	if ((buttonBits & eMouseLeft) && !m_inMultipleSelection && m_selections.size())
 	{
 		m_selections.clear();
+		selectionChanged = true;
 		m_needsRedraw = true;
 	}
 
@@ -99,12 +102,15 @@ void MapToolRegionSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vecto
 				m_selectionStart = ion::Vector2i(-1, -1);
 				m_selectionEnd = ion::Vector2i(-1, -1);
 				m_inBoxSelection = false;
+				selectionChanged = true;
 				m_needsRedraw = true;
 			}
 		}
 
 		m_prevMouseBits = buttonBits;
 	}
+
+	return selectionChanged;
 }
 
 void MapToolRegionSelector::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)

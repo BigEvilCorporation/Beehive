@@ -13,6 +13,9 @@
 
 #include "MapTool.h"
 #include "MapToolRegionSelector.h"
+#include "Gizmo.h"
+
+#include <ion/maths/Bounds.h>
 
 class MapToolStampManipulator : public wxEvtHandler, Tool
 {
@@ -62,8 +65,11 @@ protected:
 	void OnContextMenuClick(wxCommandEvent& event);
 	void EnumerateSelection();
 	void DeleteSelection();
+	void SetupGizmo();
 
 	MapToolRegionSelector m_mapSelector;
+	Gizmo m_gizmo;
 	Selection m_cursor;
-	std::vector<Selection> m_selected;
+	std::vector<Selection> m_selectedStamps;
+	ion::maths::Bounds2i m_selectedBoundsPx;
 };

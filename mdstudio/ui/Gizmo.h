@@ -9,6 +9,8 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 ///////////////////////////////////////////////////////
 
+#pragma once
+
 #include <ion/maths/Vector.h>
 #include <ion/maths/Matrix.h>
 #include <ion/maths/Geometry.h>
@@ -34,7 +36,7 @@ public:
 		Vertical
 	};
 
-	Gizmo(RenderResources& renderResources);
+	Gizmo();
 	~Gizmo();
 
 	void SetEnabled(bool enabled);
@@ -51,7 +53,7 @@ public:
 	Constraint GetCurrentConstraint() const;
 
 	void OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, int buttonBits, float cameraZoom, const ion::Vector2i& mapSizePx);
-	void OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, const ion::Vector2i& mapSizePx);
+	void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, const ion::Vector2i& mapSizePx);
 
 private:
 	static const float s_drawLineWidth;
@@ -72,7 +74,6 @@ private:
 	Constraint m_currentConstraint;
 	float m_sensitivity;
 
-	RenderResources& m_renderResources;
 	ion::render::LineSegments* m_unitLineX;
 	ion::render::LineSegments* m_unitLineY;
 	ion::render::Primitive* m_unitTriangleX;

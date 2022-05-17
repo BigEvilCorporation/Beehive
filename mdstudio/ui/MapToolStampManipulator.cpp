@@ -43,7 +43,8 @@ void MapToolStampManipulator::OnKeyboard(wxKeyEvent& event)
 
 void MapToolStampManipulator::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
 {
-	m_mapSelector.OnMousePixelEvent(mousePos, mouseDelta, tileDelta, buttonBits, tileX, tileY);
+	//TODO: if gizmo not highlighted
+	bool selectionChanged = m_mapSelector.OnMouse(mousePos, buttonBits);
 
 	if (m_mapSelector.NeedsRedraw())
 	{
@@ -52,6 +53,12 @@ void MapToolStampManipulator::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vec
 
 	const Map& map = m_project.GetEditingMap();
 	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
+
+	if (selectionChanged)
+	{
+		EnumerateSelection();
+		SetupGizmo();
+	}
 
 	//Find stamp under cursor
 	ion::Vector2i cursorPosTiles = mousePos / tileSize;
@@ -66,18 +73,16 @@ void MapToolStampManipulator::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vec
 
 	if (buttonBits & eMouseRight)
 	{
-		EnumerateSelection();
-
 		//Nothing selected? Take stamp under cursor
-		if (m_selected.size() == 0 && m_cursor.stamp)
-			m_selected.push_back(m_cursor);
+		if (m_selectedStamps.size() == 0 && m_cursor.stamp)
+			m_selectedStamps.push_back(m_cursor);
 
 		//Right-click menu
 		wxMenu contextMenu;
 		wxMenuItem* itemDelete = contextMenu.Append((int)ContextMenu::Delete, wxString("Delete stamp(s)"));
 		wxMenuItem* itemCollision = contextMenu.Append((int)ContextMenu::EditCollision, wxString("Edit stamp collision"));
 
-		if (m_selected.size() == 0)
+		if (m_selectedStamps.size() == 0)
 		{
 			itemDelete->Enable(false);
 			itemCollision->Enable(false);
@@ -90,16 +95,23 @@ void MapToolStampManipulator::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vec
 
 void MapToolStampManipulator::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
+	const Map& map = m_project.GetEditingMap();
+	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
+	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
+
 	m_mapSelector.OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, zOffset);
+	m_gizmo.OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, mapSizePx);
 	Tool::OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, zOffset);
 }
 
 void MapToolStampManipulator::EnumerateSelection()
 {
 	const Map& map = m_project.GetEditingMap();
+	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
 	const ion::Vector2i stampSize(m_project.GetPlatformConfig().stampWidth, m_project.GetPlatformConfig().stampHeight);
 
-	m_selected.clear();
+	m_selectedStamps.clear();
+	m_selectedBoundsPx.Clear();
 
 	for (auto region : m_mapSelector.GetSelectedRegions())
 	{
@@ -114,13 +126,16 @@ void MapToolStampManipulator::EnumerateSelection()
 
 				if (selection.stamp)
 				{
-					if (!ion::utils::stl::Find(m_selected, selection))
+					if (!ion::utils::stl::Find(m_selectedStamps, selection))
 					{
-						m_selected.push_back(selection);
+						m_selectedStamps.push_back(selection);
 					}
 				}
 			}
 		}
+
+		m_selectedBoundsPx.AddPoint(region.topLeft * tileSize * stampSize);
+		m_selectedBoundsPx.AddPoint((region.bottomRight + ion::Vector2i(1,1)) * tileSize * stampSize);
 	}
 }
 
@@ -128,7 +143,7 @@ void MapToolStampManipulator::DeleteSelection()
 {
 	Map& map = m_project.GetEditingMap();
 
-	for(auto stamp : m_selected)
+	for(auto stamp : m_selectedStamps)
 	{
 		//Remove stamp
 		map.RemoveStamp(stamp.stampId, stamp.stampPos.x, stamp.stampPos.y);
@@ -145,8 +160,26 @@ void MapToolStampManipulator::DeleteSelection()
 		}
 	}
 
-	m_selected.clear();
+	m_selectedStamps.clear();
 	Redraw();
+}
+
+void MapToolStampManipulator::SetupGizmo()
+{
+	Map& map = m_project.GetEditingMap();
+	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
+	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
+
+	if (m_selectedStamps.size() > 0)
+	{
+		ion::Vector2i position(m_selectedBoundsPx.GetCentre().x, mapSizePx.y - m_selectedBoundsPx.GetCentre().y);
+		m_gizmo.SetPosition(position);
+		m_gizmo.SetEnabled(true);
+	}
+	else
+	{
+		m_gizmo.SetEnabled(false);
+	}
 }
 
 void MapToolStampManipulator::OnContextMenuClick(wxCommandEvent& event)
@@ -160,9 +193,9 @@ void MapToolStampManipulator::OnContextMenuClick(wxCommandEvent& event)
 	else if (event.GetId() == (int)ContextMenu::EditCollision)
 	{
 		//Show collision editor dialog
-		if (m_selected.size())
+		if (m_selectedStamps.size())
 		{
-			for (auto stamp : m_selected)
+			for (auto stamp : m_selectedStamps)
 			{
 				m_mapPanel.EditStampCollisionDlg(*stamp.stamp);
 			}

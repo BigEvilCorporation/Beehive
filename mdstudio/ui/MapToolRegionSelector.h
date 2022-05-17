@@ -31,12 +31,14 @@ class MapToolRegionSelector
 public:
 	MapToolRegionSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor);
 
-	void OnKeyboard(wxKeyEvent& event);
-	void OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY);
+	//Input handlers return true if selection changed
+	bool OnKeyboard(wxKeyEvent& event);
+	bool OnMouse(ion::Vector2i mousePos, int buttonBits);
 	void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
 
 	ion::Vector2i GetCursorPos() const { return m_cursorPos; }
 	const std::vector<MapRegion>& GetSelectedRegions() const { return m_selections; }
+	bool IsSelecting() const { return m_inMultipleSelection || m_inBoxSelection; }
 	bool NeedsRedraw() const { return m_needsRedraw; }
 
 private:

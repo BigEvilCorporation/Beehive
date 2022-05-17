@@ -19,8 +19,7 @@ const ion::Colour Gizmo::s_drawColourAxisX = ion::Colour(1.0f, 0.0f, 0.0f, 1.0f)
 const ion::Colour Gizmo::s_drawColourAxisY = ion::Colour(0.0f, 1.0f, 0.0f, 1.0f);
 const ion::Colour Gizmo::s_drawColourBox = ion::Colour(0.8f, 0.8f, 0.8f, 0.5f);
 
-Gizmo::Gizmo(RenderResources& renderResources)
-	: m_renderResources(renderResources)
+Gizmo::Gizmo()
 {
 	m_sensitivity = 1.0f;
 	m_enabled = true;
@@ -186,11 +185,11 @@ void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, i
 	}
 }
 
-void Gizmo::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, const ion::Vector2i& mapSizePx)
+void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, const ion::Vector2i& mapSizePx)
 {
 	if (m_enabled)
 	{
-		ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
+		ion::render::Material* material = renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
 		ion::Matrix4 mtx;
 		ion::Vector2 coordSysCorrection(-mapSizePx.x / 2.0f, -mapSizePx.y / 2.0f);
