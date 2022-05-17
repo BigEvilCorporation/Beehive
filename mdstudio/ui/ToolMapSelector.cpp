@@ -11,10 +11,12 @@
 
 #include "ToolMapSelector.h"
 
-MapSelector::MapSelector(Project& project, bool allowMultipleSelection, bool allowBoxSelection)
+MapSelector::MapSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor)
 	: m_project(project)
+	, m_unitScale(unitScale)
 	, m_allowMultipleSelection(allowMultipleSelection)
 	, m_allowBoxSelection(allowBoxSelection)
+	, m_drawCursor(drawCursor)
 	, m_inMultipleSelection(false)
 	, m_inBoxSelection(false)
 	, m_prevMouseBits(0)
@@ -28,36 +30,49 @@ void MapSelector::OnKeyboard(wxKeyEvent& event)
 	m_inMultipleSelection = m_allowMultipleSelection && event.ControlDown();
 }
 
-void MapSelector::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
+void MapSelector::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
 {
 	m_needsRedraw = false;
-	Map& map = m_project.GetEditingMap();
+	m_cursorPos = ion::Vector2i(-1, -1);
 
-	const int mapWidth = map.GetWidth();
-	const int mapHeight = map.GetHeight();
-	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
-	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
-	const ion::Vector2i coords(x, y);
+	const Map& map = m_project.GetEditingMap();
+	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
+	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
+	const ion::Vector2i coords = mousePos / m_unitScale;
+
+	//If first click and not in multiple selection, clear
+	if ((buttonBits & eMouseLeft) && !m_inMultipleSelection && m_selections.size())
+	{
+		m_selections.clear();
+		m_needsRedraw = true;
+	}
+
+	if (m_drawCursor && coords != m_cursorPos)
+	{
+		m_needsRedraw = true;
+	}
 
 	//Check in map range
-	bool inMapRange = ((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight));
+	bool inMapRange = ((mousePos.x >= 0) && (mousePos.x < mapSizePx.x) && (mousePos.y >= 0) && (mousePos.y < mapSizePx.y));
 	if (inMapRange)
 	{
-		m_hoverPos = coords;
+		m_cursorPos = coords;
 
 		if (buttonBits & eMouseLeft)
 		{
-			m_needsRedraw = (coords != m_selectionStart) || (coords != m_selectionEnd);
-
-			if (!m_inMultipleSelection)
-				m_selections.clear();
+			m_needsRedraw |= (coords != m_selectionStart) || (coords != m_selectionEnd);
 
 			if (m_prevMouseBits & eMouseLeft)
 			{
-				m_selectionEnd = coords;
+				//If selection started outside map region, update selection start now
+				if(m_selectionStart.x == -1)
+					m_selectionStart = coords;
+				else
+					m_selectionEnd = coords;
 			}
 			else
 			{
+				//First click, start selection
 				m_selectionStart = coords;
 				m_selectionEnd = coords;
 			}
@@ -67,43 +82,52 @@ void MapSelector::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDe
 		}
 		else if(m_prevMouseBits & eMouseLeft)
 		{
-			//Add tile range
-			ion::Vector2i topLeft;
-			ion::Vector2i bottomRight;
-			SanitiseBoxOrder(m_selectionStart, m_selectionEnd, topLeft, bottomRight);
-			m_selections.push_back(MapSelection(topLeft, bottomRight));
+			if (m_selectionEnd.x != -1)
+			{
+				//Add tile range
+				ion::Vector2i topLeft;
+				ion::Vector2i bottomRight;
+				SanitiseBoxOrder(m_selectionStart, m_selectionEnd, topLeft, bottomRight);
+				m_selections.push_back(MapSelection(topLeft, bottomRight));
 
-			//Reset current selection
-			m_selectionStart = ion::Vector2i(-1, -1);
-			m_selectionEnd = ion::Vector2i(-1, -1);
-			m_inBoxSelection = false;
-			m_needsRedraw = true;
+				//Reset current selection
+				m_selectionStart = ion::Vector2i(-1, -1);
+				m_selectionEnd = ion::Vector2i(-1, -1);
+				m_inBoxSelection = false;
+				m_needsRedraw = true;
+			}
 		}
-	}
 
-	m_prevMouseBits = buttonBits;
+		m_prevMouseBits = buttonBits;
+	}
 }
 
 void MapSelector::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset)
 {
 	const Map& map = m_project.GetEditingMap();
-	const float tileWidth = m_project.GetPlatformConfig().tileWidth;
-	const float tileHeight = m_project.GetPlatformConfig().tileHeight;
-	const float mapWidth = map.GetWidth() * tileWidth;
-	const float mapHeight = map.GetHeight() * tileHeight;
-	const ion::Vector2i tileScale(tileWidth, tileHeight);
+	const ion::Vector2i tileSizePx(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
+	const ion::Vector2i mapSizePx = (ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSizePx);
 	const ion::Vector2i vecOne(1, 1);
 
 	ion::render::Material* material = renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
-	const ion::Colour& colour = renderResources.GetColour(RenderResources::eColourSelected);
+	const ion::Colour& cursorColour = renderResources.GetColour(RenderResources::eColourHighlight);
+	const ion::Colour& selectedColour = renderResources.GetColour(RenderResources::eColourSelected);
 	ion::render::Primitive* primitive = renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
-	material->SetDiffuseColour(colour);
 
 	ion::render::Shader* shader = renderResources.GetShader(RenderResources::eShaderFlatColour);
 	ion::render::Shader::ParamHndl<ion::Matrix4> worldViewProjParam = shader->CreateParamHndl<ion::Matrix4>("gWorldViewProjectionMatrix");
 
 	renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
 	renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
+
+	//Draw cursor
+	if (m_drawCursor && m_cursorPos.x != -1)
+	{
+		ion::Matrix4 worldViewProjMtx = CalcBoxDrawMatrix(m_cursorPos * m_unitScale, (m_cursorPos + vecOne) * m_unitScale, mapSizePx, z) * cameraInverseMtx * projectionMtx;
+		worldViewProjParam.SetValue(worldViewProjMtx);
+		material->SetDiffuseColour(cursorColour);
+		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
+	}
 
 	//Draw current region
 	if (m_selectionStart.x != -1)
@@ -112,16 +136,18 @@ void MapSelector::OnRender(ion::render::Renderer& renderer, RenderResources& ren
 		ion::Vector2i bottomRight;
 		SanitiseBoxOrder(m_selectionStart, m_selectionEnd, topLeft, bottomRight);
 
-		ion::Matrix4 worldViewProjMtx = CalcBoxDrawMatrix(topLeft * tileScale, (bottomRight + vecOne) * tileScale, mapWidth, mapHeight, z) * cameraInverseMtx * projectionMtx;
+		ion::Matrix4 worldViewProjMtx = CalcBoxDrawMatrix(topLeft * m_unitScale, (bottomRight + vecOne) * m_unitScale, mapSizePx, z) * cameraInverseMtx * projectionMtx;
 		worldViewProjParam.SetValue(worldViewProjMtx);
+		material->SetDiffuseColour(selectedColour);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 	}
 
 	//Draw selected regions
 	for (auto selection : m_selections)
 	{
-		ion::Matrix4 worldViewProjMtx = CalcBoxDrawMatrix(selection.topLeft * tileScale, (selection.bottomRight + vecOne) * tileScale, mapWidth, mapHeight, z) * cameraInverseMtx * projectionMtx;
+		ion::Matrix4 worldViewProjMtx = CalcBoxDrawMatrix(selection.topLeft * m_unitScale, (selection.bottomRight + vecOne) * m_unitScale, mapSizePx, z) * cameraInverseMtx * projectionMtx;
 		worldViewProjParam.SetValue(worldViewProjMtx);
+		material->SetDiffuseColour(selectedColour);
 		renderer.DrawVertexBuffer(primitive->GetVertexBuffer(), primitive->GetIndexBuffer());
 	}
 
@@ -139,18 +165,18 @@ void MapSelector::SanitiseBoxOrder(const ion::Vector2i& boxStart, const ion::Vec
 	bottomRight.y = ion::maths::Max(boxStart.y, boxEnd.y);
 }
 
-ion::Matrix4 MapSelector::CalcBoxDrawMatrix(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, float mapWidth, float mapHeight, float z)
+ion::Matrix4 MapSelector::CalcBoxDrawMatrix(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, const ion::Vector2i& mapSizePx, float z)
 {
 	const float x = ion::maths::Min(boxStart.x, boxEnd.x);
 	const float y = ion::maths::Min(boxStart.y, boxEnd.y);
-	const float y_inv = mapHeight - 1 - y;
+	const float y_inv = mapSizePx.y - y;
 	const float width = (float)abs(boxEnd.x - boxStart.x);
 	const float height = (float)abs(boxEnd.y - boxStart.y);
-	const ion::Vector2 mapCentre(mapWidth / 2.0f, mapHeight / 2.0f);
+	const ion::Vector2 mapCentre(mapSizePx.x / 2.0f, mapSizePx.y / 2.0f);
 	const ion::Vector2 boxCentre(width / 2.0f, height / 2.0f);
 
 	ion::Vector3 boxScale(width, height, 0.0f);
-	ion::Vector3 boxPos(floor((x - mapCentre.x + boxCentre.x)), floor((y_inv - mapCentre.y - boxCentre.y)), z);
+	ion::Vector3 boxPos(x - mapCentre.x + boxCentre.x, y_inv - mapCentre.y - boxCentre.y, z);
 
 	ion::Matrix4 boxMtx;
 	boxMtx.SetTranslation(boxPos);

@@ -13,7 +13,7 @@
 
 ToolSelectStamp::ToolSelectStamp(Project& project, MapPanel& mapPanel, TUndoStack& undoStack)
 	: Tool(StaticType(), project, mapPanel, undoStack)
-	, m_mapSelector(project, true, true)
+	, m_mapSelector(project, ion::Vector2i(project.GetPlatformConfig().stampWidth * project.GetPlatformConfig().tileWidth, project.GetPlatformConfig().stampHeight * project.GetPlatformConfig().tileHeight), true, true, true)
 {
 
 }
@@ -23,9 +23,9 @@ void ToolSelectStamp::OnKeyboard(wxKeyEvent& event)
 	m_mapSelector.OnKeyboard(event);
 }
 
-void ToolSelectStamp::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int x, int y)
+void ToolSelectStamp::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
 {
-	m_mapSelector.OnMouseTileEvent(mousePos, mouseDelta, tileDelta, buttonBits, x, y);
+	m_mapSelector.OnMousePixelEvent(mousePos, mouseDelta, tileDelta, buttonBits, tileX, tileY);
 
 	if (m_mapSelector.NeedsRedraw())
 	{
