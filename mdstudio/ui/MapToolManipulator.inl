@@ -141,32 +141,6 @@ template <typename T> void MapToolManipulator<T>::OnContextMenuClick(wxCommandEv
 {
 	ContextMenuItem& menuItem = m_contextMenuItems[event.GetId()];
 	menuItem.callback(menuItem.id, m_selectedObjs);
-
-	/*
-	Map& map = m_project.GetEditingMap();
-
-	if (event.GetId() == (int)ContextMenu::Delete)
-	{
-		DeleteObjects(m_selectedObjs);
-		m_selectedObjs.clear();
-		Redraw();
-	}
-	else if (event.GetId() == (int)ContextMenu::EditCollision)
-	{
-		//Show collision editor dialog
-		if (m_selectedStamps.size())
-		{
-			for (auto stamp : m_selectedStamps)
-			{
-				m_mapPanel.EditStampCollisionDlg(*stamp.stamp);
-			}
-		}
-		else if (m_cursor.stamp)
-		{
-			m_mapPanel.EditStampCollisionDlg(*m_cursor.stamp);
-		}
-	}
-	*/
 }
 
 template <typename T> void MapToolManipulator<T>::OnContextMenuDelete(int id, std::vector<T>& objects)

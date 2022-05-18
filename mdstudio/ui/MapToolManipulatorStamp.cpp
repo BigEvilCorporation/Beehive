@@ -19,7 +19,7 @@ MapToolManipulatorStamp::MapToolManipulatorStamp(Project& project, MapPanel& map
 	, m_unitSizePx(	project.GetPlatformConfig().stampWidth * project.GetPlatformConfig().tileWidth,
 					project.GetPlatformConfig().stampHeight * project.GetPlatformConfig().tileHeight)
 {
-	
+	AddContextMenuItem(0, "Edit collision", std::bind(&MapToolManipulatorStamp::OnContextMenuEditCollision, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 MapToolManipulatorStamp::~MapToolManipulatorStamp()
@@ -146,5 +146,13 @@ void MapToolManipulatorStamp::DeleteObjects(Map& map, std::vector<MapObjIdentifi
 				GetMapPanel().PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
 			}
 		}
+	}
+}
+
+void MapToolManipulatorStamp::OnContextMenuEditCollision(int id, std::vector<MapObjIdentifierStamp>& objects)
+{
+	for (auto stamp : objects)
+	{
+		GetMapPanel().EditStampCollisionDlg(*stamp.stamp);
 	}
 }
