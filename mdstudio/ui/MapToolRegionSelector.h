@@ -29,7 +29,16 @@ struct MapRegion
 class MapToolRegionSelector
 {
 public:
-	MapToolRegionSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor);
+	enum Flags
+	{
+		AllowMultipleSelection	= 1<<0,
+		AllowBoxSelection		= 1<<1,
+		DrawRegionOutline		= 1<<2,
+		DrawRegionFill			= 1<<3,
+		DrawCursor				= 1<<4
+	};
+
+	MapToolRegionSelector(Project& project, const ion::Vector2i& unitScale, int flags);
 
 	//Input handlers return true if selection changed
 	bool OnKeyboard(wxKeyEvent& event);
@@ -47,9 +56,7 @@ private:
 
 	Project& m_project;
 	ion::Vector2i m_unitScale;
-	bool m_allowMultipleSelection;
-	bool m_allowBoxSelection;
-	bool m_drawCursor;
+	int m_flags;
 	bool m_inMultipleSelection;
 	bool m_inBoxSelection;
 	ion::Vector2i m_cursorPos;

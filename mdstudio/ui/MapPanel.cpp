@@ -25,7 +25,7 @@
 #endif
 
 //All tools
-#include "MapToolStampManipulator.h"
+#include "MapToolManipulatorStamp.h"
 
 MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Renderer& renderer, wxGLContext* glContext, wxGLAttributes& glAttributes, RenderResources& renderResources, wxWindow *parent, wxWindowID winid, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 	: ViewPanel(mainWindow, project, renderer, glContext, glAttributes, renderResources, parent, winid, pos, size, style, name)
@@ -74,7 +74,7 @@ MapPanel::MapPanel(MainWindow* mainWindow, Project& project, ion::render::Render
 	}
 
 	//Create all tools
-	m_toolFactory.RegisterTool<MapToolStampManipulator>(project, *this, m_undoStack);
+	m_toolFactory.RegisterTool<MapToolManipulatorStamp>(project, *this, m_undoStack);
 }
 
 MapPanel::~MapPanel()

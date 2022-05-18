@@ -11,12 +11,10 @@
 
 #include "MapToolRegionSelector.h"
 
-MapToolRegionSelector::MapToolRegionSelector(Project& project, const ion::Vector2i& unitScale, bool allowMultipleSelection, bool allowBoxSelection, bool drawCursor)
+MapToolRegionSelector::MapToolRegionSelector(Project& project, const ion::Vector2i& unitScale, int flags)
 	: m_project(project)
 	, m_unitScale(unitScale)
-	, m_allowMultipleSelection(allowMultipleSelection)
-	, m_allowBoxSelection(allowBoxSelection)
-	, m_drawCursor(drawCursor)
+	, m_flags(flags)
 	, m_inMultipleSelection(false)
 	, m_inBoxSelection(false)
 	, m_prevMouseBits(0)
@@ -29,7 +27,7 @@ MapToolRegionSelector::MapToolRegionSelector(Project& project, const ion::Vector
 
 bool MapToolRegionSelector::OnKeyboard(wxKeyEvent& event)
 {
-	m_inMultipleSelection = m_allowMultipleSelection && event.ControlDown();
+	m_inMultipleSelection = (m_flags & Flags::AllowMultipleSelection) && event.ControlDown();
 	return false;
 }
 
@@ -52,7 +50,7 @@ bool MapToolRegionSelector::OnMouse(ion::Vector2i mousePos, int buttonBits)
 		m_needsRedraw = true;
 	}
 
-	if (m_drawCursor && coords != m_cursorPos)
+	if ((m_flags & Flags::DrawCursor) && coords != m_cursorPos)
 	{
 		m_needsRedraw = true;
 	}
@@ -70,7 +68,7 @@ bool MapToolRegionSelector::OnMouse(ion::Vector2i mousePos, int buttonBits)
 			if (m_prevMouseBits & eMouseLeft)
 			{
 				//If selection started outside map region, update selection start now
-				if (m_inMultipleSelection && m_allowBoxSelection)
+				if (m_inMultipleSelection && (m_flags & Flags::AllowBoxSelection))
 				{
 					if (m_selectionStart.x == -1)
 						m_selectionStart = coords;
@@ -86,7 +84,7 @@ bool MapToolRegionSelector::OnMouse(ion::Vector2i mousePos, int buttonBits)
 			}
 			
 			//If dragged > 1 tile, start box selection
-			m_inBoxSelection = m_inMultipleSelection && m_allowBoxSelection && (coords != m_selectionStart);
+			m_inBoxSelection = m_inMultipleSelection && (m_flags & Flags::AllowBoxSelection) && (coords != m_selectionStart);
 		}
 		else if(m_prevMouseBits & eMouseLeft)
 		{
@@ -132,7 +130,7 @@ void MapToolRegionSelector::OnRender(ion::render::Renderer& renderer, RenderReso
 	renderer.BindMaterial(*material, ion::Matrix4(), cameraInverseMtx, projectionMtx);
 
 	//Draw cursor
-	if (m_drawCursor && m_cursorPos.x != -1)
+	if ((m_flags & Flags::DrawCursor) && m_cursorPos.x != -1)
 	{
 		ion::Matrix4 worldViewProjMtx = CalcBoxDrawMatrix(m_cursorPos * m_unitScale, (m_cursorPos + vecOne) * m_unitScale, mapSizePx, z) * cameraInverseMtx * projectionMtx;
 		worldViewProjParam.SetValue(worldViewProjMtx);

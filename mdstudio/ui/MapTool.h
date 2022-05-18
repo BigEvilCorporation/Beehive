@@ -82,6 +82,9 @@ public:
 	{
 	}
 
+	Project& GetProject() { return m_project; }
+	MapPanel& GetMapPanel() { return m_mapPanel; }
+
 	//Use help text
 	virtual std::string GetName() = 0;
 	virtual std::string GetDescription() = 0;
