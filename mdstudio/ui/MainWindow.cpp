@@ -2141,6 +2141,20 @@ void MainWindow::Build(bool exportProj, bool assemble, bool run)
 	if(m_project.get())
 	{
 #if defined BEEHIVE_PLUGIN_LUMINARY
+		const std::string engineRootDir = m_project->m_settings.Get("engineRootDir");
+		const std::string projectRootDir = m_project->m_settings.Get("projectRootDir");
+
+		const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
+		const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
+
+		const std::string animsExportDir = projectRootDir + "\\DATA\\ANIMS\\";
+		const std::string entitiesExportDir = projectRootDir + "\\DATA\\ENTITIES\\";
+		const std::string palettesExportDir = projectRootDir + "\\DATA\\PALETTES\\";
+		const std::string scenesRootDir = projectRootDir + "\\DATA\\SCENES\\";
+		const std::string scenesExportDir = scenesRootDir + m_project->GetName();
+		const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
+		const std::string spritesExportDir = projectRootDir + "\\DATA\\SPRITES\\";
+
 		if (exportProj)
 		{
 			luminary::TilesetExporter tilesetExporter;
@@ -2151,20 +2165,6 @@ void MainWindow::Build(bool exportProj, bool assemble, bool run)
 			luminary::TerrainExporter terrainExporter;
 			luminary::ScriptTranspiler scriptTranspiler;
 			luminary::ScriptCompiler scriptCompiler;
-
-			const std::string engineRootDir = m_project->m_settings.Get("engineRootDir");
-			const std::string projectRootDir = m_project->m_settings.Get("projectRootDir");
-
-			const std::string scriptsSourceDir = projectRootDir + "\\SCRIPTS\\";
-			const std::string scriptsEngineIncludes = engineRootDir + "\\INCLUDE\\";
-
-			const std::string animsExportDir = projectRootDir + "\\DATA\\ANIMS\\";
-			const std::string entitiesExportDir = projectRootDir + "\\DATA\\ENTITIES\\";
-			const std::string palettesExportDir = projectRootDir + "\\DATA\\PALETTES\\";
-			const std::string scenesRootDir = projectRootDir + "\\DATA\\SCENES\\";
-			const std::string scenesExportDir = scenesRootDir + m_project->GetName();
-			const std::string scriptsExportDir = projectRootDir + "\\DATA\\SCRIPTS\\";
-			const std::string spritesExportDir = projectRootDir + "\\DATA\\SPRITES\\";
 
 			const std::string scenesExportDirRelative = "data/scenes/" + m_project->GetName() + "/";
 
@@ -2571,7 +2571,7 @@ void MainWindow::Build(bool exportProj, bool assemble, bool run)
 			}
 
 			//Append to master include file
-			m_project->AppendMasterIncludeFile(projectRootDir, scenesExportDirRelative, "include.asm", scenesRootDir, "INCLUDE.ASM");
+			//m_project->AppendMasterIncludeFile(projectRootDir, scenesExportDirRelative, "include.asm", scenesRootDir, "INCLUDE.ASM");
 
 			SetStatusText("Export complete");
 		}
@@ -2592,12 +2592,23 @@ void MainWindow::Build(bool exportProj, bool assemble, bool run)
 				{
 					//Write editor file - TODO: write equ pairs for camera pos, initial game state, etc
 					std::string sceneName = "SceneData_" + m_project->GetName() + "_" + m_project->GetEditingMap().GetName();
-					std::string editorFilename = ion::string::GetDirectory(assemblyFile) + "\\BEEHIVE.ASM";
-					ion::io::File* editorFile = new ion::io::File(editorFilename, ion::io::File::OpenMode::Write);
-					std::string beehiveScene = "BEEHIVE_SCENE\tequ " + sceneName;
-					editorFile->Write(beehiveScene.data(), beehiveScene.size());
-					editorFile->Close();
-					delete editorFile;
+
+					std::string editorConstsFilename = ion::string::GetDirectory(assemblyFile) + "\\BEECONST.ASM";
+					std::string editorDataFilename = ion::string::GetDirectory(assemblyFile) + "\\BEEDATA.ASM";
+
+					ion::io::File* editorConstsFile = new ion::io::File(editorConstsFilename, ion::io::File::OpenMode::Write);
+					ion::io::File* editorDataFile = new ion::io::File(editorDataFilename, ion::io::File::OpenMode::Write);
+
+					std::string beehiveSceneInclude = "\tinclude \'" + scenesExportDir + "\\include.asm\'";
+					std::string beehiveScene = "\nBEEHIVE_SCENE\tequ " + sceneName;
+
+					editorConstsFile->Write(beehiveScene.data(), beehiveScene.size());
+					editorDataFile->Write(beehiveSceneInclude.data(), beehiveSceneInclude.size());
+
+					editorConstsFile->Close();
+					editorDataFile->Close();
+					delete editorConstsFile;
+					delete editorDataFile;
 
 					std::vector<std::string> includes;
 					std::vector<std::pair<std::string, std::string>> defines;
