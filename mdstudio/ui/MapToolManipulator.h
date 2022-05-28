@@ -38,8 +38,8 @@ protected:
 
 	virtual std::string GetTooltipText(const T& object, const ion::Vector2i& cursorPosPx) = 0;
 
-	virtual ion::Vector2i GetUnitSizePx() { return ion::Vector2i(); }
-	virtual int GetRegionSelectorFlags() { return 0; }
+	virtual ion::Vector2i GetUnitSizePx() = 0;
+	virtual int GetRegionSelectorFlags() = 0;
 
 	virtual void FindObjects(const Map& map, const std::vector<MapRegion>& regions, std::vector<T>& selection) = 0;
 	virtual void MoveObjects(Map& map, std::vector<T>& selection, const ion::Vector2i& delta) = 0;

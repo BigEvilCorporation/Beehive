@@ -101,7 +101,7 @@ void MapToolManipulatorStamp::FindObjects(const Map& map, const std::vector<MapR
 			{
 				//Stamp map coords in tiles - convert to and from
 				stamp.stampId = map.FindStamp(x * stampSize.x, y * stampSize.y, stamp.stampPos, stamp.stampFlags, stamp.stampMapEntryIdx);
-				stamp.stampPos *= stampSize;
+				stamp.stampPos /= stampSize;
 
 				//Resolve
 				stamp.stamp = GetProject().GetStamp(stamp.stampId);
@@ -131,7 +131,7 @@ void MapToolManipulatorStamp::DeleteObjects(Map& map, std::vector<MapObjIdentifi
 	for (auto stamp : selection)
 	{
 		//Stamp map coords in tiles
-		ion::Vector2i stampPosTiles = stamp.stampPos / stampSize;
+		ion::Vector2i stampPosTiles = stamp.stampPos * stampSize;
 
 		//Remove stamp
 		map.RemoveStamp(stamp.stampId, stampPosTiles.x, stampPosTiles.y);

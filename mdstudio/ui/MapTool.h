@@ -115,7 +115,7 @@ protected:
 		m_undoStack.push_back(std::make_pair(m_type, stream));
 	}
 
-	bool Redraw() { m_needsRedraw = true; }
+	void Redraw() { m_needsRedraw = true; }
 
 	Project& m_project;
 	MapPanel& m_mapPanel;
