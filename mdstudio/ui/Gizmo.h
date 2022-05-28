@@ -46,6 +46,7 @@ public:
 	const ion::Vector2i& GetPosition() const;
 
 	const ion::Vector2i& GetLastDelta() const;
+	const ion::Vector2i& GetMoveDelta() const;
 
 	void SetSensitivity(float unitsPerPixel);
 	float GetSensitivity() const;
@@ -69,6 +70,7 @@ private:
 	ion::Vector2i m_position;
 	ion::Vector2i m_lastDelta;
 	ion::Vector2i m_moveStartPosition;
+	ion::Vector2i m_moveDelta;
 	ion::Vector2 m_accumulatedDelta;
 	int m_prevMouseButtonBits;
 	Constraint m_currentConstraint;

@@ -120,7 +120,23 @@ void MapToolManipulatorStamp::FindObjects(const Map& map, const std::vector<MapR
 
 void MapToolManipulatorStamp::MoveObjects(Map& map, std::vector<MapObjIdentifierStamp>& selection, const ion::Vector2i& delta)
 {
+	const ion::Vector2i tileSize(GetProject().GetPlatformConfig().tileWidth, GetProject().GetPlatformConfig().tileHeight);
+	const ion::Vector2i stampSize(GetProject().GetPlatformConfig().stampWidth, GetProject().GetPlatformConfig().stampHeight);
 
+	for (auto stamp : selection)
+	{
+		//Stamp map coords in tiles
+		ion::Vector2i stampPosOriginal = stamp.stampPos;
+		ion::Vector2i stampPosNew = stampPosOriginal + delta;
+
+		ion::Vector2i stampPosOriginalTile = stampPosOriginal * stampSize;
+		ion::Vector2i stampPosNewTile = stampPosNew * stampSize;
+
+		m_project.GetEditingMap().MoveStamp(stamp.stampId, stamp.stampMapEntryIdx, stampPosNewTile.x, stampPosNewTile.y, stampPosOriginalTile.x, stampPosOriginalTile.y);
+
+		RepaintStampArea(stampPosOriginal);
+		RepaintStampArea(stampPosNew);
+	}
 }
 
 void MapToolManipulatorStamp::DeleteObjects(Map& map, std::vector<MapObjIdentifierStamp>& selection)
@@ -137,15 +153,7 @@ void MapToolManipulatorStamp::DeleteObjects(Map& map, std::vector<MapObjIdentifi
 		map.RemoveStamp(stamp.stampId, stampPosTiles.x, stampPosTiles.y);
 
 		//Repaint area underneath stamp
-		for (int tileX = stampPosTiles.x; tileX < stampPosTiles.x + stamp.stamp->GetWidth(); tileX++)
-		{
-			for (int tileY = stampPosTiles.y; tileY < stampPosTiles.y + stamp.stamp->GetHeight(); tileY++)
-			{
-				//Invert Y for OpenGL
-				int y_inv = map.GetHeight() - 1 - tileY;
-				GetMapPanel().PaintTile(map.GetTile(tileX, tileY), tileX, y_inv, map.GetTileFlags(tileX, tileY));
-			}
-		}
+		RepaintStampArea(stamp.stampPos);
 	}
 }
 
@@ -154,5 +162,65 @@ void MapToolManipulatorStamp::OnContextMenuEditCollision(int id, std::vector<Map
 	for (auto stamp : objects)
 	{
 		GetMapPanel().EditStampCollisionDlg(*stamp.stamp);
+	}
+}
+
+void MapToolManipulatorStamp::RepaintStampArea(const ion::Vector2i& stampPos)
+{
+	const Map& map = m_project.GetEditingMap();
+	const ion::Vector2i tileSize(GetProject().GetPlatformConfig().tileWidth, GetProject().GetPlatformConfig().tileHeight);
+	const ion::Vector2i stampSize(GetProject().GetPlatformConfig().stampWidth, GetProject().GetPlatformConfig().stampHeight);
+	const ion::Vector2i mapSizeTiles(map.GetWidth() * stampSize.x, map.GetHeight() * stampSize.y);
+
+	//Stamp map coords in tiles
+	ion::Vector2i stampPosTiles = stampPos * stampSize;
+
+	for (int x = stampPosTiles.x; x < stampPosTiles.x + stampSize.x; x++)
+	{
+		for (int y = stampPosTiles.y; y < stampPosTiles.y + stampSize.y; y++)
+		{
+			//Invert Y for OpenGL
+			int y_inv = map.GetHeight() - 1 - y;
+
+			//Stamps can be placed outside map boundaries, only paint tiles that are inside
+			if (x >= 0 && x < mapSizeTiles.x && y_inv >= 0 && y_inv < mapSizeTiles.y)
+			{
+				TileId tileId = InvalidTileId;
+
+				//Find stamp under cursor first
+				ion::Vector2i stampPos;
+				u32 flags = 0;
+				u32 mapEntryIndex = 0;
+
+				//TODO: Very slow
+				StampId stampId = map.FindStamp(x, y, stampPos, flags, mapEntryIndex);
+
+				if (stampId)
+				{
+					//Get from stamp
+					if (Stamp* stamp = m_project.GetStamp(stampId))
+					{
+						ion::Vector2i offset = ion::Vector2i(x, y) - stampPos;
+
+						int sourceX = (flags & Map::eFlipX) ? (stamp->GetWidth() - 1 - offset.x) : offset.x;
+						int sourceY = (flags & Map::eFlipY) ? (stamp->GetHeight() - 1 - offset.y) : offset.y;
+
+						if (sourceX >= 0 && sourceX < stamp->GetWidth() && sourceY >= 0 && sourceY < stamp->GetHeight())
+						{
+							tileId = stamp->GetTile(sourceX, sourceY);
+							flags ^= stamp->GetTileFlags(sourceX, sourceY);
+						}
+					}
+				}
+				else
+				{
+					//Pick tile
+					tileId = map.GetTile(x, y);
+					flags = map.GetTileFlags(x, y);
+				}
+
+				m_mapPanel.PaintTile(tileId, x, y_inv, flags);
+			}
+		}
 	}
 }

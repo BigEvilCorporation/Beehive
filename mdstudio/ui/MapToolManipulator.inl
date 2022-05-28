@@ -32,58 +32,77 @@ template <typename T> void MapToolManipulator<T>::OnMousePixelEvent(ion::Vector2
 	if(!m_mapSelector)
 		m_mapSelector = new MapToolRegionSelector(m_project, GetUnitSizePx(), GetRegionSelectorFlags());
 
-	//TODO: if gizmo not highlighted
-	bool selectionChanged = m_mapSelector->OnMouse(mousePos, buttonBits);
-
-	if (m_mapSelector->NeedsRedraw())
-	{
-		Redraw();
-	}
-
-	if (selectionChanged)
-	{
-		EnumerateSelection();
-		SetupGizmo();
-	}
-
-	const Map& map = m_project.GetEditingMap();
+	Map& map = m_project.GetEditingMap();
 	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
+	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
 
-	//Find first object under cursor
-	std::vector<T> objects;
-	MapRegion cursorRegion;
-	cursorRegion.topLeft = m_mapSelector->GetCursorPos();
-	cursorRegion.bottomRight = m_mapSelector->GetCursorPos();
-	FindObjects(map, { cursorRegion }, objects);
+	// Update gizmo
+	m_gizmo.OnMouse(mousePos, mouseDelta, buttonBits, m_mapPanel.GetCameraZoom(), mapSizePx);
 
-	if (objects.size())
-		m_objUnderCursor = objects[0];
-	else
-		m_objUnderCursor = T();
-
-	if (m_objUnderCursor.IsValid() && buttonBits == 0)
-		m_mapPanel.SetToolTip(GetTooltipText(m_objUnderCursor, mousePos).c_str());
-	else
-		m_mapPanel.UnsetToolTip();
-
-	if (buttonBits & eMouseRight)
+	// If gizmo in use
+	if (m_gizmo.GetCurrentConstraint() != Gizmo::Constraint::None)
 	{
-		//Nothing selected? Take object under cursor
-		if (m_selectedObjs.size() == 0 && m_objUnderCursor.IsValid())
-			m_selectedObjs.push_back(m_objUnderCursor);
+		ion::Vector2i moveDelta(ion::maths::RoundDownToNearest(m_gizmo.GetMoveDelta().x, GetUnitSizePx().x) / GetUnitSizePx().x,
+								ion::maths::RoundDownToNearest(m_gizmo.GetMoveDelta().y, GetUnitSizePx().y) / GetUnitSizePx().y);
 
-		//Right-click menu
-		wxMenu contextMenu;
-
-		for (int i = 0; i < m_contextMenuItems.size(); i++)
+		if (moveDelta.GetLengthSq() > 0)
 		{
-			wxMenuItem* item = contextMenu.Append(i, wxString(m_contextMenuItems[i].name));
-			if (m_selectedObjs.size() == 0)
-				item->Enable(false);
+			MoveObjects(map, m_selectedObjs, moveDelta);
+		}
+	}
+	else
+	{
+		bool selectionChanged = m_mapSelector->OnMouse(mousePos, buttonBits);
+
+		if (m_mapSelector->NeedsRedraw())
+		{
+			Redraw();
 		}
 
-		contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapToolManipulator::OnContextMenuClick, NULL, this);
-		m_mapPanel.PopupMenu(&contextMenu);
+		if (selectionChanged)
+		{
+			EnumerateSelection();
+			SetupGizmo();
+		}
+
+		const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
+
+		//Find first object under cursor
+		std::vector<T> objects;
+		MapRegion cursorRegion;
+		cursorRegion.topLeft = m_mapSelector->GetCursorPos();
+		cursorRegion.bottomRight = m_mapSelector->GetCursorPos();
+		FindObjects(map, { cursorRegion }, objects);
+
+		if (objects.size())
+			m_objUnderCursor = objects[0];
+		else
+			m_objUnderCursor = T();
+
+		if (m_objUnderCursor.IsValid() && buttonBits == 0)
+			m_mapPanel.SetToolTip(GetTooltipText(m_objUnderCursor, mousePos).c_str());
+		else
+			m_mapPanel.UnsetToolTip();
+
+		if (buttonBits & eMouseRight)
+		{
+			//Nothing selected? Take object under cursor
+			if (m_selectedObjs.size() == 0 && m_objUnderCursor.IsValid())
+				m_selectedObjs.push_back(m_objUnderCursor);
+
+			//Right-click menu
+			wxMenu contextMenu;
+
+			for (int i = 0; i < m_contextMenuItems.size(); i++)
+			{
+				wxMenuItem* item = contextMenu.Append(i, wxString(m_contextMenuItems[i].name));
+				if (m_selectedObjs.size() == 0)
+					item->Enable(false);
+			}
+
+			contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapToolManipulator::OnContextMenuClick, NULL, this);
+			m_mapPanel.PopupMenu(&contextMenu);
+		}
 	}
 }
 

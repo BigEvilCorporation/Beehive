@@ -2029,6 +2029,11 @@ ion::Vector2 MapPanel::GetCameraPos() const
 	return ion::Vector2(cameraPos.x, cameraPos.y);
 }
 
+float MapPanel::GetCameraZoom() const
+{
+	return m_cameraZoom;
+}
+
 void MapPanel::SelectGameObject(GameObjectId gameObjectId)
 {
 	m_selectedGameObjects.clear();

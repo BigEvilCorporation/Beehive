@@ -68,5 +68,6 @@ public:
 	void OnContextMenuEditCollision(int id, std::vector<MapObjIdentifierStamp>& objects);
 
 private:
+	void RepaintStampArea(const ion::Vector2i& stampPos);
 	ion::Vector2i m_unitSizePx;
 };

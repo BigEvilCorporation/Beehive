@@ -23,6 +23,7 @@ Gizmo::Gizmo()
 {
 	m_sensitivity = 1.0f;
 	m_enabled = true;
+	m_currentConstraint = Constraint::None;
 
 	std::vector<ion::Vector3> lineX;
 	std::vector<ion::Vector3> lineY;
@@ -98,6 +99,11 @@ const ion::Vector2i& Gizmo::GetLastDelta() const
 	return m_lastDelta;
 }
 
+const ion::Vector2i& Gizmo::GetMoveDelta() const
+{
+	return m_moveDelta;
+}
+
 void Gizmo::SetSensitivity(float unitsPerPixel)
 {
 	m_sensitivity = unitsPerPixel;
@@ -147,10 +153,14 @@ void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, i
 			{
 				m_lastDelta = intDelta;
 			}
+
+			m_moveDelta += m_lastDelta;
 		}
 		else
 		{
 			//Mouse up, bounds check against axis
+			m_moveDelta = ion::Vector2i();
+
 			ion::Vector2 pos(position.x + m_lastDelta.x, mapSizePx.y - position.y + m_lastDelta.y);
 
 			float halfWidth = s_drawTriangleSize / 2.0f;
