@@ -15,15 +15,19 @@ const float Gizmo::s_drawLineWidth = 4.0f;
 const float Gizmo::s_drawAxisLength = 24.0f;
 const float Gizmo::s_drawTriangleSize = 8.0f;
 const float Gizmo::s_drawBoxSize = 8.0f;
+const float Gizmo::s_drawScale = 2.0f;
 const ion::Colour Gizmo::s_drawColourAxisX = ion::Colour(1.0f, 0.0f, 0.0f, 1.0f);
 const ion::Colour Gizmo::s_drawColourAxisY = ion::Colour(0.0f, 1.0f, 0.0f, 1.0f);
 const ion::Colour Gizmo::s_drawColourBox = ion::Colour(0.8f, 0.8f, 0.8f, 0.5f);
+const ion::Colour Gizmo::s_drawColourSelected = ion::Colour(1.0f, 1.0f, 1.0f, 1.0f);
 
 Gizmo::Gizmo()
 {
 	m_sensitivity = 1.0f;
 	m_enabled = true;
+	m_hoverConstraint = Constraint::None;
 	m_currentConstraint = Constraint::None;
+	m_prevMouseBits = 0;
 
 	std::vector<ion::Vector3> lineX;
 	std::vector<ion::Vector3> lineY;
@@ -84,14 +88,24 @@ bool Gizmo::IsEnabled() const
 	return m_enabled;
 }
 
-void Gizmo::SetPosition(const ion::Vector2i& position)
+void Gizmo::SetObjectPosition(const ion::Vector2i& position)
 {
-	m_position = position;
+	m_objectPosition = position;
 }
 
-const ion::Vector2i& Gizmo::GetPosition() const
+const ion::Vector2i& Gizmo::GetObjectPosition() const
 {
-	return m_position;
+	return m_objectPosition;
+}
+
+const ion::Vector2i& Gizmo::GetGizmoPosition() const
+{
+	return m_gizmoPosition;
+}
+
+const ion::Vector2i& Gizmo::GetMoveStartPosition() const
+{
+	return m_moveStartPosition;
 }
 
 const ion::Vector2i& Gizmo::GetLastDelta() const
@@ -126,12 +140,9 @@ void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, i
 		m_lastDelta.x = 0;
 		m_lastDelta.y = 0;
 
-		//Apply camera zoom
-		ion::Vector2 zoomedDelta((float)delta.x / cameraZoom, (float)delta.y / cameraZoom);
-
 		//Accumulate lost precision
-		ion::Vector2i intDelta(zoomedDelta.x, zoomedDelta.y);
-		m_accumulatedDelta += ion::Vector2(zoomedDelta.x - intDelta.x, zoomedDelta.y - intDelta.y);
+		ion::Vector2i intDelta(delta.x, delta.y);
+		m_accumulatedDelta += ion::Vector2(delta.x - intDelta.x, delta.y - intDelta.y);
 
 		ion::Vector2i overflow(m_accumulatedDelta.x - intDelta.x, m_accumulatedDelta.y - intDelta.y);
 		m_accumulatedDelta.x -= overflow.x;
@@ -139,7 +150,7 @@ void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, i
 		intDelta += overflow;
 
 		//If already constrained + mouse button down + mouse moved, update pos and process callbacks
-		if (buttonBits & eMouseLeft)
+		if ((buttonBits & eMouseLeft) && (m_prevMouseBits & eMouseLeft))
 		{
 			if (m_currentConstraint == Constraint::Horizontal && delta.x != 0)
 			{
@@ -155,47 +166,59 @@ void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, i
 			}
 
 			m_moveDelta += m_lastDelta;
+			m_gizmoPosition += m_lastDelta;
+		}
+		else if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+		{
+			//Start action
+			m_currentConstraint = m_hoverConstraint;
+			m_moveStartPosition = m_gizmoPosition;
+			m_moveDelta = ion::Vector2i();
 		}
 		else
 		{
-			//Mouse up, bounds check against axis
-			m_moveDelta = ion::Vector2i();
+			///Mouse up, snap back to original state
+			m_currentConstraint = Constraint::None;
+			m_gizmoPosition = m_objectPosition;
 
-			ion::Vector2 pos(position.x + m_lastDelta.x, mapSizePx.y - position.y + m_lastDelta.y);
+			//Bounds check against axis
+			ion::Vector2 pos(position.x + m_lastDelta.x, position.y + m_lastDelta.y);
 
 			float halfWidth = s_drawTriangleSize / 2.0f;
-			float length = s_drawAxisLength + (s_drawTriangleSize / 2.0f);
+			float length = (s_drawAxisLength + (s_drawTriangleSize / 2.0f)) * s_drawScale;
 
-			ion::Vector2 minBox(m_position.x, m_position.y);
-			ion::Vector2 maxBox(m_position.x + s_drawBoxSize, m_position.y + s_drawBoxSize);
+			ion::Vector2 minBox(m_gizmoPosition.x, m_gizmoPosition.y);
+			ion::Vector2 maxBox(m_gizmoPosition.x + s_drawBoxSize * s_drawScale, m_gizmoPosition.y + s_drawBoxSize * s_drawScale);
 
-			ion::Vector2 minX(m_position.x, m_position.y - halfWidth);
-			ion::Vector2 maxX(m_position.x + length, m_position.y + halfWidth);
+			ion::Vector2 minX(m_gizmoPosition.x, m_gizmoPosition.y - halfWidth);
+			ion::Vector2 maxX(m_gizmoPosition.x + length, m_gizmoPosition.y + halfWidth);
 
-			ion::Vector2 minY(m_position.x - halfWidth, m_position.y);
-			ion::Vector2 maxY(m_position.x + halfWidth, m_position.y + length);
+			ion::Vector2 minY(m_gizmoPosition.x - halfWidth, m_gizmoPosition.y - length);
+			ion::Vector2 maxY(m_gizmoPosition.x + halfWidth, m_gizmoPosition.y);
 
 			if (ion::maths::PointInsideBox(pos, minBox, maxBox))
 			{
-				m_currentConstraint = Constraint::All;
+				m_hoverConstraint = Constraint::All;
 			}
 			else if (ion::maths::PointInsideBox(pos, minX, maxX))
 			{
-				m_currentConstraint = Constraint::Horizontal;
+				m_hoverConstraint = Constraint::Horizontal;
 			}
 			else if (ion::maths::PointInsideBox(pos, minY, maxY))
 			{
-				m_currentConstraint = Constraint::Vertical;
+				m_hoverConstraint = Constraint::Vertical;
 			}
 			else
 			{
-				m_currentConstraint = Constraint::None;
+				m_hoverConstraint = Constraint::None;
 			}
 		}
+
+		m_prevMouseBits = buttonBits;
 	}
 }
 
-void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, const ion::Vector2i& mapSizePx)
+void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float cameraZoom, const ion::Vector2i& mapSizePx)
 {
 	if (m_enabled)
 	{
@@ -203,9 +226,14 @@ void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderRes
 
 		ion::Matrix4 mtx;
 		ion::Vector2 coordSysCorrection(-mapSizePx.x / 2.0f, -mapSizePx.y / 2.0f);
-		mtx.SetTranslation(ion::Vector3(m_position.x + coordSysCorrection.x, m_position.y + coordSysCorrection.y, z));
+		mtx.SetTranslation(ion::Vector3(m_gizmoPosition.x + coordSysCorrection.x, (mapSizePx.y - 1 - m_gizmoPosition.y) + coordSysCorrection.y, z));
+		mtx.SetScale(ion::Vector3(s_drawScale, s_drawScale, 1.0f));
 
-		material->SetDiffuseColour(s_drawColourAxisX);
+		bool selectedX = m_hoverConstraint == Constraint::Horizontal || m_hoverConstraint == Constraint::All;
+		bool selectedY = m_hoverConstraint == Constraint::Vertical || m_hoverConstraint == Constraint::All;
+		bool selectedBox = m_hoverConstraint == Constraint::All;
+
+		material->SetDiffuseColour(selectedX ? s_drawColourSelected : s_drawColourAxisX);
 		renderer.BindMaterial(*material, mtx, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(s_drawLineWidth);
 		renderer.DrawVertexBuffer(m_unitLineX->GetVertexBuffer());
@@ -213,7 +241,7 @@ void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderRes
 		renderer.SetLineWidth(1.0f);
 		renderer.UnbindMaterial(*material);
 
-		material->SetDiffuseColour(s_drawColourAxisY);
+		material->SetDiffuseColour(selectedY ? s_drawColourSelected : s_drawColourAxisY);
 		renderer.BindMaterial(*material, mtx, cameraInverseMtx, projectionMtx);
 		renderer.SetLineWidth(s_drawLineWidth);
 		renderer.DrawVertexBuffer(m_unitLineY->GetVertexBuffer());
@@ -222,7 +250,7 @@ void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderRes
 		renderer.UnbindMaterial(*material);
 
 		renderer.SetAlphaBlending(ion::render::Renderer::AlphaBlendType::Translucent);
-		material->SetDiffuseColour(s_drawColourBox);
+		material->SetDiffuseColour(selectedBox ? s_drawColourSelected : s_drawColourBox);
 		renderer.BindMaterial(*material, mtx, cameraInverseMtx, projectionMtx);
 		renderer.DrawVertexBuffer(m_unitBox->GetVertexBuffer(), m_unitBox->GetIndexBuffer());
 		renderer.UnbindMaterial(*material);

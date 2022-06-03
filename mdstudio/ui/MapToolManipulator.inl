@@ -42,13 +42,18 @@ template <typename T> void MapToolManipulator<T>::OnMousePixelEvent(ion::Vector2
 	// If gizmo in use
 	if (m_gizmo.GetCurrentConstraint() != Gizmo::Constraint::None)
 	{
-		ion::Vector2i moveDelta(ion::maths::RoundDownToNearest(m_gizmo.GetMoveDelta().x, GetUnitSizePx().x) / GetUnitSizePx().x,
-								ion::maths::RoundDownToNearest(m_gizmo.GetMoveDelta().y, GetUnitSizePx().y) / GetUnitSizePx().y);
+		ion::Vector2i moveStart(ion::maths::RoundDownToNearest(m_gizmo.GetMoveStartPosition().x, GetUnitSizePx().x) / GetUnitSizePx().x,
+								ion::maths::RoundDownToNearest(m_gizmo.GetMoveStartPosition().y, GetUnitSizePx().y) / GetUnitSizePx().y);
+		ion::Vector2i moveDest(ion::maths::RoundDownToNearest(m_gizmo.GetGizmoPosition().x, GetUnitSizePx().x) / GetUnitSizePx().x,
+								ion::maths::RoundDownToNearest(m_gizmo.GetGizmoPosition().y, GetUnitSizePx().y) / GetUnitSizePx().y);
+		ion::Vector2i moveDelta = moveDest - moveStart;
 
 		if (moveDelta.GetLengthSq() > 0)
 		{
 			MoveObjects(map, m_selectedObjs, moveDelta);
 		}
+
+		Redraw();
 	}
 	else
 	{
@@ -113,7 +118,7 @@ template <typename T> void MapToolManipulator<T>::OnRender(ion::render::Renderer
 	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
 
 	m_mapSelector->OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, zOffset);
-	m_gizmo.OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, mapSizePx);
+	m_gizmo.OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, m_mapPanel.GetCameraZoom(), mapSizePx);
 	Tool::OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, zOffset);
 }
 
@@ -136,13 +141,11 @@ template <typename T> void MapToolManipulator<T>::EnumerateSelection()
 template <typename T> void MapToolManipulator<T>::SetupGizmo()
 {
 	Map& map = m_project.GetEditingMap();
-	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
-	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
 
 	if (m_selectedObjs.size() > 0)
 	{
-		ion::Vector2i position(m_selectedBoundsPx.GetCentre().x, mapSizePx.y - m_selectedBoundsPx.GetCentre().y);
-		m_gizmo.SetPosition(position);
+		ion::Vector2i position(m_selectedBoundsPx.GetCentre());
+		m_gizmo.SetObjectPosition(position);
 		m_gizmo.SetEnabled(true);
 	}
 	else

@@ -1937,7 +1937,7 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 
 	//Render gizmo
 	ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
-	m_gizmo.OnRender(renderer, m_renderResources, cameraInverseMtx, projectionMtx, z, mapSizePx);
+	m_gizmo.OnRender(renderer, m_renderResources, cameraInverseMtx, projectionMtx, z, m_cameraZoom, mapSizePx);
 }
 
 void MapPanel::Refresh(bool eraseBackground, const wxRect *rect)
@@ -2469,9 +2469,8 @@ void MapPanel::SetTool(ToolType tool)
 
 void MapPanel::SetGizmoCentre(const ion::Vector2i& centre)
 {
-	ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
-	ion::Vector2i position(centre.x, mapSizePx.y - centre.y);
-	m_gizmo.SetPosition(position);
+	ion::Vector2i position(centre);
+	m_gizmo.SetObjectPosition(position);
 }
 
 void MapPanel::ResetToolData()
