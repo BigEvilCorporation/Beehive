@@ -91,6 +91,7 @@ bool Gizmo::IsEnabled() const
 void Gizmo::SetObjectPosition(const ion::Vector2i& position)
 {
 	m_objectPosition = position;
+	m_gizmoPosition = position;
 }
 
 const ion::Vector2i& Gizmo::GetObjectPosition() const
@@ -133,8 +134,10 @@ Gizmo::Constraint Gizmo::GetCurrentConstraint() const
 	return m_currentConstraint;
 }
 
-void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, int buttonBits, float cameraZoom, const ion::Vector2i& mapSizePx)
+Gizmo::Action Gizmo::Update(const ion::Vector2i& position, const ion::Vector2i& delta, int buttonBits, float cameraZoom, const ion::Vector2i& mapSizePx)
 {
+	Action result = Action::None;
+
 	if (m_enabled)
 	{
 		m_lastDelta.x = 0;
@@ -149,46 +152,17 @@ void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, i
 		m_accumulatedDelta.y -= overflow.y;
 		intDelta += overflow;
 
-		//If already constrained + mouse button down + mouse moved, update pos and process callbacks
-		if ((buttonBits & eMouseLeft) && (m_prevMouseBits & eMouseLeft))
+		if (m_currentConstraint == Constraint::None)
 		{
-			if (m_currentConstraint == Constraint::Horizontal && delta.x != 0)
-			{
-				m_lastDelta.x = intDelta.x;
-			}
-			else if (m_currentConstraint == Constraint::Vertical && delta.y != 0)
-			{
-				m_lastDelta.y = intDelta.y;
-			}
-			else if (m_currentConstraint == Constraint::All)
-			{
-				m_lastDelta = intDelta;
-			}
-
-			m_moveDelta += m_lastDelta;
-			m_gizmoPosition += m_lastDelta;
-		}
-		else if ((buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
-		{
-			//Start action
-			m_currentConstraint = m_hoverConstraint;
-			m_moveStartPosition = m_gizmoPosition;
-			m_moveDelta = ion::Vector2i();
-		}
-		else
-		{
-			///Mouse up, snap back to original state
-			m_currentConstraint = Constraint::None;
-			m_gizmoPosition = m_objectPosition;
-
 			//Bounds check against axis
+			Constraint currentConstraint = Constraint::None;
 			ion::Vector2 pos(position.x + m_lastDelta.x, position.y + m_lastDelta.y);
 
 			float halfWidth = s_drawTriangleSize / 2.0f;
 			float length = (s_drawAxisLength + (s_drawTriangleSize / 2.0f)) * s_drawScale;
 
-			ion::Vector2 minBox(m_gizmoPosition.x, m_gizmoPosition.y);
-			ion::Vector2 maxBox(m_gizmoPosition.x + s_drawBoxSize * s_drawScale, m_gizmoPosition.y + s_drawBoxSize * s_drawScale);
+			ion::Vector2 minBox(m_gizmoPosition.x, m_gizmoPosition.y - s_drawBoxSize * s_drawScale);
+			ion::Vector2 maxBox(m_gizmoPosition.x + s_drawBoxSize * s_drawScale, m_gizmoPosition.y);
 
 			ion::Vector2 minX(m_gizmoPosition.x, m_gizmoPosition.y - halfWidth);
 			ion::Vector2 maxX(m_gizmoPosition.x + length, m_gizmoPosition.y + halfWidth);
@@ -198,24 +172,71 @@ void Gizmo::OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, i
 
 			if (ion::maths::PointInsideBox(pos, minBox, maxBox))
 			{
-				m_hoverConstraint = Constraint::All;
+				currentConstraint = Constraint::All;
 			}
 			else if (ion::maths::PointInsideBox(pos, minX, maxX))
 			{
-				m_hoverConstraint = Constraint::Horizontal;
+				currentConstraint = Constraint::Horizontal;
 			}
 			else if (ion::maths::PointInsideBox(pos, minY, maxY))
 			{
-				m_hoverConstraint = Constraint::Vertical;
+				currentConstraint = Constraint::Vertical;
 			}
 			else
 			{
-				m_hoverConstraint = Constraint::None;
+				currentConstraint = Constraint::None;
+			}
+
+			if (currentConstraint != m_hoverConstraint)
+			{
+				//Constraint changed
+				m_hoverConstraint = currentConstraint;
+				result = Action::ConstraintChanged;
+			}
+		}
+
+		if (m_hoverConstraint != Constraint::None && (buttonBits & eMouseLeft) && !(m_prevMouseBits & eMouseLeft))
+		{
+			//Mouse down, start action
+			m_currentConstraint = m_hoverConstraint;
+			m_moveStartPosition = m_gizmoPosition;
+			m_moveDelta = ion::Vector2i();
+			result = Action::Started;
+		}
+		else if (m_currentConstraint != Constraint::None)
+		{
+			if (!(buttonBits & eMouseLeft) && (m_prevMouseBits & eMouseLeft))
+			{
+				///Mouse up, finished
+				m_currentConstraint = Constraint::None;
+				result = Action::Finished;
+			}
+			else if ((buttonBits & eMouseLeft) && (m_prevMouseBits & eMouseLeft))
+			{
+				//Mouse dragging, calculate move delta
+				if (m_currentConstraint == Constraint::Horizontal && delta.x != 0)
+				{
+					m_lastDelta.x = intDelta.x;
+				}
+				else if (m_currentConstraint == Constraint::Vertical && delta.y != 0)
+				{
+					m_lastDelta.y = intDelta.y;
+				}
+				else if (m_currentConstraint == Constraint::All)
+				{
+					m_lastDelta = intDelta;
+				}
+
+				m_moveDelta += m_lastDelta;
+				m_gizmoPosition += m_lastDelta;
+				result = Action::Dragging;
 			}
 		}
 
 		m_prevMouseBits = buttonBits;
 	}
+
+	return result;
 }
 
 void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float cameraZoom, const ion::Vector2i& mapSizePx)

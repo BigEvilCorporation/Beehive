@@ -32,6 +32,7 @@ public:
 protected:
 	void OnContextMenuClick(wxCommandEvent& event);
 	void EnumerateSelection();
+	void CalcSelectionBounds();
 	void SetupGizmo();
 
 	void AddContextMenuItem(int id, const std::string& name, std::function<void(int, std::vector<T>&)> const& callback);

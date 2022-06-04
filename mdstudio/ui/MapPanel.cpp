@@ -1212,7 +1212,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 
 	//Update Gizmo mouse cursor
 	ion::Vector2i mapSizePx(m_project.GetEditingMap().GetWidth() * m_project.GetPlatformConfig().tileWidth, m_project.GetEditingMap().GetHeight() * m_project.GetPlatformConfig().tileHeight);
-	m_gizmo.OnMouse(mousePos, mouseDelta, buttonBits, m_cameraZoom, mapSizePx);
+	m_gizmo.Update(mousePos, mouseDelta, buttonBits, m_cameraZoom, mapSizePx);
 	ion::Vector2i gizmoDelta = m_gizmo.GetLastDelta();
 
 	switch (m_gizmo.GetCurrentConstraint())

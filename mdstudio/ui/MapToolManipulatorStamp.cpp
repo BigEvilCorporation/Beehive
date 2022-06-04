@@ -123,7 +123,7 @@ void MapToolManipulatorStamp::MoveObjects(Map& map, std::vector<MapObjIdentifier
 	const ion::Vector2i tileSize(GetProject().GetPlatformConfig().tileWidth, GetProject().GetPlatformConfig().tileHeight);
 	const ion::Vector2i stampSize(GetProject().GetPlatformConfig().stampWidth, GetProject().GetPlatformConfig().stampHeight);
 
-	for (auto stamp : selection)
+	for (auto& stamp : selection)
 	{
 		//Stamp map coords in tiles
 		ion::Vector2i stampPosOriginal = stamp.stampPos;
@@ -133,6 +133,8 @@ void MapToolManipulatorStamp::MoveObjects(Map& map, std::vector<MapObjIdentifier
 		ion::Vector2i stampPosNewTile = stampPosNew * stampSize;
 
 		m_project.GetEditingMap().MoveStamp(stamp.stampId, stamp.stampMapEntryIdx, stampPosNewTile.x, stampPosNewTile.y, stampPosOriginalTile.x, stampPosOriginalTile.y);
+
+		stamp.stampPos = stampPosNew;
 
 		RepaintStampArea(stampPosOriginal);
 		RepaintStampArea(stampPosNew);

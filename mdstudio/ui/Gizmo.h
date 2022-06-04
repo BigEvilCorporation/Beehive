@@ -36,6 +36,15 @@ public:
 		Vertical
 	};
 
+	enum class Action
+	{
+		None,
+		ConstraintChanged,
+		Started,
+		Dragging,
+		Finished
+	};
+
 	Gizmo();
 	~Gizmo();
 
@@ -55,7 +64,7 @@ public:
 
 	Constraint GetCurrentConstraint() const;
 
-	void OnMouse(const ion::Vector2i& position, const ion::Vector2i& delta, int buttonBits, float cameraZoom, const ion::Vector2i& mapSizePx);
+	Action Update(const ion::Vector2i& position, const ion::Vector2i& delta, int buttonBits, float cameraZoom, const ion::Vector2i& mapSizePx);
 	void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float cameraZoom, const ion::Vector2i& mapSizePx);
 
 private:

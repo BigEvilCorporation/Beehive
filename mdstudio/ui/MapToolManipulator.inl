@@ -37,10 +37,18 @@ template <typename T> void MapToolManipulator<T>::OnMousePixelEvent(ion::Vector2
 	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
 
 	// Update gizmo
-	m_gizmo.OnMouse(mousePos, mouseDelta, buttonBits, m_mapPanel.GetCameraZoom(), mapSizePx);
+	Gizmo::Action gizmoAction = m_gizmo.Update(mousePos, mouseDelta, buttonBits, m_mapPanel.GetCameraZoom(), mapSizePx);
 
 	// If gizmo in use
-	if (m_gizmo.GetCurrentConstraint() != Gizmo::Constraint::None)
+	if (gizmoAction == Gizmo::Action::Dragging)
+	{
+		Redraw();
+	}
+	else if (gizmoAction == Gizmo::Action::ConstraintChanged)
+	{
+		Redraw();
+	}
+	else if (gizmoAction == Gizmo::Action::Finished)
 	{
 		ion::Vector2i moveStart(ion::maths::RoundDownToNearest(m_gizmo.GetMoveStartPosition().x, GetUnitSizePx().x) / GetUnitSizePx().x,
 								ion::maths::RoundDownToNearest(m_gizmo.GetMoveStartPosition().y, GetUnitSizePx().y) / GetUnitSizePx().y);
@@ -51,11 +59,13 @@ template <typename T> void MapToolManipulator<T>::OnMousePixelEvent(ion::Vector2
 		if (moveDelta.GetLengthSq() > 0)
 		{
 			MoveObjects(map, m_selectedObjs, moveDelta);
+			CalcSelectionBounds();
 		}
 
+		SetupGizmo();
 		Redraw();
 	}
-	else
+	else if (gizmoAction == Gizmo::Action::None)
 	{
 		bool selectionChanged = m_mapSelector->OnMouse(mousePos, buttonBits);
 
@@ -67,6 +77,7 @@ template <typename T> void MapToolManipulator<T>::OnMousePixelEvent(ion::Vector2
 		if (selectionChanged)
 		{
 			EnumerateSelection();
+			CalcSelectionBounds();
 			SetupGizmo();
 		}
 
@@ -127,9 +138,13 @@ template <typename T> void MapToolManipulator<T>::EnumerateSelection()
 	Map& map = m_project.GetEditingMap();
 
 	m_selectedObjs.clear();
-	m_selectedBoundsPx.Clear();
 
 	FindObjects(map, m_mapSelector->GetSelectedRegions(), m_selectedObjs);
+}
+
+template <typename T> void MapToolManipulator<T>::CalcSelectionBounds()
+{
+	m_selectedBoundsPx.Clear();
 
 	for (auto object : m_selectedObjs)
 	{
