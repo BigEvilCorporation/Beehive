@@ -261,6 +261,7 @@ private:
 
 	//Recently opened projects
 	static const int s_maxRecentProjects = 8;
+	int m_recentProjectsMenuCount;
 	std::vector<std::string> m_recentProjects;
 
 	//Filesystem

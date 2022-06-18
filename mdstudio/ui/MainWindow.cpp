@@ -63,6 +63,7 @@ MainWindow::MainWindow()
 	SetStatusText("Beehive Studio v0.5");
 
 	m_refreshLockStack = 0;
+	m_recentProjectsMenuCount = 0;
 
 	//Lock refresh during init
 	LockRefresh();
@@ -819,7 +820,7 @@ wxString MainWindow::GetRecentFilesConfig() const
 
 void MainWindow::CreateRecentProjectsMenu()
 {
-	for (int i = 0; i < m_menuOpenRecent->GetMenuItemCount(); i++)
+	for (int i = 0; i < m_recentProjectsMenuCount; i++)
 	{
 		m_menuOpenRecent->Destroy(i);
 	}
@@ -828,6 +829,9 @@ void MainWindow::CreateRecentProjectsMenu()
 	{
 		wxMenuItem* item = m_menuOpenRecent->Append(i, wxString(m_recentProjects[i]));
 	}
+
+	// wx bug - wxMenu::GetItemCount() not working
+	m_recentProjectsMenuCount = m_recentProjects.size();
 
 	m_menuOpenRecent->Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MainWindow::OnMenuRecentProjects, NULL, this);
 }
