@@ -43,7 +43,7 @@ public:
 	//Input handlers return true if selection changed
 	bool OnKeyboard(wxKeyEvent& event);
 	bool OnMouse(ion::Vector2i mousePos, int buttonBits);
-	void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, float& z, float zOffset);
+	void OnRender(ion::render::Renderer& renderer, RenderResources& renderResources, const ion::Matrix4& cameraInverseMtx, const ion::Matrix4& projectionMtx, const ion::Vector2i& selectionOffsetUnit, float& z, float zOffset);
 
 	ion::Vector2i GetCursorPos() const { return m_cursorPos; }
 	const std::vector<MapRegion>& GetSelectedRegions() const { return m_selections; }
@@ -51,9 +51,6 @@ public:
 	bool NeedsRedraw() const { return m_needsRedraw; }
 
 private:
-	void SanitiseBoxOrder(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, ion::Vector2i& topLeft, ion::Vector2i& bottomRight);
-	ion::Matrix4 CalcBoxDrawMatrix(const ion::Vector2i& boxStart, const ion::Vector2i& boxEnd, const ion::Vector2i& mapSizePx, float z);
-
 	Project& m_project;
 	ion::Vector2i m_unitScale;
 	int m_flags;

@@ -42,24 +42,26 @@ template <typename T> void MapToolManipulator<T>::OnMousePixelEvent(ion::Vector2
 	// If gizmo in use
 	if (gizmoAction == Gizmo::Action::Dragging)
 	{
-		Redraw();
-	}
-	else if (gizmoAction == Gizmo::Action::ConstraintChanged)
-	{
-		Redraw();
-	}
-	else if (gizmoAction == Gizmo::Action::Finished)
-	{
 		ion::Vector2i moveStart(ion::maths::RoundDownToNearest(m_gizmo.GetMoveStartPosition().x, GetUnitSizePx().x) / GetUnitSizePx().x,
 								ion::maths::RoundDownToNearest(m_gizmo.GetMoveStartPosition().y, GetUnitSizePx().y) / GetUnitSizePx().y);
 		ion::Vector2i moveDest(ion::maths::RoundDownToNearest(m_gizmo.GetGizmoPosition().x, GetUnitSizePx().x) / GetUnitSizePx().x,
 								ion::maths::RoundDownToNearest(m_gizmo.GetGizmoPosition().y, GetUnitSizePx().y) / GetUnitSizePx().y);
-		ion::Vector2i moveDelta = moveDest - moveStart;
+		m_moveDelta = moveDest - moveStart;
 
-		if (moveDelta.GetLengthSq() > 0)
+		Redraw();
+	}
+	else if (gizmoAction == Gizmo::Action::ConstraintChanged)
+	{
+		m_moveDelta = ion::Vector2i();
+		Redraw();
+	}
+	else if (gizmoAction == Gizmo::Action::Finished)
+	{
+		if (m_moveDelta.GetLengthSq() > 0)
 		{
-			MoveObjects(map, m_selectedObjs, moveDelta);
+			MoveObjects(map, m_selectedObjs, m_moveDelta);
 			CalcSelectionBounds();
+			m_moveDelta = ion::Vector2i();
 		}
 
 		SetupGizmo();
@@ -128,7 +130,7 @@ template <typename T> void MapToolManipulator<T>::OnRender(ion::render::Renderer
 	const ion::Vector2i tileSize(m_project.GetPlatformConfig().tileWidth, m_project.GetPlatformConfig().tileHeight);
 	const ion::Vector2i mapSizePx = ion::Vector2i(map.GetWidth(), map.GetHeight()) * tileSize;
 
-	m_mapSelector->OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, zOffset);
+	m_mapSelector->OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, m_moveDelta, z, zOffset);
 	m_gizmo.OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, m_mapPanel.GetCameraZoom(), mapSizePx);
 	Tool::OnRender(renderer, renderResources, cameraInverseMtx, projectionMtx, z, zOffset);
 }

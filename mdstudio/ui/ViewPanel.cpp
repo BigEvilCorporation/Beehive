@@ -479,7 +479,7 @@ void ViewPanel::RenderGrid(ion::render::Renderer& renderer, const ion::Matrix4& 
 {
 	//Draw grid
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
-	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourGrid);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourGridTile);
 
 	ion::Matrix4 gridMtx;
 	gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));

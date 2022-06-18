@@ -62,6 +62,7 @@ private:
 	T m_objUnderCursor;
 	std::vector<T> m_selectedObjs;
 	ion::maths::Bounds2i m_selectedBoundsPx;
+	ion::Vector2i m_moveDelta;
 	std::vector<ContextMenuItem> m_contextMenuItems;
 };
 

@@ -159,10 +159,10 @@ Gizmo::Action Gizmo::Update(const ion::Vector2i& position, const ion::Vector2i& 
 			ion::Vector2 pos(position.x + m_lastDelta.x, position.y + m_lastDelta.y);
 
 			float halfWidth = s_drawTriangleSize / 2.0f;
-			float length = (s_drawAxisLength + (s_drawTriangleSize / 2.0f)) * s_drawScale;
+			float length = (s_drawAxisLength + (s_drawTriangleSize / 2.0f)) * s_drawScale * (1.0f / cameraZoom);
 
-			ion::Vector2 minBox(m_gizmoPosition.x, m_gizmoPosition.y - s_drawBoxSize * s_drawScale);
-			ion::Vector2 maxBox(m_gizmoPosition.x + s_drawBoxSize * s_drawScale, m_gizmoPosition.y);
+			ion::Vector2 minBox(m_gizmoPosition.x, m_gizmoPosition.y - s_drawBoxSize * s_drawScale * (1.0f / cameraZoom));
+			ion::Vector2 maxBox(m_gizmoPosition.x + s_drawBoxSize * s_drawScale * (1.0f / cameraZoom), m_gizmoPosition.y);
 
 			ion::Vector2 minX(m_gizmoPosition.x, m_gizmoPosition.y - halfWidth);
 			ion::Vector2 maxX(m_gizmoPosition.x + length, m_gizmoPosition.y + halfWidth);
@@ -245,10 +245,13 @@ void Gizmo::OnRender(ion::render::Renderer& renderer, RenderResources& renderRes
 	{
 		ion::render::Material* material = renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
 
+		//Draw on top of everything
+		const float gizmoZOffset = 0.2f;
+
 		ion::Matrix4 mtx;
 		ion::Vector2 coordSysCorrection(-mapSizePx.x / 2.0f, -mapSizePx.y / 2.0f);
-		mtx.SetTranslation(ion::Vector3(m_gizmoPosition.x + coordSysCorrection.x, (mapSizePx.y - 1 - m_gizmoPosition.y) + coordSysCorrection.y, z));
-		mtx.SetScale(ion::Vector3(s_drawScale, s_drawScale, 1.0f));
+		mtx.SetTranslation(ion::Vector3(m_gizmoPosition.x + coordSysCorrection.x, (mapSizePx.y - 1 - m_gizmoPosition.y) + coordSysCorrection.y, z + gizmoZOffset));
+		mtx.SetScale(ion::Vector3(s_drawScale * (1.0f / cameraZoom), s_drawScale * (1.0f / cameraZoom), 1.0f));
 
 		bool selectedX = m_hoverConstraint == Constraint::Horizontal || m_hoverConstraint == Constraint::All;
 		bool selectedY = m_hoverConstraint == Constraint::Vertical || m_hoverConstraint == Constraint::All;

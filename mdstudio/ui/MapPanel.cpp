@@ -3410,7 +3410,7 @@ void MapPanel::RenderStampGrid(ion::render::Renderer& renderer, const ion::Matri
 {
 	//Draw grid
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialFlatColour);
-	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourOutline);
+	const ion::Colour& colour = m_renderResources.GetColour(RenderResources::eColourGridStamp);
 
 	ion::Matrix4 gridMtx;
 	gridMtx.SetTranslation(ion::Vector3(0.0f, 0.0f, z));

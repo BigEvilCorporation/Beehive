@@ -63,7 +63,8 @@ public:
 		eColourUnselected,
 		eColourPreview,
 		eColourOutline,
-		eColourGrid,
+		eColourGridTile,
+		eColourGridStamp,
 		eColourDisplayFrame,
 		eColourMax
 	};
