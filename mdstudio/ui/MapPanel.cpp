@@ -1915,11 +1915,13 @@ void MapPanel::OnRender(ion::render::Renderer& renderer, const ion::Matrix4& cam
 	}
 
 	//Render stamp outlines
+#if !BEEHIVE_FIXED_STAMP_MODE // Stamps are always aligned to grid
 	if(m_project.GetShowStampOutlines())
 	{
 		RenderStampOutlines(renderer, cameraInverseMtx, projectionMtx, z);
 		z += zOffset;
 	}
+#endif
 
 	//Render physics world outline
 	//if(m_project.GetShowPhysicsworldOutline())
