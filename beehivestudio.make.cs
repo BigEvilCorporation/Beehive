@@ -14,7 +14,7 @@ class BeehiveStudio : IonExe
         Luminary
     }
 
-    ExportPlugin exportPlugin = ExportPlugin.Luminary;
+    ExportPlugin exportPlugin = ExportPlugin.Tanglewood;
 
     public BeehiveStudio() : base("BeehiveStudio", "MDStudio")
     {

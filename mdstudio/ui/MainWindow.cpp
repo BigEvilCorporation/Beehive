@@ -2049,7 +2049,7 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 
 		ion::io::FileDevice* fileDevice = ion::io::FileDevice::GetDefault();
 
-		const std::string projectRootDir = m_project->m_settings.projectRootDir + fileDevice->GetPathSeparator();
+		const std::string projectRootDir = m_project->m_settings.Get("projectRootDir") + fileDevice->GetPathSeparator();
 
 		dialog.m_txtProjectName->SetValue(m_project->GetName());
 		dialog.m_filePickerPalettes->SetPath(fileDevice->NormalisePath(projectRootDir + m_project->m_exportFilenames.palettes));
