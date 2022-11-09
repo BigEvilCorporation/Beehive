@@ -355,7 +355,7 @@ void RenderResources::CreateCollisionTypesTexture()
 	delete data;
 }
 
-void RenderResources::CreateReferenceImageTexture(const BMPReader& reader)
+void RenderResources::CreateReferenceImageTexture(const ion::ImageFormat& reader)
 {
 	u32 textureWidth = reader.GetWidth();
 	u32 textureHeight = reader.GetHeight();
@@ -369,7 +369,7 @@ void RenderResources::CreateReferenceImageTexture(const BMPReader& reader)
 	{
 		for (int y = 0; y < textureHeight; y++)
 		{
-			const BMPReader::Colour& colour = reader.GetPixel(x, y);
+			const ion::ImageFormat::Colour& colour = reader.GetPixel(x, y);
 
 			u32 pixelIdx = (y * textureWidth) + x;
 			u32 dataOffset = pixelIdx * bytesPerPixel;
@@ -388,7 +388,7 @@ void RenderResources::CreateReferenceImageTexture(const BMPReader& reader)
 	delete data;
 }
 
-void RenderResources::CreateSpriteSheetPreviewTexture(const BMPReader& reader)
+void RenderResources::CreateSpriteSheetPreviewTexture(const ion::ImageFormat& reader)
 {
 	u32 textureWidth = reader.GetWidth();
 	u32 textureHeight = reader.GetHeight();
@@ -402,7 +402,7 @@ void RenderResources::CreateSpriteSheetPreviewTexture(const BMPReader& reader)
 	{
 		for(int y = 0; y < textureHeight; y++)
 		{
-			const BMPReader::Colour& colour = reader.GetPixel(x, y);
+			const ion::ImageFormat::Colour& colour = reader.GetPixel(x, y);
 
 			u32 pixelIdx = (y * textureWidth) + x;
 			u32 dataOffset = pixelIdx * bytesPerPixel;

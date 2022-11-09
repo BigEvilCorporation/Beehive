@@ -440,7 +440,7 @@ DialogUpdateStampBase::DialogUpdateStampBase( wxWindow* parent, wxWindowID id, c
 	fgSizer41->SetFlexibleDirection( wxBOTH );
 	fgSizer41->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	m_filePicker10 = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("BMP files (*.bmp)|*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
+	m_filePicker10 = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
 	fgSizer41->Add( m_filePicker10, 0, wxALL|wxEXPAND, 5 );
 
 	m_chkReplacePalette = new wxCheckBox( this, wxID_ANY, wxT("Replace palette"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -2032,7 +2032,7 @@ ImportDialogBase::ImportDialogBase( wxWindow* parent, wxWindowID id, const wxStr
 	wxBoxSizer* bSizer11;
 	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText8 = new wxStaticText( this, wxID_ANY, wxT("Bitmap files:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText8 = new wxStaticText( this, wxID_ANY, wxT("Image files:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText8->Wrap( -1 );
 	bSizer11->Add( m_staticText8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 

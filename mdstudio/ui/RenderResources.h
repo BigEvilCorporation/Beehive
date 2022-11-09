@@ -17,7 +17,7 @@
 #include <ion/renderer/Renderer.h>
 #include <ion/renderer/Shader.h>
 #include <ion/renderer/Texture.h>
-#include <ion/renderer/imageformats/BMPReader.h>
+#include <ion/renderer/imageformats/ImageFormatBMP.h>
 #include <ion/beehive/Project.h>
 #include <ion/beehive/SpriteSheet.h>
 #include <ion/resource/ResourceManager.h>
@@ -91,11 +91,11 @@ public:
 	void CreateCollisionTypesTexture();
 
 	//Create spriteSheet preview texture
-	void CreateSpriteSheetPreviewTexture(const BMPReader& reader);
+	void CreateSpriteSheetPreviewTexture(const ion::ImageFormat& reader);
 	ion::render::Texture* CreateSpriteSheetPreviewTexture(const SpriteSheet& spriteSheet);
 
 	//Create reference image texture
-	void CreateReferenceImageTexture(const BMPReader& reader);
+	void CreateReferenceImageTexture(const ion::ImageFormat& reader);
 
 	//Get tileset UV coords for tile
 	void GetTileTexCoords(TileId tileId, ion::render::TexCoord texCoords[4], u32 flipFlags) const;

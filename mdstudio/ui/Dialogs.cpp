@@ -9,7 +9,7 @@
 // Licensed under GPLv3, see http://www.gnu.org/licenses/gpl-3.0.html
 /////////////////////////////////////////////////////
 
-#include <ion/renderer/imageformats/BMPReader.h>
+#include <ion/renderer/imageformats/ImageFormatBMP.h>
 
 #include "Dialogs.h"
 #include "SpriteCanvas.h"
@@ -57,7 +57,7 @@ ImportDialog::ImportDialog(wxWindow* parent) : ImportDialogBase(parent)
 
 void ImportDialog::OnBtnBrowse(wxCommandEvent& event)
 {
-	wxFileDialog dialog(this, _("Open BMP files"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
+	wxFileDialog dialog(this, _("Open image files"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
 	if(dialog.ShowModal() == wxID_OK)
 	{
 		dialog.GetPaths(m_paths);
@@ -73,7 +73,7 @@ void ImportDialog::OnBtnBrowse(wxCommandEvent& event)
 		else
 		{
 			char text[128] = { 0 };
-			sprintf(text, "(%u) BMP files", m_paths.size());
+			sprintf(text, "(%u) image files", m_paths.size());
 			m_filenames->SetValue(wxString(text));
 		}
 	}
@@ -86,7 +86,7 @@ ImportStampsDialog::ImportStampsDialog(wxWindow* parent) : ImportStampsDialogBas
 
 void ImportStampsDialog::OnBtnBrowse(wxCommandEvent& event)
 {
-	wxFileDialog dialog(this, _("Open BMP files"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
+	wxFileDialog dialog(this, _("Open image files"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		dialog.GetPaths(m_paths);
@@ -102,7 +102,7 @@ void ImportStampsDialog::OnBtnBrowse(wxCommandEvent& event)
 		else
 		{
 			char text[128] = { 0 };
-			sprintf(text, "(%u) BMP files", m_paths.size());
+			sprintf(text, "(%u) image files", m_paths.size());
 			m_filenames->SetValue(wxString(text));
 		}
 	}
@@ -141,10 +141,10 @@ void ImportDialogSpriteSheet::OnFileOpened(wxFileDirPickerEvent& event)
 	const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 	const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-	BMPReader reader;
-	if(reader.Read(event.GetPath().GetData().AsChar()))
+	ion::ImageFormat* reader = ion::ImageFormat::CreateReader(ion::string::GetFileExtension(event.GetPath().GetData().AsChar()));
+	if(reader && reader->Read(event.GetPath().GetData().AsChar()))
 	{
-		if(reader.GetWidth() % tileWidth != 0 || reader.GetHeight() % tileHeight != 0)
+		if(reader->GetWidth() % tileWidth != 0 || reader->GetHeight() % tileHeight != 0)
 		{
 			if(wxMessageBox("Bitmap width/height is not multiple of target platform tile width/height, image will be truncated", "Warning", wxOK | wxCANCEL | wxICON_WARNING) == wxCANCEL)
 			{
@@ -153,11 +153,13 @@ void ImportDialogSpriteSheet::OnFileOpened(wxFileDirPickerEvent& event)
 		}
 
 		//Create texture from bitmap
-		m_renderResources.CreateSpriteSheetPreviewTexture(reader);
+		m_renderResources.CreateSpriteSheetPreviewTexture(*reader);
 
-		m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(reader.GetWidth(), reader.GetHeight()));
+		m_canvas->SetSpriteSheetDimentionsPixels(ion::Vector2i(reader->GetWidth(), reader->GetHeight()));
 
 		m_textName->SetValue(m_filePicker->GetFileName().GetName());
+
+		delete reader;
 	}
 }
 

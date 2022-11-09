@@ -29,10 +29,10 @@ ProjectSettingsDialog::ProjectSettingsDialog(MainWindow& mainWindow, Project& pr
 	, m_renderResources(renderResources)
 {
 	m_textProjectName->SetValue(m_project.GetName());
-	m_dirPickerProject->SetPath(m_project.m_settings.projectRootDir);
-	m_dirPickerEngine->SetPath(m_project.m_settings.engineRootDir);
-	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.gameObjectsExternalFile);
-	m_filePickerSpritesProj->SetPath(m_project.m_settings.spriteActorsExternalFile);
+	m_dirPickerProject->SetPath(m_project.m_settings.Get("projectRootDir"));
+	m_dirPickerEngine->SetPath(m_project.m_settings.Get("engineRootDir"));
+	m_filePickerGameObjTypesFile->SetPath(m_project.m_settings.Get("gameObjectsExternalFile"));
+	m_filePickerSpritesProj->SetPath(m_project.m_settings.Get("spriteActorsExternalFile"));
 	m_spinStampWidth->SetValue(m_project.GetPlatformConfig().stampWidth);
 	m_spinStampHeight->SetValue(m_project.GetPlatformConfig().stampHeight);
 
@@ -61,7 +61,7 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 
 	bool buildSpriteResources = false;
 
-	if (m_project.m_settings.gameObjectsExternalFile != gameObjectsFile)
+	if (m_project.m_settings.Get("gameObjectsExternalFile") != gameObjectsFile)
 	{
 		if (!gameObjectsFile.empty())
 		{
@@ -72,11 +72,11 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 			}
 		}
 
-		m_project.m_settings.gameObjectsExternalFile = gameObjectsFile;
+		m_project.m_settings.Set("gameObjectsExternalFile", gameObjectsFile);
 		buildSpriteResources = true;
 	}
 
-	if (m_project.m_settings.spriteActorsExternalFile != spritesFile)
+	if (m_project.m_settings.Get("spriteActorsExternalFile") != spritesFile)
 	{
 		if (!spritesFile.empty())
 		{
@@ -87,16 +87,17 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 			}
 		}
 
-		m_project.m_settings.spriteActorsExternalFile = spritesFile;
+		m_project.m_settings.Set("spriteActorsExternalFile", spritesFile);
 		buildSpriteResources = true;
 	}
 
 	if (referenceFile.size() > 0)
 	{
-		BMPReader reader;
-		if (reader.Read(referenceFile))
+		ion::ImageFormat* reader = ion::ImageFormat::CreateReader(ion::string::GetFileExtension(referenceFile));
+		if (reader && reader->Read(referenceFile))
 		{
-			m_renderResources.CreateReferenceImageTexture(reader);
+			m_renderResources.CreateReferenceImageTexture(*reader);
+			delete reader;
 		}
 	}
 
@@ -105,15 +106,15 @@ void ProjectSettingsDialog::OnBtnOK(wxCommandEvent& event)
 		m_renderResources.CreateSpriteSheetResources(m_project);
 	}
 
-	if (projectDir != m_project.m_settings.projectRootDir || engineDir != m_project.m_settings.engineRootDir)
+	if (projectDir != m_project.m_settings.Get("projectRootDir") || engineDir != m_project.m_settings.Get("engineRootDir"))
 	{
 		if (wxMessageBox("Engine or project directory has changed, would you like to re-scan for entity types?", "Scan for entities", wxOK | wxCANCEL) == wxOK)
 		{
 			ScanProject(engineDir, projectDir);
 		}
 
-		m_project.m_settings.projectRootDir = projectDir;
-		m_project.m_settings.engineRootDir = engineDir;
+		m_project.m_settings.Set("projectRootDir", projectDir);
+		m_project.m_settings.Set("engineRootDir", engineDir);
 	}
 
 	m_project.GetPlatformConfig().stampWidth = m_spinStampWidth->GetValue();

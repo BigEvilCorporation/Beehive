@@ -227,7 +227,7 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)
 			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
 			//Import bitmap
-			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), tileWidth, tileHeight, dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), dialog.m_spinCellCount->GetValue()))
+			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), tileWidth, tileHeight, dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), 0, dialog.m_spinCellCount->GetValue()))
 			{
 				//Create render resources
 				m_renderResources.CreateSpriteSheetResources(spriteSheetId, *spriteSheet);

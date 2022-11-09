@@ -293,19 +293,19 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 		Stamp* stamp = m_project.GetStamp(m_hoverStamp);
 		if(stamp)
 		{
-			wxFileDialog dialog(this, _("Open BMP file"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			wxFileDialog dialog(this, _("Open BMP file"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 			if(dialog.ShowModal() == wxID_OK)
 			{
 				std::string filename = dialog.GetPath().c_str().AsChar();
-				BMPReader reader;
-				if(reader.Read(filename))
+				ion::ImageFormat* reader = ion::ImageFormat::CreateReader(ion::string::GetFileExtension(referenceFile));
+				if(reader && reader->Read(filename))
 				{
 					const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 					const int tileHeight = m_project.GetPlatformConfig().tileHeight;
 
-					if(reader.GetWidth() != (stamp->GetWidth() * tileWidth) || (reader.GetHeight() != stamp->GetHeight() * tileHeight))
+					if(reader->GetWidth() != (stamp->GetWidth() * tileWidth) || (reader->GetHeight() != stamp->GetHeight() * tileHeight))
 					{
-						ion::debug::log << "Bitmap width / height " << reader.GetWidth() << "x" << reader.GetHeight() << " does not match original stamp: " << filename << ion::debug::end;
+						ion::debug::log << "Bitmap width / height " << reader->GetWidth() << "x" << reader->GetHeight() << " does not match original stamp: " << filename << ion::debug::end;
 						return;
 					}
 
@@ -335,7 +335,7 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 									u8 originalIdx = tile->GetPixelColour(x % tileWidth, y % tileHeight);
 
 									//Get colour of new pixel
-									BMPReader::Colour colour = reader.GetPixel(x, y);
+									ion::ImageFormat::Colour colour = reader->GetPixel(x, y);
 
 									//Replace colour in original palette
 									newPalette.SetColour(originalIdx, Colour(colour.GetRed(), colour.GetGreen(), colour.GetBlue()));
@@ -349,6 +349,8 @@ void StampsPanel::OnContextMenuClick(wxCommandEvent& event)
 						//Refresh
 						m_mainWindow->RefreshAll();
 					}
+
+					delete reader;
 				}
 			}
 		}

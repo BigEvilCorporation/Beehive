@@ -157,7 +157,7 @@ void GameObjectTypeDialog::OnBtnLoadSprite(wxCommandEvent& event)
 {
 	if(GameObjectType* gameObjType = m_project.GetGameObjectType(m_currentTypeId))
 	{
-		wxFileDialog dialog(this, _("Open BMP files"), "", "", "BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+		wxFileDialog dialog(this, _("Open image files"), "", "", "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 		if(dialog.ShowModal() == wxID_OK)
 		{
 			std::string filename = dialog.GetPath().GetData().AsChar();

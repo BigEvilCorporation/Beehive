@@ -49,10 +49,10 @@ void DialogUpdateStamp::OnFileBrowse(wxFileDirPickerEvent& event)
 	}
 
 	//Import bitmap to temp stamp
-	u32 flags = Project::eBMPImportReplaceStamp;
+	u32 flags = Project::eTileImportReplaceStamp;
 	//if(m_chkReplacePalette->GetValue())
 	//{
-	//	flags |= Project::eBMPImportWholePalette;
+	//	flags |= Project::eTileImportWholePalette;
 	//}
 
 	//'Replace' temp stamp to show preview
@@ -70,7 +70,7 @@ void DialogUpdateStamp::OnFileBrowse(wxFileDirPickerEvent& event)
 void DialogUpdateStamp::OnBtnOk(wxCommandEvent& event)
 {
 	//Replace stamp for real
-	m_project.ImportBitmap(m_filename, Project::eBMPImportReplaceStamp, 1 << m_paletteIdx, &m_stampOld);
+	m_project.ImportBitmap(m_filename, Project::eTileImportReplaceStamp, 1 << m_paletteIdx, &m_stampOld);
 
 	EndModal(wxID_OK);
 }
