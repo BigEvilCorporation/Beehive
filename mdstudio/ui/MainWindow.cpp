@@ -2190,25 +2190,25 @@ void MainWindow::OnBtnProjExport(wxCommandEvent& event)
 				dialog.GetMapFormValues(projectRootDir, mapIndex, it->second.m_exportFilenames);
 
 				if(it->second.m_exportFilenames.mapExportEnabled)
-					m_project->ExportMap(it->first, it->second.m_exportFilenames.map, format);
+					m_project->ExportMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.map), format);
 
 				if(it->second.m_exportFilenames.blockMapExportEnabled)
-					m_project->ExportBlockMap(it->first, it->second.m_exportFilenames.blockMap, format, blockWidth, blockHeight);
+					m_project->ExportBlockMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.blockMap), format, blockWidth, blockHeight);
 
 				if(it->second.m_exportFilenames.stampMapExportEnabled)
-					m_project->ExportStampMap(it->first, it->second.m_exportFilenames.stampMap, format);
+					m_project->ExportStampMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.stampMap), format);
 				
 				if(it->second.m_exportFilenames.collisionMapExportEnabled)
-					m_project->ExportCollisionMap(it->first, it->second.m_exportFilenames.collisionMap, format);
+					m_project->ExportCollisionMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.collisionMap), format);
 
 				if(it->second.m_exportFilenames.terrainBlockMapExportEnabled)
-					m_project->ExportTerrainBlockMap(it->first, it->second.m_exportFilenames.terrainBlockMap, format, terrainBlockWidth, terrainBlockHeight);
+					m_project->ExportTerrainBlockMap(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.terrainBlockMap), format, terrainBlockWidth, terrainBlockHeight);
 
 				if(it->second.m_exportFilenames.sceneAnimExportEnabled)
-					m_project->ExportSceneAnimations(it->first, it->second.m_exportFilenames.sceneAnims, format);
+					m_project->ExportSceneAnimations(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.sceneAnims), format);
 
 				if (it->second.m_exportFilenames.gameObjectsExportEnabled)
-					m_project->ExportGameObjects(it->first, it->second.m_exportFilenames.gameObjects, format);
+					m_project->ExportGameObjects(it->first, fileDevice->CombinePath(projectRootDir, it->second.m_exportFilenames.gameObjects), format);
 			}
 
 			SetStatusText("Export complete");
