@@ -133,7 +133,7 @@ public:
 		SpriteSheetRenderResources();
 		~SpriteSheetRenderResources();
 
-		void Load(const SpriteSheet& spriteSheet, ion::render::Shader* shader, Project* project);
+		void Load(const SpriteSheet& spriteSheet, ion::io::ResourceHandle<ion::render::Shader>& shader, Project* project, ion::io::ResourceManager& resourceManager);
 
 		struct Frame
 		{
@@ -176,7 +176,7 @@ private:
 	//Resources
 	ion::io::ResourceHandle<ion::render::Shader> m_shaders[eShaderMax];
 	ion::io::ResourceHandle<ion::render::Texture> m_textures[eTextureMax];
-	ion::render::Material* m_materials[eMaterialMax];
+	ion::io::ResourceHandle<ion::render::Material> m_materials[eMaterialMax];
 	ion::render::Primitive* m_primitives[ePrimitiveMax];
 	ion::Colour m_colours[eColourMax];
 
