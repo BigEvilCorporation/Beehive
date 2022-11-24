@@ -290,6 +290,9 @@ void MainWindow::SetProject(Project* project)
 		//Delete previous, set new
 		m_project.reset(project);
 
+		//Wait for resource manager to dispose of materials
+		m_resourceManager->WaitForResources();
+
 		if(project)
 		{
 			//Create render resources
