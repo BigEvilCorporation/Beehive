@@ -137,6 +137,8 @@ RenderResources::~RenderResources()
 		m_shaders[i].Clear();
 	}
 
+	m_spriteSheetRenderResources.clear();
+
 	while (m_resourceManager.GetNumResourcesWaiting() > 0)
 	{
 		ion::thread::Sleep(5);
@@ -804,7 +806,7 @@ RenderResources::SpriteSheetRenderResources::SpriteSheetRenderResources()
 	m_primitive = NULL;
 }
 
-void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& spriteSheet, ion::io::ResourceHandle<ion::render::Shader>& shader, Project* project, ion::io::ResourceManager& resourceManager)
+void RenderResources::SpriteSheetRenderResources::Load(const std::string& actorName, const SpriteSheet& spriteSheet, ion::io::ResourceHandle<ion::render::Shader>& shader, Project* project, ion::io::ResourceManager& resourceManager)
 {
 	if (spriteSheet.GetNumFrames() > 0)
 	{
@@ -831,8 +833,8 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 			Frame renderFrame;
 
 			//Create tileset texture for frame
-			std::string name = "SpriteSheet_" + spriteSheet.GetName() + "_frame_" + std::to_string(i);
-			renderFrame.texture = resourceManager.CreateResource(name, ion::render::Texture::Create());
+			std::string textureName = "actor_" + actorName + "sheet_" + spriteSheet.GetName() + "_frame_" + std::to_string(i) + "_texture";
+			renderFrame.texture = resourceManager.CreateResource(textureName, ion::render::Texture::Create());
 
 			u8* data = new u8[textureSize];
 			ion::memory::MemSet(data, 0, textureSize);
@@ -905,7 +907,8 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 			renderFrame.texture->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 			//Create material
-			renderFrame.material = new ion::render::Material();
+			std::string materialName = "actor_" + actorName + "sheet_" + spriteSheet.GetName() + "_frame_" + std::to_string(i) + "_material";
+			renderFrame.material = resourceManager.CreateResource(materialName, new ion::render::Material());
 			renderFrame.material->AddDiffuseMap(renderFrame.texture);
 			renderFrame.material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
@@ -924,7 +927,7 @@ RenderResources::SpriteSheetRenderResources::~SpriteSheetRenderResources()
 {
 	for(int i = 0; i < m_frames.size(); i++)
 	{
-		delete m_frames[i].material;
+		m_frames[i].material.Clear();
 		m_frames[i].texture.Clear();
 	}
 
@@ -942,21 +945,21 @@ void RenderResources::CreateSpriteSheetResources(const Project& project)
 	{
 		for(TSpriteSheetMap::const_iterator it = actorIt->second.SpriteSheetsBegin(), end = actorIt->second.SpriteSheetsEnd(); it != end; ++it)
 		{
-			CreateSpriteSheetResources(it->first, it->second);
+			CreateSpriteSheetResources(actorIt->second.GetName(), it->first, it->second);
 		}
 	}
 
 	for(TGameObjectTypeMap::const_iterator it = project.GetGameObjectTypes().begin(), end = project.GetGameObjectTypes().end(); it != end; ++it)
 	{
-		CreateSpriteSheetResources(it->second.GetPreviewSpriteSheetId(), it->second.GetPreviewSpriteSheet());
+		CreateSpriteSheetResources(it->second.GetName(), it->second.GetPreviewSpriteSheetId(), it->second.GetPreviewSpriteSheet());
 	}
 }
 
-void RenderResources::CreateSpriteSheetResources(SpriteSheetId spriteSheetId, const SpriteSheet& spriteSheet)
+void RenderResources::CreateSpriteSheetResources(const std::string& actorName, SpriteSheetId spriteSheetId, const SpriteSheet& spriteSheet)
 {
 	m_spriteSheetRenderResources.erase(spriteSheetId);
 	std::pair<std::map<SpriteSheetId, SpriteSheetRenderResources>::iterator, bool> it = m_spriteSheetRenderResources.insert(std::make_pair(spriteSheetId, SpriteSheetRenderResources()));
-	it.first->second.Load(spriteSheet, m_shaders[eShaderFlatTextured], &m_project, m_resourceManager);
+	it.first->second.Load(actorName, spriteSheet, m_shaders[eShaderFlatTextured], &m_project, m_resourceManager);
 }
 
 void RenderResources::DeleteSpriteSheetRenderResources(SpriteSheetId spriteSheetId)

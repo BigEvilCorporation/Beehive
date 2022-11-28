@@ -164,7 +164,7 @@ void GameObjectTypeDialog::OnBtnLoadSprite(wxCommandEvent& event)
 			if(gameObjType->LoadPreviewSprite(filename))
 			{
 				m_renderResources.DeleteSpriteSheetRenderResources(gameObjType->GetPreviewSpriteSheetId());
-				m_renderResources.CreateSpriteSheetResources(gameObjType->GetPreviewSpriteSheetId(), gameObjType->GetPreviewSpriteSheet());
+				m_renderResources.CreateSpriteSheetResources(gameObjType->GetName(), gameObjType->GetPreviewSpriteSheetId(), gameObjType->GetPreviewSpriteSheet());
 				m_mainWindow.RefreshPanel(MainWindow::ePanelMap);
 			}
 		}

@@ -230,7 +230,7 @@ void SpriteAnimEditorDialog::OnBtnSpriteSheetImport(wxCommandEvent& event)
 			if(spriteSheet->ImportBitmap(dialog.m_filePicker->GetPath().GetData().AsChar(), dialog.m_textName->GetValue().GetData().AsChar(), tileWidth, tileHeight, dialog.m_spinWidthCells->GetValue(), dialog.m_spinHeightCells->GetValue(), 0, dialog.m_spinCellCount->GetValue()))
 			{
 				//Create render resources
-				m_renderResources.CreateSpriteSheetResources(spriteSheetId, *spriteSheet);
+				m_renderResources.CreateSpriteSheetResources(m_selectedActor ? m_selectedActor->GetName() : m_selectedStamp->GetName(), spriteSheetId, *spriteSheet);
 
 				//Populate spriteSheet list
 				if(m_selectedActor)
@@ -646,7 +646,7 @@ void SpriteAnimEditorDialog::PopulateAnimList(const SpriteSheet& spriteSheet)
 	}
 }
 
-void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteSheetId)
+void SpriteAnimEditorDialog::PopulateSpriteFrames(const std::string& parentName, const SpriteSheetId& spriteSheetId)
 {
 	//Get sprite resources
 	const RenderResources::SpriteSheetRenderResources* spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
@@ -654,7 +654,7 @@ void SpriteAnimEditorDialog::PopulateSpriteFrames(const SpriteSheetId& spriteShe
 	//TEMP - for stamps
 	if(!spriteResources && m_selectedStamp)
 	{
-		m_renderResources.CreateSpriteSheetResources(spriteSheetId, *m_selectedStamp->GetStampAnimSheet(spriteSheetId));
+		m_renderResources.CreateSpriteSheetResources(parentName, spriteSheetId, *m_selectedStamp->GetStampAnimSheet(spriteSheetId));
 		spriteResources = m_renderResources.GetSpriteSheetResources(spriteSheetId);
 	}
 
@@ -888,7 +888,11 @@ void SpriteAnimEditorDialog::SelectSpriteSheet(int index)
 			m_canvas->SetGridColour(ion::Colour(1.0f, 1.0f, 1.0f, 1.0f));
 			m_canvas->SetDrawGrid(true);
 
-			PopulateSpriteFrames(m_selectedSpriteSheetId);
+			std::string name =  m_selectedActor ? m_selectedActor->GetName() :
+								m_selectedStamp ? m_selectedStamp->GetName() :
+								"none";
+
+			PopulateSpriteFrames(name, m_selectedSpriteSheetId);
 			PopulateAnimList(*m_selectedSpriteSheet);
 		}
 	}

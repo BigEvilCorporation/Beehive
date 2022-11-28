@@ -95,7 +95,7 @@ private:
 	void PopulateStampList();
 	void PopulateSpriteSheetList(const Actor& actor);
 	void PopulateStampAnimSheetList(const Stamp& stamp);
-	void PopulateSpriteFrames(const SpriteSheetId& spriteSheetId);
+	void PopulateSpriteFrames(const std::string& parentName, const SpriteSheetId& spriteSheetId);
 	void PopulateAnimList(const SpriteSheet& spriteSheet);
 	void PopulateKeyframes(const SpriteSheetId& spriteSheetId, const SpriteAnimation& anim);
 		 

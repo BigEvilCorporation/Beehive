@@ -132,12 +132,12 @@ public:
 		SpriteSheetRenderResources();
 		~SpriteSheetRenderResources();
 
-		void Load(const SpriteSheet& spriteSheet, ion::io::ResourceHandle<ion::render::Shader>& shader, Project* project, ion::io::ResourceManager& resourceManager);
+		void Load(const std::string& actorName, const SpriteSheet& spriteSheet, ion::io::ResourceHandle<ion::render::Shader>& shader, Project* project, ion::io::ResourceManager& resourceManager);
 
 		struct Frame
 		{
 			ion::io::ResourceHandle<ion::render::Texture> texture;
-			ion::render::Material* material;
+			ion::io::ResourceHandle<ion::render::Material> material;
 		};
 
 		ion::render::Chessboard* m_primitive;
@@ -145,7 +145,7 @@ public:
 	};
 
 	void CreateSpriteSheetResources(const Project& project);
-	void CreateSpriteSheetResources(SpriteSheetId spriteSheetId, const SpriteSheet& spriteSheet);
+	void CreateSpriteSheetResources(const std::string& actorName, SpriteSheetId spriteSheetId, const SpriteSheet& spriteSheet);
 	void DeleteSpriteSheetRenderResources(SpriteSheetId spriteSheetId);
 	SpriteSheetRenderResources* GetSpriteSheetResources(SpriteSheetId spriteSheetId);
 
