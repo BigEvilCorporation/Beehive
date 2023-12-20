@@ -69,6 +69,7 @@ private:
 		eContextMenuStampBringToFront,
 		eContextMenuStampSendToBack,
 #endif
+		eContextMenuGameObjDelete,
 		eContextMenuGameObjAddToAnim,
 		eContextMenuGameObjCreatePrefab,
 		eContextMenuSetTerrainFlagSpecial,

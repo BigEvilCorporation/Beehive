@@ -74,6 +74,24 @@ void SceneExplorerPanel::Refresh(bool eraseBackground, const wxRect *rect)
 	}
 }
 
+void SceneExplorerPanel::SetSelectedGameObject(GameObject* gameObject)
+{
+	const wxTreeItemId* treeId = nullptr;
+	for (const auto& mapping : m_objectMap)
+	{
+		if (mapping.second == gameObject->GetId())
+		{
+			treeId = &mapping.first;
+			break;
+		}
+	}
+
+	if (treeId)
+	{
+		m_tree->SelectItem(*treeId);
+	}
+}
+
 void SceneExplorerPanel::OnToolAddMap(wxCommandEvent& event)
 {
 

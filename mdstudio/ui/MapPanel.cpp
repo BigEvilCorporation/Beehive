@@ -992,6 +992,16 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		m_project.InvalidateMap(false);
 	}
 #endif
+	else if (event.GetId() == eContextMenuGameObjDelete)
+	{
+		if (m_hoverGameObject != InvalidGameObjectId)
+			m_project.GetEditingMap().RemoveGameObject(m_hoverGameObject);
+
+		m_project.InvalidateMap(true);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
+		m_project.InvalidateMap(false);
+	}
 	else if (event.GetId() == eContextMenuGameObjCreatePrefab)
 	{
 		if (m_selectedGameObjects.size() > 0)
@@ -1688,6 +1698,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					//Right-click menu
 					wxMenu contextMenu;
 
+					contextMenu.Append(eContextMenuGameObjDelete, wxString("Delete Object"));
 					contextMenu.Append(eContextMenuGameObjCreatePrefab, wxString("Create Prefab"));
 					contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
@@ -2896,7 +2907,7 @@ void MapPanel::RenderReferenceImage(ion::render::Renderer& renderer, const ion::
 	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialReferenceImage);
 
-	if (material->GetDiffuseMap(0)->GetWidth() > 0)
+	if (material->GetTextureMap(ion::render::Material::TextureMapType::Diffuse)->GetWidth() > 0)
 	{
 		const Map& map = m_project.GetEditingMap();
 		const float mapWidth = map.GetWidth();
@@ -2905,8 +2916,8 @@ void MapPanel::RenderReferenceImage(ion::render::Renderer& renderer, const ion::
 		const float x = 0.0f;
 		const float y = 0.0f;
 		const float y_inv = mapHeight - 1 - y;
-		const float width = material->GetDiffuseMap(0)->GetWidth();
-		const float height = material->GetDiffuseMap(0)->GetHeight();
+		const float width = material->GetTextureMap(ion::render::Material::TextureMapType::Diffuse)->GetWidth();
+		const float height = material->GetTextureMap(ion::render::Material::TextureMapType::Diffuse)->GetHeight();
 
 		ion::Matrix4 matrix;
 		ion::Vector3 scale(width, height, 1.0f);

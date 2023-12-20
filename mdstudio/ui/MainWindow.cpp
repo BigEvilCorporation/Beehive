@@ -1087,6 +1087,11 @@ void MainWindow::SetSelectedGameObject(GameObject* gameObject)
 	{
 		m_propertyPanel->SetGameObject(gameObject->GetId());
 	}
+
+	if (m_sceneExplorerPanel)
+	{
+		m_sceneExplorerPanel->SetSelectedGameObject(gameObject);
+	}
 }
 
 AnimationId MainWindow::GetSelectedAnimation()

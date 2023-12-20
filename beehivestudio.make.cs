@@ -67,8 +67,8 @@ class BeehiveStudio : IonExe
             }
         }
 
-        // Assets
-        conf.TargetCopyFilesToSubDirectory.Add(new KeyValuePair<string, string>(@"[project.SharpmakeCsPath]/.build/projects/shaders/", @"[project.SharpmakeCsPath]/MDStudio/shaders"));
+        // Engine assets
+        conf.TargetCopyFilesToSubDirectory.Add(new KeyValuePair<string, string>(@"[project.SharpmakeCsPath]/ion/shaders", @"[project.SharpmakeCsPath]/MDStudio/shaders"));
     }
 }
 
