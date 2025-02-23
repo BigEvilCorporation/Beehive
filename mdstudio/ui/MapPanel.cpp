@@ -453,9 +453,9 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						int right = ion::maths::Max(m_boxSelectStart.x / tileWidth, m_boxSelectEnd.x / tileWidth);
 
 						//Add all tiles in box
-						for(int tileX = left; tileX <= right; tileX++)
+						for(int tileX = left; tileX < right; tileX++)
 						{
-							for(int tileY = top; tileY <= bottom; tileY++)
+							for(int tileY = top; tileY < bottom; tileY++)
 							{
 								m_selectedTiles.push_back(ion::Vector2i(tileX, tileY));
 							}
