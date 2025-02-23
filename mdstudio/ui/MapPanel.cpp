@@ -447,10 +447,10 @@ void MapPanel::OnMouseTileEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta
 						m_selectedTiles.clear();
 
 						//Sanitise loop order
-						int top = ion::maths::Min(m_boxSelectStart.y * tileHeight, m_boxSelectEnd.y * tileHeight);
-						int left = ion::maths::Min(m_boxSelectStart.x * tileWidth, m_boxSelectEnd.x * tileWidth);
-						int bottom = ion::maths::Max(m_boxSelectStart.y * tileHeight, m_boxSelectEnd.y * tileHeight);
-						int right = ion::maths::Max(m_boxSelectStart.x * tileWidth, m_boxSelectEnd.x * tileWidth);
+						int top = ion::maths::Min(m_boxSelectStart.y / tileHeight, m_boxSelectEnd.y / tileHeight);
+						int left = ion::maths::Min(m_boxSelectStart.x / tileWidth, m_boxSelectEnd.x / tileWidth);
+						int bottom = ion::maths::Max(m_boxSelectStart.y / tileHeight, m_boxSelectEnd.y / tileHeight);
+						int right = ion::maths::Max(m_boxSelectStart.x / tileWidth, m_boxSelectEnd.x / tileWidth);
 
 						//Add all tiles in box
 						for(int tileX = left; tileX <= right; tileX++)
