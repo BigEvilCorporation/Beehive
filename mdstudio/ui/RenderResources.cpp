@@ -61,6 +61,7 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 	//Setup textured collision types material
 	m_materials[eMaterialCollisionTypes]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureCollisionTypes]);
 	m_materials[eMaterialCollisionTypes]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialCollisionTypes]->SetBlendMode(ion::render::Renderer::AlphaBlendType::Translucent);
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialCollisionTypes]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
@@ -68,12 +69,14 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 	//Setup textured terrain tileset materials
 	m_materials[eMaterialTerrainTilesetHeight]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureTerrainTilesetHeight]);
 	m_materials[eMaterialTerrainTilesetHeight]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialTerrainTilesetHeight]->SetBlendMode(ion::render::Renderer::AlphaBlendType::Translucent);
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialTerrainTilesetHeight]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
 
 	m_materials[eMaterialTerrainTilesetWidth]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureTerrainTilesetWidth]);
 	m_materials[eMaterialTerrainTilesetWidth]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
+	m_materials[eMaterialTerrainTilesetWidth]->SetBlendMode(ion::render::Renderer::AlphaBlendType::Translucent);
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialTerrainTilesetWidth]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
