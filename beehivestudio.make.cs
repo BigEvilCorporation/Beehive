@@ -10,7 +10,7 @@ class BeehiveStudio : IonExe
 {
     public BeehiveStudio() : base("BeehiveStudio", "MDStudio")
     {
-        AddTargets(Globals.IonTargetsDefault);
+        AddTargets(Globals.IonTargetsTool);
         SourceFilesExtensions.Add(".glsl");
     }
 
@@ -51,7 +51,7 @@ class BeehiveStudioSolution : IonSolution
 {
     public BeehiveStudioSolution() : base("BeehiveStudio")
     {
-        AddTargets(Globals.IonTargetsDefault);
+        AddTargets(Globals.IonTargetsTool);
     }
 
     [Configure]
