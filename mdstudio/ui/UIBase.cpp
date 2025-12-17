@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b3)
+// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -27,18 +27,22 @@
 #include "../FormBuilderProj/stepright_16_16.xpm"
 #include "../FormBuilderProj/stop_16_16.xpm"
 #include "../FormBuilderProj/tool_addterrainbezier.xpm"
+#include "../FormBuilderProj/tool_animate.xpm"
 #include "../FormBuilderProj/tool_clone.xpm"
 #include "../FormBuilderProj/tool_createstamp.xpm"
 #include "../FormBuilderProj/tool_deletegameobj.xpm"
 #include "../FormBuilderProj/tool_deletestamp.xpm"
 #include "../FormBuilderProj/tool_deleteterrainbezier.xpm"
 #include "../FormBuilderProj/tool_deleteterraintile.xpm"
+#include "../FormBuilderProj/tool_dropper.xpm"
 #include "../FormBuilderProj/tool_editterrainbezier.xpm"
+#include "../FormBuilderProj/tool_eraser.xpm"
 #include "../FormBuilderProj/tool_fill.xpm"
 #include "../FormBuilderProj/tool_flipx.xpm"
 #include "../FormBuilderProj/tool_flipy.xpm"
 #include "../FormBuilderProj/tool_genterrain_beziers.xpm"
-#include "../FormBuilderProj/tool_movestamp.xpm"
+#include "../FormBuilderProj/tool_move.xpm"
+#include "../FormBuilderProj/tool_paint.xpm"
 #include "../FormBuilderProj/tool_paintcolhole.xpm"
 #include "../FormBuilderProj/tool_paintcolpixel.xpm"
 #include "../FormBuilderProj/tool_paintcolwall.xpm"
@@ -46,6 +50,7 @@
 #include "../FormBuilderProj/tool_painttile.xpm"
 #include "../FormBuilderProj/tool_picker.xpm"
 #include "../FormBuilderProj/tool_placegameobj.xpm"
+#include "../FormBuilderProj/tool_rectangle.xpm"
 #include "../FormBuilderProj/tool_select.xpm"
 #include "../FormBuilderProj/tool_selectgameobj.xpm"
 #include "../FormBuilderProj/tool_selectstamp.xpm"
@@ -1300,29 +1305,29 @@ MapToolboxGameObjs::MapToolboxGameObjs( wxWindow* parent, wxWindowID id, const w
 
 	m_toolSelectGameObject = new wxBitmapButton( this, wxID_TOOL_SELECTGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolSelectGameObject->SetBitmap( wxBitmap( tool_selectgameobj_xpm ) );
-	m_toolSelectGameObject->SetToolTip( wxT("Select Game Object") );
+	m_toolSelectGameObject->SetBitmap( wxBitmap( tool_move_xpm ) );
+	m_toolSelectGameObject->SetToolTip( wxT("Select Entity") );
 
 	fgSizer9->Add( m_toolSelectGameObject, 0, wxALL, 5 );
 
 	m_toolPlaceGameObject = new wxBitmapButton( this, wxID_TOOL_PLACEGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolPlaceGameObject->SetBitmap( wxBitmap( tool_placegameobj_xpm ) );
-	m_toolPlaceGameObject->SetToolTip( wxT("Place Game Object") );
+	m_toolPlaceGameObject->SetBitmap( wxBitmap( tool_paint_xpm ) );
+	m_toolPlaceGameObject->SetToolTip( wxT("Place Entity") );
 
 	fgSizer9->Add( m_toolPlaceGameObject, 0, wxALL, 5 );
 
 	m_toolDrawGameObject = new wxBitmapButton( this, wxID_TOOL_DRAWGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolDrawGameObject->SetBitmap( wxBitmap( tool_placegameobj_xpm ) );
-	m_toolDrawGameObject->SetToolTip( wxT("Draw Game Object") );
+	m_toolDrawGameObject->SetBitmap( wxBitmap( tool_rectangle_xpm ) );
+	m_toolDrawGameObject->SetToolTip( wxT("Draw Entity Region") );
 
 	fgSizer9->Add( m_toolDrawGameObject, 0, wxALL, 5 );
 
 	m_toolAnimateGameObject = new wxBitmapButton( this, wxID_TOOL_ANIMATEGAMEOBJ, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolAnimateGameObject->SetBitmap( wxBitmap( tool_selectgameobj_xpm ) );
-	m_toolAnimateGameObject->SetToolTip( wxT("Animate Game Object") );
+	m_toolAnimateGameObject->SetBitmap( wxBitmap( tool_animate_xpm ) );
+	m_toolAnimateGameObject->SetToolTip( wxT("Animate Entity") );
 
 	fgSizer9->Add( m_toolAnimateGameObject, 0, wxALL, 5 );
 
@@ -1524,28 +1529,21 @@ MapToolboxStamps::MapToolboxStamps( wxWindow* parent, wxWindowID id, const wxPoi
 
 	m_toolSelectStamp = new wxBitmapButton( this, wxID_TOOL_SELECTSTAMP, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolSelectStamp->SetBitmap( wxBitmap( tool_selectstamp_xpm ) );
+	m_toolSelectStamp->SetBitmap( wxBitmap( tool_move_xpm ) );
 	m_toolSelectStamp->SetToolTip( wxT("Select Stamp") );
 
 	fgSizer7->Add( m_toolSelectStamp, 0, wxALL, 5 );
 
 	m_toolPaintStamp = new wxBitmapButton( this, wxID_TOOL_STAMP, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolPaintStamp->SetBitmap( wxBitmap( tool_paintstamp_xpm ) );
+	m_toolPaintStamp->SetBitmap( wxBitmap( tool_paint_xpm ) );
 	m_toolPaintStamp->SetToolTip( wxT("Paint Stamp") );
 
 	fgSizer7->Add( m_toolPaintStamp, 0, wxALL, 5 );
 
-	m_toolMveStamp = new wxBitmapButton( this, wxID_TOOL_MOVESTAMP, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
-
-	m_toolMveStamp->SetBitmap( wxBitmap( tool_movestamp_xpm ) );
-	m_toolMveStamp->SetToolTip( wxT("Move Stamp") );
-
-	fgSizer7->Add( m_toolMveStamp, 0, wxALL, 5 );
-
 	m_toolStampPicker = new wxBitmapButton( this, wxID_TOOL_STAMPPICKER, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolStampPicker->SetBitmap( wxBitmap( tool_stamppicker_xpm ) );
+	m_toolStampPicker->SetBitmap( wxBitmap( tool_dropper_xpm ) );
 	m_toolStampPicker->SetToolTip( wxT("Pick Stamp") );
 
 	fgSizer7->Add( m_toolStampPicker, 0, wxALL, 5 );
@@ -1559,7 +1557,7 @@ MapToolboxStamps::MapToolboxStamps( wxWindow* parent, wxWindowID id, const wxPoi
 
 	m_toolRemoveStamp = new wxBitmapButton( this, wxID_TOOL_REMOVESTAMP, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
 
-	m_toolRemoveStamp->SetBitmap( wxBitmap( tool_deletestamp_xpm ) );
+	m_toolRemoveStamp->SetBitmap( wxBitmap( tool_eraser_xpm ) );
 	m_toolRemoveStamp->SetToolTip( wxT("Remove Stamp") );
 
 	fgSizer7->Add( m_toolRemoveStamp, 0, wxALL, 5 );

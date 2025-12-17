@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.10.1-0-g8feb16b3)
+// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -594,7 +594,6 @@ class MapToolboxStamps : public wxPanel
 
 	protected:
 		wxBitmapButton* m_toolSelectStamp;
-		wxBitmapButton* m_toolMveStamp;
 		wxBitmapButton* m_toolStampPicker;
 		wxBitmapButton* m_toolRemoveStamp;
 

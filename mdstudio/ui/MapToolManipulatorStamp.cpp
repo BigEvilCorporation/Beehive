@@ -46,8 +46,8 @@ std::string MapToolManipulatorStamp::GetTooltipText(const MapObjIdentifierStamp&
 {
 	const ion::Vector2i tileSize(GetProject().GetPlatformConfig().tileWidth, GetProject().GetPlatformConfig().tileHeight);
 	const ion::Vector2i cursorPosTl = cursorPosPx * tileSize;
-	int stampX = cursorPosTl.x % object.stamp->GetWidth();
-	int stampY = cursorPosTl.y % object.stamp->GetHeight();
+	int stampX = ion::maths::Clamp(cursorPosTl.x % object.stamp->GetWidth(), 0, object.stamp->GetWidth());
+	int stampY = ion::maths::Clamp(cursorPosTl.y % object.stamp->GetHeight(), 0, object.stamp->GetHeight());
 	TileId tileId = object.stamp->GetTile(stampX, stampY);
 
 	TerrainTileId terrainTileId = object.stamp->GetTerrainTile(stampX, stampY);

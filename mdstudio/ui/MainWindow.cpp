@@ -153,9 +153,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::OnPostInit()
 {
-#if BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 
-#endif
 }
 
 void MainWindow::EventHandlerKeyboard(wxKeyEvent& event)
@@ -1309,7 +1307,6 @@ void MainWindow::ShowToolboxStamps()
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMP);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_STAMPPICKER);
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_REMOVESTAMP);
-		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_MOVESTAMP);
 
 #if !BEEHIVE_FIXED_STAMP_MODE //No tile/collision editing in fixed mode
 		Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MainWindow::OnBtnTool, this, wxID_TOOL_CREATESTAMP);
@@ -3835,9 +3832,6 @@ void MainWindow::OnBtnTool(wxCommandEvent& event)
 			break;
 		case wxID_TOOL_CREATE_SCENE_ANIM:
 			m_mapPanel->SetTool(eToolCreateStampAnim);
-			break;
-		case wxID_TOOL_MOVESTAMP:
-			m_mapPanel->SetTool(eToolMoveStamp);
 			break;
 		case wxID_TOOL_REMOVESTAMP:
 			m_mapPanel->SetTool(eToolRemoveStamp);
