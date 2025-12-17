@@ -138,7 +138,7 @@ public:
 		struct Frame
 		{
 			ion::io::ResourceHandle<ion::render::Texture> texture;
-			ion::render::Material* material;
+			ion::io::ResourceHandle<ion::render::Material> material;
 		};
 
 		ion::render::Chessboard* m_primitive;

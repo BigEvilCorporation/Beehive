@@ -1012,7 +1012,7 @@ RenderResources::SpriteSheetRenderResources::~SpriteSheetRenderResources()
 {
 	for(int i = 0; i < m_frames.size(); i++)
 	{
-		delete m_frames[i].material;
+		m_frames[i].material.Clear();
 		m_frames[i].texture.Clear();
 	}
 
