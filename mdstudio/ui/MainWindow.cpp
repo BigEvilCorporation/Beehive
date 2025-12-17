@@ -1585,6 +1585,11 @@ void MainWindow::SetSelectedPrefabChild(GameObjectType* rootObjectType, GameObje
 	{
 		m_propertyPanel->SetPrefabChild(rootObjectType->GetId(), rootObject->GetId(), childObjectType->GetId(), childInstanceId);
 	}
+
+	if (m_sceneExplorerPanel)
+	{
+		m_sceneExplorerPanel->SetSelectedGameObject(childInstanceId);
+	}
 }
 
 AnimationId MainWindow::GetSelectedAnimation()

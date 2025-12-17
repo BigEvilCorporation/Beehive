@@ -1183,6 +1183,16 @@ void MapPanel::OnContextMenuClick(wxCommandEvent& event)
 		u16 currentFlags = m_project.GetEditingCollisionMap().GetTerrainBezierFlags(m_highlightedBezierIdx);
 		m_project.GetEditingCollisionMap().SetTerrainBezierFlags(m_highlightedBezierIdx, currentFlags ^ eCollisionTileFlagWater);
 	}
+	else if (event.GetId() == eContextMenuGameObjDelete)
+	{
+		if (m_hoverGameObject != InvalidGameObjectId)
+			m_project.GetEditingMap().RemoveGameObject(m_hoverGameObject);
+
+		m_project.InvalidateMap(true);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelMap);
+		m_mainWindow->RefreshPanel(MainWindow::ePanelSceneExplorer);
+		m_project.InvalidateMap(false);
+	}
 }
 
 void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelta, ion::Vector2i tileDelta, int buttonBits, int tileX, int tileY)
@@ -1313,6 +1323,7 @@ void MapPanel::OnMousePixelEvent(ion::Vector2i mousePos, ion::Vector2i mouseDelt
 					contextMenu.Append(eContextMenuGameObjCreateArchetype, wxString("Create Archetype"));
 					contextMenu.Append(eContextMenuGameObjCreatePrefab, wxString("Create Prefab"));
 					contextMenu.Append(eContextMenuGameObjAddToAnim, wxString("Add to animation"));
+					contextMenu.Append(eContextMenuGameObjDelete, wxString("Delete Object"));
 					contextMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&MapPanel::OnContextMenuClick, NULL, this);
 					PopupMenu(&contextMenu);
 				}
@@ -2268,7 +2279,7 @@ void MapPanel::RenderReferenceImage(ion::render::Renderer& renderer, const ion::
 	ion::render::Primitive* primitive = m_renderResources.GetPrimitive(RenderResources::ePrimitiveUnitQuad);
 	ion::render::Material* material = m_renderResources.GetMaterial(RenderResources::eMaterialReferenceImage);
 
-	if (material->GetDiffuseMap(0)->GetWidth() > 0)
+	if (material->GetTextureMap(ion::render::Material::TextureMapType::Diffuse)->GetWidth() > 0)
 	{
 		const Map& map = m_project.GetEditingMap();
 		const float mapWidth = map.GetWidth();
@@ -2277,8 +2288,8 @@ void MapPanel::RenderReferenceImage(ion::render::Renderer& renderer, const ion::
 		const float x = 0.0f;
 		const float y = 0.0f;
 		const float y_inv = mapHeight - 1 - y;
-		const float width = material->GetDiffuseMap(0)->GetWidth();
-		const float height = material->GetDiffuseMap(0)->GetHeight();
+		const float width = material->GetTextureMap(ion::render::Material::TextureMapType::Diffuse)->GetWidth();
+		const float height = material->GetTextureMap(ion::render::Material::TextureMapType::Diffuse)->GetHeight();
 
 		ion::Matrix4 matrix;
 		ion::Vector3 scale(width, height, 1.0f);

@@ -71,6 +71,7 @@ private:
 		eContextMenuStampBringToFront,
 		eContextMenuStampSendToBack,
 #endif
+		eContextMenuGameObjDelete,
 		eContextMenuGameObjAddToAnim,
 		eContextMenuGameObjCreateArchetype,
 		eContextMenuGameObjCreatePrefab,

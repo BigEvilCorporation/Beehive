@@ -36,6 +36,9 @@ public:
 	virtual void OnItemContextMenu(wxTreeEvent& event);
 	virtual void OnItemSelected(wxTreeEvent& event);
 
+	void SetSelectedGameObject(GameObjectId gameObjectId);
+	void SetSelectedGameObject(GameObject* gameObject);
+
 protected:
 	enum ContextMenu
 	{

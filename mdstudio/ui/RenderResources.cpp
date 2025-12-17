@@ -52,41 +52,41 @@ RenderResources::RenderResources(Project& project, ion::io::ResourceManager& res
 #endif
 
 	//Setup textured tileset material
-	m_materials[eMaterialTileset]->AddDiffuseMap(m_textures[eTextureTileset]);
+	m_materials[eMaterialTileset]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureTileset]);
 	m_materials[eMaterialTileset]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialTileset]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
 
 	//Setup textured collision types material
-	m_materials[eMaterialCollisionTypes]->AddDiffuseMap(m_textures[eTextureCollisionTypes]);
+	m_materials[eMaterialCollisionTypes]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureCollisionTypes]);
 	m_materials[eMaterialCollisionTypes]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialCollisionTypes]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
 
 	//Setup textured terrain tileset materials
-	m_materials[eMaterialTerrainTilesetHeight]->AddDiffuseMap(m_textures[eTextureTerrainTilesetHeight]);
+	m_materials[eMaterialTerrainTilesetHeight]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureTerrainTilesetHeight]);
 	m_materials[eMaterialTerrainTilesetHeight]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialTerrainTilesetHeight]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
 
-	m_materials[eMaterialTerrainTilesetWidth]->AddDiffuseMap(m_textures[eTextureTerrainTilesetWidth]);
+	m_materials[eMaterialTerrainTilesetWidth]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureTerrainTilesetWidth]);
 	m_materials[eMaterialTerrainTilesetWidth]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialTerrainTilesetWidth]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
 
 	//Setup textured spriteSheet material
-	m_materials[eMaterialSpriteSheet]->AddDiffuseMap(m_textures[eTextureSpriteSheetPreview]);
+	m_materials[eMaterialSpriteSheet]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureSpriteSheetPreview]);
 	m_materials[eMaterialSpriteSheet]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialSpriteSheet]->SetShader(m_shaders[eShaderFlatTextured]);
 #endif
 
 	//Setup textured reference material
-	m_materials[eMaterialReferenceImage]->AddDiffuseMap(m_textures[eTextureReferenceImage]);
+	m_materials[eMaterialReferenceImage]->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, m_textures[eTextureReferenceImage]);
 	m_materials[eMaterialReferenceImage]->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
 	m_materials[eMaterialReferenceImage]->SetShader(m_shaders[eShaderFlatTextured]);
@@ -202,7 +202,21 @@ void RenderResources::CreateTilesetTexture()
 		}
 	}
 
-	m_textures[eTextureTileset]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGB, ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	ion::render::Texture::TextureDesc desc =
+	{
+		textureWidth,
+		textureHeight,
+		ion::render::Texture::Type::Texture2D,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::BitsPerPixel::BPP24,
+		ion::render::Texture::DataType::Int,
+		false,
+		false,
+		data
+	};
+
+	m_textures[eTextureTileset]->Load(desc);
 	m_textures[eTextureTileset]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureTileset]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureTileset]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
@@ -299,12 +313,28 @@ void RenderResources::CreateTerrainTilesTextures()
 		}
 	}
 
-	m_textures[eTextureTerrainTilesetHeight]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, heightData);
+	ion::render::Texture::TextureDesc desc =
+	{
+		textureWidth,
+		textureHeight,
+		ion::render::Texture::Type::Texture2D,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::BitsPerPixel::BPP24,
+		ion::render::Texture::DataType::Int,
+		false,
+		false,
+		heightData
+	};
+
+	m_textures[eTextureTerrainTilesetHeight]->Load(desc);
 	m_textures[eTextureTerrainTilesetHeight]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureTerrainTilesetHeight]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureTerrainTilesetHeight]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
-	m_textures[eTextureTerrainTilesetWidth]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, widthData);
+	desc.data = widthData;
+
+	m_textures[eTextureTerrainTilesetWidth]->Load(desc);
 	m_textures[eTextureTerrainTilesetWidth]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureTerrainTilesetWidth]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureTerrainTilesetWidth]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
@@ -350,7 +380,21 @@ void RenderResources::CreateCollisionTypesTexture()
 		data[dataOffset + 3] = colour.a * 255;
 	}
 
-	m_textures[eTextureCollisionTypes]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	ion::render::Texture::TextureDesc desc =
+	{
+		textureWidth,
+		textureHeight,
+		ion::render::Texture::Type::Texture2D,
+		ion::render::Texture::Format::RGBA,
+		ion::render::Texture::Format::RGBA,
+		ion::render::Texture::BitsPerPixel::BPP24,
+		ion::render::Texture::DataType::Int,
+		false,
+		false,
+		data
+	};
+
+	m_textures[eTextureCollisionTypes]->Load(desc);
 	m_textures[eTextureCollisionTypes]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureCollisionTypes]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureCollisionTypes]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
@@ -383,7 +427,21 @@ void RenderResources::CreateReferenceImageTexture(const ion::ImageFormat& reader
 		}
 	}
 
-	m_textures[eTextureReferenceImage]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGB, ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	ion::render::Texture::TextureDesc desc =
+	{
+		textureWidth,
+		textureHeight,
+		ion::render::Texture::Type::Texture2D,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::BitsPerPixel::BPP24,
+		ion::render::Texture::DataType::Int,
+		false,
+		false,
+		data
+	};
+
+	m_textures[eTextureReferenceImage]->Load(desc);
 	m_textures[eTextureReferenceImage]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureReferenceImage]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureReferenceImage]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
@@ -416,7 +474,21 @@ void RenderResources::CreateSpriteSheetPreviewTexture(const ion::ImageFormat& re
 		}
 	}
 
-	m_textures[eTextureSpriteSheetPreview]->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGB, ion::render::Texture::Format::RGB, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+	ion::render::Texture::TextureDesc desc =
+	{
+		textureWidth,
+		textureHeight,
+		ion::render::Texture::Type::Texture2D,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::Format::RGB,
+		ion::render::Texture::BitsPerPixel::BPP24,
+		ion::render::Texture::DataType::Int,
+		false,
+		false,
+		data
+	};
+
+	m_textures[eTextureSpriteSheetPreview]->Load(desc);
 	m_textures[eTextureSpriteSheetPreview]->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureSpriteSheetPreview]->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 	m_textures[eTextureSpriteSheetPreview]->SetWrapping(ion::render::Texture::Wrapping::Clamp);
@@ -900,14 +972,29 @@ void RenderResources::SpriteSheetRenderResources::Load(const SpriteSheet& sprite
 
 			m_primitive->GetVertexBuffer().CommitBuffer();
 
-			renderFrame.texture->Load(textureWidth, textureHeight, ion::render::Texture::Format::RGBA, ion::render::Texture::Format::RGBA, ion::render::Texture::BitsPerPixel::BPP24, false, false, data);
+			ion::render::Texture::TextureDesc desc =
+			{
+				textureWidth,
+				textureHeight,
+				ion::render::Texture::Type::Texture2D,
+				ion::render::Texture::Format::RGBA,
+				ion::render::Texture::Format::RGBA,
+				ion::render::Texture::BitsPerPixel::BPP24,
+				ion::render::Texture::DataType::Int,
+				false,
+				false,
+				data
+			};
+
+			renderFrame.texture->Load(desc);
 			renderFrame.texture->SetMinifyFilter(ion::render::Texture::Filter::Nearest);
 			renderFrame.texture->SetMagnifyFilter(ion::render::Texture::Filter::Nearest);
 			renderFrame.texture->SetWrapping(ion::render::Texture::Wrapping::Clamp);
 
 			//Create material
-			renderFrame.material = new ion::render::Material();
-			renderFrame.material->AddDiffuseMap(renderFrame.texture);
+			std::string materialName = name + "_material";
+			renderFrame.material = resourceManager.CreateResource(materialName, new ion::render::Material());
+			renderFrame.material->SetTextureMap(ion::render::Material::TextureMapType::Diffuse, renderFrame.texture);
 			renderFrame.material->SetDiffuseColour(ion::Colour(1.0f, 1.0f, 1.0f));
 #if defined ION_RENDERER_SHADER
 			renderFrame.material->SetShader(shader);
