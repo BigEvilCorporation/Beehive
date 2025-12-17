@@ -68,7 +68,15 @@ class BeehiveStudio : IonExe
         }
 
         // Engine assets
-        conf.TargetCopyFilesToSubDirectory.Add(new KeyValuePair<string, string>(@"[project.SharpmakeCsPath]/ion/shaders", @"[project.SharpmakeCsPath]/MDStudio/shaders"));
+        var shaders = Directory.GetFiles("ion/shaders", "*.ion.shader");
+        foreach(var shader in shaders)
+        {
+            conf.TargetCopyFilesToSubDirectory.Add(new KeyValuePair<string, string>(shader, @"[project.SharpmakeCsPath]/MDStudio/shaders"));
+        }
+
+        // Working dir
+        conf.VcxprojUserFile = new Project.Configuration.VcxprojUserFileSettings();
+        conf.VcxprojUserFile.LocalDebuggerWorkingDirectory = @"[project.SharpmakeCsPath]/MDStudio";
     }
 }
 
