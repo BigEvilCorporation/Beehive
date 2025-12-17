@@ -2000,52 +2000,6 @@ ProjectSettingsDialogBase::ProjectSettingsDialogBase( wxWindow* parent, wxWindow
 
 	bSizer69->Add( fgSizer40, 1, wxEXPAND, 5 );
 
-	m_advancedPane = new wxCollapsiblePane( this, wxID_ANY, wxT("Advanced Settings"), wxDefaultPosition, wxDefaultSize, wxCP_DEFAULT_STYLE );
-	m_advancedPane->Collapse( true );
-
-	wxFlexGridSizer* fgSizer64;
-	fgSizer64 = new wxFlexGridSizer( 0, 3, 0, 0 );
-	fgSizer64->AddGrowableCol( 1 );
-	fgSizer64->AddGrowableRow( 0 );
-	fgSizer64->SetFlexibleDirection( wxBOTH );
-	fgSizer64->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-
-	m_staticText75 = new wxStaticText( m_advancedPane->GetPane(), wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText75->Wrap( -1 );
-	fgSizer64->Add( m_staticText75, 0, wxALIGN_RIGHT|wxALL, 5 );
-
-	m_textCtrl18 = new wxTextCtrl( m_advancedPane->GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer64->Add( m_textCtrl18, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer64->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText76 = new wxStaticText( m_advancedPane->GetPane(), wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText76->Wrap( -1 );
-	fgSizer64->Add( m_staticText76, 0, wxALIGN_RIGHT|wxALL, 5 );
-
-	m_textCtrl19 = new wxTextCtrl( m_advancedPane->GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer64->Add( m_textCtrl19, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer64->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_staticText77 = new wxStaticText( m_advancedPane->GetPane(), wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText77->Wrap( -1 );
-	fgSizer64->Add( m_staticText77, 0, wxALIGN_RIGHT|wxALL, 5 );
-
-	m_textCtrl20 = new wxTextCtrl( m_advancedPane->GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer64->Add( m_textCtrl20, 0, wxALL|wxEXPAND, 5 );
-
-
-	fgSizer64->Add( 0, 0, 1, wxEXPAND, 5 );
-
-
-	m_advancedPane->GetPane()->SetSizer( fgSizer64 );
-	m_advancedPane->GetPane()->Layout();
-	fgSizer64->Fit( m_advancedPane->GetPane() );
-	bSizer69->Add( m_advancedPane, 1, wxEXPAND | wxALL, 5 );
-
 	m_sdbSizer7 = new wxStdDialogButtonSizer();
 	m_sdbSizer7OK = new wxButton( this, wxID_OK );
 	m_sdbSizer7->AddButton( m_sdbSizer7OK );

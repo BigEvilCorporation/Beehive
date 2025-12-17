@@ -42,7 +42,6 @@ class SpriteCanvas;
 #include <wx/radiobut.h>
 #include <wx/scrolwin.h>
 #include <wx/notebook.h>
-#include <wx/collpane.h>
 #include <wx/clrpicker.h>
 #include <wx/grid.h>
 #include <wx/slider.h>
@@ -745,13 +744,6 @@ class ProjectSettingsDialogBase : public wxDialog
 		wxSpinCtrl* m_spinStampWidth;
 		wxStaticText* m_staticText69;
 		wxSpinCtrl* m_spinStampHeight;
-		wxCollapsiblePane* m_advancedPane;
-		wxStaticText* m_staticText75;
-		wxTextCtrl* m_textCtrl18;
-		wxStaticText* m_staticText76;
-		wxTextCtrl* m_textCtrl19;
-		wxStaticText* m_staticText77;
-		wxTextCtrl* m_textCtrl20;
 		wxStdDialogButtonSizer* m_sdbSizer7;
 		wxButton* m_sdbSizer7OK;
 		wxButton* m_sdbSizer7Cancel;
