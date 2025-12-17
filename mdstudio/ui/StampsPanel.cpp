@@ -99,7 +99,7 @@ void StampsPanel::OnResize(wxSizeEvent& event)
 {
 	if(!m_mainWindow->IsRefreshLocked())
 	{
-		if (event.GetSize().x != m_panelSize.x && event.GetSize().y != m_panelSize.y)
+		if (event.GetSize().x != m_panelSize.x || event.GetSize().y != m_panelSize.y)
 		{
 			const int tileWidth = m_project.GetPlatformConfig().tileWidth;
 			const int tileHeight = m_project.GetPlatformConfig().tileHeight;
