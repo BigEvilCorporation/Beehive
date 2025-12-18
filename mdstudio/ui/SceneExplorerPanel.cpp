@@ -90,18 +90,26 @@ void SceneExplorerPanel::SetSelectedGameObject(GameObjectId gameObjectId)
 void SceneExplorerPanel::SetSelectedGameObject(GameObject* gameObject)
 {
 	const wxTreeItemId* treeId = nullptr;
-	for (const auto& mapping : m_objectMap)
+
+	if (gameObject)
 	{
-		if (mapping.second == gameObject->GetId())
+		for (const auto& mapping : m_objectMap)
 		{
-			treeId = &mapping.first;
-			break;
+			if (mapping.second == gameObject->GetId())
+			{
+				treeId = &mapping.first;
+				break;
+			}
 		}
 	}
 
 	if (treeId)
 	{
 		m_tree->SelectItem(*treeId);
+	}
+	else
+	{
+		m_tree->Unselect();
 	}
 }
 

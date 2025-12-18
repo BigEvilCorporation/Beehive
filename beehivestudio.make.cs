@@ -3,19 +3,10 @@ using System.Collections.Generic;
 using Sharpmake;
 
 [module: Sharpmake.Include("ion/ion.make.cs")]
-[module: Sharpmake.Include("../LUMINARY/TOOLS/BeehivePlugins/luminary/luminary.make.cs")]
 
 [Generate]
 class BeehiveStudio : IonExe
 {
-    enum ExportPlugin
-    {
-        Tanglewood,
-        Luminary
-    }
-
-    ExportPlugin exportPlugin = ExportPlugin.Luminary;
-
     public BeehiveStudio() : base("BeehiveStudio", "MDStudio")
     {
         AddTargets(Globals.IonTargetsTool);
@@ -48,24 +39,6 @@ class BeehiveStudio : IonExe
 
         conf.IncludePaths.Add(@"[project.SharpmakeCsPath]/mdstudio/ui");
         conf.IncludePaths.Add(@"[project.SharpmakeCsPath]/ion/renderer/imageformats");
-
-        // Configure features
-        switch (exportPlugin)
-        {
-            case ExportPlugin.Luminary:
-            {
-                conf.AddPublicDependency<Luminary>(target);
-
-                conf.Defines.Add("BEEHIVE_PLUGIN_LUMINARY=1");
-                conf.Defines.Add("BEEHIVE_FIXED_STAMP_MODE=1");
-                conf.Defines.Add("BEEHIVE_LEAN_UI=1");
-                conf.Defines.Add("BEEHIVE_GAMEOBJ_ORIGIN_CENTRE=1");
-
-                // Requires Luminary checkout at ../luminary
-                conf.IncludePaths.Add(@"[project.SharpmakeCsPath]/../LUMINARY/TOOLS/BeehivePlugins");
-                break;
-            }
-        }
 
         // Engine assets
         var shaders = Directory.GetFiles("ion/shaders", "*.ion.shader");

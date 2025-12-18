@@ -1,1 +1,1 @@
-buildtools\sharpmake\Sharpmake.Application.exe /verbose /sources('beehivestudio.make.cs')
+buildtools\sharpmake\Sharpmake.Application.exe /verbose /sources('beehivestudio.make.cs') /defines('ION_SUPPORT_PLUGINS')

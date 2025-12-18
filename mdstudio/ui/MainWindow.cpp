@@ -2393,6 +2393,21 @@ void MainWindow::Build(bool exportProj, bool assemble, bool run)
 			std::string prefabsFilename = entitiesExportDir + "PREFABS.ASM";
 			entityExporter.ExportPrefabs(prefabsFilename, prefabs);
 
+			//Export prefab animations
+			std::vector<luminary::Animation> prefabAnimations;
+			for (TAnimationMap::const_iterator animIt = m_project->AnimationsBegin(), animEnd = m_project->AnimationsEnd(); animIt != animEnd; ++animIt)
+			{
+				if (animIt->second.GetPrefabId() != InvalidGameObjectTypeId)
+				{
+					luminary::Animation anim;
+					luminary::beehive::ConvertPrefabAnimation(*m_project, animIt->second, anim);
+					prefabAnimations.push_back(anim);
+				}
+			}
+
+			std::string animsFilename = entitiesExportDir + "ANIMS.ASM";
+			entityExporter.ExportAnimations(animsFilename, prefabAnimations);
+
 			//Export sprite data
 			// TODO: Luminary (binary) data formats
 			m_project->ExportSpriteSheets(spritesExportDir, Project::ExportFormat::BinaryCompressed);
@@ -2566,6 +2581,7 @@ void MainWindow::Build(bool exportProj, bool assemble, bool run)
 
 					std::string sceneName = m_project->GetName() + "_" + mapFg.GetName();
 					std::string sceneFilename = scenesExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + ".ASM";
+					std::string animsFilename = scenesExportDir + "\\" + ion::string::ToUpper(mapFg.GetName()) + "_anims.ASM";
 					if (sceneExporter.ExportScene(sceneFilename, sceneName, sceneData))
 					{
 						includeFilenames.push_back(Project::IncludeFile{ std::string("scene_") + sceneName, sceneFilename, Project::IncludeExportFlags::None });
